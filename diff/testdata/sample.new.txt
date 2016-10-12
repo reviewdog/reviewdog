@@ -1,0 +1,4 @@
+unchanged, contextual line
+added line
+added line
+unchanged, contextual line

@@ -1,0 +1,6 @@
+No newline at end of the orig file
+Newline at end of the new file
+a
+
+
+" vim: nofixeol noendofline

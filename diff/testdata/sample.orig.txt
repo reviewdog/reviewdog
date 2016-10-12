@@ -1,0 +1,3 @@
+unchanged, contextual line
+deleted line
+unchanged, contextual line

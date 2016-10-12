@@ -1,0 +1,10 @@
+--- nonewline2.orig.txt	2016-10-13 05:01:10.458216957 +0900
++++ nonewline2.new.txt	2016-10-13 05:01:39.751699606 +0900
+@@ -1,4 +1,4 @@
+ No newline at end of both the orig and new file (unchanged)
+-a
+-a
++b
++b
+ " vim: nofixeol noendofline
+\ No newline at end of file
