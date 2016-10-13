@@ -8,3 +8,4 @@ diff -u empty.txt empty.txt > empty.diff
 git diff --no-index /dev/null empty.txt > empty_new.diff
 git diff --no-index empty.txt /dev/null  > empty_deleted.diff
 git diff --no-index /dev/null "empty space.txt" > empty_space.diff
+git diff --no-index golint.{old,new}.go > golint.diff
