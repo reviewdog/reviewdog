@@ -202,7 +202,7 @@ func (p *hunkParser) Parse() (*Hunk, error) {
 				line.LnumNew = lnew
 				lnew++
 			case tokenDeletedLine:
-				line.Type = LineAdded
+				line.Type = LineDeleted
 				line.LnumDiff = p.lnumdiff
 				line.LnumOld = lold
 				lold++

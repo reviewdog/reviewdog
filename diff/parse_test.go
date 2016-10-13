@@ -75,7 +75,7 @@ index e69de29..0000000
 						StartLineOld: 1, LineLengthOld: 3, StartLineNew: 1, LineLengthNew: 4,
 						Lines: []*Line{
 							{Type: 0, Content: "unchanged, contextual line", LnumDiff: 1, LnumOld: 1, LnumNew: 1},
-							{Type: 1, Content: "deleted line", LnumDiff: 2, LnumOld: 2, LnumNew: 0},
+							{Type: 2, Content: "deleted line", LnumDiff: 2, LnumOld: 2, LnumNew: 0},
 							{Type: 1, Content: "added line", LnumDiff: 3, LnumOld: 0, LnumNew: 2},
 							{Type: 1, Content: "added line", LnumDiff: 4, LnumOld: 0, LnumNew: 3},
 							{Type: 0, Content: "unchanged, contextual line", LnumDiff: 5, LnumOld: 3, LnumNew: 4},
@@ -188,7 +188,7 @@ func TestHunkParser_Parse(t *testing.T) {
 				Section: "optional section heading",
 				Lines: []*Line{
 					{Type: 0, Content: "unchanged, contextual line", LnumDiff: 1, LnumOld: 1, LnumNew: 1},
-					{Type: 1, Content: "deleted line", LnumDiff: 2, LnumOld: 2, LnumNew: 0},
+					{Type: 2, Content: "deleted line", LnumDiff: 2, LnumOld: 2, LnumNew: 0},
 					{Type: 1, Content: "added line", LnumDiff: 3, LnumOld: 0, LnumNew: 2},
 					{Type: 1, Content: "added line", LnumDiff: 4, LnumOld: 0, LnumNew: 3},
 					{Type: 0, Content: "unchanged, contextual line", LnumDiff: 5, LnumOld: 3, LnumNew: 4},
@@ -210,7 +210,7 @@ func TestHunkParser_Parse(t *testing.T) {
 				Section: "",
 				Lines: []*Line{
 					{Type: 0, Content: "unchanged, contextual line", LnumDiff: 15, LnumOld: 1, LnumNew: 1},
-					{Type: 1, Content: "deleted line", LnumDiff: 16, LnumOld: 2, LnumNew: 0},
+					{Type: 2, Content: "deleted line", LnumDiff: 16, LnumOld: 2, LnumNew: 0},
 					{Type: 1, Content: "added line", LnumDiff: 17, LnumOld: 0, LnumNew: 2},
 					{Type: 1, Content: "added line", LnumDiff: 18, LnumOld: 0, LnumNew: 3},
 					{Type: 0, Content: "unchanged, contextual line", LnumDiff: 19, LnumOld: 3, LnumNew: 4},
