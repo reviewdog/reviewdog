@@ -81,13 +81,13 @@ func (p *fileParser) Parse() (*FileDiff, error) {
 	if bytes.HasPrefix(b, []byte(tokenOldFile)) {
 		// parse `--- sample.old.txt	2016-10-13 05:09:35.820791185 +0900`
 		oldline, _ := readline(p.r) // ignore err because we know it can read something
-		fd.NameOld, fd.TimeOld = parseFileHeader(oldline)
+		fd.PathOld, fd.TimeOld = parseFileHeader(oldline)
 		// parse `+++ sample.new.txt	2016-10-13 05:09:35.820791185 +0900`
 		if b, err := p.r.Peek(len(tokenNewFile)); err != nil || !bytes.HasPrefix(b, []byte(tokenNewFile)) {
 			return nil, ErrNoNewFile
 		}
 		newline, _ := readline(p.r) // ignore err because we know it can read something
-		fd.NameNew, fd.TimeNew = parseFileHeader(newline)
+		fd.PathNew, fd.TimeNew = parseFileHeader(newline)
 	}
 	// parse hunks
 	fd.Hunks, err = p.parseHunks()

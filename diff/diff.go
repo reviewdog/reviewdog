@@ -8,10 +8,10 @@ package diff
 //   --- oldname	2009-10-11 15:12:20.000000000 -0700
 //   +++ newname	2009-10-11 15:12:30.000000000 -0700
 type FileDiff struct {
-	// the old name of the file
-	NameOld string
-	// the new name of the file
-	NameNew string
+	// the old path of the file
+	PathOld string
+	// the new path of the file
+	PathNew string
 
 	// the old timestamp (empty if not present)
 	TimeOld string

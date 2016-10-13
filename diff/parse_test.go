@@ -66,8 +66,8 @@ index e69de29..0000000
  unchanged, contextual line
 `,
 			want: &FileDiff{
-				NameOld: "sample.old.txt",
-				NameNew: "sample.new.txt",
+				PathOld: "sample.old.txt",
+				PathNew: "sample.new.txt",
 				TimeOld: "2016-10-13 05:09:35.820791185 +0900",
 				TimeNew: "2016-10-13 05:15:26.839245048 +0900",
 				Hunks: []*Hunk{
