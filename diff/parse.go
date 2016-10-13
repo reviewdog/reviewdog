@@ -178,6 +178,9 @@ func (p *hunkParser) Parse() (*Hunk, error) {
 	lold := hr.lold
 	lnew := hr.lnew
 	for {
+		if b, err := p.r.Peek(3); err != nil || string(b) == tokenOldFile {
+			break
+		}
 		b, err := p.r.Peek(1)
 		if err != nil {
 			break

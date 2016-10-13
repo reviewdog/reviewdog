@@ -33,6 +33,85 @@ func TestParseMultiFile(t *testing.T) {
 	}
 }
 
+func TestParseMultiFile_sample(t *testing.T) {
+	content := `--- sample.old.txt	2016-10-13 05:09:35.820791185 +0900
++++ sample.new.txt	2016-10-13 05:15:26.839245048 +0900
+@@ -1,3 +1,4 @@
+ unchanged, contextual line
+-deleted line
++added line
++added line
+ unchanged, contextual line
+--- nonewline.old.txt	2016-10-13 15:34:14.931778318 +0900
++++ nonewline.new.txt	2016-10-13 15:34:14.868444672 +0900
+@@ -1,4 +1,4 @@
+ " vim: nofixeol noendofline
+ No newline at end of both the old and new file
+-a
+-a
+\ No newline at end of file
++b
++b
+\ No newline at end of file
+`
+
+	got, err := ParseMultiFile(strings.NewReader(content))
+	if err != nil {
+		t.Fatal(err)
+	}
+	want := []*FileDiff{
+		&FileDiff{
+			PathOld: "sample.old.txt",
+			PathNew: "sample.new.txt",
+			TimeOld: "2016-10-13 05:09:35.820791185 +0900",
+			TimeNew: "2016-10-13 05:15:26.839245048 +0900",
+			Hunks: []*Hunk{
+				{
+					StartLineOld: 1, LineLengthOld: 3, StartLineNew: 1, LineLengthNew: 4,
+					Lines: []*Line{
+						{Type: 0, Content: "unchanged, contextual line", LnumDiff: 1, LnumOld: 1, LnumNew: 1},
+						{Type: 2, Content: "deleted line", LnumDiff: 2, LnumOld: 2, LnumNew: 0},
+						{Type: 1, Content: "added line", LnumDiff: 3, LnumOld: 0, LnumNew: 2},
+						{Type: 1, Content: "added line", LnumDiff: 4, LnumOld: 0, LnumNew: 3},
+						{Type: 0, Content: "unchanged, contextual line", LnumDiff: 5, LnumOld: 3, LnumNew: 4},
+					},
+				},
+			},
+		},
+		&FileDiff{
+			PathOld: "nonewline.old.txt",
+			PathNew: "nonewline.new.txt",
+			TimeOld: "2016-10-13 15:34:14.931778318 +0900",
+			TimeNew: "2016-10-13 15:34:14.868444672 +0900",
+			Hunks: []*Hunk{
+				{
+					StartLineOld: 1, LineLengthOld: 4, StartLineNew: 1, LineLengthNew: 4,
+					Lines: []*Line{
+						{Type: 0, Content: "\" vim: nofixeol noendofline", LnumDiff: 1, LnumOld: 1, LnumNew: 1},
+						{Type: 0, Content: "No newline at end of both the old and new file", LnumDiff: 2, LnumOld: 2, LnumNew: 2},
+						{Type: 2, Content: "a", LnumDiff: 3, LnumOld: 3, LnumNew: 0},
+						{Type: 2, Content: "a", LnumDiff: 4, LnumOld: 4, LnumNew: 0},
+						{Type: 1, Content: "b", LnumDiff: 5, LnumOld: 0, LnumNew: 3},
+						{Type: 1, Content: "b", LnumDiff: 6, LnumOld: 0, LnumNew: 4},
+					},
+				},
+			},
+		},
+	}
+	if !reflect.DeepEqual(got, want) {
+		t.Error("error. in:\n%v", content)
+		for _, fd := range got {
+			t.Logf("FileDiff: %#v\n", fd)
+			for _, h := range fd.Hunks {
+				t.Logf("  Hunk%#v\n", h)
+				for _, l := range h.Lines {
+					t.Logf("    Line%#v\n", l)
+				}
+			}
+		}
+	}
+}
+
 func TestFileParser_Parse(t *testing.T) {
 	tests := []struct {
 		in   string
