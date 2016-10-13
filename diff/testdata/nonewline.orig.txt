@@ -1,4 +1,0 @@
-" vim: nofixeol noendofline
-No newline at end of both the orig and new file
-a
-a

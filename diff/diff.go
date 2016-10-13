@@ -8,13 +8,13 @@ package diff
 //   --- oldname	2009-10-11 15:12:20.000000000 -0700
 //   +++ newname	2009-10-11 15:12:30.000000000 -0700
 type FileDiff struct {
-	// the original name of the file
-	NameOrig string
+	// the old name of the file
+	NameOld string
 	// the new name of the file
 	NameNew string
 
-	// the original timestamp (empty if not present)
-	TimeOrig string
+	// the old timestamp (empty if not present)
+	TimeOld string
 	// the new timestamp (empty if not present)
 	TimeNew string
 
@@ -24,7 +24,7 @@ type FileDiff struct {
 	Extended []string
 
 	// TODO: we may want `\ No newline at end of file` information for both the
-	// original and new file.
+	// old and new file.
 }
 
 // Hunk represents change hunks that contain the line differences in the file.
@@ -37,15 +37,15 @@ type FileDiff struct {
 //   +added line
 //    unchanged, contextual line
 //
-//  -1 -> the starting line number of the original file
-//  3  -> the number of lines the change hunk applies to for the original file
+//  -1 -> the starting line number of the old file
+//  3  -> the number of lines the change hunk applies to for the old file
 //  +1 -> the starting line number of the new file
 //  4  -> the number of lines the change hunk applies to for the new file
 type Hunk struct {
-	// the starting line number of the original file
-	StartLineOrig int
-	// the number of lines the change hunk applies to for the original file
-	LineLengthOrig int
+	// the starting line number of the old file
+	StartLineOld int
+	// the number of lines the change hunk applies to for the old file
+	LineLengthOld int
 
 	// the starting line number of the new file
 	StartLineNew int
@@ -87,9 +87,9 @@ type Line struct {
 	// API of GitHub https://developer.github.com/v3/pulls/comments/#input
 	LnumDiff int
 
-	// the line number of the original file for LineUnchanged and LineDeleted
+	// the line number of the old file for LineUnchanged and LineDeleted
 	// type. 0 for LineAdded type.
-	LnumOrig int
+	LnumOld int
 
 	// the line number of the new file for LineUnchanged and LineAdded type.
 	// 0 for LineDeleted type.

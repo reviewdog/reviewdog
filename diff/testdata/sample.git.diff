@@ -1,6 +1,6 @@
-diff --git a/sample.orig.txt b/sample.new.txt
+diff --git a/sample.old.txt b/sample.new.txt
 index a949a96..769bdae 100644
---- a/sample.orig.txt
+--- a/sample.old.txt
 +++ b/sample.new.txt
 @@ -1,3 +1,4 @@
  unchanged, contextual line

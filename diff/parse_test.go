@@ -56,7 +56,7 @@ index e69de29..0000000
 			},
 		},
 		{
-			in: `--- sample.orig.txt	2016-10-13 05:09:35.820791185 +0900
+			in: `--- sample.old.txt	2016-10-13 05:09:35.820791185 +0900
 +++ sample.new.txt	2016-10-13 05:15:26.839245048 +0900
 @@ -1,3 +1,4 @@
  unchanged, contextual line
@@ -66,19 +66,19 @@ index e69de29..0000000
  unchanged, contextual line
 `,
 			want: &FileDiff{
-				NameOrig: "sample.orig.txt",
-				NameNew:  "sample.new.txt",
-				TimeOrig: "2016-10-13 05:09:35.820791185 +0900",
-				TimeNew:  "2016-10-13 05:15:26.839245048 +0900",
+				NameOld: "sample.old.txt",
+				NameNew: "sample.new.txt",
+				TimeOld: "2016-10-13 05:09:35.820791185 +0900",
+				TimeNew: "2016-10-13 05:15:26.839245048 +0900",
 				Hunks: []*Hunk{
 					{
-						StartLineOrig: 1, LineLengthOrig: 3, StartLineNew: 1, LineLengthNew: 4,
+						StartLineOld: 1, LineLengthOld: 3, StartLineNew: 1, LineLengthNew: 4,
 						Lines: []*Line{
-							{Type: 0, Content: "unchanged, contextual line", LnumDiff: 1, LnumOrig: 1, LnumNew: 1},
-							{Type: 1, Content: "deleted line", LnumDiff: 2, LnumOrig: 2, LnumNew: 0},
-							{Type: 1, Content: "added line", LnumDiff: 3, LnumOrig: 0, LnumNew: 2},
-							{Type: 1, Content: "added line", LnumDiff: 4, LnumOrig: 0, LnumNew: 3},
-							{Type: 0, Content: "unchanged, contextual line", LnumDiff: 5, LnumOrig: 3, LnumNew: 4},
+							{Type: 0, Content: "unchanged, contextual line", LnumDiff: 1, LnumOld: 1, LnumNew: 1},
+							{Type: 1, Content: "deleted line", LnumDiff: 2, LnumOld: 2, LnumNew: 0},
+							{Type: 1, Content: "added line", LnumDiff: 3, LnumOld: 0, LnumNew: 2},
+							{Type: 1, Content: "added line", LnumDiff: 4, LnumOld: 0, LnumNew: 3},
+							{Type: 0, Content: "unchanged, contextual line", LnumDiff: 5, LnumOld: 3, LnumNew: 4},
 						},
 					},
 				},
@@ -104,13 +104,13 @@ func TestParseFileHeader(t *testing.T) {
 		timestamp string
 	}{
 		{
-			in: "--- sample.orig.txt	2016-10-13 05:09:35.820791185 +0900",
-			filename:  "sample.orig.txt",
+			in: "--- sample.old.txt	2016-10-13 05:09:35.820791185 +0900",
+			filename:  "sample.old.txt",
 			timestamp: "2016-10-13 05:09:35.820791185 +0900",
 		},
 		{
-			in:        "+++ sample.orig.txt",
-			filename:  "sample.orig.txt",
+			in:        "+++ sample.old.txt",
+			filename:  "sample.old.txt",
 			timestamp: "",
 		},
 	}
@@ -130,7 +130,7 @@ func TestParseExtenedHeader(t *testing.T) {
 		{
 			in: `diff --git a/sample.txt b/sample.txt
 index a949a96..769bdae 100644
---- a/sample.orig.txt
+--- a/sample.old.txt
 +++ b/sample.new.txt
 @@ -1,3 +1,4 @@
 `,
@@ -154,7 +154,7 @@ index 0000000..ee946eb
 			want: []string{"diff --git a/sample.txt b/sample.txt", "new file mode 100644", "index 0000000..e69de29"},
 		},
 		{
-			in: `--- a/sample.orig.txt
+			in: `--- a/sample.old.txt
 +++ b/sample.new.txt
 @@ -1,3 +1,4 @@
 `,
@@ -184,14 +184,14 @@ func TestHunkParser_Parse(t *testing.T) {
  unchanged, contextual line
 `,
 			want: &Hunk{
-				StartLineOrig: 1, LineLengthOrig: 3, StartLineNew: 1, LineLengthNew: 4,
+				StartLineOld: 1, LineLengthOld: 3, StartLineNew: 1, LineLengthNew: 4,
 				Section: "optional section heading",
 				Lines: []*Line{
-					{Type: 0, Content: "unchanged, contextual line", LnumDiff: 1, LnumOrig: 1, LnumNew: 1},
-					{Type: 1, Content: "deleted line", LnumDiff: 2, LnumOrig: 2, LnumNew: 0},
-					{Type: 1, Content: "added line", LnumDiff: 3, LnumOrig: 0, LnumNew: 2},
-					{Type: 1, Content: "added line", LnumDiff: 4, LnumOrig: 0, LnumNew: 3},
-					{Type: 0, Content: "unchanged, contextual line", LnumDiff: 5, LnumOrig: 3, LnumNew: 4},
+					{Type: 0, Content: "unchanged, contextual line", LnumDiff: 1, LnumOld: 1, LnumNew: 1},
+					{Type: 1, Content: "deleted line", LnumDiff: 2, LnumOld: 2, LnumNew: 0},
+					{Type: 1, Content: "added line", LnumDiff: 3, LnumOld: 0, LnumNew: 2},
+					{Type: 1, Content: "added line", LnumDiff: 4, LnumOld: 0, LnumNew: 3},
+					{Type: 0, Content: "unchanged, contextual line", LnumDiff: 5, LnumOld: 3, LnumNew: 4},
 				},
 			},
 		},
@@ -206,14 +206,14 @@ func TestHunkParser_Parse(t *testing.T) {
 `,
 			lnumdiff: 14,
 			want: &Hunk{
-				StartLineOrig: 1, LineLengthOrig: 3, StartLineNew: 1, LineLengthNew: 4,
+				StartLineOld: 1, LineLengthOld: 3, StartLineNew: 1, LineLengthNew: 4,
 				Section: "",
 				Lines: []*Line{
-					{Type: 0, Content: "unchanged, contextual line", LnumDiff: 15, LnumOrig: 1, LnumNew: 1},
-					{Type: 1, Content: "deleted line", LnumDiff: 16, LnumOrig: 2, LnumNew: 0},
-					{Type: 1, Content: "added line", LnumDiff: 17, LnumOrig: 0, LnumNew: 2},
-					{Type: 1, Content: "added line", LnumDiff: 18, LnumOrig: 0, LnumNew: 3},
-					{Type: 0, Content: "unchanged, contextual line", LnumDiff: 19, LnumOrig: 3, LnumNew: 4},
+					{Type: 0, Content: "unchanged, contextual line", LnumDiff: 15, LnumOld: 1, LnumNew: 1},
+					{Type: 1, Content: "deleted line", LnumDiff: 16, LnumOld: 2, LnumNew: 0},
+					{Type: 1, Content: "added line", LnumDiff: 17, LnumOld: 0, LnumNew: 2},
+					{Type: 1, Content: "added line", LnumDiff: 18, LnumOld: 0, LnumNew: 3},
+					{Type: 0, Content: "unchanged, contextual line", LnumDiff: 19, LnumOld: 3, LnumNew: 4},
 				},
 			},
 		},
@@ -244,15 +244,15 @@ func TestParseHunkRange(t *testing.T) {
 	}{
 		{
 			in:   "@@ -1,3 +1,4 @@",
-			want: &hunkrange{lorig: 1, sorig: 3, lnew: 1, snew: 4},
+			want: &hunkrange{lold: 1, sold: 3, lnew: 1, snew: 4},
 		},
 		{
 			in:   "@@ -1 +1 @@",
-			want: &hunkrange{lorig: 1, sorig: 1, lnew: 1, snew: 1},
+			want: &hunkrange{lold: 1, sold: 1, lnew: 1, snew: 1},
 		},
 		{
 			in:   "@@ -1,3 +1,4 @@ optional section",
-			want: &hunkrange{lorig: 1, sorig: 3, lnew: 1, snew: 4, section: "optional section"},
+			want: &hunkrange{lold: 1, sold: 3, lnew: 1, snew: 4, section: "optional section"},
 		},
 	}
 	for _, tt := range tests {

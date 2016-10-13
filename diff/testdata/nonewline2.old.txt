@@ -1,4 +1,4 @@
 No newline at end of both the old and new file (unchanged)
-b
-b
+a
+a
 " vim: nofixeol noendofline

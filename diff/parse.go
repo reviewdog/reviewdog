@@ -11,8 +11,8 @@ import (
 )
 
 const (
-	tokenDiffGit        = "diff --git" // diff --git a/sample.orig.txt b/sample.new.txt
-	tokenOrigFile       = "---"        // --- sample.orig.txt	2016-10-13 05:09:35.820791185 +0900
+	tokenDiffGit        = "diff --git" // diff --git a/sample.old.txt b/sample.new.txt
+	tokenOldFile        = "---"        // --- sample.old.txt	2016-10-13 05:09:35.820791185 +0900
 	tokenNewFile        = "+++"        // +++ sample.new.txt	2016-10-13 05:15:26.839245048 +0900
 	tokenStartHunk      = "@@"         // @@ -1,3 +1,4 @@
 	tokenUnchangedLine  = " "          //  unchanged, contextual line
@@ -71,17 +71,17 @@ type fileParser struct {
 func (p *fileParser) Parse() (*FileDiff, error) {
 	fd := &FileDiff{}
 	fd.Extended = parseExtenedHeader(p.r)
-	b, err := p.r.Peek(len(tokenOrigFile))
+	b, err := p.r.Peek(len(tokenOldFile))
 	if err != nil {
 		if err == io.EOF && len(fd.Extended) > 0 {
 			return fd, nil
 		}
 		return nil, nil
 	}
-	if bytes.HasPrefix(b, []byte(tokenOrigFile)) {
-		// parse `--- sample.orig.txt	2016-10-13 05:09:35.820791185 +0900`
-		origline, _ := readline(p.r) // ignore err because we know it can read something
-		fd.NameOrig, fd.TimeOrig = parseFileHeader(origline)
+	if bytes.HasPrefix(b, []byte(tokenOldFile)) {
+		// parse `--- sample.old.txt	2016-10-13 05:09:35.820791185 +0900`
+		oldline, _ := readline(p.r) // ignore err because we know it can read something
+		fd.NameOld, fd.TimeOld = parseFileHeader(oldline)
 		// parse `+++ sample.new.txt	2016-10-13 05:09:35.820791185 +0900`
 		if b, err := p.r.Peek(len(tokenNewFile)); err != nil || !bytes.HasPrefix(b, []byte(tokenNewFile)) {
 			return nil, ErrNoNewFile
@@ -98,7 +98,7 @@ func (p *fileParser) Parse() (*FileDiff, error) {
 }
 
 func (p *fileParser) parseHunks() ([]*Hunk, error) {
-	b, err := p.r.Peek(len(tokenOrigFile))
+	b, err := p.r.Peek(len(tokenOldFile))
 	if err != nil {
 		return nil, ErrNoHunks
 	}
@@ -124,7 +124,7 @@ func (p *fileParser) parseHunks() ([]*Hunk, error) {
 // timestamp may be empty.
 func parseFileHeader(line string) (filename, timestamp string) {
 	// strip `+++ ` or `--- `
-	ss := line[len(tokenOrigFile)+1:]
+	ss := line[len(tokenOldFile)+1:]
 	tabi := strings.LastIndex(ss, "\t")
 	if tabi == -1 {
 		return ss, ""
@@ -144,7 +144,7 @@ func parseExtenedHeader(r *bufio.Reader) []string {
 		es = append(es, diffgitline)
 		for {
 			b, err := r.Peek(len(tokenDiffGit))
-			if err != nil || bytes.HasPrefix(b, []byte(tokenOrigFile)) || bytes.HasPrefix(b, []byte(tokenDiffGit)) {
+			if err != nil || bytes.HasPrefix(b, []byte(tokenOldFile)) || bytes.HasPrefix(b, []byte(tokenDiffGit)) {
 				break
 			}
 			line, _ := readline(r)
@@ -169,13 +169,13 @@ func (p *hunkParser) Parse() (*Hunk, error) {
 		return nil, err
 	}
 	hunk := &Hunk{
-		StartLineOrig:  hr.lorig,
-		LineLengthOrig: hr.sorig,
-		StartLineNew:   hr.lnew,
-		LineLengthNew:  hr.snew,
-		Section:        hr.section,
+		StartLineOld:  hr.lold,
+		LineLengthOld: hr.sold,
+		StartLineNew:  hr.lnew,
+		LineLengthNew: hr.snew,
+		Section:       hr.section,
 	}
-	lorig := hr.lorig
+	lold := hr.lold
 	lnew := hr.lnew
 	for {
 		b, err := p.r.Peek(1)
@@ -192,9 +192,9 @@ func (p *hunkParser) Parse() (*Hunk, error) {
 			case tokenUnchangedLine:
 				line.Type = LineUnchanged
 				line.LnumDiff = p.lnumdiff
-				line.LnumOrig = lorig
+				line.LnumOld = lold
 				line.LnumNew = lnew
-				lorig++
+				lold++
 				lnew++
 			case tokenAddedLine:
 				line.Type = LineAdded
@@ -204,8 +204,8 @@ func (p *hunkParser) Parse() (*Hunk, error) {
 			case tokenDeletedLine:
 				line.Type = LineAdded
 				line.LnumDiff = p.lnumdiff
-				line.LnumOrig = lorig
-				lorig++
+				line.LnumOld = lold
+				lold++
 			}
 			hunk.Lines = append(hunk.Lines, line)
 		case tokenNoNewlineAtEOF:
@@ -220,11 +220,11 @@ func (p *hunkParser) Parse() (*Hunk, error) {
 
 // @@ -l,s +l,s @@ optional section heading
 type hunkrange struct {
-	lorig, sorig, lnew, snew int
-	section                  string
+	lold, sold, lnew, snew int
+	section                string
 }
 
-// @@ -lorig[,sorig] +lnew[,snew] @@[ section]
+// @@ -lold[,sold] +lnew[,snew] @@[ section]
 // 0  1              2            3   4
 func parseHunkRange(rangeline string) (*hunkrange, error) {
 	ps := strings.SplitN(rangeline, " ", 5)
@@ -233,16 +233,16 @@ func parseHunkRange(rangeline string) (*hunkrange, error) {
 	if len(ps) < 4 || ps[0] != "@@" || ps[3] != "@@" {
 		return nil, invalidErr
 	}
-	orig := ps[1] // -lorig[,sorig]
-	if !strings.HasPrefix(orig, "-") {
+	old := ps[1] // -lold[,sold]
+	if !strings.HasPrefix(old, "-") {
 		return nil, invalidErr
 	}
-	lorig, sorig, err := parseLS(orig[1:])
+	lold, sold, err := parseLS(old[1:])
 	if err != nil {
 		return nil, invalidErr
 	}
-	hunkrange.lorig = lorig
-	hunkrange.sorig = sorig
+	hunkrange.lold = lold
+	hunkrange.sold = sold
 	new := ps[2] // +lnew[,snew]
 	if !strings.HasPrefix(new, "+") {
 		return nil, invalidErr
