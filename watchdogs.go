@@ -13,6 +13,7 @@ import (
 type Watchdogs struct {
 	p     Parser
 	c     CommentService
+	d     DiffService
 	strip int
 }
 
@@ -39,6 +40,9 @@ type Comment struct {
 
 type CommentService interface {
 	Post(*Comment) error
+}
+
+type DiffService interface {
 	Diff() ([]byte, error)
 }
 
@@ -48,7 +52,7 @@ func (w *Watchdogs) Run(r io.Reader) error {
 		return fmt.Errorf("parse error: %v", err)
 	}
 
-	d, err := w.c.Diff()
+	d, err := w.d.Diff()
 	if err != nil {
 		return fmt.Errorf("fail to get diff: %v", err)
 	}
