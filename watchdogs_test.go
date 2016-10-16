@@ -35,8 +35,7 @@ func mustAtoI(s string) int {
 }
 
 type commentWriter struct {
-	w    io.Writer
-	diff []byte
+	w io.Writer
 }
 
 func (w *commentWriter) Post(c *Comment) error {
@@ -44,10 +43,6 @@ func (w *commentWriter) Post(c *Comment) error {
 	fmt.Fprintf(w.w, "%v:%v:\n", c.Path, c.Lnum)
 	fmt.Fprintln(w.w, c.Body)
 	return nil
-}
-
-func (w *commentWriter) Diff() ([]byte, error) {
-	return w.diff, nil
 }
 
 func ExampleWatchdogs() {
@@ -74,14 +69,10 @@ golint.new.go:5:5: exported var NewError1 should have comment or be unexported
 golint.new.go:7:1: comment on exported function F should be of the form "F ..."
 golint.new.go:11:1: comment on exported function F2 should be of the form "F2 ..."
 `
-	app := &Watchdogs{
-		p: &golintParser{},
-		c: &commentWriter{
-			w:    os.Stdout,
-			diff: []byte(difftext),
-		},
-		strip: 1,
-	}
+	p := &golintParser{}
+	c := &commentWriter{w: os.Stdout}
+	d := NewDiffString(difftext, 1)
+	app := NewWatchdogs(p, c, d)
 	app.Run(strings.NewReader(lintresult))
 	// Output:
 	// ---

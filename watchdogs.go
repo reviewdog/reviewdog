@@ -11,20 +11,24 @@ import (
 )
 
 type Watchdogs struct {
-	p     Parser
-	c     CommentService
-	d     DiffService
-	strip int
+	p Parser
+	c CommentService
+	d DiffService
+}
+
+func NewWatchdogs(p Parser, c CommentService, d DiffService) *Watchdogs {
+	return &Watchdogs{p: p, c: c, d: d}
 }
 
 // CheckResult represents a checked result of static analysis tools.
 // :h error-file-format
 type CheckResult struct {
-	Path    string // file path
-	Lnum    int    // line number
-	Col     int    // column number (1 <tab> == 1 character column)
-	Vcol    int    // virtual column number (1 <tab> == 8 screen columns)
-	Message string // error message
+	Path    string   // file path
+	Lnum    int      // line number
+	Col     int      // column number (1 <tab> == 1 character column)
+	Vcol    int      // virtual column number (1 <tab> == 8 screen columns)
+	Message string   // error message
+	Lines   []string // Original error lines (often one line)
 }
 
 type Parser interface {
@@ -32,9 +36,8 @@ type Parser interface {
 }
 
 type Comment struct {
+	*CheckResult
 	Body     string
-	Path     string
-	Lnum     int
 	LnumDiff int
 }
 
@@ -44,6 +47,7 @@ type CommentService interface {
 
 type DiffService interface {
 	Diff() ([]byte, error)
+	Strip() int
 }
 
 func (w *Watchdogs) Run(r io.Reader) error {
@@ -61,16 +65,15 @@ func (w *Watchdogs) Run(r io.Reader) error {
 	if err != nil {
 		return fmt.Errorf("fail to parse diff: %v", err)
 	}
-	addedlines := AddedLines(filediffs, w.strip)
+	addedlines := AddedLines(filediffs, w.d.Strip())
 
 	for _, result := range results {
 		addedline := addedlines.Get(result.Path, result.Lnum)
 		if addedline != nil {
 			comment := &Comment{
-				Body:     result.Message, // TODO: format message
-				Path:     addedline.Path,
-				Lnum:     addedline.Lnum,
-				LnumDiff: addedline.LnumDiff,
+				CheckResult: result,
+				Body:        result.Message, // TODO: format message
+				LnumDiff:    addedline.LnumDiff,
 			}
 			if err := w.c.Post(comment); err != nil {
 				return err
