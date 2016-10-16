@@ -1,38 +1,14 @@
 package watchdogs
 
 import (
-	"bufio"
 	"fmt"
 	"io"
 	"os"
-	"strconv"
 	"strings"
 
+	"github.com/haya14busa/errorformat"
 	"github.com/haya14busa/watchdogs/diff"
 )
-
-type golintParser struct{}
-
-func (*golintParser) Parse(r io.Reader) ([]*CheckResult, error) {
-	var rs []*CheckResult
-	s := bufio.NewScanner(r)
-	for s.Scan() {
-		ps := strings.SplitN(s.Text(), ":", 4)
-		r := &CheckResult{
-			Path:    ps[0],
-			Lnum:    mustAtoI(ps[1]),
-			Col:     mustAtoI(ps[2]),
-			Message: ps[3][1:],
-		}
-		rs = append(rs, r)
-	}
-	return rs, nil
-}
-
-func mustAtoI(s string) int {
-	i, _ := strconv.Atoi(s)
-	return i
-}
 
 type commentWriter struct {
 	w io.Writer
@@ -69,18 +45,15 @@ golint.new.go:5:5: exported var NewError1 should have comment or be unexported
 golint.new.go:7:1: comment on exported function F should be of the form "F ..."
 golint.new.go:11:1: comment on exported function F2 should be of the form "F2 ..."
 `
-	p := &golintParser{}
-	c := &commentWriter{w: os.Stdout}
+	efm, _ := errorformat.NewErrorformat([]string{`%f:%l:%c: %m`})
+	p := NewErrorformatParser(efm)
+	c := NewCommentWriter(os.Stdout)
 	d := NewDiffString(difftext, 1)
 	app := NewWatchdogs(p, c, d)
 	app.Run(strings.NewReader(lintresult))
-	// Output:
-	// ---
-	// golint.new.go:5:
-	// exported var NewError1 should have comment or be unexported
-	// ---
-	// golint.new.go:11:
-	// comment on exported function F2 should be of the form "F2 ..."
+	// Unordered output:
+	// golint.new.go:5:5: exported var NewError1 should have comment or be unexported
+	// golint.new.go:11:1: comment on exported function F2 should be of the form "F2 ..."
 }
 
 func ExampleAddedLines() {
@@ -111,7 +84,7 @@ func ExampleAddedLines() {
 			fmt.Printf("%v:%v:(difflnum:%v) %v\n", path, lnum, addedline.LnumDiff, addedline.Content)
 		}
 	}
-	// Output:
+	// Unordered output:
 	// sample.new.txt:2:(difflnum:3) added line
 	// sample.new.txt:3:(difflnum:4) added line
 	// nonewline.new.txt:3:(difflnum:5) b

@@ -26,7 +26,6 @@ type CheckResult struct {
 	Path    string   // file path
 	Lnum    int      // line number
 	Col     int      // column number (1 <tab> == 1 character column)
-	Vcol    int      // virtual column number (1 <tab> == 8 screen columns)
 	Message string   // error message
 	Lines   []string // Original error lines (often one line)
 }
