@@ -12,7 +12,7 @@ var _ = github.ScopeAdminOrg
 var _ CommentService = &GitHubPullRequest{}
 var _ DiffService = &GitHubPullRequest{}
 
-// `path` to `position`(LnumDiff) to comment `body`s
+// `path` to `position`(Lnum for new file) to comment `body`s
 type postedcomments map[string]map[int][]string
 
 // IsPosted returns true if a given comment has been posted in GitHub already,
@@ -22,7 +22,7 @@ func (p postedcomments) IsPosted(c *Comment) bool {
 	if _, ok := p[c.Path]; !ok {
 		return false
 	}
-	bodys, ok := p[c.Path][c.LnumDiff]
+	bodys, ok := p[c.Path][c.Lnum]
 	if !ok {
 		return false
 	}
