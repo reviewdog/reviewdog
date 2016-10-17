@@ -70,6 +70,8 @@ func (g *GitHubPullRequest) ListPostComments() []*Comment {
 	return g.postComments
 }
 
+const bodyPrefix = `:dog:  [[watchdogs](https://github.com/haya14busa/watchdogs)] :dog:`
+
 // Flash posts comments which has not been posted yet.
 func (g *GitHubPullRequest) Flash() error {
 	if err := g.setPostedComment(); err != nil {
@@ -82,9 +84,11 @@ func (g *GitHubPullRequest) Flash() error {
 			continue
 		}
 		eg.Go(func() error {
+			body := bodyPrefix + "\n" + comment.Body
+			// https://github.com/haya14busa/watchdogs
 			prcomment := &github.PullRequestComment{
 				CommitID: &g.sha,
-				Body:     &comment.Body,
+				Body:     &body,
 				Path:     &comment.Path,
 				Position: &comment.LnumDiff,
 			}
