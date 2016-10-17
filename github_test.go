@@ -1,20 +1,35 @@
 package watchdogs
 
-import "github.com/google/go-github/github"
-import "testing"
+import (
+	"os"
+	"testing"
 
-import "golang.org/x/oauth2"
+	"github.com/google/go-github/github"
+	"golang.org/x/oauth2"
+)
 
-func TestGitHubPullRequest_Post(t *testing.T) {
-	t.Skip("skipping test which requires actual Personal access tokens")
+const notokenSkipTestMes = "skipping test (requires actual Personal access tokens. export WATCHDOGS_TEST_GITHUB_API_TOKEN=<GitHub Personal Access Token>)"
 
-	// https://github.com/settings/tokens
-	token := "<GitHub Personal access tokens>"
+func setupGitHubClient() *github.Client {
+	token := os.Getenv("WATCHDOGS_TEST_GITHUB_API_TOKEN")
+	if token == "" {
+		return nil
+	}
 	ts := oauth2.StaticTokenSource(
 		&oauth2.Token{AccessToken: token},
 	)
 	tc := oauth2.NewClient(oauth2.NoContext, ts)
-	client := github.NewClient(tc)
+	return github.NewClient(tc)
+}
+
+func TestGitHubPullRequest_Post(t *testing.T) {
+	if testing.Short() {
+		t.Skip("skipping test which contains actual API requests in short mode")
+	}
+	client := setupGitHubClient()
+	if client == nil {
+		t.Skip(notokenSkipTestMes)
+	}
 
 	// https://github.com/haya14busa/errorformat/pull/2
 	owner := "haya14busa"
@@ -28,7 +43,7 @@ func TestGitHubPullRequest_Post(t *testing.T) {
 			Path: "watchdogs.go",
 		},
 		LnumDiff: 17,
-		Body:     "[watchdogs] test",
+		Body:     "[watchdogs] test2",
 	}
 	// https://github.com/haya14busa/watchdogs/pull/2/files#diff-ed1d019a10f54464cfaeaf6a736b7d27L20
 	if err := g.Post(comment); err != nil {
@@ -42,6 +57,10 @@ func TestGitHubPullRequest_Post(t *testing.T) {
 func TestGitHubPullRequest_Diff(t *testing.T) {
 	if testing.Short() {
 		t.Skip("skipping test which contains actual API requests in short mode")
+	}
+	client := setupGitHubClient()
+	if client == nil {
+		t.Skip(notokenSkipTestMes)
 	}
 
 	want := `diff --git a/diff.go b/diff.go
@@ -90,7 +109,6 @@ index 61450f3..f63f149 100644
 `
 
 	// https://github.com/haya14busa/errorformat/pull/2
-	client := github.NewClient(nil)
 	owner := "haya14busa"
 	repo := "watchdogs"
 	pr := 2
@@ -108,8 +126,11 @@ func TestGitHubPullRequest_comment(t *testing.T) {
 	if testing.Short() {
 		t.Skip("skipping test which contains actual API requests in short mode")
 	}
+	client := setupGitHubClient()
+	if client == nil {
+		t.Skip(notokenSkipTestMes)
+	}
 	// https://github.com/haya14busa/errorformat/pull/2
-	client := github.NewClient(nil)
 	owner := "haya14busa"
 	repo := "watchdogs"
 	pr := 2

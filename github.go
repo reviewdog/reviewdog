@@ -22,10 +22,16 @@ func (p postedcomments) IsPosted(c *Comment) bool {
 	if _, ok := p[c.Path]; !ok {
 		return false
 	}
-	if _, ok := p[c.Path][c.LnumDiff]; !ok {
+	bodys, ok := p[c.Path][c.LnumDiff]
+	if !ok {
 		return false
 	}
-	return true
+	for _, body := range bodys {
+		if body == c.Body {
+			return true
+		}
+	}
+	return false
 }
 
 // https://developer.github.com/v3/pulls/comments/#create-a-comment
