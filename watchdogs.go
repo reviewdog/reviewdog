@@ -10,18 +10,18 @@ import (
 	"github.com/haya14busa/watchdogs/diff"
 )
 
+var TestExportedVarWithoutComment = 1
+
+func NewWatchdogs(p Parser, c CommentService, d DiffService) *Watchdogs {
+	return &Watchdogs{p: p, c: c, d: d}
+}
+
 type Watchdogs struct {
 	p Parser
 	c CommentService
 	d DiffService
 }
 
-func NewWatchdogs(p Parser, c CommentService, d DiffService) *Watchdogs {
-	return &Watchdogs{p: p, c: c, d: d}
-}
-
-// CheckResult represents a checked result of static analysis tools.
-// :h error-file-format
 type CheckResult struct {
 	Path    string   // file path
 	Lnum    int      // line number
