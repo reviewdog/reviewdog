@@ -130,7 +130,7 @@ func (g *GitHubPullRequest) Strip() int {
 	return 1
 }
 
-func (g *GitHubPullRequest) comment() ([]github.PullRequestComment, error) {
+func (g *GitHubPullRequest) comment() ([]*github.PullRequestComment, error) {
 	comments, _, err := g.cli.PullRequests.ListComments(g.owner, g.repo, g.pr, nil)
 	if err != nil {
 		return nil, err
