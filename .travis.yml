@@ -1,0 +1,18 @@
+language: go
+
+go:
+  - 1.7
+  - tip
+
+install:
+  - go get -d -v -t ./...
+  - go get github.com/mattn/goveralls
+  - go get github.com/golang/lint/golint
+  - go get honnef.co/go/unused/cmd/unused
+
+script:
+  - go test -v -race ./...
+  - goveralls -service=travis-ci
+  - go vet ./...
+  # - golint -set_exit_status ./...
+  - unused ./...
