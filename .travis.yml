@@ -4,6 +4,10 @@ go:
   - 1.7
   - tip
 
+env:
+  global:
+    - secure: "XwylxWp4nmRW+d4NhQWbBq9QWNOHAT7oyi8KHS8BLLNNHi5Kl5AL7e8dwg3eU2XRFM1FxBIXpaEGd7wI3NXt4rrsYo9x2OXnPABJ6TKp6qHQCbk7AXtnDwWpxiPd/pfnqPT0qyM+kDkpNcWJeYKukwytCngw5ZLNtlgyjcgNYNgD9uzFxyVHGdcyMb5dKq9VbON3IAP1jbmGUjLZALlig2Bg9m5CXKZuAq3IIWlkri596rJ6vGD0HDkE9EZPWTqjTtB6bRAbBncvfFO1yJFp6jj2VPhNPaVZRefgHZu409RyWdF40t+k8lMtZpdQ74P5anR2iRdal9/y0jAE4Tr5yxkwDglPgQxZLsPEpZ1ROsn+ha20wk6RPnD3zGVrV5jrx4h30OrF7ODfrXgNFums/qua4/Q5MZck/XPxN2Qbj0C1x08yxcxSJSda0oN/IH5PjQMsYk1h0Ag81X/gDtma6Jdvp2WK5VBqZuZy84rv/Uif2IyXMC48Aqj5aZuGUfqp58jmvPw5z1Oc1+8xRQDdIskwPZtHyIEBTdRsOGFgOejuAgB/yElCb4iooMkmvjm+ttf/0aUpu3mIoOCrhnXiWN+2sYDpP65nSmEq11Mb0Dt9b+y4H2n/VlE9m78G1rUnR/2PQd+vmBRGf7BeaG6czr9uqrJ5WoF7dK4Y2DkwG8I="
+
 before_script:
   - echo $TRAVIS
   - echo $TRAVIS_PULL_REQUEST
