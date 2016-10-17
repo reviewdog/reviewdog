@@ -31,7 +31,7 @@ func TestGitHubPullRequest_Post(t *testing.T) {
 		t.Skip(notokenSkipTestMes)
 	}
 
-	// https://github.com/haya14busa/errorformat/pull/2
+	// https://github.com/haya14busa/watchdogs/pull/2
 	owner := "haya14busa"
 	repo := "watchdogs"
 	pr := 2
@@ -108,7 +108,7 @@ index 61450f3..f63f149 100644
  	Lnum    int      // line number
 `
 
-	// https://github.com/haya14busa/errorformat/pull/2
+	// https://github.com/haya14busa/watchdogs/pull/2
 	owner := "haya14busa"
 	repo := "watchdogs"
 	pr := 2
@@ -130,7 +130,7 @@ func TestGitHubPullRequest_comment(t *testing.T) {
 	if client == nil {
 		t.Skip(notokenSkipTestMes)
 	}
-	// https://github.com/haya14busa/errorformat/pull/2
+	// https://github.com/haya14busa/watchdogs/pull/2
 	owner := "haya14busa"
 	repo := "watchdogs"
 	pr := 2
