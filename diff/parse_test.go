@@ -99,7 +99,7 @@ func TestParseMultiFile_sample(t *testing.T) {
 		},
 	}
 	if !reflect.DeepEqual(got, want) {
-		t.Error("error. in:\n%v", content)
+		t.Errorf("error. in:\n%v", content)
 		for _, fd := range got {
 			t.Logf("FileDiff: %#v\n", fd)
 			for _, h := range fd.Hunks {
