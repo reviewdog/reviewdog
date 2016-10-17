@@ -2,24 +2,12 @@ package watchdogs
 
 import (
 	"fmt"
-	"io"
 	"os"
 	"strings"
 
 	"github.com/haya14busa/errorformat"
 	"github.com/haya14busa/watchdogs/diff"
 )
-
-type commentWriter struct {
-	w io.Writer
-}
-
-func (w *commentWriter) Post(c *Comment) error {
-	fmt.Fprintln(w.w, "---")
-	fmt.Fprintf(w.w, "%v:%v:\n", c.Path, c.Lnum)
-	fmt.Fprintln(w.w, c.Body)
-	return nil
-}
 
 func ExampleWatchdogs() {
 	difftext := `diff --git a/golint.old.go b/golint.new.go
