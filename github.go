@@ -22,12 +22,12 @@ func (p postedcomments) IsPosted(c *Comment) bool {
 	if _, ok := p[c.Path]; !ok {
 		return false
 	}
-	bodys, ok := p[c.Path][c.Lnum]
+	bodys, ok := p[c.Path][c.LnumDiff]
 	if !ok {
 		return false
 	}
 	for _, body := range bodys {
-		if body == c.Body {
+		if body == commentBody(c) {
 			return true
 		}
 	}
@@ -72,6 +72,10 @@ func (g *GitHubPullRequest) ListPostComments() []*Comment {
 
 const bodyPrefix = `:dog:  [[watchdogs](https://github.com/haya14busa/watchdogs)] :dog:`
 
+func commentBody(c *Comment) string {
+	return bodyPrefix + "\n" + c.Body
+}
+
 // Flash posts comments which has not been posted yet.
 func (g *GitHubPullRequest) Flash() error {
 	if err := g.setPostedComment(); err != nil {
@@ -84,8 +88,7 @@ func (g *GitHubPullRequest) Flash() error {
 			continue
 		}
 		eg.Go(func() error {
-			body := bodyPrefix + "\n" + comment.Body
-			// https://github.com/haya14busa/watchdogs
+			body := commentBody(comment)
 			prcomment := &github.PullRequestComment{
 				CommitID: &g.sha,
 				Body:     &body,
