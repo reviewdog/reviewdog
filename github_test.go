@@ -23,9 +23,7 @@ func setupGitHubClient() *github.Client {
 }
 
 func TestGitHubPullRequest_Post(t *testing.T) {
-	if testing.Short() {
-		t.Skip("skipping test which contains actual API requests in short mode")
-	}
+	t.Skip("skipping test which post comments actually")
 	client := setupGitHubClient()
 	if client == nil {
 		t.Skip(notokenSkipTestMes)
@@ -43,7 +41,7 @@ func TestGitHubPullRequest_Post(t *testing.T) {
 			Path: "watchdogs.go",
 		},
 		LnumDiff: 17,
-		Body:     "[watchdogs] test2",
+		Body:     "[watchdogs] test",
 	}
 	// https://github.com/haya14busa/watchdogs/pull/2/files#diff-ed1d019a10f54464cfaeaf6a736b7d27L20
 	if err := g.Post(comment); err != nil {
