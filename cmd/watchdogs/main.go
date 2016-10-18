@@ -7,7 +7,12 @@ import (
 	"io"
 	"os"
 	"os/exec"
+	"strconv"
+	"strings"
 
+	"golang.org/x/oauth2"
+
+	"github.com/google/go-github/github"
 	"github.com/haya14busa/errorformat"
 	"github.com/haya14busa/watchdogs"
 	"github.com/mattn/go-shellwords"
@@ -22,12 +27,14 @@ var (
 	diffCmd   string
 	diffStrip int
 	efms      strslice
+	ci        string
 )
 
 func init() {
 	flag.StringVar(&diffCmd, "diff", "", "diff command for filitering checker results")
 	flag.IntVar(&diffStrip, "strip", 1, "strip NUM leading components from diff file names (equivalent to `patch -p`) (default is 1 for git diff)")
 	flag.Var(&efms, "efm", "list of errorformat")
+	flag.StringVar(&ci, "ci", "", "CI service (supported travis)")
 }
 
 func usage() {
@@ -40,24 +47,61 @@ func usage() {
 func main() {
 	flag.Usage = usage
 	flag.Parse()
-	if err := run(os.Stdin, os.Stdout, diffCmd, diffStrip, efms); err != nil {
+	if err := run(os.Stdin, os.Stdout, diffCmd, diffStrip, efms, ci); err != nil {
 		fmt.Fprintln(os.Stderr, err)
 		os.Exit(1)
 	}
 }
 
-func run(r io.Reader, w io.Writer, diffCmd string, diffStrip int, efms []string) error {
-	d, err := diffService(diffCmd, diffStrip)
-	if err != nil {
-		return err
-	}
+func run(r io.Reader, w io.Writer, diffCmd string, diffStrip int, efms []string, ci string) error {
 	p, err := efmParser(efms)
 	if err != nil {
 		return err
 	}
-	c := watchdogs.NewCommentWriter(w)
-	app := watchdogs.NewWatchdogs(p, c, d)
-	return app.Run(r)
+
+	var cs watchdogs.CommentService
+	var ds watchdogs.DiffService
+
+	if ci != "" {
+		gs, isPR, err := githubService(ci)
+		if err != nil {
+			return err
+		}
+		if !isPR {
+			fmt.Fprintf(w, "this is not PullRequest build. CI: %v", ci)
+			return nil
+		}
+		cs = gs
+		ds = gs
+	} else {
+		// local
+		cs = watchdogs.NewCommentWriter(w)
+		d, err := diffService(diffCmd, diffStrip)
+		if err != nil {
+			return err
+		}
+		ds = d
+	}
+
+	app := watchdogs.NewWatchdogs(p, cs, ds)
+	if err := app.Run(r); err != nil {
+		return err
+	}
+	if fcs, ok := cs.(FlashCommentService); ok {
+		// Output log to writer
+		for _, c := range fcs.ListPostComments() {
+			fmt.Fprintln(w, strings.Join(c.Lines, "\n"))
+		}
+		return fcs.Flash()
+	}
+	return nil
+}
+
+// FlashCommentService is CommentService which uses Flash method to post comment.
+type FlashCommentService interface {
+	watchdogs.CommentService
+	ListPostComments() []*watchdogs.Comment
+	Flash() error
 }
 
 func efmParser(efms []string) (watchdogs.Parser, error) {
@@ -79,6 +123,84 @@ func diffService(s string, strip int) (watchdogs.DiffService, error) {
 	cmd := exec.Command(cmds[0], cmds[1:]...)
 	d := watchdogs.NewDiffCmd(cmd, strip)
 	return d, nil
+}
+
+func githubService(ci string) (githubservice *watchdogs.GitHubPullRequest, isPR bool, err error) {
+	token, err := nonEmptyEnv("WATCHDOGS_GITHUB_API_TOKEN")
+	if err != nil {
+		return nil, false, err
+	}
+	var g *GitHubPR
+	switch ci {
+	case "travis":
+		gpr, isPR, err := travis()
+		if err != nil {
+			return nil, false, err
+		}
+		// TODO: support commit build
+		if !isPR {
+			return nil, false, nil
+		}
+		g = gpr
+	default:
+		return nil, false, fmt.Errorf("unsupported CI: %v", ci)
+	}
+	ts := oauth2.StaticTokenSource(
+		&oauth2.Token{AccessToken: token},
+	)
+	tc := oauth2.NewClient(oauth2.NoContext, ts)
+	client := github.NewClient(tc)
+	githubservice = watchdogs.NewGitHubPullReqest(client, g.owner, g.repo, g.pr, g.sha)
+	return githubservice, true, nil
+}
+
+func travis() (g *GitHubPR, isPR bool, err error) {
+	prs := os.Getenv("TRAVIS_PULL_REQUEST")
+	if prs == "false" {
+		return nil, false, nil
+	}
+	pr, err := strconv.Atoi(prs)
+	if err != nil {
+		return nil, true, fmt.Errorf("unexpected env variable. TRAVIS_PULL_REQUEST=%v", prs)
+	}
+	reposlug, err := nonEmptyEnv("TRAVIS_REPO_SLUG")
+	if err != nil {
+		return nil, true, err
+	}
+	rss := strings.SplitN(reposlug, "/", 2)
+	if len(rss) < 2 {
+		return nil, true, fmt.Errorf("unexpected env variable. TRAVIS_REPO_SLUG=%v", reposlug)
+	}
+	owner, repo := rss[0], rss[1]
+
+	sha, err := nonEmptyEnv("TRAVIS_PULL_REQUEST_SHA")
+	if err != nil {
+		return nil, true, err
+	}
+
+	g = &GitHubPR{
+		owner: owner,
+		repo:  repo,
+		pr:    pr,
+		sha:   sha,
+	}
+	return g, true, nil
+}
+
+// GitHubPR represents required information about GitHub PullRequest.
+type GitHubPR struct {
+	owner string
+	repo  string
+	pr    int
+	sha   string
+}
+
+func nonEmptyEnv(env string) (string, error) {
+	v := os.Getenv(env)
+	if v == "" {
+		return "", fmt.Errorf("environment variable $%v is not set", env)
+	}
+	return v, nil
 }
 
 type strslice []string

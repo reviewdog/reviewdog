@@ -177,6 +177,7 @@ func (p *hunkParser) Parse() (*Hunk, error) {
 	}
 	lold := hr.lold
 	lnew := hr.lnew
+endhunk:
 	for {
 		if b, err := p.r.Peek(3); err != nil || string(b) == tokenOldFile {
 			break
@@ -215,9 +216,10 @@ func (p *hunkParser) Parse() (*Hunk, error) {
 			// skip \ No newline at end of file. just consume line
 			readline(p.r)
 		default:
-			return hunk, nil
+			break endhunk
 		}
 	}
+	p.lnumdiff++ // count up by an additional hunk
 	return hunk, nil
 }
 

@@ -163,6 +163,35 @@ index e69de29..0000000
 				},
 			},
 		},
+		{
+			in: `--- sample.old.txt	2016-10-13 05:09:35.820791185 +0900
++++ sample.new.txt	2016-10-13 05:15:26.839245048 +0900
+@@ -1,1 +1,1 @@
+ unchanged, contextual line
+@@ -2,1 +2,1 @@
+ unchanged, contextual line
+`,
+			want: &FileDiff{
+				PathOld: "sample.old.txt",
+				PathNew: "sample.new.txt",
+				TimeOld: "2016-10-13 05:09:35.820791185 +0900",
+				TimeNew: "2016-10-13 05:15:26.839245048 +0900",
+				Hunks: []*Hunk{
+					{
+						StartLineOld: 1, LineLengthOld: 1, StartLineNew: 1, LineLengthNew: 1,
+						Lines: []*Line{
+							{Type: 0, Content: "unchanged, contextual line", LnumDiff: 1, LnumOld: 1, LnumNew: 1},
+						},
+					},
+					{
+						StartLineOld: 2, LineLengthOld: 1, StartLineNew: 2, LineLengthNew: 1,
+						Lines: []*Line{
+							{Type: 0, Content: "unchanged, contextual line", LnumDiff: 3, LnumOld: 2, LnumNew: 2},
+						},
+					},
+				},
+			},
+		},
 	}
 	for _, tt := range tests {
 		p := &fileParser{r: bufio.NewReader(strings.NewReader(tt.in))}
@@ -172,6 +201,18 @@ index e69de29..0000000
 		}
 		if !reflect.DeepEqual(got, tt.want) {
 			t.Errorf("fileParser.Parse() = %#v, want %#v\nin: %v", got, tt.want, tt.in)
+			t.Log("got:")
+			for _, h := range got.Hunks {
+				for _, l := range h.Lines {
+					t.Logf("%#v", l)
+				}
+			}
+			t.Log("want:")
+			for _, h := range tt.want.Hunks {
+				for _, l := range h.Lines {
+					t.Logf("%#v", l)
+				}
+			}
 		}
 	}
 }
