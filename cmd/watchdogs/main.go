@@ -97,6 +97,7 @@ func run(r io.Reader, w io.Writer, diffCmd string, diffStrip int, efms []string,
 	return nil
 }
 
+// FlashCommentService is CommentService which uses Flash method to post comment.
 type FlashCommentService interface {
 	watchdogs.CommentService
 	ListPostComments() []*watchdogs.Comment
@@ -186,6 +187,7 @@ func travis() (g *GitHubPR, isPR bool, err error) {
 	return g, true, nil
 }
 
+// GitHubPR represents required information about GitHub PullRequest.
 type GitHubPR struct {
 	owner string
 	repo  string

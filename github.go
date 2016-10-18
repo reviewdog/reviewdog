@@ -34,8 +34,11 @@ func (p postedcomments) IsPosted(c *Comment) bool {
 	return false
 }
 
-// https://developer.github.com/v3/pulls/comments/#create-a-comment
-// POST /repos/:owner/:repo/pulls/:number/comments
+// GitHubPullRequest is a comment and diff service for GitHub PullRequest.
+//
+// API:
+//	https://developer.github.com/v3/pulls/comments/#create-a-comment
+// 	POST /repos/:owner/:repo/pulls/:number/comments
 type GitHubPullRequest struct {
 	postComments []*Comment
 
@@ -48,6 +51,7 @@ type GitHubPullRequest struct {
 	postedcs postedcomments
 }
 
+// NewGitHubPullReqest returns a new GitHubPullRequest service.
 func NewGitHubPullReqest(cli *github.Client, owner, repo string, pr int, sha string) *GitHubPullRequest {
 	return &GitHubPullRequest{
 		cli:   cli,
@@ -123,6 +127,7 @@ func (g *GitHubPullRequest) setPostedComment() error {
 	return nil
 }
 
+// Diff returns a diff of PullRequest.
 func (g *GitHubPullRequest) Diff() ([]byte, error) {
 	pr, _, err := g.cli.PullRequests.Get(g.owner, g.repo, g.pr)
 	if err != nil {
@@ -139,6 +144,7 @@ func (g *GitHubPullRequest) Diff() ([]byte, error) {
 	return buf.Bytes(), nil
 }
 
+// Strip returns 1 as a strip of git diff.
 func (g *GitHubPullRequest) Strip() int {
 	return 1
 }
