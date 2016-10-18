@@ -141,7 +141,9 @@ func TestGitHubPullRequest_comment(t *testing.T) {
 		t.Log("---")
 		t.Log(*c.Body)
 		t.Log(*c.Path)
-		t.Log(*c.Position)
+		if c.Position != nil {
+			t.Log(*c.Position)
+		}
 		t.Log(*c.CommitID)
 	}
 }

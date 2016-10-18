@@ -113,6 +113,11 @@ func (g *GitHubPullRequest) setPostedComment() error {
 		return err
 	}
 	for _, c := range cs {
+		if c.Position == nil || c.Path == nil || c.Body == nil {
+			// skip resolved comments. Or comments which do not have "path" nor
+			// "body".
+			continue
+		}
 		path := *c.Path
 		pos := *c.Position
 		body := *c.Body
