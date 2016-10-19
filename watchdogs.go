@@ -10,6 +10,8 @@ import (
 	"github.com/haya14busa/watchdogs/diff"
 )
 
+var TestNewExportedVar = 1 // TODO(#4): remove
+
 type Watchdogs struct {
 	p Parser
 	c CommentService
