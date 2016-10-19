@@ -31,4 +31,4 @@ script:
   - unused ./...
   - go install ./cmd/watchdogs
   - >-
-    (golint ./... | watchdogs -efm="%f:%l:%c: %m" -ci=travis)
+    golint ./... | watchdogs -efm="%f:%l:%c: %m" -ci=travis

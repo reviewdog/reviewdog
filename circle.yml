@@ -1,0 +1,20 @@
+test:
+  pre:
+    - go get github.com/golang/lint/golint
+    - go install ./cmd/watchdogs
+    - go build ./cmd/watchdogs
+    - echo $CI_PULL_REQUESTS
+    - echo $CI_PULL_REQUEST
+    - echo $CIRCLE_PROJECT_USERNAME
+    - echo $CIRCLE_PROJECT_REPONAME
+    - echo $CIRCLE_SHA1
+    - echo $CIRCLE_PR_USERNAME
+    - echo $CIRCLE_PR_REPONAME
+    - echo $CIRCLE_PR_NUMBER
+  override:
+    - go test -v -race ./...
+    - golint ./...
+    # - >-
+    #   golint ./... | watchdogs -efm="%f:%l:%c: %m" -diff="git diff master"
+    - >-
+      golint ./... | ./watchdogs -efm="%f:%l:%c: %m" -diff="git diff master"
