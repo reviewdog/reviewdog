@@ -7,6 +7,7 @@ import (
 	"io"
 	"os"
 	"os/exec"
+	"regexp"
 	"strconv"
 	"strings"
 
@@ -34,7 +35,7 @@ func init() {
 	flag.StringVar(&diffCmd, "diff", "", "diff command for filitering checker results")
 	flag.IntVar(&diffStrip, "strip", 1, "strip NUM leading components from diff file names (equivalent to `patch -p`) (default is 1 for git diff)")
 	flag.Var(&efms, "efm", "list of errorformat")
-	flag.StringVar(&ci, "ci", "", "CI service (supported travis)")
+	flag.StringVar(&ci, "ci", "", "CI service (supported travis, circle-ci)")
 }
 
 func usage() {
@@ -133,17 +134,18 @@ func githubService(ci string) (githubservice *watchdogs.GitHubPullRequest, isPR 
 	var g *GitHubPR
 	switch ci {
 	case "travis":
-		gpr, isPR, err := travis()
-		if err != nil {
-			return nil, false, err
-		}
-		// TODO: support commit build
-		if !isPR {
-			return nil, false, nil
-		}
-		g = gpr
+		g, isPR, err = travis()
+	case "circle-ci":
+		g, isPR, err = circleci()
 	default:
 		return nil, false, fmt.Errorf("unsupported CI: %v", ci)
+	}
+	if err != nil {
+		return nil, false, err
+	}
+	// TODO: support commit build
+	if !isPR {
+		return nil, false, nil
 	}
 	ts := oauth2.StaticTokenSource(
 		&oauth2.Token{AccessToken: token},
@@ -178,6 +180,51 @@ func travis() (g *GitHubPR, isPR bool, err error) {
 		return nil, true, err
 	}
 
+	g = &GitHubPR{
+		owner: owner,
+		repo:  repo,
+		pr:    pr,
+		sha:   sha,
+	}
+	return g, true, nil
+}
+
+// https://circleci.com/docs/environment-variables/
+func circleci() (g *GitHubPR, isPR bool, err error) {
+	var prs string // pull request number in string
+	// For Pull Request from a same repository
+	// e.g. https: //github.com/haya14busa/watchdogs/pull/6
+	// it might be better to support CI_PULL_REQUESTS instead.
+	prs = os.Getenv("CI_PULL_REQUEST")
+	if prs == "" {
+		// For Pull Request by a fork repository
+		// e.g. 6
+		prs = os.Getenv("CIRCLE_PR_NUMBER")
+	}
+	if prs == "" {
+		// not a pull-request build
+		return nil, false, nil
+	}
+	// regexp.MustCompile() in func intentionally because this func is called
+	// once for one run.
+	re := regexp.MustCompile(`[1-9]\d*$`)
+	prm := re.FindString(prs)
+	pr, err := strconv.Atoi(prm)
+	if err != nil {
+		return nil, true, fmt.Errorf("unexpected env variable (CI_PULL_REQUEST or CIRCLE_PR_NUMBER): %v", prs)
+	}
+	owner, err := nonEmptyEnv("CIRCLE_PROJECT_USERNAME")
+	if err != nil {
+		return nil, true, err
+	}
+	repo, err := nonEmptyEnv("CIRCLE_PROJECT_REPONAME")
+	if err != nil {
+		return nil, true, err
+	}
+	sha, err := nonEmptyEnv("CIRCLE_SHA1")
+	if err != nil {
+		return nil, true, err
+	}
 	g = &GitHubPR{
 		owner: owner,
 		repo:  repo,
