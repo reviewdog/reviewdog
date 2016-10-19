@@ -3,6 +3,7 @@ package main
 import (
 	"bytes"
 	"os"
+	"reflect"
 	"strings"
 	"testing"
 )
@@ -97,4 +98,92 @@ func TestRun_travis(t *testing.T) {
 		t.Log(buf.String())
 	}
 
+}
+
+func TestCircleci(t *testing.T) {
+	envs := []string{
+		"CI_PULL_REQUEST",
+		"CIRCLE_PR_NUMBER",
+		"CIRCLE_PROJECT_USERNAME",
+		"CIRCLE_PROJECT_REPONAME",
+		"CIRCLE_SHA1",
+		"WATCHDOGS_GITHUB_API_TOKEN",
+	}
+	// save and clean
+	saveEnvs := make(map[string]string)
+	for _, key := range envs {
+		saveEnvs[key] = os.Getenv(key)
+		os.Setenv(key, "")
+	}
+	// restore
+	defer func() {
+		for key, value := range saveEnvs {
+			os.Setenv(key, value)
+		}
+	}()
+
+	if _, isPR, err := circleci(); isPR {
+		t.Errorf("should be non pull-request build. error: %v", err)
+	}
+
+	os.Setenv("CI_PULL_REQUEST", "invalid")
+	if _, _, err := circleci(); err == nil {
+		t.Error("error expected but got nil")
+	} else {
+		t.Log(err)
+	}
+
+	os.Setenv("CI_PULL_REQUEST", "")
+	os.Setenv("CIRCLE_PR_NUMBER", "invalid")
+	if _, _, err := circleci(); err == nil {
+		t.Error("error expected but got nil")
+	} else {
+		t.Log(err)
+	}
+
+	os.Setenv("CIRCLE_PR_NUMBER", "1")
+	if _, _, err := circleci(); err == nil {
+		t.Error("error expected but got nil")
+	} else {
+		t.Log(err)
+	}
+
+	os.Setenv("CIRCLE_PROJECT_USERNAME", "haya14busa")
+	if _, _, err := circleci(); err == nil {
+		t.Error("error expected but got nil")
+	} else {
+		t.Log(err)
+	}
+
+	os.Setenv("CIRCLE_PROJECT_REPONAME", "watchdogs")
+	if _, _, err := circleci(); err == nil {
+		t.Error("error expected but got nil")
+	} else {
+		t.Log(err)
+	}
+
+	os.Setenv("CIRCLE_SHA1", "sha1")
+	g, isPR, err := circleci()
+	if err != nil {
+		t.Errorf("unexpected error: %v", err)
+	}
+	if !isPR {
+		t.Error("should be pull request build")
+	}
+	want := &GitHubPR{
+		owner: "haya14busa",
+		repo:  "watchdogs",
+		pr:    1,
+		sha:   "sha1",
+	}
+	if !reflect.DeepEqual(g, want) {
+		t.Errorf("got: %#v, want: %#v", g, want)
+	}
+
+	os.Setenv("WATCHDOGS_GITHUB_API_TOKEN", "<WATCHDOGS_GITHUB_API_TOKEN>")
+	if err := run(strings.NewReader("compiler result"), new(bytes.Buffer), "", 0, nil, "circle-ci"); err == nil {
+		t.Error("error expected but got nil")
+	} else {
+		t.Log(err)
+	}
 }
