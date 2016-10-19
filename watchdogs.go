@@ -43,6 +43,8 @@ type Comment struct {
 	LnumDiff int
 }
 
+var TestExportedVar = 1
+
 type CommentService interface {
 	Post(*Comment) error
 }
