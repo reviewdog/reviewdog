@@ -1,10 +1,7 @@
 test:
   pre:
-    - go install ./cmd/watchdogs
     - go build ./cmd/watchdogs
-    - go get github.com/golang/lint/golint
   override:
     - go test -v -race ./...
-    - golint ./...
     - >-
-      golint ./... | ./watchdogs -efm="%f:%l:%c: %m" -ci="circle-ci"
+      go tool vet -all -shadowstrict . | ./watchdogs -efm="%f:%l: %m" -ci="circle-ci"
