@@ -1,0 +1,8 @@
+test:
+  pre:
+    - go install ./cmd/watchdogs
+    - go get github.com/golang/lint/golint
+  override:
+    - go test -v -race ./...
+    - >-
+      golint ./... | watchdogs -efm="%f:%l:%c: %m" -diff="git diff master"
