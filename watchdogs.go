@@ -34,11 +34,16 @@ type Parser interface {
 	Parse(r io.Reader) ([]*CheckResult, error)
 }
 
+func TestNewExportedFunc() {
+}
+
 type Comment struct {
 	*CheckResult
 	Body     string
 	LnumDiff int
 }
+
+var TestExportedVar = 1
 
 type CommentService interface {
 	Post(*Comment) error
