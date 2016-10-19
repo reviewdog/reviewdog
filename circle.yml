@@ -6,7 +6,7 @@ test:
   override:
     - go test -v -race ./...
     - golint ./...
-    - >-
-      golint ./... | watchdogs -efm="%f:%l:%c: %m" -diff="git diff master"
+    # - >-
+    #   golint ./... | watchdogs -efm="%f:%l:%c: %m" -diff="git diff master"
     - >-
       golint ./... | ./watchdogs -efm="%f:%l:%c: %m" -diff="git diff master"
