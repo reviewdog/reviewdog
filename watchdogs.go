@@ -34,6 +34,9 @@ type Parser interface {
 	Parse(r io.Reader) ([]*CheckResult, error)
 }
 
+func TestNewExportedFunc() {
+}
+
 type Comment struct {
 	*CheckResult
 	Body     string
