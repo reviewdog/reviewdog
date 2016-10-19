@@ -1,8 +1,8 @@
 test:
   pre:
+    - go get github.com/golang/lint/golint
     - go install ./cmd/watchdogs
     - go build ./cmd/watchdogs
-    - go get github.com/golang/lint/golint
     - echo $CI_PULL_REQUESTS
     - echo $CI_PULL_REQUEST
     - echo $CIRCLE_PROJECT_USERNAME
