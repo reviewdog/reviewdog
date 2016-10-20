@@ -50,6 +50,8 @@ type DiffService interface {
 	Strip() int
 }
 
+var unusedVar = 1
+
 func (w *Watchdogs) Run(r io.Reader) error {
 	results, err := w.p.Parse(r)
 	if err != nil {
