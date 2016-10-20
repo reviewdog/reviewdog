@@ -67,9 +67,10 @@ func ExampleAddedLines() {
 `
 
 	filediffs, _ := diff.ParseMultiFile(strings.NewReader(content))
+	wd, _ := os.Getwd()
 	for path, ltol := range AddedLines(filediffs, 0) {
 		for lnum, addedline := range ltol {
-			fmt.Printf("%v:%v:(difflnum:%v) %v\n", path, lnum, addedline.LnumDiff, addedline.Content)
+			fmt.Printf("%v:%v:(difflnum:%v) %v\n", path[len(wd)+1:], lnum, addedline.LnumDiff, addedline.Content)
 		}
 	}
 	// Unordered output:
