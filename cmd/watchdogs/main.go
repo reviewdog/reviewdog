@@ -35,7 +35,7 @@ func init() {
 	flag.StringVar(&diffCmd, "diff", "", "diff command for filitering checker results")
 	flag.IntVar(&diffStrip, "strip", 1, "strip NUM leading components from diff file names (equivalent to `patch -p`) (default is 1 for git diff)")
 	flag.Var(&efms, "efm", "list of errorformat")
-	flag.StringVar(&ci, "ci", "", "CI service (supported travis, circle-ci, droneio(OSS))")
+	flag.StringVar(&ci, "ci", "", "CI service (supported travis, circle-ci, droneio(OSS 0.4))")
 }
 
 func usage() {
