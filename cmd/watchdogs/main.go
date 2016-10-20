@@ -35,7 +35,7 @@ func init() {
 	flag.StringVar(&diffCmd, "diff", "", "diff command for filitering checker results")
 	flag.IntVar(&diffStrip, "strip", 1, "strip NUM leading components from diff file names (equivalent to `patch -p`) (default is 1 for git diff)")
 	flag.Var(&efms, "efm", "list of errorformat")
-	flag.StringVar(&ci, "ci", "", "CI service (supported travis, circle-ci)")
+	flag.StringVar(&ci, "ci", "", "CI service (supported travis, circle-ci, droneio(OSS 0.4))")
 }
 
 func usage() {
@@ -137,6 +137,8 @@ func githubService(ci string) (githubservice *watchdogs.GitHubPullRequest, isPR 
 		g, isPR, err = travis()
 	case "circle-ci":
 		g, isPR, err = circleci()
+	case "droneio":
+		g, isPR, err = droneio()
 	default:
 		return nil, false, fmt.Errorf("unsupported CI: %v", ci)
 	}
@@ -222,6 +224,40 @@ func circleci() (g *GitHubPR, isPR bool, err error) {
 		return nil, true, err
 	}
 	sha, err := nonEmptyEnv("CIRCLE_SHA1")
+	if err != nil {
+		return nil, true, err
+	}
+	g = &GitHubPR{
+		owner: owner,
+		repo:  repo,
+		pr:    pr,
+		sha:   sha,
+	}
+	return g, true, nil
+}
+
+// http://readme.drone.io/usage/variables/
+func droneio() (g *GitHubPR, isPR bool, err error) {
+	var prs string // pull request number in string
+	prs = os.Getenv("DRONE_PULL_REQUEST")
+	if prs == "" {
+		// not a pull-request build
+		return nil, false, nil
+	}
+	pr, err := strconv.Atoi(prs)
+	if err != nil {
+		return nil, true, fmt.Errorf("unexpected env variable (DRONE_PULL_REQUEST): %v", prs)
+	}
+	reposlug, err := nonEmptyEnv("DRONE_REPO") // e.g. haya14busa/watchdogs
+	if err != nil {
+		return nil, true, err
+	}
+	rss := strings.SplitN(reposlug, "/", 2)
+	if len(rss) < 2 {
+		return nil, true, fmt.Errorf("unexpected env variable. DRONE_REPO=%v", reposlug)
+	}
+	owner, repo := rss[0], rss[1]
+	sha, err := nonEmptyEnv("DRONE_COMMIT")
 	if err != nil {
 		return nil, true, err
 	}

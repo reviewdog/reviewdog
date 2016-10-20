@@ -1,0 +1,4 @@
+# copy this file to .drone.sec.yaml and insert <WATCHDOGS_GITHUB_API_TOKEN>
+#   cp .drone.sec.sample.yaml .drone.sec.yaml
+environment:
+  WATCHDOGS_GITHUB_API_TOKEN: <WATCHDOGS_GITHUB_API_TOKEN>

@@ -187,3 +187,81 @@ func TestCircleci(t *testing.T) {
 		t.Log(err)
 	}
 }
+
+func TestDroneio(t *testing.T) {
+	envs := []string{
+		"DRONE_PULL_REQUEST",
+		"DRONE_REPO",
+		"DRONE_COMMIT",
+		"WATCHDOGS_GITHUB_API_TOKEN",
+	}
+	// save and clean
+	saveEnvs := make(map[string]string)
+	for _, key := range envs {
+		saveEnvs[key] = os.Getenv(key)
+		os.Setenv(key, "")
+	}
+	// restore
+	defer func() {
+		for key, value := range saveEnvs {
+			os.Setenv(key, value)
+		}
+	}()
+
+	if _, isPR, err := droneio(); isPR {
+		t.Errorf("should be non pull-request build. error: %v", err)
+	}
+
+	os.Setenv("DRONE_PULL_REQUEST", "invalid")
+	if _, _, err := droneio(); err == nil {
+		t.Error("error expected but got nil")
+	} else {
+		t.Log(err)
+	}
+
+	os.Setenv("DRONE_PULL_REQUEST", "1")
+	if _, _, err := droneio(); err == nil {
+		t.Error("error expected but got nil")
+	} else {
+		t.Log(err)
+	}
+
+	os.Setenv("DRONE_REPO", "invalid")
+	if _, _, err := droneio(); err == nil {
+		t.Error("error expected but got nil")
+	} else {
+		t.Log(err)
+	}
+
+	os.Setenv("DRONE_REPO", "haya14busa/watchdogs")
+	if _, _, err := droneio(); err == nil {
+		t.Error("error expected but got nil")
+	} else {
+		t.Log(err)
+	}
+
+	os.Setenv("DRONE_COMMIT", "sha1")
+	g, isPR, err := droneio()
+	if err != nil {
+		t.Errorf("unexpected error: %v", err)
+	}
+	if !isPR {
+		t.Error("should be pull request build")
+	}
+	want := &GitHubPR{
+		owner: "haya14busa",
+		repo:  "watchdogs",
+		pr:    1,
+		sha:   "sha1",
+	}
+	if !reflect.DeepEqual(g, want) {
+		t.Errorf("got: %#v, want: %#v", g, want)
+	}
+
+	os.Setenv("WATCHDOGS_GITHUB_API_TOKEN", "<WATCHDOGS_GITHUB_API_TOKEN>")
+	if err := run(strings.NewReader("compiler result"), new(bytes.Buffer), "", 0, nil, "droneio"); err == nil {
+		t.Error("error expected but got nil")
+	} else {
+		t.Log(err)
+	}
+}

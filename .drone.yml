@@ -1,0 +1,44 @@
+# Run the below command when you edit .drone.yml
+#   drone secure --repo haya14busa/watchdogs --in .drone.sec.yaml
+#
+build:
+  test:
+    image: golang
+    commands:
+      - go get -d -v -t ./...
+      - go test -v ./...
+  lint:
+    image: golang
+    environment:
+      - WATCHDOGS_GITHUB_API_TOKEN=$$WATCHDOGS_GITHUB_API_TOKEN
+    commands:
+      - go get -d -v -t ./...
+      - go get honnef.co/go/unused/cmd/unused
+      - go install ./cmd/watchdogs
+      - |
+        unused ./... | watchdogs -efm="%f:%l:%c: %m" -ci=droneio
+    when:
+      event: pull_request
+  env:
+    image: alpine
+    commands:
+      - echo $DRONE
+      - echo $DRONE_REPO
+      - echo $DRONE_BRANCH
+      - echo $DRONE_COMMIT
+      - echo $DRONE_DIR
+      - echo $DRONE_BUILD_NUMBER
+      - echo $DRONE_PULL_REQUEST
+      - echo $DRONE_JOB_NUMBER
+      - echo $DRONE_TAG
+      - echo $CI
+      - echo $CI_NAME=drone
+      - echo $CI_REPO
+      - echo $CI_BRANCH
+      - echo $CI_COMMIT
+      - echo $CI_BUILD_NUMBER
+      - echo $CI_PULL_REQUEST
+      - echo $CI_JOB_NUMBER
+      - echo $CI_BUILD_DIR
+      - echo $CI_BUILD_URL
+      - echo $CI_TAG
