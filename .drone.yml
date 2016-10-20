@@ -34,5 +34,5 @@ build:
       - echo $CI_TAG
       - |
         unused ./... | watchdogs -efm="%f:%l:%c: %m" -ci=droneio
-    # when:
-    #   event: pull_request
+    when:
+      event: pull_request
