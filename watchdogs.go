@@ -91,11 +91,15 @@ type AddedLine struct {
 	Content  string // line content
 }
 
-// PosToAddedLine is a hash table of path to line number to AddedLine.
+// PosToAddedLine is a hash table of normalized path to line number to AddedLine.
 type PosToAddedLine map[string]map[int]*AddedLine
 
 func (p PosToAddedLine) Get(path string, lnum int) *AddedLine {
-	ltodiff, ok := p[path]
+	npath, err := normalizePath(path)
+	if err != nil {
+		return nil
+	}
+	ltodiff, ok := p[npath]
 	if !ok {
 		return nil
 	}
@@ -117,6 +121,12 @@ func AddedLines(filediffs []*diff.FileDiff, strip int) PosToAddedLine {
 		if len(ps) > strip {
 			path = filepath.Join(ps[strip:]...)
 		}
+		np, err := normalizePath(path)
+		if err != nil {
+			// FIXME(haya14busa): log or return error?
+			continue
+		}
+		path = np
 
 		for _, hunk := range filediff.Hunks {
 			for _, line := range hunk.Lines {
@@ -133,4 +143,12 @@ func AddedLines(filediffs []*diff.FileDiff, strip int) PosToAddedLine {
 		r[path] = ltodiff
 	}
 	return r
+}
+
+func normalizePath(p string) (string, error) {
+	path, err := filepath.Abs(p)
+	if err != nil {
+		return "", err
+	}
+	return filepath.ToSlash(path), nil
 }
