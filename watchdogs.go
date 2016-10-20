@@ -4,6 +4,7 @@ import (
 	"bytes"
 	"fmt"
 	"io"
+	"os"
 	"path/filepath"
 	"strings"
 
@@ -23,7 +24,7 @@ func NewWatchdogs(p Parser, c CommentService, d DiffService) *Watchdogs {
 // CheckResult represents a checked result of static analysis tools.
 // :h error-file-format
 type CheckResult struct {
-	Path    string   // file path
+	Path    string   // relative file path
 	Lnum    int      // line number
 	Col     int      // column number (1 <tab> == 1 character column)
 	Message string   // error message
@@ -66,8 +67,20 @@ func (w *Watchdogs) Run(r io.Reader) error {
 	}
 	addedlines := AddedLines(filediffs, w.d.Strip())
 
+	wd, err := os.Getwd()
+	if err != nil {
+		return err
+	}
+
 	for _, result := range results {
 		addedline := addedlines.Get(result.Path, result.Lnum)
+		if filepath.IsAbs(result.Path) {
+			relpath, err := filepath.Rel(wd, result.Path)
+			if err != nil {
+				return err
+			}
+			result.Path = relpath
+		}
 		if addedline != nil {
 			comment := &Comment{
 				CheckResult: result,
