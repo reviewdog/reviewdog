@@ -29,5 +29,5 @@ build:
       - echo $CI_BUILD_DIR
       - echo $CI_BUILD_URL
       - echo $CI_TAG
-    when:
-      event: pull_request
+    # when:
+    #   event: pull_request
