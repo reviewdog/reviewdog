@@ -6,6 +6,8 @@ build:
       - go test -v ./...
   lint:
     image: golang
+    environment:
+      - WATCHDOGS_GITHUB_API_TOKEN=$$WATCHDOGS_GITHUB_API_TOKEN
     commands:
       - go get -d -v -t ./...
       - go get honnef.co/go/unused/cmd/unused
