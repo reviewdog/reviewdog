@@ -12,6 +12,7 @@ build:
     environment:
       - WATCHDOGS_GITHUB_API_TOKEN=$$WATCHDOGS_GITHUB_API_TOKEN
     commands:
+      - echo $WATCHDOGS_GITHUB_API_TOKEN
       - go get -d -v -t ./...
       - go get honnef.co/go/unused/cmd/unused
       - go install ./cmd/watchdogs
