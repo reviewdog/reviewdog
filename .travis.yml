@@ -22,13 +22,12 @@ install:
   - go get -d -v -t ./...
   - go get github.com/mattn/goveralls
   - go get github.com/golang/lint/golint
-  - go get honnef.co/go/unused/cmd/unused
 
 script:
   - go test -v -race ./...
   - goveralls -service=travis-ci
   # - go vet ./... ref: circle.yml
-  - unused ./...
+  # - unused ./... ref: .drone.yml
   - go install ./cmd/watchdogs
   - >-
     golint ./... | watchdogs -efm="%f:%l:%c: %m" -ci=travis

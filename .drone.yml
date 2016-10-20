@@ -8,6 +8,7 @@ build:
     image: golang
     commands:
       - go get -d -v -t ./...
+      - go get honnef.co/go/unused/cmd/unused
       - go install ./cmd/watchdogs
       - echo $DRONE
       - echo $DRONE_REPO
@@ -29,5 +30,7 @@ build:
       - echo $CI_BUILD_DIR
       - echo $CI_BUILD_URL
       - echo $CI_TAG
+      - |
+        unused ./... | watchdogs -efm="%f:%l:%c: %m" -ci=droneio
     # when:
     #   event: pull_request
