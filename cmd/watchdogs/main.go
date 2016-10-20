@@ -69,7 +69,7 @@ func run(r io.Reader, w io.Writer, diffCmd string, diffStrip int, efms []string,
 			return err
 		}
 		if !isPR {
-			fmt.Fprintf(w, "this is not PullRequest build. CI: %v", ci)
+			fmt.Fprintf(os.Stderr, "this is not PullRequest build. CI: %v\n", ci)
 			return nil
 		}
 		cs = gs
