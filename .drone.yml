@@ -12,33 +12,14 @@ build:
     environment:
       - WATCHDOGS_GITHUB_API_TOKEN=$$WATCHDOGS_GITHUB_API_TOKEN
     commands:
-      - go get -d -v -t ./...
+      - go get github.com/haya14busa/watchdogs/cmd/watchdogs
+      - go get github.com/golang/lint/golint
       - go get honnef.co/go/unused/cmd/unused
-      - go install ./cmd/watchdogs
+      - |
+        go tool vet -all -shadowstrict . | watchdogs -efm="%f:%l: %m" -ci=droneio
+      - |
+        golint ./... | watchdogs -efm="%f:%l:%c: %m" -ci=droneio
       - |
         unused ./... | watchdogs -efm="%f:%l:%c: %m" -ci=droneio
     when:
       event: pull_request
-  env:
-    image: alpine
-    commands:
-      - echo $DRONE
-      - echo $DRONE_REPO
-      - echo $DRONE_BRANCH
-      - echo $DRONE_COMMIT
-      - echo $DRONE_DIR
-      - echo $DRONE_BUILD_NUMBER
-      - echo $DRONE_PULL_REQUEST
-      - echo $DRONE_JOB_NUMBER
-      - echo $DRONE_TAG
-      - echo $CI
-      - echo $CI_NAME=drone
-      - echo $CI_REPO
-      - echo $CI_BRANCH
-      - echo $CI_COMMIT
-      - echo $CI_BUILD_NUMBER
-      - echo $CI_PULL_REQUEST
-      - echo $CI_JOB_NUMBER
-      - echo $CI_BUILD_DIR
-      - echo $CI_BUILD_URL
-      - echo $CI_TAG
