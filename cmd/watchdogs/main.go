@@ -296,3 +296,5 @@ func (ss *strslice) Set(value string) error {
 	*ss = append(*ss, value)
 	return nil
 }
+
+var unusedVar = 1 // TODO(#8): remove
