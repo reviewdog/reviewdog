@@ -43,3 +43,10 @@ build:
         name: go test
         code: |
           go test -v -race ./...
+
+    - script:
+        name: lint
+        code: |
+          echo $TEST_PROTECTED_VAR
+          go build ./cmd/watchdogs
+          go tool vet -all -shadowstrict . | ./watchdogs -efm="%f:%l: %m" -ci="circle-ci"
