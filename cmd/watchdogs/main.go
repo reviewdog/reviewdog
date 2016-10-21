@@ -19,6 +19,10 @@ import (
 	"github.com/mattn/go-shellwords"
 )
 
+// TODO(#14): remove
+func F() {
+}
+
 const usageMessage = "" +
 	`Usage:	watchdogs [flags]
 	watchdogs accepts any compiler or linter results from stdin and filters
