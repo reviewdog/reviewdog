@@ -45,6 +45,8 @@ type CommentService interface {
 	Post(*Comment) error
 }
 
+var TestNewExportedVar = 1
+
 type DiffService interface {
 	Diff() ([]byte, error)
 	Strip() int
