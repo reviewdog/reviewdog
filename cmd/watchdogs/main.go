@@ -20,22 +20,39 @@ import (
 )
 
 const usageMessage = "" +
-	`Usage: watchdogs [flags]
+	`Usage:	watchdogs [flags]
+	watchdogs accepts any compiler or linter results from stdin and filters
+	them by diff for review. watchdogs also can posts the results as a comment to
+	GitHub if you use watchdogs in CI service.
 `
 
 // flags
 var (
-	diffCmd   string
+	diffCmd    string
+	diffCmdDoc = `diff command (e.g. "git diff"). diff flag is ignored if you pass "ci" flag`
+
 	diffStrip int
 	efms      strslice
-	ci        string
+
+	ci    string
+	ciDoc = `CI service (supported travis, circle-ci, droneio(OSS 0.4), common)
+	If you use "ci" flag, you need to set WATCHDOGS_GITHUB_API_TOKEN environment
+	variable.  Go to https://github.com/settings/tokens and create new Personal
+	access token with repo scope.
+
+	"common" requires following environment variables
+		CI_PULL_REQUEST	Pull Request number (e.g. 14)
+		CI_COMMIT	SHA1 for the current build
+		CI_REPO_OWNER	repository owner (e.g. "haya14busa" for https://github.com/haya14busa/watchdogs)
+		CI_REPO_NAME	repository name (e.g. "watchdogs" for https://github.com/haya14busa/watchdogs)
+`
 )
 
 func init() {
-	flag.StringVar(&diffCmd, "diff", "", "diff command for filitering checker results")
+	flag.StringVar(&diffCmd, "diff", "", diffCmdDoc)
 	flag.IntVar(&diffStrip, "strip", 1, "strip NUM leading components from diff file names (equivalent to `patch -p`) (default is 1 for git diff)")
-	flag.Var(&efms, "efm", "list of errorformat")
-	flag.StringVar(&ci, "ci", "", "CI service (supported travis, circle-ci, droneio(OSS 0.4))")
+	flag.Var(&efms, "efm", "list of errorformat (https://github.com/haya14busa/errorformat)")
+	flag.StringVar(&ci, "ci", "", ciDoc)
 }
 
 func usage() {
@@ -144,6 +161,8 @@ func githubService(ci string) (githubservice *watchdogs.GitHubPullRequest, isPR 
 		g, isPR, err = circleci()
 	case "droneio":
 		g, isPR, err = droneio()
+	case "common":
+		g, isPR, err = commonci()
 	default:
 		return nil, false, fmt.Errorf("unsupported CI: %v", ci)
 	}
@@ -263,6 +282,38 @@ func droneio() (g *GitHubPR, isPR bool, err error) {
 	}
 	owner, repo := rss[0], rss[1]
 	sha, err := nonEmptyEnv("DRONE_COMMIT")
+	if err != nil {
+		return nil, true, err
+	}
+	g = &GitHubPR{
+		owner: owner,
+		repo:  repo,
+		pr:    pr,
+		sha:   sha,
+	}
+	return g, true, nil
+}
+
+func commonci() (g *GitHubPR, isPR bool, err error) {
+	var prs string // pull request number in string
+	prs = os.Getenv("CI_PULL_REQUEST")
+	if prs == "" {
+		// not a pull-request build
+		return nil, false, nil
+	}
+	pr, err := strconv.Atoi(prs)
+	if err != nil {
+		return nil, true, fmt.Errorf("unexpected env variable (CI_PULL_REQUEST): %v", prs)
+	}
+	owner, err := nonEmptyEnv("CI_REPO_OWNER")
+	if err != nil {
+		return nil, true, err
+	}
+	repo, err := nonEmptyEnv("CI_REPO_NAME")
+	if err != nil {
+		return nil, true, err
+	}
+	sha, err := nonEmptyEnv("CI_COMMIT")
 	if err != nil {
 		return nil, true, err
 	}
