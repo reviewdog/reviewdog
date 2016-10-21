@@ -263,3 +263,76 @@ func TestDroneio(t *testing.T) {
 		t.Log(err)
 	}
 }
+
+func TestCommonci(t *testing.T) {
+	envs := []string{
+		"CI_PULL_REQUEST",
+		"CI_COMMIT",
+		"CI_REPO_OWNER",
+		"CI_REPO_NAME",
+		"WATCHDOGS_GITHUB_API_TOKEN",
+	}
+	// save and clean
+	saveEnvs := make(map[string]string)
+	for _, key := range envs {
+		saveEnvs[key] = os.Getenv(key)
+		os.Setenv(key, "")
+	}
+	// restore
+	defer func() {
+		for key, value := range saveEnvs {
+			os.Setenv(key, value)
+		}
+	}()
+
+	if _, isPR, err := commonci(); isPR {
+		t.Errorf("should be non pull-request build. error: %v", err)
+	}
+
+	os.Setenv("CI_PULL_REQUEST", "invalid")
+	if _, _, err := commonci(); err == nil {
+		t.Error("error expected but got nil")
+	} else {
+		t.Log(err)
+	}
+
+	os.Setenv("CI_PULL_REQUEST", "1")
+	if _, _, err := commonci(); err == nil {
+		t.Error("error expected but got nil")
+	} else {
+		t.Log(err)
+	}
+
+	os.Setenv("CI_REPO_OWNER", "haya14busa")
+	if _, _, err := commonci(); err == nil {
+		t.Error("error expected but got nil")
+	} else {
+		t.Log(err)
+	}
+
+	os.Setenv("CI_REPO_NAME", "watchdogs")
+	if _, _, err := commonci(); err == nil {
+		t.Error("error expected but got nil")
+	} else {
+		t.Log(err)
+	}
+
+	os.Setenv("CI_COMMIT", "sha1")
+	g, isPR, err := commonci()
+	if err != nil {
+		t.Errorf("unexpected error: %v", err)
+	}
+	if !isPR {
+		t.Error("should be pull request build")
+	}
+	want := &GitHubPR{
+		owner: "haya14busa",
+		repo:  "watchdogs",
+		pr:    1,
+		sha:   "sha1",
+	}
+	if !reflect.DeepEqual(g, want) {
+		t.Errorf("got: %#v, want: %#v", g, want)
+	}
+
+}
