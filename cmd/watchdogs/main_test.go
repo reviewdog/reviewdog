@@ -28,10 +28,8 @@ func TestRun_travis(t *testing.T) {
 		}
 	}()
 
-	if err := run(nil, nil, "", 0, nil, "ciname"); err == nil {
-		t.Error("error expected but got nil")
-	} else {
-		t.Log(err)
+	if err := run(nil, nil, "", 0, nil, "ciname"); err != nil {
+		t.Errorf("got an unexpected error: %v", err)
 	}
 
 	os.Setenv("WATCHDOGS_GITHUB_API_TOKEN", "<WATCHDOGS_GITHUB_API_TOKEN>")

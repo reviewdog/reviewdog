@@ -64,16 +64,21 @@ func run(r io.Reader, w io.Writer, diffCmd string, diffStrip int, efms []string,
 	var ds watchdogs.DiffService
 
 	if ci != "" {
-		gs, isPR, err := githubService(ci)
-		if err != nil {
-			return err
-		}
-		if !isPR {
-			fmt.Fprintf(os.Stderr, "this is not PullRequest build. CI: %v\n", ci)
+		if os.Getenv("WATCHDOGS_GITHUB_API_TOKEN") != "" {
+			gs, isPR, err := githubService(ci)
+			if err != nil {
+				return err
+			}
+			if !isPR {
+				fmt.Fprintf(os.Stderr, "this is not PullRequest build. CI: %v\n", ci)
+				return nil
+			}
+			cs = gs
+			ds = gs
+		} else {
+			fmt.Fprintf(os.Stderr, "WATCHDOGS_GITHUB_API_TOKEN is not set\n")
 			return nil
 		}
-		cs = gs
-		ds = gs
 	} else {
 		// local
 		cs = watchdogs.NewCommentWriter(w)
