@@ -15,15 +15,15 @@ import (
 
 	"github.com/google/go-github/github"
 	"github.com/haya14busa/errorformat"
-	"github.com/haya14busa/watchdogs"
+	"github.com/haya14busa/reviewdog"
 	"github.com/mattn/go-shellwords"
 )
 
 const usageMessage = "" +
-	`Usage:	watchdogs [flags]
-	watchdogs accepts any compiler or linter results from stdin and filters
-	them by diff for review. watchdogs also can posts the results as a comment to
-	GitHub if you use watchdogs in CI service.
+	`Usage:	reviewdog [flags]
+	reviewdog accepts any compiler or linter results from stdin and filters
+	them by diff for review. reviewdog also can posts the results as a comment to
+	GitHub if you use reviewdog in CI service.
 `
 
 // flags
@@ -43,8 +43,8 @@ var (
 	"common" requires following environment variables
 		CI_PULL_REQUEST	Pull Request number (e.g. 14)
 		CI_COMMIT	SHA1 for the current build
-		CI_REPO_OWNER	repository owner (e.g. "haya14busa" for https://github.com/haya14busa/watchdogs)
-		CI_REPO_NAME	repository name (e.g. "watchdogs" for https://github.com/haya14busa/watchdogs)
+		CI_REPO_OWNER	repository owner (e.g. "haya14busa" for https://github.com/haya14busa/reviewdog)
+		CI_REPO_NAME	repository name (e.g. "reviewdog" for https://github.com/haya14busa/reviewdog)
 `
 )
 
@@ -77,8 +77,8 @@ func run(r io.Reader, w io.Writer, diffCmd string, diffStrip int, efms []string,
 		return err
 	}
 
-	var cs watchdogs.CommentService
-	var ds watchdogs.DiffService
+	var cs reviewdog.CommentService
+	var ds reviewdog.DiffService
 
 	if ci != "" {
 		if os.Getenv("WATCHDOGS_GITHUB_API_TOKEN") != "" {
@@ -98,7 +98,7 @@ func run(r io.Reader, w io.Writer, diffCmd string, diffStrip int, efms []string,
 		}
 	} else {
 		// local
-		cs = watchdogs.NewCommentWriter(w)
+		cs = reviewdog.NewCommentWriter(w)
 		d, err := diffService(diffCmd, diffStrip)
 		if err != nil {
 			return err
@@ -106,7 +106,7 @@ func run(r io.Reader, w io.Writer, diffCmd string, diffStrip int, efms []string,
 		ds = d
 	}
 
-	app := watchdogs.NewWatchdogs(p, cs, ds)
+	app := reviewdog.NewReviewdog(p, cs, ds)
 	if err := app.Run(r); err != nil {
 		return err
 	}
@@ -122,20 +122,20 @@ func run(r io.Reader, w io.Writer, diffCmd string, diffStrip int, efms []string,
 
 // FlashCommentService is CommentService which uses Flash method to post comment.
 type FlashCommentService interface {
-	watchdogs.CommentService
-	ListPostComments() []*watchdogs.Comment
+	reviewdog.CommentService
+	ListPostComments() []*reviewdog.Comment
 	Flash() error
 }
 
-func efmParser(efms []string) (watchdogs.Parser, error) {
+func efmParser(efms []string) (reviewdog.Parser, error) {
 	efm, err := errorformat.NewErrorformat(efms)
 	if err != nil {
 		return nil, err
 	}
-	return watchdogs.NewErrorformatParser(efm), nil
+	return reviewdog.NewErrorformatParser(efm), nil
 }
 
-func diffService(s string, strip int) (watchdogs.DiffService, error) {
+func diffService(s string, strip int) (reviewdog.DiffService, error) {
 	cmds, err := shellwords.Parse(s)
 	if err != nil {
 		return nil, err
@@ -144,11 +144,11 @@ func diffService(s string, strip int) (watchdogs.DiffService, error) {
 		return nil, errors.New("diff command is empty")
 	}
 	cmd := exec.Command(cmds[0], cmds[1:]...)
-	d := watchdogs.NewDiffCmd(cmd, strip)
+	d := reviewdog.NewDiffCmd(cmd, strip)
 	return d, nil
 }
 
-func githubService(ci string) (githubservice *watchdogs.GitHubPullRequest, isPR bool, err error) {
+func githubService(ci string) (githubservice *reviewdog.GitHubPullRequest, isPR bool, err error) {
 	token, err := nonEmptyEnv("WATCHDOGS_GITHUB_API_TOKEN")
 	if err != nil {
 		return nil, false, err
@@ -178,7 +178,7 @@ func githubService(ci string) (githubservice *watchdogs.GitHubPullRequest, isPR 
 	)
 	tc := oauth2.NewClient(oauth2.NoContext, ts)
 	client := github.NewClient(tc)
-	githubservice = watchdogs.NewGitHubPullReqest(client, g.owner, g.repo, g.pr, g.sha)
+	githubservice = reviewdog.NewGitHubPullReqest(client, g.owner, g.repo, g.pr, g.sha)
 	return githubservice, true, nil
 }
 
@@ -219,7 +219,7 @@ func travis() (g *GitHubPR, isPR bool, err error) {
 func circleci() (g *GitHubPR, isPR bool, err error) {
 	var prs string // pull request number in string
 	// For Pull Request from a same repository
-	// e.g. https: //github.com/haya14busa/watchdogs/pull/6
+	// e.g. https: //github.com/haya14busa/reviewdog/pull/6
 	// it might be better to support CI_PULL_REQUESTS instead.
 	prs = os.Getenv("CI_PULL_REQUEST")
 	if prs == "" {
@@ -272,7 +272,7 @@ func droneio() (g *GitHubPR, isPR bool, err error) {
 	if err != nil {
 		return nil, true, fmt.Errorf("unexpected env variable (DRONE_PULL_REQUEST): %v", prs)
 	}
-	reposlug, err := nonEmptyEnv("DRONE_REPO") // e.g. haya14busa/watchdogs
+	reposlug, err := nonEmptyEnv("DRONE_REPO") // e.g. haya14busa/reviewdog
 	if err != nil {
 		return nil, true, err
 	}

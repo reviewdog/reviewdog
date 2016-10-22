@@ -1,4 +1,4 @@
-package watchdogs
+package reviewdog
 
 import (
 	"os"
@@ -29,21 +29,21 @@ func TestGitHubPullRequest_Post(t *testing.T) {
 		t.Skip(notokenSkipTestMes)
 	}
 
-	// https://github.com/haya14busa/watchdogs/pull/2
+	// https://github.com/haya14busa/reviewdog/pull/2
 	owner := "haya14busa"
-	repo := "watchdogs"
+	repo := "reviewdog"
 	pr := 2
 	sha := "cce89afa9ac5519a7f5b1734db2e3aa776b138a7"
 
 	g := NewGitHubPullReqest(client, owner, repo, pr, sha)
 	comment := &Comment{
 		CheckResult: &CheckResult{
-			Path: "watchdogs.go",
+			Path: "reviewdog.go",
 		},
 		LnumDiff: 17,
-		Body:     "[watchdogs] test",
+		Body:     "[reviewdog] test",
 	}
-	// https://github.com/haya14busa/watchdogs/pull/2/files#diff-ed1d019a10f54464cfaeaf6a736b7d27L20
+	// https://github.com/haya14busa/reviewdog/pull/2/files#diff-ed1d019a10f54464cfaeaf6a736b7d27L20
 	if err := g.Post(comment); err != nil {
 		t.Error(err)
 	}
@@ -75,28 +75,28 @@ index b380b67..6abc0f1 100644
  var _ DiffService = &DiffString{}
  
  type DiffString struct {
-diff --git a/watchdogs.go b/watchdogs.go
+diff --git a/reviewdog.go b/reviewdog.go
 index 61450f3..f63f149 100644
---- a/watchdogs.go
-+++ b/watchdogs.go
+--- a/reviewdog.go
++++ b/reviewdog.go
 @@ -10,18 +10,18 @@ import (
- 	"github.com/haya14busa/watchdogs/diff"
+ 	"github.com/haya14busa/reviewdog/diff"
  )
  
 +var TestExportedVarWithoutComment = 1
 +
-+func NewWatchdogs(p Parser, c CommentService, d DiffService) *Watchdogs {
-+	return &Watchdogs{p: p, c: c, d: d}
++func NewReviewdog(p Parser, c CommentService, d DiffService) *Reviewdog {
++	return &Reviewdog{p: p, c: c, d: d}
 +}
 +
- type Watchdogs struct {
+ type Reviewdog struct {
  	p Parser
  	c CommentService
  	d DiffService
  }
  
--func NewWatchdogs(p Parser, c CommentService, d DiffService) *Watchdogs {
--	return &Watchdogs{p: p, c: c, d: d}
+-func NewReviewdog(p Parser, c CommentService, d DiffService) *Reviewdog {
+-	return &Reviewdog{p: p, c: c, d: d}
 -}
 -
 -// CheckResult represents a checked result of static analysis tools.
@@ -106,9 +106,9 @@ index 61450f3..f63f149 100644
  	Lnum    int      // line number
 `
 
-	// https://github.com/haya14busa/watchdogs/pull/2
+	// https://github.com/haya14busa/reviewdog/pull/2
 	owner := "haya14busa"
-	repo := "watchdogs"
+	repo := "reviewdog"
 	pr := 2
 	g := NewGitHubPullReqest(client, owner, repo, pr, "")
 	b, err := g.Diff()
@@ -128,9 +128,9 @@ func TestGitHubPullRequest_comment(t *testing.T) {
 	if client == nil {
 		t.Skip(notokenSkipTestMes)
 	}
-	// https://github.com/haya14busa/watchdogs/pull/2
+	// https://github.com/haya14busa/reviewdog/pull/2
 	owner := "haya14busa"
-	repo := "watchdogs"
+	repo := "reviewdog"
 	pr := 2
 	g := NewGitHubPullReqest(client, owner, repo, pr, "")
 	comments, err := g.comment()

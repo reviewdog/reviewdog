@@ -1,15 +1,18 @@
-package watchdogs
+package reviewdog
 
 import (
 	"fmt"
 	"os"
+	"reflect"
+	"sort"
 	"strings"
+	"testing"
 
 	"github.com/haya14busa/errorformat"
-	"github.com/haya14busa/watchdogs/diff"
+	"github.com/haya14busa/reviewdog/diff"
 )
 
-func ExampleWatchdogs() {
+func ExampleReviewdog() {
 	difftext := `diff --git a/golint.old.go b/golint.new.go
 index 34cacb9..a727dd3 100644
 --- a/golint.old.go
@@ -37,14 +40,14 @@ golint.new.go:11:1: comment on exported function F2 should be of the form "F2 ..
 	p := NewErrorformatParser(efm)
 	c := NewCommentWriter(os.Stdout)
 	d := NewDiffString(difftext, 1)
-	app := NewWatchdogs(p, c, d)
+	app := NewReviewdog(p, c, d)
 	app.Run(strings.NewReader(lintresult))
 	// Unordered output:
 	// golint.new.go:5:5: exported var NewError1 should have comment or be unexported
 	// golint.new.go:11:1: comment on exported function F2 should be of the form "F2 ..."
 }
 
-func ExampleAddedLines() {
+func TestAddedDiffLines(t *testing.T) {
 	content := `--- sample.old.txt	2016-10-13 05:09:35.820791185 +0900
 +++ sample.new.txt	2016-10-13 05:15:26.839245048 +0900
 @@ -1,3 +1,4 @@
@@ -68,14 +71,22 @@ func ExampleAddedLines() {
 
 	filediffs, _ := diff.ParseMultiFile(strings.NewReader(content))
 	wd, _ := os.Getwd()
-	for path, ltol := range AddedLines(filediffs, 0) {
+	wantlines := []string{
+		"sample.new.txt:2:(difflnum:3) added line",
+		"sample.new.txt:3:(difflnum:4) added line",
+		"nonewline.new.txt:3:(difflnum:5) b",
+		"nonewline.new.txt:4:(difflnum:6) b",
+	}
+	var gotlines []string
+	for path, ltol := range addedDiffLines(filediffs, 0) {
 		for lnum, addedline := range ltol {
-			fmt.Printf("%v:%v:(difflnum:%v) %v\n", path[len(wd)+1:], lnum, addedline.LnumDiff, addedline.Content)
+			l := fmt.Sprintf("%v:%v:(difflnum:%v) %v", path[len(wd)+1:], lnum, addedline.LnumDiff, addedline.Content)
+			gotlines = append(gotlines, l)
 		}
 	}
-	// Unordered output:
-	// sample.new.txt:2:(difflnum:3) added line
-	// sample.new.txt:3:(difflnum:4) added line
-	// nonewline.new.txt:3:(difflnum:5) b
-	// nonewline.new.txt:4:(difflnum:6) b
+	sort.Strings(gotlines)
+	sort.Strings(wantlines)
+	if !reflect.DeepEqual(gotlines, wantlines) {
+		t.Errorf("got:\n%v\nwant:\n%v", gotlines, wantlines)
+	}
 }

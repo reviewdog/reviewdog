@@ -1,7 +1,7 @@
 test:
   pre:
-    - go build ./cmd/watchdogs
+    - go build ./cmd/reviewdog
   override:
     - go test -v -race ./...
     - >-
-      go tool vet -all -shadowstrict . | ./watchdogs -efm="%f:%l: %m" -ci="circle-ci"
+      go tool vet -all -shadowstrict . | ./reviewdog -efm="%f:%l: %m" -ci="circle-ci"

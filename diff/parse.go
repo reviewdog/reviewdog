@@ -178,10 +178,7 @@ func (p *hunkParser) Parse() (*Hunk, error) {
 	lold := hr.lold
 	lnew := hr.lnew
 endhunk:
-	for {
-		if b, err := p.r.Peek(3); err != nil || string(b) == tokenOldFile {
-			break
-		}
+	for !p.done(lold, lnew, hr) {
 		b, err := p.r.Peek(1)
 		if err != nil {
 			break
@@ -221,6 +218,14 @@ endhunk:
 	}
 	p.lnumdiff++ // count up by an additional hunk
 	return hunk, nil
+}
+
+func (p *hunkParser) done(lold, lnew int, hr *hunkrange) bool {
+	end := (lold >= hr.lold+hr.sold && lnew >= hr.lnew+hr.snew)
+	if b, err := p.r.Peek(1); err != nil || (string(b) != tokenNoNewlineAtEOF && end) {
+		return true
+	}
+	return false
 }
 
 // @@ -l,s +l,s @@ optional section heading

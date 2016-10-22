@@ -27,6 +27,6 @@ script:
   - goveralls -service=travis-ci
   # - go vet ./... ref: circle.yml
   # - unused ./... ref: .drone.yml
-  - go install ./cmd/watchdogs
+  - go install ./cmd/reviewdog
   - >-
-    golint ./... | watchdogs -efm="%f:%l:%c: %m" -ci=travis
+    golint ./... | reviewdog -efm="%f:%l:%c: %m" -ci=travis

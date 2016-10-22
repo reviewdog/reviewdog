@@ -1,4 +1,4 @@
-package watchdogs
+package reviewdog
 
 import (
 	"io"
