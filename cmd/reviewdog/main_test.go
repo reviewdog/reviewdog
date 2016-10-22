@@ -70,7 +70,7 @@ func TestRun_travis(t *testing.T) {
 		t.Log(err)
 	}
 
-	os.Setenv("TRAVIS_REPO_SLUG", "haya14busa/watchdogs")
+	os.Setenv("TRAVIS_REPO_SLUG", "haya14busa/reviewdog")
 
 	if err := run(nil, nil, "", 0, nil, "travis"); err == nil {
 		t.Error("error expected but got nil")
@@ -153,7 +153,7 @@ func TestCircleci(t *testing.T) {
 		t.Log(err)
 	}
 
-	os.Setenv("CIRCLE_PROJECT_REPONAME", "watchdogs")
+	os.Setenv("CIRCLE_PROJECT_REPONAME", "reviewdog")
 	if _, _, err := circleci(); err == nil {
 		t.Error("error expected but got nil")
 	} else {
@@ -170,7 +170,7 @@ func TestCircleci(t *testing.T) {
 	}
 	want := &GitHubPR{
 		owner: "haya14busa",
-		repo:  "watchdogs",
+		repo:  "reviewdog",
 		pr:    1,
 		sha:   "sha1",
 	}
@@ -231,7 +231,7 @@ func TestDroneio(t *testing.T) {
 		t.Log(err)
 	}
 
-	os.Setenv("DRONE_REPO", "haya14busa/watchdogs")
+	os.Setenv("DRONE_REPO", "haya14busa/reviewdog")
 	if _, _, err := droneio(); err == nil {
 		t.Error("error expected but got nil")
 	} else {
@@ -248,7 +248,7 @@ func TestDroneio(t *testing.T) {
 	}
 	want := &GitHubPR{
 		owner: "haya14busa",
-		repo:  "watchdogs",
+		repo:  "reviewdog",
 		pr:    1,
 		sha:   "sha1",
 	}
@@ -310,7 +310,7 @@ func TestCommonci(t *testing.T) {
 		t.Log(err)
 	}
 
-	os.Setenv("CI_REPO_NAME", "watchdogs")
+	os.Setenv("CI_REPO_NAME", "reviewdog")
 	if _, _, err := commonci(); err == nil {
 		t.Error("error expected but got nil")
 	} else {
@@ -327,7 +327,7 @@ func TestCommonci(t *testing.T) {
 	}
 	want := &GitHubPR{
 		owner: "haya14busa",
-		repo:  "watchdogs",
+		repo:  "reviewdog",
 		pr:    1,
 		sha:   "sha1",
 	}

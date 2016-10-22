@@ -1,4 +1,4 @@
-package watchdogs
+package reviewdog
 
 import (
 	"bytes"
@@ -8,17 +8,17 @@ import (
 	"path/filepath"
 	"strings"
 
-	"github.com/haya14busa/watchdogs/diff"
+	"github.com/haya14busa/reviewdog/diff"
 )
 
-type Watchdogs struct {
+type Reviewdog struct {
 	p Parser
 	c CommentService
 	d DiffService
 }
 
-func NewWatchdogs(p Parser, c CommentService, d DiffService) *Watchdogs {
-	return &Watchdogs{p: p, c: c, d: d}
+func NewReviewdog(p Parser, c CommentService, d DiffService) *Reviewdog {
+	return &Reviewdog{p: p, c: c, d: d}
 }
 
 // CheckResult represents a checked result of static analysis tools.
@@ -50,7 +50,7 @@ type DiffService interface {
 	Strip() int
 }
 
-func (w *Watchdogs) Run(r io.Reader) error {
+func (w *Reviewdog) Run(r io.Reader) error {
 	results, err := w.p.Parse(r)
 	if err != nil {
 		return fmt.Errorf("parse error: %v", err)

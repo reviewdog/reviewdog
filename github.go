@@ -1,4 +1,4 @@
-package watchdogs
+package reviewdog
 
 import (
 	"bytes"
@@ -74,7 +74,7 @@ func (g *GitHubPullRequest) ListPostComments() []*Comment {
 	return g.postComments
 }
 
-const bodyPrefix = `:dog:  [[watchdogs](https://github.com/haya14busa/watchdogs)] :dog:`
+const bodyPrefix = `:dog:  [[reviewdog](https://github.com/haya14busa/reviewdog)] :dog:`
 
 func commentBody(c *Comment) string {
 	return bodyPrefix + "\n" + c.Body

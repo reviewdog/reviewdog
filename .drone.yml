@@ -1,5 +1,5 @@
 # Run the below command when you edit .drone.yml
-#   drone secure --repo haya14busa/watchdogs --in .drone.sec.yaml
+#   drone secure --repo haya14busa/reviewdog --in .drone.sec.yaml
 #
 build:
   test:
@@ -12,14 +12,14 @@ build:
     environment:
       - WATCHDOGS_GITHUB_API_TOKEN=$$WATCHDOGS_GITHUB_API_TOKEN
     commands:
-      - go get github.com/haya14busa/watchdogs/cmd/watchdogs
+      - go get github.com/haya14busa/reviewdog/cmd/reviewdog
       - go get github.com/golang/lint/golint
       - go get honnef.co/go/unused/cmd/unused
       - |
-        go tool vet -all -shadowstrict . | watchdogs -efm="%f:%l: %m" -ci=droneio
+        go tool vet -all -shadowstrict . | reviewdog -efm="%f:%l: %m" -ci=droneio
       - |
-        golint ./... | watchdogs -efm="%f:%l:%c: %m" -ci=droneio
+        golint ./... | reviewdog -efm="%f:%l:%c: %m" -ci=droneio
       - |
-        unused ./... | watchdogs -efm="%f:%l:%c: %m" -ci=droneio
+        unused ./... | reviewdog -efm="%f:%l:%c: %m" -ci=droneio
     when:
       event: pull_request

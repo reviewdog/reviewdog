@@ -1,4 +1,4 @@
-package watchdogs
+package reviewdog
 
 import (
 	"fmt"
@@ -6,10 +6,10 @@ import (
 	"strings"
 
 	"github.com/haya14busa/errorformat"
-	"github.com/haya14busa/watchdogs/diff"
+	"github.com/haya14busa/reviewdog/diff"
 )
 
-func ExampleWatchdogs() {
+func ExampleReviewdog() {
 	difftext := `diff --git a/golint.old.go b/golint.new.go
 index 34cacb9..a727dd3 100644
 --- a/golint.old.go
@@ -37,7 +37,7 @@ golint.new.go:11:1: comment on exported function F2 should be of the form "F2 ..
 	p := NewErrorformatParser(efm)
 	c := NewCommentWriter(os.Stdout)
 	d := NewDiffString(difftext, 1)
-	app := NewWatchdogs(p, c, d)
+	app := NewReviewdog(p, c, d)
 	app.Run(strings.NewReader(lintresult))
 	// Unordered output:
 	// golint.new.go:5:5: exported var NewError1 should have comment or be unexported
