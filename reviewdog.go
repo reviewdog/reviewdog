@@ -11,21 +11,15 @@ import (
 	"github.com/haya14busa/reviewdog/diff"
 )
 
-var TestExportedVar = 1 // TODO(#17): remove
-
 type Reviewdog struct {
 	p Parser
 	c CommentService
 	d DiffService
 }
 
-var unusedVar = 1 // TODO(#17): remove
-
 func NewReviewdog(p Parser, c CommentService, d DiffService) *Reviewdog {
 	return &Reviewdog{p: p, c: c, d: d}
 }
-
-var _ = fmt.Sprintf("", 1, 2, 3) // TODO(#17): remove
 
 // CheckResult represents a checked result of static analysis tools.
 // :h error-file-format
