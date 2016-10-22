@@ -11,12 +11,16 @@ import (
 	"github.com/haya14busa/reviewdog/diff"
 )
 
+// Reviewdog represents review dog application which parses result of compiler
+// or linter, get diff and filter the results by diff, and report filterd
+// results.
 type Reviewdog struct {
 	p Parser
 	c CommentService
 	d DiffService
 }
 
+// NewReviewdog returns a new Reviewdog.
 func NewReviewdog(p Parser, c CommentService, d DiffService) *Reviewdog {
 	return &Reviewdog{p: p, c: c, d: d}
 }
@@ -31,25 +35,31 @@ type CheckResult struct {
 	Lines   []string // Original error lines (often one line)
 }
 
+// Parser is an interface which parses compilers, linters, or any tools
+// results.
 type Parser interface {
 	Parse(r io.Reader) ([]*CheckResult, error)
 }
 
+// Comment represents a reported result as a comment.
 type Comment struct {
 	*CheckResult
 	Body     string
 	LnumDiff int
 }
 
+// CommentService is an interface which posts Comment.
 type CommentService interface {
 	Post(*Comment) error
 }
 
+// DiffService is an interface which get diff.
 type DiffService interface {
 	Diff() ([]byte, error)
 	Strip() int
 }
 
+// Run runs Reviewdog application.
 func (w *Reviewdog) Run(r io.Reader) error {
 	results, err := w.p.Parse(r)
 	if err != nil {
@@ -65,7 +75,7 @@ func (w *Reviewdog) Run(r io.Reader) error {
 	if err != nil {
 		return fmt.Errorf("fail to parse diff: %v", err)
 	}
-	addedlines := AddedLines(filediffs, w.d.Strip())
+	addedlines := addedDiffLines(filediffs, w.d.Strip())
 
 	wd, err := os.Getwd()
 	if err != nil {
@@ -104,10 +114,10 @@ type AddedLine struct {
 	Content  string // line content
 }
 
-// PosToAddedLine is a hash table of normalized path to line number to AddedLine.
-type PosToAddedLine map[string]map[int]*AddedLine
+// posToAddedLine is a hash table of normalized path to line number to AddedLine.
+type posToAddedLine map[string]map[int]*AddedLine
 
-func (p PosToAddedLine) Get(path string, lnum int) *AddedLine {
+func (p posToAddedLine) Get(path string, lnum int) *AddedLine {
 	npath, err := normalizePath(path)
 	if err != nil {
 		return nil
@@ -123,9 +133,9 @@ func (p PosToAddedLine) Get(path string, lnum int) *AddedLine {
 	return diffline
 }
 
-// AddedLines traverse []*diff.FileDiff and returns PosToAddedLine.
-func AddedLines(filediffs []*diff.FileDiff, strip int) PosToAddedLine {
-	r := make(PosToAddedLine)
+// addedDiffLines traverse []*diff.FileDiff and returns posToAddedLine.
+func addedDiffLines(filediffs []*diff.FileDiff, strip int) posToAddedLine {
+	r := make(posToAddedLine)
 	for _, filediff := range filediffs {
 		path := filediff.PathNew
 		ltodiff := make(map[int]*AddedLine)
