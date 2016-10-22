@@ -1,7 +1,7 @@
 package reviewdog
 
 import (
-	"bytes"
+	"os/exec"
 
 	"github.com/google/go-github/github"
 	"golang.org/x/sync/errgroup"
@@ -132,21 +132,17 @@ func (g *GitHubPullRequest) setPostedComment() error {
 	return nil
 }
 
-// Diff returns a diff of PullRequest.
+// Diff returns a diff of PullRequest. It runs `git diff` locally instead of
+// diff_url of GitHub Pull Request because diff of diff_url is not suited for
+// comment API in a sense that diff of diff_url is equivalent to
+// `git diff --no-renames`, we want diff which is equivalent to
+// `git diff --find-renames`.
 func (g *GitHubPullRequest) Diff() ([]byte, error) {
 	pr, _, err := g.cli.PullRequests.Get(g.owner, g.repo, g.pr)
 	if err != nil {
 		return nil, err
 	}
-	req, err := g.cli.NewRequest("GET", *pr.DiffURL, nil)
-	if err != nil {
-		return nil, err
-	}
-	buf := new(bytes.Buffer)
-	if _, err := g.cli.Do(req, buf); err != nil {
-		return nil, err
-	}
-	return buf.Bytes(), nil
+	return exec.Command("git", "diff", "--find-renames", *pr.Base.SHA, g.sha).Output()
 }
 
 // Strip returns 1 as a strip of git diff.
