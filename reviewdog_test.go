@@ -40,7 +40,7 @@ golint.new.go:11:1: comment on exported function F2 should be of the form "F2 ..
 	p := NewErrorformatParser(efm)
 	c := NewCommentWriter(os.Stdout)
 	d := NewDiffString(difftext, 1)
-	app := NewReviewdog(p, c, d)
+	app := NewReviewdog("tool name", p, c, d)
 	app.Run(strings.NewReader(lintresult))
 	// Unordered output:
 	// golint.new.go:5:5: exported var NewError1 should have comment or be unexported

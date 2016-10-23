@@ -1,6 +1,7 @@
 package reviewdog
 
 import (
+	"fmt"
 	"os/exec"
 
 	"github.com/google/go-github/github"
@@ -74,10 +75,14 @@ func (g *GitHubPullRequest) ListPostComments() []*Comment {
 	return g.postComments
 }
 
-const bodyPrefix = `:dog:  [[reviewdog](https://github.com/haya14busa/reviewdog)] :dog:`
+const bodyPrefix = `<sub>reported by [reviewdog](https://github.com/haya14busa/reviewdog) :dog:</sub>`
 
 func commentBody(c *Comment) string {
-	return bodyPrefix + "\n" + c.Body
+	tool := ""
+	if c.ToolName != "" {
+		tool = fmt.Sprintf("**[%s]** ", c.ToolName)
+	}
+	return tool + bodyPrefix + "\n" + c.Body
 }
 
 // Flash posts comments which has not been posted yet.

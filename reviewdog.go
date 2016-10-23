@@ -15,13 +15,14 @@ import (
 // or linter, get diff and filter the results by diff, and report filterd
 // results.
 type Reviewdog struct {
-	p Parser
-	c CommentService
-	d DiffService
+	toolname string
+	p        Parser
+	c        CommentService
+	d        DiffService
 }
 
 // NewReviewdog returns a new Reviewdog.
-func NewReviewdog(p Parser, c CommentService, d DiffService) *Reviewdog {
+func NewReviewdog(toolname string, p Parser, c CommentService, d DiffService) *Reviewdog {
 	return &Reviewdog{p: p, c: c, d: d}
 }
 
@@ -46,6 +47,7 @@ type Comment struct {
 	*CheckResult
 	Body     string
 	LnumDiff int
+	ToolName string
 }
 
 // CommentService is an interface which posts Comment.
@@ -96,6 +98,7 @@ func (w *Reviewdog) Run(r io.Reader) error {
 				CheckResult: result,
 				Body:        result.Message, // TODO: format message
 				LnumDiff:    addedline.LnumDiff,
+				ToolName:    w.toolname,
 			}
 			if err := w.c.Post(comment); err != nil {
 				return err
