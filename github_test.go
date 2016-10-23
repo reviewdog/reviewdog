@@ -8,10 +8,10 @@ import (
 	"golang.org/x/oauth2"
 )
 
-const notokenSkipTestMes = "skipping test (requires actual Personal access tokens. export WATCHDOGS_TEST_GITHUB_API_TOKEN=<GitHub Personal Access Token>)"
+const notokenSkipTestMes = "skipping test (requires actual Personal access tokens. export REVIEWDOG_TEST_GITHUB_API_TOKEN=<GitHub Personal Access Token>)"
 
 func setupGitHubClient() *github.Client {
-	token := os.Getenv("WATCHDOGS_TEST_GITHUB_API_TOKEN")
+	token := os.Getenv("REVIEWDOG_TEST_GITHUB_API_TOKEN")
 	if token == "" {
 		return nil
 	}
