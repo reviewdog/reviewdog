@@ -1,4 +1,4 @@
-## reviewdog - A code review dog working with any compiler, linter, or whatever tools
+## reviewdog - A code review dog who keeps your codebase healthy
 
 [![LICENSE](https://img.shields.io/badge/license-MIT-blue.svg)](LICENSE)
 
