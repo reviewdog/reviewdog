@@ -84,6 +84,18 @@ func run(r io.Reader, w io.Writer, diffCmd string, diffStrip int, efms []string,
 		return runList(w)
 	}
 
+	// use defined errorformat
+	if f != "" {
+		if len(efms) > 0 {
+			return errors.New("you cannot specify both -f and -efms at the same time")
+		}
+		efm, ok := fmts.DefinedFmts()[f]
+		if !ok {
+			return fmt.Errorf("%q is not supported. Use -efms or consider to add new errrorformat to https://github.com/haya14busa/errorformat", f)
+		}
+		efms = efm.Errorformat
+	}
+
 	p, err := efmParser(efms)
 	if err != nil {
 		return err
