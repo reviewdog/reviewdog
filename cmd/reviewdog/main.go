@@ -36,7 +36,7 @@ var (
 
 	ci    string
 	ciDoc = `CI service (supported travis, circle-ci, droneio(OSS 0.4), common)
-	If you use "ci" flag, you need to set WATCHDOGS_GITHUB_API_TOKEN environment
+	If you use "ci" flag, you need to set REVIEWDOG_GITHUB_API_TOKEN environment
 	variable.  Go to https://github.com/settings/tokens and create new Personal
 	access token with repo scope.
 
@@ -81,7 +81,7 @@ func run(r io.Reader, w io.Writer, diffCmd string, diffStrip int, efms []string,
 	var ds reviewdog.DiffService
 
 	if ci != "" {
-		if os.Getenv("WATCHDOGS_GITHUB_API_TOKEN") != "" {
+		if os.Getenv("REVIEWDOG_GITHUB_API_TOKEN") != "" {
 			gs, isPR, err := githubService(ci)
 			if err != nil {
 				return err
@@ -93,7 +93,7 @@ func run(r io.Reader, w io.Writer, diffCmd string, diffStrip int, efms []string,
 			cs = gs
 			ds = gs
 		} else {
-			fmt.Fprintf(os.Stderr, "WATCHDOGS_GITHUB_API_TOKEN is not set\n")
+			fmt.Fprintf(os.Stderr, "REVIEWDOG_GITHUB_API_TOKEN is not set\n")
 			return nil
 		}
 	} else {
@@ -149,7 +149,7 @@ func diffService(s string, strip int) (reviewdog.DiffService, error) {
 }
 
 func githubService(ci string) (githubservice *reviewdog.GitHubPullRequest, isPR bool, err error) {
-	token, err := nonEmptyEnv("WATCHDOGS_GITHUB_API_TOKEN")
+	token, err := nonEmptyEnv("REVIEWDOG_GITHUB_API_TOKEN")
 	if err != nil {
 		return nil, false, err
 	}

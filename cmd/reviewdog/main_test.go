@@ -10,7 +10,7 @@ import (
 
 func TestRun_travis(t *testing.T) {
 	envs := []string{
-		"WATCHDOGS_GITHUB_API_TOKEN",
+		"REVIEWDOG_GITHUB_API_TOKEN",
 		"TRAVIS_PULL_REQUEST",
 		"TRAVIS_REPO_SLUG",
 		"TRAVIS_PULL_REQUEST_SHA",
@@ -32,7 +32,7 @@ func TestRun_travis(t *testing.T) {
 		t.Errorf("got an unexpected error: %v", err)
 	}
 
-	os.Setenv("WATCHDOGS_GITHUB_API_TOKEN", "<WATCHDOGS_GITHUB_API_TOKEN>")
+	os.Setenv("REVIEWDOG_GITHUB_API_TOKEN", "<REVIEWDOG_GITHUB_API_TOKEN>")
 
 	if err := run(nil, nil, "", 0, nil, "unsupported ci"); err == nil {
 		t.Error("error expected but got nil")
@@ -105,7 +105,7 @@ func TestCircleci(t *testing.T) {
 		"CIRCLE_PROJECT_USERNAME",
 		"CIRCLE_PROJECT_REPONAME",
 		"CIRCLE_SHA1",
-		"WATCHDOGS_GITHUB_API_TOKEN",
+		"REVIEWDOG_GITHUB_API_TOKEN",
 	}
 	// save and clean
 	saveEnvs := make(map[string]string)
@@ -178,7 +178,7 @@ func TestCircleci(t *testing.T) {
 		t.Errorf("got: %#v, want: %#v", g, want)
 	}
 
-	os.Setenv("WATCHDOGS_GITHUB_API_TOKEN", "<WATCHDOGS_GITHUB_API_TOKEN>")
+	os.Setenv("REVIEWDOG_GITHUB_API_TOKEN", "<REVIEWDOG_GITHUB_API_TOKEN>")
 	if err := run(strings.NewReader("compiler result"), new(bytes.Buffer), "", 0, nil, "circle-ci"); err == nil {
 		t.Error("error expected but got nil")
 	} else {
@@ -191,7 +191,7 @@ func TestDroneio(t *testing.T) {
 		"DRONE_PULL_REQUEST",
 		"DRONE_REPO",
 		"DRONE_COMMIT",
-		"WATCHDOGS_GITHUB_API_TOKEN",
+		"REVIEWDOG_GITHUB_API_TOKEN",
 	}
 	// save and clean
 	saveEnvs := make(map[string]string)
@@ -256,7 +256,7 @@ func TestDroneio(t *testing.T) {
 		t.Errorf("got: %#v, want: %#v", g, want)
 	}
 
-	os.Setenv("WATCHDOGS_GITHUB_API_TOKEN", "<WATCHDOGS_GITHUB_API_TOKEN>")
+	os.Setenv("REVIEWDOG_GITHUB_API_TOKEN", "<REVIEWDOG_GITHUB_API_TOKEN>")
 	if err := run(strings.NewReader("compiler result"), new(bytes.Buffer), "", 0, nil, "droneio"); err == nil {
 		t.Error("error expected but got nil")
 	} else {
@@ -270,7 +270,7 @@ func TestCommonci(t *testing.T) {
 		"CI_COMMIT",
 		"CI_REPO_OWNER",
 		"CI_REPO_NAME",
-		"WATCHDOGS_GITHUB_API_TOKEN",
+		"REVIEWDOG_GITHUB_API_TOKEN",
 	}
 	// save and clean
 	saveEnvs := make(map[string]string)
