@@ -8,13 +8,16 @@ import (
 	"os"
 	"os/exec"
 	"regexp"
+	"sort"
 	"strconv"
 	"strings"
+	"text/tabwriter"
 
 	"golang.org/x/oauth2"
 
 	"github.com/google/go-github/github"
 	"github.com/haya14busa/errorformat"
+	"github.com/haya14busa/errorformat/fmts"
 	"github.com/haya14busa/reviewdog"
 	"github.com/mattn/go-shellwords"
 )
@@ -32,7 +35,10 @@ var (
 	diffCmdDoc = `diff command (e.g. "git diff"). diff flag is ignored if you pass "ci" flag`
 
 	diffStrip int
-	efms      strslice
+
+	efms strslice
+	f    string // errorformat name
+	list bool   // list supported errorformat name
 
 	ci    string
 	ciDoc = `CI service (supported travis, circle-ci, droneio(OSS 0.4), common)
@@ -52,6 +58,8 @@ func init() {
 	flag.StringVar(&diffCmd, "diff", "", diffCmdDoc)
 	flag.IntVar(&diffStrip, "strip", 1, "strip NUM leading components from diff file names (equivalent to `patch -p`) (default is 1 for git diff)")
 	flag.Var(&efms, "efm", "list of errorformat (https://github.com/haya14busa/errorformat)")
+	flag.StringVar(&f, "f", "", "errorformat name (run -list to see supported errorformat name)")
+	flag.BoolVar(&list, "list", false, "list available errorformat names as -f arg")
 	flag.StringVar(&ci, "ci", "", ciDoc)
 }
 
@@ -65,13 +73,29 @@ func usage() {
 func main() {
 	flag.Usage = usage
 	flag.Parse()
-	if err := run(os.Stdin, os.Stdout, diffCmd, diffStrip, efms, ci); err != nil {
+	if err := run(os.Stdin, os.Stdout, diffCmd, diffStrip, efms, f, list, ci); err != nil {
 		fmt.Fprintln(os.Stderr, err)
 		os.Exit(1)
 	}
 }
 
-func run(r io.Reader, w io.Writer, diffCmd string, diffStrip int, efms []string, ci string) error {
+func run(r io.Reader, w io.Writer, diffCmd string, diffStrip int, efms []string, f string, list bool, ci string) error {
+	if list {
+		return runList(w)
+	}
+
+	// use defined errorformat
+	if f != "" {
+		if len(efms) > 0 {
+			return errors.New("you cannot specify both -f and -efms at the same time")
+		}
+		efm, ok := fmts.DefinedFmts()[f]
+		if !ok {
+			return fmt.Errorf("%q is not supported. Use -efms or consider to add new errrorformat to https://github.com/haya14busa/errorformat", f)
+		}
+		efms = efm.Errorformat
+	}
+
 	p, err := efmParser(efms)
 	if err != nil {
 		return err
@@ -118,6 +142,29 @@ func run(r io.Reader, w io.Writer, diffCmd string, diffStrip int, efms []string,
 		return fcs.Flash()
 	}
 	return nil
+}
+
+func runList(w io.Writer) error {
+	tabw := tabwriter.NewWriter(w, 0, 8, 0, '\t', 0)
+	for _, f := range sortedFmts(fmts.DefinedFmts()) {
+		fmt.Fprintf(tabw, "%s\t%s\t- %s\n", f.Name, f.Description, f.URL)
+	}
+	return tabw.Flush()
+}
+
+type byFmtName []*fmts.Fmt
+
+func (p byFmtName) Len() int           { return len(p) }
+func (p byFmtName) Less(i, j int) bool { return p[i].Name < p[j].Name }
+func (p byFmtName) Swap(i, j int)      { p[i], p[j] = p[j], p[i] }
+
+func sortedFmts(fs fmts.Fmts) []*fmts.Fmt {
+	r := make([]*fmts.Fmt, 0, len(fs))
+	for _, f := range fs {
+		r = append(r, f)
+	}
+	sort.Sort(byFmtName(r))
+	return r
 }
 
 // FlashCommentService is CommentService which uses Flash method to post comment.
