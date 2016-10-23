@@ -1,6 +1,14 @@
 ## reviewdog - A code review dog working with any compiler, linter, or whatever tools
 
+[![LICENSE](https://img.shields.io/badge/license-MIT-blue.svg)](LICENSE)
+
 ![reviewdog logo](https://raw.githubusercontent.com/haya14busa/i/d598ed7dc49fefb0018e422e4c43e5ab8f207a6b/reviewdog/reviewdog.logo.png)
+
+| CI | Status |
+| ---- | ----------- |
+| [Travis CI](https://travis-ci.org/haya14busa/reviewdog) | [![Travis Build Status](https://travis-ci.org/haya14busa/reviewdog.svg?branch=master)](https://travis-ci.org/haya14busa/reviewdog) |
+| [CircleCI](https://circleci.com/gh/haya14busa/reviewdog) | [![CircleCI](https://circleci.com/gh/haya14busa/reviewdog.svg?style=svg)](https://circleci.com/gh/haya14busa/reviewdog) |
+| [drone.io](http://droneio.haya14busa.com/haya14busa/reviewdog) | [![drone.io Build Status](http://droneio.haya14busa.com/api/badges/haya14busa/reviewdog/status.svg)](http://droneio.haya14busa.com/haya14busa/reviewdog) |
 
 "reviewdog" provides a way to post review comments to code hosting service,
 such as GitHub, automatically by integrating with any linter tools with ease.
@@ -12,7 +20,12 @@ by diff.
 
 [design doc](https://docs.google.com/document/d/1mGOX19SSqRowWGbXieBfGPtLnM0BdTkIc9JelTiu6wA/edit?usp=sharing)
 
-![sample-comment.png](https://raw.githubusercontent.com/haya14busa/i/dc0ccb1e110515ea407c146d99b749018db05c45/reviewdog/sample-comment.png)
+
+Automatic code review ([sample PR](https://github.com/haya14busa/reviewdog/pull/24#discussion_r84599728))
+
+[![sample-comment.png](https://raw.githubusercontent.com/haya14busa/i/dc0ccb1e110515ea407c146d99b749018db05c45/reviewdog/sample-comment.png)](https://github.com/haya14busa/reviewdog/pull/24#discussion_r84599728)
+
+Local run
 
 ![reviewdog-local-demo.gif](https://raw.githubusercontent.com/haya14busa/i/dc0ccb1e110515ea407c146d99b749018db05c45/reviewdog/reviewdog-local-demo.gif)
 
