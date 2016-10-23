@@ -23,7 +23,7 @@ type Reviewdog struct {
 
 // NewReviewdog returns a new Reviewdog.
 func NewReviewdog(toolname string, p Parser, c CommentService, d DiffService) *Reviewdog {
-	return &Reviewdog{p: p, c: c, d: d}
+	return &Reviewdog{p: p, c: c, d: d, toolname: toolname}
 }
 
 // CheckResult represents a checked result of static analysis tools.
