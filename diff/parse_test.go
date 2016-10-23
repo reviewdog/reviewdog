@@ -60,7 +60,7 @@ func TestParseMultiFile_sample(t *testing.T) {
 		t.Fatal(err)
 	}
 	want := []*FileDiff{
-		&FileDiff{
+		{
 			PathOld: "sample.old.txt",
 			PathNew: "sample.new.txt",
 			TimeOld: "2016-10-13 05:09:35.820791185 +0900",
@@ -78,7 +78,7 @@ func TestParseMultiFile_sample(t *testing.T) {
 				},
 			},
 		},
-		&FileDiff{
+		{
 			PathOld: "nonewline.old.txt",
 			PathNew: "nonewline.new.txt",
 			TimeOld: "2016-10-13 15:34:14.931778318 +0900",
