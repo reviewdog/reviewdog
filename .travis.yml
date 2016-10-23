@@ -8,6 +8,11 @@ env:
   global:
     - secure: "RzVf38xAXHzHLm7bb2Z5xoj3DgEhPmZcsfiGApwKmLehA2p1vyGovINR0oZ3KDKSmJVDz+Bqhj8fWBD9fudtcKeZQaE11K9qbE6NAHrJbOJOjmtYQB6oXaDeNeNXBKClr5kvGdvP8Mahddff4FEJLt8alLEvwnP0FfobCcs7EoANl3E+N5wmXwI7neVojlPLTdbGjO6HA0+gqcvTZdXQUwYrmrmOKDM9pQwVQ2MpGaDlehsZOd0iSuVPs5VOCpYSopTROVdLH+N5R7+atjs+wf2qhA8608LkeD8yWhYQQhQ03muzat0jQALpmOMO8qu4pD9a7aFLCgvUbUvC6Z4gJBFdvgB3xJxAe+dwuql9yiTq9/SH7EMlxiS1AiP0daRnakrJ2N82mKRUzWytf+4OeQydn6zK6GcZH4onYALyXZ+liur3tDsRQ5EDPqV1LLD1J9xPVC2mBH+NyfY7Ymr186bTFWrHVJ43K209qZX1Qg5AF2nEfV7EkAv/hGGDoctm5JEoegu0t5wZdU1KPUIjGLMDUD3Z/nMPkWTVfoYVTDdfTUrwqzixYDO61CgDy5zbz/FsYVWB5JVCK4mT3XcK5n2YY3KXRlIkxgfFA6XDaXEc3OBGvdJotvTG23ZWFV/K4KSGYqMagITDnXzY/pEYaBK1UiLH/AMIYDlS6wcfE5w="
 
+install:
+  - go get -d -v -t ./...
+  - go get github.com/mattn/goveralls
+  - go get github.com/golang/lint/golint
+
 before_script:
   - echo $TRAVIS
   - echo $TRAVIS_PULL_REQUEST
@@ -17,16 +22,37 @@ before_script:
   - echo $TRAVIS_REPO_SLUG
   - echo $TRAVIS_SECURE_ENV_VARS
 
-install:
-  - go get -d -v -t ./...
-  - go get github.com/mattn/goveralls
-  - go get github.com/golang/lint/golint
-
 script:
   - go test -v -race ./...
   - goveralls -service=travis-ci
-  # - go vet ./... ref: circle.yml
-  # - unused ./... ref: .drone.yml
   - go install ./cmd/reviewdog
   - >-
     golint ./... | reviewdog -f=golint -ci=travis
+
+before_deploy:
+  - go get github.com/mitchellh/gox
+  - gox -output "dist/{{.Dir}}_{{.OS}}_{{.Arch}}" ./cmd/reviewdog/
+
+deploy:
+  provider: releases
+  api_key:
+    secure: "gOJqairdmqDqBeWvwVv6cuUOeX3uIEoufVv6/s37E+AFDth+F5t8aUinV7uaIV/FjNlucFM5T8sY1pkPiTY7ChiUkn9Fvulz9XCPwKqDymlL8i10pQP4GfgdbeVG2k+U42s+MEQBugj73GQTrYTT5UaXv3jHZUcMAbYzJUJU15sdnsqm/1VQShuKq05hDDkJqWUruZiKKMTaq5+SJoZ0YHoACx/0CMnC65+aT/BJSuHJRD6lPIq+bEA+jD1CrZ0Jkxbwxh8nHzX67GRjYpevnNgrpzheC0nKkugIX+ePds8758sQmBsjqfao7CrvEQxeI6fkZHE0vge44dt0iUixaEZaA/YoY7vdhZwkbqPfcVNBCthHee2qkCmosYmn2ipOcnyXLpHYHCp4KDiIz5ny+QNZVxd5qQbXzgDEFQw8D3grNrXEvSTyq+yZB0Ti27tL6gonvjg/ejBwjtzgfvyMZVuZRbnEwBYJDVpZ/W5A0Gr3W1mfDrW1I5/ALh0Y2kd3Erd4XzCnYLupxh1USt8648ONVFaP68ppDeKGNcmrxRIYB8JGe6VQMoxnRWjwN2xf9UNIXy8KWDtbRUlP1R92V3jUmZf2VqFkLdJVWSFs0sHlPEGeaTnk7WZLWMWQpBTJHJbeY9jYme5m4T0a7hCV+kM1WufSaMQCUmm3R0i4dkA="
+  file:
+    - dist/reviewdog_darwin_386
+    - dist/reviewdog_darwin_amd64
+    - dist/reviewdog_freebsd_386
+    - dist/reviewdog_freebsd_amd64
+    - dist/reviewdog_freebsd_arm
+    - dist/reviewdog_linux_386
+    - dist/reviewdog_linux_amd64
+    - dist/reviewdog_linux_arm
+    - dist/reviewdog_netbsd_386
+    - dist/reviewdog_netbsd_amd64
+    - dist/reviewdog_netbsd_arm
+    - dist/reviewdog_openbsd_386
+    - dist/reviewdog_openbsd_amd64
+    - dist/reviewdog_windows_386.exe
+    - dist/reviewdog_windows_amd64.exe
+  skip_cleanup: true
+  on:
+    tags: true
