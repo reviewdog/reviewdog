@@ -130,7 +130,7 @@ func run(r io.Reader, w io.Writer, diffCmd string, diffStrip int, efms []string,
 		ds = d
 	}
 
-	app := reviewdog.NewReviewdog(p, cs, ds)
+	app := reviewdog.NewReviewdog(f, p, cs, ds)
 	if err := app.Run(r); err != nil {
 		return err
 	}
