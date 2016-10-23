@@ -4,4 +4,4 @@ test:
   override:
     - go test -v -race ./...
     - >-
-      go tool vet -all -shadowstrict . | ./reviewdog -efm="%f:%l: %m" -ci="circle-ci"
+      go tool vet -all -shadowstrict . 2>&1 | ./reviewdog -f=govet -ci="circle-ci"

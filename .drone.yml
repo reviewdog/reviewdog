@@ -16,9 +16,9 @@ build:
       - go get github.com/golang/lint/golint
       - go get honnef.co/go/unused/cmd/unused
       - |
-        go tool vet -all -shadowstrict . | reviewdog -efm="%f:%l: %m" -ci=droneio
+        go tool vet -all -shadowstrict . 2>&1 | reviewdog -f=govet -ci=droneio
       - |
-        golint ./... | reviewdog -efm="%f:%l:%c: %m" -ci=droneio
+        golint ./... | reviewdog -f=golint -ci=droneio
       - |
         unused ./... | reviewdog -efm="%f:%l:%c: %m" -ci=droneio
     when:

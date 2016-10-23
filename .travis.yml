@@ -29,4 +29,4 @@ script:
   # - unused ./... ref: .drone.yml
   - go install ./cmd/reviewdog
   - >-
-    golint ./... | reviewdog -efm="%f:%l:%c: %m" -ci=travis
+    golint ./... | reviewdog -f=golint -ci=travis
