@@ -29,19 +29,25 @@ const usageMessage = "" +
 	GitHub if you use reviewdog in CI service.
 `
 
-// flags
-var (
-	diffCmd    string
-	diffCmdDoc = `diff command (e.g. "git diff"). diff flag is ignored if you pass "ci" flag`
-
+type option struct {
+	diffCmd   string
 	diffStrip int
+	efms      strslice
+	f         string // errorformat name
+	list      bool   // list supported errorformat name
+	name      string // tool name which is used in comment
+	ci        string
+}
 
-	efms strslice
-	f    string // errorformat name
-	list bool   // list supported errorformat name
-
-	ci    string
-	ciDoc = `CI service (supported travis, circle-ci, droneio(OSS 0.4), common)
+// flags doc
+const (
+	diffCmdDoc   = `diff command (e.g. "git diff"). diff flag is ignored if you pass "ci" flag`
+	diffStripDoc = "strip NUM leading components from diff file names (equivalent to `patch -p`) (default is 1 for git diff)"
+	efmsDoc      = `list of errorformat (https://github.com/haya14busa/errorformat)`
+	fDoc         = `errorformat name (run -list to see supported errorformat name)`
+	listDoc      = `list available errorformat names as -f arg`
+	nameDoc      = `tool name which is used in comment. -f is used as tool name if -name is empty`
+	ciDoc        = `CI service (supported travis, circle-ci, droneio(OSS 0.4), common)
 	If you use "ci" flag, you need to set REVIEWDOG_GITHUB_API_TOKEN environment
 	variable.  Go to https://github.com/settings/tokens and create new Personal
 	access token with repo scope.
@@ -54,13 +60,16 @@ var (
 `
 )
 
+var flags = &option{}
+
 func init() {
-	flag.StringVar(&diffCmd, "diff", "", diffCmdDoc)
-	flag.IntVar(&diffStrip, "strip", 1, "strip NUM leading components from diff file names (equivalent to `patch -p`) (default is 1 for git diff)")
-	flag.Var(&efms, "efm", "list of errorformat (https://github.com/haya14busa/errorformat)")
-	flag.StringVar(&f, "f", "", "errorformat name (run -list to see supported errorformat name)")
-	flag.BoolVar(&list, "list", false, "list available errorformat names as -f arg")
-	flag.StringVar(&ci, "ci", "", ciDoc)
+	flag.StringVar(&flags.diffCmd, "diff", "", diffCmdDoc)
+	flag.IntVar(&flags.diffStrip, "strip", 1, diffStripDoc)
+	flag.Var(&flags.efms, "efm", efmsDoc)
+	flag.StringVar(&flags.f, "f", "", fDoc)
+	flag.BoolVar(&flags.list, "list", false, listDoc)
+	flag.StringVar(&flags.name, "name", "", nameDoc)
+	flag.StringVar(&flags.ci, "ci", "", ciDoc)
 }
 
 func usage() {
@@ -73,30 +82,30 @@ func usage() {
 func main() {
 	flag.Usage = usage
 	flag.Parse()
-	if err := run(os.Stdin, os.Stdout, diffCmd, diffStrip, efms, f, list, ci); err != nil {
+	if err := run(os.Stdin, os.Stdout, flags); err != nil {
 		fmt.Fprintln(os.Stderr, err)
 		os.Exit(1)
 	}
 }
 
-func run(r io.Reader, w io.Writer, diffCmd string, diffStrip int, efms []string, f string, list bool, ci string) error {
-	if list {
+func run(r io.Reader, w io.Writer, opt *option) error {
+	if opt.list {
 		return runList(w)
 	}
 
 	// use defined errorformat
-	if f != "" {
-		if len(efms) > 0 {
+	if opt.f != "" {
+		if len(opt.efms) > 0 {
 			return errors.New("you cannot specify both -f and -efm at the same time")
 		}
-		efm, ok := fmts.DefinedFmts()[f]
+		efm, ok := fmts.DefinedFmts()[opt.f]
 		if !ok {
-			return fmt.Errorf("%q is not supported. Use -efm or consider to add new errrorformat to https://github.com/haya14busa/errorformat", f)
+			return fmt.Errorf("%q is not supported. Use -efm or consider to add new errrorformat to https://github.com/haya14busa/errorformat", opt.f)
 		}
-		efms = efm.Errorformat
+		opt.efms = efm.Errorformat
 	}
 
-	p, err := efmParser(efms)
+	p, err := efmParser(opt.efms)
 	if err != nil {
 		return err
 	}
@@ -104,14 +113,14 @@ func run(r io.Reader, w io.Writer, diffCmd string, diffStrip int, efms []string,
 	var cs reviewdog.CommentService
 	var ds reviewdog.DiffService
 
-	if ci != "" {
+	if opt.ci != "" {
 		if os.Getenv("REVIEWDOG_GITHUB_API_TOKEN") != "" {
-			gs, isPR, err := githubService(ci)
+			gs, isPR, err := githubService(opt.ci)
 			if err != nil {
 				return err
 			}
 			if !isPR {
-				fmt.Fprintf(os.Stderr, "this is not PullRequest build. CI: %v\n", ci)
+				fmt.Fprintf(os.Stderr, "this is not PullRequest build. CI: %v\n", opt.ci)
 				return nil
 			}
 			cs = gs
@@ -123,14 +132,20 @@ func run(r io.Reader, w io.Writer, diffCmd string, diffStrip int, efms []string,
 	} else {
 		// local
 		cs = reviewdog.NewCommentWriter(w)
-		d, err := diffService(diffCmd, diffStrip)
+		d, err := diffService(opt.diffCmd, opt.diffStrip)
 		if err != nil {
 			return err
 		}
 		ds = d
 	}
 
-	app := reviewdog.NewReviewdog(f, p, cs, ds)
+	// tool name
+	name := opt.name
+	if name == "" && opt.f != "" {
+		name = opt.f
+	}
+
+	app := reviewdog.NewReviewdog(name, p, cs, ds)
 	if err := app.Run(r); err != nil {
 		return err
 	}
