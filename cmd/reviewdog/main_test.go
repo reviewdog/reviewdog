@@ -28,19 +28,19 @@ func TestRun_travis(t *testing.T) {
 		}
 	}()
 
-	if err := run(nil, nil, "", 0, nil, "", false, "ciname"); err != nil {
+	if err := run(nil, nil, &option{ci: "ciname"}); err != nil {
 		t.Errorf("got an unexpected error: %v", err)
 	}
 
 	os.Setenv("REVIEWDOG_GITHUB_API_TOKEN", "<REVIEWDOG_GITHUB_API_TOKEN>")
 
-	if err := run(nil, nil, "", 0, nil, "", false, "unsupported ci"); err == nil {
+	if err := run(nil, nil, &option{ci: "unsupported ci"}); err == nil {
 		t.Error("error expected but got nil")
 	} else {
 		t.Log(err)
 	}
 
-	if err := run(nil, nil, "", 0, nil, "", false, "travis"); err == nil {
+	if err := run(nil, nil, &option{ci: "travis"}); err == nil {
 		t.Error("error expected but got nil")
 	} else {
 		t.Log(err)
@@ -48,7 +48,7 @@ func TestRun_travis(t *testing.T) {
 
 	os.Setenv("TRAVIS_PULL_REQUEST", "str")
 
-	if err := run(nil, nil, "", 0, nil, "", false, "travis"); err == nil {
+	if err := run(nil, nil, &option{ci: "travis"}); err == nil {
 		t.Error("error expected but got nil")
 	} else {
 		t.Log(err)
@@ -56,7 +56,7 @@ func TestRun_travis(t *testing.T) {
 
 	os.Setenv("TRAVIS_PULL_REQUEST", "1")
 
-	if err := run(nil, nil, "", 0, nil, "", false, "travis"); err == nil {
+	if err := run(nil, nil, &option{ci: "travis"}); err == nil {
 		t.Error("error expected but got nil")
 	} else {
 		t.Log(err)
@@ -64,7 +64,7 @@ func TestRun_travis(t *testing.T) {
 
 	os.Setenv("TRAVIS_REPO_SLUG", "invalid repo slug")
 
-	if err := run(nil, nil, "", 0, nil, "", false, "travis"); err == nil {
+	if err := run(nil, nil, &option{ci: "travis"}); err == nil {
 		t.Error("error expected but got nil")
 	} else {
 		t.Log(err)
@@ -72,7 +72,7 @@ func TestRun_travis(t *testing.T) {
 
 	os.Setenv("TRAVIS_REPO_SLUG", "haya14busa/reviewdog")
 
-	if err := run(nil, nil, "", 0, nil, "", false, "travis"); err == nil {
+	if err := run(nil, nil, &option{ci: "travis"}); err == nil {
 		t.Error("error expected but got nil")
 	} else {
 		t.Log(err)
@@ -82,7 +82,7 @@ func TestRun_travis(t *testing.T) {
 
 	r := strings.NewReader("compiler result")
 
-	if err := run(r, new(bytes.Buffer), "git diff", 0, nil, "", false, "travis"); err == nil {
+	if err := run(r, new(bytes.Buffer), &option{diffCmd: "git diff", ci: "travis"}); err == nil {
 		t.Error("error expected but got nil")
 	} else {
 		t.Log(err)
@@ -90,7 +90,7 @@ func TestRun_travis(t *testing.T) {
 
 	buf := new(bytes.Buffer)
 	os.Setenv("TRAVIS_PULL_REQUEST", "false")
-	if err := run(r, buf, "", 0, nil, "", false, "travis"); err != nil {
+	if err := run(r, buf, &option{ci: "travis"}); err != nil {
 		t.Error(err)
 	} else {
 		t.Log(buf.String())
@@ -179,7 +179,7 @@ func TestCircleci(t *testing.T) {
 	}
 
 	os.Setenv("REVIEWDOG_GITHUB_API_TOKEN", "<REVIEWDOG_GITHUB_API_TOKEN>")
-	if err := run(strings.NewReader("compiler result"), new(bytes.Buffer), "", 0, nil, "", false, "circle-ci"); err == nil {
+	if err := run(strings.NewReader("compiler result"), new(bytes.Buffer), &option{ci: "circle-ci"}); err == nil {
 		t.Error("error expected but got nil")
 	} else {
 		t.Log(err)
@@ -257,7 +257,7 @@ func TestDroneio(t *testing.T) {
 	}
 
 	os.Setenv("REVIEWDOG_GITHUB_API_TOKEN", "<REVIEWDOG_GITHUB_API_TOKEN>")
-	if err := run(strings.NewReader("compiler result"), new(bytes.Buffer), "", 0, nil, "", false, "droneio"); err == nil {
+	if err := run(strings.NewReader("compiler result"), new(bytes.Buffer), &option{ci: "droneio"}); err == nil {
 		t.Error("error expected but got nil")
 	} else {
 		t.Log(err)
