@@ -93,6 +93,7 @@ func (w *Reviewdog) Run(r io.Reader) error {
 			}
 			result.Path = relpath
 		}
+		result.Path = filepath.Clean(result.Path)
 		if addedline != nil {
 			comment := &Comment{
 				CheckResult: result,
