@@ -20,6 +20,6 @@ build:
       - |
         golint ./... | reviewdog -f=golint -ci=droneio
       - |
-        unused ./... | reviewdog -efm="%f:%l:%c: %m" -ci=droneio
+        unused ./... | reviewdog -efm="%f:%l:%c: %m" -name=unused -ci=droneio
     when:
       event: pull_request
