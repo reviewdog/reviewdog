@@ -28,7 +28,7 @@ func TestCheckStyleParser(t *testing.T) {
 	}
 	for i, cr := range crs {
 		if got, want := cr.Lines[0], wants[i]; got != want {
-			t.Error("%d: got %v, want %v", i, got, want)
+			t.Errorf("%d: got %v, want %v", i, got, want)
 		}
 	}
 
