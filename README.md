@@ -98,6 +98,26 @@ $ golint ./... | reviewdog -f=golint -diff="git diff master"
 
 You can add supported pre-defined 'errorformat' by contributing to [haya14busa/errorformat](https://github.com/haya14busa/errorformat)
 
+#### checkstyle format
+
+reviewdog also accepts [checkstyle XML format](http://checkstyle.sourceforge.net/) as well.
+If the linter supports checkstyle format as a report format, you can us
+-f=checkstyle instead of using 'errorformat'.
+
+```
+# Local
+$ eslint -f checkstyle . | reviewdog -f=checkstyle -diff="git diff"
+
+# CI (overwrite tool name which is shown in review comment by -name arg)
+$ eslint -f checkstyle . | reviewdog -f=checkstyle -name="eslint" -ci="circle-ci"
+```
+
+Also, if you want to pass other Json/XML/etc... format to reviewdog, you can write a converter.
+
+```
+$ <linter> | <convert-to-checkstyle> | reviewdog -f=checkstyle -name="<linter>" -ci="circle-ci"
+```
+
 ### Run locally
 
 reviewdog can find new introduced warnings or error by filtering linter results

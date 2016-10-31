@@ -48,9 +48,9 @@ const (
 	diffCmdDoc   = `diff command (e.g. "git diff"). diff flag is ignored if you pass "ci" flag`
 	diffStripDoc = "strip NUM leading components from diff file names (equivalent to `patch -p`) (default is 1 for git diff)"
 	efmsDoc      = `list of errorformat (https://github.com/haya14busa/errorformat)`
-	fDoc         = `errorformat name (run -list to see supported errorformat name)`
-	listDoc      = `list available errorformat names as -f arg`
-	nameDoc      = `tool name which is used in comment. -f is used as tool name if -name is empty`
+	fDoc         = `format name (run -list to see supported format name) for input. It's also used as tool name in review comment if -name is empty`
+	listDoc      = `list supported pre-defined format names which can be used as -f arg`
+	nameDoc      = `tool name in review comment. -f is used as tool name if -name is empty`
 	ciDoc        = `CI service (supported travis, circle-ci, droneio(OSS 0.4), common)
 
 	GitHub/GitHub Enterprise:
@@ -106,19 +106,7 @@ func run(r io.Reader, w io.Writer, opt *option) error {
 		return runList(w)
 	}
 
-	// use defined errorformat
-	if opt.f != "" {
-		if len(opt.efms) > 0 {
-			return errors.New("you cannot specify both -f and -efm at the same time")
-		}
-		efm, ok := fmts.DefinedFmts()[opt.f]
-		if !ok {
-			return fmt.Errorf("%q is not supported. Use -efm or consider to add new errrorformat to https://github.com/haya14busa/errorformat", opt.f)
-		}
-		opt.efms = efm.Errorformat
-	}
-
-	p, err := efmParser(opt.efms)
+	p, err := parser(opt)
 	if err != nil {
 		return err
 	}
@@ -177,6 +165,7 @@ func runList(w io.Writer) error {
 	for _, f := range sortedFmts(fmts.DefinedFmts()) {
 		fmt.Fprintf(tabw, "%s\t%s\t- %s\n", f.Name, f.Description, f.URL)
 	}
+	fmt.Fprintf(tabw, "%s\t%s\t- %s\n", "checkstyle", "checkstyle XML format", "http://checkstyle.sourceforge.net/")
 	return tabw.Flush()
 }
 
@@ -193,6 +182,30 @@ func sortedFmts(fs fmts.Fmts) []*fmts.Fmt {
 	}
 	sort.Sort(byFmtName(r))
 	return r
+}
+
+func parser(opt *option) (reviewdog.Parser, error) {
+	if opt.f == "checkstyle" {
+		return reviewdog.NewCheckStyleParser(), nil
+	}
+
+	// use defined errorformat
+	if opt.f != "" {
+		if len(opt.efms) > 0 {
+			return nil, errors.New("you cannot specify both -f and -efm at the same time")
+		}
+		efm, ok := fmts.DefinedFmts()[opt.f]
+		if !ok {
+			return nil, fmt.Errorf("%q is not supported. Use -efm or consider to add new errrorformat to https://github.com/haya14busa/errorformat", opt.f)
+		}
+		opt.efms = efm.Errorformat
+	}
+
+	if len(opt.efms) == 0 {
+		return nil, errors.New("cannot parse input. Please specify -f or -efm")
+	}
+
+	return efmParser(opt.efms)
 }
 
 // FlashCommentService is CommentService which uses Flash method to post comment.
