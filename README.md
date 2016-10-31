@@ -33,6 +33,10 @@ Local run
 
 ### Installation
 
+Get [the binary release](https://github.com/haya14busa/reviewdog/releases) (recommended way)
+
+or
+
 ```
 go get -u github.com/haya14busa/reviewdog/cmd/reviewdog
 ```
@@ -179,12 +183,18 @@ to run reviewdog for fork PR, please use it at your own risk.
 circle.yml sample
 
 ```yaml
+machine:
+  environment:
+    REVIEWDOG_VERSION: 0.9.1
+
+dependencies:
+  override:
+    - curl -fSL https://github.com/haya14busa/reviewdog/releases/download/$REVIEWDOG_VERSION/reviewdog_linux_amd64 -o reviewdog && chmod +x ./reviewdog
+
 test:
-  pre:
-    - go get github.com/haya14busa/reviewdog/cmd/reviewdog
   override:
     - >-
-      go tool vet -all -shadowstrict . 2>&1 | reviewdog -f=govet -ci="circle-ci"
+      go tool vet -all -shadowstrict . 2>&1 | ./reviewdog -f=govet -ci="circle-ci"
 ```
 
 ##### drone.io
