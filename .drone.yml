@@ -23,3 +23,7 @@ build:
         unused ./... | reviewdog -efm="%f:%l:%c: %m" -name=unused -ci=droneio
     when:
       event: pull_request
+
+notify:
+  gitter:
+    webhook: "https://webhooks.gitter.im/e/8dfc2f32c464a65d6da2"
