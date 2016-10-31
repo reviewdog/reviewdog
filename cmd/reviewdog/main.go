@@ -52,9 +52,16 @@ const (
 	listDoc      = `list available errorformat names as -f arg`
 	nameDoc      = `tool name which is used in comment. -f is used as tool name if -name is empty`
 	ciDoc        = `CI service (supported travis, circle-ci, droneio(OSS 0.4), common)
-	If you use "ci" flag, you need to set REVIEWDOG_GITHUB_API_TOKEN environment
-	variable.  Go to https://github.com/settings/tokens and create new Personal
-	access token with repo scope.
+
+	GitHub/GitHub Enterprise:
+		You need to set REVIEWDOG_GITHUB_API_TOKEN environment variable.
+		Go to https://github.com/settings/tokens and create new Personal access token with repo scope.
+
+		For GitHub Enterprise:
+			export GITHUB_API="https://example.githubenterprise.com/api/v3"
+
+		if you want to skip verifing SSL (please use this at your own risk)
+			export REVIEWDOG_INSECURE_SKIP_VERIFY=true
 
 	"common" requires following environment variables
 		CI_PULL_REQUEST	Pull Request number (e.g. 14)
