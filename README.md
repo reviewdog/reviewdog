@@ -18,7 +18,7 @@ such as GitHub, automatically by integrating with any linter tools with ease.
 It uses any output of lint tools and post them as a comment if the file and
 line are in diff of patches to review.
 
-reviewdog also supports run in local environment to filter output of lint tools
+reviewdog also supports run in local environment to filterd output of lint tools
 by diff.
 
 [design doc](https://docs.google.com/document/d/1mGOX19SSqRowWGbXieBfGPtLnM0BdTkIc9JelTiu6wA/edit?usp=sharing)
