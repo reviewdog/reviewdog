@@ -33,6 +33,10 @@ Local run
 
 ### Installation
 
+Get [the binary release](https://github.com/haya14busa/reviewdog/releases) (recommended way)
+
+or
+
 ```
 go get -u github.com/haya14busa/reviewdog/cmd/reviewdog
 ```
