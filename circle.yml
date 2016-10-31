@@ -10,3 +10,8 @@ test:
   override:
     - >-
       go tool vet -all -shadowstrict . 2>&1 | ./reviewdog -f=govet -ci="circle-ci"
+
+notify:
+  webhooks:
+    - url: https://webhooks.gitter.im/e/1285d150756c4cbf4795
+
