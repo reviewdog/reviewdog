@@ -1,10 +1,14 @@
 package main
 
 import (
+	"context"
+	"crypto/tls"
 	"errors"
 	"flag"
 	"fmt"
 	"io"
+	"net/http"
+	"net/url"
 	"os"
 	"os/exec"
 	"regexp"
@@ -48,9 +52,16 @@ const (
 	listDoc      = `list available errorformat names as -f arg`
 	nameDoc      = `tool name which is used in comment. -f is used as tool name if -name is empty`
 	ciDoc        = `CI service (supported travis, circle-ci, droneio(OSS 0.4), common)
-	If you use "ci" flag, you need to set REVIEWDOG_GITHUB_API_TOKEN environment
-	variable.  Go to https://github.com/settings/tokens and create new Personal
-	access token with repo scope.
+
+	GitHub/GitHub Enterprise:
+		You need to set REVIEWDOG_GITHUB_API_TOKEN environment variable.
+		Go to https://github.com/settings/tokens and create new Personal access token with repo scope.
+
+		For GitHub Enterprise:
+			export GITHUB_API="https://example.githubenterprise.com/api/v3"
+
+		if you want to skip verifing SSL (please use this at your own risk)
+			export REVIEWDOG_INSECURE_SKIP_VERIFY=true
 
 	"common" requires following environment variables
 		CI_PULL_REQUEST	Pull Request number (e.g. 14)
@@ -89,6 +100,8 @@ func main() {
 }
 
 func run(r io.Reader, w io.Writer, opt *option) error {
+	ctx := context.Background()
+
 	if opt.list {
 		return runList(w)
 	}
@@ -115,7 +128,7 @@ func run(r io.Reader, w io.Writer, opt *option) error {
 
 	if opt.ci != "" {
 		if os.Getenv("REVIEWDOG_GITHUB_API_TOKEN") != "" {
-			gs, isPR, err := githubService(opt.ci)
+			gs, isPR, err := githubService(ctx, opt.ci)
 			if err != nil {
 				return err
 			}
@@ -210,7 +223,7 @@ func diffService(s string, strip int) (reviewdog.DiffService, error) {
 	return d, nil
 }
 
-func githubService(ci string) (githubservice *reviewdog.GitHubPullRequest, isPR bool, err error) {
+func githubService(ctx context.Context, ci string) (githubservice *reviewdog.GitHubPullRequest, isPR bool, err error) {
 	token, err := nonEmptyEnv("REVIEWDOG_GITHUB_API_TOKEN")
 	if err != nil {
 		return nil, false, err
@@ -235,13 +248,48 @@ func githubService(ci string) (githubservice *reviewdog.GitHubPullRequest, isPR 
 	if !isPR {
 		return nil, false, nil
 	}
+
+	client, err := githubClient(ctx, token)
+	if err != nil {
+		return nil, true, err
+	}
+
+	githubservice = reviewdog.NewGitHubPullReqest(client, g.owner, g.repo, g.pr, g.sha)
+	return githubservice, true, nil
+}
+
+func githubClient(ctx context.Context, token string) (*github.Client, error) {
+	tr := &http.Transport{
+		TLSClientConfig: &tls.Config{InsecureSkipVerify: insecureSkipVerify()},
+	}
+	sslcli := &http.Client{Transport: tr}
+	ctx = context.WithValue(ctx, oauth2.HTTPClient, sslcli)
 	ts := oauth2.StaticTokenSource(
 		&oauth2.Token{AccessToken: token},
 	)
-	tc := oauth2.NewClient(oauth2.NoContext, ts)
+	tc := oauth2.NewClient(ctx, ts)
 	client := github.NewClient(tc)
-	githubservice = reviewdog.NewGitHubPullReqest(client, g.owner, g.repo, g.pr, g.sha)
-	return githubservice, true, nil
+	var err error
+	client.BaseURL, err = githubBaseURL()
+	return client, err
+}
+
+const defaultGitHubAPI = "https://api.github.com"
+
+func githubBaseURL() (*url.URL, error) {
+	baseURL := os.Getenv("GITHUB_API")
+	if baseURL == "" {
+		baseURL = defaultGitHubAPI
+	}
+	u, err := url.Parse(baseURL)
+	if err != nil {
+		return nil, fmt.Errorf("GitHub base URL is invalid: %v, %v", baseURL, err)
+	}
+	return u, nil
+}
+
+func insecureSkipVerify() bool {
+	return os.Getenv("REVIEWDOG_INSECURE_SKIP_VERIFY") == "true"
 }
 
 func travis() (g *GitHubPR, isPR bool, err error) {
