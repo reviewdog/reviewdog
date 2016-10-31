@@ -1,5 +1,7 @@
 ## reviewdog - A code review dog who keeps your codebase healthy
 
+[![Join the chat at https://gitter.im/haya14busa/reviewdog](https://badges.gitter.im/haya14busa/reviewdog.svg)](https://gitter.im/haya14busa/reviewdog?utm_source=badge&utm_medium=badge&utm_campaign=pr-badge&utm_content=badge)
+
 [![LICENSE](https://img.shields.io/badge/license-MIT-blue.svg)](LICENSE)
 [![Go Report Card](https://goreportcard.com/badge/github.com/haya14busa/reviewdog)](https://goreportcard.com/report/github.com/haya14busa/reviewdog)
 [![releases](https://img.shields.io/github/release/haya14busa/reviewdog.svg)](https://github.com/haya14busa/reviewdog/releases)
@@ -109,18 +111,22 @@ reviewdog can intergrate with CI service and post review comments to report
 results automatically as well!
 
 #### Supported code hosting (or code review) service
-At the time of writing, reviewdog only supports [GitHub](https://github.com/)
-as a code hosting service for posting comments.
+At the time of writing, reviewdog supports [GitHub](https://github.com/) and
+[GitHub Enterprise](https://enterprise.github.com/home) as a code hosting service for posting comments.
 
-It have a high chance to support [GitHub Enterprise](https://enterprise.github.com/home) since it already supported GitHub.
 It may support [Gerrit](https://www.gerritcodereview.com/), [Bitbucket](https://bitbucket.org/product), or other services later.
 
-reviewdog requires GitHub Personal API Access token as an environment variable to post comments to GitHub.
+reviewdog requires GitHub Personal API Access token as an environment variable
+(`REVIEWDOG_GITHUB_API_TOKEN`) to post comments to GitHub or GitHub Enterprise.
 Go to https://github.com/settings/tokens and generate new API token.
 Check `repo` for private repositories or `public_repo` for public repositories.
+Export the token environment variable by secure way, depending on CI services.
 
-environment variable name is `REVIEWDOG_GITHUB_API_TOKEN`.
-Export it by secure way, depending on CI services.
+For GitHub Enterprise, please set API endpoint by environment variable.
+
+```
+export GITHUB_API="https://example.githubenterprise.com/api/v3"
+```
 
 #### Supported CI services
 
