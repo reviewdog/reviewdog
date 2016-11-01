@@ -1,7 +1,6 @@
 package main
 
 import (
-	"context"
 	"crypto/tls"
 	"errors"
 	"flag"
@@ -16,6 +15,8 @@ import (
 	"strconv"
 	"strings"
 	"text/tabwriter"
+
+	"golang.org/x/net/context" // "context"
 
 	"golang.org/x/oauth2"
 
