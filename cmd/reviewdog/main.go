@@ -82,8 +82,6 @@ func init() {
 	flag.BoolVar(&flags.list, "list", false, listDoc)
 	flag.StringVar(&flags.name, "name", "", nameDoc)
 	flag.StringVar(&flags.ci, "ci", "", ciDoc)
-
-	regexp.Compile(`errcheck test`)
 }
 
 func usage() {
