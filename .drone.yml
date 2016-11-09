@@ -15,12 +15,15 @@ build:
       - go get github.com/haya14busa/reviewdog/cmd/reviewdog
       - go get github.com/golang/lint/golint
       - go get honnef.co/go/unused/cmd/unused
+      - go get github.com/kisielk/errcheck
       - |
         go tool vet -all -shadowstrict . 2>&1 | reviewdog -f=govet -ci=droneio
       - |
         golint ./... | reviewdog -f=golint -ci=droneio
       - |
         unused ./... | reviewdog -efm="%f:%l:%c: %m" -name=unused -ci=droneio
+      - |
+        errcheck -asserts -ignoretests -blank ./... | reviewdog -efm="%f:%l:%c:%m" -name=errcheck -ci=droneio
     when:
       event: pull_request
 
