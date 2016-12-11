@@ -11,6 +11,7 @@ env:
 install:
   - go get -d -v -t ./...
   - go get github.com/mattn/goveralls
+  - go get github.com/haya14busa/goverage
   - go get github.com/golang/lint/golint
 
 before_script:
@@ -24,7 +25,8 @@ before_script:
 
 script:
   - go test -v -race ./...
-  - goveralls -service=travis-ci
+  - goverage -coverprofile=coverage.txt ./...
+  - goveralls -service=travis-ci -coverprofile=coverage.txt
   - go install ./cmd/reviewdog
   - >-
     golint ./... | reviewdog -f=golint -ci=travis
