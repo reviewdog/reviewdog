@@ -172,10 +172,6 @@ func addedDiffLines(filediffs []*diff.FileDiff, strip int) posToAddedLine {
 	return r
 }
 
-func NewDummyFunc() error {
-	return nil
-}
-
 func normalizePath(p string) (string, error) {
 	path, err := filepath.Abs(p)
 	if err != nil {
