@@ -26,10 +26,13 @@ before_script:
 script:
   - go test -v -race ./...
   - goverage -coverprofile=coverage.txt ./...
-  - goveralls -service=travis-ci -coverprofile=coverage.txt
   - go install ./cmd/reviewdog
   - >-
     golint ./... | reviewdog -f=golint -ci=travis
+
+after_success:
+  - goveralls -service=travis-ci -coverprofile=coverage.txt
+  - bash <(curl -s https://codecov.io/bash)
 
 before_deploy:
   - go get github.com/mitchellh/gox
