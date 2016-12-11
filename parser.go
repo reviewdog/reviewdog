@@ -16,8 +16,18 @@ type ErrorformatParser struct {
 }
 
 // NewErrorformatParser returns a new ErrorformatParser.
-func NewErrorformatParser(efm *errorformat.Errorformat) Parser {
+func NewErrorformatParser(efm *errorformat.Errorformat) *ErrorformatParser {
 	return &ErrorformatParser{efm: efm}
+}
+
+// NewErrorformatParserString returns a new ErrorformatParser from errorformat
+// in string representation.
+func NewErrorformatParserString(efms []string) (*ErrorformatParser, error) {
+	efm, err := errorformat.NewErrorformat(efms)
+	if err != nil {
+		return nil, err
+	}
+	return NewErrorformatParser(efm), nil
 }
 
 func (p *ErrorformatParser) Parse(r io.Reader) ([]*CheckResult, error) {

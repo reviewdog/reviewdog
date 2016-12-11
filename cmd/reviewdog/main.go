@@ -21,7 +21,6 @@ import (
 	"golang.org/x/oauth2"
 
 	"github.com/google/go-github/github"
-	"github.com/haya14busa/errorformat"
 	"github.com/haya14busa/errorformat/fmts"
 	"github.com/haya14busa/reviewdog"
 	"github.com/mattn/go-shellwords"
@@ -206,7 +205,7 @@ func parser(opt *option) (reviewdog.Parser, error) {
 		return nil, errors.New("cannot parse input. Please specify -f or -efm")
 	}
 
-	return efmParser(opt.efms)
+	return reviewdog.NewErrorformatParserString(opt.efms)
 }
 
 // FlashCommentService is CommentService which uses Flash method to post comment.
@@ -214,14 +213,6 @@ type FlashCommentService interface {
 	reviewdog.CommentService
 	ListPostComments() []*reviewdog.Comment
 	Flash() error
-}
-
-func efmParser(efms []string) (reviewdog.Parser, error) {
-	efm, err := errorformat.NewErrorformat(efms)
-	if err != nil {
-		return nil, err
-	}
-	return reviewdog.NewErrorformatParser(efm), nil
 }
 
 func diffService(s string, strip int) (reviewdog.DiffService, error) {
