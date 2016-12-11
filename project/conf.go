@@ -1,5 +1,6 @@
-// Package yaml provides utility of reviewdog config yaml file.
-package yaml
+// Package project provides utility for reviewdog execution based on project
+// config.
+package project
 
 import yaml "gopkg.in/yaml.v2"
 

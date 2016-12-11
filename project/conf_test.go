@@ -1,7 +1,10 @@
-package yaml
+package project
 
-import "github.com/kylelemons/godebug/pretty"
-import "testing"
+import (
+	"testing"
+
+	"github.com/kylelemons/godebug/pretty"
+)
 
 func TestParse(t *testing.T) {
 	const yml = `
