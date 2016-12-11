@@ -13,7 +13,8 @@ func TestParse(t *testing.T) {
 runner:
   golint:
     cmd: golint ./...
-    errorformat: "%f:%l:%c: %m"
+    errorformat:
+      - "%f:%l:%c: %m"
   govet:
     cmd: go tool vet -all -shadowstrict .
     format: govet
@@ -27,7 +28,7 @@ runner:
 		Runner: map[string]*Runner{
 			"golint": &Runner{
 				Cmd:         "golint ./...",
-				Errorformat: `%f:%l:%c: %m`,
+				Errorformat: []string{`%f:%l:%c: %m`},
 				Name:        "golint",
 			},
 			"govet": &Runner{

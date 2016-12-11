@@ -18,8 +18,8 @@ type Runner struct {
 	Name string
 	// errorformat name. (e.g. `checkstyle`)
 	Format string
-	// errorformat. (e.g. `%f:%l:%c:%m`)
-	Errorformat string
+	// errorformat. (e.g. `%f:%l:%c:%m`, `%-G%.%#`)
+	Errorformat []string
 }
 
 // Parse parses reviewdog config in yaml format.
