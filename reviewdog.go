@@ -55,6 +55,13 @@ type CommentService interface {
 	Post(*Comment) error
 }
 
+// BulkCommentService posts comments all at once when Flash() is called.
+// Flash() will be called at the end of reviewdog run.
+type BulkCommentService interface {
+	CommentService
+	Flash() error
+}
+
 // DiffService is an interface which get diff.
 type DiffService interface {
 	Diff() ([]byte, error)
@@ -84,6 +91,9 @@ func (w *Reviewdog) Run(r io.Reader) error {
 		return err
 	}
 
+	if bulk, ok := w.c.(BulkCommentService); ok {
+		defer bulk.Flash()
+	}
 	for _, result := range results {
 		addedline := addedlines.Get(result.Path, result.Lnum)
 		if filepath.IsAbs(result.Path) {
