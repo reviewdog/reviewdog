@@ -2,11 +2,71 @@ package main
 
 import (
 	"bytes"
+	"fmt"
+	"io/ioutil"
 	"os"
 	"reflect"
 	"strings"
 	"testing"
 )
+
+func TestRun_local(t *testing.T) {
+	const (
+		before = `line1
+line2
+line3
+`
+		after = `line1
+line2 changed
+line3
+`
+	)
+
+	beforef, err := ioutil.TempFile("", "reviewdog-test")
+	if err != nil {
+		t.Fatal(err)
+	}
+	defer beforef.Close()
+	defer os.Remove(beforef.Name())
+	afterf, err := ioutil.TempFile("", "reviewdog-test")
+	if err != nil {
+		t.Fatal(err)
+	}
+	defer afterf.Close()
+	defer os.Remove(afterf.Name())
+
+	beforef.WriteString(before)
+	afterf.WriteString(after)
+
+	fname := afterf.Name()
+
+	var (
+		stdin = strings.Join([]string{
+			fname + "(2,1): message1",
+			fname + "(2): message2",
+			fname + "(14,1): message3",
+		}, "\n")
+		want = fname + "(2,1): message1"
+	)
+
+	diffCmd := fmt.Sprintf("diff -u %s %s", beforef.Name(), afterf.Name())
+
+	opt := &option{
+		diffCmd:   diffCmd,
+		efms:      strslice([]string{`%f(%l,%c): %m`}),
+		diffStrip: 0,
+	}
+
+	stdout := new(bytes.Buffer)
+	if err := run(strings.NewReader(stdin), stdout, opt); err != nil {
+		t.Error(err)
+	}
+
+	if got := strings.Trim(stdout.String(), "\n"); got != want {
+		t.Errorf("raw: got %v, want %v", got, want)
+	}
+
+}
 
 func TestRun_travis(t *testing.T) {
 	envs := []string{

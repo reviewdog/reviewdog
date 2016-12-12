@@ -48,7 +48,7 @@ golint.new.go:11:1: comment on exported function F2 should be of the form "F2 ..
 `
 	efm, _ := errorformat.NewErrorformat([]string{`%f:%l:%c: %m`})
 	p := NewErrorformatParser(efm)
-	c := NewCommentWriter(os.Stdout)
+	c := NewRawCommentWriter(os.Stdout)
 	d := NewDiffString(difftext, 1)
 	app := NewReviewdog("tool name", p, c, d)
 	app.Run(strings.NewReader(lintresult))

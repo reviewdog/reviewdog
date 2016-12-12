@@ -70,11 +70,6 @@ func (g *GitHubPullRequest) Post(c *Comment) error {
 	return nil
 }
 
-// ListPostComments lists comments to post.
-func (g *GitHubPullRequest) ListPostComments() []*Comment {
-	return g.postComments
-}
-
 const bodyPrefix = `<sub>reported by [reviewdog](https://github.com/haya14busa/reviewdog) :dog:</sub>`
 
 func commentBody(c *Comment) string {
@@ -91,7 +86,7 @@ func (g *GitHubPullRequest) Flash() error {
 		return err
 	}
 	var eg errgroup.Group
-	for _, c := range g.ListPostComments() {
+	for _, c := range g.postComments {
 		comment := c
 		if g.postedcs.IsPosted(comment) {
 			continue

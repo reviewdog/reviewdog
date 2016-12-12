@@ -124,7 +124,7 @@ func run(r io.Reader, w io.Writer, opt *option) error {
 				fmt.Fprintf(os.Stderr, "this is not PullRequest build. CI: %v\n", opt.ci)
 				return nil
 			}
-			cs = gs
+			cs = reviewdog.MultiCommentService(gs, reviewdog.NewRawCommentWriter(w))
 			ds = gs
 		} else {
 			fmt.Fprintf(os.Stderr, "REVIEWDOG_GITHUB_API_TOKEN is not set\n")
@@ -132,7 +132,7 @@ func run(r io.Reader, w io.Writer, opt *option) error {
 		}
 	} else {
 		// local
-		cs = reviewdog.NewCommentWriter(w)
+		cs = reviewdog.NewRawCommentWriter(w)
 		d, err := diffService(opt.diffCmd, opt.diffStrip)
 		if err != nil {
 			return err
@@ -149,13 +149,6 @@ func run(r io.Reader, w io.Writer, opt *option) error {
 	app := reviewdog.NewReviewdog(name, p, cs, ds)
 	if err := app.Run(r); err != nil {
 		return err
-	}
-	if fcs, ok := cs.(FlashCommentService); ok {
-		// Output log to writer
-		for _, c := range fcs.ListPostComments() {
-			fmt.Fprintln(w, strings.Join(c.Lines, "\n"))
-		}
-		return fcs.Flash()
 	}
 	return nil
 }
@@ -182,13 +175,6 @@ func sortedFmts(fs fmts.Fmts) []*fmts.Fmt {
 	}
 	sort.Sort(byFmtName(r))
 	return r
-}
-
-// FlashCommentService is CommentService which uses Flash method to post comment.
-type FlashCommentService interface {
-	reviewdog.CommentService
-	ListPostComments() []*reviewdog.Comment
-	Flash() error
 }
 
 func diffService(s string, strip int) (reviewdog.DiffService, error) {
