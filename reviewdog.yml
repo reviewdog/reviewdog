@@ -1,0 +1,17 @@
+# reviewdog.yml
+
+runner:
+  golint:
+    cmd: golint ./...
+    errorformat:
+      - "%f:%l:%c: %m"
+  govet:
+    cmd: go tool vet -all -shadowstrict .
+  unused:
+    cmd: unused ./...
+    errorformat:
+      - "%f:%l:%c: %m"
+  errcheck:
+    cmd: errcheck -asserts -ignoretests -blank ./...
+    errorformat:
+      - "%f:%l:%c:%m"
