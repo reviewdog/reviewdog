@@ -159,7 +159,7 @@ func run(r io.Reader, w io.Writer, opt *option) error {
 		}
 		conf, err := project.Parse(b)
 		if err != nil {
-			return fmt.Errorf("fail to get config: %v", err)
+			return fmt.Errorf("config is invalid: %v", err)
 		}
 		return project.Run(ctx, conf, cs, ds)
 	}
