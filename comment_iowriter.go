@@ -6,17 +6,19 @@ import (
 	"strings"
 )
 
-var _ CommentService = &CommentWriter{}
+var _ CommentService = &RawCommentWriter{}
 
-type CommentWriter struct {
+// RawCommentWriter is comment writer which writes results to given writer
+// without any formatting.
+type RawCommentWriter struct {
 	w io.Writer
 }
 
-func NewCommentWriter(w io.Writer) *CommentWriter {
-	return &CommentWriter{w: w}
+func NewRawCommentWriter(w io.Writer) *RawCommentWriter {
+	return &RawCommentWriter{w: w}
 }
 
-func (s *CommentWriter) Post(c *Comment) error {
+func (s *RawCommentWriter) Post(c *Comment) error {
 	_, err := fmt.Fprintln(s.w, strings.Join(c.CheckResult.Lines, "\n"))
 	return err
 }

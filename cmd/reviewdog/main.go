@@ -124,7 +124,7 @@ func run(r io.Reader, w io.Writer, opt *option) error {
 				fmt.Fprintf(os.Stderr, "this is not PullRequest build. CI: %v\n", opt.ci)
 				return nil
 			}
-			cs = reviewdog.MultiCommentService(gs, reviewdog.NewCommentWriter(w))
+			cs = reviewdog.MultiCommentService(gs, reviewdog.NewRawCommentWriter(w))
 			ds = gs
 		} else {
 			fmt.Fprintf(os.Stderr, "REVIEWDOG_GITHUB_API_TOKEN is not set\n")
@@ -132,7 +132,7 @@ func run(r io.Reader, w io.Writer, opt *option) error {
 		}
 	} else {
 		// local
-		cs = reviewdog.NewCommentWriter(w)
+		cs = reviewdog.NewRawCommentWriter(w)
 		d, err := diffService(opt.diffCmd, opt.diffStrip)
 		if err != nil {
 			return err
