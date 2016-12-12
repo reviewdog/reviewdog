@@ -21,7 +21,6 @@ import (
 	"golang.org/x/oauth2"
 
 	"github.com/google/go-github/github"
-	"github.com/haya14busa/errorformat"
 	"github.com/haya14busa/errorformat/fmts"
 	"github.com/haya14busa/reviewdog"
 	"github.com/mattn/go-shellwords"
@@ -107,9 +106,9 @@ func run(r io.Reader, w io.Writer, opt *option) error {
 		return runList(w)
 	}
 
-	p, err := parser(opt)
+	p, err := reviewdog.NewParser(&reviewdog.ParserOpt{FormatName: opt.f, Errorformat: opt.efms})
 	if err != nil {
-		return err
+		return fmt.Errorf("fail to create parser. use either -f or -efm: %v", err)
 	}
 
 	var cs reviewdog.CommentService
@@ -185,43 +184,11 @@ func sortedFmts(fs fmts.Fmts) []*fmts.Fmt {
 	return r
 }
 
-func parser(opt *option) (reviewdog.Parser, error) {
-	if opt.f == "checkstyle" {
-		return reviewdog.NewCheckStyleParser(), nil
-	}
-
-	// use defined errorformat
-	if opt.f != "" {
-		if len(opt.efms) > 0 {
-			return nil, errors.New("you cannot specify both -f and -efm at the same time")
-		}
-		efm, ok := fmts.DefinedFmts()[opt.f]
-		if !ok {
-			return nil, fmt.Errorf("%q is not supported. Use -efm or consider to add new errrorformat to https://github.com/haya14busa/errorformat", opt.f)
-		}
-		opt.efms = efm.Errorformat
-	}
-
-	if len(opt.efms) == 0 {
-		return nil, errors.New("cannot parse input. Please specify -f or -efm")
-	}
-
-	return efmParser(opt.efms)
-}
-
 // FlashCommentService is CommentService which uses Flash method to post comment.
 type FlashCommentService interface {
 	reviewdog.CommentService
 	ListPostComments() []*reviewdog.Comment
 	Flash() error
-}
-
-func efmParser(efms []string) (reviewdog.Parser, error) {
-	efm, err := errorformat.NewErrorformat(efms)
-	if err != nil {
-		return nil, err
-	}
-	return reviewdog.NewErrorformatParser(efm), nil
 }
 
 func diffService(s string, strip int) (reviewdog.DiffService, error) {

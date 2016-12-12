@@ -44,9 +44,15 @@ func TestDiffCmd(t *testing.T) {
 	want := strings.SplitN(string(wantb), "\n", 5)[4] // strip extended header
 	cmd := exec.Command("git", "diff", "--no-index", "./diff/testdata/golint.old.go", "./diff/testdata/golint.new.go")
 	d := NewDiffCmd(cmd, 1)
-	b, _ := d.Diff()
-	got := strings.SplitN(string(b), "\n", 5)[4]
-	if got != want {
-		t.Errorf("got:\n%v\nwant:\n%v", got, want)
+	// ensure it supports multiple use
+	for i := 0; i < 3; i++ {
+		b, err := d.Diff()
+		if err != nil {
+			t.Fatal(string(b), err)
+		}
+		got := strings.SplitN(string(b), "\n", 5)[4]
+		if got != want {
+			t.Errorf("got:\n%v\nwant:\n%v", got, want)
+		}
 	}
 }
