@@ -153,10 +153,11 @@ func addedDiffLines(filediffs []*diff.FileDiff, strip int) posToAddedLine {
 	for _, filediff := range filediffs {
 		path := filediff.PathNew
 		ltodiff := make(map[int]*AddedLine)
-		ps := strings.Split(filepath.ToSlash(filediff.PathNew), "/")
-
-		if len(ps) > strip {
-			path = filepath.Join(ps[strip:]...)
+		if strip > 0 {
+			ps := strings.Split(filepath.ToSlash(filediff.PathNew), "/")
+			if len(ps) > strip {
+				path = filepath.Join(ps[strip:]...)
+			}
 		}
 		np, err := normalizePath(path)
 		if err != nil {
@@ -183,9 +184,12 @@ func addedDiffLines(filediffs []*diff.FileDiff, strip int) posToAddedLine {
 }
 
 func normalizePath(p string) (string, error) {
-	path, err := filepath.Abs(p)
-	if err != nil {
-		return "", err
+	if !filepath.IsAbs(p) {
+		path, err := filepath.Abs(p)
+		if err != nil {
+			return "", err
+		}
+		p = path
 	}
-	return filepath.ToSlash(path), nil
+	return filepath.ToSlash(p), nil
 }
