@@ -3,6 +3,8 @@ package project
 import (
 	"context"
 	"errors"
+	"os"
+	"strings"
 	"testing"
 
 	"github.com/haya14busa/reviewdog"
@@ -122,4 +124,27 @@ func TestRun(t *testing.T) {
 		}
 	})
 
+}
+
+func TestFilteredEnviron(t *testing.T) {
+	const name = "REVIEWDOG_GITHUB_API_TOKEN"
+	defer os.Setenv(name, os.Getenv(name))
+	os.Setenv(name, "value")
+
+	filtered := filteredEnviron()
+	if len(filtered) != len(os.Environ()) {
+		t.Errorf("len(filtered) != len(os.Environ()), %v != %v", len(filtered), len(os.Environ()))
+	}
+
+	for _, kv := range filtered {
+		if strings.HasPrefix(kv, name) && kv != name+"=" {
+			t.Errorf("filtered: %v, want %v=", kv, name)
+		}
+	}
+
+	for _, kv := range os.Environ() {
+		if strings.HasPrefix(kv, name) && kv != name+"=value" {
+			t.Errorf("envs: %v, want %v=value", kv, name)
+		}
+	}
 }
