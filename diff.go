@@ -1,6 +1,9 @@
 package reviewdog
 
-import "os/exec"
+import (
+	"os/exec"
+	"sync"
+)
 
 var _ DiffService = &DiffString{}
 
@@ -28,6 +31,7 @@ type DiffCmd struct {
 	strip int
 	out   []byte
 	done  bool
+	mu    sync.RWMutex
 }
 
 func NewDiffCmd(cmd *exec.Cmd, strip int) *DiffCmd {
@@ -36,6 +40,8 @@ func NewDiffCmd(cmd *exec.Cmd, strip int) *DiffCmd {
 
 // Diff returns diff. It caches the result and can be used more than once.
 func (d *DiffCmd) Diff() ([]byte, error) {
+	d.mu.Lock()
+	defer d.mu.Unlock()
 	if d.done {
 		return d.out, nil
 	}
