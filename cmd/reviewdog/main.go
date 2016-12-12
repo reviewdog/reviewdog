@@ -6,6 +6,7 @@ import (
 	"flag"
 	"fmt"
 	"io"
+	"io/ioutil"
 	"net/http"
 	"net/url"
 	"os"
@@ -23,6 +24,8 @@ import (
 	"github.com/google/go-github/github"
 	"github.com/haya14busa/errorformat/fmts"
 	"github.com/haya14busa/reviewdog"
+	"github.com/haya14busa/reviewdog/project"
+	isatty "github.com/mattn/go-isatty"
 	"github.com/mattn/go-shellwords"
 )
 
@@ -41,6 +44,9 @@ type option struct {
 	list      bool   // list supported errorformat name
 	name      string // tool name which is used in comment
 	ci        string
+	conf      string
+
+	isatty bool // it's not specified by flag
 }
 
 // flags doc
@@ -69,18 +75,22 @@ const (
 		CI_REPO_OWNER	repository owner (e.g. "haya14busa" for https://github.com/haya14busa/reviewdog)
 		CI_REPO_NAME	repository name (e.g. "reviewdog" for https://github.com/haya14busa/reviewdog)
 `
+	confDoc = `config file path`
 )
 
-var flags = &option{}
+var opt = &option{}
 
 func init() {
-	flag.StringVar(&flags.diffCmd, "diff", "", diffCmdDoc)
-	flag.IntVar(&flags.diffStrip, "strip", 1, diffStripDoc)
-	flag.Var(&flags.efms, "efm", efmsDoc)
-	flag.StringVar(&flags.f, "f", "", fDoc)
-	flag.BoolVar(&flags.list, "list", false, listDoc)
-	flag.StringVar(&flags.name, "name", "", nameDoc)
-	flag.StringVar(&flags.ci, "ci", "", ciDoc)
+	flag.StringVar(&opt.diffCmd, "diff", "", diffCmdDoc)
+	flag.IntVar(&opt.diffStrip, "strip", 1, diffStripDoc)
+	flag.Var(&opt.efms, "efm", efmsDoc)
+	flag.StringVar(&opt.f, "f", "", fDoc)
+	flag.BoolVar(&opt.list, "list", false, listDoc)
+	flag.StringVar(&opt.name, "name", "", nameDoc)
+	flag.StringVar(&opt.ci, "ci", "", ciDoc)
+	flag.StringVar(&opt.conf, "conf", "reviewdog.yml", confDoc)
+
+	opt.isatty = isatty.IsTerminal(os.Stdin.Fd())
 }
 
 func usage() {
@@ -93,7 +103,7 @@ func usage() {
 func main() {
 	flag.Usage = usage
 	flag.Parse()
-	if err := run(os.Stdin, os.Stdout, flags); err != nil {
+	if err := run(os.Stdin, os.Stdout, opt); err != nil {
 		fmt.Fprintln(os.Stderr, err)
 		os.Exit(1)
 	}
@@ -106,13 +116,16 @@ func run(r io.Reader, w io.Writer, opt *option) error {
 		return runList(w)
 	}
 
-	p, err := reviewdog.NewParser(&reviewdog.ParserOpt{FormatName: opt.f, Errorformat: opt.efms})
-	if err != nil {
-		return fmt.Errorf("fail to create parser. use either -f or -efm: %v", err)
-	}
+	isProject := opt.isatty && len(opt.efms) == 0 && opt.f == ""
 
 	var cs reviewdog.CommentService
 	var ds reviewdog.DiffService
+
+	if isProject {
+		cs = reviewdog.NewUnifiedCommentWriter(w)
+	} else {
+		cs = reviewdog.NewRawCommentWriter(w)
+	}
 
 	if opt.ci != "" {
 		if os.Getenv("REVIEWDOG_GITHUB_API_TOKEN") != "" {
@@ -124,7 +137,7 @@ func run(r io.Reader, w io.Writer, opt *option) error {
 				fmt.Fprintf(os.Stderr, "this is not PullRequest build. CI: %v\n", opt.ci)
 				return nil
 			}
-			cs = reviewdog.MultiCommentService(gs, reviewdog.NewRawCommentWriter(w))
+			cs = reviewdog.MultiCommentService(gs, cs)
 			ds = gs
 		} else {
 			fmt.Fprintf(os.Stderr, "REVIEWDOG_GITHUB_API_TOKEN is not set\n")
@@ -132,12 +145,28 @@ func run(r io.Reader, w io.Writer, opt *option) error {
 		}
 	} else {
 		// local
-		cs = reviewdog.NewRawCommentWriter(w)
 		d, err := diffService(opt.diffCmd, opt.diffStrip)
 		if err != nil {
 			return err
 		}
 		ds = d
+	}
+
+	if isProject {
+		b, err := ioutil.ReadFile(opt.conf)
+		if err != nil {
+			return fmt.Errorf("fail to open config: %v", err)
+		}
+		conf, err := project.Parse(b)
+		if err != nil {
+			return fmt.Errorf("fail to get config: %v", err)
+		}
+		return project.Run(ctx, conf, cs, ds)
+	}
+
+	p, err := reviewdog.NewParser(&reviewdog.ParserOpt{FormatName: opt.f, Errorformat: opt.efms})
+	if err != nil {
+		return fmt.Errorf("fail to create parser. use either -f or -efm: %v", err)
 	}
 
 	// tool name
