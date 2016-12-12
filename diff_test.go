@@ -1,10 +1,13 @@
 package reviewdog
 
-import "io/ioutil"
+import (
+	"io/ioutil"
+	"os/exec"
+	"sync"
+	"testing"
+)
 
-import "os/exec"
 import "strings"
-import "testing"
 
 func TestDiffString(t *testing.T) {
 	difftext := `diff --git a/golint.old.go b/golint.new.go
@@ -45,14 +48,20 @@ func TestDiffCmd(t *testing.T) {
 	cmd := exec.Command("git", "diff", "--no-index", "./diff/testdata/golint.old.go", "./diff/testdata/golint.new.go")
 	d := NewDiffCmd(cmd, 1)
 	// ensure it supports multiple use
+	var wg sync.WaitGroup
 	for i := 0; i < 3; i++ {
-		b, err := d.Diff()
-		if err != nil {
-			t.Fatal(string(b), err)
-		}
-		got := strings.SplitN(string(b), "\n", 5)[4]
-		if got != want {
-			t.Errorf("got:\n%v\nwant:\n%v", got, want)
-		}
+		wg.Add(1)
+		go func() {
+			defer wg.Done()
+			b, err := d.Diff()
+			if err != nil {
+				t.Error(string(b), err)
+			}
+			got := strings.SplitN(string(b), "\n", 5)[4]
+			if got != want {
+				t.Errorf("got:\n%v\nwant:\n%v", got, want)
+			}
+		}()
 	}
+	wg.Wait()
 }
