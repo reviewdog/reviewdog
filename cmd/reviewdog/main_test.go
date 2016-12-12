@@ -68,6 +68,75 @@ line3
 
 }
 
+func TestRun_project(t *testing.T) {
+	t.Run("diff command is empty", func(t *testing.T) {
+		opt := &option{
+			conf:   "reviewdog.yml",
+			isatty: true,
+		}
+		stdout := new(bytes.Buffer)
+		if err := run(nil, stdout, opt); err == nil {
+			t.Error("want err, got nil")
+		} else {
+			t.Log(err)
+		}
+	})
+
+	t.Run("config not found", func(t *testing.T) {
+		opt := &option{
+			conf:    "reviewdog.notfound.yml",
+			diffCmd: "echo ''",
+			isatty:  true,
+		}
+		stdout := new(bytes.Buffer)
+		if err := run(nil, stdout, opt); err == nil {
+			t.Error("want err, got nil")
+		} else {
+			t.Log(err)
+		}
+	})
+
+	t.Run("invalid config", func(t *testing.T) {
+		conffile, err := ioutil.TempFile("", "reviewdog-test")
+		if err != nil {
+			t.Fatal(err)
+		}
+		defer conffile.Close()
+		defer os.Remove(conffile.Name())
+		conffile.WriteString("invalid yaml")
+		opt := &option{
+			conf:    conffile.Name(),
+			diffCmd: "echo ''",
+			isatty:  true,
+		}
+		stdout := new(bytes.Buffer)
+		if err := run(nil, stdout, opt); err == nil {
+			t.Error("want err, got nil")
+		} else {
+			t.Log(err)
+		}
+	})
+
+	t.Run("ok", func(t *testing.T) {
+		conffile, err := ioutil.TempFile("", "reviewdog-test")
+		if err != nil {
+			t.Fatal(err)
+		}
+		defer conffile.Close()
+		defer os.Remove(conffile.Name())
+		conffile.WriteString("") // empty
+		opt := &option{
+			conf:    conffile.Name(),
+			diffCmd: "echo ''",
+			isatty:  true,
+		}
+		stdout := new(bytes.Buffer)
+		if err := run(nil, stdout, opt); err != nil {
+			t.Errorf("got unexpected err: %v", err)
+		}
+	})
+}
+
 func TestRun_travis(t *testing.T) {
 	envs := []string{
 		"REVIEWDOG_GITHUB_API_TOKEN",
