@@ -25,7 +25,6 @@ import (
 	"github.com/haya14busa/errorformat/fmts"
 	"github.com/haya14busa/reviewdog"
 	"github.com/haya14busa/reviewdog/project"
-	isatty "github.com/mattn/go-isatty"
 	"github.com/mattn/go-shellwords"
 )
 
@@ -45,8 +44,6 @@ type option struct {
 	name      string // tool name which is used in comment
 	ci        string
 	conf      string
-
-	isatty bool // it's not specified by flag
 }
 
 // flags doc
@@ -89,8 +86,6 @@ func init() {
 	flag.StringVar(&opt.name, "name", "", nameDoc)
 	flag.StringVar(&opt.ci, "ci", "", ciDoc)
 	flag.StringVar(&opt.conf, "conf", "reviewdog.yml", confDoc)
-
-	opt.isatty = isatty.IsTerminal(os.Stdin.Fd())
 }
 
 func usage() {
@@ -116,7 +111,8 @@ func run(r io.Reader, w io.Writer, opt *option) error {
 		return runList(w)
 	}
 
-	isProject := opt.isatty && len(opt.efms) == 0 && opt.f == ""
+	// assume it's project based run when both -efm ane -f are not specified
+	isProject := len(opt.efms) == 0 && opt.f == ""
 
 	var cs reviewdog.CommentService
 	var ds reviewdog.DiffService

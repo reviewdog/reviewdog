@@ -71,8 +71,7 @@ line3
 func TestRun_project(t *testing.T) {
 	t.Run("diff command is empty", func(t *testing.T) {
 		opt := &option{
-			conf:   "reviewdog.yml",
-			isatty: true,
+			conf: "reviewdog.yml",
 		}
 		stdout := new(bytes.Buffer)
 		if err := run(nil, stdout, opt); err == nil {
@@ -86,7 +85,6 @@ func TestRun_project(t *testing.T) {
 		opt := &option{
 			conf:    "reviewdog.notfound.yml",
 			diffCmd: "echo ''",
-			isatty:  true,
 		}
 		stdout := new(bytes.Buffer)
 		if err := run(nil, stdout, opt); err == nil {
@@ -107,7 +105,6 @@ func TestRun_project(t *testing.T) {
 		opt := &option{
 			conf:    conffile.Name(),
 			diffCmd: "echo ''",
-			isatty:  true,
 		}
 		stdout := new(bytes.Buffer)
 		if err := run(nil, stdout, opt); err == nil {
@@ -128,7 +125,6 @@ func TestRun_project(t *testing.T) {
 		opt := &option{
 			conf:    conffile.Name(),
 			diffCmd: "echo ''",
-			isatty:  true,
 		}
 		stdout := new(bytes.Buffer)
 		if err := run(nil, stdout, opt); err != nil {
