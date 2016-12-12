@@ -4,6 +4,7 @@ import (
 	"context"
 	"fmt"
 	"io"
+	"os"
 	"os/exec"
 
 	"golang.org/x/sync/errgroup"
@@ -13,6 +14,8 @@ import (
 
 // Run runs reviewdog tasks based on Config.
 func Run(ctx context.Context, conf *Config, c reviewdog.CommentService, d reviewdog.DiffService) error {
+	// environment variables for each commands
+	envs := filteredEnviron()
 	var g errgroup.Group
 	for _, runner := range conf.Runner {
 		fname := runner.Format
@@ -26,6 +29,7 @@ func Run(ctx context.Context, conf *Config, c reviewdog.CommentService, d review
 		}
 		rd := reviewdog.NewReviewdog(runner.Name, p, c, d)
 		cmd := exec.CommandContext(ctx, "sh", "-c", runner.Cmd)
+		cmd.Env = envs
 		stdout, err := cmd.StdoutPipe()
 		stderr, err := cmd.StderrPipe()
 		if err != nil {
@@ -42,4 +46,16 @@ func Run(ctx context.Context, conf *Config, c reviewdog.CommentService, d review
 		return fmt.Errorf("fail to run reviewdog: %v", err)
 	}
 	return nil
+}
+
+var secretEnvs = [...]string{
+	"REVIEWDOG_GITHUB_API_TOKEN",
+}
+
+func filteredEnviron() []string {
+	for _, name := range secretEnvs {
+		defer os.Setenv(name, os.Getenv(name))
+		os.Setenv(name, "")
+	}
+	return os.Environ()
 }
