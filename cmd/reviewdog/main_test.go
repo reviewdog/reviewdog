@@ -10,8 +10,6 @@ import (
 	"testing"
 )
 
-var _ = fmt.Sprintf("", 1, 2, 3)
-
 func TestRun_local(t *testing.T) {
 	const (
 		before = `line1

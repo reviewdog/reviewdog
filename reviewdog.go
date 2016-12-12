@@ -120,10 +120,6 @@ func (w *Reviewdog) Run(r io.Reader) error {
 	return nil
 }
 
-var unused = ""
-
-var NoComment = ""
-
 // AddedLine represents added line in diff.
 type AddedLine struct {
 	Path     string // path to new file
