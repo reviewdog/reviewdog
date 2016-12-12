@@ -77,6 +77,10 @@ const (
 
 var opt = &option{}
 
+func f() {
+	os.Setenv("key", "value")
+}
+
 func init() {
 	flag.StringVar(&opt.diffCmd, "diff", "", diffCmdDoc)
 	flag.IntVar(&opt.diffStrip, "strip", 1, diffStripDoc)
