@@ -171,7 +171,7 @@ func TestGitHubPullRequest_Post_Flash_mock(t *testing.T) {
 			want := `<sub>reported by [reviewdog](https://github.com/haya14busa/reviewdog) :dog:</sub>
 [reviewdog] test`
 			if body != want {
-				t.Error("body: got %v, want %v", body, want)
+				t.Errorf("body: got %v, want %v", body, want)
 			}
 		default:
 			t.Errorf("unexpected access: %v %v", r.Method, r.URL)
