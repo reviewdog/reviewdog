@@ -253,7 +253,7 @@ circle.yml sample
 ```yaml
 machine:
   environment:
-    REVIEWDOG_VERSION: 0.9.2
+    REVIEWDOG_VERSION: 0.9.3
 
 dependencies:
   override:
