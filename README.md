@@ -118,6 +118,49 @@ Also, if you want to pass other Json/XML/etc... format to reviewdog, you can wri
 $ <linter> | <convert-to-checkstyle> | reviewdog -f=checkstyle -name="<linter>" -ci="circle-ci"
 ```
 
+### Project Configuration Based Run
+
+[experimental]
+
+reviewdog can also be controlled via the reviewdog.yml configuration file instead of "-f" or "-efm" arguments.
+
+With reviewdog.yml, you can run the same commands both CI service and local
+environment including editor intergration with ease.
+
+#### reviewdog.yml
+
+```yaml
+runner:
+  <tool-name>:
+    cmd: <command> # (required)
+    errorformat: # (optional if there is supporeted format for <tool-name>. see reviewdog -list)
+      - <list of errorformat>
+    name: <tool-name> # (optional. you can overwrite <tool-name> defined by runner key)
+
+  # examples
+  golint:
+    cmd: golint ./...
+    errorformat:
+      - "%f:%l:%c: %m"
+  govet:
+    cmd: go tool vet -all -shadowstrict .
+```
+
+```
+$ reviewdog -diff="git diff master"
+project/run_test.go:61:28: [golint] error strings should not end with punctuation
+project/run.go:57:18: [errcheck]        defer os.Setenv(name, os.Getenv(name))
+project/run.go:58:12: [errcheck]        os.Setenv(name, "")
+# You can use -conf to specify config file path.
+$ reviewdog -ci=droneio -conf=./reviewdog.yml
+```
+
+Output format for project config based run is one of following formats.
+
+- `<file>: [<tool name>] <message>`
+- `<file>:<lnum>: [<tool name>] <message>`
+- `<file>:<lnum>:<col>: [<tool name>] <message>`
+
 ### Run locally
 
 reviewdog can find new introduced warnings or error by filtering linter results
