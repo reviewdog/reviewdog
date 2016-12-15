@@ -171,11 +171,7 @@ func run(r io.Reader, w io.Writer, opt *option) error {
 		name = opt.f
 	}
 
-	app := reviewdog.NewReviewdog(name, p, cs, ds)
-	if err := app.Run(r); err != nil {
-		return err
-	}
-	return nil
+	return reviewdog.NewReviewdog(name, p, cs, ds).Run(r)
 }
 
 func runList(w io.Writer) error {
