@@ -15,3 +15,7 @@ runner:
     cmd: errcheck -asserts -ignoretests -blank ./...
     errorformat:
       - "%f:%l:%c:%m"
+  gosimple:
+    cmd: gosimple ./...
+    errorformat:
+      - "%f:%l:%c: %m"
