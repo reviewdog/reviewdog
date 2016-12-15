@@ -124,6 +124,9 @@ $ <linter> | <convert-to-checkstyle> | reviewdog -f=checkstyle -name="<linter>" 
 
 reviewdog can also be controlled via the reviewdog.yml configuration file instead of "-f" or "-efm" arguments.
 
+With reviewdog.yml, you can run the same commands both CI service and local
+environment including editor intergration with ease.
+
 #### reviewdog.yml
 
 ```yaml
@@ -151,6 +154,12 @@ project/run.go:58:12: [errcheck]        os.Setenv(name, "")
 # You can use -conf to specify config file path.
 $ reviewdog -ci=droneio -conf=./reviewdog.yml
 ```
+
+Output format for project config based run is one of following formats.
+
+- `<file>: [<tool name>] <message>`
+- `<file>:<lnum>: [<tool name>] <message>`
+- `<file>:<lnum>:<col>: [<tool name>] <message>`
 
 ### Run locally
 
