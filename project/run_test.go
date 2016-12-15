@@ -132,8 +132,8 @@ func TestFilteredEnviron(t *testing.T) {
 	os.Setenv(name, "value")
 
 	filtered := filteredEnviron()
-	if len(filtered) != len(os.Environ()) {
-		t.Errorf("len(filtered) != len(os.Environ()), %v != %v", len(filtered), len(os.Environ()))
+	if len(filtered) != len(os.Environ())-1 {
+		t.Errorf("len(filtered) != len(os.Environ())-1, %v != %v-1", len(filtered), len(os.Environ()))
 	}
 
 	for _, kv := range filtered {

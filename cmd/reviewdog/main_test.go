@@ -144,7 +144,7 @@ func TestRun_travis(t *testing.T) {
 	saveEnvs := make(map[string]string)
 	for _, key := range envs {
 		saveEnvs[key] = os.Getenv(key)
-		os.Setenv(key, "")
+		os.Unsetenv(key)
 	}
 	// restore
 	defer func() {
@@ -236,7 +236,7 @@ func TestCircleci(t *testing.T) {
 	saveEnvs := make(map[string]string)
 	for _, key := range envs {
 		saveEnvs[key] = os.Getenv(key)
-		os.Setenv(key, "")
+		os.Unsetenv(key)
 	}
 	// restore
 	defer func() {
@@ -256,7 +256,7 @@ func TestCircleci(t *testing.T) {
 		t.Log(err)
 	}
 
-	os.Setenv("CI_PULL_REQUEST", "")
+	os.Unsetenv("CI_PULL_REQUEST")
 	os.Setenv("CIRCLE_PR_NUMBER", "invalid")
 	if _, _, err := circleci(); err == nil {
 		t.Error("error expected but got nil")
@@ -322,7 +322,7 @@ func TestDroneio(t *testing.T) {
 	saveEnvs := make(map[string]string)
 	for _, key := range envs {
 		saveEnvs[key] = os.Getenv(key)
-		os.Setenv(key, "")
+		os.Unsetenv(key)
 	}
 	// restore
 	defer func() {
@@ -401,7 +401,7 @@ func TestCommonci(t *testing.T) {
 	saveEnvs := make(map[string]string)
 	for _, key := range envs {
 		saveEnvs[key] = os.Getenv(key)
-		os.Setenv(key, "")
+		os.Unsetenv(key)
 	}
 	// restore
 	defer func() {
