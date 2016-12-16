@@ -28,6 +28,8 @@ import (
 	"github.com/mattn/go-shellwords"
 )
 
+const version = "0.9.4"
+
 const usageMessage = "" +
 	`Usage:	reviewdog [flags]
 	reviewdog accepts any compiler or linter results from stdin and filters
@@ -36,6 +38,7 @@ const usageMessage = "" +
 `
 
 type option struct {
+	version   bool
 	diffCmd   string
 	diffStrip int
 	efms      strslice
@@ -78,6 +81,7 @@ const (
 var opt = &option{}
 
 func init() {
+	flag.BoolVar(&opt.version, "version", false, "print version")
 	flag.StringVar(&opt.diffCmd, "diff", "", diffCmdDoc)
 	flag.IntVar(&opt.diffStrip, "strip", 1, diffStripDoc)
 	flag.Var(&opt.efms, "efm", efmsDoc)
@@ -106,6 +110,11 @@ func main() {
 
 func run(r io.Reader, w io.Writer, opt *option) error {
 	ctx := context.Background()
+
+	if opt.version {
+		fmt.Fprintln(w, version)
+		return nil
+	}
 
 	if opt.list {
 		return runList(w)
