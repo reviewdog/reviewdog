@@ -12,6 +12,22 @@ import (
 	"golang.org/x/oauth2"
 )
 
+func setupGithub() (*http.ServeMux, *httptest.Server, *github.Client) {
+	mux := http.NewServeMux()
+	server := httptest.NewServer(mux)
+	client := github.NewClient(nil)
+	url, _ := url.Parse(server.URL)
+	client.BaseURL = url
+	client.UploadURL = url
+	return mux, server, client
+}
+
+func testMethod(t *testing.T, r *http.Request, want string) {
+	if got := r.Method; got != want {
+		t.Errorf("Request method: %v, want %v", got, want)
+	}
+}
+
 const notokenSkipTestMes = "skipping test (requires actual Personal access tokens. export REVIEWDOG_TEST_GITHUB_API_TOKEN=<GitHub Personal Access Token>)"
 
 func setupGitHubClient() *github.Client {
@@ -206,5 +222,56 @@ func TestGitHubPullRequest_Post_Flash_mock(t *testing.T) {
 	}
 	if apiCalled != 2 {
 		t.Errorf("API should be called 2 times, but %v times", apiCalled)
+	}
+}
+
+func TestGitHubPullRequest_Post_Flash_mock_review_api(t *testing.T) {
+	mux, server, client := setupGithub()
+	defer server.Close()
+	defer func(u string) { githubAPIHost = u }(githubAPIHost)
+	u, _ := url.Parse(server.URL)
+	githubAPIHost = u.Host
+
+	mux.HandleFunc("/repos/o/r/pulls/1/comments", func(w http.ResponseWriter, r *http.Request) {
+		testMethod(t, r, "GET")
+	})
+	mux.HandleFunc("/repos/o/r/pulls/1/reviews", func(w http.ResponseWriter, r *http.Request) {
+		testMethod(t, r, "POST")
+
+		v := new(Review)
+		json.NewDecoder(r.Body).Decode(v)
+
+		if v.Body != nil {
+			t.Errorf("Review body = %v, want nil", *v.Body)
+		}
+		if want := "COMMENT"; *v.Event != want {
+			t.Errorf("Review event = %v, want %v", *v.Event, want)
+		}
+		c := v.Comments[0]
+
+		if want := bodyPrefix + "\n[reviewdog] test"; *c.Body != want {
+			t.Errorf("Review comment body = %v, want %v", *c.Body, want)
+		}
+		if want := "reviewdog.go"; *c.Path != want {
+			t.Errorf("Review comment position = %v, want %v", *c.Path, want)
+		}
+		if want := 17; *c.Position != want {
+			t.Errorf("Review comment position = %v, want %v", *c.Position, want)
+		}
+	})
+
+	g := NewGitHubPullReqest(client, "o", "r", 1, "SHA1")
+	comment := &Comment{
+		CheckResult: &CheckResult{
+			Path: "reviewdog.go",
+		},
+		LnumDiff: 17,
+		Body:     "[reviewdog] test",
+	}
+	if err := g.Post(comment); err != nil {
+		t.Error(err)
+	}
+	if err := g.Flash(); err != nil {
+		t.Error(err)
 	}
 }

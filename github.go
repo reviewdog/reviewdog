@@ -81,6 +81,8 @@ func commentBody(c *Comment) string {
 	return tool + bodyPrefix + "\n" + c.Body
 }
 
+var githubAPIHost = "api.github.com"
+
 // Flash posts comments which has not been posted yet.
 func (g *GitHubPullRequest) Flash() error {
 	if err := g.setPostedComment(); err != nil {
@@ -88,7 +90,7 @@ func (g *GitHubPullRequest) Flash() error {
 	}
 	// TODO(haya14busa,#58): remove host check when GitHub Enterprise supports
 	// Pull Request API.
-	if g.cli.BaseURL.Host == "api.github.com" {
+	if g.cli.BaseURL.Host == githubAPIHost {
 		return g.postAsReviewComment()
 	}
 	return g.postCommentsForEach()
