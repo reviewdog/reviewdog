@@ -217,12 +217,14 @@ const (
 	mediaTypePullRequestReview = "application/vnd.github.black-cat-preview+json"
 )
 
+// Review represents a pull request review.
 type Review struct {
 	Body     *string          `json:"body,omitempty"`
 	Event    *string          `json:"event,omitempty"`
 	Comments []*ReviewComment `json:"comments,omitempty"`
 }
 
+// ReviewComment represents draft review comments.
 type ReviewComment struct {
 	Path     *string `json:"path,omitempty"`
 	Position *int    `json:"position,omitempty"`
