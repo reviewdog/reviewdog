@@ -461,3 +461,13 @@ func TestCommonci(t *testing.T) {
 	}
 
 }
+
+func TestRun_version(t *testing.T) {
+	stdout := new(bytes.Buffer)
+	if err := run(nil, stdout, &option{version: true}); err != nil {
+		t.Error(err)
+	}
+	if got := strings.TrimRight(stdout.String(), "\n"); got != version {
+		t.Errorf("version = %v, want %v", got, version)
+	}
+}
