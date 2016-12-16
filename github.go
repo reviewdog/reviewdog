@@ -2,10 +2,13 @@ package reviewdog
 
 import (
 	"fmt"
+	"log"
 	"os/exec"
+	"sync"
+
+	"golang.org/x/sync/errgroup"
 
 	"github.com/google/go-github/github"
-	"golang.org/x/sync/errgroup"
 )
 
 var _ = github.ScopeAdminOrg
@@ -50,6 +53,8 @@ type GitHubPullRequest struct {
 	sha   string
 
 	postedcs postedcomments
+
+	muFlash sync.Mutex
 }
 
 // NewGitHubPullReqest returns a new GitHubPullRequest service.
@@ -66,6 +71,8 @@ func NewGitHubPullReqest(cli *github.Client, owner, repo string, pr int, sha str
 // Post accepts a comment and holds it. Flash method actually posts comments to
 // GitHub in parallel.
 func (g *GitHubPullRequest) Post(c *Comment) error {
+	g.muFlash.Lock()
+	defer g.muFlash.Unlock()
 	g.postComments = append(g.postComments, c)
 	return nil
 }
@@ -80,11 +87,55 @@ func commentBody(c *Comment) string {
 	return tool + bodyPrefix + "\n" + c.Body
 }
 
+var githubAPIHost = "api.github.com"
+
 // Flash posts comments which has not been posted yet.
 func (g *GitHubPullRequest) Flash() error {
+	g.muFlash.Lock()
+	defer g.muFlash.Unlock()
+
 	if err := g.setPostedComment(); err != nil {
 		return err
 	}
+	// TODO(haya14busa,#58): remove host check when GitHub Enterprise supports
+	// Pull Request API.
+	if g.cli.BaseURL.Host == githubAPIHost {
+		return g.postAsReviewComment()
+	}
+	return g.postCommentsForEach()
+}
+
+func (g *GitHubPullRequest) postAsReviewComment() error {
+	comments := make([]*ReviewComment, 0, len(g.postComments))
+	for _, c := range g.postComments {
+		if g.postedcs.IsPosted(c) {
+			continue
+		}
+		cbody := commentBody(c)
+		comments = append(comments, &ReviewComment{
+			Path:     &c.Path,
+			Position: &c.LnumDiff,
+			Body:     &cbody,
+		})
+	}
+
+	if len(comments) == 0 {
+		return nil
+	}
+
+	// TODO(haya14busa): it might be useful to report overview results by "body"
+	// field.
+	event := "COMMENT"
+	review := &Review{Event: &event, Comments: comments}
+
+	_, _, err := g.CreateReview(g.owner, g.repo, g.pr, review)
+	if err != nil {
+		return err
+	}
+	return nil
+}
+
+func (g *GitHubPullRequest) postCommentsForEach() error {
 	var eg errgroup.Group
 	for _, c := range g.postComments {
 		comment := c
@@ -156,4 +207,48 @@ func (g *GitHubPullRequest) comment() ([]*github.PullRequestComment, error) {
 		return nil, err
 	}
 	return comments, nil
+}
+
+// ---
+// GitHub PullRequest Review API Implementation
+// ref: https://github.com/google/go-github/issues/495
+
+const (
+	mediaTypePullRequestReview = "application/vnd.github.black-cat-preview+json"
+)
+
+// Review represents a pull request review.
+type Review struct {
+	Body     *string          `json:"body,omitempty"`
+	Event    *string          `json:"event,omitempty"`
+	Comments []*ReviewComment `json:"comments,omitempty"`
+}
+
+// ReviewComment represents draft review comments.
+type ReviewComment struct {
+	Path     *string `json:"path,omitempty"`
+	Position *int    `json:"position,omitempty"`
+	Body     *string `json:"body,omitempty"`
+}
+
+// CreateReview creates a new review comment on the specified pull request.
+//
+// GitHub API docs: https://developer.github.com/v3/pulls/reviews/#create-a-pull-request-review
+func (g *GitHubPullRequest) CreateReview(owner, repo string, number int, review *Review) (*github.PullRequestReview, *github.Response, error) {
+	u := fmt.Sprintf("repos/%v/%v/pulls/%d/reviews", owner, repo, number)
+
+	req, err := g.cli.NewRequest("POST", u, review)
+	if err != nil {
+		return nil, nil, err
+	}
+
+	req.Header.Set("Accept", mediaTypePullRequestReview)
+
+	r := new(github.PullRequestReview)
+	resp, err := g.cli.Do(req, r)
+	if err != nil {
+		log.Printf("GitHub Review API error: %v", err)
+		return nil, resp, err
+	}
+	return r, resp, err
 }
