@@ -2,7 +2,9 @@ package reviewdog
 
 import (
 	"fmt"
+	"log"
 	"os/exec"
+	"sync"
 
 	"golang.org/x/sync/errgroup"
 
@@ -51,6 +53,8 @@ type GitHubPullRequest struct {
 	sha   string
 
 	postedcs postedcomments
+
+	muFlash sync.Mutex
 }
 
 // NewGitHubPullReqest returns a new GitHubPullRequest service.
@@ -67,6 +71,8 @@ func NewGitHubPullReqest(cli *github.Client, owner, repo string, pr int, sha str
 // Post accepts a comment and holds it. Flash method actually posts comments to
 // GitHub in parallel.
 func (g *GitHubPullRequest) Post(c *Comment) error {
+	g.muFlash.Lock()
+	defer g.muFlash.Unlock()
 	g.postComments = append(g.postComments, c)
 	return nil
 }
@@ -85,6 +91,9 @@ var githubAPIHost = "api.github.com"
 
 // Flash posts comments which has not been posted yet.
 func (g *GitHubPullRequest) Flash() error {
+	g.muFlash.Lock()
+	defer g.muFlash.Unlock()
+
 	if err := g.setPostedComment(); err != nil {
 		return err
 	}
@@ -97,19 +106,26 @@ func (g *GitHubPullRequest) Flash() error {
 }
 
 func (g *GitHubPullRequest) postAsReviewComment() error {
-	comments := make([]*ReviewComment, len(g.postComments))
-	for i, c := range g.postComments {
+	comments := make([]*ReviewComment, 0, len(g.postComments))
+	for _, c := range g.postComments {
+		if g.postedcs.IsPosted(c) {
+			continue
+		}
 		cbody := commentBody(c)
-		comments[i] = &ReviewComment{
+		comments = append(comments, &ReviewComment{
 			Path:     &c.Path,
 			Position: &c.LnumDiff,
 			Body:     &cbody,
-		}
+		})
+	}
+
+	if len(comments) == 0 {
+		return nil
 	}
 
 	// TODO(haya14busa): it might be useful to report overview results by "body"
 	// field.
-	var event = "COMMENT"
+	event := "COMMENT"
 	review := &Review{Event: &event, Comments: comments}
 
 	_, _, err := g.CreateReview(g.owner, g.repo, g.pr, review)
@@ -229,6 +245,7 @@ func (g *GitHubPullRequest) CreateReview(owner, repo string, number int, review 
 	r := new(github.PullRequestReview)
 	resp, err := g.cli.Do(req, r)
 	if err != nil {
+		log.Printf("GitHub Review API error: %v", err)
 		return nil, resp, err
 	}
 	return r, resp, err
