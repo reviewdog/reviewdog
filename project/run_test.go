@@ -45,7 +45,7 @@ func TestRun(t *testing.T) {
 	t.Run("erorformat error", func(t *testing.T) {
 		conf := &Config{
 			Runner: map[string]*Runner{
-				"test": &Runner{},
+				"test": {},
 			},
 		}
 		if err := Run(ctx, conf, nil, nil); err == nil {
@@ -63,7 +63,7 @@ func TestRun(t *testing.T) {
 		}
 		conf := &Config{
 			Runner: map[string]*Runner{
-				"test": &Runner{
+				"test": {
 					Cmd:         "not found",
 					Errorformat: []string{`%f:%l:%c:%m`},
 				},
@@ -89,7 +89,7 @@ func TestRun(t *testing.T) {
 		}
 		conf := &Config{
 			Runner: map[string]*Runner{
-				"test": &Runner{
+				"test": {
 					Cmd:         "not found",
 					Errorformat: []string{`%f:%l:%c:%m`},
 				},
@@ -113,7 +113,7 @@ func TestRun(t *testing.T) {
 		}
 		conf := &Config{
 			Runner: map[string]*Runner{
-				"test": &Runner{
+				"test": {
 					Cmd:         "echo 'hi'",
 					Errorformat: []string{`%f:%l:%c:%m`},
 				},
