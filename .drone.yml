@@ -7,6 +7,7 @@ build:
     commands:
       - go get -d -v -t ./...
       - go test -v ./...
+      - (! gofmt -s -d . | grep '^') # exit 1 if any output given
   lint:
     image: golang
     environment:
