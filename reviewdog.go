@@ -91,9 +91,6 @@ func (w *Reviewdog) Run(r io.Reader) error {
 		return err
 	}
 
-	if bulk, ok := w.c.(BulkCommentService); ok {
-		defer bulk.Flash()
-	}
 	for _, result := range results {
 		addedline := addedlines.Get(result.Path, result.Lnum)
 		if filepath.IsAbs(result.Path) {
@@ -115,6 +112,10 @@ func (w *Reviewdog) Run(r io.Reader) error {
 				return err
 			}
 		}
+	}
+
+	if bulk, ok := w.c.(BulkCommentService); ok {
+		return bulk.Flash()
 	}
 
 	return nil
