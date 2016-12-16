@@ -26,17 +26,17 @@ runner:
 
 	want := &Config{
 		Runner: map[string]*Runner{
-			"golint": &Runner{
+			"golint": {
 				Cmd:         "golint ./...",
 				Errorformat: []string{`%f:%l:%c: %m`},
 				Name:        "golint",
 			},
-			"govet": &Runner{
+			"govet": {
 				Cmd:    "go tool vet -all -shadowstrict .",
 				Format: "govet",
 				Name:   "govet",
 			},
-			"namekey": &Runner{
+			"namekey": {
 				Cmd:    "echo 'name'",
 				Format: "checkstyle",
 				Name:   "nameoverwritten",

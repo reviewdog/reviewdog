@@ -6,6 +6,7 @@ import (
 	"io"
 	"os"
 	"os/exec"
+	"runtime"
 
 	"golang.org/x/sync/errgroup"
 
@@ -17,7 +18,9 @@ func Run(ctx context.Context, conf *Config, c reviewdog.CommentService, d review
 	// environment variables for each commands
 	envs := filteredEnviron()
 	var g errgroup.Group
+	semaphore := make(chan int, runtime.NumCPU())
 	for _, runner := range conf.Runner {
+		semaphore <- 1
 		fname := runner.Format
 		if fname == "" && len(runner.Errorformat) == 0 {
 			fname = runner.Name
@@ -39,6 +42,7 @@ func Run(ctx context.Context, conf *Config, c reviewdog.CommentService, d review
 			return fmt.Errorf("fail to start command: %v", err)
 		}
 		g.Go(func() error {
+			defer func() { <-semaphore }()
 			return rd.Run(io.MultiReader(stdout, stderr))
 		})
 	}

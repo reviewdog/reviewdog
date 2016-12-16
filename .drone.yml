@@ -7,6 +7,7 @@ build:
     commands:
       - go get -d -v -t ./...
       - go test -v ./...
+      - (! gofmt -s -d . | grep '^') # exit 1 if any output given
   lint:
     image: golang
     environment:
@@ -16,6 +17,7 @@ build:
       - go get github.com/golang/lint/golint
       - go get honnef.co/go/unused/cmd/unused
       - go get honnef.co/go/simple/cmd/gosimple
+      - go get honnef.co/go/staticcheck/cmd/staticcheck
       - go get github.com/kisielk/errcheck
       - reviewdog -ci=droneio
     when:

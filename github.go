@@ -129,10 +129,7 @@ func (g *GitHubPullRequest) postAsReviewComment() error {
 	review := &Review{Event: &event, Comments: comments}
 
 	_, _, err := g.CreateReview(g.owner, g.repo, g.pr, review)
-	if err != nil {
-		return err
-	}
-	return nil
+	return err
 }
 
 func (g *GitHubPullRequest) postCommentsForEach() error {
