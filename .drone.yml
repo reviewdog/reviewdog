@@ -5,9 +5,11 @@ build:
   test:
     image: golang
     commands:
-      - go get -d -v -t ./...
-      - go test -v ./...
-      - (! gofmt -s -d . | grep '^') # exit 1 if any output given
+      - git submodule update --init --recursive
+      - go build -v $(go list ./... | grep -v "/vendor/")
+      - go get -d -v -t $(go list ./... | grep -v "/vendor/")
+      - go test -v -race $(go list ./... | grep -v "/vendor/")
+      - (! gofmt -s -d *.go cmd diff project | grep '^')
   lint:
     image: golang
     environment:

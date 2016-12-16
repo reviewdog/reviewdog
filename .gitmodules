@@ -1,0 +1,24 @@
+[submodule "vendor/github.com/google/go-github"]
+	path = vendor/github.com/google/go-github
+	url = https://github.com/google/go-github
+[submodule "vendor/github.com/google/go-querystring"]
+	path = vendor/github.com/google/go-querystring
+	url = https://github.com/google/go-querystring
+[submodule "vendor/github.com/haya14busa/errorformat"]
+	path = vendor/github.com/haya14busa/errorformat
+	url = https://github.com/haya14busa/errorformat
+[submodule "vendor/github.com/mattn/go-shellwords"]
+	path = vendor/github.com/mattn/go-shellwords
+	url = https://github.com/mattn/go-shellwords
+[submodule "vendor/golang.org/x/net"]
+	path = vendor/golang.org/x/net
+	url = https://go.googlesource.com/net
+[submodule "vendor/golang.org/x/oauth2"]
+	path = vendor/golang.org/x/oauth2
+	url = https://go.googlesource.com/oauth2
+[submodule "vendor/golang.org/x/sync"]
+	path = vendor/golang.org/x/sync
+	url = https://go.googlesource.com/sync
+[submodule "vendor/gopkg.in/yaml.v2"]
+	path = vendor/gopkg.in/yaml.v2
+	url = https://gopkg.in/yaml.v2
