@@ -157,3 +157,44 @@ func (g *GitHubPullRequest) comment() ([]*github.PullRequestComment, error) {
 	}
 	return comments, nil
 }
+
+// ---
+// GitHub PullRequest Review API Implementation
+// ref: https://github.com/google/go-github/issues/495
+
+const (
+	mediaTypePullRequestReview = "application/vnd.github.black-cat-preview+json"
+)
+
+type Review struct {
+	Body     *string          `json:"body,omitempty"`
+	Event    *string          `json:"event,omitempty"`
+	Comments []*ReviewComment `json:"comments,omitempty"`
+}
+
+type ReviewComment struct {
+	Path     *string `json:"path,omitempty"`
+	Position *int    `json:"position,omitempty"`
+	Body     *string `json:"body,omitempty"`
+}
+
+// CreateReview creates a new review comment on the specified pull request.
+//
+// GitHub API docs: https://developer.github.com/v3/pulls/reviews/#create-a-pull-request-review
+func (g *GitHubPullRequest) CreateReview(owner, repo string, number int, review *Review) (*github.PullRequestReview, *github.Response, error) {
+	u := fmt.Sprintf("repos/%v/%v/pulls/%d/reviews", owner, repo, number)
+
+	req, err := g.cli.NewRequest("POST", u, review)
+	if err != nil {
+		return nil, nil, err
+	}
+
+	req.Header.Set("Accept", mediaTypePullRequestReview)
+
+	r := new(github.PullRequestReview)
+	resp, err := g.cli.Do(req, r)
+	if err != nil {
+		return nil, resp, err
+	}
+	return r, resp, err
+}
