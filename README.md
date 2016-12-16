@@ -12,6 +12,7 @@
 | [Travis CI](https://travis-ci.org/haya14busa/reviewdog) | [![Travis Build Status](https://travis-ci.org/haya14busa/reviewdog.svg?branch=master)](https://travis-ci.org/haya14busa/reviewdog) |
 | [CircleCI](https://circleci.com/gh/haya14busa/reviewdog) | [![CircleCI](https://circleci.com/gh/haya14busa/reviewdog.svg?style=svg)](https://circleci.com/gh/haya14busa/reviewdog) |
 | [drone.io](http://droneio.haya14busa.com/haya14busa/reviewdog) | [![drone.io Build Status](http://droneio.haya14busa.com/api/badges/haya14busa/reviewdog/status.svg)](http://droneio.haya14busa.com/haya14busa/reviewdog) |
+| [codecov](https://codecov.io/gh/haya14busa/reviewdog) | [![codecov](https://codecov.io/gh/haya14busa/reviewdog/branch/master/graph/badge.svg)](https://codecov.io/gh/haya14busa/reviewdog) |
 
 "reviewdog" provides a way to post review comments to code hosting service,
 such as GitHub, automatically by integrating with any linter tools with ease.
