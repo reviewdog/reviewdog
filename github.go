@@ -5,7 +5,6 @@ import (
 	"log"
 	"os/exec"
 	"sync"
-	"time"
 
 	"golang.org/x/sync/errgroup"
 
@@ -67,15 +66,6 @@ func NewGitHubPullReqest(cli *github.Client, owner, repo string, pr int, sha str
 		pr:    pr,
 		sha:   sha,
 	}
-}
-
-func F() {
-	go func() {
-		var tick = time.Tick(1 * time.Second)
-		for t := range tick {
-			fmt.Println(t)
-		}
-	}()
 }
 
 // Post accepts a comment and holds it. Flash method actually posts comments to
