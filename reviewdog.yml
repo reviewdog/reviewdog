@@ -19,3 +19,7 @@ runner:
     cmd: gosimple ./...
     errorformat:
       - "%f:%l:%c: %m"
+  staticcheck:
+    cmd: staticcheck ./...
+    errorformat:
+      - "%f:%l:%c: %m"
