@@ -24,7 +24,7 @@ before_script:
   - echo $TRAVIS_SECURE_ENV_VARS
 
 script:
-  - go test -v -race ./...
+  - go test -v -race $(go list ./... | grep -v "/vendor/")
   - goverage -coverprofile=coverage.txt ./...
   - go install ./cmd/reviewdog
   - >-
