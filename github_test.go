@@ -42,7 +42,7 @@ func TestGitHubPullRequest_Post(t *testing.T) {
 	g := NewGitHubPullReqest(client, owner, repo, pr, sha)
 	comment := &Comment{
 		CheckResult: &CheckResult{
-			Path: "reviewdog.go",
+			Path: "watchdogs.go",
 		},
 		LnumDiff: 17,
 		Body:     "[reviewdog] test",

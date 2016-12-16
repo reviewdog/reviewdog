@@ -4,8 +4,9 @@ import (
 	"fmt"
 	"os/exec"
 
-	"github.com/google/go-github/github"
 	"golang.org/x/sync/errgroup"
+
+	"github.com/google/go-github/github"
 )
 
 var _ = github.ScopeAdminOrg
@@ -85,6 +86,38 @@ func (g *GitHubPullRequest) Flash() error {
 	if err := g.setPostedComment(); err != nil {
 		return err
 	}
+	// TODO(haya14busa,#58): remove host check when GitHub Enterprise supports
+	// Pull Request API.
+	if g.cli.BaseURL.Host == "api.github.com" {
+		return g.postAsReviewComment()
+	}
+	return g.postCommentsForEach()
+}
+
+func (g *GitHubPullRequest) postAsReviewComment() error {
+	comments := make([]*ReviewComment, len(g.postComments))
+	for i, c := range g.postComments {
+		cbody := commentBody(c)
+		comments[i] = &ReviewComment{
+			Path:     &c.Path,
+			Position: &c.LnumDiff,
+			Body:     &cbody,
+		}
+	}
+
+	// TODO(haya14busa): it might be useful to report overview results by "body"
+	// field.
+	var event = "COMMENT"
+	review := &Review{Event: &event, Comments: comments}
+
+	_, _, err := g.CreateReview(g.owner, g.repo, g.pr, review)
+	if err != nil {
+		return err
+	}
+	return nil
+}
+
+func (g *GitHubPullRequest) postCommentsForEach() error {
 	var eg errgroup.Group
 	for _, c := range g.postComments {
 		comment := c
