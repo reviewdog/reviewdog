@@ -35,6 +35,7 @@ after_success:
   - bash <(curl -s https://codecov.io/bash)
 
 before_deploy:
+  - zip -r source.zip . && mkdir dist && mv source.zip dist
   - go get github.com/mitchellh/gox
   - gox -output "dist/{{.Dir}}_{{.OS}}_{{.Arch}}" ./cmd/reviewdog/
 
@@ -43,6 +44,7 @@ deploy:
   api_key:
     secure: "gOJqairdmqDqBeWvwVv6cuUOeX3uIEoufVv6/s37E+AFDth+F5t8aUinV7uaIV/FjNlucFM5T8sY1pkPiTY7ChiUkn9Fvulz9XCPwKqDymlL8i10pQP4GfgdbeVG2k+U42s+MEQBugj73GQTrYTT5UaXv3jHZUcMAbYzJUJU15sdnsqm/1VQShuKq05hDDkJqWUruZiKKMTaq5+SJoZ0YHoACx/0CMnC65+aT/BJSuHJRD6lPIq+bEA+jD1CrZ0Jkxbwxh8nHzX67GRjYpevnNgrpzheC0nKkugIX+ePds8758sQmBsjqfao7CrvEQxeI6fkZHE0vge44dt0iUixaEZaA/YoY7vdhZwkbqPfcVNBCthHee2qkCmosYmn2ipOcnyXLpHYHCp4KDiIz5ny+QNZVxd5qQbXzgDEFQw8D3grNrXEvSTyq+yZB0Ti27tL6gonvjg/ejBwjtzgfvyMZVuZRbnEwBYJDVpZ/W5A0Gr3W1mfDrW1I5/ALh0Y2kd3Erd4XzCnYLupxh1USt8648ONVFaP68ppDeKGNcmrxRIYB8JGe6VQMoxnRWjwN2xf9UNIXy8KWDtbRUlP1R92V3jUmZf2VqFkLdJVWSFs0sHlPEGeaTnk7WZLWMWQpBTJHJbeY9jYme5m4T0a7hCV+kM1WufSaMQCUmm3R0i4dkA="
   file:
+    - dist/source.zip
     - dist/reviewdog_darwin_386
     - dist/reviewdog_darwin_amd64
     - dist/reviewdog_freebsd_386
