@@ -2,24 +2,24 @@
 
 runner:
   golint:
-    cmd: golint ./...
+    cmd: golint $(go list ./... | grep -v /vendor/)
     errorformat:
       - "%f:%l:%c: %m"
   govet:
-    cmd: go tool vet -all -shadowstrict .
+    cmd: go vet $(go list ./... | grep -v /vendor/)
   unused:
-    cmd: unused ./...
+    cmd: unused $(go list ./... | grep -v /vendor/)
     errorformat:
       - "%f:%l:%c: %m"
   errcheck:
-    cmd: errcheck -asserts -ignoretests -blank ./...
+    cmd: errcheck -asserts -ignoretests -blank $(go list ./... | grep -v /vendor/)
     errorformat:
       - "%f:%l:%c:%m"
   gosimple:
-    cmd: gosimple ./...
+    cmd: gosimple $(go list ./... | grep -v /vendor/)
     errorformat:
       - "%f:%l:%c: %m"
   staticcheck:
-    cmd: staticcheck ./...
+    cmd: staticcheck $(go list ./... | grep -v /vendor/)
     errorformat:
       - "%f:%l:%c: %m"
