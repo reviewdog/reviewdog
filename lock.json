@@ -1,5 +1,5 @@
 {
-    "memo": "",
+    "memo": "037e56154645b9aca4b01c5919a67b0fa052998c167ee0498fcd07b293744c35",
     "projects": [
         {
             "name": "github.com/golang/protobuf",
@@ -30,8 +30,16 @@
             "branch": "master",
             "revision": "0d1a2be84d2789c227496907902db42623f1d802",
             "packages": [
-                "fmts",
-                "."
+                ".",
+                "fmts"
+            ]
+        },
+        {
+            "name": "github.com/kylelemons/godebug",
+            "branch": "master",
+            "revision": "d99083b96f422f8fd5a93bc02040acec769e178f",
+            "packages": [
+                "pretty"
             ]
         },
         {
