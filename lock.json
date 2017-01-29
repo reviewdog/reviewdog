@@ -1,0 +1,86 @@
+{
+    "memo": "",
+    "projects": [
+        {
+            "name": "github.com/golang/protobuf",
+            "branch": "master",
+            "revision": "0c1f6d65b5a189c2250d10e71a5506f06f9fa0a0",
+            "packages": [
+                "proto"
+            ]
+        },
+        {
+            "name": "github.com/google/go-github",
+            "branch": "master",
+            "revision": "c9c37fd6ce0247943d1aa34fc3813c62c5cb0225",
+            "packages": [
+                "github"
+            ]
+        },
+        {
+            "name": "github.com/google/go-querystring",
+            "branch": "master",
+            "revision": "9235644dd9e52eeae6fa48efd539fdc351a0af53",
+            "packages": [
+                "query"
+            ]
+        },
+        {
+            "name": "github.com/haya14busa/errorformat",
+            "branch": "master",
+            "revision": "0d1a2be84d2789c227496907902db42623f1d802",
+            "packages": [
+                "fmts",
+                "."
+            ]
+        },
+        {
+            "name": "github.com/mattn/go-shellwords",
+            "branch": "master",
+            "revision": "525bedee691b5a8df547cb5cf9f86b7fb1883e24",
+            "packages": [
+                "."
+            ]
+        },
+        {
+            "name": "golang.org/x/net",
+            "branch": "master",
+            "revision": "f2499483f923065a842d38eb4c7f1927e6fc6e6d",
+            "packages": [
+                "context"
+            ]
+        },
+        {
+            "name": "golang.org/x/oauth2",
+            "branch": "master",
+            "revision": "65a8d08c6292395d47053be10b3c5e91960def76",
+            "packages": [
+                "."
+            ]
+        },
+        {
+            "name": "golang.org/x/sync",
+            "branch": "master",
+            "revision": "1ae7c7b29e06598039be46c5083819ba6fd7a97e",
+            "packages": [
+                "errgroup"
+            ]
+        },
+        {
+            "name": "google.golang.org/appengine",
+            "branch": "master",
+            "revision": "7f59a8c76b8594d06044bfe0bcbe475cb2020482",
+            "packages": [
+                "urlfetch"
+            ]
+        },
+        {
+            "name": "gopkg.in/yaml.v2",
+            "branch": "master",
+            "revision": "4c78c975fe7c825c6d1466c42be594d1d6f3aba6",
+            "packages": [
+                "."
+            ]
+        }
+    ]
+}
