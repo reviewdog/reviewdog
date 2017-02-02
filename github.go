@@ -4,6 +4,7 @@ import (
 	"fmt"
 	"log"
 	"os/exec"
+	"strings"
 	"sync"
 
 	"golang.org/x/sync/errgroup"
@@ -190,7 +191,12 @@ func (g *GitHubPullRequest) Diff() ([]byte, error) {
 	if err != nil {
 		return nil, err
 	}
-	return exec.Command("git", "diff", "--find-renames", *pr.Base.SHA, g.sha).Output()
+	b, err := exec.Command("git", "merge-base", g.sha, *pr.Base.SHA).Output()
+	if err != nil {
+		return nil, fmt.Errorf("failed to get merge-base commit: %v", err)
+	}
+	mergeBase := strings.Trim(string(b), "\n")
+	return exec.Command("git", "diff", "--find-renames", mergeBase, g.sha).Output()
 }
 
 // Strip returns 1 as a strip of git diff.
