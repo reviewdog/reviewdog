@@ -2,9 +2,7 @@
 
 runner:
   golint:
-    cmd: |
-      go list ./... | grep -v /vendor/ | xargs -i golint {}
-      # `golint $(go list ./... | grep -v /vendor/)` doesn't work...
+    cmd: golint $(go list ./... | grep -v /vendor/)
     errorformat:
       - "%f:%l:%c: %m"
   govet:
