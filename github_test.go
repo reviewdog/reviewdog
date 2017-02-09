@@ -13,16 +13,6 @@ import (
 	"golang.org/x/oauth2"
 )
 
-func setupGithub() (*http.ServeMux, *httptest.Server, *github.Client) {
-	mux := http.NewServeMux()
-	server := httptest.NewServer(mux)
-	client := github.NewClient(nil)
-	url, _ := url.Parse(server.URL)
-	client.BaseURL = url
-	client.UploadURL = url
-	return mux, server, client
-}
-
 const notokenSkipTestMes = "skipping test (requires actual Personal access tokens. export REVIEWDOG_TEST_GITHUB_API_TOKEN=<GitHub Personal Access Token>)"
 
 func setupGitHubClient() *github.Client {
