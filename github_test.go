@@ -222,55 +222,57 @@ func TestGitHubPullRequest_Post_Flash_mock(t *testing.T) {
 
 func TestGitHubPullRequest_Post_Flash_review_api(t *testing.T) {
 	apiCalled := 0
-	ts := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+	mux := http.NewServeMux()
+	mux.HandleFunc("/repos/o/r/pulls/14/comments", func(w http.ResponseWriter, r *http.Request) {
 		apiCalled++
-		switch r.Method {
-		case "GET":
-			if r.URL.String() != "/repos/o/r/pulls/14/comments" {
-				t.Errorf("unexpected access: %v %v", r.Method, r.URL)
-			}
-			cs := []*github.PullRequestComment{
-				{
-					Path:     github.String("reviewdog.go"),
-					Position: github.Int(1),
-					Body:     github.String(bodyPrefix + "\n[reviewdog] already commented"),
-				},
-			}
-			if err := json.NewEncoder(w).Encode(cs); err != nil {
-				t.Fatal(err)
-			}
-		case "POST":
-			if r.URL.String() != "/repos/o/r/pulls/14/reviews" {
-				t.Errorf("unexpected access: %v %v", r.Method, r.URL)
-			}
-			var req github.PullRequestReviewRequest
-			if err := json.NewDecoder(r.Body).Decode(&req); err != nil {
-				t.Error(err)
-			}
-			if *req.Event != "COMMENT" {
-				t.Errorf("PullRequestReviewRequest.Event = %v, want COMMENT", *req.Event)
-			}
-			if req.Body != nil {
-				t.Errorf("PullRequestReviewRequest.Body = %v, want empty", *req.Body)
-			}
-			want := []*github.DraftReviewComment{
-				{
-					Path:     github.String("reviewdog.go"),
-					Position: github.Int(14),
-					Body:     github.String(bodyPrefix + "\n[reviewdog] new comment"),
-				},
-			}
-			if diff := pretty.Compare(want, req.Comments); diff != "" {
-				t.Errorf("req.Comments diff: (-got +want)\n%s", diff)
-			}
-		default:
+		if r.Method != "GET" {
 			t.Errorf("unexpected access: %v %v", r.Method, r.URL)
 		}
-	}))
+		cs := []*github.PullRequestComment{
+			{
+				Path:     github.String("reviewdog.go"),
+				Position: github.Int(1),
+				Body:     github.String(bodyPrefix + "\nalready commented"),
+			},
+		}
+		if err := json.NewEncoder(w).Encode(cs); err != nil {
+			t.Fatal(err)
+		}
+	})
+	mux.HandleFunc("/repos/o/r/pulls/14/reviews", func(w http.ResponseWriter, r *http.Request) {
+		apiCalled++
+		if r.Method != "POST" {
+			t.Errorf("unexpected access: %v %v", r.Method, r.URL)
+		}
+		var req github.PullRequestReviewRequest
+		if err := json.NewDecoder(r.Body).Decode(&req); err != nil {
+			t.Error(err)
+		}
+		if *req.Event != "COMMENT" {
+			t.Errorf("PullRequestReviewRequest.Event = %v, want COMMENT", *req.Event)
+		}
+		if req.Body != nil {
+			t.Errorf("PullRequestReviewRequest.Body = %v, want empty", *req.Body)
+		}
+		want := []*github.DraftReviewComment{
+			{
+				Path:     github.String("reviewdog.go"),
+				Position: github.Int(14),
+				Body:     github.String(bodyPrefix + "\nnew comment"),
+			},
+		}
+		if diff := pretty.Compare(want, req.Comments); diff != "" {
+			t.Errorf("req.Comments diff: (-got +want)\n%s", diff)
+		}
+	})
+	ts := httptest.NewServer(mux)
 	defer ts.Close()
+
+	// modify githubAPIHost to use GitHub Review API
 	defer func(h string) { githubAPIHost = h }(githubAPIHost)
 	u, _ := url.Parse(ts.URL)
 	githubAPIHost = u.Host
+
 	cli := github.NewClient(nil)
 	cli.BaseURL, _ = url.Parse(ts.URL)
 	g := NewGitHubPullReqest(cli, "o", "r", 14, "")
@@ -280,14 +282,14 @@ func TestGitHubPullRequest_Post_Flash_review_api(t *testing.T) {
 				Path: "reviewdog.go",
 			},
 			LnumDiff: 1,
-			Body:     "[reviewdog] already commented",
+			Body:     "already commented",
 		},
 		{
 			CheckResult: &CheckResult{
 				Path: "reviewdog.go",
 			},
 			LnumDiff: 14,
-			Body:     "[reviewdog] new comment",
+			Body:     "new comment",
 		},
 	}
 	for _, c := range comments {
