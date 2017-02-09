@@ -12,7 +12,7 @@
         {
             "name": "github.com/google/go-github",
             "branch": "master",
-            "revision": "c9c37fd6ce0247943d1aa34fc3813c62c5cb0225",
+            "revision": "27c7c32b6d369610435bd2ad7b4d8554f235eb01",
             "packages": [
                 "github"
             ]
@@ -20,7 +20,7 @@
         {
             "name": "github.com/google/go-querystring",
             "branch": "master",
-            "revision": "9235644dd9e52eeae6fa48efd539fdc351a0af53",
+            "revision": "53e6ce116135b80d037921a7fdd5138cf32d7a8a",
             "packages": [
                 "query"
             ]
@@ -45,7 +45,7 @@
         {
             "name": "github.com/mattn/go-shellwords",
             "branch": "master",
-            "revision": "525bedee691b5a8df547cb5cf9f86b7fb1883e24",
+            "revision": "753a2322a99f87c0eff284980e77f53041555bc6",
             "packages": [
                 "."
             ]
@@ -53,7 +53,7 @@
         {
             "name": "golang.org/x/net",
             "branch": "master",
-            "revision": "f2499483f923065a842d38eb4c7f1927e6fc6e6d",
+            "revision": "236b8f043b920452504e263bc21d354427127473",
             "packages": [
                 "context"
             ]
@@ -61,7 +61,7 @@
         {
             "name": "golang.org/x/oauth2",
             "branch": "master",
-            "revision": "65a8d08c6292395d47053be10b3c5e91960def76",
+            "revision": "de0725b330ab43c1a3d6c84d961cf01183783f1e",
             "packages": [
                 "."
             ]
@@ -69,7 +69,7 @@
         {
             "name": "golang.org/x/sync",
             "branch": "master",
-            "revision": "1ae7c7b29e06598039be46c5083819ba6fd7a97e",
+            "revision": "450f422ab23cf9881c94e2db30cac0eb1b7cf80c",
             "packages": [
                 "errgroup"
             ]
@@ -85,7 +85,7 @@
         {
             "name": "gopkg.in/yaml.v2",
             "branch": "master",
-            "revision": "4c78c975fe7c825c6d1466c42be594d1d6f3aba6",
+            "revision": "a3f3340b5840cee44f372bddb5880fcbc419b46a",
             "packages": [
                 "."
             ]

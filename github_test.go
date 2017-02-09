@@ -9,6 +9,7 @@ import (
 	"testing"
 
 	"github.com/google/go-github/github"
+	"github.com/kylelemons/godebug/pretty"
 	"golang.org/x/oauth2"
 )
 
@@ -20,12 +21,6 @@ func setupGithub() (*http.ServeMux, *httptest.Server, *github.Client) {
 	client.BaseURL = url
 	client.UploadURL = url
 	return mux, server, client
-}
-
-func testMethod(t *testing.T, r *http.Request, want string) {
-	if got := r.Method; got != want {
-		t.Errorf("Request method: %v, want %v", got, want)
-	}
 }
 
 const notokenSkipTestMes = "skipping test (requires actual Personal access tokens. export REVIEWDOG_TEST_GITHUB_API_TOKEN=<GitHub Personal Access Token>)"
@@ -225,53 +220,87 @@ func TestGitHubPullRequest_Post_Flash_mock(t *testing.T) {
 	}
 }
 
-func TestGitHubPullRequest_Post_Flash_mock_review_api(t *testing.T) {
-	mux, server, client := setupGithub()
-	defer server.Close()
-	defer func(u string) { githubAPIHost = u }(githubAPIHost)
-	u, _ := url.Parse(server.URL)
+func TestGitHubPullRequest_Post_Flash_review_api(t *testing.T) {
+	apiCalled := 0
+	mux := http.NewServeMux()
+	mux.HandleFunc("/repos/o/r/pulls/14/comments", func(w http.ResponseWriter, r *http.Request) {
+		apiCalled++
+		if r.Method != "GET" {
+			t.Errorf("unexpected access: %v %v", r.Method, r.URL)
+		}
+		cs := []*github.PullRequestComment{
+			{
+				Path:     github.String("reviewdog.go"),
+				Position: github.Int(1),
+				Body:     github.String(bodyPrefix + "\nalready commented"),
+			},
+		}
+		if err := json.NewEncoder(w).Encode(cs); err != nil {
+			t.Fatal(err)
+		}
+	})
+	mux.HandleFunc("/repos/o/r/pulls/14/reviews", func(w http.ResponseWriter, r *http.Request) {
+		apiCalled++
+		if r.Method != "POST" {
+			t.Errorf("unexpected access: %v %v", r.Method, r.URL)
+		}
+		var req github.PullRequestReviewRequest
+		if err := json.NewDecoder(r.Body).Decode(&req); err != nil {
+			t.Error(err)
+		}
+		if *req.Event != "COMMENT" {
+			t.Errorf("PullRequestReviewRequest.Event = %v, want COMMENT", *req.Event)
+		}
+		if req.Body != nil {
+			t.Errorf("PullRequestReviewRequest.Body = %v, want empty", *req.Body)
+		}
+		want := []*github.DraftReviewComment{
+			{
+				Path:     github.String("reviewdog.go"),
+				Position: github.Int(14),
+				Body:     github.String(bodyPrefix + "\nnew comment"),
+			},
+		}
+		if diff := pretty.Compare(want, req.Comments); diff != "" {
+			t.Errorf("req.Comments diff: (-got +want)\n%s", diff)
+		}
+	})
+	ts := httptest.NewServer(mux)
+	defer ts.Close()
+
+	// modify githubAPIHost to use GitHub Review API
+	defer func(h string) { githubAPIHost = h }(githubAPIHost)
+	u, _ := url.Parse(ts.URL)
 	githubAPIHost = u.Host
 
-	mux.HandleFunc("/repos/o/r/pulls/1/comments", func(w http.ResponseWriter, r *http.Request) {
-		testMethod(t, r, "GET")
-	})
-	mux.HandleFunc("/repos/o/r/pulls/1/reviews", func(w http.ResponseWriter, r *http.Request) {
-		testMethod(t, r, "POST")
-
-		v := new(Review)
-		json.NewDecoder(r.Body).Decode(v)
-
-		if v.Body != nil {
-			t.Errorf("Review body = %v, want nil", *v.Body)
-		}
-		if want := "COMMENT"; *v.Event != want {
-			t.Errorf("Review event = %v, want %v", *v.Event, want)
-		}
-		c := v.Comments[0]
-
-		if want := bodyPrefix + "\n[reviewdog] test"; *c.Body != want {
-			t.Errorf("Review comment body = %v, want %v", *c.Body, want)
-		}
-		if want := "reviewdog.go"; *c.Path != want {
-			t.Errorf("Review comment position = %v, want %v", *c.Path, want)
-		}
-		if want := 17; *c.Position != want {
-			t.Errorf("Review comment position = %v, want %v", *c.Position, want)
-		}
-	})
-
-	g := NewGitHubPullReqest(client, "o", "r", 1, "SHA1")
-	comment := &Comment{
-		CheckResult: &CheckResult{
-			Path: "reviewdog.go",
+	cli := github.NewClient(nil)
+	cli.BaseURL, _ = url.Parse(ts.URL)
+	g := NewGitHubPullReqest(cli, "o", "r", 14, "")
+	comments := []*Comment{
+		{
+			CheckResult: &CheckResult{
+				Path: "reviewdog.go",
+			},
+			LnumDiff: 1,
+			Body:     "already commented",
 		},
-		LnumDiff: 17,
-		Body:     "[reviewdog] test",
+		{
+			CheckResult: &CheckResult{
+				Path: "reviewdog.go",
+			},
+			LnumDiff: 14,
+			Body:     "new comment",
+		},
 	}
-	if err := g.Post(comment); err != nil {
-		t.Error(err)
+	for _, c := range comments {
+		if err := g.Post(c); err != nil {
+			t.Error(err)
+		}
 	}
 	if err := g.Flash(); err != nil {
 		t.Error(err)
+	}
+	if apiCalled != 2 {
+		t.Errorf("GitHub API should be called once; called %v times", apiCalled)
 	}
 }
