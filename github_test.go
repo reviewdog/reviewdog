@@ -267,6 +267,7 @@ func TestGitHubPullRequest_Post_Flash_review_api(t *testing.T) {
 			t.Errorf("unexpected access: %v %v", r.Method, r.URL)
 		}
 	}))
+	defer ts.Close()
 	defer func(h string) { githubAPIHost = h }(githubAPIHost)
 	u, _ := url.Parse(ts.URL)
 	githubAPIHost = u.Host
