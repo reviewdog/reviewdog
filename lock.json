@@ -1,10 +1,10 @@
 {
-    "memo": "037e56154645b9aca4b01c5919a67b0fa052998c167ee0498fcd07b293744c35",
+    "memo": "dbd8c93301a3035fe4f99eb38a62c8aae49663645048c0a595cad53b2aff6533",
     "projects": [
         {
             "name": "github.com/golang/protobuf",
             "branch": "master",
-            "revision": "0c1f6d65b5a189c2250d10e71a5506f06f9fa0a0",
+            "revision": "8ee79997227bf9b34611aee7946ae64735e6fd93",
             "packages": [
                 "proto"
             ]
@@ -44,7 +44,7 @@
         },
         {
             "name": "github.com/mattn/go-shellwords",
-            "branch": "master",
+            "version": "v1.0.1",
             "revision": "753a2322a99f87c0eff284980e77f53041555bc6",
             "packages": [
                 "."
@@ -53,7 +53,7 @@
         {
             "name": "golang.org/x/net",
             "branch": "master",
-            "revision": "236b8f043b920452504e263bc21d354427127473",
+            "revision": "a689eb3bc4b53af70390acc3cf68c9f549b6b8d6",
             "packages": [
                 "context"
             ]
@@ -76,15 +76,15 @@
         },
         {
             "name": "google.golang.org/appengine",
-            "branch": "master",
-            "revision": "7f59a8c76b8594d06044bfe0bcbe475cb2020482",
+            "version": "v1.0.0",
+            "revision": "150dc57a1b433e64154302bdc40b6bb8aefa313a",
             "packages": [
                 "urlfetch"
             ]
         },
         {
             "name": "gopkg.in/yaml.v2",
-            "branch": "master",
+            "branch": "v2",
             "revision": "a3f3340b5840cee44f372bddb5880fcbc419b46a",
             "packages": [
                 "."
