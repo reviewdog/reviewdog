@@ -19,7 +19,7 @@
             "branch": "master"
         },
         "gopkg.in/yaml.v2": {
-            "branch": "master"
+            "branch": "v2"
         }
     }
 }
