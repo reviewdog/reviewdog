@@ -11,6 +11,7 @@ import (
 	"github.com/google/go-github/github"
 	"github.com/kylelemons/godebug/pretty"
 	"golang.org/x/oauth2"
+	"context"
 )
 
 const notokenSkipTestMes = "skipping test (requires actual Personal access tokens. export REVIEWDOG_TEST_GITHUB_API_TOKEN=<GitHub Personal Access Token>)"
@@ -40,7 +41,7 @@ func TestGitHubPullRequest_Post(t *testing.T) {
 	pr := 2
 	sha := "cce89afa9ac5519a7f5b1734db2e3aa776b138a7"
 
-	g := NewGitHubPullReqest(client, owner, repo, pr, sha)
+	g := NewGitHubPullReqest(client, context.Background(), owner, repo, pr, sha)
 	comment := &Comment{
 		CheckResult: &CheckResult{
 			Path: "watchdogs.go",
@@ -115,7 +116,7 @@ index 61450f3..f63f149 100644
 	owner := "haya14busa"
 	repo := "reviewdog"
 	pr := 2
-	g := NewGitHubPullReqest(client, owner, repo, pr, "")
+	g := NewGitHubPullReqest(client, context.Background(), owner, repo, pr, "")
 	b, err := g.Diff()
 	if err != nil {
 		t.Fatal(err)
@@ -137,7 +138,7 @@ func TestGitHubPullRequest_comment(t *testing.T) {
 	owner := "haya14busa"
 	repo := "reviewdog"
 	pr := 2
-	g := NewGitHubPullReqest(client, owner, repo, pr, "")
+	g := NewGitHubPullReqest(client, context.Background(), owner, repo, pr, "")
 	comments, err := g.comment()
 	if err != nil {
 		t.Fatal(err)
@@ -190,7 +191,7 @@ func TestGitHubPullRequest_Post_Flash_mock(t *testing.T) {
 	pr := 2
 	sha := "cce89afa9ac5519a7f5b1734db2e3aa776b138a7"
 
-	g := NewGitHubPullReqest(cli, owner, repo, pr, sha)
+	g := NewGitHubPullReqest(cli, context.Background(), owner, repo, pr, sha)
 	comment := &Comment{
 		CheckResult: &CheckResult{
 			Path: "reviewdog.go",
@@ -265,7 +266,7 @@ func TestGitHubPullRequest_Post_Flash_review_api(t *testing.T) {
 
 	cli := github.NewClient(nil)
 	cli.BaseURL, _ = url.Parse(ts.URL)
-	g := NewGitHubPullReqest(cli, "o", "r", 14, "")
+	g := NewGitHubPullReqest(cli, context.Background(),"o", "r", 14, "")
 	comments := []*Comment{
 		{
 			CheckResult: &CheckResult{

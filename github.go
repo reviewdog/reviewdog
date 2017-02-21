@@ -9,6 +9,7 @@ import (
 	"golang.org/x/sync/errgroup"
 
 	"github.com/google/go-github/github"
+	"context"
 )
 
 var _ = github.ScopeAdminOrg
@@ -47,6 +48,7 @@ type GitHubPullRequest struct {
 	postComments []*Comment
 
 	cli   *github.Client
+	ctx   context.Context
 	owner string
 	repo  string
 	pr    int
@@ -58,9 +60,10 @@ type GitHubPullRequest struct {
 }
 
 // NewGitHubPullReqest returns a new GitHubPullRequest service.
-func NewGitHubPullReqest(cli *github.Client, owner, repo string, pr int, sha string) *GitHubPullRequest {
+func NewGitHubPullReqest(cli *github.Client, ctx context.Context, owner, repo string, pr int, sha string) *GitHubPullRequest {
 	return &GitHubPullRequest{
 		cli:   cli,
+		ctx:   ctx,
 		owner: owner,
 		repo:  repo,
 		pr:    pr,
@@ -129,7 +132,7 @@ func (g *GitHubPullRequest) postAsReviewComment() error {
 		Event:    github.String("COMMENT"),
 		Comments: comments,
 	}
-	_, _, err := g.cli.PullRequests.CreateReview(g.owner, g.repo, g.pr, review)
+	_, _, err := g.cli.PullRequests.CreateReview(g.ctx, g.owner, g.repo, g.pr, review)
 	return err
 }
 
@@ -148,7 +151,7 @@ func (g *GitHubPullRequest) postCommentsForEach() error {
 				Path:     &comment.Path,
 				Position: &comment.LnumDiff,
 			}
-			_, _, err := g.cli.PullRequests.CreateComment(g.owner, g.repo, g.pr, prcomment)
+			_, _, err := g.cli.PullRequests.CreateComment(g.ctx, g.owner, g.repo, g.pr, prcomment)
 			return err
 		})
 	}
@@ -187,7 +190,7 @@ func (g *GitHubPullRequest) setPostedComment() error {
 // `git diff --no-renames`, we want diff which is equivalent to
 // `git diff --find-renames`.
 func (g *GitHubPullRequest) Diff() ([]byte, error) {
-	pr, _, err := g.cli.PullRequests.Get(g.owner, g.repo, g.pr)
+	pr, _, err := g.cli.PullRequests.Get(g.ctx, g.owner, g.repo, g.pr)
 	if err != nil {
 		return nil, err
 	}
@@ -205,7 +208,7 @@ func (g *GitHubPullRequest) Strip() int {
 }
 
 func (g *GitHubPullRequest) comment() ([]*github.PullRequestComment, error) {
-	comments, _, err := g.cli.PullRequests.ListComments(g.owner, g.repo, g.pr, nil)
+	comments, _, err := g.cli.PullRequests.ListComments(g.ctx, g.owner, g.repo, g.pr, nil)
 	if err != nil {
 		return nil, err
 	}

@@ -252,7 +252,7 @@ func githubService(ctx context.Context, ci string) (githubservice *reviewdog.Git
 		return nil, true, err
 	}
 
-	githubservice = reviewdog.NewGitHubPullReqest(client, g.owner, g.repo, g.pr, g.sha)
+	githubservice = reviewdog.NewGitHubPullReqest(client, ctx, g.owner, g.repo, g.pr, g.sha)
 	return githubservice, true, nil
 }
 
