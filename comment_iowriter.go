@@ -1,6 +1,7 @@
 package reviewdog
 
 import (
+	"context"
 	"fmt"
 	"io"
 	"strings"
@@ -18,7 +19,7 @@ func NewRawCommentWriter(w io.Writer) *RawCommentWriter {
 	return &RawCommentWriter{w: w}
 }
 
-func (s *RawCommentWriter) Post(c *Comment) error {
+func (s *RawCommentWriter) Post(_ context.Context, c *Comment) error {
 	_, err := fmt.Fprintln(s.w, strings.Join(c.CheckResult.Lines, "\n"))
 	return err
 }
@@ -41,7 +42,7 @@ func NewUnifiedCommentWriter(w io.Writer) *UnifiedCommentWriter {
 	return &UnifiedCommentWriter{w: w}
 }
 
-func (mc *UnifiedCommentWriter) Post(c *Comment) error {
+func (mc *UnifiedCommentWriter) Post(_ context.Context, c *Comment) error {
 	s := c.Path
 	if c.Lnum > 0 {
 		s += fmt.Sprintf(":%d", c.Lnum)

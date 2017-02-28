@@ -43,7 +43,7 @@ func Run(ctx context.Context, conf *Config, c reviewdog.CommentService, d review
 		}
 		g.Go(func() error {
 			defer func() { <-semaphore }()
-			return rd.Run(io.MultiReader(stdout, stderr))
+			return rd.Run(ctx, io.MultiReader(stdout, stderr))
 		})
 	}
 	if err := g.Wait(); err != nil {

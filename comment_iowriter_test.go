@@ -2,6 +2,7 @@ package reviewdog
 
 import (
 	"bytes"
+	"context"
 	"strings"
 	"testing"
 )
@@ -60,7 +61,7 @@ line2`,
 	for _, tt := range tests {
 		buf := new(bytes.Buffer)
 		mc := NewUnifiedCommentWriter(buf)
-		if err := mc.Post(tt.in); err != nil {
+		if err := mc.Post(context.Background(), tt.in); err != nil {
 			t.Error(err)
 			continue
 		}

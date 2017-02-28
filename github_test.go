@@ -1,6 +1,7 @@
 package reviewdog
 
 import (
+	"context"
 	"encoding/json"
 	"net/http"
 	"net/http/httptest"
@@ -49,10 +50,10 @@ func TestGitHubPullRequest_Post(t *testing.T) {
 		Body:     "[reviewdog] test",
 	}
 	// https://github.com/haya14busa/reviewdog/pull/2/files#diff-ed1d019a10f54464cfaeaf6a736b7d27L20
-	if err := g.Post(comment); err != nil {
+	if err := g.Post(context.Background(), comment); err != nil {
 		t.Error(err)
 	}
-	if err := g.Flash(); err != nil {
+	if err := g.Flash(context.Background()); err != nil {
 		t.Error(err)
 	}
 }
@@ -116,7 +117,7 @@ index 61450f3..f63f149 100644
 	repo := "reviewdog"
 	pr := 2
 	g := NewGitHubPullReqest(client, owner, repo, pr, "")
-	b, err := g.Diff()
+	b, err := g.Diff(context.Background())
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -138,7 +139,7 @@ func TestGitHubPullRequest_comment(t *testing.T) {
 	repo := "reviewdog"
 	pr := 2
 	g := NewGitHubPullReqest(client, owner, repo, pr, "")
-	comments, err := g.comment()
+	comments, err := g.comment(context.Background())
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -199,10 +200,10 @@ func TestGitHubPullRequest_Post_Flash_mock(t *testing.T) {
 		Body:     "[reviewdog] test",
 	}
 	// https://github.com/haya14busa/reviewdog/pull/2/files#diff-ed1d019a10f54464cfaeaf6a736b7d27L20
-	if err := g.Post(comment); err != nil {
+	if err := g.Post(context.Background(), comment); err != nil {
 		t.Error(err)
 	}
-	if err := g.Flash(); err != nil {
+	if err := g.Flash(context.Background()); err != nil {
 		t.Error(err)
 	}
 	if apiCalled != 2 {
@@ -283,11 +284,11 @@ func TestGitHubPullRequest_Post_Flash_review_api(t *testing.T) {
 		},
 	}
 	for _, c := range comments {
-		if err := g.Post(c); err != nil {
+		if err := g.Post(context.Background(), c); err != nil {
 			t.Error(err)
 		}
 	}
-	if err := g.Flash(); err != nil {
+	if err := g.Flash(context.Background()); err != nil {
 		t.Error(err)
 	}
 	if apiCalled != 2 {

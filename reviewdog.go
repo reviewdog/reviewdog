@@ -2,6 +2,7 @@ package reviewdog
 
 import (
 	"bytes"
+	"context"
 	"fmt"
 	"io"
 	"os"
@@ -52,30 +53,30 @@ type Comment struct {
 
 // CommentService is an interface which posts Comment.
 type CommentService interface {
-	Post(*Comment) error
+	Post(context.Context, *Comment) error
 }
 
 // BulkCommentService posts comments all at once when Flash() is called.
 // Flash() will be called at the end of reviewdog run.
 type BulkCommentService interface {
 	CommentService
-	Flash() error
+	Flash(context.Context) error
 }
 
 // DiffService is an interface which get diff.
 type DiffService interface {
-	Diff() ([]byte, error)
+	Diff(context.Context) ([]byte, error)
 	Strip() int
 }
 
 // Run runs Reviewdog application.
-func (w *Reviewdog) Run(r io.Reader) error {
+func (w *Reviewdog) Run(ctx context.Context, r io.Reader) error {
 	results, err := w.p.Parse(r)
 	if err != nil {
 		return fmt.Errorf("parse error: %v", err)
 	}
 
-	d, err := w.d.Diff()
+	d, err := w.d.Diff(ctx)
 	if err != nil {
 		return fmt.Errorf("fail to get diff: %v", err)
 	}
@@ -108,14 +109,14 @@ func (w *Reviewdog) Run(r io.Reader) error {
 				LnumDiff:    addedline.LnumDiff,
 				ToolName:    w.toolname,
 			}
-			if err := w.c.Post(comment); err != nil {
+			if err := w.c.Post(ctx, comment); err != nil {
 				return err
 			}
 		}
 	}
 
 	if bulk, ok := w.c.(BulkCommentService); ok {
-		return bulk.Flash()
+		return bulk.Flash(ctx)
 	}
 
 	return nil
