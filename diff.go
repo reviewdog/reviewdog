@@ -1,6 +1,7 @@
 package reviewdog
 
 import (
+	"context"
 	"os/exec"
 	"sync"
 )
@@ -16,7 +17,7 @@ func NewDiffString(diff string, strip int) DiffService {
 	return &DiffString{b: []byte(diff), strip: strip}
 }
 
-func (d *DiffString) Diff() ([]byte, error) {
+func (d *DiffString) Diff(_ context.Context) ([]byte, error) {
 	return d.b, nil
 }
 
@@ -39,7 +40,7 @@ func NewDiffCmd(cmd *exec.Cmd, strip int) *DiffCmd {
 }
 
 // Diff returns diff. It caches the result and can be used more than once.
-func (d *DiffCmd) Diff() ([]byte, error) {
+func (d *DiffCmd) Diff(_ context.Context) ([]byte, error) {
 	d.mu.Lock()
 	defer d.mu.Unlock()
 	if d.done {

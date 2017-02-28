@@ -1,24 +1,26 @@
 package reviewdog
 
+import "context"
+
 var _ BulkCommentService = &multiCommentService{}
 
 type multiCommentService struct {
 	services []CommentService
 }
 
-func (m *multiCommentService) Post(c *Comment) error {
+func (m *multiCommentService) Post(ctx context.Context, c *Comment) error {
 	for _, cs := range m.services {
-		if err := cs.Post(c); err != nil {
+		if err := cs.Post(ctx, c); err != nil {
 			return err
 		}
 	}
 	return nil
 }
 
-func (m *multiCommentService) Flash() error {
+func (m *multiCommentService) Flash(ctx context.Context) error {
 	for _, cs := range m.services {
 		if bulk, ok := cs.(BulkCommentService); ok {
-			if err := bulk.Flash(); err != nil {
+			if err := bulk.Flash(ctx); err != nil {
 				return err
 			}
 		}

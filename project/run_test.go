@@ -15,7 +15,7 @@ type fakeDiffService struct {
 	FakeDiff func() ([]byte, error)
 }
 
-func (f *fakeDiffService) Diff() ([]byte, error) {
+func (f *fakeDiffService) Diff(_ context.Context) ([]byte, error) {
 	return f.FakeDiff()
 }
 
@@ -28,7 +28,7 @@ type fakeCommentService struct {
 	FakePost func(*reviewdog.Comment) error
 }
 
-func (f *fakeCommentService) Post(c *reviewdog.Comment) error {
+func (f *fakeCommentService) Post(_ context.Context, c *reviewdog.Comment) error {
 	return f.FakePost(c)
 }
 

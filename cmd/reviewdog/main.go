@@ -181,7 +181,7 @@ func run(r io.Reader, w io.Writer, opt *option) error {
 	}
 
 	app := reviewdog.NewReviewdog(name, p, cs, ds)
-	return app.Run(r)
+	return app.Run(ctx, r)
 }
 
 func runList(w io.Writer) error {

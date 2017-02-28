@@ -1,13 +1,13 @@
 package reviewdog
 
 import (
+	"context"
 	"io/ioutil"
 	"os/exec"
+	"strings"
 	"sync"
 	"testing"
 )
-
-import "strings"
 
 func TestDiffString(t *testing.T) {
 	difftext := `diff --git a/golint.old.go b/golint.new.go
@@ -29,7 +29,7 @@ index 34cacb9..a727dd3 100644
 +}
 `
 	d := NewDiffString(difftext, 1)
-	b, err := d.Diff()
+	b, err := d.Diff(context.Background())
 	if err != nil {
 		t.Error(err)
 	}
@@ -53,7 +53,7 @@ func TestDiffCmd(t *testing.T) {
 		wg.Add(1)
 		go func() {
 			defer wg.Done()
-			b, err := d.Diff()
+			b, err := d.Diff(context.Background())
 			if err != nil {
 				t.Error(string(b), err)
 			}

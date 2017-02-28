@@ -1,6 +1,7 @@
 package reviewdog
 
 import (
+	"context"
 	"fmt"
 	"os/exec"
 	"strings"
@@ -70,7 +71,7 @@ func NewGitHubPullReqest(cli *github.Client, owner, repo string, pr int, sha str
 
 // Post accepts a comment and holds it. Flash method actually posts comments to
 // GitHub in parallel.
-func (g *GitHubPullRequest) Post(c *Comment) error {
+func (g *GitHubPullRequest) Post(_ context.Context, c *Comment) error {
 	g.muFlash.Lock()
 	defer g.muFlash.Unlock()
 	g.postComments = append(g.postComments, c)
@@ -90,22 +91,22 @@ func commentBody(c *Comment) string {
 var githubAPIHost = "api.github.com"
 
 // Flash posts comments which has not been posted yet.
-func (g *GitHubPullRequest) Flash() error {
+func (g *GitHubPullRequest) Flash(ctx context.Context) error {
 	g.muFlash.Lock()
 	defer g.muFlash.Unlock()
 
-	if err := g.setPostedComment(); err != nil {
+	if err := g.setPostedComment(ctx); err != nil {
 		return err
 	}
 	// TODO(haya14busa,#58): remove host check when GitHub Enterprise supports
 	// Pull Request API.
 	if g.cli.BaseURL.Host == githubAPIHost {
-		return g.postAsReviewComment()
+		return g.postAsReviewComment(ctx)
 	}
-	return g.postCommentsForEach()
+	return g.postCommentsForEach(ctx)
 }
 
-func (g *GitHubPullRequest) postAsReviewComment() error {
+func (g *GitHubPullRequest) postAsReviewComment(ctx context.Context) error {
 	comments := make([]*github.DraftReviewComment, 0, len(g.postComments))
 	for _, c := range g.postComments {
 		if g.postedcs.IsPosted(c) {
@@ -129,11 +130,11 @@ func (g *GitHubPullRequest) postAsReviewComment() error {
 		Event:    github.String("COMMENT"),
 		Comments: comments,
 	}
-	_, _, err := g.cli.PullRequests.CreateReview(g.owner, g.repo, g.pr, review)
+	_, _, err := g.cli.PullRequests.CreateReview(ctx, g.owner, g.repo, g.pr, review)
 	return err
 }
 
-func (g *GitHubPullRequest) postCommentsForEach() error {
+func (g *GitHubPullRequest) postCommentsForEach(ctx context.Context) error {
 	var eg errgroup.Group
 	for _, c := range g.postComments {
 		comment := c
@@ -148,16 +149,16 @@ func (g *GitHubPullRequest) postCommentsForEach() error {
 				Path:     &comment.Path,
 				Position: &comment.LnumDiff,
 			}
-			_, _, err := g.cli.PullRequests.CreateComment(g.owner, g.repo, g.pr, prcomment)
+			_, _, err := g.cli.PullRequests.CreateComment(ctx, g.owner, g.repo, g.pr, prcomment)
 			return err
 		})
 	}
 	return eg.Wait()
 }
 
-func (g *GitHubPullRequest) setPostedComment() error {
+func (g *GitHubPullRequest) setPostedComment(ctx context.Context) error {
 	g.postedcs = make(postedcomments)
-	cs, err := g.comment()
+	cs, err := g.comment(ctx)
 	if err != nil {
 		return err
 	}
@@ -186,8 +187,8 @@ func (g *GitHubPullRequest) setPostedComment() error {
 // comment API in a sense that diff of diff_url is equivalent to
 // `git diff --no-renames`, we want diff which is equivalent to
 // `git diff --find-renames`.
-func (g *GitHubPullRequest) Diff() ([]byte, error) {
-	pr, _, err := g.cli.PullRequests.Get(g.owner, g.repo, g.pr)
+func (g *GitHubPullRequest) Diff(ctx context.Context) ([]byte, error) {
+	pr, _, err := g.cli.PullRequests.Get(ctx, g.owner, g.repo, g.pr)
 	if err != nil {
 		return nil, err
 	}
@@ -204,8 +205,8 @@ func (g *GitHubPullRequest) Strip() int {
 	return 1
 }
 
-func (g *GitHubPullRequest) comment() ([]*github.PullRequestComment, error) {
-	comments, _, err := g.cli.PullRequests.ListComments(g.owner, g.repo, g.pr, nil)
+func (g *GitHubPullRequest) comment(ctx context.Context) ([]*github.PullRequestComment, error) {
+	comments, _, err := g.cli.PullRequests.ListComments(ctx, g.owner, g.repo, g.pr, nil)
 	if err != nil {
 		return nil, err
 	}

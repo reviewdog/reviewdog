@@ -2,6 +2,7 @@ package reviewdog
 
 import (
 	"bytes"
+	"context"
 	"strings"
 	"testing"
 )
@@ -14,7 +15,7 @@ func TestMultiCommentService_Post(t *testing.T) {
 	const want = "line1\nline2"
 
 	c := &Comment{CheckResult: &CheckResult{Lines: strings.Split(want, "\n")}}
-	if err := w.Post(c); err != nil {
+	if err := w.Post(context.Background(), c); err != nil {
 		t.Fatal(err)
 	}
 
@@ -26,7 +27,7 @@ func TestMultiCommentService_Post(t *testing.T) {
 		t.Errorf("writer 2: got %v, want %v", got, want)
 	}
 
-	if err := w.(BulkCommentService).Flash(); err != nil {
+	if err := w.(BulkCommentService).Flash(context.Background()); err != nil {
 		t.Errorf("MultiCommentService implements BulkCommentService and should not return error when any services implements it: %v", err)
 	}
 }
@@ -36,7 +37,7 @@ type fakeBulkCommentService struct {
 	calledFlash bool
 }
 
-func (f *fakeBulkCommentService) Flash() error {
+func (f *fakeBulkCommentService) Flash(_ context.Context) error {
 	f.calledFlash = true
 	return nil
 }
@@ -45,7 +46,7 @@ func TestMultiCommentService_Flash(t *testing.T) {
 	f1 := &fakeBulkCommentService{}
 	f2 := &fakeBulkCommentService{}
 	w := MultiCommentService(f1, f2)
-	if err := w.(BulkCommentService).Flash(); err != nil {
+	if err := w.(BulkCommentService).Flash(context.Background()); err != nil {
 		t.Fatal(err)
 	}
 	if !f1.calledFlash || !f2.calledFlash {

@@ -1,6 +1,7 @@
 package reviewdog
 
 import (
+	"context"
 	"fmt"
 	"os"
 	"reflect"
@@ -18,7 +19,7 @@ type testWriter struct {
 	FakePost func(c *Comment) error
 }
 
-func (s *testWriter) Post(c *Comment) error {
+func (s *testWriter) Post(_ context.Context, c *Comment) error {
 	return s.FakePost(c)
 }
 
@@ -51,7 +52,7 @@ golint.new.go:11:1: comment on exported function F2 should be of the form "F2 ..
 	c := NewRawCommentWriter(os.Stdout)
 	d := NewDiffString(difftext, 1)
 	app := NewReviewdog("tool name", p, c, d)
-	app.Run(strings.NewReader(lintresult))
+	app.Run(context.Background(), strings.NewReader(lintresult))
 	// Unordered output:
 	// golint.new.go:5:5: exported var NewError1 should have comment or be unexported
 	// golint.new.go:11:1: comment on exported function F2 should be of the form "F2 ..."
@@ -97,7 +98,7 @@ index 34cacb9..a727dd3 100644
 	p := NewErrorformatParser(efm)
 	d := NewDiffString(difftext, 1)
 	app := NewReviewdog("tool name", p, c, d)
-	app.Run(strings.NewReader(lintresult))
+	app.Run(context.Background(), strings.NewReader(lintresult))
 }
 
 func TestAddedDiffLines(t *testing.T) {
