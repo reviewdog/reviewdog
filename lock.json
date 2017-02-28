@@ -4,7 +4,7 @@
         {
             "name": "github.com/golang/protobuf",
             "branch": "master",
-            "revision": "8ee79997227bf9b34611aee7946ae64735e6fd93",
+            "revision": "69b215d01a5606c843240eab4937eab3acee6530",
             "packages": [
                 "proto"
             ]
@@ -12,7 +12,7 @@
         {
             "name": "github.com/google/go-github",
             "branch": "master",
-            "revision": "27c7c32b6d369610435bd2ad7b4d8554f235eb01",
+            "revision": "9be6ce168fa69a3cc2db27a776950a42d18c2ae0",
             "packages": [
                 "github"
             ]
@@ -37,15 +37,15 @@
         {
             "name": "github.com/kylelemons/godebug",
             "branch": "master",
-            "revision": "d99083b96f422f8fd5a93bc02040acec769e178f",
+            "revision": "a616ab194758ae0a11290d87ca46ee8c440117b0",
             "packages": [
                 "pretty"
             ]
         },
         {
             "name": "github.com/mattn/go-shellwords",
-            "version": "v1.0.1",
-            "revision": "753a2322a99f87c0eff284980e77f53041555bc6",
+            "version": "v1.0.2",
+            "revision": "005a0944d84452842197c2108bd9168ced206f78",
             "packages": [
                 "."
             ]
@@ -53,7 +53,7 @@
         {
             "name": "golang.org/x/net",
             "branch": "master",
-            "revision": "a689eb3bc4b53af70390acc3cf68c9f549b6b8d6",
+            "revision": "906cda9512f77671ab44f8c8563b13a8e707b230",
             "packages": [
                 "context"
             ]
@@ -61,7 +61,7 @@
         {
             "name": "golang.org/x/oauth2",
             "branch": "master",
-            "revision": "de0725b330ab43c1a3d6c84d961cf01183783f1e",
+            "revision": "810daf0509f84359cfa9527f6ea4886f1dbabfc5",
             "packages": [
                 "."
             ]
@@ -69,7 +69,7 @@
         {
             "name": "golang.org/x/sync",
             "branch": "master",
-            "revision": "450f422ab23cf9881c94e2db30cac0eb1b7cf80c",
+            "revision": "86ddc858aa39d0f6cccccd733e482ddc52b852e9",
             "packages": [
                 "errgroup"
             ]
