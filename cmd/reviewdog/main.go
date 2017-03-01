@@ -224,7 +224,7 @@ func diffService(s string, strip int) (reviewdog.DiffService, error) {
 func githubService(ctx context.Context, ci string) (githubservice *reviewdog.GitHubPullRequest, isPR bool, err error) {
 	token, err := nonEmptyEnv("REVIEWDOG_GITHUB_API_TOKEN")
 	if err != nil {
-		return nil, false, err
+		return nil, isPR, err
 	}
 	var g *GitHubPR
 	switch ci {
@@ -237,23 +237,26 @@ func githubService(ctx context.Context, ci string) (githubservice *reviewdog.Git
 	case "common":
 		g, isPR, err = commonci()
 	default:
-		return nil, false, fmt.Errorf("unsupported CI: %v", ci)
+		return nil, isPR, fmt.Errorf("unsupported CI: %v", ci)
 	}
 	if err != nil {
-		return nil, false, err
+		return nil, isPR, err
 	}
 	// TODO: support commit build
 	if !isPR {
-		return nil, false, nil
+		return nil, isPR, nil
 	}
 
 	client, err := githubClient(ctx, token)
 	if err != nil {
-		return nil, true, err
+		return nil, isPR, err
 	}
 
-	githubservice = reviewdog.NewGitHubPullReqest(client, g.owner, g.repo, g.pr, g.sha)
-	return githubservice, true, nil
+	githubservice, err = reviewdog.NewGitHubPullReqest(client, g.owner, g.repo, g.pr, g.sha)
+	if err != nil {
+		return nil, isPR, err
+	}
+	return githubservice, isPR, nil
 }
 
 func githubClient(ctx context.Context, token string) (*github.Client, error) {

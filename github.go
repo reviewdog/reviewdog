@@ -46,10 +46,6 @@ func (p postedcomments) IsPosted(c *Comment) bool {
 //	https://developer.github.com/v3/pulls/comments/#create-a-comment
 // 	POST /repos/:owner/:repo/pulls/:number/comments
 type GitHubPullRequest struct {
-	// WorkDir is working directory relative to root of repository.
-	// If you run reviewdog on sub-directory, you need to set WorkDir field.
-	WorkDir string
-
 	cli   *github.Client
 	owner string
 	repo  string
@@ -60,23 +56,32 @@ type GitHubPullRequest struct {
 	postComments []*Comment
 
 	postedcs postedcomments
+
+	// wd is working directory relative to root of repository.
+	wd string
 }
 
 // NewGitHubPullReqest returns a new GitHubPullRequest service.
-func NewGitHubPullReqest(cli *github.Client, owner, repo string, pr int, sha string) *GitHubPullRequest {
+// GitHubPullRequest service needs git command in $PATH.
+func NewGitHubPullReqest(cli *github.Client, owner, repo string, pr int, sha string) (*GitHubPullRequest, error) {
+	workDir, err := gitRelWorkdir()
+	if err != nil {
+		return nil, fmt.Errorf("GitHubPullRequest needs 'git' command: %v", err)
+	}
 	return &GitHubPullRequest{
 		cli:   cli,
 		owner: owner,
 		repo:  repo,
 		pr:    pr,
 		sha:   sha,
-	}
+		wd:    workDir,
+	}, nil
 }
 
 // Post accepts a comment and holds it. Flash method actually posts comments to
 // GitHub in parallel.
 func (g *GitHubPullRequest) Post(_ context.Context, c *Comment) error {
-	c.Path = filepath.Join(g.WorkDir, c.Path)
+	c.Path = filepath.Join(g.wd, c.Path)
 	g.muComments.Lock()
 	defer g.muComments.Unlock()
 	g.postComments = append(g.postComments, c)
@@ -202,7 +207,7 @@ func (g *GitHubPullRequest) Diff(ctx context.Context) ([]byte, error) {
 		return nil, fmt.Errorf("failed to get merge-base commit: %v", err)
 	}
 	mergeBase := strings.Trim(string(b), "\n")
-	return exec.Command("git", "diff", "--relative", g.WorkDir, "--find-renames", mergeBase, g.sha).Output()
+	return exec.Command("git", "diff", "--relative", g.wd, "--find-renames", mergeBase, g.sha).Output()
 }
 
 // Strip returns 1 as a strip of git diff.
@@ -216,4 +221,12 @@ func (g *GitHubPullRequest) comment(ctx context.Context) ([]*github.PullRequestC
 		return nil, err
 	}
 	return comments, nil
+}
+
+func gitRelWorkdir() (string, error) {
+	b, err := exec.Command("git", "rev-parse", "--show-prefix").Output()
+	if err != nil {
+		return "", fmt.Errorf("failed to run 'git rev-parse --show-prefix': %v", err)
+	}
+	return strings.Trim(string(b), "\n"), nil
 }
