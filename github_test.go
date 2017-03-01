@@ -310,3 +310,20 @@ func TestGitHubPullRequest_Post_Flash_review_api(t *testing.T) {
 		t.Errorf("GitHub API should be called once; called %v times", apiCalled)
 	}
 }
+
+func TestGitRelWorkdir(t *testing.T) {
+	wd, err := gitRelWorkdir()
+	if err != nil {
+		t.Fatal(err)
+	}
+	if wd != "" {
+		t.Fatalf("gitRelWorkdir() = %q, want empty", wd)
+	}
+	subDir := "cmd/"
+	if err := os.Chdir(subDir); err != nil {
+		t.Fatal(err)
+	}
+	if wd, _ := gitRelWorkdir(); wd != subDir {
+		t.Fatalf("gitRelWorkdir() = %q, want %q", wd, subDir)
+	}
+}
