@@ -4,6 +4,7 @@ import (
 	"context"
 	"fmt"
 	"os/exec"
+	"path/filepath"
 	"strings"
 	"sync"
 
@@ -45,6 +46,10 @@ func (p postedcomments) IsPosted(c *Comment) bool {
 //	https://developer.github.com/v3/pulls/comments/#create-a-comment
 // 	POST /repos/:owner/:repo/pulls/:number/comments
 type GitHubPullRequest struct {
+	// WorkDir is working directory relative to root of repository.
+	// If you run reviewdog on sub-directory, you need to set WorkDir field.
+	WorkDir string
+
 	cli   *github.Client
 	owner string
 	repo  string
@@ -71,6 +76,7 @@ func NewGitHubPullReqest(cli *github.Client, owner, repo string, pr int, sha str
 // Post accepts a comment and holds it. Flash method actually posts comments to
 // GitHub in parallel.
 func (g *GitHubPullRequest) Post(_ context.Context, c *Comment) error {
+	c.Path = filepath.Join(g.WorkDir, c.Path)
 	g.muComments.Lock()
 	defer g.muComments.Unlock()
 	g.postComments = append(g.postComments, c)
@@ -196,7 +202,7 @@ func (g *GitHubPullRequest) Diff(ctx context.Context) ([]byte, error) {
 		return nil, fmt.Errorf("failed to get merge-base commit: %v", err)
 	}
 	mergeBase := strings.Trim(string(b), "\n")
-	return exec.Command("git", "diff", "--find-renames", mergeBase, g.sha).Output()
+	return exec.Command("git", "diff", "--relative", g.WorkDir, "--find-renames", mergeBase, g.sha).Output()
 }
 
 // Strip returns 1 as a strip of git diff.
