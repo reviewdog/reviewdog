@@ -207,7 +207,12 @@ func (g *GitHubPullRequest) Diff(ctx context.Context) ([]byte, error) {
 		return nil, fmt.Errorf("failed to get merge-base commit: %v", err)
 	}
 	mergeBase := strings.Trim(string(b), "\n")
-	return exec.Command("git", "diff", "--relative", g.wd, "--find-renames", mergeBase, g.sha).Output()
+	relArg := fmt.Sprintf("--relative=%s", g.wd)
+	bytes, err := exec.Command("git", "diff", relArg, "--find-renames", mergeBase, g.sha).Output()
+	if err != nil {
+		return nil, fmt.Errorf("failed to run git diff: %v", err)
+	}
+	return bytes, nil
 }
 
 // Strip returns 1 as a strip of git diff.
