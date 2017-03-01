@@ -312,6 +312,9 @@ func TestGitHubPullRequest_Post_Flash_review_api(t *testing.T) {
 }
 
 func TestGitRelWorkdir(t *testing.T) {
+	cwd, _ := os.Getwd()
+	defer os.Chdir(cwd)
+
 	wd, err := gitRelWorkdir()
 	if err != nil {
 		t.Fatal(err)
@@ -325,5 +328,39 @@ func TestGitRelWorkdir(t *testing.T) {
 	}
 	if wd, _ := gitRelWorkdir(); wd != subDir {
 		t.Fatalf("gitRelWorkdir() = %q, want %q", wd, subDir)
+	}
+}
+
+func TestGitHubPullReqest_workdir(t *testing.T) {
+	cwd, _ := os.Getwd()
+	defer os.Chdir(cwd)
+
+	g, err := NewGitHubPullReqest(nil, "", "", 0, "")
+	if err != nil {
+		t.Fatal(err)
+	}
+	if g.wd != "" {
+		t.Fatalf("g.wd = %q, want empty", g.wd)
+	}
+	ctx := context.Background()
+	want := "a/b/c"
+	g.Post(ctx, &Comment{CheckResult: &CheckResult{Path: want}})
+	if got := g.postComments[0].Path; got != want {
+		t.Errorf("wd=%q path=%q, want %q", g.wd, got, want)
+	}
+
+	subDir := "cmd/"
+	if err := os.Chdir(subDir); err != nil {
+		t.Fatal(err)
+	}
+	g, _ = NewGitHubPullReqest(nil, "", "", 0, "")
+	if g.wd != subDir {
+		t.Fatalf("gitRelWorkdir() = %q, want %q", g.wd, subDir)
+	}
+	path := "a/b/c"
+	wantPath := "cmd/" + path
+	g.Post(ctx, &Comment{CheckResult: &CheckResult{Path: path}})
+	if got := g.postComments[0].Path; got != wantPath {
+		t.Errorf("wd=%q path=%q, want %q", g.wd, got, wantPath)
 	}
 }
