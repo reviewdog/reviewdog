@@ -45,17 +45,16 @@ func (p postedcomments) IsPosted(c *Comment) bool {
 //	https://developer.github.com/v3/pulls/comments/#create-a-comment
 // 	POST /repos/:owner/:repo/pulls/:number/comments
 type GitHubPullRequest struct {
-	postComments []*Comment
-
 	cli   *github.Client
 	owner string
 	repo  string
 	pr    int
 	sha   string
 
-	postedcs postedcomments
+	muComments   sync.Mutex
+	postComments []*Comment
 
-	muFlash sync.Mutex
+	postedcs postedcomments
 }
 
 // NewGitHubPullReqest returns a new GitHubPullRequest service.
@@ -72,8 +71,8 @@ func NewGitHubPullReqest(cli *github.Client, owner, repo string, pr int, sha str
 // Post accepts a comment and holds it. Flash method actually posts comments to
 // GitHub in parallel.
 func (g *GitHubPullRequest) Post(_ context.Context, c *Comment) error {
-	g.muFlash.Lock()
-	defer g.muFlash.Unlock()
+	g.muComments.Lock()
+	defer g.muComments.Unlock()
 	g.postComments = append(g.postComments, c)
 	return nil
 }
@@ -92,8 +91,8 @@ var githubAPIHost = "api.github.com"
 
 // Flash posts comments which has not been posted yet.
 func (g *GitHubPullRequest) Flash(ctx context.Context) error {
-	g.muFlash.Lock()
-	defer g.muFlash.Unlock()
+	g.muComments.Lock()
+	defer g.muComments.Unlock()
 
 	if err := g.setPostedComment(ctx); err != nil {
 		return err
