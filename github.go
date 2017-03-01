@@ -202,7 +202,11 @@ func (g *GitHubPullRequest) Diff(ctx context.Context) ([]byte, error) {
 	if err != nil {
 		return nil, err
 	}
-	b, err := exec.Command("git", "merge-base", g.sha, *pr.Base.SHA).Output()
+	return g.gitDiff(ctx, *pr.Base.SHA)
+}
+
+func (g *GitHubPullRequest) gitDiff(ctx context.Context, baseSha string) ([]byte, error) {
+	b, err := exec.Command("git", "merge-base", g.sha, baseSha).Output()
 	if err != nil {
 		return nil, fmt.Errorf("failed to get merge-base commit: %v", err)
 	}

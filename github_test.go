@@ -1,6 +1,7 @@
 package reviewdog
 
 import (
+	"bytes"
 	"context"
 	"encoding/json"
 	"net/http"
@@ -10,6 +11,7 @@ import (
 	"testing"
 
 	"github.com/google/go-github/github"
+	"github.com/haya14busa/reviewdog/diff"
 	"github.com/kylelemons/godebug/pretty"
 	"golang.org/x/oauth2"
 )
@@ -362,5 +364,20 @@ func TestGitHubPullReqest_workdir(t *testing.T) {
 	g.Post(ctx, &Comment{CheckResult: &CheckResult{Path: path}})
 	if got := g.postComments[0].Path; got != wantPath {
 		t.Errorf("wd=%q path=%q, want %q", g.wd, got, wantPath)
+	}
+}
+
+func TestGitHubPullRequest_GitDiff(t *testing.T) {
+	g, err := NewGitHubPullReqest(nil, "", "", 0, "HEAD")
+	if err != nil {
+		t.Fatal(err)
+	}
+	b, err := g.gitDiff(context.Background(), "HEAD~")
+	if err != nil {
+		t.Fatal(err)
+	}
+	// check output diff can be parsed.
+	if _, err := diff.ParseMultiFile(bytes.NewReader(b)); err != nil {
+		t.Fatal(err)
 	}
 }
