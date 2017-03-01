@@ -2,7 +2,7 @@ language: go
 
 go:
   - 1.8
-  - tip
+  - master
 
 env:
   global:
