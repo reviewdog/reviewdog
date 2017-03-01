@@ -4,6 +4,7 @@ import (
 	"context"
 	"fmt"
 	"os/exec"
+	"path/filepath"
 	"strings"
 	"sync"
 
@@ -45,35 +46,44 @@ func (p postedcomments) IsPosted(c *Comment) bool {
 //	https://developer.github.com/v3/pulls/comments/#create-a-comment
 // 	POST /repos/:owner/:repo/pulls/:number/comments
 type GitHubPullRequest struct {
-	postComments []*Comment
-
 	cli   *github.Client
 	owner string
 	repo  string
 	pr    int
 	sha   string
 
+	muComments   sync.Mutex
+	postComments []*Comment
+
 	postedcs postedcomments
 
-	muFlash sync.Mutex
+	// wd is working directory relative to root of repository.
+	wd string
 }
 
 // NewGitHubPullReqest returns a new GitHubPullRequest service.
-func NewGitHubPullReqest(cli *github.Client, owner, repo string, pr int, sha string) *GitHubPullRequest {
+// GitHubPullRequest service needs git command in $PATH.
+func NewGitHubPullReqest(cli *github.Client, owner, repo string, pr int, sha string) (*GitHubPullRequest, error) {
+	workDir, err := gitRelWorkdir()
+	if err != nil {
+		return nil, fmt.Errorf("GitHubPullRequest needs 'git' command: %v", err)
+	}
 	return &GitHubPullRequest{
 		cli:   cli,
 		owner: owner,
 		repo:  repo,
 		pr:    pr,
 		sha:   sha,
-	}
+		wd:    workDir,
+	}, nil
 }
 
 // Post accepts a comment and holds it. Flash method actually posts comments to
 // GitHub in parallel.
 func (g *GitHubPullRequest) Post(_ context.Context, c *Comment) error {
-	g.muFlash.Lock()
-	defer g.muFlash.Unlock()
+	c.Path = filepath.Join(g.wd, c.Path)
+	g.muComments.Lock()
+	defer g.muComments.Unlock()
 	g.postComments = append(g.postComments, c)
 	return nil
 }
@@ -92,8 +102,8 @@ var githubAPIHost = "api.github.com"
 
 // Flash posts comments which has not been posted yet.
 func (g *GitHubPullRequest) Flash(ctx context.Context) error {
-	g.muFlash.Lock()
-	defer g.muFlash.Unlock()
+	g.muComments.Lock()
+	defer g.muComments.Unlock()
 
 	if err := g.setPostedComment(ctx); err != nil {
 		return err
@@ -192,12 +202,21 @@ func (g *GitHubPullRequest) Diff(ctx context.Context) ([]byte, error) {
 	if err != nil {
 		return nil, err
 	}
-	b, err := exec.Command("git", "merge-base", g.sha, *pr.Base.SHA).Output()
+	return g.gitDiff(ctx, *pr.Base.SHA)
+}
+
+func (g *GitHubPullRequest) gitDiff(ctx context.Context, baseSha string) ([]byte, error) {
+	b, err := exec.Command("git", "merge-base", g.sha, baseSha).Output()
 	if err != nil {
 		return nil, fmt.Errorf("failed to get merge-base commit: %v", err)
 	}
 	mergeBase := strings.Trim(string(b), "\n")
-	return exec.Command("git", "diff", "--find-renames", mergeBase, g.sha).Output()
+	relArg := fmt.Sprintf("--relative=%s", g.wd)
+	bytes, err := exec.Command("git", "diff", relArg, "--find-renames", mergeBase, g.sha).Output()
+	if err != nil {
+		return nil, fmt.Errorf("failed to run git diff: %v", err)
+	}
+	return bytes, nil
 }
 
 // Strip returns 1 as a strip of git diff.
@@ -211,4 +230,12 @@ func (g *GitHubPullRequest) comment(ctx context.Context) ([]*github.PullRequestC
 		return nil, err
 	}
 	return comments, nil
+}
+
+func gitRelWorkdir() (string, error) {
+	b, err := exec.Command("git", "rev-parse", "--show-prefix").Output()
+	if err != nil {
+		return "", fmt.Errorf("failed to run 'git rev-parse --show-prefix': %v", err)
+	}
+	return strings.Trim(string(b), "\n"), nil
 }

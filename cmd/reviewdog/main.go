@@ -52,12 +52,12 @@ type option struct {
 // flags doc
 const (
 	diffCmdDoc   = `diff command (e.g. "git diff"). diff flag is ignored if you pass "ci" flag`
-	diffStripDoc = "strip NUM leading components from diff file names (equivalent to `patch -p`) (default is 1 for git diff)"
+	diffStripDoc = "strip NUM leading components from diff file names (equivalent to 'patch -p') (default is 1 for git diff)"
 	efmsDoc      = `list of errorformat (https://github.com/haya14busa/errorformat)`
 	fDoc         = `format name (run -list to see supported format name) for input. It's also used as tool name in review comment if -name is empty`
 	listDoc      = `list supported pre-defined format names which can be used as -f arg`
 	nameDoc      = `tool name in review comment. -f is used as tool name if -name is empty`
-	ciDoc        = `CI service (supported travis, circle-ci, droneio(OSS 0.4), common)
+	ciDoc        = `CI service ('travis', 'circle-ci', 'droneio'(OSS 0.4) or 'common')
 
 	GitHub/GitHub Enterprise:
 		You need to set REVIEWDOG_GITHUB_API_TOKEN environment variable.
@@ -224,7 +224,7 @@ func diffService(s string, strip int) (reviewdog.DiffService, error) {
 func githubService(ctx context.Context, ci string) (githubservice *reviewdog.GitHubPullRequest, isPR bool, err error) {
 	token, err := nonEmptyEnv("REVIEWDOG_GITHUB_API_TOKEN")
 	if err != nil {
-		return nil, false, err
+		return nil, isPR, err
 	}
 	var g *GitHubPR
 	switch ci {
@@ -237,23 +237,26 @@ func githubService(ctx context.Context, ci string) (githubservice *reviewdog.Git
 	case "common":
 		g, isPR, err = commonci()
 	default:
-		return nil, false, fmt.Errorf("unsupported CI: %v", ci)
+		return nil, isPR, fmt.Errorf("unsupported CI: %v", ci)
 	}
 	if err != nil {
-		return nil, false, err
+		return nil, isPR, err
 	}
 	// TODO: support commit build
 	if !isPR {
-		return nil, false, nil
+		return nil, isPR, nil
 	}
 
 	client, err := githubClient(ctx, token)
 	if err != nil {
-		return nil, true, err
+		return nil, isPR, err
 	}
 
-	githubservice = reviewdog.NewGitHubPullReqest(client, g.owner, g.repo, g.pr, g.sha)
-	return githubservice, true, nil
+	githubservice, err = reviewdog.NewGitHubPullReqest(client, g.owner, g.repo, g.pr, g.sha)
+	if err != nil {
+		return nil, isPR, err
+	}
+	return githubservice, isPR, nil
 }
 
 func githubClient(ctx context.Context, token string) (*github.Client, error) {

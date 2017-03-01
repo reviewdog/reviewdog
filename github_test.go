@@ -1,6 +1,7 @@
 package reviewdog
 
 import (
+	"bytes"
 	"context"
 	"encoding/json"
 	"net/http"
@@ -10,6 +11,7 @@ import (
 	"testing"
 
 	"github.com/google/go-github/github"
+	"github.com/haya14busa/reviewdog/diff"
 	"github.com/kylelemons/godebug/pretty"
 	"golang.org/x/oauth2"
 )
@@ -41,7 +43,10 @@ func TestGitHubPullRequest_Post(t *testing.T) {
 	pr := 2
 	sha := "cce89afa9ac5519a7f5b1734db2e3aa776b138a7"
 
-	g := NewGitHubPullReqest(client, owner, repo, pr, sha)
+	g, err := NewGitHubPullReqest(client, owner, repo, pr, sha)
+	if err != nil {
+		t.Fatal(err)
+	}
 	comment := &Comment{
 		CheckResult: &CheckResult{
 			Path: "watchdogs.go",
@@ -116,7 +121,10 @@ index 61450f3..f63f149 100644
 	owner := "haya14busa"
 	repo := "reviewdog"
 	pr := 2
-	g := NewGitHubPullReqest(client, owner, repo, pr, "")
+	g, err := NewGitHubPullReqest(client, owner, repo, pr, "")
+	if err != nil {
+		t.Fatal(err)
+	}
 	b, err := g.Diff(context.Background())
 	if err != nil {
 		t.Fatal(err)
@@ -138,7 +146,10 @@ func TestGitHubPullRequest_comment(t *testing.T) {
 	owner := "haya14busa"
 	repo := "reviewdog"
 	pr := 2
-	g := NewGitHubPullReqest(client, owner, repo, pr, "")
+	g, err := NewGitHubPullReqest(client, owner, repo, pr, "")
+	if err != nil {
+		t.Fatal(err)
+	}
 	comments, err := g.comment(context.Background())
 	if err != nil {
 		t.Fatal(err)
@@ -191,7 +202,10 @@ func TestGitHubPullRequest_Post_Flash_mock(t *testing.T) {
 	pr := 2
 	sha := "cce89afa9ac5519a7f5b1734db2e3aa776b138a7"
 
-	g := NewGitHubPullReqest(cli, owner, repo, pr, sha)
+	g, err := NewGitHubPullReqest(cli, owner, repo, pr, sha)
+	if err != nil {
+		t.Fatal(err)
+	}
 	comment := &Comment{
 		CheckResult: &CheckResult{
 			Path: "reviewdog.go",
@@ -266,7 +280,10 @@ func TestGitHubPullRequest_Post_Flash_review_api(t *testing.T) {
 
 	cli := github.NewClient(nil)
 	cli.BaseURL, _ = url.Parse(ts.URL)
-	g := NewGitHubPullReqest(cli, "o", "r", 14, "")
+	g, err := NewGitHubPullReqest(cli, "o", "r", 14, "")
+	if err != nil {
+		t.Fatal(err)
+	}
 	comments := []*Comment{
 		{
 			CheckResult: &CheckResult{
@@ -293,5 +310,74 @@ func TestGitHubPullRequest_Post_Flash_review_api(t *testing.T) {
 	}
 	if apiCalled != 2 {
 		t.Errorf("GitHub API should be called once; called %v times", apiCalled)
+	}
+}
+
+func TestGitRelWorkdir(t *testing.T) {
+	cwd, _ := os.Getwd()
+	defer os.Chdir(cwd)
+
+	wd, err := gitRelWorkdir()
+	if err != nil {
+		t.Fatal(err)
+	}
+	if wd != "" {
+		t.Fatalf("gitRelWorkdir() = %q, want empty", wd)
+	}
+	subDir := "cmd/"
+	if err := os.Chdir(subDir); err != nil {
+		t.Fatal(err)
+	}
+	if wd, _ := gitRelWorkdir(); wd != subDir {
+		t.Fatalf("gitRelWorkdir() = %q, want %q", wd, subDir)
+	}
+}
+
+func TestGitHubPullReqest_workdir(t *testing.T) {
+	cwd, _ := os.Getwd()
+	defer os.Chdir(cwd)
+
+	g, err := NewGitHubPullReqest(nil, "", "", 0, "")
+	if err != nil {
+		t.Fatal(err)
+	}
+	if g.wd != "" {
+		t.Fatalf("g.wd = %q, want empty", g.wd)
+	}
+	ctx := context.Background()
+	want := "a/b/c"
+	g.Post(ctx, &Comment{CheckResult: &CheckResult{Path: want}})
+	if got := g.postComments[0].Path; got != want {
+		t.Errorf("wd=%q path=%q, want %q", g.wd, got, want)
+	}
+
+	subDir := "cmd/"
+	if err := os.Chdir(subDir); err != nil {
+		t.Fatal(err)
+	}
+	g, _ = NewGitHubPullReqest(nil, "", "", 0, "")
+	if g.wd != subDir {
+		t.Fatalf("gitRelWorkdir() = %q, want %q", g.wd, subDir)
+	}
+	path := "a/b/c"
+	wantPath := "cmd/" + path
+	g.Post(ctx, &Comment{CheckResult: &CheckResult{Path: path}})
+	if got := g.postComments[0].Path; got != wantPath {
+		t.Errorf("wd=%q path=%q, want %q", g.wd, got, wantPath)
+	}
+}
+
+func TestGitHubPullRequest_GitDiff(t *testing.T) {
+	g, err := NewGitHubPullReqest(nil, "", "", 0, "HEAD")
+	if err != nil {
+		t.Fatal(err)
+	}
+	b, err := g.gitDiff(context.Background(), "HEAD~")
+	if err != nil {
+		t.Fatal(err)
+	}
+	// check output diff can be parsed.
+	if _, err := diff.ParseMultiFile(bytes.NewReader(b)); err != nil {
+		t.Fatal(err)
 	}
 }
