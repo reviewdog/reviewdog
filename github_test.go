@@ -41,7 +41,10 @@ func TestGitHubPullRequest_Post(t *testing.T) {
 	pr := 2
 	sha := "cce89afa9ac5519a7f5b1734db2e3aa776b138a7"
 
-	g := NewGitHubPullReqest(client, owner, repo, pr, sha)
+	g, err := NewGitHubPullReqest(client, owner, repo, pr, sha)
+	if err != nil {
+		t.Fatal(err)
+	}
 	comment := &Comment{
 		CheckResult: &CheckResult{
 			Path: "watchdogs.go",
@@ -116,7 +119,10 @@ index 61450f3..f63f149 100644
 	owner := "haya14busa"
 	repo := "reviewdog"
 	pr := 2
-	g := NewGitHubPullReqest(client, owner, repo, pr, "")
+	g, err := NewGitHubPullReqest(client, owner, repo, pr, "")
+	if err != nil {
+		t.Fatal(err)
+	}
 	b, err := g.Diff(context.Background())
 	if err != nil {
 		t.Fatal(err)
@@ -138,7 +144,10 @@ func TestGitHubPullRequest_comment(t *testing.T) {
 	owner := "haya14busa"
 	repo := "reviewdog"
 	pr := 2
-	g := NewGitHubPullReqest(client, owner, repo, pr, "")
+	g, err := NewGitHubPullReqest(client, owner, repo, pr, "")
+	if err != nil {
+		t.Fatal(err)
+	}
 	comments, err := g.comment(context.Background())
 	if err != nil {
 		t.Fatal(err)
@@ -191,7 +200,10 @@ func TestGitHubPullRequest_Post_Flash_mock(t *testing.T) {
 	pr := 2
 	sha := "cce89afa9ac5519a7f5b1734db2e3aa776b138a7"
 
-	g := NewGitHubPullReqest(cli, owner, repo, pr, sha)
+	g, err := NewGitHubPullReqest(cli, owner, repo, pr, sha)
+	if err != nil {
+		t.Fatal(err)
+	}
 	comment := &Comment{
 		CheckResult: &CheckResult{
 			Path: "reviewdog.go",
@@ -266,7 +278,10 @@ func TestGitHubPullRequest_Post_Flash_review_api(t *testing.T) {
 
 	cli := github.NewClient(nil)
 	cli.BaseURL, _ = url.Parse(ts.URL)
-	g := NewGitHubPullReqest(cli, "o", "r", 14, "")
+	g, err := NewGitHubPullReqest(cli, "o", "r", 14, "")
+	if err != nil {
+		t.Fatal(err)
+	}
 	comments := []*Comment{
 		{
 			CheckResult: &CheckResult{
