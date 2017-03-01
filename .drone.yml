@@ -22,6 +22,8 @@ build:
       - go get honnef.co/go/staticcheck/cmd/staticcheck
       - go get github.com/kisielk/errcheck
       - reviewdog -ci=droneio
+        # test
+      - cd _testdata && golint . | reviewdog -f=golint -ci=droneio
     when:
       event: pull_request
 
