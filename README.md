@@ -223,15 +223,20 @@ Example:
 ```yaml
 env:
   global:
-    secure: xxxxxxxxxxxxx
+    - secure: xxxxxxxxxxxxx
+    - REVIEWDOG_VERSION=0.9.6
 
 install:
-  - go get github.com/haya14busa/reviewdog/cmd/reviewdog
+  - mkdir -p ~/bin/ && export export PATH="~/bin/:$PATH"
+  - curl -fSL https://github.com/haya14busa/reviewdog/releases/download/$REVIEWDOG_VERSION/reviewdog_linux_amd64 -o ~/bin/reviewdog && chmod +x ~/bin/reviewdog
 
 script:
   - >-
     golint ./... | reviewdog -f=golint -ci=travis
 ```
+
+Examples
+- https://github.com/azu/textlint-reviewdog-example
 
 ##### Circle CI
 
@@ -255,7 +260,7 @@ circle.yml sample
 ```yaml
 machine:
   environment:
-    REVIEWDOG_VERSION: 0.9.3
+    REVIEWDOG_VERSION: 0.9.6
 
 dependencies:
   override:
