@@ -13,7 +13,7 @@ import (
 )
 
 // Reviewdog represents review dog application which parses result of compiler
-// or linter, get diff and filter the results by diff, and report filterd
+// or linter, get diff and filter the results by diff, and report filtered
 // results.
 type Reviewdog struct {
 	toolname string
