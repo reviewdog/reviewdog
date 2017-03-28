@@ -334,6 +334,19 @@ $ export REVIEWDOG_GITHUB_API_TOKEN="<your token>"
 $ golint ./... | reviewdog -f=golint -ci=common
 ```
 
+##### Jenkins with Github pull request builder plugin
+- [GitHub pull request builder plugin - Jenkins - Jenkins Wiki](https://wiki.jenkins-ci.org/display/JENKINS/GitHub+pull+request+builder+plugin)
+
+```sh
+$ export CI_PULL_REQUEST=${ghprbPullId}
+$ export CI_REPO_OWNER=haya14busa
+$ export CI_REPO_NAME=reviewdog
+$ export CI_COMMIT=${ghprbActualCommit}
+$ export REVIEWDOG_GITHUB_API_TOKEN="<your token>"
+$ export REVIEWDOG_INSECURE_SKIP_VERIFY=true # set this as you need
+$ reviewdog -ci=common
+```
+
 ## :bird: Author
 haya14busa (https://github.com/haya14busa)
 
