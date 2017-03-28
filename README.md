@@ -344,7 +344,7 @@ $ export CI_REPO_NAME=reviewdog
 $ export CI_COMMIT=${ghprbActualCommit}
 $ export REVIEWDOG_GITHUB_API_TOKEN="<your token>"
 $ export REVIEWDOG_INSECURE_SKIP_VERIFY=true # set this as you need
-$ reviewdog -ci=common
+$ reviewdog -ci=common -conf=reviewdog.yml
 ```
 
 ## :bird: Author
