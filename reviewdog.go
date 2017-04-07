@@ -22,10 +22,14 @@ type Reviewdog struct {
 	d        DiffService
 }
 
+var ExportedVarWithoutComment = 1 // TODO: revert
+
 // NewReviewdog returns a new Reviewdog.
 func NewReviewdog(toolname string, p Parser, c CommentService, d DiffService) *Reviewdog {
 	return &Reviewdog{p: p, c: c, d: d, toolname: toolname}
 }
+
+var unusedVar = 2 // TODO: revert
 
 // CheckResult represents a checked result of static analysis tools.
 // :h error-file-format
@@ -36,6 +40,8 @@ type CheckResult struct {
 	Message string   // error message
 	Lines   []string // Original error lines (often one line)
 }
+
+var vetError = fmt.Sprintf("", 1, 2, 3) // TODO: revert
 
 // Parser is an interface which parses compilers, linters, or any tools
 // results.
