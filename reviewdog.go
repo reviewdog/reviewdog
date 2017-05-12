@@ -5,11 +5,20 @@ import (
 	"context"
 	"fmt"
 	"io"
-	"os"
 	"path/filepath"
 	"strings"
 
 	"github.com/haya14busa/reviewdog/diff"
+)
+
+const (
+	devNull = "/dev/null"
+)
+
+const (
+	commentIfFileIsModified = 0
+	commentIfFileIsRemoved  = -iota
+	commentIfFileIsAdded
 )
 
 // Reviewdog represents review dog application which parses result of compiler
@@ -86,24 +95,27 @@ func (w *Reviewdog) Run(ctx context.Context, r io.Reader) error {
 		return fmt.Errorf("fail to parse diff: %v", err)
 	}
 	addedlines := addedDiffLines(filediffs, w.d.Strip())
+	// TODO(JensRantil): normalize paths (except magic "/dev/null") of
+	// filediffs instead of within the methods below.
+	addedFiles := filesAdded(filediffs, w.d.Strip())
+	removedFiles := filesRemoved(filediffs, w.d.Strip())
+	modifiedFiles := filesModified(filediffs, w.d.Strip())
 
-	wd, err := os.Getwd()
 	if err != nil {
 		return err
 	}
 
 	for _, result := range results {
-
-		if filepath.IsAbs(result.Path) {
-			relpath, err := filepath.Rel(wd, result.Path)
-			if err != nil {
-				return err
-			}
-			result.Path = relpath
+		var absolutePath string
+		absolutePath, err = filepath.Abs(result.Path)
+		if err != nil {
+			return err
 		}
+
+		// Simplify the path.
 		result.Path = filepath.Clean(result.Path)
 
-		addedline := addedlines.Get(result.Path, result.Lnum)
+		addedline := addedlines.Get(absolutePath, result.Lnum)
 		comment := &Comment{
 			CheckResult: result,
 			Body:        result.Message, // TODO: format message
@@ -114,6 +126,18 @@ func (w *Reviewdog) Run(ctx context.Context, r io.Reader) error {
 		if addedline != nil {
 			// Line added.
 			comment.LnumDiff = addedline.LnumDiff
+			err = w.c.Post(ctx, comment)
+		} else if addedFiles.Contains(absolutePath) && result.Lnum == commentIfFileIsAdded {
+			// Brand new file added.
+			comment.LnumDiff = 0
+			err = w.c.Post(ctx, comment)
+		} else if removedFiles.Contains(absolutePath) && result.Lnum == commentIfFileIsRemoved {
+			// File removed.
+			comment.LnumDiff = 0
+			err = w.c.Post(ctx, comment)
+		} else if modifiedFiles.Contains(absolutePath) && result.Lnum == commentIfFileIsModified {
+			// File removed.
+			comment.LnumDiff = 0
 			err = w.c.Post(ctx, comment)
 		}
 		if err != nil {
@@ -126,6 +150,56 @@ func (w *Reviewdog) Run(ctx context.Context, r io.Reader) error {
 	}
 
 	return nil
+}
+
+type fileSet map[string]struct{}
+
+func (f fileSet) Contains(path string) bool {
+	_, exists := f[path]
+	return exists
+}
+
+func filesAdded(filediffs []*diff.FileDiff, strip int) fileSet {
+	r := make(fileSet)
+	for _, filediff := range filediffs {
+		if filediff.PathOld == devNull {
+			normalizedPath, err := stripPath(filediff.PathNew, strip)
+			if err != nil {
+				// FIXME(JensRantil): log or return error?
+				continue
+			}
+			r[normalizedPath] = struct{}{}
+		}
+	}
+	return r
+}
+
+func filesRemoved(filediffs []*diff.FileDiff, strip int) fileSet {
+	r := make(fileSet)
+	for _, filediff := range filediffs {
+		if filediff.PathNew == devNull {
+			normalizedPath, err := stripPath(filediff.PathOld, strip)
+			if err != nil {
+				// FIXME(JensRantil): log or return error?
+				continue
+			}
+			r[normalizedPath] = struct{}{}
+		}
+	}
+	return r
+}
+
+func filesModified(filediffs []*diff.FileDiff, strip int) fileSet {
+	r := make(fileSet)
+	for _, filediff := range filediffs {
+		normalizedPath, err := stripPath(filediff.PathNew, strip)
+		if err != nil {
+			// FIXME(JensRantil): log or return error?
+			continue
+		}
+		r[normalizedPath] = struct{}{}
+	}
+	return r
 }
 
 // AddedLine represents added line in diff.
