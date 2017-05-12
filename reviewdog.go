@@ -93,7 +93,7 @@ func (w *Reviewdog) Run(ctx context.Context, r io.Reader) error {
 	}
 
 	for _, result := range results {
-		addedline := addedlines.Get(result.Path, result.Lnum)
+
 		if filepath.IsAbs(result.Path) {
 			relpath, err := filepath.Rel(wd, result.Path)
 			if err != nil {
@@ -102,6 +102,8 @@ func (w *Reviewdog) Run(ctx context.Context, r io.Reader) error {
 			result.Path = relpath
 		}
 		result.Path = filepath.Clean(result.Path)
+
+		addedline := addedlines.Get(result.Path, result.Lnum)
 		if addedline != nil {
 			comment := &Comment{
 				CheckResult: result,
