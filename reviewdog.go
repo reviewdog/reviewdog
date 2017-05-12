@@ -149,23 +149,25 @@ func (p posToAddedLine) Get(path string, lnum int) *AddedLine {
 	return diffline
 }
 
+func stripPath(path string, strip int) (string, error) {
+	if strip > 0 {
+		ps := strings.Split(filepath.ToSlash(path), "/")
+		if len(ps) > strip {
+			path = filepath.Join(ps[strip:]...)
+		}
+	}
+	return normalizePath(path)
+}
+
 // addedDiffLines traverse []*diff.FileDiff and returns posToAddedLine.
 func addedDiffLines(filediffs []*diff.FileDiff, strip int) posToAddedLine {
 	r := make(posToAddedLine)
 	for _, filediff := range filediffs {
-		path := filediff.PathNew
-		if strip > 0 {
-			ps := strings.Split(filepath.ToSlash(filediff.PathNew), "/")
-			if len(ps) > strip {
-				path = filepath.Join(ps[strip:]...)
-			}
-		}
-		np, err := normalizePath(path)
+		path, err := stripPath(filediff.PathNew, strip)
 		if err != nil {
 			// FIXME(haya14busa): log or return error?
 			continue
 		}
-		path = np
 
 		ltodiff := make(map[int]*AddedLine)
 		for _, hunk := range filediff.Hunks {
