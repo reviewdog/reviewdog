@@ -282,7 +282,7 @@ index 0000000..ee946eb
 		},
 	}
 	for _, tt := range tests {
-		got := parseExtenedHeader(bufio.NewReader(strings.NewReader(tt.in)))
+		got := parseExtendedHeader(bufio.NewReader(strings.NewReader(tt.in)))
 		if !reflect.DeepEqual(got, tt.want) {
 			t.Errorf("in:\n%v\ngot:\n%v\nwant:\n%v", tt.in, strings.Join(got, "\n"), strings.Join(tt.want, "\n"))
 		}
