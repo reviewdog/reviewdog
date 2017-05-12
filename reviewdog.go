@@ -104,16 +104,20 @@ func (w *Reviewdog) Run(ctx context.Context, r io.Reader) error {
 		result.Path = filepath.Clean(result.Path)
 
 		addedline := addedlines.Get(result.Path, result.Lnum)
+		comment := &Comment{
+			CheckResult: result,
+			Body:        result.Message, // TODO: format message
+			ToolName:    w.toolname,
+		}
+
+		var err error
 		if addedline != nil {
-			comment := &Comment{
-				CheckResult: result,
-				Body:        result.Message, // TODO: format message
-				LnumDiff:    addedline.LnumDiff,
-				ToolName:    w.toolname,
-			}
-			if err := w.c.Post(ctx, comment); err != nil {
-				return err
-			}
+			// Line added.
+			comment.LnumDiff = addedline.LnumDiff
+			err = w.c.Post(ctx, comment)
+		}
+		if err != nil {
+			return err
 		}
 	}
 
