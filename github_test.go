@@ -58,7 +58,7 @@ func TestGitHubPullRequest_Post(t *testing.T) {
 	if err := g.Post(context.Background(), comment); err != nil {
 		t.Error(err)
 	}
-	if err := g.Flash(context.Background()); err != nil {
+	if err := g.Flush(context.Background()); err != nil {
 		t.Error(err)
 	}
 }
@@ -165,7 +165,7 @@ func TestGitHubPullRequest_comment(t *testing.T) {
 	}
 }
 
-func TestGitHubPullRequest_Post_Flash_mock(t *testing.T) {
+func TestGitHubPullRequest_Post_Flush_mock(t *testing.T) {
 	apiCalled := 0
 	ts := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		if r.URL.String() != "/repos/haya14busa/reviewdog/pulls/2/comments" {
@@ -217,7 +217,7 @@ func TestGitHubPullRequest_Post_Flash_mock(t *testing.T) {
 	if err := g.Post(context.Background(), comment); err != nil {
 		t.Error(err)
 	}
-	if err := g.Flash(context.Background()); err != nil {
+	if err := g.Flush(context.Background()); err != nil {
 		t.Error(err)
 	}
 	if apiCalled != 2 {
@@ -225,7 +225,7 @@ func TestGitHubPullRequest_Post_Flash_mock(t *testing.T) {
 	}
 }
 
-func TestGitHubPullRequest_Post_Flash_review_api(t *testing.T) {
+func TestGitHubPullRequest_Post_Flush_review_api(t *testing.T) {
 	apiCalled := 0
 	mux := http.NewServeMux()
 	mux.HandleFunc("/repos/o/r/pulls/14/comments", func(w http.ResponseWriter, r *http.Request) {
@@ -305,7 +305,7 @@ func TestGitHubPullRequest_Post_Flash_review_api(t *testing.T) {
 			t.Error(err)
 		}
 	}
-	if err := g.Flash(context.Background()); err != nil {
+	if err := g.Flush(context.Background()); err != nil {
 		t.Error(err)
 	}
 	if apiCalled != 2 {

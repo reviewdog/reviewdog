@@ -27,29 +27,29 @@ func TestMultiCommentService_Post(t *testing.T) {
 		t.Errorf("writer 2: got %v, want %v", got, want)
 	}
 
-	if err := w.(BulkCommentService).Flash(context.Background()); err != nil {
+	if err := w.(BulkCommentService).Flush(context.Background()); err != nil {
 		t.Errorf("MultiCommentService implements BulkCommentService and should not return error when any services implements it: %v", err)
 	}
 }
 
 type fakeBulkCommentService struct {
 	BulkCommentService
-	calledFlash bool
+	calledFlush bool
 }
 
-func (f *fakeBulkCommentService) Flash(_ context.Context) error {
-	f.calledFlash = true
+func (f *fakeBulkCommentService) Flush(_ context.Context) error {
+	f.calledFlush = true
 	return nil
 }
 
-func TestMultiCommentService_Flash(t *testing.T) {
+func TestMultiCommentService_Flush(t *testing.T) {
 	f1 := &fakeBulkCommentService{}
 	f2 := &fakeBulkCommentService{}
 	w := MultiCommentService(f1, f2)
-	if err := w.(BulkCommentService).Flash(context.Background()); err != nil {
+	if err := w.(BulkCommentService).Flush(context.Background()); err != nil {
 		t.Fatal(err)
 	}
-	if !f1.calledFlash || !f2.calledFlash {
-		t.Error("MultiCommentService_Flash should run Flash() for every services")
+	if !f1.calledFlush || !f2.calledFlush {
+		t.Error("MultiCommentService_Flush should run Flush() for every services")
 	}
 }
