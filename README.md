@@ -78,6 +78,18 @@ complex output like multi-line error message.
 
 By this 'errorformat' feature, reviewdog can support any tools output with ease.
 
+#### Special line numbers
+
+There are three special line numbers which can be used for general comments when a file is changes:
+
+| line number | description |
+| 0 | Adds a comment on the first line modified for a file. |
+| -1 | Adds a comment if a file is removed. |
+| -2 | Adds a comment if a file is added. |
+
+Example when this is useful is if you'd want to let the developer know he needs
+to check with someone before merging if certain files are modified etc.
+
 ### Available pre-defined 'errorformat'
 
 But, you don't have to write 'errorformat' in many cases. reviewdog supports
