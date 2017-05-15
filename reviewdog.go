@@ -56,11 +56,11 @@ type CommentService interface {
 	Post(context.Context, *Comment) error
 }
 
-// BulkCommentService posts comments all at once when Flash() is called.
-// Flash() will be called at the end of reviewdog run.
+// BulkCommentService posts comments all at once when Flush() is called.
+// Flush() will be called at the end of reviewdog run.
 type BulkCommentService interface {
 	CommentService
-	Flash(context.Context) error
+	Flush(context.Context) error
 }
 
 // DiffService is an interface which get diff.
@@ -116,7 +116,7 @@ func (w *Reviewdog) Run(ctx context.Context, r io.Reader) error {
 	}
 
 	if bulk, ok := w.c.(BulkCommentService); ok {
-		return bulk.Flash(ctx)
+		return bulk.Flush(ctx)
 	}
 
 	return nil

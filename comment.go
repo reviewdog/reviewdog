@@ -17,10 +17,10 @@ func (m *multiCommentService) Post(ctx context.Context, c *Comment) error {
 	return nil
 }
 
-func (m *multiCommentService) Flash(ctx context.Context) error {
+func (m *multiCommentService) Flush(ctx context.Context) error {
 	for _, cs := range m.services {
 		if bulk, ok := cs.(BulkCommentService); ok {
-			if err := bulk.Flash(ctx); err != nil {
+			if err := bulk.Flush(ctx); err != nil {
 				return err
 			}
 		}

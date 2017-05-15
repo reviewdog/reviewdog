@@ -70,7 +70,7 @@ type fileParser struct {
 
 func (p *fileParser) Parse() (*FileDiff, error) {
 	fd := &FileDiff{}
-	fd.Extended = parseExtenedHeader(p.r)
+	fd.Extended = parseExtendedHeader(p.r)
 	b, err := p.r.Peek(len(tokenOldFile))
 	if err != nil {
 		if err == io.EOF && len(fd.Extended) > 0 {
@@ -132,7 +132,7 @@ func parseFileHeader(line string) (filename, timestamp string) {
 	return ss[:tabi], ss[tabi+1:]
 }
 
-func parseExtenedHeader(r *bufio.Reader) []string {
+func parseExtendedHeader(r *bufio.Reader) []string {
 	var es []string
 	b, err := r.Peek(len(tokenDiffGit))
 	if err != nil {

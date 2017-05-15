@@ -78,7 +78,7 @@ func NewGitHubPullReqest(cli *github.Client, owner, repo string, pr int, sha str
 	}, nil
 }
 
-// Post accepts a comment and holds it. Flash method actually posts comments to
+// Post accepts a comment and holds it. Flush method actually posts comments to
 // GitHub in parallel.
 func (g *GitHubPullRequest) Post(_ context.Context, c *Comment) error {
 	c.Path = filepath.Join(g.wd, c.Path)
@@ -100,8 +100,8 @@ func commentBody(c *Comment) string {
 
 var githubAPIHost = "api.github.com"
 
-// Flash posts comments which has not been posted yet.
-func (g *GitHubPullRequest) Flash(ctx context.Context) error {
+// Flush posts comments which has not been posted yet.
+func (g *GitHubPullRequest) Flush(ctx context.Context) error {
 	g.muComments.Lock()
 	defer g.muComments.Unlock()
 
