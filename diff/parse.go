@@ -103,7 +103,15 @@ func (p *fileParser) parseHunks() ([]*Hunk, error) {
 		return nil, ErrNoHunks
 	}
 	if !bytes.HasPrefix(b, []byte(tokenStartHunk)) {
-		return nil, ErrNoHunks
+		b, err := p.r.Peek(len(tokenDiffGit))
+		if err != nil {
+			return nil, ErrNoHunks
+		}
+		if !bytes.HasPrefix(b, []byte(tokenDiffGit)) {
+			return nil, ErrNoHunks
+		}
+		// It seems that you deleted an empty file.
+		return []*Hunk{}, nil
 	}
 	var hunks []*Hunk
 	hp := &hunkParser{r: p.r}
