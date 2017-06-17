@@ -1,0 +1,14 @@
+[
+  {
+    "PathOld": "",
+    "PathNew": "",
+    "TimeOld": "",
+    "TimeNew": "",
+    "Hunks": null,
+    "Extended": [
+      "diff --git a/empty.txt b/empty.txt",
+      "deleted file mode 100644",
+      "index e69de29..0000000"
+    ]
+  }
+]

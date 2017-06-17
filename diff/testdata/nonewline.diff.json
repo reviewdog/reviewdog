@@ -1,0 +1,62 @@
+[
+  {
+    "PathOld": "nonewline.old.txt",
+    "PathNew": "nonewline.new.txt",
+    "TimeOld": "2016-10-13 15:34:14.931778318 +0900",
+    "TimeNew": "2016-10-13 15:34:14.868444672 +0900",
+    "Hunks": [
+      {
+        "StartLineOld": 1,
+        "LineLengthOld": 4,
+        "StartLineNew": 1,
+        "LineLengthNew": 4,
+        "Section": "",
+        "Lines": [
+          {
+            "Type": 0,
+            "Content": "\" vim: nofixeol noendofline",
+            "LnumDiff": 1,
+            "LnumOld": 1,
+            "LnumNew": 1
+          },
+          {
+            "Type": 0,
+            "Content": "No newline at end of both the old and new file",
+            "LnumDiff": 2,
+            "LnumOld": 2,
+            "LnumNew": 2
+          },
+          {
+            "Type": 2,
+            "Content": "a",
+            "LnumDiff": 3,
+            "LnumOld": 3,
+            "LnumNew": 0
+          },
+          {
+            "Type": 2,
+            "Content": "a",
+            "LnumDiff": 4,
+            "LnumOld": 4,
+            "LnumNew": 0
+          },
+          {
+            "Type": 1,
+            "Content": "b",
+            "LnumDiff": 5,
+            "LnumOld": 0,
+            "LnumNew": 3
+          },
+          {
+            "Type": 1,
+            "Content": "b",
+            "LnumDiff": 6,
+            "LnumOld": 0,
+            "LnumNew": 4
+          }
+        ]
+      }
+    ],
+    "Extended": null
+  }
+]

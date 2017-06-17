@@ -1,0 +1,76 @@
+[
+  {
+    "PathOld": "nonewline3.old.txt",
+    "PathNew": "nonewline3.new.txt",
+    "TimeOld": "2016-10-13 15:34:15.361780443 +0900",
+    "TimeNew": "2016-10-13 15:34:15.288446747 +0900",
+    "Hunks": [
+      {
+        "StartLineOld": 1,
+        "LineLengthOld": 6,
+        "StartLineNew": 1,
+        "LineLengthNew": 7,
+        "Section": "",
+        "Lines": [
+          {
+            "Type": 0,
+            "Content": "No newline at end of the old file",
+            "LnumDiff": 1,
+            "LnumOld": 1,
+            "LnumNew": 1
+          },
+          {
+            "Type": 0,
+            "Content": "Newline at end of the new file",
+            "LnumDiff": 2,
+            "LnumOld": 2,
+            "LnumNew": 2
+          },
+          {
+            "Type": 2,
+            "Content": "a",
+            "LnumDiff": 3,
+            "LnumOld": 3,
+            "LnumNew": 0
+          },
+          {
+            "Type": 1,
+            "Content": "b",
+            "LnumDiff": 4,
+            "LnumOld": 0,
+            "LnumNew": 3
+          },
+          {
+            "Type": 1,
+            "Content": "b",
+            "LnumDiff": 5,
+            "LnumOld": 0,
+            "LnumNew": 4
+          },
+          {
+            "Type": 0,
+            "Content": "",
+            "LnumDiff": 6,
+            "LnumOld": 4,
+            "LnumNew": 5
+          },
+          {
+            "Type": 0,
+            "Content": "",
+            "LnumDiff": 7,
+            "LnumOld": 5,
+            "LnumNew": 6
+          },
+          {
+            "Type": 0,
+            "Content": "\" vim: nofixeol noendofline",
+            "LnumDiff": 8,
+            "LnumOld": 6,
+            "LnumNew": 7
+          }
+        ]
+      }
+    ],
+    "Extended": null
+  }
+]
