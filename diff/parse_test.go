@@ -35,8 +35,7 @@ func TestParseMultiFile(t *testing.T) {
 		}
 		dec := json.NewDecoder(wantfile)
 		var want []*FileDiff
-		err = dec.Decode(&want)
-		if err != nil {
+		if err := dec.Decode(&want); err != nil {
 			t.Fatal(err)
 		}
 		if !reflect.DeepEqual(difffiles, want) {
