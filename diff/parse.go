@@ -107,11 +107,12 @@ func (p *fileParser) parseHunks() ([]*Hunk, error) {
 		if err != nil {
 			return nil, ErrNoHunks
 		}
-		if !bytes.HasPrefix(b, []byte(tokenDiffGit)) {
-			return nil, ErrNoHunks
+		if bytes.HasPrefix(b, []byte(tokenDiffGit)) {
+			// git diff may contain a file diff with empty hunks.
+			// e.g. delete an empty file.
+			return []*Hunk{}, nil
 		}
-		// It seems that you deleted an empty file.
-		return []*Hunk{}, nil
+		return nil, ErrNoHunks
 	}
 	var hunks []*Hunk
 	hp := &hunkParser{r: p.r}
