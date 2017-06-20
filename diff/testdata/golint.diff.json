@@ -1,0 +1,107 @@
+[
+  {
+    "PathOld": "a/golint.old.go",
+    "PathNew": "b/golint.new.go",
+    "TimeOld": "",
+    "TimeNew": "",
+    "Hunks": [
+      {
+        "StartLineOld": 2,
+        "LineLengthOld": 6,
+        "StartLineNew": 2,
+        "LineLengthNew": 12,
+        "Section": "package test",
+        "Lines": [
+          {
+            "Type": 0,
+            "Content": "",
+            "LnumDiff": 1,
+            "LnumOld": 2,
+            "LnumNew": 2
+          },
+          {
+            "Type": 0,
+            "Content": "var V int",
+            "LnumDiff": 2,
+            "LnumOld": 3,
+            "LnumNew": 3
+          },
+          {
+            "Type": 0,
+            "Content": "",
+            "LnumDiff": 3,
+            "LnumOld": 4,
+            "LnumNew": 4
+          },
+          {
+            "Type": 1,
+            "Content": "var NewError1 int",
+            "LnumDiff": 4,
+            "LnumOld": 0,
+            "LnumNew": 5
+          },
+          {
+            "Type": 1,
+            "Content": "",
+            "LnumDiff": 5,
+            "LnumOld": 0,
+            "LnumNew": 6
+          },
+          {
+            "Type": 0,
+            "Content": "// invalid func comment",
+            "LnumDiff": 6,
+            "LnumOld": 5,
+            "LnumNew": 7
+          },
+          {
+            "Type": 0,
+            "Content": "func F() {",
+            "LnumDiff": 7,
+            "LnumOld": 6,
+            "LnumNew": 8
+          },
+          {
+            "Type": 0,
+            "Content": "}",
+            "LnumDiff": 8,
+            "LnumOld": 7,
+            "LnumNew": 9
+          },
+          {
+            "Type": 1,
+            "Content": "",
+            "LnumDiff": 9,
+            "LnumOld": 0,
+            "LnumNew": 10
+          },
+          {
+            "Type": 1,
+            "Content": "// invalid func comment2",
+            "LnumDiff": 10,
+            "LnumOld": 0,
+            "LnumNew": 11
+          },
+          {
+            "Type": 1,
+            "Content": "func F2() {",
+            "LnumDiff": 11,
+            "LnumOld": 0,
+            "LnumNew": 12
+          },
+          {
+            "Type": 1,
+            "Content": "}",
+            "LnumDiff": 12,
+            "LnumOld": 0,
+            "LnumNew": 13
+          }
+        ]
+      }
+    ],
+    "Extended": [
+      "diff --git a/golint.old.go b/golint.new.go",
+      "index 34cacb9..a727dd3 100644"
+    ]
+  }
+]

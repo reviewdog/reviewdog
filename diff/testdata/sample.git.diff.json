@@ -1,0 +1,58 @@
+[
+  {
+    "PathOld": "a/sample.old.txt",
+    "PathNew": "b/sample.new.txt",
+    "TimeOld": "",
+    "TimeNew": "",
+    "Hunks": [
+      {
+        "StartLineOld": 1,
+        "LineLengthOld": 3,
+        "StartLineNew": 1,
+        "LineLengthNew": 4,
+        "Section": "",
+        "Lines": [
+          {
+            "Type": 0,
+            "Content": "unchanged, contextual line",
+            "LnumDiff": 1,
+            "LnumOld": 1,
+            "LnumNew": 1
+          },
+          {
+            "Type": 2,
+            "Content": "deleted line",
+            "LnumDiff": 2,
+            "LnumOld": 2,
+            "LnumNew": 0
+          },
+          {
+            "Type": 1,
+            "Content": "added line",
+            "LnumDiff": 3,
+            "LnumOld": 0,
+            "LnumNew": 2
+          },
+          {
+            "Type": 1,
+            "Content": "added line",
+            "LnumDiff": 4,
+            "LnumOld": 0,
+            "LnumNew": 3
+          },
+          {
+            "Type": 0,
+            "Content": "unchanged, contextual line",
+            "LnumDiff": 5,
+            "LnumOld": 3,
+            "LnumNew": 4
+          }
+        ]
+      }
+    ],
+    "Extended": [
+      "diff --git a/sample.old.txt b/sample.new.txt",
+      "index a949a96..769bdae 100644"
+    ]
+  }
+]

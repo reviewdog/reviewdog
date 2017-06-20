@@ -1,0 +1,20 @@
+diff --git a/empty.txt b/empty.txt
+deleted file mode 100644
+index e69de29..0000000
+diff --git a/golint.old.go b/golint.new.go
+index 34cacb9..a727dd3 100644
+--- a/golint.old.go
++++ b/golint.new.go
+@@ -2,6 +2,12 @@ package test
+ 
+ var V int
+ 
++var NewError1 int
++
+ // invalid func comment
+ func F() {
+ }
++
++// invalid func comment2
++func F2() {
++}
