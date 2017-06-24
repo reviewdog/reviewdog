@@ -261,6 +261,7 @@ func githubService(ctx context.Context, ci string) (githubservice *reviewdog.Git
 
 func githubClient(ctx context.Context, token string) (*github.Client, error) {
 	tr := &http.Transport{
+		Proxy:           http.ProxyFromEnvironment,
 		TLSClientConfig: &tls.Config{InsecureSkipVerify: insecureSkipVerify()},
 	}
 	sslcli := &http.Client{Transport: tr}
