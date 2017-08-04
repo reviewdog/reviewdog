@@ -103,7 +103,7 @@ func main() {
 	flag.Usage = usage
 	flag.Parse()
 	if err := run(os.Stdin, os.Stdout, opt); err != nil {
-		fmt.Fprintln(os.Stderr, err)
+		fmt.Fprintf(os.Stderr, "reviewdog: %v\n", err)
 		os.Exit(1)
 	}
 }
