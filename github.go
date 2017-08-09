@@ -8,8 +8,6 @@ import (
 	"strings"
 	"sync"
 
-	"golang.org/x/sync/errgroup"
-
 	"github.com/google/go-github/github"
 )
 
@@ -108,12 +106,7 @@ func (g *GitHubPullRequest) Flush(ctx context.Context) error {
 	if err := g.setPostedComment(ctx); err != nil {
 		return err
 	}
-	// TODO(haya14busa,#58): remove host check when GitHub Enterprise supports
-	// Pull Request API.
-	if g.cli.BaseURL.Host == githubAPIHost {
-		return g.postAsReviewComment(ctx)
-	}
-	return g.postCommentsForEach(ctx)
+	return g.postAsReviewComment(ctx)
 }
 
 func (g *GitHubPullRequest) postAsReviewComment(ctx context.Context) error {
@@ -142,28 +135,6 @@ func (g *GitHubPullRequest) postAsReviewComment(ctx context.Context) error {
 	}
 	_, _, err := g.cli.PullRequests.CreateReview(ctx, g.owner, g.repo, g.pr, review)
 	return err
-}
-
-func (g *GitHubPullRequest) postCommentsForEach(ctx context.Context) error {
-	var eg errgroup.Group
-	for _, c := range g.postComments {
-		comment := c
-		if g.postedcs.IsPosted(comment) {
-			continue
-		}
-		eg.Go(func() error {
-			body := commentBody(comment)
-			prcomment := &github.PullRequestComment{
-				CommitID: &g.sha,
-				Body:     &body,
-				Path:     &comment.Path,
-				Position: &comment.LnumDiff,
-			}
-			_, _, err := g.cli.PullRequests.CreateComment(ctx, g.owner, g.repo, g.pr, prcomment)
-			return err
-		})
-	}
-	return eg.Wait()
 }
 
 func (g *GitHubPullRequest) setPostedComment(ctx context.Context) error {
