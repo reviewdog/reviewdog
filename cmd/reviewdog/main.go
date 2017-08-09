@@ -28,7 +28,7 @@ import (
 	"github.com/mattn/go-shellwords"
 )
 
-const version = "0.9.6"
+const version = "0.9.7"
 
 const usageMessage = "" +
 	`Usage:	reviewdog [flags]
