@@ -165,66 +165,6 @@ func TestGitHubPullRequest_comment(t *testing.T) {
 	}
 }
 
-func TestGitHubPullRequest_Post_Flush_mock(t *testing.T) {
-	apiCalled := 0
-	ts := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
-		if r.URL.String() != "/repos/haya14busa/reviewdog/pulls/2/comments" {
-			t.Errorf("unexpected access: %v %v", r.Method, r.URL)
-			return
-		}
-
-		switch r.Method {
-		case "GET":
-		case "POST":
-			var v github.PullRequestComment
-			if err := json.NewDecoder(r.Body).Decode(&v); err != nil {
-				t.Error(err)
-			}
-			body := *v.Body
-			want := `<sub>reported by [reviewdog](https://github.com/haya14busa/reviewdog) :dog:</sub>
-[reviewdog] test`
-			if body != want {
-				t.Errorf("body: got %v, want %v", body, want)
-			}
-		default:
-			t.Errorf("unexpected access: %v %v", r.Method, r.URL)
-		}
-		apiCalled++
-	}))
-	defer ts.Close()
-
-	cli := github.NewClient(nil)
-	cli.BaseURL, _ = url.Parse(ts.URL)
-
-	// https://github.com/haya14busa/reviewdog/pull/2
-	owner := "haya14busa"
-	repo := "reviewdog"
-	pr := 2
-	sha := "cce89afa9ac5519a7f5b1734db2e3aa776b138a7"
-
-	g, err := NewGitHubPullReqest(cli, owner, repo, pr, sha)
-	if err != nil {
-		t.Fatal(err)
-	}
-	comment := &Comment{
-		CheckResult: &CheckResult{
-			Path: "reviewdog.go",
-		},
-		LnumDiff: 17,
-		Body:     "[reviewdog] test",
-	}
-	// https://github.com/haya14busa/reviewdog/pull/2/files#diff-ed1d019a10f54464cfaeaf6a736b7d27L20
-	if err := g.Post(context.Background(), comment); err != nil {
-		t.Error(err)
-	}
-	if err := g.Flush(context.Background()); err != nil {
-		t.Error(err)
-	}
-	if apiCalled != 2 {
-		t.Errorf("API should be called 2 times, but %v times", apiCalled)
-	}
-}
-
 func TestGitHubPullRequest_Post_Flush_review_api(t *testing.T) {
 	apiCalled := 0
 	mux := http.NewServeMux()
