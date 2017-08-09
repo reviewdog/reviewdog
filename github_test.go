@@ -199,6 +199,9 @@ func TestGitHubPullRequest_Post_Flush_review_api(t *testing.T) {
 		if req.Body != nil {
 			t.Errorf("PullRequestReviewRequest.Body = %v, want empty", *req.Body)
 		}
+		if *req.CommitID != "sha" {
+			t.Errorf("PullRequestReviewRequest.Body = %v, want empty", *req.Body)
+		}
 		want := []*github.DraftReviewComment{
 			{
 				Path:     github.String("reviewdog.go"),
@@ -213,14 +216,9 @@ func TestGitHubPullRequest_Post_Flush_review_api(t *testing.T) {
 	ts := httptest.NewServer(mux)
 	defer ts.Close()
 
-	// modify githubAPIHost to use GitHub Review API
-	defer func(h string) { githubAPIHost = h }(githubAPIHost)
-	u, _ := url.Parse(ts.URL)
-	githubAPIHost = u.Host
-
 	cli := github.NewClient(nil)
 	cli.BaseURL, _ = url.Parse(ts.URL)
-	g, err := NewGitHubPullReqest(cli, "o", "r", 14, "")
+	g, err := NewGitHubPullReqest(cli, "o", "r", 14, "sha")
 	if err != nil {
 		t.Fatal(err)
 	}
