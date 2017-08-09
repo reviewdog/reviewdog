@@ -130,6 +130,7 @@ func (g *GitHubPullRequest) postAsReviewComment(ctx context.Context) error {
 	// TODO(haya14busa): it might be useful to report overview results by "body"
 	// field.
 	review := &github.PullRequestReviewRequest{
+		CommitID: &g.sha,
 		Event:    github.String("COMMENT"),
 		Comments: comments,
 	}
