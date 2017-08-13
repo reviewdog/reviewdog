@@ -164,31 +164,14 @@ func (g *GitHubPullRequest) setPostedComment(ctx context.Context) error {
 	return nil
 }
 
-// Diff returns a diff of PullRequest. It runs `git diff` locally instead of
-// diff_url of GitHub Pull Request because diff of diff_url is not suited for
-// comment API in a sense that diff of diff_url is equivalent to
-// `git diff --no-renames`, we want diff which is equivalent to
-// `git diff --find-renames`.
+// Diff returns a diff of PullRequest.
 func (g *GitHubPullRequest) Diff(ctx context.Context) ([]byte, error) {
-	pr, _, err := g.cli.PullRequests.Get(ctx, g.owner, g.repo, g.pr)
+	opt := github.RawOptions{Type: github.Diff}
+	d, _, err := g.cli.PullRequests.GetRaw(ctx, g.owner, g.repo, g.pr, opt)
 	if err != nil {
 		return nil, err
 	}
-	return g.gitDiff(ctx, *pr.Base.SHA)
-}
-
-func (g *GitHubPullRequest) gitDiff(ctx context.Context, baseSha string) ([]byte, error) {
-	b, err := exec.Command("git", "merge-base", g.sha, baseSha).Output()
-	if err != nil {
-		return nil, fmt.Errorf("failed to get merge-base commit: %v", err)
-	}
-	mergeBase := strings.Trim(string(b), "\n")
-	relArg := fmt.Sprintf("--relative=%s", g.wd)
-	bytes, err := exec.Command("git", "diff", relArg, "--find-renames", mergeBase, g.sha).Output()
-	if err != nil {
-		return nil, fmt.Errorf("failed to run git diff: %v", err)
-	}
-	return bytes, nil
+	return []byte(d), nil
 }
 
 // Strip returns 1 as a strip of git diff.
