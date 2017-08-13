@@ -1,17 +1,16 @@
 package reviewdog
 
 import (
-	"bytes"
 	"context"
 	"encoding/json"
 	"net/http"
 	"net/http/httptest"
 	"net/url"
 	"os"
+	"strings"
 	"testing"
 
 	"github.com/google/go-github/github"
-	"github.com/haya14busa/reviewdog/diff"
 	"github.com/kylelemons/godebug/pretty"
 	"golang.org/x/oauth2"
 )
@@ -305,17 +304,32 @@ func TestGitHubPullReqest_workdir(t *testing.T) {
 	}
 }
 
-func TestGitHubPullRequest_GitDiff(t *testing.T) {
-	g, err := NewGitHubPullReqest(nil, "", "", 0, "HEAD")
+func TestGitHubPullRequest_Diff_fake(t *testing.T) {
+	apiCalled := 0
+	mux := http.NewServeMux()
+	mux.HandleFunc("/repos/o/r/pulls/14", func(w http.ResponseWriter, r *http.Request) {
+		apiCalled++
+		if r.Method != "GET" {
+			t.Errorf("unexpected access: %v %v", r.Method, r.URL)
+		}
+		if accept := r.Header.Get("Accept"); !strings.Contains(accept, "diff") {
+			t.Errorf("Accept header doesn't contain 'diff': %v", accept)
+		}
+		w.Write([]byte("Pull Request diff"))
+	})
+	ts := httptest.NewServer(mux)
+	defer ts.Close()
+
+	cli := github.NewClient(nil)
+	cli.BaseURL, _ = url.Parse(ts.URL)
+	g, err := NewGitHubPullReqest(cli, "o", "r", 14, "sha")
 	if err != nil {
 		t.Fatal(err)
 	}
-	b, err := g.gitDiff(context.Background(), "HEAD~")
-	if err != nil {
+	if _, err := g.Diff(context.Background()); err != nil {
 		t.Fatal(err)
 	}
-	// check output diff can be parsed.
-	if _, err := diff.ParseMultiFile(bytes.NewReader(b)); err != nil {
-		t.Fatal(err)
+	if apiCalled != 1 {
+		t.Errorf("GitHub API should be called once; called %v times", apiCalled)
 	}
 }
