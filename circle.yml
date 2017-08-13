@@ -1,6 +1,6 @@
 machine:
   environment:
-    REVIEWDOG_VERSION: 0.9.7
+    REVIEWDOG_VERSION: 0.9.8
 
 dependencies:
   override:

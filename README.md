@@ -224,7 +224,7 @@ Example:
 env:
   global:
     - secure: xxxxxxxxxxxxx
-    - REVIEWDOG_VERSION=0.9.7
+    - REVIEWDOG_VERSION=0.9.8
 
 install:
   - mkdir -p ~/bin/ && export export PATH="~/bin/:$PATH"
@@ -260,7 +260,7 @@ circle.yml sample
 ```yaml
 machine:
   environment:
-    REVIEWDOG_VERSION: 0.9.7
+    REVIEWDOG_VERSION: 0.9.8
 
 dependencies:
   override:
