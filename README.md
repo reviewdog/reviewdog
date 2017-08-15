@@ -166,7 +166,7 @@ Output format for project config based run is one of following formats.
 ### Run locally
 
 reviewdog can find new introduced warnings or error by filtering linter results
-using diff. You can pass diff comamnd as `-diff` arg, like `-diff="git diff"`,
+using diff. You can pass diff command as `-diff` arg, like `-diff="git diff"`,
 `-diff="git diff master"`, etc... when you use reviewdog in local environment.
 
 ### Working with GitHub and CI services
