@@ -276,7 +276,7 @@ func githubClient(ctx context.Context, token string) (*github.Client, error) {
 	return client, err
 }
 
-const defaultGitHubAPI = "https://api.github.com"
+const defaultGitHubAPI = "https://api.github.com/"
 
 func githubBaseURL() (*url.URL, error) {
 	baseURL := os.Getenv("GITHUB_API")
