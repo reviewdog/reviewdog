@@ -384,15 +384,14 @@ func droneio() (g *GitHubPR, isPR bool, err error) {
 	if err != nil {
 		return nil, true, fmt.Errorf("unexpected env variable (DRONE_PULL_REQUEST): %v", prs)
 	}
-	reposlug, err := nonEmptyEnv("DRONE_REPO") // e.g. haya14busa/reviewdog
+	owner, err := nonEmptyEnv("DRONE_REPO_OWNER")
 	if err != nil {
 		return nil, true, err
 	}
-	rss := strings.SplitN(reposlug, "/", 2)
-	if len(rss) < 2 {
-		return nil, true, fmt.Errorf("unexpected env variable. DRONE_REPO=%v", reposlug)
+	repo, err := nonEmptyEnv("DRONE_REPO_NAME")
+	if err != nil {
+		return nil, true, err
 	}
-	owner, repo := rss[0], rss[1]
 	sha, err := nonEmptyEnv("DRONE_COMMIT")
 	if err != nil {
 		return nil, true, err
