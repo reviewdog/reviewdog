@@ -3,7 +3,7 @@
 #
 build:
   test:
-    image: golang
+    image: golang:1.9
     commands:
       - go get -u github.com/golang/dep/...
       - dep ensure
