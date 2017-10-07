@@ -384,14 +384,25 @@ func droneio() (g *GitHubPR, isPR bool, err error) {
 	if err != nil {
 		return nil, true, fmt.Errorf("unexpected env variable (DRONE_PULL_REQUEST): %v", prs)
 	}
-	owner, err := nonEmptyEnv("DRONE_REPO_OWNER")
-	if err != nil {
-		return nil, true, err
+
+	owner, errOwner := nonEmptyEnv("DRONE_REPO_OWNER")
+	repo, errRepo := nonEmptyEnv("DRONE_REPO_NAME")
+	repoSlug, errSlug := nonEmptyEnv("DRONE_REPO")
+
+	if (errOwner != nil || errRepo != nil) && errSlug != nil {
+		return nil, true, fmt.Errorf("unable to detect repo and owner\n - %v\n - %v\n - %v", errOwner, errRepo, errSlug)
 	}
-	repo, err := nonEmptyEnv("DRONE_REPO_NAME")
-	if err != nil {
-		return nil, true, err
+
+	// Try to detect using env variable available in drone<=0.4
+	if errSlug == nil {
+		rss := strings.SplitN(repoSlug, "/", 2)
+		if len(rss) < 2 {
+			return nil, true, fmt.Errorf("unexpected env variable. DRONE_REPO=%v", repoSlug)
+		}
+
+		owner, repo = rss[0], rss[1]
 	}
+
 	sha, err := nonEmptyEnv("DRONE_COMMIT")
 	if err != nil {
 		return nil, true, err
