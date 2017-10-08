@@ -17,9 +17,9 @@ build:
     commands:
       - go get github.com/haya14busa/reviewdog/cmd/reviewdog
       - go get github.com/golang/lint/golint
-      - go get honnef.co/go/unused/cmd/unused
-      - go get honnef.co/go/simple/cmd/gosimple
-      - go get honnef.co/go/staticcheck/cmd/staticcheck
+      - go get honnef.co/go/tools/cmd/unused
+      - go get honnef.co/go/tools/cmd/gosimple
+      - go get honnef.co/go/tools/cmd/staticcheck
       - go get github.com/kisielk/errcheck
       - reviewdog -ci=droneio
         # test
