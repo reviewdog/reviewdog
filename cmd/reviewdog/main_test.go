@@ -315,6 +315,8 @@ func TestDroneio(t *testing.T) {
 	envs := []string{
 		"DRONE_PULL_REQUEST",
 		"DRONE_REPO",
+		"DRONE_REPO_OWNER",
+		"DRONE_REPO_NAME",
 		"DRONE_COMMIT",
 		"REVIEWDOG_GITHUB_API_TOKEN",
 	}
@@ -349,19 +351,35 @@ func TestDroneio(t *testing.T) {
 		t.Log(err)
 	}
 
+	// Drone <= 0.4 without valid repo
 	os.Setenv("DRONE_REPO", "invalid")
 	if _, _, err := droneio(); err == nil {
 		t.Error("error expected but got nil")
 	} else {
 		t.Log(err)
 	}
+	os.Unsetenv("DRONE_REPO")
 
-	os.Setenv("DRONE_REPO", "haya14busa/reviewdog")
+	// Drone > 0.4 without DRONE_REPO_NAME
+	os.Setenv("DRONE_REPO_OWNER", "haya14busa")
 	if _, _, err := droneio(); err == nil {
 		t.Error("error expected but got nil")
 	} else {
 		t.Log(err)
 	}
+	os.Unsetenv("DRONE_REPO_OWNER")
+
+	// Drone > 0.4 without DRONE_REPO_OWNER
+	os.Setenv("DRONE_REPO_NAME", "reviewdog")
+	if _, _, err := droneio(); err == nil {
+		t.Error("error expected but got nil")
+	} else {
+		t.Log(err)
+	}
+
+	// Drone > 0.4 have valid variables
+	os.Setenv("DRONE_REPO_NAME", "reviewdog")
+	os.Setenv("DRONE_REPO_OWNER", "haya14busa")
 
 	os.Setenv("DRONE_COMMIT", "sha1")
 	g, isPR, err := droneio()
