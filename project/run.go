@@ -41,7 +41,9 @@ func Run(ctx context.Context, conf *Config, c reviewdog.CommentService, d review
 		if err != nil {
 			return err
 		}
-		log.Printf("Start\t%q", cmdName)
+		if verbose {
+			log.Printf("Start\t%q", cmdName)
+		}
 		if err := cmd.Start(); err != nil {
 			return fmt.Errorf("fail to start command: %v", err)
 		}
