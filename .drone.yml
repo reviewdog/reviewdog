@@ -21,6 +21,7 @@ build:
       - go get honnef.co/go/tools/cmd/gosimple
       - go get honnef.co/go/tools/cmd/staticcheck
       - go get github.com/kisielk/errcheck
+      - go get mvdan.cc/unparam
       - reviewdog -ci=droneio
         # test
       - cd _testdata && golint . | reviewdog -f=golint -ci=droneio
