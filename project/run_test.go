@@ -37,7 +37,7 @@ func TestRun(t *testing.T) {
 
 	t.Run("empty", func(t *testing.T) {
 		conf := &Config{}
-		if err := Run(ctx, conf, nil, nil); err != nil {
+		if err := Run(ctx, conf, nil, nil, false); err != nil {
 			t.Error(err)
 		}
 	})
@@ -48,7 +48,7 @@ func TestRun(t *testing.T) {
 				"test": {},
 			},
 		}
-		if err := Run(ctx, conf, nil, nil); err == nil {
+		if err := Run(ctx, conf, nil, nil, false); err == nil {
 			t.Error("want error, got nil")
 		} else {
 			t.Log(err)
@@ -69,7 +69,7 @@ func TestRun(t *testing.T) {
 				},
 			},
 		}
-		if err := Run(ctx, conf, nil, ds); err == nil {
+		if err := Run(ctx, conf, nil, ds, false); err == nil {
 			t.Error("want error, got nil")
 		} else {
 			t.Log(err)
@@ -95,7 +95,7 @@ func TestRun(t *testing.T) {
 				},
 			},
 		}
-		if err := Run(ctx, conf, cs, ds); err != nil {
+		if err := Run(ctx, conf, cs, ds, false); err != nil {
 			t.Error(err)
 		}
 	})
@@ -119,7 +119,7 @@ func TestRun(t *testing.T) {
 				},
 			},
 		}
-		if err := Run(ctx, conf, cs, ds); err != nil {
+		if err := Run(ctx, conf, cs, ds, false); err != nil {
 			t.Error(err)
 		}
 	})

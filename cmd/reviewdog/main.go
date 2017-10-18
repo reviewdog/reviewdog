@@ -7,6 +7,7 @@ import (
 	"fmt"
 	"io"
 	"io/ioutil"
+	"log"
 	"net/http"
 	"net/url"
 	"os"
@@ -25,7 +26,7 @@ import (
 	"github.com/haya14busa/errorformat/fmts"
 	"github.com/haya14busa/reviewdog"
 	"github.com/haya14busa/reviewdog/project"
-	"github.com/mattn/go-shellwords"
+	shellwords "github.com/mattn/go-shellwords"
 )
 
 const version = "0.9.8"
@@ -47,6 +48,7 @@ type option struct {
 	name      string // tool name which is used in comment
 	ci        string
 	conf      string
+	verbose   bool
 }
 
 // flags doc
@@ -90,6 +92,7 @@ func init() {
 	flag.StringVar(&opt.name, "name", "", nameDoc)
 	flag.StringVar(&opt.ci, "ci", "", ciDoc)
 	flag.StringVar(&opt.conf, "conf", "reviewdog.yml", confDoc)
+	flag.BoolVar(&opt.verbose, "verbose", false, "verbose output")
 }
 
 func usage() {
@@ -166,7 +169,7 @@ func run(r io.Reader, w io.Writer, opt *option) error {
 		if err != nil {
 			return fmt.Errorf("config is invalid: %v", err)
 		}
-		return project.Run(ctx, conf, cs, ds)
+		return project.Run(ctx, conf, cs, ds, opt.verbose)
 	}
 
 	p, err := reviewdog.NewParser(&reviewdog.ParserOpt{FormatName: opt.f, Errorformat: opt.efms})
@@ -246,6 +249,8 @@ func githubService(ctx context.Context, ci string) (githubservice *reviewdog.Git
 	if !isPR {
 		return nil, isPR, nil
 	}
+
+	_ = opt.verbose && vlog(fmt.Sprintf("GitHub PullRequest target: %s", g))
 
 	client, err := githubClient(ctx, token)
 	if err != nil {
@@ -456,6 +461,11 @@ type GitHubPR struct {
 	sha   string
 }
 
+func (g *GitHubPR) String() string {
+	return fmt.Sprintf("https://github.com/%s/%s/pull/%d/commits/%s",
+		g.owner, g.repo, g.pr, g.sha)
+}
+
 func nonEmptyEnv(env string) (string, error) {
 	v := os.Getenv(env)
 	if v == "" {
@@ -473,4 +483,17 @@ func (ss *strslice) String() string {
 func (ss *strslice) Set(value string) error {
 	*ss = append(*ss, value)
 	return nil
+}
+
+// vlog is debug util func for verbose logging.
+// Usage:
+// _ = opt.verbose && vlog("msg")
+func vlog(msg string) bool {
+	log.Println(msg)
+	return true
+}
+
+func vlogf(format string, a ...interface{}) bool {
+	log.Printf(format, a...)
+	return true
 }
