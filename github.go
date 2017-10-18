@@ -11,6 +11,10 @@ import (
 	"github.com/google/go-github/github"
 )
 
+func f(x int, unused bool) int {
+	return x * x
+}
+
 var _ = github.ScopeAdminOrg
 
 var _ CommentService = &GitHubPullRequest{}
