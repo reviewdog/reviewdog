@@ -330,10 +330,14 @@ func travis() (g *GitHubPR, isPR bool, err error) {
 // https://circleci.com/docs/environment-variables/
 func circleci() (g *GitHubPR, isPR bool, err error) {
 	var prs string // pull request number in string
-	// For Pull Request from a same repository
+	// For Pull Request from a same repository (CircleCI 2.0)
 	// e.g. https: //github.com/haya14busa/reviewdog/pull/6
 	// it might be better to support CI_PULL_REQUESTS instead.
-	prs = os.Getenv("CI_PULL_REQUEST")
+	prs = os.Getenv("CIRCLE_PULL_REQUEST")
+	if prs == "" {
+		// For the backward compatibility with CircleCI 1.0.
+		prs = os.Getenv("CI_PULL_REQUEST")
+	}
 	if prs == "" {
 		// For Pull Request by a fork repository
 		// e.g. 6
