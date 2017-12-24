@@ -89,7 +89,7 @@ func init() {
 	flag.BoolVar(&opt.list, "list", false, listDoc)
 	flag.StringVar(&opt.name, "name", "", nameDoc)
 	flag.StringVar(&opt.ci, "ci", "", ciDoc)
-	flag.StringVar(&opt.conf, "conf", "reviewdog.yml", confDoc)
+	flag.StringVar(&opt.conf, "conf", "", confDoc)
 }
 
 func usage() {
@@ -158,7 +158,7 @@ func run(r io.Reader, w io.Writer, opt *option) error {
 	}
 
 	if isProject {
-		b, err := ioutil.ReadFile(opt.conf)
+		b, err := readConf(opt.conf)
 		if err != nil {
 			return fmt.Errorf("fail to open config: %v", err)
 		}
@@ -473,4 +473,25 @@ func (ss *strslice) String() string {
 func (ss *strslice) Set(value string) error {
 	*ss = append(*ss, value)
 	return nil
+}
+
+func readConf(conf string) (bytes []byte, err error) {
+	var fs []string
+	if conf != "" {
+		fs = []string{conf}
+	} else {
+		fs = []string{
+			".reviewdog.yaml",
+			".reviewdog.yml",
+			"reviewdog.yaml",
+			"reviewdog.yml",
+		}
+	}
+	for _, f := range fs {
+		bytes, err = ioutil.ReadFile(f)
+		if err == nil {
+			return
+		}
+	}
+	return
 }
