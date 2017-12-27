@@ -25,7 +25,7 @@ import (
 	"github.com/haya14busa/errorformat/fmts"
 	"github.com/haya14busa/reviewdog"
 	"github.com/haya14busa/reviewdog/project"
-	"github.com/mattn/go-shellwords"
+	shellwords "github.com/mattn/go-shellwords"
 )
 
 const version = "0.9.8"
@@ -476,18 +476,18 @@ func (ss *strslice) Set(value string) error {
 }
 
 func readConf(conf string) (bytes []byte, err error) {
-	var fs []string
+	var conffiles []string
 	if conf != "" {
-		fs = []string{conf}
+		conffiles = []string{conf}
 	} else {
-		fs = []string{
+		conffiles = []string{
 			".reviewdog.yaml",
 			".reviewdog.yml",
 			"reviewdog.yaml",
 			"reviewdog.yml",
 		}
 	}
-	for _, f := range fs {
+	for _, f := range conffiles {
 		bytes, err = ioutil.ReadFile(f)
 		if err == nil {
 			return
