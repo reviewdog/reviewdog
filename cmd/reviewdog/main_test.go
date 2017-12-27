@@ -141,7 +141,7 @@ func TestRun_project(t *testing.T) {
 			defer f.Close()
 			defer os.Remove(n)
 			if _, err := readConf(n); err != nil {
-				t.Error("want nil, got err:", err)
+				t.Errorf("readConf(%q) got unexpected err: %v", n, err)
 			}
 		}
 	})

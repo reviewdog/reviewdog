@@ -475,7 +475,7 @@ func (ss *strslice) Set(value string) error {
 	return nil
 }
 
-func readConf(conf string) (bytes []byte, err error) {
+func readConf(conf string) ([]byte, error) {
 	var conffiles []string
 	if conf != "" {
 		conffiles = []string{conf}
@@ -488,10 +488,10 @@ func readConf(conf string) (bytes []byte, err error) {
 		}
 	}
 	for _, f := range conffiles {
-		bytes, err = ioutil.ReadFile(f)
+		bytes, err := ioutil.ReadFile(f)
 		if err == nil {
-			return
+			return bytes, nil
 		}
 	}
-	return
+	return nil, errors.New(".reviewdog.yml not found")
 }
