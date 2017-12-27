@@ -124,12 +124,12 @@ $ <linter> | <convert-to-checkstyle> | reviewdog -f=checkstyle -name="<linter>" 
 
 [experimental]
 
-reviewdog can also be controlled via the reviewdog.yml configuration file instead of "-f" or "-efm" arguments.
+reviewdog can also be controlled via the .reviewdog.yml configuration file instead of "-f" or "-efm" arguments.
 
-With reviewdog.yml, you can run the same commands both CI service and local
+With .reviewdog.yml, you can run the same commands both CI service and local
 environment including editor intergration with ease.
 
-#### reviewdog.yml
+#### .reviewdog.yml
 
 ```yaml
 runner:
@@ -154,7 +154,7 @@ project/run_test.go:61:28: [golint] error strings should not end with punctuatio
 project/run.go:57:18: [errcheck]        defer os.Setenv(name, os.Getenv(name))
 project/run.go:58:12: [errcheck]        os.Setenv(name, "")
 # You can use -conf to specify config file path.
-$ reviewdog -ci=droneio -conf=./reviewdog.yml
+$ reviewdog -ci=droneio -conf=./.reviewdog.yml
 ```
 
 Output format for project config based run is one of following formats.
@@ -344,7 +344,7 @@ $ export CI_REPO_NAME=reviewdog
 $ export CI_COMMIT=${ghprbActualCommit}
 $ export REVIEWDOG_GITHUB_API_TOKEN="<your token>"
 $ export REVIEWDOG_INSECURE_SKIP_VERIFY=true # set this as you need
-$ reviewdog -ci=common -conf=reviewdog.yml
+$ reviewdog -ci=common -conf=.reviewdog.yml
 ```
 
 ## :bird: Author
