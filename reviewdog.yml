@@ -23,3 +23,7 @@ runner:
     cmd: staticcheck $(go list ./... | grep -v /vendor/)
     errorformat:
       - "%f:%l:%c: %m"
+  unparam:
+    cmd: unparam $(go list ./... | grep -v /vendor/)
+    errorformat:
+      - "%f:%l:%c: %m"
