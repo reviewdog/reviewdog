@@ -131,6 +131,20 @@ func TestRun_project(t *testing.T) {
 			t.Errorf("got unexpected err: %v", err)
 		}
 	})
+
+	t.Run("conffile allows to be prefixed with '.' and '.yaml' file extension", func(t *testing.T) {
+		for _, n := range []string{".reviewdog.yml", "reviewdog.yaml"} {
+			f, err := os.OpenFile(n, os.O_RDONLY|os.O_CREATE, 0666)
+			if err != nil {
+				t.Fatal(err)
+			}
+			defer f.Close()
+			defer os.Remove(n)
+			if _, err := readConf(n); err != nil {
+				t.Errorf("readConf(%q) got unexpected err: %v", n, err)
+			}
+		}
+	})
 }
 
 func TestRun_travis(t *testing.T) {

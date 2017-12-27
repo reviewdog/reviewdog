@@ -25,7 +25,7 @@ import (
 	"github.com/haya14busa/errorformat/fmts"
 	"github.com/haya14busa/reviewdog"
 	"github.com/haya14busa/reviewdog/project"
-	"github.com/mattn/go-shellwords"
+	shellwords "github.com/mattn/go-shellwords"
 )
 
 const version = "0.9.8"
@@ -89,7 +89,7 @@ func init() {
 	flag.BoolVar(&opt.list, "list", false, listDoc)
 	flag.StringVar(&opt.name, "name", "", nameDoc)
 	flag.StringVar(&opt.ci, "ci", "", ciDoc)
-	flag.StringVar(&opt.conf, "conf", "reviewdog.yml", confDoc)
+	flag.StringVar(&opt.conf, "conf", "", confDoc)
 }
 
 func usage() {
@@ -158,7 +158,7 @@ func run(r io.Reader, w io.Writer, opt *option) error {
 	}
 
 	if isProject {
-		b, err := ioutil.ReadFile(opt.conf)
+		b, err := readConf(opt.conf)
 		if err != nil {
 			return fmt.Errorf("fail to open config: %v", err)
 		}
@@ -477,4 +477,25 @@ func (ss *strslice) String() string {
 func (ss *strslice) Set(value string) error {
 	*ss = append(*ss, value)
 	return nil
+}
+
+func readConf(conf string) ([]byte, error) {
+	var conffiles []string
+	if conf != "" {
+		conffiles = []string{conf}
+	} else {
+		conffiles = []string{
+			".reviewdog.yaml",
+			".reviewdog.yml",
+			"reviewdog.yaml",
+			"reviewdog.yml",
+		}
+	}
+	for _, f := range conffiles {
+		bytes, err := ioutil.ReadFile(f)
+		if err == nil {
+			return bytes, nil
+		}
+	}
+	return nil, errors.New(".reviewdog.yml not found")
 }
