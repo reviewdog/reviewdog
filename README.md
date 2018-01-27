@@ -189,7 +189,7 @@ Export the token environment variable by secure way, depending on CI services.
 For GitHub Enterprise, please set API endpoint by environment variable.
 
 ```
-export GITHUB_API="https://example.githubenterprise.com/api/v3"
+export GITHUB_API="https://example.githubenterprise.com/api/v3/"
 ```
 
 #### Supported CI services
