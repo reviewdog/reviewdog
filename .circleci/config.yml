@@ -2,7 +2,7 @@ version: 2
 
 jobs:
   build:
-    working_directory: ~/danger-js
+    working_directory: ~/reviewdog
     docker:
       - image: golang:latest
         environment:
