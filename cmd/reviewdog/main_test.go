@@ -307,7 +307,7 @@ func TestCircleci(t *testing.T) {
 	if !isPR {
 		t.Error("should be pull request build")
 	}
-	want := &GitHubPR{
+	want := &RequestInfo{
 		owner: "haya14busa",
 		repo:  "reviewdog",
 		pr:    1,
@@ -403,7 +403,7 @@ func TestDroneio(t *testing.T) {
 	if !isPR {
 		t.Error("should be pull request build")
 	}
-	want := &GitHubPR{
+	want := &RequestInfo{
 		owner: "haya14busa",
 		repo:  "reviewdog",
 		pr:    1,
@@ -482,7 +482,7 @@ func TestCommonci(t *testing.T) {
 	if !isPR {
 		t.Error("should be pull request build")
 	}
-	want := &GitHubPR{
+	want := &RequestInfo{
 		owner: "haya14busa",
 		repo:  "reviewdog",
 		pr:    1,

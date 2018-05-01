@@ -26,6 +26,16 @@
   revision = "793e2bf5248a576ef25094e00b41dc021cca0550"
 
 [[projects]]
+  name = "github.com/haya14busa/reviewdog"
+  packages = [
+    ".",
+    "diff",
+    "project"
+  ]
+  revision = "6104ffcc538144a06d1bb8dd1b2e66542108fbb1"
+  version = "0.9.8"
+
+[[projects]]
   branch = "master"
   name = "github.com/kylelemons/godebug"
   packages = ["diff","pretty"]
@@ -36,6 +46,12 @@
   packages = ["."]
   revision = "02e3cf038dcea8290e44424da473dd12be796a8a"
   version = "v1.0.3"
+
+[[projects]]
+  name = "github.com/xanzy/go-gitlab"
+  packages = ["."]
+  revision = "109fd962a3876c6e486a5bc9507289d060e3c587"
+  version = "v0.9.0"
 
 [[projects]]
   branch = "master"
@@ -70,6 +86,6 @@
 [solve-meta]
   analyzer-name = "dep"
   analyzer-version = 1
-  inputs-digest = "b77019b667fcfdee82a633320d01d250a44fdcafbbd196ce3b9afed059e2c6a0"
+  inputs-digest = "b599854e3899c3f4ac942c18e0df363d326baf00a78258a588e14838ed0a5fef"
   solver-name = "gps-cdcl"
   solver-version = 1

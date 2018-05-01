@@ -10,7 +10,7 @@ import (
 
 	"golang.org/x/sync/errgroup"
 
-	"github.com/haya14busa/reviewdog"
+	"github.com/nakatanakatana/reviewdog"
 )
 
 // Run runs reviewdog tasks based on Config.
@@ -54,6 +54,7 @@ func Run(ctx context.Context, conf *Config, c reviewdog.CommentService, d review
 
 var secretEnvs = [...]string{
 	"REVIEWDOG_GITHUB_API_TOKEN",
+	"REVIEWDOG_GITLAB_API_TOKEN",
 }
 
 func filteredEnviron() []string {

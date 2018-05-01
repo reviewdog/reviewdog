@@ -23,9 +23,10 @@ import (
 
 	"github.com/google/go-github/github"
 	"github.com/haya14busa/errorformat/fmts"
-	"github.com/haya14busa/reviewdog"
-	"github.com/haya14busa/reviewdog/project"
+	"github.com/nakatanakatana/reviewdog"
+	"github.com/nakatanakatana/reviewdog/project"
 	shellwords "github.com/mattn/go-shellwords"
+	"github.com/xanzy/go-gitlab"
 )
 
 const version = "0.9.8"
@@ -68,6 +69,13 @@ const (
 
 		if you want to skip verifing SSL (please use this at your own risk)
 			export REVIEWDOG_INSECURE_SKIP_VERIFY=true
+
+	GitLab.com/self hosted Gitlab:
+		You need to set REVIEWDOG_GITLAB_API_TOKEN environment variable.
+		Go to https://gitlab.com/profile/personal_access_tokens 
+
+		For self hosted GitLab:
+			export GITLAB_API="https://example.gitlab.com/api/v4"
 
 	"common" requires following environment variables
 		CI_PULL_REQUEST	Pull Request number (e.g. 14)
@@ -140,6 +148,17 @@ func run(r io.Reader, w io.Writer, opt *option) error {
 			}
 			if !isPR {
 				fmt.Fprintf(os.Stderr, "this is not PullRequest build. CI: %v\n", opt.ci)
+				return nil
+			}
+			cs = reviewdog.MultiCommentService(gs, cs)
+			ds = gs
+		} else if os.Getenv("REVIEWDOG_GITLAB_API_TOKEN") != "" {
+			gs, isPR, err := gitlabService(ctx, opt.ci)
+			if err != nil {
+				return err
+			}
+			if !isPR {
+				fmt.Fprintf(os.Stderr, "this is not MergeRequest build. CI: %v\n", opt.ci)
 				return nil
 			}
 			cs = reviewdog.MultiCommentService(gs, cs)
@@ -226,7 +245,7 @@ func githubService(ctx context.Context, ci string) (githubservice *reviewdog.Git
 	if err != nil {
 		return nil, isPR, err
 	}
-	var g *GitHubPR
+	var g *RequestInfo
 	switch ci {
 	case "travis":
 		g, isPR, err = travis()
@@ -290,11 +309,72 @@ func githubBaseURL() (*url.URL, error) {
 	return u, nil
 }
 
+func gitlabService(ctx context.Context, ci string) (gitlabservice *reviewdog.GitLabMergeRequest, isPR bool, err error) {
+	token, err := nonEmptyEnv("REVIEWDOG_GITLAB_API_TOKEN")
+	if err != nil {
+		return nil, isPR, err
+	}
+	var g *RequestInfo
+	switch ci {
+	case "travis":
+		g, isPR, err = travis()
+	case "circle-ci":
+		g, isPR, err = circleci()
+	case "droneio":
+		g, isPR, err = droneio()
+	case "common":
+		g, isPR, err = commonci()
+	default:
+		return nil, isPR, fmt.Errorf("unsupported CI: %v", ci)
+	}
+	if err != nil {
+		return nil, isPR, err
+	}
+	// TODO: support commit build
+	if !isPR {
+		return nil, isPR, nil
+	}
+
+	client, err := gitlabClient(ctx, token)
+	if err != nil {
+		return nil, isPR, err
+	}
+
+	gitlabservice, err = reviewdog.NewGitLabMergeReqest(client, g.owner, g.repo, g.pr, g.sha)
+	if err != nil {
+		return nil, isPR, err
+	}
+	return gitlabservice, isPR, nil
+}
+
+func gitlabClient(_ context.Context, token string) (*gitlab.Client, error) {
+	client := gitlab.NewClient(nil, token)
+	var err error
+	baseURL, err := gitlabBaseURL()
+	client.SetBaseURL(baseURL.String())
+	return client, err
+}
+
+const defaultGitLabAPI = "https://gitlab.com/api/v4"
+
+func gitlabBaseURL() (*url.URL, error){
+	baseURL := os.Getenv("GITLAB_API")
+	if baseURL == "" {
+		baseURL = defaultGitLabAPI
+	}
+	u, err := url.Parse(baseURL)
+	if err != nil {
+		return nil, fmt.Errorf("GitLab base URL is invalid: %v, %v", baseURL, err)
+	}
+	return u, nil
+
+}
+
 func insecureSkipVerify() bool {
 	return os.Getenv("REVIEWDOG_INSECURE_SKIP_VERIFY") == "true"
 }
 
-func travis() (g *GitHubPR, isPR bool, err error) {
+func travis() (g *RequestInfo, isPR bool, err error) {
 	prs := os.Getenv("TRAVIS_PULL_REQUEST")
 	if prs == "false" {
 		return nil, false, nil
@@ -318,7 +398,7 @@ func travis() (g *GitHubPR, isPR bool, err error) {
 		return nil, true, err
 	}
 
-	g = &GitHubPR{
+	g = &RequestInfo{
 		owner: owner,
 		repo:  repo,
 		pr:    pr,
@@ -328,7 +408,7 @@ func travis() (g *GitHubPR, isPR bool, err error) {
 }
 
 // https://circleci.com/docs/environment-variables/
-func circleci() (g *GitHubPR, isPR bool, err error) {
+func circleci() (g *RequestInfo, isPR bool, err error) {
 	var prs string // pull request number in string
 	// For Pull Request from a same repository (CircleCI 2.0)
 	// e.g. https: //github.com/haya14busa/reviewdog/pull/6
@@ -367,7 +447,7 @@ func circleci() (g *GitHubPR, isPR bool, err error) {
 	if err != nil {
 		return nil, true, err
 	}
-	g = &GitHubPR{
+	g = &RequestInfo{
 		owner: owner,
 		repo:  repo,
 		pr:    pr,
@@ -377,7 +457,7 @@ func circleci() (g *GitHubPR, isPR bool, err error) {
 }
 
 // http://readme.drone.io/usage/variables/
-func droneio() (g *GitHubPR, isPR bool, err error) {
+func droneio() (g *RequestInfo, isPR bool, err error) {
 	var prs string // pull request number in string
 	prs = os.Getenv("DRONE_PULL_REQUEST")
 	if prs == "" {
@@ -411,7 +491,7 @@ func droneio() (g *GitHubPR, isPR bool, err error) {
 	if err != nil {
 		return nil, true, err
 	}
-	g = &GitHubPR{
+	g = &RequestInfo{
 		owner: owner,
 		repo:  repo,
 		pr:    pr,
@@ -420,7 +500,7 @@ func droneio() (g *GitHubPR, isPR bool, err error) {
 	return g, true, nil
 }
 
-func commonci() (g *GitHubPR, isPR bool, err error) {
+func commonci() (g *RequestInfo, isPR bool, err error) {
 	var prs string // pull request number in string
 	prs = os.Getenv("CI_PULL_REQUEST")
 	if prs == "" {
@@ -443,7 +523,7 @@ func commonci() (g *GitHubPR, isPR bool, err error) {
 	if err != nil {
 		return nil, true, err
 	}
-	g = &GitHubPR{
+	g = &RequestInfo{
 		owner: owner,
 		repo:  repo,
 		pr:    pr,
@@ -452,8 +532,8 @@ func commonci() (g *GitHubPR, isPR bool, err error) {
 	return g, true, nil
 }
 
-// GitHubPR represents required information about GitHub PullRequest.
-type GitHubPR struct {
+// RequestInfo represents required information about GitHub PullRequest and Gitlab MergeRequest.
+type RequestInfo struct {
 	owner string
 	repo  string
 	pr    int

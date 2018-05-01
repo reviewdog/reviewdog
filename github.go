@@ -3,9 +3,7 @@ package reviewdog
 import (
 	"context"
 	"fmt"
-	"os/exec"
 	"path/filepath"
-	"strings"
 	"sync"
 
 	"github.com/google/go-github/github"
@@ -15,28 +13,6 @@ var _ = github.ScopeAdminOrg
 
 var _ CommentService = &GitHubPullRequest{}
 var _ DiffService = &GitHubPullRequest{}
-
-// `path` to `position`(Lnum for new file) to comment `body`s
-type postedcomments map[string]map[int][]string
-
-// IsPosted returns true if a given comment has been posted in GitHub already,
-// otherwise returns false. It sees comments with same path, same position,
-// and same body as same comments.
-func (p postedcomments) IsPosted(c *Comment) bool {
-	if _, ok := p[c.Path]; !ok {
-		return false
-	}
-	bodys, ok := p[c.Path][c.LnumDiff]
-	if !ok {
-		return false
-	}
-	for _, body := range bodys {
-		if body == commentBody(c) {
-			return true
-		}
-	}
-	return false
-}
 
 // GitHubPullRequest is a comment and diff service for GitHub PullRequest.
 //
@@ -86,16 +62,6 @@ func (g *GitHubPullRequest) Post(_ context.Context, c *Comment) error {
 	return nil
 }
 
-const bodyPrefix = `<sub>reported by [reviewdog](https://github.com/haya14busa/reviewdog) :dog:</sub>`
-
-func commentBody(c *Comment) string {
-	tool := ""
-	if c.ToolName != "" {
-		tool = fmt.Sprintf("**[%s]** ", c.ToolName)
-	}
-	return tool + bodyPrefix + "\n" + c.Body
-}
-
 var githubAPIHost = "api.github.com"
 
 // Flush posts comments which has not been posted yet.
@@ -112,7 +78,7 @@ func (g *GitHubPullRequest) Flush(ctx context.Context) error {
 func (g *GitHubPullRequest) postAsReviewComment(ctx context.Context) error {
 	comments := make([]*github.DraftReviewComment, 0, len(g.postComments))
 	for _, c := range g.postComments {
-		if g.postedcs.IsPosted(c) {
+		if g.postedcs.IsPosted(c, c.LnumDiff) {
 			continue
 		}
 		cbody := commentBody(c)
@@ -185,12 +151,4 @@ func (g *GitHubPullRequest) comment(ctx context.Context) ([]*github.PullRequestC
 		return nil, err
 	}
 	return comments, nil
-}
-
-func gitRelWorkdir() (string, error) {
-	b, err := exec.Command("git", "rev-parse", "--show-prefix").Output()
-	if err != nil {
-		return "", fmt.Errorf("failed to run 'git rev-parse --show-prefix': %v", err)
-	}
-	return strings.Trim(string(b), "\n"), nil
 }
