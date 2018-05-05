@@ -10,7 +10,7 @@ import (
 
 	"golang.org/x/sync/errgroup"
 
-	"github.com/nakatanakatana/reviewdog"
+	"github.com/haya14busa/reviewdog"
 )
 
 // Run runs reviewdog tasks based on Config.

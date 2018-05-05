@@ -23,8 +23,8 @@ import (
 
 	"github.com/google/go-github/github"
 	"github.com/haya14busa/errorformat/fmts"
-	"github.com/nakatanakatana/reviewdog"
-	"github.com/nakatanakatana/reviewdog/project"
+	"github.com/haya14busa/reviewdog"
+	"github.com/haya14busa/reviewdog/project"
 	shellwords "github.com/mattn/go-shellwords"
 	"github.com/xanzy/go-gitlab"
 )

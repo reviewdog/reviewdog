@@ -7,7 +7,7 @@ import (
 	"strings"
 	"testing"
 
-	"github.com/nakatanakatana/reviewdog"
+	"github.com/haya14busa/reviewdog"
 )
 
 type fakeDiffService struct {
