@@ -2,14 +2,14 @@ package reviewdog
 
 import (
 	"context"
+	"encoding/json"
+	"net/http"
+	"net/http/httptest"
 	"os"
 	"testing"
 
-	"github.com/xanzy/go-gitlab"
-	"net/http"
-	"encoding/json"
-	"net/http/httptest"
 	"github.com/kylelemons/godebug/pretty"
+	"github.com/xanzy/go-gitlab"
 )
 
 const noGitlabTokenSkipTestMes = "skipping test (requires actual Personal access tokens. export REVIEWDOG_TEST_GITHUB_API_TOKEN=<GitLab Personal Access Token>)"
@@ -31,7 +31,7 @@ func TestGitLabMergeRequest_Post(t *testing.T) {
 		t.Skip(noGitlabTokenSkipTestMes)
 	}
 
-	// https://gitlab.com/nakatanakatana/reviewdog/pull/2
+	// https://gitlab.com/nakatanakatana/reviewdog/merge_requests/1
 	owner := "nakatanakatana"
 	repo := "reviewdog"
 	pr := 1
@@ -43,12 +43,13 @@ func TestGitLabMergeRequest_Post(t *testing.T) {
 	}
 	comment := &Comment{
 		CheckResult: &CheckResult{
-			Path: "watchdogs.go",
+			Path: "diff.go",
+			Lnum: 22,
 		},
-		LnumDiff: 17,
+		LnumDiff: 11,
 		Body:     "[reviewdog] test",
 	}
-	// https://github.com/haya14busa/reviewdog/pull/2/files#diff-ed1d019a10f54464cfaeaf6a736b7d27L20
+	// https://gitlab.com/nakatanakatana/reviewdog/merge_requests/1
 	if err := g.Post(context.Background(), comment); err != nil {
 		t.Error(err)
 	}
@@ -91,7 +92,7 @@ index 496d0d8..f06d633 100644
  }
 `
 
-	// https://gitlab.com/nakatanakatana/reviewdog/pull/2
+	// https://gitlab.com/nakatanakatana/reviewdog/merge_requests/1
 	owner := "nakatanakatana"
 	repo := "reviewdog"
 	pr := 1
@@ -116,7 +117,7 @@ func TestGitLabMergeRequest_comment(t *testing.T) {
 	if client == nil {
 		t.Skip(notokenSkipTestMes)
 	}
-	// https://gitlab.com/nakatanakatana/reviewdog/pull/2
+	// https://gitlab.com/nakatanakatana/reviewdog/merge_requests/1
 	owner := "nakatanakatana"
 	repo := "reviewdog"
 	pr := 1
@@ -161,7 +162,7 @@ func TestGitLabPullRequest_Post_Flush_review_api(t *testing.T) {
 		}
 		cs := []*gitlab.CommitComment{
 			{
-				Path: "reviewdog.go",
+				Path: "notExistFile.go",
 				Line: 1,
 				Note: bodyPrefix + "\nalready commented",
 			},
@@ -180,7 +181,7 @@ func TestGitLabPullRequest_Post_Flush_review_api(t *testing.T) {
 			t.Error(err)
 		}
 		want := gitlab.CommitComment{
-			Path:     "reviewdog.go",
+			Path:     "notExistFile.go",
 			Line:     14,
 			Note:     bodyPrefix + "\nnew comment",
 			LineType: "new",
@@ -201,20 +202,22 @@ func TestGitLabPullRequest_Post_Flush_review_api(t *testing.T) {
 	if err != nil {
 		t.Fatal(err)
 	}
+	// Path is set to notExistFile path for mock-up test.
+	// If setting exists file path, sha is changed by last commit id.
 	comments := []*Comment{
 		{
 			CheckResult: &CheckResult{
-				Path: "reviewdog.go",
+				Path: "notExistFile.go",
+				Lnum: 1,
 			},
-			LnumDiff: 1,
-			Body:     "already commented",
+			Body: "already commented",
 		},
 		{
 			CheckResult: &CheckResult{
-				Path: "reviewdog.go",
+				Path: "notExistFile.go",
+				Lnum: 14,
 			},
-			LnumDiff: 14,
-			Body:     "new comment",
+			Body: "new comment",
 		},
 	}
 	for _, c := range comments {
@@ -263,4 +266,3 @@ func TestGitLabPullReqest_workdir(t *testing.T) {
 		t.Errorf("wd=%q path=%q, want %q", g.wd, got, wantPath)
 	}
 }
-

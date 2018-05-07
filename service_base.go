@@ -9,7 +9,7 @@ import (
 // `path` to `position`(Lnum for new file) to comment `body`s
 type postedcomments map[string]map[int][]string
 
-// IsPosted returns true if a given comment has been posted in GitHub already,
+// IsPosted returns true if a given comment has been posted in code review service already,
 // otherwise returns false. It sees comments with same path, same position,
 // and same body as same comments.
 func (p postedcomments) IsPosted(c *Comment, lineNum int) bool {

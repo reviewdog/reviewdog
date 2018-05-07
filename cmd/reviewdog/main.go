@@ -72,7 +72,7 @@ const (
 
 	GitLab.com/self hosted Gitlab:
 		You need to set REVIEWDOG_GITLAB_API_TOKEN environment variable.
-		Go to https://gitlab.com/profile/personal_access_tokens 
+		Go to https://gitlab.com/profile/personal_access_tokens
 
 		For self hosted GitLab:
 			export GITLAB_API="https://example.gitlab.com/api/v4"
@@ -240,24 +240,30 @@ func diffService(s string, strip int) (reviewdog.DiffService, error) {
 	return d, nil
 }
 
+func getRequestInfo(ci string) (requestInfo *RequestInfo, isPR bool, err error) {
+	var info *RequestInfo
+	switch ci {
+	case "travis":
+		info, isPR, err = travis()
+	case "circle-ci":
+		info, isPR, err = circleci()
+	case "droneio":
+		info, isPR, err = droneio()
+	case "common":
+		info, isPR, err = commonci()
+	default:
+		return nil, isPR, fmt.Errorf("unsupported CI: %v", ci)
+	}
+	return info, isPR, err
+}
+
 func githubService(ctx context.Context, ci string) (githubservice *reviewdog.GitHubPullRequest, isPR bool, err error) {
 	token, err := nonEmptyEnv("REVIEWDOG_GITHUB_API_TOKEN")
 	if err != nil {
 		return nil, isPR, err
 	}
-	var g *RequestInfo
-	switch ci {
-	case "travis":
-		g, isPR, err = travis()
-	case "circle-ci":
-		g, isPR, err = circleci()
-	case "droneio":
-		g, isPR, err = droneio()
-	case "common":
-		g, isPR, err = commonci()
-	default:
-		return nil, isPR, fmt.Errorf("unsupported CI: %v", ci)
-	}
+
+	g, isPR, err := getRequestInfo(ci)
 	if err != nil {
 		return nil, isPR, err
 	}
@@ -314,19 +320,8 @@ func gitlabService(ctx context.Context, ci string) (gitlabservice *reviewdog.Git
 	if err != nil {
 		return nil, isPR, err
 	}
-	var g *RequestInfo
-	switch ci {
-	case "travis":
-		g, isPR, err = travis()
-	case "circle-ci":
-		g, isPR, err = circleci()
-	case "droneio":
-		g, isPR, err = droneio()
-	case "common":
-		g, isPR, err = commonci()
-	default:
-		return nil, isPR, fmt.Errorf("unsupported CI: %v", ci)
-	}
+
+	g, isPR, err := getRequestInfo(ci)
 	if err != nil {
 		return nil, isPR, err
 	}
@@ -334,7 +329,6 @@ func gitlabService(ctx context.Context, ci string) (gitlabservice *reviewdog.Git
 	if !isPR {
 		return nil, isPR, nil
 	}
-
 	client, err := gitlabClient(ctx, token)
 	if err != nil {
 		return nil, isPR, err
@@ -349,10 +343,14 @@ func gitlabService(ctx context.Context, ci string) (gitlabservice *reviewdog.Git
 
 func gitlabClient(_ context.Context, token string) (*gitlab.Client, error) {
 	client := gitlab.NewClient(nil, token)
-	var err error
 	baseURL, err := gitlabBaseURL()
-	client.SetBaseURL(baseURL.String())
-	return client, err
+	if err != nil {
+		return nil, err
+	}
+	if err := client.SetBaseURL(baseURL.String()); err != nil {
+		return nil, err
+	}
+	return client, nil
 }
 
 const defaultGitLabAPI = "https://gitlab.com/api/v4"
@@ -367,7 +365,6 @@ func gitlabBaseURL() (*url.URL, error){
 		return nil, fmt.Errorf("GitLab base URL is invalid: %v, %v", baseURL, err)
 	}
 	return u, nil
-
 }
 
 func insecureSkipVerify() bool {

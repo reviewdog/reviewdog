@@ -9,7 +9,6 @@ import (
 	"sync"
 
 	"github.com/xanzy/go-gitlab"
-
 	"golang.org/x/sync/errgroup"
 )
 
@@ -19,8 +18,8 @@ var _ DiffService = &GitLabMergeRequest{}
 // GitLabMergeRequest is a comment and diff service for GitLab MergeRequest.
 //
 // API:
-//
-//
+//  https://docs.gitlab.com/ce/api/commits.html#post-comment-to-commit
+//  POST /projects/:id/repository/commits/:sha/comments
 type GitLabMergeRequest struct {
 	cli      *gitlab.Client
 	owner    string
@@ -88,7 +87,7 @@ func (g *GitLabMergeRequest) postCommentsForEach(ctx context.Context) error {
 		eg.Go(func() error {
 			commitID, err := g.getLastCommitsID(comment.Path, comment.Lnum)
 			if err != nil {
-				return err
+				commitID = g.sha
 			}
 			body := commentBody(comment)
 			ltype := "new"
@@ -98,7 +97,8 @@ func (g *GitLabMergeRequest) postCommentsForEach(ctx context.Context) error {
 				Line:     &comment.Lnum,
 				LineType: &ltype,
 			}
-			_, _, err = g.cli.Commits.PostCommitComment(g.projects, commitID, prcomment, nil)
+			a, _, err := g.cli.Commits.PostCommitComment(g.projects, commitID, prcomment, nil)
+			fmt.Println(a)
 			return err
 		})
 	}
@@ -122,7 +122,7 @@ func (g *GitLabMergeRequest) setPostedComment(ctx context.Context) error {
 		return err
 	}
 	for _, c := range cs {
-		if &c.Line == nil || &c.Path == nil || &c.Note == nil {
+		if c.Line == 0 || c.Path == "" || c.Note == "" {
 			// skip resolved comments. Or comments which do not have "path" nor
 			// "body".
 			continue

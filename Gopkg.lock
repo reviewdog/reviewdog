@@ -26,16 +26,6 @@
   revision = "793e2bf5248a576ef25094e00b41dc021cca0550"
 
 [[projects]]
-  name = "github.com/haya14busa/reviewdog"
-  packages = [
-    ".",
-    "diff",
-    "project"
-  ]
-  revision = "6104ffcc538144a06d1bb8dd1b2e66542108fbb1"
-  version = "0.9.8"
-
-[[projects]]
   branch = "master"
   name = "github.com/kylelemons/godebug"
   packages = ["diff","pretty"]
