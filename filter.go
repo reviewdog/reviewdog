@@ -7,12 +7,15 @@ import (
 	"github.com/haya14busa/reviewdog/diff"
 )
 
+// FilteredCheck represents CheckResult with filtering info.
 type FilteredCheck struct {
 	*CheckResult
 	InDiff   bool
 	LnumDiff int
 }
 
+// FilterCheck filters check results by diff. It doesn't not drop check which
+// is not in diff but set FilteredCheck.InDiff field false.
 func FilterCheck(results []*CheckResult, diff []*diff.FileDiff, strip int, wd string) []*FilteredCheck {
 	checks := make([]*FilteredCheck, 0, len(results))
 
@@ -23,7 +26,10 @@ func FilterCheck(results []*CheckResult, diff []*diff.FileDiff, strip int, wd st
 
 		addedline := addedlines.Get(result.Path, result.Lnum)
 		if filepath.IsAbs(result.Path) && wd != "" {
-			result.Path, _ = filepath.Rel(wd, result.Path)
+			relPath, err := filepath.Rel(wd, result.Path)
+			if err == nil {
+				result.Path = relPath
+			}
 		}
 		result.Path = filepath.Clean(result.Path)
 		if addedline != nil {
