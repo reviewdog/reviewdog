@@ -16,6 +16,8 @@ var _ = github.ScopeAdminOrg
 var _ CommentService = &GitHubPullRequest{}
 var _ DiffService = &GitHubPullRequest{}
 
+var X = 1
+
 // `path` to `position`(Lnum for new file) to comment `body`s
 type postedcomments map[string]map[int][]string
 
