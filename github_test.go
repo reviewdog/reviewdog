@@ -216,7 +216,7 @@ func TestGitHubPullRequest_Post_Flush_review_api(t *testing.T) {
 	defer ts.Close()
 
 	cli := github.NewClient(nil)
-	cli.BaseURL, _ = url.Parse(ts.URL)
+	cli.BaseURL, _ = url.Parse(ts.URL + "/")
 	g, err := NewGitHubPullReqest(cli, "o", "r", 14, "sha")
 	if err != nil {
 		t.Fatal(err)
@@ -321,7 +321,7 @@ func TestGitHubPullRequest_Diff_fake(t *testing.T) {
 	defer ts.Close()
 
 	cli := github.NewClient(nil)
-	cli.BaseURL, _ = url.Parse(ts.URL)
+	cli.BaseURL, _ = url.Parse(ts.URL + "/")
 	g, err := NewGitHubPullReqest(cli, "o", "r", 14, "sha")
 	if err != nil {
 		t.Fatal(err)
