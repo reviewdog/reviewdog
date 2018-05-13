@@ -59,6 +59,14 @@ const (
 	nameDoc      = `tool name in review comment. -f is used as tool name if -name is empty`
 	ciDoc        = `CI service ('travis', 'circle-ci', 'droneio'(OSS 0.4) or 'common')
 
+	GitHub with reviewdog GitHub Apps: <experimental>
+		1. Install reviedog Apps. https://github.com/apps/reviewdog
+		2. Set REVIEWDOG_GITHUB_APP_INSTALLATION_ID environment variable.
+			1. Go to https://github.com/settings/installations
+			2. Click "Configure" of reviewdog app
+			3. The last part of URL is installation id.
+				 https://github.com/settings/installations/<INSTALLATION_ID>
+
 	GitHub/GitHub Enterprise:
 		You need to set REVIEWDOG_GITHUB_API_TOKEN environment variable.
 		Go to https://github.com/settings/tokens and create new Personal access token with repo scope.
@@ -122,14 +130,6 @@ func run(r io.Reader, w io.Writer, opt *option) error {
 
 	// assume it's project based run when both -efm ane -f are not specified
 	isProject := len(opt.efms) == 0 && opt.f == ""
-	var conf *project.Config
-	if isProject {
-		var err error
-		conf, err = projectConfig(opt.conf)
-		if err != nil {
-			return err
-		}
-	}
 
 	var cs reviewdog.CommentService
 	var ds reviewdog.DiffService
@@ -141,6 +141,10 @@ func run(r io.Reader, w io.Writer, opt *option) error {
 	}
 
 	if opt.ci != "" {
+		if id := os.Getenv("REVIEWDOG_GITHUB_APP_INSTALLATION_ID"); id != "" {
+			return runDoghouse(ctx, r, id, opt, isProject)
+		}
+
 		if os.Getenv("REVIEWDOG_GITHUB_API_TOKEN") != "" {
 			gs, isPR, err := githubService(ctx, opt.ci)
 			if err != nil {
@@ -166,21 +170,19 @@ func run(r io.Reader, w io.Writer, opt *option) error {
 	}
 
 	if isProject {
+		conf, err := projectConfig(opt.conf)
+		if err != nil {
+			return err
+		}
 		return project.Run(ctx, conf, cs, ds)
 	}
 
-	p, err := reviewdog.NewParser(&reviewdog.ParserOpt{FormatName: opt.f, Errorformat: opt.efms})
+	p, err := newParserFromOpt(opt)
 	if err != nil {
-		return fmt.Errorf("fail to create parser. use either -f or -efm: %v", err)
+		return err
 	}
 
-	// tool name
-	name := opt.name
-	if name == "" && opt.f != "" {
-		name = opt.f
-	}
-
-	app := reviewdog.NewReviewdog(name, p, cs, ds)
+	app := reviewdog.NewReviewdog(toolName(opt), p, cs, ds)
 	return app.Run(ctx, r)
 }
 
@@ -219,6 +221,22 @@ func diffService(s string, strip int) (reviewdog.DiffService, error) {
 	cmd := exec.Command(cmds[0], cmds[1:]...)
 	d := reviewdog.NewDiffCmd(cmd, strip)
 	return d, nil
+}
+
+func getGitHubPR(ci string) (g *GitHubPR, isPR bool, err error) {
+	switch ci {
+	case "travis":
+		g, isPR, err = travis()
+	case "circle-ci":
+		g, isPR, err = circleci()
+	case "droneio":
+		g, isPR, err = droneio()
+	case "common":
+		g, isPR, err = commonci()
+	default:
+		return nil, isPR, fmt.Errorf("unsupported CI: %v", ci)
+	}
+	return g, isPR, err
 }
 
 func githubService(ctx context.Context, ci string) (githubservice *reviewdog.GitHubPullRequest, isPR bool, err error) {
@@ -510,4 +528,20 @@ func readConf(conf string) ([]byte, error) {
 		}
 	}
 	return nil, errors.New(".reviewdog.yml not found")
+}
+
+func newParserFromOpt(opt *option) (reviewdog.Parser, error) {
+	p, err := reviewdog.NewParser(&reviewdog.ParserOpt{FormatName: opt.f, Errorformat: opt.efms})
+	if err != nil {
+		return nil, fmt.Errorf("fail to create parser. use either -f or -efm: %v", err)
+	}
+	return p, err
+}
+
+func toolName(opt *option) string {
+	name := opt.name
+	if name == "" && opt.f != "" {
+		name = opt.f
+	}
+	return name
 }
