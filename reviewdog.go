@@ -25,6 +25,11 @@ func NewReviewdog(toolname string, p Parser, c CommentService, d DiffService) *R
 	return &Reviewdog{p: p, c: c, d: d, toolname: toolname}
 }
 
+func RunFromResult(ctx context.Context, c CommentService, results []*CheckResult,
+	filediffs []*diff.FileDiff, strip int, toolname string) error {
+	return (&Reviewdog{c: c, toolname: toolname}).runFromResult(ctx, results, filediffs, strip)
+}
+
 // CheckResult represents a checked result of static analysis tools.
 // :h error-file-format
 type CheckResult struct {
@@ -67,29 +72,14 @@ type DiffService interface {
 	Strip() int
 }
 
-// Run runs Reviewdog application.
-func (w *Reviewdog) Run(ctx context.Context, r io.Reader) error {
-	results, err := w.p.Parse(r)
-	if err != nil {
-		return fmt.Errorf("parse error: %v", err)
-	}
-
-	d, err := w.d.Diff(ctx)
-	if err != nil {
-		return fmt.Errorf("fail to get diff: %v", err)
-	}
-
-	filediffs, err := diff.ParseMultiFile(bytes.NewReader(d))
-	if err != nil {
-		return fmt.Errorf("fail to parse diff: %v", err)
-	}
-
+func (w *Reviewdog) runFromResult(ctx context.Context, results []*CheckResult,
+	filediffs []*diff.FileDiff, strip int) error {
 	wd, err := os.Getwd()
 	if err != nil {
 		return err
 	}
 
-	checks := FilterCheck(results, filediffs, w.d.Strip(), wd)
+	checks := FilterCheck(results, filediffs, strip, wd)
 	for _, check := range checks {
 		if !check.InDiff {
 			continue
@@ -110,4 +100,24 @@ func (w *Reviewdog) Run(ctx context.Context, r io.Reader) error {
 	}
 
 	return nil
+}
+
+// Run runs Reviewdog application.
+func (w *Reviewdog) Run(ctx context.Context, r io.Reader) error {
+	results, err := w.p.Parse(r)
+	if err != nil {
+		return fmt.Errorf("parse error: %v", err)
+	}
+
+	d, err := w.d.Diff(ctx)
+	if err != nil {
+		return fmt.Errorf("fail to get diff: %v", err)
+	}
+
+	filediffs, err := diff.ParseMultiFile(bytes.NewReader(d))
+	if err != nil {
+		return fmt.Errorf("fail to parse diff: %v", err)
+	}
+
+	return w.runFromResult(ctx, results, filediffs, w.d.Strip())
 }
