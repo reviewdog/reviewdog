@@ -40,6 +40,10 @@ func handleTop(w http.ResponseWriter, r *http.Request) {
 }
 
 func handleCheck(w http.ResponseWriter, r *http.Request) {
+	if r.Method != "POST" {
+		w.WriteHeader(http.StatusMethodNotAllowed)
+		return
+	}
 	var req doghouse.CheckRequest
 	if err := json.NewDecoder(r.Body).Decode(&req); err != nil {
 		w.WriteHeader(http.StatusBadRequest)
