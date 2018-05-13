@@ -46,17 +46,18 @@ func (c *DogHouseClient) Check(req *doghouse.CheckRequest) (*doghouse.CheckRespo
 	}
 	defer httpResp.Body.Close()
 
+	respb, err := ioutil.ReadAll(httpResp.Body)
+	if err != nil {
+		return nil, err
+	}
+
 	if httpResp.StatusCode != http.StatusOK {
-		b, err := ioutil.ReadAll(httpResp.Body)
-		if err != nil {
-			return nil, err
-		}
-		return nil, fmt.Errorf("status=%v: %s", httpResp.StatusCode, b)
+		return nil, fmt.Errorf("status=%v: %s", httpResp.StatusCode, respb)
 	}
 
 	var resp doghouse.CheckResponse
-	if err := json.NewDecoder(httpResp.Body).Decode(&resp); err != nil {
-		return nil, err
+	if err := json.Unmarshal(respb, &resp); err != nil {
+		return nil, fmt.Errorf("failed to decode response: error=%v, resp=%s", err, respb)
 	}
 	return &resp, nil
 }
