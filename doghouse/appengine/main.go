@@ -42,26 +42,26 @@ func handleTop(w http.ResponseWriter, r *http.Request) {
 func handleCheck(w http.ResponseWriter, r *http.Request) {
 	var req doghouse.CheckRequest
 	if err := json.NewDecoder(r.Body).Decode(&req); err != nil {
-		fmt.Fprintf(w, "failed to decode request: %v", err)
 		w.WriteHeader(http.StatusBadRequest)
+		fmt.Fprintf(w, "failed to decode request: %v", err)
 		return
 	}
 	ctx := appengine.NewContext(r)
 	dh, err := server.New(&req, githubAppsPrivateKey, integrationID, urlfetch.Client(ctx))
 	if err != nil {
-		fmt.Fprintln(w, err)
 		w.WriteHeader(http.StatusBadRequest)
+		fmt.Fprintln(w, err)
 		return
 	}
 	res, err := dh.Check(ctx, &req)
 	if err != nil {
-		fmt.Fprintln(w, err)
 		w.WriteHeader(http.StatusBadRequest)
+		fmt.Fprintln(w, err)
 		return
 	}
 	if err := json.NewEncoder(w).Encode(res); err != nil {
-		fmt.Fprintln(w, err)
 		w.WriteHeader(http.StatusBadRequest)
+		fmt.Fprintln(w, err)
 		return
 	}
 }
