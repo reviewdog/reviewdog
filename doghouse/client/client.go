@@ -2,6 +2,7 @@ package client
 
 import (
 	"bytes"
+	"context"
 	"encoding/json"
 	"fmt"
 	"io/ioutil"
@@ -28,7 +29,7 @@ func New(client *http.Client) *DogHouseClient {
 	return dh
 }
 
-func (c *DogHouseClient) Check(req *doghouse.CheckRequest) (*doghouse.CheckResponse, error) {
+func (c *DogHouseClient) Check(ctx context.Context, req *doghouse.CheckRequest) (*doghouse.CheckResponse, error) {
 	url := c.BaseURL.String() + "/check"
 	b, err := json.Marshal(req)
 	if err != nil {
@@ -38,6 +39,7 @@ func (c *DogHouseClient) Check(req *doghouse.CheckRequest) (*doghouse.CheckRespo
 	if err != nil {
 		return nil, err
 	}
+	httpReq.WithContext(ctx)
 	httpReq.Header.Set("Content-Type", "application/json")
 
 	httpResp, err := c.Client.Do(httpReq)
