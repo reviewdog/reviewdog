@@ -122,6 +122,14 @@ func run(r io.Reader, w io.Writer, opt *option) error {
 
 	// assume it's project based run when both -efm ane -f are not specified
 	isProject := len(opt.efms) == 0 && opt.f == ""
+	var conf *project.Config
+	if isProject {
+		var err error
+		conf, err = projectConfig(opt.conf)
+		if err != nil {
+			return err
+		}
+	}
 
 	var cs reviewdog.CommentService
 	var ds reviewdog.DiffService
@@ -158,14 +166,6 @@ func run(r io.Reader, w io.Writer, opt *option) error {
 	}
 
 	if isProject {
-		b, err := readConf(opt.conf)
-		if err != nil {
-			return fmt.Errorf("fail to open config: %v", err)
-		}
-		conf, err := project.Parse(b)
-		if err != nil {
-			return fmt.Errorf("config is invalid: %v", err)
-		}
 		return project.Run(ctx, conf, cs, ds)
 	}
 
@@ -477,6 +477,18 @@ func (ss *strslice) String() string {
 func (ss *strslice) Set(value string) error {
 	*ss = append(*ss, value)
 	return nil
+}
+
+func projectConfig(path string) (*project.Config, error) {
+	b, err := readConf(path)
+	if err != nil {
+		return nil, fmt.Errorf("fail to open config: %v", err)
+	}
+	conf, err := project.Parse(b)
+	if err != nil {
+		return nil, fmt.Errorf("config is invalid: %v", err)
+	}
+	return conf, nil
 }
 
 func readConf(conf string) ([]byte, error) {
