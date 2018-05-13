@@ -31,7 +31,7 @@ func FilterCheck(results []*CheckResult, diff []*diff.FileDiff, strip int, wd st
 				result.Path = relPath
 			}
 		}
-		result.Path = filepath.Clean(result.Path)
+		result.Path = cleanPath(result.Path)
 		if addedline != nil {
 			check.InDiff = true
 			check.LnumDiff = addedline.LnumDiff
@@ -41,6 +41,14 @@ func FilterCheck(results []*CheckResult, diff []*diff.FileDiff, strip int, wd st
 	}
 
 	return checks
+}
+
+func cleanPath(path string) string {
+	p := filepath.Clean(path)
+	if p == "." {
+		return ""
+	}
+	return p
 }
 
 // addedLine represents added line in diff.
