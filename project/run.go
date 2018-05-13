@@ -13,6 +13,9 @@ import (
 	"github.com/haya14busa/reviewdog"
 )
 
+func foo() {
+}
+
 // Run runs reviewdog tasks based on Config.
 func Run(ctx context.Context, conf *Config, c reviewdog.CommentService, d reviewdog.DiffService) error {
 	// environment variables for each commands
