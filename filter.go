@@ -14,7 +14,7 @@ type FilteredCheck struct {
 	LnumDiff int
 }
 
-// FilterCheck filters check results by diff. It doesn't not drop check which
+// FilterCheck filters check results by diff. It doesn't drop check which
 // is not in diff but set FilteredCheck.InDiff field false.
 func FilterCheck(results []*CheckResult, diff []*diff.FileDiff, strip int, wd string) []*FilteredCheck {
 	checks := make([]*FilteredCheck, 0, len(results))
@@ -25,13 +25,7 @@ func FilterCheck(results []*CheckResult, diff []*diff.FileDiff, strip int, wd st
 		check := &FilteredCheck{CheckResult: result}
 
 		addedline := addedlines.Get(result.Path, result.Lnum)
-		if filepath.IsAbs(result.Path) && wd != "" {
-			relPath, err := filepath.Rel(wd, result.Path)
-			if err == nil {
-				result.Path = relPath
-			}
-		}
-		result.Path = cleanPath(result.Path)
+		result.Path = CleanPath(result.Path, wd)
 		if addedline != nil {
 			check.InDiff = true
 			check.LnumDiff = addedline.LnumDiff
@@ -42,9 +36,15 @@ func FilterCheck(results []*CheckResult, diff []*diff.FileDiff, strip int, wd st
 
 	return checks
 }
-
-func cleanPath(path string) string {
-	p := filepath.Clean(path)
+func CleanPath(path, workdir string) string {
+	p := path
+	if filepath.IsAbs(path) && workdir != "" {
+		relPath, err := filepath.Rel(workdir, path)
+		if err == nil {
+			p = relPath
+		}
+	}
+	p = filepath.Clean(p)
 	if p == "." {
 		return ""
 	}

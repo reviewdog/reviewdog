@@ -6,6 +6,7 @@ import (
 	"fmt"
 	"io"
 	"log"
+	"os"
 	"strconv"
 	"strings"
 
@@ -55,11 +56,12 @@ func runDoghouse(ctx context.Context, r io.Reader, installationID string, opt *o
 
 	cli := client.New(nil)
 	var g errgroup.Group
+	wd, _ := os.Getwd()
 	for name, results := range resultSet {
 		name := name
 		as := make([]*doghouse.Annotation, 0, len(results))
 		for _, r := range results {
-			as = append(as, checkResultToAnnotation(r))
+			as = append(as, checkResultToAnnotation(r, wd))
 		}
 		req := &doghouse.CheckRequest{
 			InstallationID: id,
@@ -82,9 +84,9 @@ func runDoghouse(ctx context.Context, r io.Reader, installationID string, opt *o
 	return g.Wait()
 }
 
-func checkResultToAnnotation(c *reviewdog.CheckResult) *doghouse.Annotation {
+func checkResultToAnnotation(c *reviewdog.CheckResult, wd string) *doghouse.Annotation {
 	return &doghouse.Annotation{
-		Path:       c.Path,
+		Path:       reviewdog.CleanPath(c.Path, wd),
 		Line:       c.Lnum,
 		Message:    c.Message,
 		RawMessage: strings.Join(c.Lines, "\n"),
