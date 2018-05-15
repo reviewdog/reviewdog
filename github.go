@@ -11,7 +11,7 @@ import (
 	"github.com/google/go-github/github"
 )
 
-var X = 1
+var XY = 1
 
 var _ = github.ScopeAdminOrg
 
