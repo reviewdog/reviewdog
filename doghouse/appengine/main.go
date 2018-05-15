@@ -32,6 +32,7 @@ func init() {
 func main() {
 	http.HandleFunc("/", handleTop)
 	http.HandleFunc("/check", handleCheck)
+	http.HandleFunc("/webhook", handleWebhook)
 	appengine.Main()
 }
 
@@ -51,13 +52,24 @@ func handleCheck(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 	ctx := appengine.NewContext(r)
-	dh, err := server.New(&req, githubAppsPrivateKey, integrationID, urlfetch.Client(ctx))
+
+	opt := &server.NewGitHubClientOption{
+		PrivateKey:     githubAppsPrivateKey,
+		IntegrationID:  integrationID,
+		InstallationID: req.InstallationID,
+		RepoOwner:      req.Owner,
+		RepoName:       req.Repo,
+		Client:         urlfetch.Client(ctx),
+	}
+
+	gh, err := server.NewGitHubClient(ctx, opt)
 	if err != nil {
 		w.WriteHeader(http.StatusBadRequest)
 		fmt.Fprintln(w, err)
 		return
 	}
-	res, err := dh.Check(ctx, &req)
+
+	res, err := server.NewChecker(&req, gh).Check(ctx)
 	if err != nil {
 		w.WriteHeader(http.StatusBadRequest)
 		fmt.Fprintln(w, err)
