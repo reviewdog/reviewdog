@@ -47,6 +47,7 @@ type option struct {
 	name      string // tool name which is used in comment
 	ci        string
 	conf      string
+	ghCheck   bool
 }
 
 // flags doc
@@ -61,11 +62,7 @@ const (
 
 	GitHub with reviewdog GitHub Apps: <experimental>
 		1. Install reviedog Apps. https://github.com/apps/reviewdog
-		2. Set REVIEWDOG_GITHUB_APP_INSTALLATION_ID environment variable.
-			1. Go to https://github.com/settings/installations
-			2. Click "Configure" of reviewdog app
-			3. The last part of URL is installation id.
-				 https://github.com/settings/installations/<INSTALLATION_ID>
+		2. Run reviewdog command with -gh-check flag.
 
 	GitHub/GitHub Enterprise:
 		You need to set REVIEWDOG_GITHUB_API_TOKEN environment variable.
@@ -83,7 +80,8 @@ const (
 		CI_REPO_OWNER	repository owner (e.g. "haya14busa" for https://github.com/haya14busa/reviewdog)
 		CI_REPO_NAME	repository name (e.g. "reviewdog" for https://github.com/haya14busa/reviewdog)
 `
-	confDoc = `config file path`
+	confDoc    = `config file path`
+	ghCheckDoc = `use reviewdog GitHub apps and Check API instead. See -ci flag doc too.`
 )
 
 var opt = &option{}
@@ -98,6 +96,7 @@ func init() {
 	flag.StringVar(&opt.name, "name", "", nameDoc)
 	flag.StringVar(&opt.ci, "ci", "", ciDoc)
 	flag.StringVar(&opt.conf, "conf", "", confDoc)
+	flag.BoolVar(&opt.ghCheck, "gh-check", false, ghCheckDoc)
 }
 
 func usage() {
@@ -141,8 +140,8 @@ func run(r io.Reader, w io.Writer, opt *option) error {
 	}
 
 	if opt.ci != "" {
-		if id := os.Getenv("REVIEWDOG_GITHUB_APP_INSTALLATION_ID"); id != "" {
-			return runDoghouse(ctx, r, id, opt, isProject)
+		if opt.ghCheck {
+			return runDoghouse(ctx, r, opt, isProject)
 		}
 
 		if os.Getenv("REVIEWDOG_GITHUB_API_TOKEN") != "" {

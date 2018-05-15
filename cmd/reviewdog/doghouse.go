@@ -3,7 +3,6 @@ package main
 import (
 	"context"
 	"errors"
-	"fmt"
 	"io"
 	"log"
 	"os"
@@ -17,12 +16,7 @@ import (
 	"golang.org/x/sync/errgroup"
 )
 
-func runDoghouse(ctx context.Context, r io.Reader, installationID string, opt *option, isProject bool) error {
-	id, err := strconv.Atoi(installationID)
-	if err != nil {
-		return fmt.Errorf("installationID should be integer: %v, got %s", err, installationID)
-	}
-
+func runDoghouse(ctx context.Context, r io.Reader, opt *option, isProject bool) error {
 	ghInfo, isPr, err := getGitHubPR(opt.ci)
 	if err != nil {
 		return err
@@ -64,13 +58,15 @@ func runDoghouse(ctx context.Context, r io.Reader, installationID string, opt *o
 			as = append(as, checkResultToAnnotation(r, wd))
 		}
 		req := &doghouse.CheckRequest{
-			InstallationID: id,
-			Name:           name,
-			Owner:          ghInfo.owner,
-			Repo:           ghInfo.repo,
-			PullRequest:    ghInfo.pr,
-			SHA:            ghInfo.sha,
-			Annotations:    as,
+			Name:        name,
+			Owner:       ghInfo.owner,
+			Repo:        ghInfo.repo,
+			PullRequest: ghInfo.pr,
+			SHA:         ghInfo.sha,
+			Annotations: as,
+		}
+		if id := installationID(); id != 0 {
+			req.InstallationID = id
 		}
 		g.Go(func() error {
 			res, err := cli.Check(ctx, req)
@@ -91,4 +87,9 @@ func checkResultToAnnotation(c *reviewdog.CheckResult, wd string) *doghouse.Anno
 		Message:    c.Message,
 		RawMessage: strings.Join(c.Lines, "\n"),
 	}
+}
+
+func installationID() int {
+	id, _ := strconv.Atoi(os.Getenv("REVIEWDOG_GITHUB_APP_INSTALLATION_ID"))
+	return id
 }
