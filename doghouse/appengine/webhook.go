@@ -17,17 +17,22 @@ func handleWebhook(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 	ctx := appengine.NewContext(r)
+	payload, err := github.ValidatePayload(r, githubWebhookSecret)
+	if err != nil {
+		w.WriteHeader(http.StatusUnauthorized)
+		return
+	}
 	switch github.WebHookType(r) {
 	case "check_suite":
-		if err := handleCheckSuiteEvent(ctx, r); err != nil {
+		if err := handleCheckSuiteEvent(ctx, payload); err != nil {
 			log.Errorf(ctx, "failed to handle check_suite event: %v", err)
 		}
 	}
 }
 
-func handleCheckSuiteEvent(ctx context.Context, r *http.Request) error {
+func handleCheckSuiteEvent(ctx context.Context, payload []byte) error {
 	var c server.CheckSuiteEvent
-	if err := json.NewDecoder(r.Body).Decode(&c); err != nil {
+	if err := json.Unmarshal(payload, &c); err != nil {
 		return err
 	}
 	log.Debugf(ctx, "%#v", c)

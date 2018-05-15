@@ -6,6 +6,7 @@ import (
 	"io/ioutil"
 	"log"
 	"net/http"
+	"os"
 
 	"github.com/haya14busa/reviewdog/doghouse"
 	"github.com/haya14busa/reviewdog/doghouse/server"
@@ -13,7 +14,10 @@ import (
 	"google.golang.org/appengine/urlfetch"
 )
 
-var githubAppsPrivateKey []byte
+var (
+	githubAppsPrivateKey []byte
+	githubWebhookSecret  []byte
+)
 
 const (
 	integrationID = 12131 // https://github.com/apps/reviewdog
@@ -27,6 +31,11 @@ func init() {
 	if err != nil {
 		log.Fatalf("could not read private key: %s", err)
 	}
+	s := os.Getenv("GITHUB_WEBHOOK_SECRET")
+	if s == "" {
+		log.Fatalf("GITHUB_WEBHOOK_SECRET is not set")
+	}
+	githubWebhookSecret = []byte(s)
 }
 
 func main() {

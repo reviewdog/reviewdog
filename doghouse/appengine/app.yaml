@@ -8,3 +8,6 @@ handlers:
 
 - url: /.*
   script: _go_app
+
+includes:
+- secret/secret.yaml # set GITHUB_WEBHOOK_SECRET env var
