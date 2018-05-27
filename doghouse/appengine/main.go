@@ -29,10 +29,6 @@ func mustCookieMan() *cookieman.CookieMan {
 			Path:     "/",
 		},
 	}
-	if !appengine.IsDevAppServer() {
-		c.Secure = true
-		c.Domain = "review-dog.appspot.com"
-	}
 	return cookieman.New(cipher, c)
 }
 
