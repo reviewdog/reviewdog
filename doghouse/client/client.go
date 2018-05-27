@@ -6,8 +6,10 @@ import (
 	"encoding/json"
 	"fmt"
 	"io/ioutil"
+	"log"
 	"net/http"
 	"net/url"
+	"os"
 
 	"github.com/haya14busa/reviewdog/doghouse"
 )
@@ -25,7 +27,15 @@ func New(client *http.Client) *DogHouseClient {
 	if dh.Client == nil {
 		dh.Client = http.DefaultClient
 	}
-	dh.BaseURL, _ = url.Parse(baseEndpoint)
+	base := baseEndpoint
+	if baseEnvURL := os.Getenv("REVIEWDOG_GITHUB_APP_URL"); baseEnvURL != "" {
+		base = baseEnvURL
+	}
+	var err error
+	dh.BaseURL, err = url.Parse(base)
+	if err != nil {
+		log.Fatal(err)
+	}
 	return dh
 }
 

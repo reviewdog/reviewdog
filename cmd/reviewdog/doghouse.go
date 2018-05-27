@@ -5,6 +5,7 @@ import (
 	"errors"
 	"io"
 	"log"
+	"net/http"
 	"os"
 	"strconv"
 	"strings"
@@ -13,6 +14,7 @@ import (
 	"github.com/haya14busa/reviewdog/doghouse"
 	"github.com/haya14busa/reviewdog/doghouse/client"
 	"github.com/haya14busa/reviewdog/project"
+	"golang.org/x/oauth2"
 	"golang.org/x/sync/errgroup"
 )
 
@@ -48,7 +50,16 @@ func runDoghouse(ctx context.Context, r io.Reader, opt *option, isProject bool) 
 		resultSet[toolName(opt)] = rs
 	}
 
-	cli := client.New(nil)
+	httpCli := http.DefaultClient
+	if token := os.Getenv("REVIEWDOG_TOKEN"); token != "" {
+		ts := oauth2.StaticTokenSource(
+			&oauth2.Token{AccessToken: token},
+		)
+		httpCli = oauth2.NewClient(ctx, ts)
+	}
+
+	cli := client.New(httpCli)
+
 	var g errgroup.Group
 	wd, _ := os.Getwd()
 	for name, results := range resultSet {
