@@ -1,6 +1,8 @@
 package server
 
 import (
+	"fmt"
+
 	"golang.org/x/net/context"
 	"google.golang.org/appengine/datastore"
 )
@@ -52,6 +54,17 @@ func SaveInstallationFromCheckSuite(ctx context.Context, c CheckSuiteEvent) erro
 		}
 		return nil
 	}, nil)
+}
+
+func GetRepoToken(ctx context.Context, repoFullName string) (string, error) {
+	ok, inst, err := getInstallation(ctx, repoFullName)
+	if err != nil {
+		return "", err
+	}
+	if !ok {
+		return "", fmt.Errorf("repository token not found for %q", repoFullName)
+	}
+	return inst.RepositoryToken, nil
 }
 
 func GetOrUpdateRepoToken(ctx context.Context, repoFullName string, repoID int64, regenerate bool) (string, error) {
