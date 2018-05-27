@@ -15,6 +15,7 @@ import (
 
 	"github.com/google/go-github/github"
 	"github.com/haya14busa/reviewdog/doghouse/server"
+	"github.com/haya14busa/reviewdog/doghouse/server/cookieman"
 	"golang.org/x/oauth2"
 	"google.golang.org/appengine"
 	"google.golang.org/appengine/log"
@@ -25,18 +26,18 @@ type GitHubHandler struct {
 	clientID     string
 	clientSecret string
 
-	tokenStore     *CookieStore
-	redirURLStore  *CookieStore // Redirect URL after login.
-	authStateStore *CookieStore
+	tokenStore     *cookieman.CookieStore
+	redirURLStore  *cookieman.CookieStore // Redirect URL after login.
+	authStateStore *cookieman.CookieStore
 }
 
-func NewGitHubHandler(clientID, clientSecret string, cookieman *CookieMan) *GitHubHandler {
+func NewGitHubHandler(clientID, clientSecret string, c *cookieman.CookieMan) *GitHubHandler {
 	return &GitHubHandler{
 		clientID:       clientID,
 		clientSecret:   clientSecret,
-		tokenStore:     cookieman.NewCookieStore("github-token", nil),
-		redirURLStore:  cookieman.NewCookieStore("github-redirect-url", nil),
-		authStateStore: cookieman.NewCookieStore("github-auth-state", nil),
+		tokenStore:     c.NewCookieStore("github-token", nil),
+		redirURLStore:  c.NewCookieStore("github-redirect-url", nil),
+		authStateStore: c.NewCookieStore("github-auth-state", nil),
 	}
 }
 

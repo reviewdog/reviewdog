@@ -1,4 +1,4 @@
-package main
+package cookieman
 
 import (
 	"encoding/base64"
@@ -41,7 +41,7 @@ func (cs *CookieStore) Clear(w http.ResponseWriter) {
 	cs.cookieman.Clear(w, cs.name)
 }
 
-func NewCookieMan(cipher Cipher, defaultOpt CookieOption) *CookieMan {
+func New(cipher Cipher, defaultOpt CookieOption) *CookieMan {
 	return &CookieMan{defaultOpt: defaultOpt, cipher: cipher}
 }
 

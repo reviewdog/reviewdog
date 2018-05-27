@@ -11,6 +11,7 @@ import (
 
 	"github.com/haya14busa/reviewdog/doghouse"
 	"github.com/haya14busa/reviewdog/doghouse/server"
+	"github.com/haya14busa/reviewdog/doghouse/server/cookieman"
 	"github.com/haya14busa/secretbox"
 	"google.golang.org/appengine"
 	"google.golang.org/appengine/urlfetch"
@@ -19,7 +20,7 @@ import (
 var (
 	githubAppsPrivateKey []byte
 	githubWebhookSecret  []byte
-	cookieman            *CookieMan
+	cookiemanager        *cookieman.CookieMan
 )
 
 const (
@@ -49,7 +50,7 @@ func initCookieMan() {
 	if err != nil {
 		log.Fatalf("failed to create secretbox: %v", err)
 	}
-	c := CookieOption{
+	c := cookieman.CookieOption{
 		http.Cookie{
 			HttpOnly: true,
 			Secure:   !appengine.IsDevAppServer(),
@@ -61,14 +62,14 @@ func initCookieMan() {
 		c.Secure = true
 		c.Domain = "review-dog.appspot.com"
 	}
-	cookieman = NewCookieMan(cipher, c)
+	cookiemanager = cookieman.New(cipher, c)
 }
 
 func main() {
 	ghHandler := NewGitHubHandler(
 		os.Getenv("GITHUB_CLIENT_ID"),
 		os.Getenv("GITHUB_CLIENT_SECRET"),
-		cookieman,
+		cookiemanager,
 	)
 
 	http.HandleFunc("/", handleTop)
