@@ -5,11 +5,13 @@ import (
 	"encoding/json"
 	"fmt"
 	"net/http"
+	"net/url"
 	"strings"
 
 	"github.com/haya14busa/reviewdog/doghouse"
 	"github.com/haya14busa/reviewdog/doghouse/server"
 	"google.golang.org/appengine"
+	"google.golang.org/appengine/log"
 	"google.golang.org/appengine/urlfetch"
 )
 
@@ -71,6 +73,7 @@ func validateCheckRequest(ctx context.Context, w http.ResponseWriter, r *http.Re
 	if token == "" {
 		w.Header().Set("The WWW-Authenticate", `error="invalid_request", error_description="The access token not provided"`)
 		w.WriteHeader(http.StatusUnauthorized)
+		fmt.Fprintf(w, "The access token not provided. Get token from %s", githubRepoURL(ctx, owner, repo))
 		return false
 	}
 	wantToken, err := server.GetRepoToken(ctx, fmt.Sprintf("%s/%s", owner, repo))
@@ -81,9 +84,28 @@ func validateCheckRequest(ctx context.Context, w http.ResponseWriter, r *http.Re
 	if token != wantToken {
 		w.Header().Set("The WWW-Authenticate", `error="invalid_token", error_description="The access token is invalid"`)
 		w.WriteHeader(http.StatusUnauthorized)
+		fmt.Fprintf(w, "The access token is invalid. Get valid token from %s", githubRepoURL(ctx, owner, repo))
 		return false
 	}
 	return true
+}
+
+func githubRepoURL(ctx context.Context, owner, repo string) string {
+	u := doghouseBaseURL(ctx)
+	u.Path = fmt.Sprintf("/gh/%s/%s", owner, repo)
+	return u.String()
+}
+
+func doghouseBaseURL(ctx context.Context) *url.URL {
+	scheme := "https://"
+	if appengine.IsDevAppServer() {
+		scheme = "http://"
+	}
+	u, err := url.Parse(scheme + appengine.DefaultVersionHostname(ctx))
+	if err != nil {
+		log.Errorf(ctx, "%v", err)
+	}
+	return u
 }
 
 func extractBearerToken(r *http.Request) string {
