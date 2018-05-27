@@ -7,6 +7,7 @@ import (
 	"log"
 	"net/http"
 	"os"
+	"strconv"
 	"time"
 
 	"github.com/haya14busa/reviewdog/doghouse"
@@ -17,36 +18,10 @@ import (
 	"google.golang.org/appengine/urlfetch"
 )
 
-var (
-	githubAppsPrivateKey []byte
-	githubWebhookSecret  []byte
-	cookiemanager        *cookieman.CookieMan
-)
-
-const (
-	integrationID = 12131 // https://github.com/apps/reviewdog
-)
-
-func init() {
-	// Private keys https://github.com/settings/apps/reviewdog
-	const privateKeyFile = "./secret/github-apps.private-key.pem"
-	var err error
-	githubAppsPrivateKey, err = ioutil.ReadFile(privateKeyFile)
-	if err != nil {
-		log.Fatalf("could not read private key: %s", err)
-	}
-	s := os.Getenv("GITHUB_WEBHOOK_SECRET")
-	if s == "" {
-		log.Fatalf("GITHUB_WEBHOOK_SECRET is not set")
-	}
-	githubWebhookSecret = []byte(s)
-	initCookieMan()
-}
-
-func initCookieMan() {
+func mustCookieMan() *cookieman.CookieMan {
 	// Create secret key by following command.
 	// $ ruby -rsecurerandom -e 'puts SecureRandom.hex(32)'
-	cipher, err := secretbox.NewFromHexKey(os.Getenv("SECRETBOX_SECRET"))
+	cipher, err := secretbox.NewFromHexKey(mustGetenv("SECRETBOX_SECRET"))
 	if err != nil {
 		log.Fatalf("failed to create secretbox: %v", err)
 	}
@@ -62,19 +37,63 @@ func initCookieMan() {
 		c.Secure = true
 		c.Domain = "review-dog.appspot.com"
 	}
-	cookiemanager = cookieman.New(cipher, c)
+	return cookieman.New(cipher, c)
+}
+
+func mustGitHubAppsPrivateKey() []byte {
+	// Private keys https://github.com/settings/apps/reviewdog
+	const privateKeyFile = "./secret/github-apps.private-key.pem"
+	githubAppsPrivateKey, err := ioutil.ReadFile(privateKeyFile)
+	if err != nil {
+		log.Fatalf("could not read private key: %s", err)
+	}
+	return githubAppsPrivateKey
+}
+
+func mustGetenv(name string) string {
+	s := os.Getenv(name)
+	if s == "" {
+		log.Fatalf("%s is not set", name)
+	}
+	return s
+}
+
+func mustIntEnv(name string) int {
+	s := os.Getenv(name)
+	if s == "" {
+		log.Fatalf("%s is not set", name)
+	}
+	i, err := strconv.Atoi(s)
+	if err != nil {
+		log.Fatal(err)
+	}
+	return i
 }
 
 func main() {
+	integrationID := mustIntEnv("GITHUB_INTEGRATION_ID")
+	ghPrivateKey := mustGitHubAppsPrivateKey()
+
 	ghHandler := NewGitHubHandler(
-		os.Getenv("GITHUB_CLIENT_ID"),
-		os.Getenv("GITHUB_CLIENT_SECRET"),
-		cookiemanager,
+		mustGetenv("GITHUB_CLIENT_ID"),
+		mustGetenv("GITHUB_CLIENT_SECRET"),
+		mustCookieMan(),
+		ghPrivateKey,
+		integrationID,
 	)
 
+	ghChecker := &githubChecker{
+		privateKey:    ghPrivateKey,
+		integrationID: integrationID,
+	}
+
+	ghWebhookHandler := &githubWebhookHandler{
+		secret: []byte(mustGetenv("GITHUB_WEBHOOK_SECRET")),
+	}
+
 	http.HandleFunc("/", handleTop)
-	http.HandleFunc("/check", handleCheck)
-	http.HandleFunc("/webhook", handleWebhook)
+	http.HandleFunc("/check", ghChecker.handleCheck)
+	http.HandleFunc("/webhook", ghWebhookHandler.handleWebhook)
 	http.HandleFunc("/gh/_auth/callback", ghHandler.HandleAuthCallback)
 	http.Handle("/gh/", ghHandler.Handler(http.HandlerFunc(ghHandler.HandleGitHubTop)))
 	appengine.Main()
@@ -84,7 +103,12 @@ func handleTop(w http.ResponseWriter, r *http.Request) {
 	fmt.Fprintln(w, "reviewdog")
 }
 
-func handleCheck(w http.ResponseWriter, r *http.Request) {
+type githubChecker struct {
+	privateKey    []byte
+	integrationID int
+}
+
+func (gc *githubChecker) handleCheck(w http.ResponseWriter, r *http.Request) {
 	if r.Method != "POST" {
 		w.WriteHeader(http.StatusMethodNotAllowed)
 		return
@@ -98,8 +122,8 @@ func handleCheck(w http.ResponseWriter, r *http.Request) {
 	ctx := appengine.NewContext(r)
 
 	opt := &server.NewGitHubClientOption{
-		PrivateKey:     githubAppsPrivateKey,
-		IntegrationID:  integrationID,
+		PrivateKey:     gc.privateKey,
+		IntegrationID:  gc.integrationID,
 		InstallationID: req.InstallationID,
 		RepoOwner:      req.Owner,
 		RepoName:       req.Repo,

@@ -29,15 +29,20 @@ type GitHubHandler struct {
 	tokenStore     *cookieman.CookieStore
 	redirURLStore  *cookieman.CookieStore // Redirect URL after login.
 	authStateStore *cookieman.CookieStore
+
+	privateKey    []byte
+	integrationID int
 }
 
-func NewGitHubHandler(clientID, clientSecret string, c *cookieman.CookieMan) *GitHubHandler {
+func NewGitHubHandler(clientID, clientSecret string, c *cookieman.CookieMan, privateKey []byte, integrationID int) *GitHubHandler {
 	return &GitHubHandler{
 		clientID:       clientID,
 		clientSecret:   clientSecret,
 		tokenStore:     c.NewCookieStore("github-token", nil),
 		redirURLStore:  c.NewCookieStore("github-redirect-url", nil),
 		authStateStore: c.NewCookieStore("github-auth-state", nil),
+		integrationID:  integrationID,
+		privateKey:     privateKey,
 	}
 }
 
@@ -194,8 +199,8 @@ func (g *GitHubHandler) HandleGitHubTop(w http.ResponseWriter, r *http.Request) 
 		fmt.Fprintln(w, "")
 		ghcli, err := server.NewGitHubClient(ctx, &server.NewGitHubClientOption{
 			Client:        urlfetch.Client(ctx),
-			IntegrationID: integrationID,
-			PrivateKey:    githubAppsPrivateKey,
+			IntegrationID: g.integrationID,
+			PrivateKey:    g.privateKey,
 		})
 		if err != nil {
 			fmt.Fprintln(w, err)

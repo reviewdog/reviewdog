@@ -11,13 +11,17 @@ import (
 	"google.golang.org/appengine/log"
 )
 
-func handleWebhook(w http.ResponseWriter, r *http.Request) {
+type githubWebhookHandler struct {
+	secret []byte
+}
+
+func (g *githubWebhookHandler) handleWebhook(w http.ResponseWriter, r *http.Request) {
 	if r.Method != "POST" {
 		w.WriteHeader(http.StatusMethodNotAllowed)
 		return
 	}
 	ctx := appengine.NewContext(r)
-	payload, err := github.ValidatePayload(r, githubWebhookSecret)
+	payload, err := github.ValidatePayload(r, g.secret)
 	if err != nil {
 		w.WriteHeader(http.StatusUnauthorized)
 		return
