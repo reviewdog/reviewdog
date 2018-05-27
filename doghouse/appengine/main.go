@@ -7,9 +7,11 @@ import (
 	"log"
 	"net/http"
 	"os"
+	"time"
 
 	"github.com/haya14busa/reviewdog/doghouse"
 	"github.com/haya14busa/reviewdog/doghouse/server"
+	"github.com/haya14busa/secretbox"
 	"google.golang.org/appengine"
 	"google.golang.org/appengine/urlfetch"
 )
@@ -17,6 +19,7 @@ import (
 var (
 	githubAppsPrivateKey []byte
 	githubWebhookSecret  []byte
+	cookieman            *CookieMan
 )
 
 const (
@@ -36,12 +39,43 @@ func init() {
 		log.Fatalf("GITHUB_WEBHOOK_SECRET is not set")
 	}
 	githubWebhookSecret = []byte(s)
+	initCookieMan()
+}
+
+func initCookieMan() {
+	// Create secret key by following command.
+	// $ ruby -rsecurerandom -e 'puts SecureRandom.hex(32)'
+	cipher, err := secretbox.NewFromHexKey(os.Getenv("SECRETBOX_SECRET"))
+	if err != nil {
+		log.Fatalf("failed to create secretbox: %v", err)
+	}
+	c := CookieOption{
+		http.Cookie{
+			HttpOnly: true,
+			Secure:   !appengine.IsDevAppServer(),
+			MaxAge:   int((30 * 24 * time.Hour).Seconds()),
+			Path:     "/",
+		},
+	}
+	if !appengine.IsDevAppServer() {
+		c.Secure = true
+		c.Domain = "review-dog.appspot.com"
+	}
+	cookieman = NewCookieMan(cipher, c)
 }
 
 func main() {
+	ghHandler := NewGitHubHandler(
+		os.Getenv("GITHUB_CLIENT_ID"),
+		os.Getenv("GITHUB_CLIENT_SECRET"),
+		cookieman,
+	)
+
 	http.HandleFunc("/", handleTop)
 	http.HandleFunc("/check", handleCheck)
 	http.HandleFunc("/webhook", handleWebhook)
+	http.HandleFunc("/gh/_auth/callback", ghHandler.HandleAuthCallback)
+	http.Handle("/gh/", ghHandler.Handler(http.HandlerFunc(ghHandler.HandleGitHubTop)))
 	appengine.Main()
 }
 

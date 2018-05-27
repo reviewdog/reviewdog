@@ -16,7 +16,8 @@ type NewGitHubClientOption struct {
 	// Required
 	IntegrationID int
 
-	// Either InstallationID OR (RepoOwner AND RepoName) is required.
+	// Either InstallationID OR (RepoOwner AND RepoName) is required for
+	// installation API.
 	InstallationID int
 	RepoOwner      string
 	RepoName       string
@@ -30,16 +31,26 @@ func NewGitHubClient(ctx context.Context, opt *NewGitHubClientOption) (*github.C
 	if client == nil {
 		client = http.DefaultClient
 	}
+
+	itr, err := githubAppTransport(ctx, client, opt)
+	if err != nil {
+		return nil, fmt.Errorf("failed to create gh transport: %v", err)
+	}
+
+	client.Transport = itr
+	return github.NewClient(client), nil
+}
+
+func githubAppTransport(ctx context.Context, client *http.Client, opt *NewGitHubClientOption) (http.RoundTripper, error) {
+	if opt.InstallationID == 0 && opt.RepoOwner == "" && opt.RepoName == "" {
+		return ghinstallation.NewAppsTransport(client.Transport, opt.IntegrationID, opt.PrivateKey)
+	}
+
 	installationID, err := installationIDFromOpt(ctx, opt)
 	if err != nil {
 		return nil, err
 	}
-	itr, err := ghinstallation.New(client.Transport, opt.IntegrationID, installationID, opt.PrivateKey)
-	if err != nil {
-		return nil, fmt.Errorf("failed to create gh transport: %v", err)
-	}
-	client.Transport = itr
-	return github.NewClient(client), nil
+	return ghinstallation.New(client.Transport, opt.IntegrationID, installationID, opt.PrivateKey)
 }
 
 func installationIDFromOpt(ctx context.Context, opt *NewGitHubClientOption) (int, error) {
