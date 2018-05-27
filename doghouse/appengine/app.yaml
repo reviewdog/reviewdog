@@ -1,5 +1,6 @@
+# https://cloud.google.com/appengine/docs/standard/go/config/appref
 runtime: go
-api_version: go1
+api_version: go1.9
 
 handlers:
 - url: /secret/*
