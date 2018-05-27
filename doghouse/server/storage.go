@@ -1,15 +1,15 @@
 package server
 
 import (
-	"context"
-
+	"golang.org/x/net/context"
 	"google.golang.org/appengine/datastore"
 )
 
 type Installation struct {
+	RepositoryFullName string // {owner}/{repo}
 	RepositoryID       int64
 	InstallationID     int
-	RepositoryFullName string
+	RepositoryToken    string
 }
 
 func newInstallationKey(ctx context.Context, repositoryName string) *datastore.Key {
@@ -34,12 +34,56 @@ func SaveInstallationFromCheckSuite(ctx context.Context, c CheckSuiteEvent) erro
 		RepositoryFullName: c.Repository.FullName,
 		RepositoryID:       c.Repository.ID,
 	}
-	return saveInstallation(ctx, installation)
+	return datastore.RunInTransaction(ctx, func(ctx context.Context) error {
+		ok, oldInst, err := getInstallation(ctx, installation.RepositoryFullName)
+		if err != nil {
+			return err
+		}
+		if !ok {
+			// Not found. Generate repo token and save installation.
+			installation.RepositoryToken = GenerateRepositoryToken()
+			return saveInstallation(ctx, &installation)
+		}
+		// Found existing installation.
+		// Update InstallationID if and only if InstallationID is different.
+		if oldInst.InstallationID != installation.InstallationID {
+			oldInst.InstallationID = installation.InstallationID
+			return saveInstallation(ctx, oldInst)
+		}
+		return nil
+	}, nil)
 }
 
-func saveInstallation(ctx context.Context, installation Installation) error {
+func GetOrUpdateRepoToken(ctx context.Context, repoFullName string, repoID int64, regenerate bool) (string, error) {
+	var token string
+	err := datastore.RunInTransaction(ctx, func(ctx context.Context) error {
+		ok, inst, err := getInstallation(ctx, repoFullName)
+		if err != nil {
+			return err
+		}
+		if !ok {
+			inst = &Installation{
+				RepositoryFullName: repoFullName,
+				RepositoryID:       repoID,
+			}
+		}
+		token = inst.RepositoryToken
+		if token == "" || regenerate {
+			token = GenerateRepositoryToken()
+			inst.RepositoryToken = token
+			saveInstallation(ctx, inst)
+		}
+		return nil
+	}, nil)
+	if err != nil {
+		return "", err
+	}
+	return token, nil
+}
+
+func saveInstallation(ctx context.Context, installation *Installation) error {
 	key := newInstallationKey(ctx, installation.RepositoryFullName)
-	if _, err := datastore.Put(ctx, key, &installation); err != nil {
+	if _, err := datastore.Put(ctx, key, installation); err != nil {
 		return err
 	}
 	return nil

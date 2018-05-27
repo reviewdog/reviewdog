@@ -117,9 +117,9 @@ func (g *GitHubHandler) isLoggedIn(r *http.Request) bool {
 }
 
 func securerandom(n int) string {
-	state := make([]byte, n)
-	io.ReadFull(rand.Reader, state[:])
-	return fmt.Sprintf("%x", state)
+	b := make([]byte, n)
+	io.ReadFull(rand.Reader, b[:])
+	return fmt.Sprintf("%x", b)
 }
 
 // https://developer.github.com/apps/building-github-apps/identifying-and-authorizing-users-for-github-apps/#2-users-are-redirected-back-to-your-site-by-github
@@ -186,6 +186,25 @@ func (g *GitHubHandler) HandleGitHubTop(w http.ResponseWriter, r *http.Request) 
 		&oauth2.Token{AccessToken: token},
 	)
 	ghcli := github.NewClient(NewAuthClient(ctx, urlfetch.Client(ctx).Transport, ts))
+
+	// /gh/{owner}/{repo}
+	paths := strings.Split(strings.Trim(r.URL.Path, "/"), "/")
+	switch len(paths) {
+	case 1:
+		g.handleTop(ctx, ghcli, w, r)
+	case 3:
+		g.handleRepo(ctx, ghcli, w, r, paths[1], paths[2])
+	default:
+		notfound(w)
+	}
+}
+
+func notfound(w http.ResponseWriter) {
+	w.WriteHeader(http.StatusNotFound)
+	fmt.Fprintln(w, "404 Not Found")
+}
+
+func (g *GitHubHandler) handleTop(ctx context.Context, ghcli *github.Client, w http.ResponseWriter, r *http.Request) {
 	u, _, err := ghcli.Users.Get(ctx, "")
 	if err != nil {
 		w.WriteHeader(http.StatusBadRequest)
@@ -226,6 +245,36 @@ func (g *GitHubHandler) HandleGitHubTop(w http.ResponseWriter, r *http.Request) 
 			fmt.Fprintf(w, "\t%s: %s\n", inst.GetAccount().GetLogin(), inst.GetHTMLURL())
 		}
 	}
+}
+
+func (g *GitHubHandler) handleRepo(ctx context.Context, ghcli *github.Client, w http.ResponseWriter, r *http.Request, owner, repoName string) {
+	repo, _, err := ghcli.Repositories.Get(ctx, owner, repoName)
+	if err != nil {
+		if err, ok := err.(*github.ErrorResponse); ok {
+			if err.Response.StatusCode == http.StatusNotFound {
+				notfound(w)
+				return
+			}
+		}
+		w.WriteHeader(http.StatusBadRequest)
+		fmt.Fprintf(w, "failed to get repo: %#v", err)
+		return
+	}
+
+	if !repo.GetPermissions()["push"] {
+		w.WriteHeader(http.StatusUnauthorized)
+		fmt.Fprintf(w, "You don't have write permission for %s.", repo.GetHTMLURL())
+		return
+	}
+
+	token, err := server.GetOrUpdateRepoToken(ctx, repo.GetFullName(), repo.GetID(), false)
+	if err != nil {
+		w.WriteHeader(http.StatusInternalServerError)
+		fmt.Fprintf(w, "failed to get token for %s.", repo.GetHTMLURL())
+		return
+	}
+
+	fmt.Fprintf(w, "%s token: %s", repo.GetFullName(), token)
 }
 
 func NewAuthClient(ctx context.Context, base http.RoundTripper, token oauth2.TokenSource) *http.Client {
