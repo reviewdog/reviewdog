@@ -28,8 +28,6 @@ import (
 	shellwords "github.com/mattn/go-shellwords"
 )
 
-const version = "0.9.8"
-
 const usageMessage = "" +
 	`Usage:	reviewdog [flags]
 	reviewdog accepts any compiler or linter results from stdin and filters
@@ -119,7 +117,7 @@ func run(r io.Reader, w io.Writer, opt *option) error {
 	ctx := context.Background()
 
 	if opt.version {
-		fmt.Fprintln(w, version)
+		fmt.Fprintln(w, reviewdog.Version)
 		return nil
 	}
 

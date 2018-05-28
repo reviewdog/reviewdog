@@ -10,6 +10,8 @@ import (
 	"github.com/haya14busa/reviewdog/diff"
 )
 
+const Version = "0.9.8"
+
 // Reviewdog represents review dog application which parses result of compiler
 // or linter, get diff and filter the results by diff, and report filtered
 // results.
