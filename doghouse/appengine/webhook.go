@@ -28,23 +28,25 @@ func (g *githubWebhookHandler) handleWebhook(w http.ResponseWriter, r *http.Requ
 		w.WriteHeader(http.StatusUnauthorized)
 		return
 	}
-	var handleFunc func(ctx context.Context, payload []byte) error
+	var handleFunc func(ctx context.Context, payload []byte) (status int, err error)
 	switch github.WebHookType(r) {
 	case "installation":
 		handleFunc = g.handleInstallationEvent
 	case "check_suite":
 		handleFunc = g.handleCheckSuiteEvent
-	default:
-		return
 	}
 	if handleFunc != nil {
-		if err := handleFunc(ctx, payload); err != nil {
+		status, err := handleFunc(ctx, payload)
+		if err != nil {
 			w.WriteHeader(http.StatusInternalServerError)
 			fmt.Fprintf(w, "failed to handle %s event: %v", github.WebHookType(r), err)
 			return
 		}
+		w.WriteHeader(status)
+		fmt.Fprintf(w, "resource created. event: %s", github.WebHookType(r))
 		return
 	}
+	w.WriteHeader(http.StatusAccepted)
 }
 
 func (g *githubWebhookHandler) validatePayload(r *http.Request) (payload []byte, err error) {
@@ -54,38 +56,38 @@ func (g *githubWebhookHandler) validatePayload(r *http.Request) (payload []byte,
 	return github.ValidatePayload(r, g.secret)
 }
 
-func (g *githubWebhookHandler) handleCheckSuiteEvent(ctx context.Context, payload []byte) error {
+func (g *githubWebhookHandler) handleCheckSuiteEvent(ctx context.Context, payload []byte) (status int, err error) {
 	var c CheckSuiteEvent
 	if err := json.Unmarshal(payload, &c); err != nil {
-		return err
+		return 0, err
 	}
 	switch c.Action {
 	case "requested":
 		// Update InstallationID on check_suite event in case the users re-install
 		// the app.
-		return g.ghInstStore.Put(ctx, &storage.GitHubInstallation{
+		return http.StatusCreated, g.ghInstStore.Put(ctx, &storage.GitHubInstallation{
 			InstallationID: c.Installation.ID,
 			AccountName:    c.Repository.Owner.Login,
 			AccountID:      c.Repository.Owner.ID,
 		})
 	}
-	return nil
+	return http.StatusAccepted, nil
 }
 
-func (g *githubWebhookHandler) handleInstallationEvent(ctx context.Context, payload []byte) error {
+func (g *githubWebhookHandler) handleInstallationEvent(ctx context.Context, payload []byte) (status int, err error) {
 	var e InstallationEvent
 	if err := json.Unmarshal(payload, &e); err != nil {
-		return err
+		return 0, err
 	}
 	switch e.Action {
 	case "created":
-		return g.ghInstStore.Put(ctx, &storage.GitHubInstallation{
+		return http.StatusCreated, g.ghInstStore.Put(ctx, &storage.GitHubInstallation{
 			InstallationID: e.Installation.ID,
 			AccountName:    e.Installation.Account.Login,
 			AccountID:      e.Installation.Account.ID,
 		})
 	}
-	return nil
+	return http.StatusAccepted, nil
 }
 
 // Example: https://gist.github.com/haya14busa/7a9a87da5159d6853fed865ca5ad5ec7
