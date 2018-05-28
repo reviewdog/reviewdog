@@ -5,7 +5,7 @@ type CheckRequest struct {
 	// Installation ID of reviewdog GitHub APP.
 	// https://github.com/settings/installations/<INSTALLATION_ID>
 	// You can find from here: https://github.com/settings/installations/
-	InstallationID int `json:"installation_id,omitempty"`
+	InstallationID int64 `json:"installation_id,omitempty"`
 
 	SHA         string `json:"sha,omitempty"`
 	PullRequest int    `json:"pull_request,omitempty"`

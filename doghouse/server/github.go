@@ -8,6 +8,7 @@ import (
 
 	"github.com/bradleyfalzon/ghinstallation"
 	"github.com/google/go-github/github"
+	"github.com/haya14busa/reviewdog/doghouse/server/storage"
 )
 
 type NewGitHubClientOption struct {
@@ -16,11 +17,11 @@ type NewGitHubClientOption struct {
 	// Required
 	IntegrationID int
 
-	// Either InstallationID OR (RepoOwner AND RepoName) is required for
+	// Either InstallationID OR (RepoOwner AND InstallationStore) is required for
 	// installation API.
-	InstallationID int
-	RepoOwner      string
-	RepoName       string
+	InstallationID    int64
+	RepoOwner         string
+	InstallationStore storage.GitHubInstallationStore
 
 	// Optional
 	Client *http.Client
@@ -42,7 +43,7 @@ func NewGitHubClient(ctx context.Context, opt *NewGitHubClientOption) (*github.C
 }
 
 func githubAppTransport(ctx context.Context, client *http.Client, opt *NewGitHubClientOption) (http.RoundTripper, error) {
-	if opt.InstallationID == 0 && opt.RepoOwner == "" && opt.RepoName == "" {
+	if opt.InstallationID == 0 && opt.RepoOwner == "" {
 		return ghinstallation.NewAppsTransport(client.Transport, opt.IntegrationID, opt.PrivateKey)
 	}
 
@@ -50,23 +51,25 @@ func githubAppTransport(ctx context.Context, client *http.Client, opt *NewGitHub
 	if err != nil {
 		return nil, err
 	}
-	return ghinstallation.New(client.Transport, opt.IntegrationID, installationID, opt.PrivateKey)
+	return ghinstallation.New(client.Transport, opt.IntegrationID, int(installationID), opt.PrivateKey)
 }
 
-func installationIDFromOpt(ctx context.Context, opt *NewGitHubClientOption) (int, error) {
+func installationIDFromOpt(ctx context.Context, opt *NewGitHubClientOption) (int64, error) {
 	if opt.InstallationID != 0 {
 		return opt.InstallationID, nil
 	}
-	if opt.RepoOwner == "" || opt.RepoName == "" {
-		return 0, errors.New("both repo owner and repo name are required")
+	if opt.RepoOwner == "" {
+		return 0, errors.New("repo owner is required")
 	}
-	repoFullName := fmt.Sprintf("%s/%s", opt.RepoOwner, opt.RepoName)
-	ok, installation, err := getInstallation(ctx, repoFullName)
+	if opt.InstallationStore == nil {
+		return 0, errors.New("instllation store is not provided")
+	}
+	ok, inst, err := opt.InstallationStore.Get(ctx, opt.RepoOwner)
 	if err != nil {
-		return 0, fmt.Errorf("failed to get installation: %v", err)
+		return 0, fmt.Errorf("failed to retrieve installation ID: %v", err)
 	}
 	if !ok {
-		return 0, errors.New("installation ID not found")
+		return 0, fmt.Errorf("installation ID not found for %s", opt.RepoOwner)
 	}
-	return installation.InstallationID, nil
+	return inst.InstallationID, nil
 }

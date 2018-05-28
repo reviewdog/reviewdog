@@ -100,7 +100,7 @@ func checkResultToAnnotation(c *reviewdog.CheckResult, wd string) *doghouse.Anno
 	}
 }
 
-func installationID() int {
+func installationID() int64 {
 	id, _ := strconv.Atoi(os.Getenv("REVIEWDOG_GITHUB_APP_INSTALLATION_ID"))
-	return id
+	return int64(id)
 }

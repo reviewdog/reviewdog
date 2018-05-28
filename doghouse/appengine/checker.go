@@ -10,14 +10,17 @@ import (
 
 	"github.com/haya14busa/reviewdog/doghouse"
 	"github.com/haya14busa/reviewdog/doghouse/server"
+	"github.com/haya14busa/reviewdog/doghouse/server/storage"
 	"google.golang.org/appengine"
 	"google.golang.org/appengine/log"
 	"google.golang.org/appengine/urlfetch"
 )
 
 type githubChecker struct {
-	privateKey    []byte
-	integrationID int
+	privateKey       []byte
+	integrationID    int
+	ghInstStore      storage.GitHubInstallationStore
+	ghRepoTokenStore storage.GitHubRepositoryTokenStore
 }
 
 func (gc *githubChecker) handleCheck(w http.ResponseWriter, r *http.Request) {
@@ -35,17 +38,17 @@ func (gc *githubChecker) handleCheck(w http.ResponseWriter, r *http.Request) {
 	}
 
 	// Check authorization.
-	if !validateCheckRequest(ctx, w, r, req.Owner, req.Repo) {
+	if !gc.validateCheckRequest(ctx, w, r, req.Owner, req.Repo) {
 		return
 	}
 
 	opt := &server.NewGitHubClientOption{
-		PrivateKey:     gc.privateKey,
-		IntegrationID:  gc.integrationID,
-		InstallationID: req.InstallationID,
-		RepoOwner:      req.Owner,
-		RepoName:       req.Repo,
-		Client:         urlfetch.Client(ctx),
+		PrivateKey:        gc.privateKey,
+		IntegrationID:     gc.integrationID,
+		InstallationID:    req.InstallationID,
+		RepoOwner:         req.Owner,
+		Client:            urlfetch.Client(ctx),
+		InstallationStore: gc.ghInstStore,
 	}
 
 	gh, err := server.NewGitHubClient(ctx, opt)
@@ -68,7 +71,7 @@ func (gc *githubChecker) handleCheck(w http.ResponseWriter, r *http.Request) {
 	}
 }
 
-func validateCheckRequest(ctx context.Context, w http.ResponseWriter, r *http.Request, owner, repo string) bool {
+func (gc *githubChecker) validateCheckRequest(ctx context.Context, w http.ResponseWriter, r *http.Request, owner, repo string) bool {
 	token := extractBearerToken(r)
 	if token == "" {
 		w.Header().Set("The WWW-Authenticate", `error="invalid_request", error_description="The access token not provided"`)
@@ -76,12 +79,15 @@ func validateCheckRequest(ctx context.Context, w http.ResponseWriter, r *http.Re
 		fmt.Fprintf(w, "The access token not provided. Get token from %s", githubRepoURL(ctx, owner, repo))
 		return false
 	}
-	wantToken, err := server.GetRepoToken(ctx, fmt.Sprintf("%s/%s", owner, repo))
+	_, wantToken, err := gc.ghRepoTokenStore.Get(ctx, owner, repo)
 	if err != nil {
+		log.Errorf(ctx, "failed to get repository (%s/%s) token: %v", owner, repo, err)
+	}
+	if wantToken == nil {
 		w.WriteHeader(http.StatusNotFound)
 		return false
 	}
-	if token != wantToken {
+	if token != wantToken.Token {
 		w.Header().Set("The WWW-Authenticate", `error="invalid_token", error_description="The access token is invalid"`)
 		w.WriteHeader(http.StatusUnauthorized)
 		fmt.Fprintf(w, "The access token is invalid. Get valid token from %s", githubRepoURL(ctx, owner, repo))

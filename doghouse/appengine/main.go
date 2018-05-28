@@ -10,6 +10,7 @@ import (
 	"time"
 
 	"github.com/haya14busa/reviewdog/doghouse/server/cookieman"
+	"github.com/haya14busa/reviewdog/doghouse/server/storage"
 	"github.com/haya14busa/secretbox"
 	"google.golang.org/appengine"
 )
@@ -66,6 +67,9 @@ func main() {
 	integrationID := mustIntEnv("GITHUB_INTEGRATION_ID")
 	ghPrivateKey := mustGitHubAppsPrivateKey()
 
+	ghInstStore := storage.GitHubInstallationDatastore{}
+	ghRepoTokenStore := storage.GitHubRepoTokenDatastore{}
+
 	ghHandler := NewGitHubHandler(
 		mustGetenv("GITHUB_CLIENT_ID"),
 		mustGetenv("GITHUB_CLIENT_SECRET"),
@@ -74,13 +78,16 @@ func main() {
 		integrationID,
 	)
 
-	ghChecker := &githubChecker{
-		privateKey:    ghPrivateKey,
-		integrationID: integrationID,
+	ghChecker := githubChecker{
+		privateKey:       ghPrivateKey,
+		integrationID:    integrationID,
+		ghInstStore:      &ghInstStore,
+		ghRepoTokenStore: &ghRepoTokenStore,
 	}
 
-	ghWebhookHandler := &githubWebhookHandler{
-		secret: []byte(mustGetenv("GITHUB_WEBHOOK_SECRET")),
+	ghWebhookHandler := githubWebhookHandler{
+		secret:      []byte(mustGetenv("GITHUB_WEBHOOK_SECRET")),
+		ghInstStore: &ghInstStore,
 	}
 
 	http.HandleFunc("/", handleTop)

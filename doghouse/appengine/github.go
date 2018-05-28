@@ -16,6 +16,7 @@ import (
 	"github.com/google/go-github/github"
 	"github.com/haya14busa/reviewdog/doghouse/server"
 	"github.com/haya14busa/reviewdog/doghouse/server/cookieman"
+	"github.com/haya14busa/reviewdog/doghouse/server/storage"
 	"golang.org/x/oauth2"
 	"google.golang.org/appengine"
 	"google.golang.org/appengine/log"
@@ -30,6 +31,8 @@ type GitHubHandler struct {
 	redirURLStore  *cookieman.CookieStore // Redirect URL after login.
 	authStateStore *cookieman.CookieStore
 
+	repoTokenStore storage.GitHubRepositoryTokenStore
+
 	privateKey    []byte
 	integrationID int
 }
@@ -41,6 +44,7 @@ func NewGitHubHandler(clientID, clientSecret string, c *cookieman.CookieMan, pri
 		tokenStore:     c.NewCookieStore("github-token", nil),
 		redirURLStore:  c.NewCookieStore("github-redirect-url", nil),
 		authStateStore: c.NewCookieStore("github-auth-state", nil),
+		repoTokenStore: &storage.GitHubRepoTokenDatastore{},
 		integrationID:  integrationID,
 		privateKey:     privateKey,
 	}
@@ -267,14 +271,14 @@ func (g *GitHubHandler) handleRepo(ctx context.Context, ghcli *github.Client, w 
 		return
 	}
 
-	token, err := server.GetOrUpdateRepoToken(ctx, repo.GetFullName(), repo.GetID(), false)
+	repoToken, err := server.GetOrGenerateRepoToken(ctx, g.repoTokenStore, repo.Owner.GetLogin(), repo.GetName(), repo.GetID())
 	if err != nil {
 		w.WriteHeader(http.StatusInternalServerError)
-		fmt.Fprintf(w, "failed to get token for %s.", repo.GetHTMLURL())
+		fmt.Fprintf(w, "failed to get repository token for %s.", repo.GetHTMLURL())
 		return
 	}
 
-	fmt.Fprintf(w, "%s token: %s", repo.GetFullName(), token)
+	fmt.Fprintf(w, "%s repository token: %s", repo.GetFullName(), repoToken)
 }
 
 func NewAuthClient(ctx context.Context, base http.RoundTripper, token oauth2.TokenSource) *http.Client {
