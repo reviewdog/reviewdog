@@ -7,7 +7,6 @@ import (
 	"net/http"
 	"os"
 	"strconv"
-	"time"
 
 	"github.com/haya14busa/reviewdog/doghouse/server/cookieman"
 	"github.com/haya14busa/reviewdog/doghouse/server/storage"
@@ -26,7 +25,6 @@ func mustCookieMan() *cookieman.CookieMan {
 		http.Cookie{
 			HttpOnly: true,
 			Secure:   !appengine.IsDevAppServer(),
-			MaxAge:   int((30 * 24 * time.Hour).Seconds()),
 			Path:     "/",
 		},
 	}
