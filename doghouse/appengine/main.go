@@ -92,6 +92,7 @@ func main() {
 	http.HandleFunc("/check", ghChecker.handleCheck)
 	http.HandleFunc("/gh_/webhook", ghWebhookHandler.handleWebhook)
 	http.HandleFunc("/gh_/auth/callback", ghHandler.HandleAuthCallback)
+	http.HandleFunc("/gh_/logout", ghHandler.HandleLogout)
 	http.Handle("/gh/", ghHandler.Handler(http.HandlerFunc(ghHandler.HandleGitHubTop)))
 	appengine.Main()
 }

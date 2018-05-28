@@ -99,6 +99,11 @@ func (g *GitHubHandler) HandleAuthCallback(w http.ResponseWriter, r *http.Reques
 	http.Redirect(w, r, redirURL, http.StatusFound)
 }
 
+func (g *GitHubHandler) HandleLogout(w http.ResponseWriter, r *http.Request) {
+	g.tokenStore.Clear(w)
+	http.Redirect(w, r, "/", http.StatusFound)
+}
+
 func (g *GitHubHandler) Handler(h http.Handler) http.Handler {
 	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		ctx := appengine.NewContext(r)
