@@ -10,22 +10,23 @@ build:
       - go build -v $(go list ./... | grep -v "/vendor/")
       - go test -v -race $(go list ./... | grep -v "/vendor/")
       - (! gofmt -s -d *.go cmd diff project | grep '^')
-  lint:
-    image: golang
-    environment:
-      - REVIEWDOG_GITHUB_API_TOKEN=$$REVIEWDOG_GITHUB_API_TOKEN
-    commands:
-      - go get github.com/haya14busa/reviewdog/cmd/reviewdog
-      - go get github.com/golang/lint/golint
-      - go get honnef.co/go/tools/cmd/unused
-      - go get honnef.co/go/tools/cmd/gosimple
-      - go get honnef.co/go/tools/cmd/staticcheck
-      - go get github.com/kisielk/errcheck
-      - reviewdog -ci=droneio
-        # test
-      - cd _testdata && golint . | reviewdog -f=golint -ci=droneio
-    when:
-      event: pull_request
+  # NOTE: Temporality disable post results from droneio. Use travis CI instead.
+  # lint:
+  #   image: golang
+  #   environment:
+  #     - REVIEWDOG_GITHUB_API_TOKEN=$$REVIEWDOG_GITHUB_API_TOKEN
+  #   commands:
+  #     - go get github.com/haya14busa/reviewdog/cmd/reviewdog
+  #     - go get github.com/golang/lint/golint
+  #     - go get honnef.co/go/tools/cmd/unused
+  #     - go get honnef.co/go/tools/cmd/gosimple
+  #     - go get honnef.co/go/tools/cmd/staticcheck
+  #     - go get github.com/kisielk/errcheck
+  #     - reviewdog -ci=droneio
+  #       # test
+  #     - cd _testdata && golint . | reviewdog -f=golint -ci=droneio
+  #   when:
+  #     event: pull_request
 
 notify:
   gitter:
