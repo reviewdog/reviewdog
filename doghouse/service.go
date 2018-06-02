@@ -1,26 +1,45 @@
 package doghouse
 
-// GitHub Check Request
+// CheckRequest represents doghouse GitHub check request.
 type CheckRequest struct {
-	SHA         string `json:"sha,omitempty"`
-	PullRequest int    `json:"pull_request,omitempty"`
-	Owner       string `json:"owner,omitempty"`
-	Repo        string `json:"repo,omitempty"`
+	// Commit SHA.
+	// Required.
+	SHA string `json:"sha,omitempty"`
+	// PullRequest number.
+	// Required.
+	PullRequest int `json:"pull_request,omitempty"`
+	// Owner of the repository.
+	// Required.
+	Owner string `json:"owner,omitempty"`
+	// Repository name.
+	// Required.
+	Repo string `json:"repo,omitempty"`
+
+	// Annotations associated with the repository's commit and Pull Request.
+	Annotations []*Annotation `json:"annotations,omitempty"`
 
 	// Name of the annotation tool.
 	// Optional.
-	Name        string        `json:"name,omitempty"`
-	Annotations []*Annotation `json:"annotations,omitempty"`
+	Name string `json:"name,omitempty"`
 }
 
-// GitHub Check Response
+// CheckResponse represents doghouse GitHub check response.
 type CheckResponse struct {
 	ReportURL string `json:"report_url,omitempty"`
 }
 
+// Annotation represents an annotaion to file or specific line.
 type Annotation struct {
-	Path       string `json:"path,omitempty"`        // relative file path
-	Line       int    `json:"line,omitempty"`        // line number
-	Message    string `json:"message,omitempty"`     // message
-	RawMessage string `json:"raw_message,omitempty"` // original error message
+	// Relative file path
+	// Required.
+	Path string `json:"path,omitempty"`
+	// Line number.
+	// Optional.
+	Line int `json:"line,omitempty"`
+	// Annotation message.
+	// Required.
+	Message string `json:"message,omitempty"`
+	// Original error message of this annotaion.
+	// Optional.
+	RawMessage string `json:"raw_message,omitempty"`
 }
