@@ -8,6 +8,8 @@ import (
 	"reflect"
 	"strings"
 	"testing"
+
+	"github.com/haya14busa/reviewdog"
 )
 
 func TestRun_local(t *testing.T) {
@@ -55,6 +57,7 @@ line3
 		diffCmd:   diffCmd,
 		efms:      strslice([]string{`%f(%l,%c): %m`}),
 		diffStrip: 0,
+		reporter:  "local",
 	}
 
 	stdout := new(bytes.Buffer)
@@ -71,7 +74,8 @@ line3
 func TestRun_project(t *testing.T) {
 	t.Run("diff command is empty", func(t *testing.T) {
 		opt := &option{
-			conf: "reviewdog.yml",
+			conf:     "reviewdog.yml",
+			reporter: "local",
 		}
 		stdout := new(bytes.Buffer)
 		if err := run(nil, stdout, opt); err == nil {
@@ -83,8 +87,9 @@ func TestRun_project(t *testing.T) {
 
 	t.Run("config not found", func(t *testing.T) {
 		opt := &option{
-			conf:    "reviewdog.notfound.yml",
-			diffCmd: "echo ''",
+			conf:     "reviewdog.notfound.yml",
+			diffCmd:  "echo ''",
+			reporter: "local",
 		}
 		stdout := new(bytes.Buffer)
 		if err := run(nil, stdout, opt); err == nil {
@@ -103,8 +108,9 @@ func TestRun_project(t *testing.T) {
 		defer os.Remove(conffile.Name())
 		conffile.WriteString("invalid yaml")
 		opt := &option{
-			conf:    conffile.Name(),
-			diffCmd: "echo ''",
+			conf:     conffile.Name(),
+			diffCmd:  "echo ''",
+			reporter: "local",
 		}
 		stdout := new(bytes.Buffer)
 		if err := run(nil, stdout, opt); err == nil {
@@ -123,8 +129,9 @@ func TestRun_project(t *testing.T) {
 		defer os.Remove(conffile.Name())
 		conffile.WriteString("") // empty
 		opt := &option{
-			conf:    conffile.Name(),
-			diffCmd: "echo ''",
+			conf:     conffile.Name(),
+			diffCmd:  "echo ''",
+			reporter: "local",
 		}
 		stdout := new(bytes.Buffer)
 		if err := run(nil, stdout, opt); err != nil {
@@ -167,19 +174,19 @@ func TestRun_travis(t *testing.T) {
 		}
 	}()
 
-	if err := run(nil, nil, &option{f: "golint", ci: "ciname"}); err != nil {
+	if err := run(nil, nil, &option{f: "golint", ci: "ciname", reporter: "github-pr-review"}); err != nil {
 		t.Errorf("got an unexpected error: %v", err)
 	}
 
 	os.Setenv("REVIEWDOG_GITHUB_API_TOKEN", "<REVIEWDOG_GITHUB_API_TOKEN>")
 
-	if err := run(nil, nil, &option{f: "golint", ci: "unsupported ci"}); err == nil {
+	if err := run(nil, nil, &option{f: "golint", ci: "unsupported ci", reporter: "github-pr-review"}); err == nil {
 		t.Error("error expected but got nil")
 	} else {
 		t.Log(err)
 	}
 
-	if err := run(nil, nil, &option{f: "golint", ci: "travis"}); err == nil {
+	if err := run(nil, nil, &option{f: "golint", ci: "travis", reporter: "github-pr-review"}); err == nil {
 		t.Error("error expected but got nil")
 	} else {
 		t.Log(err)
@@ -187,7 +194,7 @@ func TestRun_travis(t *testing.T) {
 
 	os.Setenv("TRAVIS_PULL_REQUEST", "str")
 
-	if err := run(nil, nil, &option{f: "golint", ci: "travis"}); err == nil {
+	if err := run(nil, nil, &option{f: "golint", ci: "travis", reporter: "github-pr-review"}); err == nil {
 		t.Error("error expected but got nil")
 	} else {
 		t.Log(err)
@@ -195,7 +202,7 @@ func TestRun_travis(t *testing.T) {
 
 	os.Setenv("TRAVIS_PULL_REQUEST", "1")
 
-	if err := run(nil, nil, &option{f: "golint", ci: "travis"}); err == nil {
+	if err := run(nil, nil, &option{f: "golint", ci: "travis", reporter: "github-pr-review"}); err == nil {
 		t.Error("error expected but got nil")
 	} else {
 		t.Log(err)
@@ -203,7 +210,7 @@ func TestRun_travis(t *testing.T) {
 
 	os.Setenv("TRAVIS_REPO_SLUG", "invalid repo slug")
 
-	if err := run(nil, nil, &option{f: "golint", ci: "travis"}); err == nil {
+	if err := run(nil, nil, &option{f: "golint", ci: "travis", reporter: "github-pr-review"}); err == nil {
 		t.Error("error expected but got nil")
 	} else {
 		t.Log(err)
@@ -211,7 +218,7 @@ func TestRun_travis(t *testing.T) {
 
 	os.Setenv("TRAVIS_REPO_SLUG", "haya14busa/reviewdog")
 
-	if err := run(nil, nil, &option{f: "golint", ci: "travis"}); err == nil {
+	if err := run(nil, nil, &option{f: "golint", ci: "travis", reporter: "github-pr-review"}); err == nil {
 		t.Error("error expected but got nil")
 	} else {
 		t.Log(err)
@@ -221,7 +228,7 @@ func TestRun_travis(t *testing.T) {
 
 	r := strings.NewReader("compiler result")
 
-	if err := run(r, new(bytes.Buffer), &option{diffCmd: "git diff", ci: "travis"}); err == nil {
+	if err := run(r, new(bytes.Buffer), &option{diffCmd: "git diff", ci: "travis", reporter: "github-pr-review"}); err == nil {
 		t.Error("error expected but got nil")
 	} else {
 		t.Log(err)
@@ -229,7 +236,7 @@ func TestRun_travis(t *testing.T) {
 
 	buf := new(bytes.Buffer)
 	os.Setenv("TRAVIS_PULL_REQUEST", "false")
-	if err := run(r, buf, &option{f: "golint", ci: "travis"}); err != nil {
+	if err := run(r, buf, &option{f: "golint", ci: "travis", reporter: "github-pr-review"}); err != nil {
 		t.Error(err)
 	} else {
 		t.Log(buf.String())
@@ -318,7 +325,7 @@ func TestCircleci(t *testing.T) {
 	}
 
 	os.Setenv("REVIEWDOG_GITHUB_API_TOKEN", "<REVIEWDOG_GITHUB_API_TOKEN>")
-	if err := run(strings.NewReader("compiler result"), new(bytes.Buffer), &option{f: "golint", ci: "circle-ci"}); err == nil {
+	if err := run(strings.NewReader("compiler result"), new(bytes.Buffer), &option{f: "golint", ci: "circle-ci", reporter: "github-pr-review"}); err == nil {
 		t.Error("error expected but got nil")
 	} else {
 		t.Log(err)
@@ -414,7 +421,7 @@ func TestDroneio(t *testing.T) {
 	}
 
 	os.Setenv("REVIEWDOG_GITHUB_API_TOKEN", "<REVIEWDOG_GITHUB_API_TOKEN>")
-	if err := run(strings.NewReader("compiler result"), new(bytes.Buffer), &option{f: "golint", ci: "droneio"}); err == nil {
+	if err := run(strings.NewReader("compiler result"), new(bytes.Buffer), &option{f: "golint", ci: "droneio", reporter: "github-pr-review"}); err == nil {
 		t.Error("error expected but got nil")
 	} else {
 		t.Log(err)
@@ -499,7 +506,7 @@ func TestRun_version(t *testing.T) {
 	if err := run(nil, stdout, &option{version: true}); err != nil {
 		t.Error(err)
 	}
-	if got := strings.TrimRight(stdout.String(), "\n"); got != version {
-		t.Errorf("version = %v, want %v", got, version)
+	if got := strings.TrimRight(stdout.String(), "\n"); got != reviewdog.Version {
+		t.Errorf("version = %v, want %v", got, reviewdog.Version)
 	}
 }

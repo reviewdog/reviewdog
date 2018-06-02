@@ -28,8 +28,6 @@ import (
 	shellwords "github.com/mattn/go-shellwords"
 )
 
-const version = "0.9.8"
-
 const usageMessage = "" +
 	`Usage:	reviewdog [flags]
 	reviewdog accepts any compiler or linter results from stdin and filters
@@ -47,6 +45,7 @@ type option struct {
 	name      string // tool name which is used in comment
 	ci        string
 	conf      string
+	reporter  string
 }
 
 // flags doc
@@ -58,24 +57,41 @@ const (
 	listDoc      = `list supported pre-defined format names which can be used as -f arg`
 	nameDoc      = `tool name in review comment. -f is used as tool name if -name is empty`
 	ciDoc        = `CI service ('travis', 'circle-ci', 'droneio'(OSS 0.4) or 'common')
-
-	GitHub/GitHub Enterprise:
-		You need to set REVIEWDOG_GITHUB_API_TOKEN environment variable.
-		Go to https://github.com/settings/tokens and create new Personal access token with repo scope.
-
-		For GitHub Enterprise:
-			export GITHUB_API="https://example.githubenterprise.com/api/v3"
-
-		if you want to skip verifing SSL (please use this at your own risk)
-			export REVIEWDOG_INSECURE_SKIP_VERIFY=true
-
 	"common" requires following environment variables
 		CI_PULL_REQUEST	Pull Request number (e.g. 14)
 		CI_COMMIT	SHA1 for the current build
 		CI_REPO_OWNER	repository owner (e.g. "haya14busa" for https://github.com/haya14busa/reviewdog)
 		CI_REPO_NAME	repository name (e.g. "reviewdog" for https://github.com/haya14busa/reviewdog)
+
+	TODO(haya14busa): Deprecate -ci flag and automatically get CI info.
 `
-	confDoc = `config file path`
+	confDoc     = `config file path`
+	reporterDoc = `reporter of reviewdog results. (local, github-pr-check, github-pr-review)
+	"local" (default)
+		Report results to stdout.
+
+	"github-pr-check" (experimental)
+		Report results to GitHub PullRequest Check tab.
+
+		1. Install reviedog Apps. https://github.com/apps/reviewdog
+		2. Set REVIEWDOG_TOKEN or run reviewdog CLI in trusted CI providers.
+		You can get token from https://review-dog.appspot.com/gh/<owner>/<repo-name>.
+		$ export REVIEWDOG_TOKEN="xxxxx"
+
+		Note: Token not required if you run reviewdog in Travis or AppVeyor.
+
+	"github-pr-review"
+		Report results to GitHub review comments.
+
+		1. Set REVIEWDOG_GITHUB_API_TOKEN environment variable.
+		Go to https://github.com/settings/tokens and create new Personal access token with repo scope.
+
+		For GitHub Enterprise:
+			$ export GITHUB_API="https://example.githubenterprise.com/api/v3"
+
+		if you want to skip verifing SSL (please use this at your own risk)
+			$ export REVIEWDOG_INSECURE_SKIP_VERIFY=true
+`
 )
 
 var opt = &option{}
@@ -90,6 +106,7 @@ func init() {
 	flag.StringVar(&opt.name, "name", "", nameDoc)
 	flag.StringVar(&opt.ci, "ci", "", ciDoc)
 	flag.StringVar(&opt.conf, "conf", "", confDoc)
+	flag.StringVar(&opt.reporter, "reporter", "local", reporterDoc)
 }
 
 func usage() {
@@ -112,7 +129,7 @@ func run(r io.Reader, w io.Writer, opt *option) error {
 	ctx := context.Background()
 
 	if opt.version {
-		fmt.Fprintln(w, version)
+		fmt.Fprintln(w, reviewdog.Version)
 		return nil
 	}
 
@@ -132,24 +149,27 @@ func run(r io.Reader, w io.Writer, opt *option) error {
 		cs = reviewdog.NewRawCommentWriter(w)
 	}
 
-	if opt.ci != "" {
-		if os.Getenv("REVIEWDOG_GITHUB_API_TOKEN") != "" {
-			gs, isPR, err := githubService(ctx, opt.ci)
-			if err != nil {
-				return err
-			}
-			if !isPR {
-				fmt.Fprintf(os.Stderr, "this is not PullRequest build. CI: %v\n", opt.ci)
-				return nil
-			}
-			cs = reviewdog.MultiCommentService(gs, cs)
-			ds = gs
-		} else {
+	switch opt.reporter {
+	default:
+		return fmt.Errorf("unknown -reporter: %s", opt.reporter)
+	case "github-pr-check":
+		return runDoghouse(ctx, r, opt, isProject)
+	case "github-pr-review":
+		if os.Getenv("REVIEWDOG_GITHUB_API_TOKEN") == "" {
 			fmt.Fprintf(os.Stderr, "REVIEWDOG_GITHUB_API_TOKEN is not set\n")
 			return nil
 		}
-	} else {
-		// local
+		gs, isPR, err := githubService(ctx, opt.ci)
+		if err != nil {
+			return err
+		}
+		if !isPR {
+			fmt.Fprintf(os.Stderr, "this is not PullRequest build. CI: %v\n", opt.ci)
+			return nil
+		}
+		cs = reviewdog.MultiCommentService(gs, cs)
+		ds = gs
+	case "local":
 		d, err := diffService(opt.diffCmd, opt.diffStrip)
 		if err != nil {
 			return err
@@ -158,29 +178,19 @@ func run(r io.Reader, w io.Writer, opt *option) error {
 	}
 
 	if isProject {
-		b, err := readConf(opt.conf)
+		conf, err := projectConfig(opt.conf)
 		if err != nil {
-			return fmt.Errorf("fail to open config: %v", err)
-		}
-		conf, err := project.Parse(b)
-		if err != nil {
-			return fmt.Errorf("config is invalid: %v", err)
+			return err
 		}
 		return project.Run(ctx, conf, cs, ds)
 	}
 
-	p, err := reviewdog.NewParser(&reviewdog.ParserOpt{FormatName: opt.f, Errorformat: opt.efms})
+	p, err := newParserFromOpt(opt)
 	if err != nil {
-		return fmt.Errorf("fail to create parser. use either -f or -efm: %v", err)
+		return err
 	}
 
-	// tool name
-	name := opt.name
-	if name == "" && opt.f != "" {
-		name = opt.f
-	}
-
-	app := reviewdog.NewReviewdog(name, p, cs, ds)
+	app := reviewdog.NewReviewdog(toolName(opt), p, cs, ds)
 	return app.Run(ctx, r)
 }
 
@@ -219,6 +229,22 @@ func diffService(s string, strip int) (reviewdog.DiffService, error) {
 	cmd := exec.Command(cmds[0], cmds[1:]...)
 	d := reviewdog.NewDiffCmd(cmd, strip)
 	return d, nil
+}
+
+func getGitHubPR(ci string) (g *GitHubPR, isPR bool, err error) {
+	switch ci {
+	case "travis":
+		g, isPR, err = travis()
+	case "circle-ci":
+		g, isPR, err = circleci()
+	case "droneio":
+		g, isPR, err = droneio()
+	case "common":
+		g, isPR, err = commonci()
+	default:
+		return nil, isPR, fmt.Errorf("unsupported CI: %v", ci)
+	}
+	return g, isPR, err
 }
 
 func githubService(ctx context.Context, ci string) (githubservice *reviewdog.GitHubPullRequest, isPR bool, err error) {
@@ -479,6 +505,18 @@ func (ss *strslice) Set(value string) error {
 	return nil
 }
 
+func projectConfig(path string) (*project.Config, error) {
+	b, err := readConf(path)
+	if err != nil {
+		return nil, fmt.Errorf("fail to open config: %v", err)
+	}
+	conf, err := project.Parse(b)
+	if err != nil {
+		return nil, fmt.Errorf("config is invalid: %v", err)
+	}
+	return conf, nil
+}
+
 func readConf(conf string) ([]byte, error) {
 	var conffiles []string
 	if conf != "" {
@@ -498,4 +536,20 @@ func readConf(conf string) ([]byte, error) {
 		}
 	}
 	return nil, errors.New(".reviewdog.yml not found")
+}
+
+func newParserFromOpt(opt *option) (reviewdog.Parser, error) {
+	p, err := reviewdog.NewParser(&reviewdog.ParserOpt{FormatName: opt.f, Errorformat: opt.efms})
+	if err != nil {
+		return nil, fmt.Errorf("fail to create parser. use either -f or -efm: %v", err)
+	}
+	return p, err
+}
+
+func toolName(opt *option) string {
+	name := opt.name
+	if name == "" && opt.f != "" {
+		name = opt.f
+	}
+	return name
 }
