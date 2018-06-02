@@ -2,7 +2,7 @@ package main
 
 import (
 	"context"
-	"errors"
+	"fmt"
 	"io"
 	"log"
 	"net/http"
@@ -23,7 +23,8 @@ func runDoghouse(ctx context.Context, r io.Reader, opt *option, isProject bool) 
 		return err
 	}
 	if !isPr {
-		return errors.New("this is not PullRequest build.")
+		fmt.Fprintf(os.Stderr, "reviewdog: this is not PullRequest build.")
+		return nil
 	}
 
 	resultSet := make(map[string][]*reviewdog.CheckResult)

@@ -164,7 +164,7 @@ func run(r io.Reader, w io.Writer, opt *option) error {
 			return err
 		}
 		if !isPR {
-			fmt.Fprintf(os.Stderr, "this is not PullRequest build. CI: %v\n", opt.ci)
+			fmt.Fprintf(os.Stderr, "reviewdog: this is not PullRequest build. CI: %v\n", opt.ci)
 			return nil
 		}
 		cs = reviewdog.MultiCommentService(gs, cs)
