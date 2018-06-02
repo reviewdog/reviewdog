@@ -1,12 +1,11 @@
 package ciutil
 
 import (
+	"encoding/json"
 	"fmt"
 	"net"
 	"net/http"
 	"sync"
-
-	"github.com/miekg/dns"
 )
 
 var (
@@ -49,7 +48,7 @@ func UpdateTravisCIIPAddrs(cli *http.Client) error {
 	defer muTravisIPAddrs.Unlock()
 	travisIPAddrs = map[string]bool{}
 	for _, ip := range ips {
-		travisIPAddrs[ip.String()] = true
+		travisIPAddrs[ip] = true
 	}
 	return nil
 }
@@ -65,26 +64,33 @@ func ipFromReq(r *http.Request) string {
 	return ip
 }
 
-func ipAddrs(target string, cli *http.Client) ([]net.IP, error) {
-	server := "8.8.8.8"
-	c := dns.Client{Net: "tcp"}
+// Cannot use "github.com/miekg/dns" in Google App Engine.
+// Use dnsjson.com instead as workaround.
+func ipAddrs(target string, cli *http.Client) ([]string, error) {
+	url := fmt.Sprintf("https://dnsjson.com/%s/A.json", target)
+	c := http.DefaultClient
 	if cli != nil {
-		c.HTTPClient = cli
+		c = cli
 	}
-	m := dns.Msg{}
-	m.SetQuestion(target+".", dns.TypeA)
-	r, _, err := c.Exchange(&m, server+":53")
+	r, err := c.Get(url)
 	if err != nil {
 		return nil, err
 	}
-	if len(r.Answer) == 0 {
-		return nil, fmt.Errorf("No results for %s", target)
+	defer r.Body.Close()
+
+	var res struct {
+		Results struct {
+			Records []string `json:"records"`
+		} `json:"results"`
 	}
-	addrs := make([]net.IP, 0, len(r.Answer))
-	for _, ans := range r.Answer {
-		if aRecord, ok := ans.(*dns.A); ok {
-			addrs = append(addrs, aRecord.A)
-		}
+
+	if err := json.NewDecoder(r.Body).Decode(&res); err != nil {
+		return nil, err
 	}
-	return addrs, nil
+
+	if len(res.Results.Records) == 0 {
+		return nil, fmt.Errorf("failed to get IP addresses of %s", target)
+	}
+
+	return res.Results.Records, nil
 }
