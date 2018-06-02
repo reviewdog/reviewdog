@@ -7,7 +7,6 @@ import (
 	"log"
 	"net/http"
 	"os"
-	"strconv"
 	"strings"
 
 	"github.com/haya14busa/reviewdog"
@@ -76,9 +75,6 @@ func runDoghouse(ctx context.Context, r io.Reader, opt *option, isProject bool) 
 			SHA:         ghInfo.sha,
 			Annotations: as,
 		}
-		if id := installationID(); id != 0 {
-			req.InstallationID = id
-		}
 		g.Go(func() error {
 			res, err := cli.Check(ctx, req)
 			if err != nil {
@@ -98,9 +94,4 @@ func checkResultToAnnotation(c *reviewdog.CheckResult, wd string) *doghouse.Anno
 		Message:    c.Message,
 		RawMessage: strings.Join(c.Lines, "\n"),
 	}
-}
-
-func installationID() int64 {
-	id, _ := strconv.Atoi(os.Getenv("REVIEWDOG_GITHUB_APP_INSTALLATION_ID"))
-	return int64(id)
 }

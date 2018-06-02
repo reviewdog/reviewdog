@@ -46,7 +46,6 @@ func (gc *githubChecker) handleCheck(w http.ResponseWriter, r *http.Request) {
 	opt := &server.NewGitHubClientOption{
 		PrivateKey:        gc.privateKey,
 		IntegrationID:     gc.integrationID,
-		InstallationID:    req.InstallationID,
 		RepoOwner:         req.Owner,
 		Client:            urlfetch.Client(ctx),
 		InstallationStore: gc.ghInstStore,

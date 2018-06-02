@@ -17,9 +17,7 @@ type NewGitHubClientOption struct {
 	// Required
 	IntegrationID int
 
-	// Either InstallationID OR (RepoOwner AND InstallationStore) is required for
-	// installation API.
-	InstallationID    int64
+	// RepoOwner AND InstallationStore is required for installation API.
 	RepoOwner         string
 	InstallationStore storage.GitHubInstallationStore
 
@@ -43,7 +41,7 @@ func NewGitHubClient(ctx context.Context, opt *NewGitHubClientOption) (*github.C
 }
 
 func githubAppTransport(ctx context.Context, client *http.Client, opt *NewGitHubClientOption) (http.RoundTripper, error) {
-	if opt.InstallationID == 0 && opt.RepoOwner == "" {
+	if opt.RepoOwner == "" {
 		return ghinstallation.NewAppsTransport(client.Transport, opt.IntegrationID, opt.PrivateKey)
 	}
 
@@ -55,9 +53,6 @@ func githubAppTransport(ctx context.Context, client *http.Client, opt *NewGitHub
 }
 
 func installationIDFromOpt(ctx context.Context, opt *NewGitHubClientOption) (int64, error) {
-	if opt.InstallationID != 0 {
-		return opt.InstallationID, nil
-	}
 	if opt.RepoOwner == "" {
 		return 0, errors.New("repo owner is required")
 	}
