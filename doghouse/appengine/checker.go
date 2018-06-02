@@ -10,6 +10,7 @@ import (
 
 	"github.com/haya14busa/reviewdog/doghouse"
 	"github.com/haya14busa/reviewdog/doghouse/server"
+	"github.com/haya14busa/reviewdog/doghouse/server/ciutil"
 	"github.com/haya14busa/reviewdog/doghouse/server/storage"
 	"google.golang.org/appengine"
 	"google.golang.org/appengine/log"
@@ -72,6 +73,14 @@ func (gc *githubChecker) handleCheck(w http.ResponseWriter, r *http.Request) {
 }
 
 func (gc *githubChecker) validateCheckRequest(ctx context.Context, w http.ResponseWriter, r *http.Request, owner, repo string) bool {
+	if ciutil.IsFromCI(r) {
+		// Skip token validation if it's from trusted CI providers.
+		return true
+	}
+	return gc.validateCheckToken(ctx, w, r, owner, repo)
+}
+
+func (gc *githubChecker) validateCheckToken(ctx context.Context, w http.ResponseWriter, r *http.Request, owner, repo string) bool {
 	token := extractBearerToken(r)
 	if token == "" {
 		w.Header().Set("The WWW-Authenticate", `error="invalid_request", error_description="The access token not provided"`)

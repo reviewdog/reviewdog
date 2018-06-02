@@ -88,6 +88,9 @@ func main() {
 		ghInstStore: &ghInstStore,
 	}
 
+	// Register Admin handlers.
+	http.HandleFunc("/_ah/warmup", warmupHandler)
+
 	http.HandleFunc("/", handleTop)
 	http.HandleFunc("/check", ghChecker.handleCheck)
 	http.HandleFunc("/gh_/webhook", ghWebhookHandler.handleWebhook)

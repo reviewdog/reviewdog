@@ -2,6 +2,10 @@
 runtime: go
 api_version: go1.9
 
+# https://cloud.google.com/appengine/docs/standard/go/warmup-requests/configuring
+inbound_services:
+- warmup
+
 handlers:
 - url: /secret/*
   secure: always
@@ -9,6 +13,10 @@ handlers:
 
 - url: /.*
   script: _go_app
+
+- url: /_ah/warmup
+  script: _go_app
+  login: admin
 
 includes:
 - secret/secret.yaml # set GITHUB_WEBHOOK_SECRET env var
