@@ -60,10 +60,7 @@ func (ch *Checker) postCheck(ctx context.Context, branch string, checks []*revie
 	}
 	conclusion := "success"
 	if len(annotations) > 0 {
-		// Use "neutral" for now because of the bug.
-		// https://platform.github.community/t/checks-api-check-contents-are-replaced-by-latest-check-with-different-check-name-in-check-page/5902?u=haya14busa
-		// conclusion = "action_required"
-		conclusion = "neutral"
+		conclusion = "action_required"
 	}
 	name := "reviewdog"
 	title := "reviewdog report"
