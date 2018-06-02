@@ -36,6 +36,9 @@ func FilterCheck(results []*CheckResult, diff []*diff.FileDiff, strip int, wd st
 
 	return checks
 }
+
+// CleanPath clean up given path. If workdir is not empty, it returns relative
+// path to the given workdir.
 func CleanPath(path, workdir string) string {
 	p := path
 	if filepath.IsAbs(path) && workdir != "" {
