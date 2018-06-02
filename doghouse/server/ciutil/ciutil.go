@@ -60,7 +60,10 @@ func IsFromAppveyor(r *http.Request) bool {
 }
 
 func ipFromReq(r *http.Request) string {
-	ip, _, _ := net.SplitHostPort(r.RemoteAddr)
+	ip, _, err := net.SplitHostPort(r.RemoteAddr)
+	if err != nil {
+		return r.RemoteAddr
+	}
 	return ip
 }
 

@@ -72,6 +72,7 @@ func (gc *githubChecker) handleCheck(w http.ResponseWriter, r *http.Request) {
 }
 
 func (gc *githubChecker) validateCheckRequest(ctx context.Context, w http.ResponseWriter, r *http.Request, owner, repo string) bool {
+	log.Infof(ctx, "Remote Addr: %s", r.RemoteAddr)
 	if ciutil.IsFromCI(r) {
 		// Skip token validation if it's from trusted CI providers.
 		return true

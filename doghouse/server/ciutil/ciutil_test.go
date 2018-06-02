@@ -9,13 +9,13 @@ import (
 func TestIsFromCI(t *testing.T) {
 	r := httptest.NewRequest("GET", "/", nil)
 
-	const allowedIP = "67.225.139.254:8000"
+	const allowedIP = "67.225.139.254"
 	r.RemoteAddr = allowedIP
 	if !IsFromCI(r) {
 		t.Error("IsFromCI(%q) = false, want true", allowedIP)
 	}
 
-	const notAllowedIP = "93.184.216.34:8000"
+	const notAllowedIP = "93.184.216.34"
 	r.RemoteAddr = notAllowedIP
 	if IsFromCI(r) {
 		t.Error("IsFromCI(%q) = true, want false", notAllowedIP)
@@ -40,13 +40,13 @@ func TestIsFromTravisCI(t *testing.T) {
 	}
 	r := httptest.NewRequest("GET", "/", nil)
 	for addr := range travisIPAddrs {
-		r.RemoteAddr = fmt.Sprintf("%s:8000", addr)
+		r.RemoteAddr = fmt.Sprintf("%s", addr)
 		if !IsFromTravisCI(r) {
 			t.Errorf("IsIsFromTravisCI(%q) = false, want true", r.RemoteAddr)
 		}
 	}
 
-	const notAllowedIP = "93.184.216.34:8000"
+	const notAllowedIP = "93.184.216.34"
 	r.RemoteAddr = notAllowedIP
 	if IsFromTravisCI(r) {
 		t.Error("IsFromTravisCI(%q) = true, want false", notAllowedIP)
@@ -56,13 +56,13 @@ func TestIsFromTravisCI(t *testing.T) {
 func TestIsFromAppveyor(t *testing.T) {
 	r := httptest.NewRequest("GET", "/", nil)
 
-	const allowedIP = "67.225.139.254:8000"
+	const allowedIP = "67.225.139.254"
 	r.RemoteAddr = allowedIP
 	if !IsFromAppveyor(r) {
 		t.Error("IsFromAppveyor(%q) = false, want true", allowedIP)
 	}
 
-	const notAllowedIP = "93.184.216.34:8000"
+	const notAllowedIP = "93.184.216.34"
 	r.RemoteAddr = notAllowedIP
 	if IsFromAppveyor(r) {
 		t.Error("IsFromAppveyor(%q) = true, want false", notAllowedIP)
