@@ -31,6 +31,7 @@ before_script:
   - echo $TRAVIS_PULL_REQUEST_SHA
   - echo $TRAVIS_REPO_SLUG
   - echo $TRAVIS_SECURE_ENV_VARS
+  - curl httpbin.org/ip
 
 script:
   - go test -v -race $(go list ./... | grep -v "/vendor/")
