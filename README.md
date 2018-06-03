@@ -391,6 +391,7 @@ You can use reviewdog to post review comments anywhere with following environmen
 | `CI_COMMIT`       | SHA1 for the current build |
 | `CI_REPO_OWNER`   | repository owner (e.g. "haya14busa" for https://github.com/haya14busa/reviewdog) |
 | `CI_REPO_NAME`    | repository name (e.g. "reviewdog" for https://github.com/haya14busa/reviewdog) |
+| `CI_BRANCH`       | [optional] branch of the commit |
 
 ```sh
 $ export CI_PULL_REQUEST=14
