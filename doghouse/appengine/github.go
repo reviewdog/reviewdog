@@ -52,6 +52,59 @@ func NewGitHubHandler(clientID, clientSecret string, c *cookieman.CookieMan, pri
 	}
 }
 
+var ghTopTmpl = template.Must(
+	template.ParseFiles(
+		"tmpl/gh/base.html",
+		"tmpl/gh/header.html",
+		"tmpl/gh/top.html",
+	))
+
+var ghRepoTmpl = template.Must(
+	template.ParseFiles(
+		"tmpl/gh/base.html",
+		"tmpl/gh/header.html",
+		"tmpl/gh/repo.html",
+	))
+
+type ghTopTmplData struct {
+	Title string
+	User  tmplUser
+
+	App struct {
+		Name    string
+		HTMLURL string
+	}
+
+	Installations []tmplInstallation
+}
+
+type tmplInstallation struct {
+	Account        string
+	AccountHTMLURL string
+	AccountIconURL string
+	HTMLURL        string
+}
+
+type ghRepoTmplData struct {
+	Title     string
+	Token     string
+	User      tmplUser
+	Repo      tmplRepo
+	CSRFToken string
+}
+
+type tmplUser struct {
+	Name      string
+	IconURL   string
+	GitHubURL string
+}
+
+type tmplRepo struct {
+	Owner     string
+	Name      string
+	GitHubURL string
+}
+
 func (g *GitHubHandler) buildGithubAuthURL(r *http.Request, state string) string {
 	var redirURL url.URL
 	redirURL = *r.URL
@@ -231,66 +284,50 @@ func (g *GitHubHandler) handleTop(ctx context.Context, ghcli *github.Client, w h
 		return
 	}
 
-	fmt.Fprintf(w, "Hi, %s!\n", u.GetName())
+	data := &ghTopTmplData{
+		Title: "GitHub - reviewdog",
+		User: tmplUser{
+			Name:      u.GetName(),
+			IconURL:   u.GetAvatarURL(),
+			GitHubURL: u.GetHTMLURL(),
+		},
+	}
 
-	{
-		fmt.Fprintln(w, "")
-		ghcli, err := server.NewGitHubClient(ctx, &server.NewGitHubClientOption{
-			Client:        urlfetch.Client(ctx),
-			IntegrationID: g.integrationID,
-			PrivateKey:    g.privateKey,
+	ghAppCli, err := server.NewGitHubClient(ctx, &server.NewGitHubClientOption{
+		Client:        urlfetch.Client(ctx),
+		IntegrationID: g.integrationID,
+		PrivateKey:    g.privateKey,
+	})
+	if err != nil {
+		w.WriteHeader(http.StatusInternalServerError)
+		fmt.Fprintln(w, err)
+		return
+	}
+	app, _, err := ghAppCli.Apps.Get(ctx, "")
+	if err != nil {
+		w.WriteHeader(http.StatusInternalServerError)
+		fmt.Fprintln(w, err)
+		return
+	}
+	data.App.Name = app.GetName()
+	data.App.HTMLURL = app.GetHTMLURL()
+
+	installations, _, err := ghcli.Apps.ListUserInstallations(ctx, nil)
+	if err != nil {
+		w.WriteHeader(http.StatusInternalServerError)
+		fmt.Fprintln(w, err)
+		return
+	}
+	for _, inst := range installations {
+		data.Installations = append(data.Installations, tmplInstallation{
+			Account:        inst.GetAccount().GetLogin(),
+			AccountHTMLURL: inst.GetAccount().GetHTMLURL(),
+			AccountIconURL: inst.GetAccount().GetAvatarURL(),
+			HTMLURL:        inst.GetHTMLURL(),
 		})
-		if err != nil {
-			fmt.Fprintln(w, err)
-			return
-		}
-		app, _, err := ghcli.Apps.Get(ctx, "")
-		if err != nil {
-			fmt.Fprintln(w, err)
-		} else {
-			fmt.Fprintf(w, "%s app setting: %s\n", app.GetName(), app.GetHTMLURL())
-		}
 	}
 
-	{
-		fmt.Fprintln(w, "")
-		fmt.Fprintf(w, "Installation setting\n")
-		installations, _, err := ghcli.Apps.ListUserInstallations(ctx, nil)
-		if err != nil {
-			fmt.Fprintln(w, err)
-			return
-		}
-		for _, inst := range installations {
-			fmt.Fprintf(w, "\t%s: %s\n", inst.GetAccount().GetLogin(), inst.GetHTMLURL())
-		}
-	}
-}
-
-var ghRepoTmpl = template.Must(
-	template.ParseFiles(
-		"tmpl/gh/base.html",
-		"tmpl/gh/header.html",
-		"tmpl/gh/repo.html",
-	))
-
-type ghRepoTmplData struct {
-	Title     string
-	Token     string
-	User      tmplUser
-	Repo      tmplRepo
-	CSRFToken string
-}
-
-type tmplUser struct {
-	Name      string
-	IconURL   string
-	GitHubURL string
-}
-
-type tmplRepo struct {
-	Owner     string
-	Name      string
-	GitHubURL string
+	ghTopTmpl.ExecuteTemplate(w, "base", data)
 }
 
 func (g *GitHubHandler) handleRepo(ctx context.Context, ghcli *github.Client, w http.ResponseWriter, r *http.Request, owner, repoName string) {
