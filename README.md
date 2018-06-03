@@ -25,9 +25,7 @@ by diff.
 
 [design doc](https://docs.google.com/document/d/1mGOX19SSqRowWGbXieBfGPtLnM0BdTkIc9JelTiu6wA/edit?usp=sharing)
 
-
-Automatic code review ([sample PR](https://github.com/haya14busa/reviewdog/pull/24#discussion_r84599728))
-
+[![github-pr-check sample](https://user-images.githubusercontent.com/3797062/40884858-6efd82a0-6756-11e8-9f1a-c6af4f920fb0.png)](https://github.com/haya14busa/reviewdog/pull/131/checks)
 [![sample-comment.png](https://raw.githubusercontent.com/haya14busa/i/dc0ccb1e110515ea407c146d99b749018db05c45/reviewdog/sample-comment.png)](https://github.com/haya14busa/reviewdog/pull/24#discussion_r84599728)
 
 Local run
@@ -180,6 +178,8 @@ It may support [Gerrit](https://www.gerritcodereview.com/), [Bitbucket](https://
 
 ### Reporter: GitHub Checks (-reporter=github-pr-check)
 [experimental]
+
+[![github-pr-check sample](https://user-images.githubusercontent.com/3797062/40884858-6efd82a0-6756-11e8-9f1a-c6af4f920fb0.png)](https://github.com/haya14busa/reviewdog/pull/131/checks)
 
 github-pr-review reporter reports results as [GitHub Checks](https://help.github.com/articles/about-status-checks/).
 Since GitHub Checks API is only for GitHub Apps, reviewdoc cli send a request to
