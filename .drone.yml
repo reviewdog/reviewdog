@@ -16,7 +16,7 @@ build:
       - REVIEWDOG_GITHUB_API_TOKEN=$$REVIEWDOG_GITHUB_API_TOKEN
     commands:
       - go install ./cmd/reviewdog
-      - go vet ./... 2>&1 | reviewdog -reporter="github-pr-review"
+      - go vet ./... 2>&1 | reviewdog -reporter="github-pr-review" -ci=droneio
     when:
       event: pull_request
 
