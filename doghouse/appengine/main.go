@@ -99,10 +99,9 @@ func main() {
 	mu.HandleFunc("/gh_/webhook", ghWebhookHandler.handleWebhook)
 	mu.HandleFunc("/gh_/auth/callback", ghHandler.HandleAuthCallback)
 	mu.HandleFunc("/gh_/logout", ghHandler.HandleLogout)
-	mu.Handle("/gh/", ghHandler.LogInHandler(http.HandlerFunc(ghHandler.HandleGitHubTop)))
+	mu.Handle("/gh/", nosurf.New(ghHandler.LogInHandler(http.HandlerFunc(ghHandler.HandleGitHubTop))))
 
-	http.Handle("/", nosurf.New(mu))
-
+	http.Handle("/", mu)
 	appengine.Main()
 }
 
