@@ -1,7 +1,7 @@
 package main
 
 import (
-	"fmt"
+	"html/template"
 	"io/ioutil"
 	"log"
 	"net/http"
@@ -100,6 +100,16 @@ func main() {
 	appengine.Main()
 }
 
+var topTmpl = template.Must(
+	template.ParseFiles(
+		"tmpl/base.html",
+		"tmpl/index.html",
+	))
+
 func handleTop(w http.ResponseWriter, r *http.Request) {
-	fmt.Fprintln(w, "reviewdog")
+	var data struct {
+		Title string
+	}
+	data.Title = "reviewdog"
+	topTmpl.ExecuteTemplate(w, "base", &data)
 }

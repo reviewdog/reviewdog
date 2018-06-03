@@ -11,6 +11,9 @@ handlers:
   secure: always
   script: _go_app
 
+- url: /static
+  static_dir: static
+
 - url: /.*
   script: _go_app
 
