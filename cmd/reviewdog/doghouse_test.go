@@ -2,13 +2,16 @@ package main
 
 import (
 	"context"
+	"io/ioutil"
 	"os"
+	"strings"
 	"testing"
 
 	"github.com/google/go-cmp/cmp"
 	"github.com/haya14busa/reviewdog"
 	"github.com/haya14busa/reviewdog/doghouse"
 	"github.com/haya14busa/reviewdog/doghouse/client"
+	"github.com/haya14busa/reviewdog/project"
 	"golang.org/x/oauth2"
 )
 
@@ -30,6 +33,66 @@ func TestNewDoghouseCli(t *testing.T) {
 
 	if _, ok := newDoghouseCli(context.Background()).Client.Transport.(*oauth2.Transport); !ok {
 		t.Error("w/ TOKEN: got unexpected http client, want oauth client")
+	}
+}
+
+func TestCheckResultSet_Project(t *testing.T) {
+	defer func(f func(ctx context.Context, conf *project.Config) (map[string][]*reviewdog.CheckResult, error)) {
+		projectRunAndParse = f
+	}(projectRunAndParse)
+
+	wantCheckResult := map[string][]*reviewdog.CheckResult{
+		"name1": {
+			&reviewdog.CheckResult{
+				Lnum:    1,
+				Col:     14,
+				Message: "msg",
+				Path:    "reviewdog.go",
+			},
+		},
+	}
+
+	projectRunAndParse = func(ctx context.Context, conf *project.Config) (map[string][]*reviewdog.CheckResult, error) {
+		return wantCheckResult, nil
+	}
+
+	tmp, err := ioutil.TempFile("", "")
+	if err != nil {
+		t.Fatal(err)
+	}
+	defer os.Remove(tmp.Name())
+
+	got, err := checkResultSet(context.Background(), nil, &option{conf: tmp.Name()}, true)
+	if err != nil {
+		t.Fatal(err)
+	}
+	if diff := cmp.Diff(got, wantCheckResult); diff != "" {
+		t.Errorf("result has diff:\n%s", diff)
+	}
+}
+
+func TestCheckResultSet_NonProject(t *testing.T) {
+	opt := &option{
+		f: "golint",
+	}
+	input := `reviewdog.go:14:14: test message`
+	got, err := checkResultSet(context.Background(), strings.NewReader(input), opt, false)
+	if err != nil {
+		t.Fatal(err)
+	}
+	want := map[string][]*reviewdog.CheckResult{
+		"golint": {
+			&reviewdog.CheckResult{
+				Lnum:    14,
+				Col:     14,
+				Message: "test message",
+				Path:    "reviewdog.go",
+				Lines:   []string{input},
+			},
+		},
+	}
+	if diff := cmp.Diff(got, want); diff != "" {
+		t.Errorf("result has diff:\n%s", diff)
 	}
 }
 

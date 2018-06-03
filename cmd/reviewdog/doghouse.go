@@ -45,6 +45,8 @@ func newDoghouseCli(ctx context.Context) *client.DogHouseClient {
 	return client.New(httpCli)
 }
 
+var projectRunAndParse = project.RunAndParse
+
 func checkResultSet(ctx context.Context, r io.Reader, opt *option, isProject bool) (map[string][]*reviewdog.CheckResult, error) {
 	resultSet := make(map[string][]*reviewdog.CheckResult)
 	if isProject {
@@ -52,7 +54,7 @@ func checkResultSet(ctx context.Context, r io.Reader, opt *option, isProject boo
 		if err != nil {
 			return nil, err
 		}
-		resultSet, err = project.RunAndParse(ctx, conf)
+		resultSet, err = projectRunAndParse(ctx, conf)
 		if err != nil {
 			return nil, err
 		}
