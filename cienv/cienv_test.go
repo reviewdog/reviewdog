@@ -24,6 +24,10 @@ func setupEnvs() (cleanup func()) {
 		"CI_COMMIT",
 		"CI_REPO_OWNER",
 		"CI_REPO_NAME",
+		"CI_BRANCH",
+		"TRAVIS_PULL_REQUEST_BRANCH",
+		"CIRCLE_BRANCH",
+		"DRONE_COMMIT_BRANCH",
 	}
 	saveEnvs := make(map[string]string)
 	for _, key := range cleanEnvs {
