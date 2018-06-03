@@ -149,6 +149,13 @@ func run(r io.Reader, w io.Writer, opt *option) error {
 		cs = reviewdog.NewRawCommentWriter(w)
 	}
 
+	// For backward compatibility, set reporter=github-pr-review if -ci is
+	// specified while -reporter is not.
+	// TODO(haya14busa): clean up when removing -ci flag.
+	if opt.ci != "" && opt.reporter == "local" {
+		opt.reporter = "github-pr-review"
+	}
+
 	switch opt.reporter {
 	default:
 		return fmt.Errorf("unknown -reporter: %s", opt.reporter)
