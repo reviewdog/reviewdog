@@ -11,6 +11,7 @@ import (
 	"github.com/haya14busa/reviewdog/doghouse/server/cookieman"
 	"github.com/haya14busa/reviewdog/doghouse/server/storage"
 	"github.com/haya14busa/secretbox"
+	"github.com/justinas/nosurf"
 	"google.golang.org/appengine"
 )
 
@@ -88,15 +89,20 @@ func main() {
 		ghInstStore: &ghInstStore,
 	}
 
-	// Register Admin handlers.
-	http.HandleFunc("/_ah/warmup", warmupHandler)
+	mu := http.NewServeMux()
 
-	http.HandleFunc("/", handleTop)
-	http.HandleFunc("/check", ghChecker.handleCheck)
-	http.HandleFunc("/gh_/webhook", ghWebhookHandler.handleWebhook)
-	http.HandleFunc("/gh_/auth/callback", ghHandler.HandleAuthCallback)
-	http.HandleFunc("/gh_/logout", ghHandler.HandleLogout)
-	http.Handle("/gh/", ghHandler.Handler(http.HandlerFunc(ghHandler.HandleGitHubTop)))
+	// Register Admin handlers.
+	mu.HandleFunc("/_ah/warmup", warmupHandler)
+
+	mu.HandleFunc("/", handleTop)
+	mu.HandleFunc("/check", ghChecker.handleCheck)
+	mu.HandleFunc("/gh_/webhook", ghWebhookHandler.handleWebhook)
+	mu.HandleFunc("/gh_/auth/callback", ghHandler.HandleAuthCallback)
+	mu.HandleFunc("/gh_/logout", ghHandler.HandleLogout)
+	mu.Handle("/gh/", ghHandler.LogInHandler(http.HandlerFunc(ghHandler.HandleGitHubTop)))
+
+	http.Handle("/", nosurf.New(mu))
+
 	appengine.Main()
 }
 

@@ -29,6 +29,11 @@ func GetOrGenerateRepoToken(ctx context.Context, s storage.GitHubRepositoryToken
 		return token.Token, nil
 	}
 	// If repo token not found, create a repo token.
+	return RegenerateRepoToken(ctx, s, owner, repo, repoID)
+}
+
+func RegenerateRepoToken(ctx context.Context, s storage.GitHubRepositoryTokenStore,
+	owner, repo string, repoID int64) (string, error) {
 	newToken := &storage.GitHubRepositoryToken{
 		RepositoryID:    repoID,
 		RepositoryName:  repo,

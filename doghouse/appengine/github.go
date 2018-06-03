@@ -18,6 +18,7 @@ import (
 	"github.com/haya14busa/reviewdog/doghouse/server"
 	"github.com/haya14busa/reviewdog/doghouse/server/cookieman"
 	"github.com/haya14busa/reviewdog/doghouse/server/storage"
+	"github.com/justinas/nosurf"
 	"golang.org/x/oauth2"
 	"google.golang.org/appengine"
 	"google.golang.org/appengine/log"
@@ -105,7 +106,7 @@ func (g *GitHubHandler) HandleLogout(w http.ResponseWriter, r *http.Request) {
 	http.Redirect(w, r, "/", http.StatusFound)
 }
 
-func (g *GitHubHandler) Handler(h http.Handler) http.Handler {
+func (g *GitHubHandler) LogInHandler(h http.Handler) http.Handler {
 	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		ctx := appengine.NewContext(r)
 		if g.isLoggedIn(r) {
@@ -273,10 +274,11 @@ var ghRepoTmpl = template.Must(
 	))
 
 type ghRepoTmplData struct {
-	Title string
-	Token string
-	User  tmplUser
-	Repo  tmplRepo
+	Title     string
+	Token     string
+	User      tmplUser
+	Repo      tmplRepo
+	CSRFToken string
 }
 
 type tmplUser struct {
@@ -315,12 +317,23 @@ func (g *GitHubHandler) handleRepo(ctx context.Context, ghcli *github.Client, w 
 		return
 	}
 
+	// Regenerate Token.
+	if r.Method == "POST" {
+		if _, err := server.RegenerateRepoToken(ctx, g.repoTokenStore, repo.Owner.GetLogin(), repo.GetName(), repo.GetID()); err != nil {
+			w.WriteHeader(http.StatusInternalServerError)
+			fmt.Fprintln(w, "failed to update repository token: %v", err)
+			return
+		}
+		http.Redirect(w, r, r.URL.String(), http.StatusFound)
+	}
+
 	repoToken, err := server.GetOrGenerateRepoToken(ctx, g.repoTokenStore, repo.Owner.GetLogin(), repo.GetName(), repo.GetID())
 	if err != nil {
 		w.WriteHeader(http.StatusInternalServerError)
 		fmt.Fprintf(w, "failed to get repository token for %s.", repo.GetHTMLURL())
 		return
 	}
+
 	ghRepoTmpl.ExecuteTemplate(w, "base", &ghRepoTmplData{
 		Title: fmt.Sprintf("%s/%s - reviewdog", repo.Owner.GetLogin(), repo.GetName()),
 		Token: repoToken,
@@ -333,7 +346,12 @@ func (g *GitHubHandler) handleRepo(ctx context.Context, ghcli *github.Client, w 
 			Name:      repo.GetName(),
 			GitHubURL: repo.GetHTMLURL(),
 		},
+		CSRFToken: nosurf.Token(r),
 	})
+}
+
+func (g *GitHubHandler) handleRegenerateToken(w http.ResponseWriter, r *http.Request) {
+	fmt.Fprintln(w, "handleRegenerateToken")
 }
 
 func NewAuthClient(ctx context.Context, base http.RoundTripper, token oauth2.TokenSource) *http.Client {

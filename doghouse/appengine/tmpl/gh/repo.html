@@ -12,4 +12,9 @@
   $ export REVIEWDOG_TOKEN="{{ .Token }}"
 </pre>
 
+<form action="/gh/{{ .Repo.Owner }}/{{ .Repo.Name }}" method="POST">
+  <input type="submit" value="Regenerate">
+  <input type="hidden" name="csrf_token" value="{{ .CSRFToken }}">
+</form>
+
 {{end}}
