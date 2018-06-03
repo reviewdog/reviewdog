@@ -9,6 +9,7 @@ import (
 
 	"github.com/google/go-cmp/cmp"
 	"github.com/haya14busa/reviewdog"
+	"github.com/haya14busa/reviewdog/cienv"
 	"github.com/haya14busa/reviewdog/doghouse"
 	"github.com/haya14busa/reviewdog/doghouse/client"
 	"github.com/haya14busa/reviewdog/project"
@@ -181,11 +182,11 @@ func TestPostResultSet(t *testing.T) {
 		},
 	}
 
-	ghInfo := &PullRequestInfo{
-		owner: owner,
-		repo:  repo,
-		pr:    prNum,
-		sha:   sha,
+	ghInfo := &cienv.PullRequestInfo{
+		Owner:       owner,
+		Repo:        repo,
+		PullRequest: prNum,
+		SHA:         sha,
 	}
 
 	if err := postResultSet(context.Background(), resultSet, ghInfo, fakeCli); err != nil {

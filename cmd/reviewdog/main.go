@@ -11,10 +11,7 @@ import (
 	"net/url"
 	"os"
 	"os/exec"
-	"regexp"
 	"sort"
-	"strconv"
-	"strings"
 	"text/tabwriter"
 
 	"golang.org/x/net/context" // "context"
@@ -24,6 +21,7 @@ import (
 	"github.com/google/go-github/github"
 	"github.com/haya14busa/errorformat/fmts"
 	"github.com/haya14busa/reviewdog"
+	"github.com/haya14busa/reviewdog/cienv"
 	"github.com/haya14busa/reviewdog/project"
 	shellwords "github.com/mattn/go-shellwords"
 )
@@ -256,109 +254,12 @@ type PullRequestInfo struct {
 	sha   string
 }
 
-// https://docs.travis-ci.com/user/environment-variables/
-// https://circleci.com/docs/environment-variables/
-// http://docs.drone.io/environment-reference/
-func getPullRequestInfoFromEnv() (g *PullRequestInfo, isPR bool, err error) {
-	pr := getPullRequestNum()
-	if pr == 0 {
-		return nil, false, nil
-	}
-
-	owner, repo := getOwnerAndRepoFromSlug([]string{
-		"TRAVIS_REPO_SLUG",
-		"DRONE_REPO", // drone<=0.4
-	})
-	if owner == "" {
-		owner = getOneEnvValue([]string{
-			"CI_REPO_OWNER", // common
-			"CIRCLE_PROJECT_USERNAME",
-			"DRONE_REPO_OWNER",
-		})
-	}
-	if owner == "" {
-		return nil, false, errors.New("cannot get repo owner from environment variable. Set CI_REPO_OWNER?")
-	}
-
-	if repo == "" {
-		repo = getOneEnvValue([]string{
-			"CI_REPO_NAME", // common
-			"CIRCLE_PROJECT_REPONAME",
-			"DRONE_REPO_NAME",
-		})
-	}
-
-	if owner == "" {
-		return nil, false, errors.New("cannot get repo name from environment variable. Set CI_REPO_NAME?")
-	}
-
-	sha := getOneEnvValue([]string{
-		"CI_COMMIT", // common
-		"TRAVIS_PULL_REQUEST_SHA",
-		"CIRCLE_SHA1",
-		"DRONE_COMMIT",
-	})
-	if sha == "" {
-		return nil, false, errors.New("cannot get commit SHA from environment variable. Set CI_COMMIT?")
-	}
-
-	return &PullRequestInfo{
-		owner: owner,
-		repo:  repo,
-		pr:    pr,
-		sha:   sha,
-	}, true, nil
-}
-
-func getPullRequestNum() int {
-	envs := []string{
-		// Common.
-		"CI_PULL_REQUEST",
-		// Travis CI.
-		"TRAVIS_PULL_REQUEST",
-		// Circle CI.
-		"CIRCLE_PULL_REQUEST", // CircleCI 2.0
-		"CIRCLE_PR_NUMBER",    // For Pull Request by a fork repository
-		// drone.io.
-		"DRONE_PULL_REQUEST",
-	}
-	// regexp.MustCompile() in func intentionally because this func is called
-	// once for one run.
-	re := regexp.MustCompile(`[1-9]\d*$`)
-	for _, env := range envs {
-		prm := re.FindString(os.Getenv(env))
-		pr, _ := strconv.Atoi(prm)
-		if pr != 0 {
-			return pr
-		}
-	}
-	return 0
-}
-
-func getOneEnvValue(envs []string) string {
-	for _, env := range envs {
-		if v := os.Getenv(env); v != "" {
-			return v
-		}
-	}
-	return ""
-}
-
-func getOwnerAndRepoFromSlug(slugEnvs []string) (string, string) {
-	repoSlug := getOneEnvValue(slugEnvs)
-	ownerAndRepo := strings.SplitN(repoSlug, "/", 2)
-	if len(ownerAndRepo) < 2 {
-		return "", ""
-	}
-	return ownerAndRepo[0], ownerAndRepo[1]
-}
-
 func githubService(ctx context.Context) (githubservice *reviewdog.GitHubPullRequest, isPR bool, err error) {
 	token, err := nonEmptyEnv("REVIEWDOG_GITHUB_API_TOKEN")
 	if err != nil {
 		return nil, isPR, err
 	}
-	g, isPR, err := getPullRequestInfoFromEnv()
+	g, isPR, err := cienv.GetPullRequestInfo()
 	if err != nil {
 		return nil, isPR, err
 	}
@@ -372,7 +273,7 @@ func githubService(ctx context.Context) (githubservice *reviewdog.GitHubPullRequ
 		return nil, isPR, err
 	}
 
-	githubservice, err = reviewdog.NewGitHubPullReqest(client, g.owner, g.repo, g.pr, g.sha)
+	githubservice, err = reviewdog.NewGitHubPullReqest(client, g.Owner, g.Repo, g.PullRequest, g.SHA)
 	if err != nil {
 		return nil, isPR, err
 	}
