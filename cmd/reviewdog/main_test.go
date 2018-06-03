@@ -154,24 +154,40 @@ func TestRun_project(t *testing.T) {
 	})
 }
 
-func TestGetPullRequestInfoFromEnv_travis(t *testing.T) {
-	envs := []string{
+func setupEnvs() (cleanup func()) {
+	var cleanEnvs = []string{
 		"TRAVIS_PULL_REQUEST",
 		"TRAVIS_REPO_SLUG",
 		"TRAVIS_PULL_REQUEST_SHA",
+		"CIRCLE_PR_NUMBER",
+		"CIRCLE_PROJECT_USERNAME",
+		"CIRCLE_PROJECT_REPONAME",
+		"CIRCLE_SHA1",
+		"DRONE_PULL_REQUEST",
+		"DRONE_REPO",
+		"DRONE_REPO_OWNER",
+		"DRONE_REPO_NAME",
+		"DRONE_COMMIT",
+		"CI_PULL_REQUEST",
+		"CI_COMMIT",
+		"CI_REPO_OWNER",
+		"CI_REPO_NAME",
 	}
-	// save and clean
 	saveEnvs := make(map[string]string)
-	for _, key := range envs {
+	for _, key := range cleanEnvs {
 		saveEnvs[key] = os.Getenv(key)
 		os.Unsetenv(key)
 	}
-	// restore
-	defer func() {
+	return func() {
 		for key, value := range saveEnvs {
 			os.Setenv(key, value)
 		}
-	}()
+	}
+}
+
+func TestGetPullRequestInfoFromEnv_travis(t *testing.T) {
+	cleanup := setupEnvs()
+	defer cleanup()
 
 	_, isPR, err := getPullRequestInfoFromEnv()
 	if err != nil {
@@ -237,24 +253,8 @@ func TestGetPullRequestInfoFromEnv_travis(t *testing.T) {
 }
 
 func TestGetPullRequestInfoFromEnv_circleci(t *testing.T) {
-	envs := []string{
-		"CIRCLE_PR_NUMBER",
-		"CIRCLE_PROJECT_USERNAME",
-		"CIRCLE_PROJECT_REPONAME",
-		"CIRCLE_SHA1",
-	}
-	// save and clean
-	saveEnvs := make(map[string]string)
-	for _, key := range envs {
-		saveEnvs[key] = os.Getenv(key)
-		os.Unsetenv(key)
-	}
-	// restore
-	defer func() {
-		for key, value := range saveEnvs {
-			os.Setenv(key, value)
-		}
-	}()
+	cleanup := setupEnvs()
+	defer cleanup()
 
 	if _, isPR, err := getPullRequestInfoFromEnv(); isPR {
 		t.Errorf("should be non pull-request build. error: %v", err)
@@ -301,25 +301,8 @@ func TestGetPullRequestInfoFromEnv_circleci(t *testing.T) {
 }
 
 func TestGetPullRequestInfoFromEnv_droneio(t *testing.T) {
-	envs := []string{
-		"DRONE_PULL_REQUEST",
-		"DRONE_REPO",
-		"DRONE_REPO_OWNER",
-		"DRONE_REPO_NAME",
-		"DRONE_COMMIT",
-	}
-	// save and clean
-	saveEnvs := make(map[string]string)
-	for _, key := range envs {
-		saveEnvs[key] = os.Getenv(key)
-		os.Unsetenv(key)
-	}
-	// restore
-	defer func() {
-		for key, value := range saveEnvs {
-			os.Setenv(key, value)
-		}
-	}()
+	cleanup := setupEnvs()
+	defer cleanup()
 
 	if _, isPR, err := getPullRequestInfoFromEnv(); isPR {
 		t.Errorf("should be non pull-request build. error: %v", err)
@@ -382,24 +365,8 @@ func TestGetPullRequestInfoFromEnv_droneio(t *testing.T) {
 }
 
 func TestGetPullRequestInfoFromEnv_common(t *testing.T) {
-	envs := []string{
-		"CI_PULL_REQUEST",
-		"CI_COMMIT",
-		"CI_REPO_OWNER",
-		"CI_REPO_NAME",
-	}
-	// save and clean
-	saveEnvs := make(map[string]string)
-	for _, key := range envs {
-		saveEnvs[key] = os.Getenv(key)
-		os.Unsetenv(key)
-	}
-	// restore
-	defer func() {
-		for key, value := range saveEnvs {
-			os.Setenv(key, value)
-		}
-	}()
+	cleanup := setupEnvs()
+	defer cleanup()
 
 	if _, isPR, err := getPullRequestInfoFromEnv(); isPR {
 		t.Errorf("should be non pull-request build. error: %v", err)
