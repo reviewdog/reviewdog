@@ -85,7 +85,7 @@ func (gc *githubChecker) validateCheckToken(ctx context.Context, w http.Response
 	if token == "" {
 		w.Header().Set("The WWW-Authenticate", `error="invalid_request", error_description="The access token not provided"`)
 		w.WriteHeader(http.StatusUnauthorized)
-		fmt.Fprintf(w, "The access token not provided. Get token from %s", githubRepoURL(ctx, owner, repo))
+		fmt.Fprintf(w, "The access token not provided. Get token from %s", githubRepoURL(ctx, r, owner, repo))
 		return false
 	}
 	_, wantToken, err := gc.ghRepoTokenStore.Get(ctx, owner, repo)
@@ -99,24 +99,30 @@ func (gc *githubChecker) validateCheckToken(ctx context.Context, w http.Response
 	if token != wantToken.Token {
 		w.Header().Set("The WWW-Authenticate", `error="invalid_token", error_description="The access token is invalid"`)
 		w.WriteHeader(http.StatusUnauthorized)
-		fmt.Fprintf(w, "The access token is invalid. Get valid token from %s", githubRepoURL(ctx, owner, repo))
+		fmt.Fprintf(w, "The access token is invalid. Get valid token from %s", githubRepoURL(ctx, r, owner, repo))
 		return false
 	}
 	return true
 }
 
-func githubRepoURL(ctx context.Context, owner, repo string) string {
-	u := doghouseBaseURL(ctx)
+func githubRepoURL(ctx context.Context, r *http.Request, owner, repo string) string {
+	u := doghouseBaseURL(ctx, r)
 	u.Path = fmt.Sprintf("/gh/%s/%s", owner, repo)
 	return u.String()
 }
 
-func doghouseBaseURL(ctx context.Context) *url.URL {
-	scheme := "https://"
-	if appengine.IsDevAppServer() {
-		scheme = "http://"
+func doghouseBaseURL(ctx context.Context, r *http.Request) *url.URL {
+	scheme := ""
+	if r.URL != nil && r.URL.Scheme != "" {
+		scheme = r.URL.Scheme
 	}
-	u, err := url.Parse(scheme + appengine.DefaultVersionHostname(ctx))
+	if scheme == "" {
+		scheme = "https"
+		if appengine.IsDevAppServer() {
+			scheme = "http"
+		}
+	}
+	u, err := url.Parse(scheme + "://" + r.Host)
 	if err != nil {
 		log.Errorf(ctx, "%v", err)
 	}
