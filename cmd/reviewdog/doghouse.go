@@ -10,6 +10,7 @@ import (
 	"strings"
 
 	"github.com/haya14busa/reviewdog"
+	"github.com/haya14busa/reviewdog/cienv"
 	"github.com/haya14busa/reviewdog/doghouse"
 	"github.com/haya14busa/reviewdog/doghouse/client"
 	"github.com/haya14busa/reviewdog/project"
@@ -18,7 +19,7 @@ import (
 )
 
 func runDoghouse(ctx context.Context, r io.Reader, opt *option, isProject bool) error {
-	ghInfo, isPr, err := getGitHubPR(opt.ci)
+	ghInfo, isPr, err := cienv.GetPullRequestInfo()
 	if err != nil {
 		return err
 	}
@@ -72,7 +73,7 @@ func checkResultSet(ctx context.Context, r io.Reader, opt *option, isProject boo
 	return resultSet, nil
 }
 
-func postResultSet(ctx context.Context, resultSet map[string][]*reviewdog.CheckResult, ghInfo *GitHubPR, cli client.DogHouseClientInterface) error {
+func postResultSet(ctx context.Context, resultSet map[string][]*reviewdog.CheckResult, ghInfo *cienv.PullRequestInfo, cli client.DogHouseClientInterface) error {
 	var g errgroup.Group
 	wd, _ := os.Getwd()
 	for name, results := range resultSet {
@@ -83,10 +84,10 @@ func postResultSet(ctx context.Context, resultSet map[string][]*reviewdog.CheckR
 		}
 		req := &doghouse.CheckRequest{
 			Name:        name,
-			Owner:       ghInfo.owner,
-			Repo:        ghInfo.repo,
-			PullRequest: ghInfo.pr,
-			SHA:         ghInfo.sha,
+			Owner:       ghInfo.Owner,
+			Repo:        ghInfo.Repo,
+			PullRequest: ghInfo.PullRequest,
+			SHA:         ghInfo.SHA,
 			Annotations: as,
 		}
 		g.Go(func() error {
