@@ -193,6 +193,20 @@ reviewdog GitHub App server and the server post resutls as GitHub Checks.
 
 Note: Token not required if you run reviewdog in Travis or AppVeyor.
 
+#### *Caution:*
+
+As described above, github-pr-review reporter is depending on reviewdog GitHub
+App server.
+The server is running with haya14busa's pocket money for now and i may break
+things, so I cannot ensure that the server is running 24h and 365 days.
+
+github-pr-check reporter is better than github-pr-review reporter in general
+because it provides more rich feature and has less scope, but please bear in
+mind the above caution and please use it on your own risk.
+
+You can use github-pr-review reporter if you don't want to depens on reviewdog
+server.
+
 ### Reporter: GitHub PullRequest review comemnt (-reporter=github-pr-review)
 
 [![sample-comment.png](https://raw.githubusercontent.com/haya14busa/i/dc0ccb1e110515ea407c146d99b749018db05c45/reviewdog/sample-comment.png)](https://github.com/haya14busa/reviewdog/pull/24#discussion_r84599728)
