@@ -11,36 +11,51 @@ import (
 	"github.com/haya14busa/reviewdog"
 	"github.com/haya14busa/reviewdog/diff"
 	"github.com/haya14busa/reviewdog/doghouse"
+	"golang.org/x/sync/errgroup"
 )
 
 type Checker struct {
 	req *doghouse.CheckRequest
-	gh  *github.Client
+	gh  checkerGitHubClientInterface
 }
 
 func NewChecker(req *doghouse.CheckRequest, gh *github.Client) *Checker {
-	return &Checker{req: req, gh: gh}
+	return &Checker{req: req, gh: &checkerGitHubClient{Client: gh}}
 }
 
 func (ch *Checker) Check(ctx context.Context) (*doghouse.CheckResponse, error) {
-	pr, _, err := ch.gh.PullRequests.Get(ctx, ch.req.Owner, ch.req.Repo, ch.req.PullRequest)
-	if err != nil {
-		return nil, fmt.Errorf("failed to get pr: %v", err)
-	}
+	var branch string
+	var filediffs []*diff.FileDiff
 
-	headBranch := pr.GetHead().GetRef()
-	if headBranch == "" {
-		return nil, fmt.Errorf("failed to get branch")
-	}
-
-	filediffs, err := ch.diff(ctx)
-	if err != nil {
-		return nil, fmt.Errorf("fail to parse diff: %v", err)
+	// Get branch from PullRequest API and PullRequest diff from diff API
+	// concurrently.
+	eg, ctx := errgroup.WithContext(ctx)
+	eg.Go(func() error {
+		br, err := ch.getBranch(ctx)
+		if err != nil {
+			return err
+		}
+		if br == "" {
+			return fmt.Errorf("failed to get branch")
+		}
+		branch = br
+		return nil
+	})
+	eg.Go(func() error {
+		fd, err := ch.diff(ctx)
+		if err != nil {
+			return fmt.Errorf("fail to parse diff: %v", err)
+		}
+		filediffs = fd
+		return nil
+	})
+	if err := eg.Wait(); err != nil {
+		return nil, err
 	}
 
 	results := annotationsToCheckResults(ch.req.Annotations)
 	filtered := reviewdog.FilterCheck(results, filediffs, 1, "")
-	checkRun, err := ch.postCheck(ctx, headBranch, filtered)
+	checkRun, err := ch.postCheck(ctx, branch, filtered)
 	if err != nil {
 		return nil, err
 	}
@@ -48,6 +63,17 @@ func (ch *Checker) Check(ctx context.Context) (*doghouse.CheckResponse, error) {
 		ReportURL: checkRun.GetHTMLURL(),
 	}
 	return res, nil
+}
+
+func (ch *Checker) getBranch(ctx context.Context) (string, error) {
+	if ch.req.Branch != "" {
+		return ch.req.Branch, nil
+	}
+	pr, err := ch.gh.GetPullRequest(ctx, ch.req.Owner, ch.req.Repo, ch.req.PullRequest)
+	if err != nil {
+		return "", fmt.Errorf("failed to get pr: %v", err)
+	}
+	return pr.GetHead().GetRef(), nil
 }
 
 func (ch *Checker) postCheck(ctx context.Context, branch string, checks []*reviewdog.FilteredCheck) (*github.CheckRun, error) {
@@ -83,7 +109,7 @@ func (ch *Checker) postCheck(ctx context.Context, branch string, checks []*revie
 		},
 	}
 
-	checkRun, _, err := ch.gh.Checks.CreateCheckRun(ctx, ch.req.Owner, ch.req.Repo, opt)
+	checkRun, err := ch.gh.CreateCheckRun(ctx, ch.req.Owner, ch.req.Repo, opt)
 	if err != nil {
 		return nil, err
 	}
@@ -172,8 +198,7 @@ func (ch *Checker) diff(ctx context.Context) ([]*diff.FileDiff, error) {
 }
 
 func (ch *Checker) rawDiff(ctx context.Context) ([]byte, error) {
-	opt := github.RawOptions{Type: github.Diff}
-	d, _, err := ch.gh.PullRequests.GetRaw(ctx, ch.req.Owner, ch.req.Repo, ch.req.PullRequest, opt)
+	d, err := ch.gh.GetPullRequestDiff(ctx, ch.req.Owner, ch.req.Repo, ch.req.PullRequest)
 	if err != nil {
 		return nil, err
 	}
