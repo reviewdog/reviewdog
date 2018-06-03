@@ -18,7 +18,7 @@ import (
 )
 
 func runDoghouse(ctx context.Context, r io.Reader, opt *option, isProject bool) error {
-	ghInfo, isPr, err := getGitHubPR(opt.ci)
+	ghInfo, isPr, err := getPullRequestInfoFromEnv()
 	if err != nil {
 		return err
 	}
@@ -72,7 +72,7 @@ func checkResultSet(ctx context.Context, r io.Reader, opt *option, isProject boo
 	return resultSet, nil
 }
 
-func postResultSet(ctx context.Context, resultSet map[string][]*reviewdog.CheckResult, ghInfo *GitHubPR, cli client.DogHouseClientInterface) error {
+func postResultSet(ctx context.Context, resultSet map[string][]*reviewdog.CheckResult, ghInfo *PullRequestInfo, cli client.DogHouseClientInterface) error {
 	var g errgroup.Group
 	wd, _ := os.Getwd()
 	for name, results := range resultSet {

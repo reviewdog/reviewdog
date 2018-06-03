@@ -181,7 +181,7 @@ func TestPostResultSet(t *testing.T) {
 		},
 	}
 
-	ghInfo := &GitHubPR{
+	ghInfo := &PullRequestInfo{
 		owner: owner,
 		repo:  repo,
 		pr:    prNum,

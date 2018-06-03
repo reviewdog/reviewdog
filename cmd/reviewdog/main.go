@@ -56,14 +56,14 @@ const (
 	fDoc         = `format name (run -list to see supported format name) for input. It's also used as tool name in review comment if -name is empty`
 	listDoc      = `list supported pre-defined format names which can be used as -f arg`
 	nameDoc      = `tool name in review comment. -f is used as tool name if -name is empty`
-	ciDoc        = `CI service ('travis', 'circle-ci', 'droneio'(OSS 0.4) or 'common')
+	ciDoc        = `[deprecated] reviewdog automatically get necessary data. See also -reporter for migration
+
+	CI service ('travis', 'circle-ci', 'droneio'(OSS 0.4) or 'common')
 	"common" requires following environment variables
 		CI_PULL_REQUEST	Pull Request number (e.g. 14)
 		CI_COMMIT	SHA1 for the current build
 		CI_REPO_OWNER	repository owner (e.g. "haya14busa" for https://github.com/haya14busa/reviewdog)
 		CI_REPO_NAME	repository name (e.g. "reviewdog" for https://github.com/haya14busa/reviewdog)
-
-	TODO(haya14busa): Deprecate -ci flag and automatically get CI info.
 `
 	confDoc     = `config file path`
 	reporterDoc = `reporter of reviewdog results. (local, github-pr-check, github-pr-review)
@@ -78,7 +78,7 @@ const (
 		You can get token from https://review-dog.appspot.com/gh/<owner>/<repo-name>.
 		$ export REVIEWDOG_TOKEN="xxxxx"
 
-		Note: Token not required if you run reviewdog in Travis or AppVeyor.
+		Note: Token is not required if you run reviewdog in Travis CI.
 
 	"github-pr-review"
 		Report results to GitHub review comments.
@@ -91,6 +91,17 @@ const (
 
 		if you want to skip verifing SSL (please use this at your own risk)
 			$ export REVIEWDOG_INSECURE_SKIP_VERIFY=true
+
+	For "github-pr-check" and "github-pr-review", reviewdog automatically get
+	necessary data from environment variable in CI service ('travis',
+	'circle-ci', 'droneio').
+	You can set necessary data with following environment variable manually if
+	you want (e.g. run reviewdog in Jenkins).
+
+		$ export CI_PULL_REQUEST=14 # Pull Request number (e.g. 14)
+		$ export CI_COMMIT="$(git rev-parse @)" # SHA1 for the current build
+		$ export CI_REPO_OWNER="haya14busa" # repository owner
+		$ export CI_REPO_NAME="reviewdog" # repository name
 `
 )
 
@@ -104,7 +115,7 @@ func init() {
 	flag.StringVar(&opt.f, "f", "", fDoc)
 	flag.BoolVar(&opt.list, "list", false, listDoc)
 	flag.StringVar(&opt.name, "name", "", nameDoc)
-	flag.StringVar(&opt.ci, "ci", "", ciDoc)
+	flag.StringVar(&opt.ci, "ci", "", "[deprecated] reviewdog automatically get necessary data. See also -reporter for migration")
 	flag.StringVar(&opt.conf, "conf", "", confDoc)
 	flag.StringVar(&opt.reporter, "reporter", "local", reporterDoc)
 }
@@ -137,6 +148,12 @@ func run(r io.Reader, w io.Writer, opt *option) error {
 		return runList(w)
 	}
 
+	// TODO(haya14busa): clean up when removing -ci flag from next release.
+	if opt.ci != "" {
+		return errors.New(`-ci flag is deprecated.
+See -reporter flag for migration and set -reporter="github-pr-review" or -reporter="github-pr-check".`)
+	}
+
 	// assume it's project based run when both -efm ane -f are not specified
 	isProject := len(opt.efms) == 0 && opt.f == ""
 
@@ -149,13 +166,6 @@ func run(r io.Reader, w io.Writer, opt *option) error {
 		cs = reviewdog.NewRawCommentWriter(w)
 	}
 
-	// For backward compatibility, set reporter=github-pr-review if -ci is
-	// specified while -reporter is not.
-	// TODO(haya14busa): clean up when removing -ci flag.
-	if opt.ci != "" && opt.reporter == "local" {
-		opt.reporter = "github-pr-review"
-	}
-
 	switch opt.reporter {
 	default:
 		return fmt.Errorf("unknown -reporter: %s", opt.reporter)
@@ -166,7 +176,7 @@ func run(r io.Reader, w io.Writer, opt *option) error {
 			fmt.Fprintf(os.Stderr, "REVIEWDOG_GITHUB_API_TOKEN is not set\n")
 			return nil
 		}
-		gs, isPR, err := githubService(ctx, opt.ci)
+		gs, isPR, err := githubService(ctx)
 		if err != nil {
 			return err
 		}
@@ -238,40 +248,103 @@ func diffService(s string, strip int) (reviewdog.DiffService, error) {
 	return d, nil
 }
 
-func getGitHubPR(ci string) (g *GitHubPR, isPR bool, err error) {
-	switch ci {
-	case "travis":
-		g, isPR, err = travis()
-	case "circle-ci":
-		g, isPR, err = circleci()
-	case "droneio":
-		g, isPR, err = droneio()
-	case "common":
-		g, isPR, err = commonci()
-	default:
-		return nil, isPR, fmt.Errorf("unsupported CI: %v", ci)
+func getPullRequestInfoFromEnv() (g *PullRequestInfo, isPR bool, err error) {
+	pr := getPullRequestNum()
+	if pr == 0 {
+		return nil, false, nil
 	}
-	return g, isPR, err
+
+	owner, repo := getOwnerAndRepoFromSlug([]string{"TRAVIS_REPO_SLUG"})
+	if owner == "" {
+		owner = getOneEnvValue([]string{
+			"CI_REPO_OWNER", // common
+			"CIRCLE_PROJECT_USERNAME",
+			"DRONE_REPO_OWNER",
+		})
+	}
+	if owner == "" {
+		return nil, false, errors.New("cannot get repo owner from environment variable. Set CI_REPO_OWNER?")
+	}
+
+	if repo == "" {
+		repo = getOneEnvValue([]string{
+			"CI_REPO_NAME", // common
+			"CIRCLE_PROJECT_REPONAME",
+			"DRONE_REPO_NAME",
+		})
+	}
+
+	if owner == "" {
+		return nil, false, errors.New("cannot get repo name from environment variable. Set CI_REPO_NAME?")
+	}
+
+	sha := getOneEnvValue([]string{
+		"CI_COMMIT", // common
+		"TRAVIS_PULL_REQUEST_SHA",
+		"CIRCLE_SHA1",
+		"DRONE_COMMIT",
+	})
+	if sha == "" {
+		return nil, false, errors.New("cannot get commit SHA from environment variable. Set CI_COMMIT?")
+	}
+
+	return &PullRequestInfo{
+		owner: owner,
+		repo:  repo,
+		pr:    pr,
+		sha:   sha,
+	}, true, nil
 }
 
-func githubService(ctx context.Context, ci string) (githubservice *reviewdog.GitHubPullRequest, isPR bool, err error) {
+func getPullRequestNum() int {
+	envs := []string{
+		// Common.
+		"CI_PULL_REQUEST",
+		// Travis CI: https://docs.travis-ci.com/user/environment-variables/
+		"TRAVIS_PULL_REQUEST",
+		// Circle CI: https://circleci.com/docs/environment-variables/
+		"CIRCLE_PULL_REQUEST", // CircleCI 2.0
+		"CIRCLE_PR_NUMBER",    // For Pull Request by a fork repository
+		// drone.io.
+		"DRONE_PULL_REQUEST",
+	}
+	// regexp.MustCompile() in func intentionally because this func is called
+	// once for one run.
+	re := regexp.MustCompile(`[1-9]\d*$`)
+	for _, env := range envs {
+		prm := re.FindString(os.Getenv(env))
+		pr, _ := strconv.Atoi(prm)
+		if pr != 0 {
+			return pr
+		}
+	}
+	return 0
+}
+
+func getOneEnvValue(envs []string) string {
+	for _, env := range envs {
+		if v := os.Getenv(env); v != "" {
+			return v
+		}
+	}
+	return ""
+}
+
+func getOwnerAndRepoFromSlug(slugEnvs []string) (string, string) {
+	repoSlug := getOneEnvValue(slugEnvs)
+	ownerAndRepo := strings.SplitN(repoSlug, "/", 2)
+	if len(ownerAndRepo) < 2 {
+		return "", ""
+	}
+	return ownerAndRepo[0], ownerAndRepo[1]
+}
+
+func githubService(ctx context.Context) (githubservice *reviewdog.GitHubPullRequest, isPR bool, err error) {
 	token, err := nonEmptyEnv("REVIEWDOG_GITHUB_API_TOKEN")
 	if err != nil {
 		return nil, isPR, err
 	}
-	var g *GitHubPR
-	switch ci {
-	case "travis":
-		g, isPR, err = travis()
-	case "circle-ci":
-		g, isPR, err = circleci()
-	case "droneio":
-		g, isPR, err = droneio()
-	case "common":
-		g, isPR, err = commonci()
-	default:
-		return nil, isPR, fmt.Errorf("unsupported CI: %v", ci)
-	}
+	g, isPR, err := getPullRequestInfoFromEnv()
 	if err != nil {
 		return nil, isPR, err
 	}
@@ -327,7 +400,7 @@ func insecureSkipVerify() bool {
 	return os.Getenv("REVIEWDOG_INSECURE_SKIP_VERIFY") == "true"
 }
 
-func travis() (g *GitHubPR, isPR bool, err error) {
+func travis() (g *PullRequestInfo, isPR bool, err error) {
 	prs := os.Getenv("TRAVIS_PULL_REQUEST")
 	if prs == "false" {
 		return nil, false, nil
@@ -351,7 +424,7 @@ func travis() (g *GitHubPR, isPR bool, err error) {
 		return nil, true, err
 	}
 
-	g = &GitHubPR{
+	g = &PullRequestInfo{
 		owner: owner,
 		repo:  repo,
 		pr:    pr,
@@ -361,7 +434,7 @@ func travis() (g *GitHubPR, isPR bool, err error) {
 }
 
 // https://circleci.com/docs/environment-variables/
-func circleci() (g *GitHubPR, isPR bool, err error) {
+func circleci() (g *PullRequestInfo, isPR bool, err error) {
 	var prs string // pull request number in string
 	// For Pull Request from a same repository (CircleCI 2.0)
 	// e.g. https: //github.com/haya14busa/reviewdog/pull/6
@@ -400,7 +473,7 @@ func circleci() (g *GitHubPR, isPR bool, err error) {
 	if err != nil {
 		return nil, true, err
 	}
-	g = &GitHubPR{
+	g = &PullRequestInfo{
 		owner: owner,
 		repo:  repo,
 		pr:    pr,
@@ -410,7 +483,7 @@ func circleci() (g *GitHubPR, isPR bool, err error) {
 }
 
 // http://readme.drone.io/usage/variables/
-func droneio() (g *GitHubPR, isPR bool, err error) {
+func droneio() (g *PullRequestInfo, isPR bool, err error) {
 	var prs string // pull request number in string
 	prs = os.Getenv("DRONE_PULL_REQUEST")
 	if prs == "" {
@@ -444,7 +517,7 @@ func droneio() (g *GitHubPR, isPR bool, err error) {
 	if err != nil {
 		return nil, true, err
 	}
-	g = &GitHubPR{
+	g = &PullRequestInfo{
 		owner: owner,
 		repo:  repo,
 		pr:    pr,
@@ -453,7 +526,7 @@ func droneio() (g *GitHubPR, isPR bool, err error) {
 	return g, true, nil
 }
 
-func commonci() (g *GitHubPR, isPR bool, err error) {
+func commonci() (g *PullRequestInfo, isPR bool, err error) {
 	var prs string // pull request number in string
 	prs = os.Getenv("CI_PULL_REQUEST")
 	if prs == "" {
@@ -476,7 +549,7 @@ func commonci() (g *GitHubPR, isPR bool, err error) {
 	if err != nil {
 		return nil, true, err
 	}
-	g = &GitHubPR{
+	g = &PullRequestInfo{
 		owner: owner,
 		repo:  repo,
 		pr:    pr,
@@ -485,8 +558,8 @@ func commonci() (g *GitHubPR, isPR bool, err error) {
 	return g, true, nil
 }
 
-// GitHubPR represents required information about GitHub PullRequest.
-type GitHubPR struct {
+// PullRequestInfo represents required information about GitHub PullRequest.
+type PullRequestInfo struct {
 	owner string
 	repo  string
 	pr    int
