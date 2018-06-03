@@ -14,6 +14,9 @@ type CheckRequest struct {
 	// Repository name.
 	// Required.
 	Repo string `json:"repo,omitempty"`
+	// Branch name.
+	// Optional.
+	Branch string `json:"branch,omitempty"`
 
 	// Annotations associated with the repository's commit and Pull Request.
 	Annotations []*Annotation `json:"annotations,omitempty"`

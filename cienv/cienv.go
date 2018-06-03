@@ -15,6 +15,9 @@ type PullRequestInfo struct {
 	Repo        string
 	PullRequest int
 	SHA         string
+
+	// Optional.
+	Branch string
 }
 
 // GetPullRequestInfo returns PullRequestInfo from environment variables.
@@ -66,11 +69,19 @@ func GetPullRequestInfo() (prInfo *PullRequestInfo, isPR bool, err error) {
 		return nil, false, errors.New("cannot get commit SHA from environment variable. Set CI_COMMIT?")
 	}
 
+	branch := getOneEnvValue([]string{
+		"CI_BRANCH", // common
+		"TRAVIS_PULL_REQUEST_BRANCH",
+		"CIRCLE_BRANCH",
+		"DRONE_COMMIT_BRANCH",
+	})
+
 	return &PullRequestInfo{
 		Owner:       owner,
 		Repo:        repo,
 		PullRequest: pr,
 		SHA:         sha,
+		Branch:      branch,
 	}, true, nil
 }
 
