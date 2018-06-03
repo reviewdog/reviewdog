@@ -88,6 +88,7 @@ func postResultSet(ctx context.Context, resultSet map[string][]*reviewdog.CheckR
 			Repo:        ghInfo.Repo,
 			PullRequest: ghInfo.PullRequest,
 			SHA:         ghInfo.SHA,
+			Branch:      ghInfo.Branch,
 			Annotations: as,
 		}
 		g.Go(func() error {
