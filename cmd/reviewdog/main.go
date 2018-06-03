@@ -246,14 +246,6 @@ func diffService(s string, strip int) (reviewdog.DiffService, error) {
 	return d, nil
 }
 
-// PullRequestInfo represents required information about GitHub PullRequest.
-type PullRequestInfo struct {
-	owner string
-	repo  string
-	pr    int
-	sha   string
-}
-
 func githubService(ctx context.Context) (githubservice *reviewdog.GitHubPullRequest, isPR bool, err error) {
 	token, err := nonEmptyEnv("REVIEWDOG_GITHUB_API_TOKEN")
 	if err != nil {
