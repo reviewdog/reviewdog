@@ -26,30 +26,15 @@ func runDoghouse(ctx context.Context, r io.Reader, opt *option, isProject bool) 
 		fmt.Fprintf(os.Stderr, "reviewdog: this is not PullRequest build.")
 		return nil
 	}
-
-	resultSet := make(map[string][]*reviewdog.CheckResult)
-
-	if isProject {
-		conf, err := projectConfig(opt.conf)
-		if err != nil {
-			return err
-		}
-		resultSet, err = project.RunAndParse(ctx, conf)
-		if err != nil {
-			return err
-		}
-	} else {
-		p, err := newParserFromOpt(opt)
-		if err != nil {
-			return err
-		}
-		rs, err := p.Parse(r)
-		if err != nil {
-			return err
-		}
-		resultSet[toolName(opt)] = rs
+	resultSet, err := checkResultSet(ctx, r, opt, isProject)
+	if err != nil {
+		return err
 	}
+	cli := newDoghouseCli(ctx)
+	return postResultSet(ctx, resultSet, ghInfo, cli)
+}
 
+func newDoghouseCli(ctx context.Context) *client.DogHouseClient {
 	httpCli := http.DefaultClient
 	if token := os.Getenv("REVIEWDOG_TOKEN"); token != "" {
 		ts := oauth2.StaticTokenSource(
@@ -57,9 +42,35 @@ func runDoghouse(ctx context.Context, r io.Reader, opt *option, isProject bool) 
 		)
 		httpCli = oauth2.NewClient(ctx, ts)
 	}
+	return client.New(httpCli)
+}
 
-	cli := client.New(httpCli)
+func checkResultSet(ctx context.Context, r io.Reader, opt *option, isProject bool) (map[string][]*reviewdog.CheckResult, error) {
+	resultSet := make(map[string][]*reviewdog.CheckResult)
+	if isProject {
+		conf, err := projectConfig(opt.conf)
+		if err != nil {
+			return nil, err
+		}
+		resultSet, err = project.RunAndParse(ctx, conf)
+		if err != nil {
+			return nil, err
+		}
+	} else {
+		p, err := newParserFromOpt(opt)
+		if err != nil {
+			return nil, err
+		}
+		rs, err := p.Parse(r)
+		if err != nil {
+			return nil, err
+		}
+		resultSet[toolName(opt)] = rs
+	}
+	return resultSet, nil
+}
 
+func postResultSet(ctx context.Context, resultSet map[string][]*reviewdog.CheckResult, ghInfo *GitHubPR, cli *client.DogHouseClient) error {
 	var g errgroup.Group
 	wd, _ := os.Getwd()
 	for name, results := range resultSet {
