@@ -73,7 +73,7 @@ const (
 
 		1. Install reviedog Apps. https://github.com/apps/reviewdog
 		2. Set REVIEWDOG_TOKEN or run reviewdog CLI in trusted CI providers.
-		You can get token from https://review-dog.appspot.com/gh/<owner>/<repo-name>.
+		You can get token from https://reviewdog.app/gh/<owner>/<repo-name>.
 		$ export REVIEWDOG_TOKEN="xxxxx"
 
 		Note: Token is not required if you run reviewdog in Travis CI.
