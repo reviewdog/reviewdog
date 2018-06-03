@@ -187,7 +187,7 @@ reviewdog GitHub App server and the server post resutls as GitHub Checks.
 
 1. Install reviedog Apps. https://github.com/apps/reviewdog
 2. Set `REVIEWDOG_TOKEN` or run reviewdog CLI in trusted CI providers.
-  - Get token from `https://review-dog.appspot.com/gh/{owner}/{repo-name}`.
+  - Get token from `https://reviewdog.app/gh/{owner}/{repo-name}`.
   - `$ export REVIEWDOG_TOKEN="xxxxx"`
 3. `$ reviewdog -conf=.reviewdog.yml -reporter=github-pr-check`
 
