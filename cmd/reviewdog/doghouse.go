@@ -70,7 +70,7 @@ func checkResultSet(ctx context.Context, r io.Reader, opt *option, isProject boo
 	return resultSet, nil
 }
 
-func postResultSet(ctx context.Context, resultSet map[string][]*reviewdog.CheckResult, ghInfo *GitHubPR, cli *client.DogHouseClient) error {
+func postResultSet(ctx context.Context, resultSet map[string][]*reviewdog.CheckResult, ghInfo *GitHubPR, cli client.DogHouseClientInterface) error {
 	var g errgroup.Group
 	wd, _ := os.Getwd()
 	for name, results := range resultSet {
