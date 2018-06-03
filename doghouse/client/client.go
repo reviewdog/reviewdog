@@ -15,17 +15,17 @@ import (
 	"github.com/haya14busa/reviewdog/doghouse"
 )
 
-const baseEndpoint = "https://review-dog.appspot.com"
+const baseEndpoint = "https://reviewdog.app"
 
 // DogHouseClientInterface is interface for doghouse client.
 type DogHouseClientInterface interface {
 	Check(ctx context.Context, req *doghouse.CheckRequest) (*doghouse.CheckResponse, error)
 }
 
-// DogHouseClient is client for doghouse (https://review-dog.appspot.com).
+// DogHouseClient is client for doghouse server.
 type DogHouseClient struct {
 	Client *http.Client
-	// Base URL for API requests. Defaults is https://review-dog.appspot.com.
+	// Base URL for API requests. Defaults is https://reviewdog.app
 	BaseURL *url.URL
 }
 
