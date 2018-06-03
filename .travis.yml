@@ -36,7 +36,7 @@ before_script:
 script:
   - go test -v -race $(go list ./... | grep -v "/vendor/")
   - goverage -coverprofile=coverage.txt ./...
-  - reviewdog -ci=travis -reporter=github-pr-check
+  - reviewdog -reporter=github-pr-check
 
 after_success:
   - goveralls -service=travis-ci -coverprofile=coverage.txt
