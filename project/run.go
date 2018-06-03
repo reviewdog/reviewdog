@@ -94,7 +94,11 @@ var secretEnvs = [...]string{
 
 func filteredEnviron() []string {
 	for _, name := range secretEnvs {
-		defer os.Setenv(name, os.Getenv(name))
+		defer func(name, value string) {
+			if value != "" {
+				os.Setenv(name, value)
+			}
+		}(name, os.Getenv(name))
 		os.Unsetenv(name)
 	}
 	return os.Environ()
