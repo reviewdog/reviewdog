@@ -89,6 +89,7 @@ func Run(ctx context.Context, conf *Config, c reviewdog.CommentService, d review
 
 var secretEnvs = [...]string{
 	"REVIEWDOG_GITHUB_API_TOKEN",
+	"REVIEWDOG_TOKEN",
 }
 
 func filteredEnviron() []string {
