@@ -45,7 +45,7 @@ type option struct {
 	name      string // tool name which is used in comment
 	ci        string
 	conf      string
-	ghCheck   bool
+	reporter  string
 }
 
 // flags doc
@@ -57,29 +57,41 @@ const (
 	listDoc      = `list supported pre-defined format names which can be used as -f arg`
 	nameDoc      = `tool name in review comment. -f is used as tool name if -name is empty`
 	ciDoc        = `CI service ('travis', 'circle-ci', 'droneio'(OSS 0.4) or 'common')
-
-	GitHub with reviewdog GitHub Apps: <experimental>
-		1. Install reviedog Apps. https://github.com/apps/reviewdog
-		2. Run reviewdog command with -gh-check flag.
-
-	GitHub/GitHub Enterprise:
-		You need to set REVIEWDOG_GITHUB_API_TOKEN environment variable.
-		Go to https://github.com/settings/tokens and create new Personal access token with repo scope.
-
-		For GitHub Enterprise:
-			export GITHUB_API="https://example.githubenterprise.com/api/v3"
-
-		if you want to skip verifing SSL (please use this at your own risk)
-			export REVIEWDOG_INSECURE_SKIP_VERIFY=true
-
 	"common" requires following environment variables
 		CI_PULL_REQUEST	Pull Request number (e.g. 14)
 		CI_COMMIT	SHA1 for the current build
 		CI_REPO_OWNER	repository owner (e.g. "haya14busa" for https://github.com/haya14busa/reviewdog)
 		CI_REPO_NAME	repository name (e.g. "reviewdog" for https://github.com/haya14busa/reviewdog)
+
+	TODO(haya14busa): Deprecate -ci flag and automatically get CI info.
 `
-	confDoc    = `config file path`
-	ghCheckDoc = `use reviewdog GitHub apps and Check API instead. See -ci flag doc too.`
+	confDoc     = `config file path`
+	reporterDoc = `reporter of reviewdog results. (local, github-pr-check, github-pr-review)
+	"local" (default)
+		Report results to stdout.
+
+	"github-pr-check" (experimental)
+		Report results to GitHub PullRequest Check tab.
+
+		1. Install reviedog Apps. https://github.com/apps/reviewdog
+		2. Set REVIEWDOG_TOKEN or run reviewdog CLI in trusted CI providers.
+		You can get token from https://review-dog.appspot.com/gh/<owner>/<repo-name>.
+		$ export REVIEWDOG_TOKEN="xxxxx"
+
+		Note: Token not required if you run reviewdog in Travis or AppVeyor.
+
+	"github-pr-review"
+		Report results to GitHub review comments.
+
+		1. Set REVIEWDOG_GITHUB_API_TOKEN environment variable.
+		Go to https://github.com/settings/tokens and create new Personal access token with repo scope.
+
+		For GitHub Enterprise:
+			$ export GITHUB_API="https://example.githubenterprise.com/api/v3"
+
+		if you want to skip verifing SSL (please use this at your own risk)
+			$ export REVIEWDOG_INSECURE_SKIP_VERIFY=true
+`
 )
 
 var opt = &option{}
@@ -94,7 +106,7 @@ func init() {
 	flag.StringVar(&opt.name, "name", "", nameDoc)
 	flag.StringVar(&opt.ci, "ci", "", ciDoc)
 	flag.StringVar(&opt.conf, "conf", "", confDoc)
-	flag.BoolVar(&opt.ghCheck, "gh-check", false, ghCheckDoc)
+	flag.StringVar(&opt.reporter, "reporter", "local", reporterDoc)
 }
 
 func usage() {
@@ -137,28 +149,34 @@ func run(r io.Reader, w io.Writer, opt *option) error {
 		cs = reviewdog.NewRawCommentWriter(w)
 	}
 
-	if opt.ci != "" {
-		if opt.ghCheck {
-			return runDoghouse(ctx, r, opt, isProject)
-		}
+	// For backward compatibility, set reporter=github-pr-review if -ci is
+	// specified while -reporter is not.
+	// TODO(haya14busa): clean up when removing -ci flag.
+	if opt.ci != "" && opt.reporter == "local" {
+		opt.reporter = "github-pr-review"
+	}
 
-		if os.Getenv("REVIEWDOG_GITHUB_API_TOKEN") != "" {
-			gs, isPR, err := githubService(ctx, opt.ci)
-			if err != nil {
-				return err
-			}
-			if !isPR {
-				fmt.Fprintf(os.Stderr, "this is not PullRequest build. CI: %v\n", opt.ci)
-				return nil
-			}
-			cs = reviewdog.MultiCommentService(gs, cs)
-			ds = gs
-		} else {
+	switch opt.reporter {
+	default:
+		return fmt.Errorf("unknown -reporter: %s", opt.reporter)
+	case "github-pr-check":
+		return runDoghouse(ctx, r, opt, isProject)
+	case "github-pr-review":
+		if os.Getenv("REVIEWDOG_GITHUB_API_TOKEN") == "" {
 			fmt.Fprintf(os.Stderr, "REVIEWDOG_GITHUB_API_TOKEN is not set\n")
 			return nil
 		}
-	} else {
-		// local
+		gs, isPR, err := githubService(ctx, opt.ci)
+		if err != nil {
+			return err
+		}
+		if !isPR {
+			fmt.Fprintf(os.Stderr, "reviewdog: this is not PullRequest build. CI: %v\n", opt.ci)
+			return nil
+		}
+		cs = reviewdog.MultiCommentService(gs, cs)
+		ds = gs
+	case "local":
 		d, err := diffService(opt.diffCmd, opt.diffStrip)
 		if err != nil {
 			return err

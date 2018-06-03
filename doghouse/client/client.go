@@ -17,12 +17,19 @@ import (
 
 const baseEndpoint = "https://review-dog.appspot.com"
 
+// DogHouseClientInterface is interface for doghouse client.
+type DogHouseClientInterface interface {
+	Check(ctx context.Context, req *doghouse.CheckRequest) (*doghouse.CheckResponse, error)
+}
+
+// DogHouseClient is client for doghouse (https://review-dog.appspot.com).
 type DogHouseClient struct {
 	Client *http.Client
 	// Base URL for API requests. Defaults is https://review-dog.appspot.com.
 	BaseURL *url.URL
 }
 
+// New returns new DogHouseClient.
 func New(client *http.Client) *DogHouseClient {
 	dh := &DogHouseClient{Client: client}
 	if dh.Client == nil {
@@ -40,6 +47,7 @@ func New(client *http.Client) *DogHouseClient {
 	return dh
 }
 
+// Check send check requests to doghouse.
 func (c *DogHouseClient) Check(ctx context.Context, req *doghouse.CheckRequest) (*doghouse.CheckResponse, error) {
 	url := c.BaseURL.String() + "/check"
 	b, err := json.Marshal(req)
@@ -50,7 +58,7 @@ func (c *DogHouseClient) Check(ctx context.Context, req *doghouse.CheckRequest) 
 	if err != nil {
 		return nil, err
 	}
-	httpReq.WithContext(ctx)
+	httpReq = httpReq.WithContext(ctx)
 	httpReq.Header.Set("Content-Type", "application/json")
 	httpReq.Header.Set("User-Agent", fmt.Sprintf("reviewdog/%s", reviewdog.Version))
 

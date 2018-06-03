@@ -10,6 +10,7 @@ import (
 	"github.com/haya14busa/reviewdog/diff"
 )
 
+// Version is version of reviewdog CLI.
 const Version = "0.9.8"
 
 // Reviewdog represents review dog application which parses result of compiler
