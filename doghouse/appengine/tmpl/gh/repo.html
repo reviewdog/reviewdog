@@ -1,0 +1,15 @@
+{{define "body"}}
+
+<h1>{{ .Repo.Owner }}/{{ .Repo.Name }}</h1>
+
+<p>
+  GitHub: <a href="{{ .Repo.GitHubURL }}">{{ .Repo.GitHubURL }}</a>
+</p>
+
+<h2>REVIEWDOG_TOKEN</h2>
+
+<pre>
+  $ export REVIEWDOG_TOKEN="{{ .Token }}"
+</pre>
+
+{{end}}

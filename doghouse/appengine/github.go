@@ -7,6 +7,7 @@ import (
 	"encoding/json"
 	"errors"
 	"fmt"
+	"html/template"
 	"io"
 	"io/ioutil"
 	"net/http"
@@ -213,11 +214,19 @@ func notfound(w http.ResponseWriter) {
 	fmt.Fprintln(w, "404 Not Found")
 }
 
-func (g *GitHubHandler) handleTop(ctx context.Context, ghcli *github.Client, w http.ResponseWriter, r *http.Request) {
+func (g *GitHubHandler) getUserOrBadRequest(ctx context.Context, ghcli *github.Client, w http.ResponseWriter, r *http.Request) (bool, *github.User) {
 	u, _, err := ghcli.Users.Get(ctx, "")
 	if err != nil {
 		w.WriteHeader(http.StatusBadRequest)
 		fmt.Fprintf(w, "cannot get GitHub authenticated user")
+		return false, nil
+	}
+	return true, u
+}
+
+func (g *GitHubHandler) handleTop(ctx context.Context, ghcli *github.Client, w http.ResponseWriter, r *http.Request) {
+	ok, u := g.getUserOrBadRequest(ctx, ghcli, w, r)
+	if !ok {
 		return
 	}
 
@@ -256,6 +265,31 @@ func (g *GitHubHandler) handleTop(ctx context.Context, ghcli *github.Client, w h
 	}
 }
 
+var ghRepoTmpl = template.Must(
+	template.ParseFiles(
+		"tmpl/gh/base.html",
+		"tmpl/gh/header.html",
+		"tmpl/gh/repo.html",
+	))
+
+type ghRepoTmplData struct {
+	Title string
+	Token string
+	User  tmplUser
+	Repo  tmplRepo
+}
+
+type tmplUser struct {
+	Name    string
+	IconURL string
+}
+
+type tmplRepo struct {
+	Owner     string
+	Name      string
+	GitHubURL string
+}
+
 func (g *GitHubHandler) handleRepo(ctx context.Context, ghcli *github.Client, w http.ResponseWriter, r *http.Request, owner, repoName string) {
 	repo, _, err := ghcli.Repositories.Get(ctx, owner, repoName)
 	if err != nil {
@@ -276,14 +310,30 @@ func (g *GitHubHandler) handleRepo(ctx context.Context, ghcli *github.Client, w 
 		return
 	}
 
+	ok, u := g.getUserOrBadRequest(ctx, ghcli, w, r)
+	if !ok {
+		return
+	}
+
 	repoToken, err := server.GetOrGenerateRepoToken(ctx, g.repoTokenStore, repo.Owner.GetLogin(), repo.GetName(), repo.GetID())
 	if err != nil {
 		w.WriteHeader(http.StatusInternalServerError)
 		fmt.Fprintf(w, "failed to get repository token for %s.", repo.GetHTMLURL())
 		return
 	}
-
-	fmt.Fprintf(w, "%s repository token: %s", repo.GetFullName(), repoToken)
+	ghRepoTmpl.ExecuteTemplate(w, "base", &ghRepoTmplData{
+		Title: fmt.Sprintf("%s/%s - reviewdog", repo.Owner.GetLogin(), repo.GetName()),
+		Token: repoToken,
+		User: tmplUser{
+			Name:    u.GetName(),
+			IconURL: u.GetAvatarURL(),
+		},
+		Repo: tmplRepo{
+			Owner:     repo.Owner.GetLogin(),
+			Name:      repo.GetName(),
+			GitHubURL: repo.GetHTMLURL(),
+		},
+	})
 }
 
 func NewAuthClient(ctx context.Context, base http.RoundTripper, token oauth2.TokenSource) *http.Client {
