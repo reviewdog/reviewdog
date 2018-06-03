@@ -282,8 +282,9 @@ type ghRepoTmplData struct {
 }
 
 type tmplUser struct {
-	Name    string
-	IconURL string
+	Name      string
+	IconURL   string
+	GitHubURL string
 }
 
 type tmplRepo struct {
@@ -338,8 +339,9 @@ func (g *GitHubHandler) handleRepo(ctx context.Context, ghcli *github.Client, w 
 		Title: fmt.Sprintf("%s/%s - reviewdog", repo.Owner.GetLogin(), repo.GetName()),
 		Token: repoToken,
 		User: tmplUser{
-			Name:    u.GetName(),
-			IconURL: u.GetAvatarURL(),
+			Name:      u.GetName(),
+			IconURL:   u.GetAvatarURL(),
+			GitHubURL: u.GetHTMLURL(),
 		},
 		Repo: tmplRepo{
 			Owner:     repo.Owner.GetLogin(),
