@@ -115,7 +115,7 @@ func init() {
 	flag.StringVar(&opt.f, "f", "", fDoc)
 	flag.BoolVar(&opt.list, "list", false, listDoc)
 	flag.StringVar(&opt.name, "name", "", nameDoc)
-	flag.StringVar(&opt.ci, "ci", "", "[deprecated] reviewdog automatically get necessary data. See also -reporter for migration")
+	flag.StringVar(&opt.ci, "ci", "", ciDoc)
 	flag.StringVar(&opt.conf, "conf", "", confDoc)
 	flag.StringVar(&opt.reporter, "reporter", "local", reporterDoc)
 }
@@ -151,7 +151,7 @@ func run(r io.Reader, w io.Writer, opt *option) error {
 	// TODO(haya14busa): clean up when removing -ci flag from next release.
 	if opt.ci != "" {
 		return errors.New(`-ci flag is deprecated.
-See -reporter flag for migration and set -reporter="github-pr-review" or -reporter="github-pr-check".`)
+See -reporter flag for migration and set -reporter="github-pr-review" or -reporter="github-pr-check"`)
 	}
 
 	// assume it's project based run when both -efm ane -f are not specified
@@ -248,13 +248,27 @@ func diffService(s string, strip int) (reviewdog.DiffService, error) {
 	return d, nil
 }
 
+// PullRequestInfo represents required information about GitHub PullRequest.
+type PullRequestInfo struct {
+	owner string
+	repo  string
+	pr    int
+	sha   string
+}
+
+// https://docs.travis-ci.com/user/environment-variables/
+// https://circleci.com/docs/environment-variables/
+// http://docs.drone.io/environment-reference/
 func getPullRequestInfoFromEnv() (g *PullRequestInfo, isPR bool, err error) {
 	pr := getPullRequestNum()
 	if pr == 0 {
 		return nil, false, nil
 	}
 
-	owner, repo := getOwnerAndRepoFromSlug([]string{"TRAVIS_REPO_SLUG"})
+	owner, repo := getOwnerAndRepoFromSlug([]string{
+		"TRAVIS_REPO_SLUG",
+		"DRONE_REPO", // drone<=0.4
+	})
 	if owner == "" {
 		owner = getOneEnvValue([]string{
 			"CI_REPO_OWNER", // common
@@ -300,9 +314,9 @@ func getPullRequestNum() int {
 	envs := []string{
 		// Common.
 		"CI_PULL_REQUEST",
-		// Travis CI: https://docs.travis-ci.com/user/environment-variables/
+		// Travis CI.
 		"TRAVIS_PULL_REQUEST",
-		// Circle CI: https://circleci.com/docs/environment-variables/
+		// Circle CI.
 		"CIRCLE_PULL_REQUEST", // CircleCI 2.0
 		"CIRCLE_PR_NUMBER",    // For Pull Request by a fork repository
 		// drone.io.
@@ -398,172 +412,6 @@ func githubBaseURL() (*url.URL, error) {
 
 func insecureSkipVerify() bool {
 	return os.Getenv("REVIEWDOG_INSECURE_SKIP_VERIFY") == "true"
-}
-
-func travis() (g *PullRequestInfo, isPR bool, err error) {
-	prs := os.Getenv("TRAVIS_PULL_REQUEST")
-	if prs == "false" {
-		return nil, false, nil
-	}
-	pr, err := strconv.Atoi(prs)
-	if err != nil {
-		return nil, true, fmt.Errorf("unexpected env variable. TRAVIS_PULL_REQUEST=%v", prs)
-	}
-	reposlug, err := nonEmptyEnv("TRAVIS_REPO_SLUG")
-	if err != nil {
-		return nil, true, err
-	}
-	rss := strings.SplitN(reposlug, "/", 2)
-	if len(rss) < 2 {
-		return nil, true, fmt.Errorf("unexpected env variable. TRAVIS_REPO_SLUG=%v", reposlug)
-	}
-	owner, repo := rss[0], rss[1]
-
-	sha, err := nonEmptyEnv("TRAVIS_PULL_REQUEST_SHA")
-	if err != nil {
-		return nil, true, err
-	}
-
-	g = &PullRequestInfo{
-		owner: owner,
-		repo:  repo,
-		pr:    pr,
-		sha:   sha,
-	}
-	return g, true, nil
-}
-
-// https://circleci.com/docs/environment-variables/
-func circleci() (g *PullRequestInfo, isPR bool, err error) {
-	var prs string // pull request number in string
-	// For Pull Request from a same repository (CircleCI 2.0)
-	// e.g. https: //github.com/haya14busa/reviewdog/pull/6
-	// it might be better to support CI_PULL_REQUESTS instead.
-	prs = os.Getenv("CIRCLE_PULL_REQUEST")
-	if prs == "" {
-		// For the backward compatibility with CircleCI 1.0.
-		prs = os.Getenv("CI_PULL_REQUEST")
-	}
-	if prs == "" {
-		// For Pull Request by a fork repository
-		// e.g. 6
-		prs = os.Getenv("CIRCLE_PR_NUMBER")
-	}
-	if prs == "" {
-		// not a pull-request build
-		return nil, false, nil
-	}
-	// regexp.MustCompile() in func intentionally because this func is called
-	// once for one run.
-	re := regexp.MustCompile(`[1-9]\d*$`)
-	prm := re.FindString(prs)
-	pr, err := strconv.Atoi(prm)
-	if err != nil {
-		return nil, true, fmt.Errorf("unexpected env variable (CI_PULL_REQUEST or CIRCLE_PR_NUMBER): %v", prs)
-	}
-	owner, err := nonEmptyEnv("CIRCLE_PROJECT_USERNAME")
-	if err != nil {
-		return nil, true, err
-	}
-	repo, err := nonEmptyEnv("CIRCLE_PROJECT_REPONAME")
-	if err != nil {
-		return nil, true, err
-	}
-	sha, err := nonEmptyEnv("CIRCLE_SHA1")
-	if err != nil {
-		return nil, true, err
-	}
-	g = &PullRequestInfo{
-		owner: owner,
-		repo:  repo,
-		pr:    pr,
-		sha:   sha,
-	}
-	return g, true, nil
-}
-
-// http://readme.drone.io/usage/variables/
-func droneio() (g *PullRequestInfo, isPR bool, err error) {
-	var prs string // pull request number in string
-	prs = os.Getenv("DRONE_PULL_REQUEST")
-	if prs == "" {
-		// not a pull-request build
-		return nil, false, nil
-	}
-	pr, err := strconv.Atoi(prs)
-	if err != nil {
-		return nil, true, fmt.Errorf("unexpected env variable (DRONE_PULL_REQUEST): %v", prs)
-	}
-
-	owner, errOwner := nonEmptyEnv("DRONE_REPO_OWNER")
-	repo, errRepo := nonEmptyEnv("DRONE_REPO_NAME")
-	repoSlug, errSlug := nonEmptyEnv("DRONE_REPO")
-
-	if (errOwner != nil || errRepo != nil) && errSlug != nil {
-		return nil, true, fmt.Errorf("unable to detect repo and owner\n - %v\n - %v\n - %v", errOwner, errRepo, errSlug)
-	}
-
-	// Try to detect using env variable available in drone<=0.4
-	if errSlug == nil {
-		rss := strings.SplitN(repoSlug, "/", 2)
-		if len(rss) < 2 {
-			return nil, true, fmt.Errorf("unexpected env variable. DRONE_REPO=%v", repoSlug)
-		}
-
-		owner, repo = rss[0], rss[1]
-	}
-
-	sha, err := nonEmptyEnv("DRONE_COMMIT")
-	if err != nil {
-		return nil, true, err
-	}
-	g = &PullRequestInfo{
-		owner: owner,
-		repo:  repo,
-		pr:    pr,
-		sha:   sha,
-	}
-	return g, true, nil
-}
-
-func commonci() (g *PullRequestInfo, isPR bool, err error) {
-	var prs string // pull request number in string
-	prs = os.Getenv("CI_PULL_REQUEST")
-	if prs == "" {
-		// not a pull-request build
-		return nil, false, nil
-	}
-	pr, err := strconv.Atoi(prs)
-	if err != nil {
-		return nil, true, fmt.Errorf("unexpected env variable (CI_PULL_REQUEST): %v", prs)
-	}
-	owner, err := nonEmptyEnv("CI_REPO_OWNER")
-	if err != nil {
-		return nil, true, err
-	}
-	repo, err := nonEmptyEnv("CI_REPO_NAME")
-	if err != nil {
-		return nil, true, err
-	}
-	sha, err := nonEmptyEnv("CI_COMMIT")
-	if err != nil {
-		return nil, true, err
-	}
-	g = &PullRequestInfo{
-		owner: owner,
-		repo:  repo,
-		pr:    pr,
-		sha:   sha,
-	}
-	return g, true, nil
-}
-
-// PullRequestInfo represents required information about GitHub PullRequest.
-type PullRequestInfo struct {
-	owner string
-	repo  string
-	pr    int
-	sha   string
 }
 
 func nonEmptyEnv(env string) (string, error) {
