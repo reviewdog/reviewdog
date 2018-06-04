@@ -53,6 +53,7 @@ func (gc *githubChecker) handleCheck(w http.ResponseWriter, r *http.Request) {
 
 	gh, err := server.NewGitHubClient(ctx, opt)
 	if err != nil {
+		log.Errorf(ctx, "failed to create GitHub client: %v", err)
 		w.WriteHeader(http.StatusBadRequest)
 		fmt.Fprintln(w, err)
 		return
@@ -60,6 +61,7 @@ func (gc *githubChecker) handleCheck(w http.ResponseWriter, r *http.Request) {
 
 	res, err := server.NewChecker(&req, gh).Check(ctx)
 	if err != nil {
+		log.Errorf(ctx, "failed to run checker: %v", err)
 		w.WriteHeader(http.StatusBadRequest)
 		fmt.Fprintln(w, err)
 		return
