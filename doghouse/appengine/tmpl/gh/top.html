@@ -23,7 +23,18 @@
   reviewdog app to other accounts.
 </p>
 <p>
-  Go to https://reviewdog.app/gh/{owner}/{repo} to get REVIEWDOG_TOKEN. 
+  Go to https://reviewdog.app/gh/{owner}/{repo} to get REVIEWDOG_TOKEN.
+  <br>
+  Or
+  <br>
+  Run reviewdoc CLI from Travis CI without REVIEWDOG_TOKEN.
+  <br>
+</p>
+<p>
+  <pre>
+$ reviewdog -conf=.reviewdog.yml -reporter=github-pr-check
+  </pre>
+  See also <a href="https://github.com/haya14busa/reviewdog">github.com/haya14busa/reviewdog</a>
 </p>
 
 
