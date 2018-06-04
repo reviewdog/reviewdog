@@ -14,6 +14,14 @@ import (
 	"golang.org/x/sync/errgroup"
 )
 
+// GitHub check runs API cannot handle too large requests.
+// Set max number of filtered findings to be showen in check-run summary.
+// ERROR:
+//  https://api.github.com/repos/easymotion/vim-easymotion/check-runs: 422
+//  Invalid request.
+//  Only 65535 characters are allowed; 250684 were supplied. []
+const maxFilteredFinding = 150
+
 type Checker struct {
 	req *doghouse.CheckRequest
 	gh  checkerGitHubClientInterface
@@ -140,7 +148,11 @@ func (ch *Checker) summaryFindings(name string, checks []*reviewdog.FilteredChec
 	lines = append(lines, "<details>")
 	lines = append(lines, fmt.Sprintf("<summary>%s (%d)</summary>", name, len(checks)))
 	lines = append(lines, "")
-	for _, c := range checks {
+	for i, c := range checks {
+		if i >= maxFilteredFinding {
+			lines = append(lines, "... (Too many findings. Dropped some findings)")
+			break
+		}
 		lines = append(lines, ch.buildFindingLink(c))
 	}
 	lines = append(lines, "</details>")
