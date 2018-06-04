@@ -6,6 +6,8 @@ import (
 	"sync"
 )
 
+var X = 1
+
 var _ DiffService = &DiffString{}
 
 type DiffString struct {
