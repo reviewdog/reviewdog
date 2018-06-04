@@ -16,7 +16,6 @@ install:
   - dep ensure
   - go install ./cmd/reviewdog
   # Install CI tools.
-  - go get github.com/mattn/goveralls
   - go get github.com/haya14busa/goverage
   # Install linters.
   - go get github.com/golang/lint/golint
@@ -36,12 +35,11 @@ before_script:
   - curl httpbin.org/ip
 
 script:
+  - reviewdog -reporter=github-pr-check
   - go test -v -race $(go list ./... | grep -v "/vendor/")
   - goverage -coverprofile=coverage.txt ./...
-  - reviewdog -reporter=github-pr-check
 
 after_success:
-  - goveralls -service=travis-ci -coverprofile=coverage.txt
   - bash <(curl -s https://codecov.io/bash)
 
 before_deploy:
@@ -73,6 +71,7 @@ deploy:
   skip_cleanup: true
   on:
     tags: true
+    go: "1.10.x"
 
 notifications:
   webhooks:
