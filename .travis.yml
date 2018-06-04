@@ -71,6 +71,7 @@ deploy:
   skip_cleanup: true
   on:
     tags: true
+    go: "1.10.x"
 
 notifications:
   webhooks:
