@@ -1,4 +1,4 @@
-# reviewdog app config: https://github.com/settings/apps/reviewdog
+# reviewdog-dev app config: https://github.com/settings/apps/reviewdog-dev
 
 # https://cloud.google.com/appengine/docs/standard/go/config/appref
 runtime: go
@@ -10,4 +10,4 @@ inbound_services:
 
 includes:
 - handlers.yaml
-- secret/secret.yaml # set GITHUB_WEBHOOK_SECRET env var
+- secret/secret_dev.yaml
