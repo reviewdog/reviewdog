@@ -24,6 +24,7 @@ import (
 	"github.com/haya14busa/reviewdog/cienv"
 	"github.com/haya14busa/reviewdog/project"
 	shellwords "github.com/mattn/go-shellwords"
+	"github.com/xanzy/go-gitlab"
 )
 
 const usageMessage = "" +
@@ -64,7 +65,7 @@ const (
 		CI_REPO_NAME	repository name (e.g. "reviewdog" for https://github.com/haya14busa/reviewdog)
 `
 	confDoc     = `config file path`
-	reporterDoc = `reporter of reviewdog results. (local, github-pr-check, github-pr-review)
+	reporterDoc = `reporter of reviewdog results. (local, github-pr-check, github-pr-review, gitlab-mr-review)
 	"local" (default)
 		Report results to stdout.
 
@@ -89,6 +90,9 @@ const (
 
 		if you want to skip verifing SSL (please use this at your own risk)
 			$ export REVIEWDOG_INSECURE_SKIP_VERIFY=true
+
+	"gitlab-mr-review"
+		Report results to GitLab comments.
 
 	For "github-pr-check" and "github-pr-review", reviewdog automatically get
 	necessary data from environment variable in CI service ('travis',
@@ -134,7 +138,8 @@ func main() {
 	}
 }
 
-func run(r io.Reader, w io.Writer, opt *option) error {
+func run(_ io.Reader, w io.Writer, opt *option) error {
+	r, err := os.Open("../phpcs-result.xml") // TODO: !!!!!!!!!!!!!!!!!!!!!!!!!! <============
 	ctx := context.Background()
 
 	if opt.version {
@@ -175,6 +180,21 @@ See -reporter flag for migration and set -reporter="github-pr-review" or -report
 			return nil
 		}
 		gs, isPR, err := githubService(ctx)
+		if err != nil {
+			return err
+		}
+		if !isPR {
+			fmt.Fprintf(os.Stderr, "reviewdog: this is not PullRequest build. CI: %v\n", opt.ci)
+			return nil
+		}
+		cs = reviewdog.MultiCommentService(gs, cs)
+		ds = gs
+	case "gitlab-mr-review":
+		if os.Getenv("REVIEWDOG_GITLAB_API_TOKEN") == "" {
+			fmt.Fprintf(os.Stderr, "REVIEWDOG_GITLAB_API_TOKEN is not set\n")
+			return nil
+		}
+		gs, isPR, err := gitlabService(ctx, opt.ci)
 		if err != nil {
 			return err
 		}
@@ -301,6 +321,60 @@ func githubBaseURL() (*url.URL, error) {
 		return nil, fmt.Errorf("GitHub base URL is invalid: %v, %v", baseURL, err)
 	}
 	return u, nil
+}
+
+func gitlabService(ctx context.Context, ci string) (gitlabservice *reviewdog.GitLabMergeRequest, isPR bool, err error) {
+	token, err := nonEmptyEnv("REVIEWDOG_GITLAB_API_TOKEN")
+	if err != nil {
+		return nil, isPR, err
+	}
+	g, isPR, err := cienv.GetPullRequestInfo()
+	if err != nil {
+		return nil, isPR, err
+	}
+	// TODO: support commit build
+	if !isPR {
+		return nil, isPR, nil
+	}
+
+	client, err := gitlabClient(ctx, token)
+	if err != nil {
+		return nil, isPR, err
+	}
+
+	pid := g.Owner + "/" + g.Repo
+	gitlabservice, err = reviewdog.NewGitLabMergeRequest(client, pid, g.PullRequest, g.SHA)
+	if err != nil {
+		return nil, isPR, err
+	}
+	return gitlabservice, isPR, nil
+}
+
+func gitlabClient(ctx context.Context, token string) (*gitlab.Client, error) {
+	tr := &http.Transport{
+		Proxy:           http.ProxyFromEnvironment,
+		TLSClientConfig: &tls.Config{InsecureSkipVerify: insecureSkipVerify()},
+	}
+	sslcli := &http.Client{Transport: tr}
+	// ctx = context.WithValue(ctx, oauth2.HTTPClient, sslcli)
+	// ts := oauth2.StaticTokenSource(
+	// 	&oauth2.Token{AccessToken: token},
+	// )
+	// tc := oauth2.NewClient(ctx, ts)
+	client := gitlab.NewClient(sslcli, token)
+	client.SetBaseURL(gitlabBaseURL())
+
+	return client, nil
+}
+
+const defaultGitLabAPI = "https://gitlab.com/"
+
+func gitlabBaseURL() string {
+	baseURL := os.Getenv("GITLAB_API")
+	if baseURL == "" {
+		baseURL = defaultGitLabAPI
+	}
+	return baseURL
 }
 
 func insecureSkipVerify() bool {
