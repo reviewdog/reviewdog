@@ -23,3 +23,7 @@ runner:
     cmd: staticcheck $(go list ./... | grep -v /vendor/)
     errorformat:
       - "%f:%l:%c: %m"
+  misspell:
+    cmd: misspell .
+    errorformat:
+      - "%f:%l:%c: %m"
