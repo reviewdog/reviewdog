@@ -1,0 +1,6 @@
+{
+  "name": "reviewdog",
+  "devDependencies": {
+    "textlint": "^10.2.1"
+  }
+}
