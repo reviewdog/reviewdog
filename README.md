@@ -125,7 +125,7 @@ $ <linter> | <convert-to-checkstyle> | reviewdog -f=checkstyle -name="<linter>" 
 reviewdog can also be controlled via the .reviewdog.yml configuration file instead of "-f" or "-efm" arguments.
 
 With .reviewdog.yml, you can run the same commands both CI service and local
-environment including editor intergration with ease.
+environment including editor integration with ease.
 
 #### .reviewdog.yml
 
@@ -187,7 +187,7 @@ github-pr-review reporter reports results as [GitHub Checks](https://help.github
 Since GitHub Checks API is only for GitHub Apps, reviewdoc cli send a request to
 reviewdog GitHub App server and the server post resutls as GitHub Checks.
 
-1. Install reviedog Apps. https://github.com/apps/reviewdog
+1. Install reviewdog Apps. https://github.com/apps/reviewdog
 2. Set `REVIEWDOG_TOKEN` or run reviewdog CLI in trusted CI providers.
   - Get token from `https://reviewdog.app/gh/{owner}/{repo-name}`.
   - `$ export REVIEWDOG_TOKEN="xxxxx"`
@@ -209,7 +209,7 @@ mind the above caution and please use it on your own risk.
 You can use github-pr-review reporter if you don't want to depens on reviewdog
 server.
 
-### Reporter: GitHub PullRequest review comemnt (-reporter=github-pr-review)
+### Reporter: GitHub PullRequest review comment (-reporter=github-pr-review)
 
 [![sample-comment.png](https://raw.githubusercontent.com/haya14busa/i/dc0ccb1e110515ea407c146d99b749018db05c45/reviewdog/sample-comment.png)](https://github.com/haya14busa/reviewdog/pull/24#discussion_r84599728)
 
