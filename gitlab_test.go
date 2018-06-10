@@ -228,8 +228,8 @@ func TestGitLabPullRequest_Post_Flush_review_api(t *testing.T) {
 	if err := g.Flush(context.Background()); err != nil {
 		t.Error(err)
 	}
-	if apiCalled != 3 {
-		t.Errorf("GitLab API should be called once; called %v times", apiCalled)
+	if want := 3; apiCalled != want {
+		t.Errorf("GitLab API is called %d times, want %d times", apiCalled, want)
 	}
 }
 
