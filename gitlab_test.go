@@ -140,7 +140,7 @@ func TestGitLabMergeRequest_comment(t *testing.T) {
 func TestGitLabPullRequest_Post_Flush_review_api(t *testing.T) {
 	apiCalled := 0
 	mux := http.NewServeMux()
-	mux.HandleFunc("/projects/o/r/merge_requests/14/commits", func(w http.ResponseWriter, r *http.Request) {
+	mux.HandleFunc("/api/v4/projects/o/r/merge_requests/14/commits", func(w http.ResponseWriter, r *http.Request) {
 		apiCalled++
 		if r.Method != "GET" {
 			t.Errorf("unexpected access: %v %v", r.Method, r.URL)
@@ -155,7 +155,7 @@ func TestGitLabPullRequest_Post_Flush_review_api(t *testing.T) {
 			t.Fatal(err)
 		}
 	})
-	mux.HandleFunc("/projects/o/r/repository/commits/0123456789abcdef/comments", func(w http.ResponseWriter, r *http.Request) {
+	mux.HandleFunc("/api/v4/projects/o/r/repository/commits/0123456789abcdef/comments", func(w http.ResponseWriter, r *http.Request) {
 		apiCalled++
 		if r.Method != "GET" {
 			t.Errorf("unexpected access: %v %v", r.Method, r.URL)
@@ -171,7 +171,7 @@ func TestGitLabPullRequest_Post_Flush_review_api(t *testing.T) {
 			t.Fatal(err)
 		}
 	})
-	mux.HandleFunc("/projects/o/r/repository/commits/sha/comments", func(w http.ResponseWriter, r *http.Request) {
+	mux.HandleFunc("/api/v4/projects/o/r/repository/commits/sha/comments", func(w http.ResponseWriter, r *http.Request) {
 		apiCalled++
 		if r.Method != "POST" {
 			t.Errorf("unexpected access: %v %v", r.Method, r.URL)
