@@ -97,8 +97,7 @@ func (g *GitLabMergeRequest) postCommentsForEach(ctx context.Context) error {
 				Line:     &comment.Lnum,
 				LineType: &ltype,
 			}
-			a, _, err := g.cli.Commits.PostCommitComment(g.projects, commitID, prcomment, nil)
-			fmt.Println(a)
+			_, _, err = g.cli.Commits.PostCommitComment(g.projects, commitID, prcomment, nil)
 			return err
 		})
 	}
