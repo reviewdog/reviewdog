@@ -202,7 +202,7 @@ func TestGitLabPullRequest_Post_Flush_review_api(t *testing.T) {
 	if err != nil {
 		t.Fatal(err)
 	}
-	// Path is set to notExistFile path for mock-up test.
+	// Path is set to non existing file path for mock test not to use last commit id of the line.
 	// If setting exists file path, sha is changed by last commit id.
 	comments := []*Comment{
 		{
