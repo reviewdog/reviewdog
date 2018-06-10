@@ -127,24 +127,37 @@ func TestRun(t *testing.T) {
 }
 
 func TestFilteredEnviron(t *testing.T) {
-	const name = "REVIEWDOG_GITHUB_API_TOKEN"
-	defer os.Setenv(name, os.Getenv(name))
-	os.Setenv(name, "value")
+	names := [...]string{
+		"REVIEWDOG_GITHUB_API_TOKEN",
+		"REVIEWDOG_GITLAB_API_TOKEN",
+		"REVIEWDOG_TOKEN",
+	}
+
+	for _, name := range names {
+		defer func(name, value string) {
+			os.Setenv(name, value)
+		}(name, os.Getenv(name))
+		os.Setenv(name, "value")
+	}
 
 	filtered := filteredEnviron()
-	if len(filtered) != len(os.Environ())-2 {
-		t.Errorf("len(filtered) != len(os.Environ())-1, %v != %v-2", len(filtered), len(os.Environ()))
+	if len(filtered) != len(os.Environ())-len(names) {
+		t.Errorf("len(filtered) != len(os.Environ())-%d, %v != %v-%d", len(names), len(filtered), len(os.Environ()), len(names))
 	}
 
 	for _, kv := range filtered {
-		if strings.HasPrefix(kv, name) && kv != name+"=" {
-			t.Errorf("filtered: %v, want %v=", kv, name)
+		for _, name := range names {
+			if strings.HasPrefix(kv, name) && kv != name+"=" {
+				t.Errorf("filtered: %v, want %v=", kv, name)
+			}
 		}
 	}
 
 	for _, kv := range os.Environ() {
-		if strings.HasPrefix(kv, name) && kv != name+"=value" {
-			t.Errorf("envs: %v, want %v=value", kv, name)
+		for _, name := range names {
+			if strings.HasPrefix(kv, name) && kv != name+"=value" {
+				t.Errorf("envs: %v, want %v=value", kv, name)
+			}
 		}
 	}
 }
