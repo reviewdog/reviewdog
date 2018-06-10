@@ -12,7 +12,7 @@ import (
 	"github.com/xanzy/go-gitlab"
 )
 
-const noGitlabTokenSkipTestMes = "skipping test (requires actual Personal access tokens. export REVIEWDOG_TEST_GITHUB_API_TOKEN=<GitLab Personal Access Token>)"
+const noGitlabTokenSkipTestMes = "skipping test (requires actual Personal access tokens. export REVIEWDOG_TEST_GITLAB_API_TOKEN=<GitLab Personal Access Token>)"
 
 func setupGitLabClient() *gitlab.Client {
 	token := os.Getenv("REVIEWDOG_TEST_GITLAB_API_TOKEN")
