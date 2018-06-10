@@ -151,6 +151,9 @@ func (g *GitLabMergeRequest) Diff(ctx context.Context) ([]byte, error) {
 		return nil, err
 	}
 	targetBranch, _, err := g.cli.Branches.GetBranch(mr.TargetProjectID, mr.TargetBranch, nil)
+	if err != nil {
+		return nil, err
+	}
 	return g.gitDiff(ctx, g.sha, targetBranch.Commit.ID)
 }
 
