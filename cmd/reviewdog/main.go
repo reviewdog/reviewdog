@@ -11,10 +11,7 @@ import (
 	"net/url"
 	"os"
 	"os/exec"
-	"regexp"
 	"sort"
-	"strconv"
-	"strings"
 	"text/tabwriter"
 
 	"golang.org/x/net/context" // "context"
@@ -24,12 +21,11 @@ import (
 	"github.com/google/go-github/github"
 	"github.com/haya14busa/errorformat/fmts"
 	"github.com/haya14busa/reviewdog"
+	"github.com/haya14busa/reviewdog/cienv"
 	"github.com/haya14busa/reviewdog/project"
 	shellwords "github.com/mattn/go-shellwords"
 	"github.com/xanzy/go-gitlab"
 )
-
-const version = "0.9.8"
 
 const usageMessage = "" +
 	`Usage:	reviewdog [flags]
@@ -48,6 +44,7 @@ type option struct {
 	name      string // tool name which is used in comment
 	ci        string
 	conf      string
+	reporter  string
 }
 
 // flags doc
@@ -58,32 +55,62 @@ const (
 	fDoc         = `format name (run -list to see supported format name) for input. It's also used as tool name in review comment if -name is empty`
 	listDoc      = `list supported pre-defined format names which can be used as -f arg`
 	nameDoc      = `tool name in review comment. -f is used as tool name if -name is empty`
-	ciDoc        = `CI service ('travis', 'circle-ci', 'droneio'(OSS 0.4) or 'common')
+	ciDoc        = `[deprecated] reviewdog automatically get necessary data. See also -reporter for migration
 
-	GitHub/GitHub Enterprise:
-		You need to set REVIEWDOG_GITHUB_API_TOKEN environment variable.
-		Go to https://github.com/settings/tokens and create new Personal access token with repo scope.
-
-		For GitHub Enterprise:
-			export GITHUB_API="https://example.githubenterprise.com/api/v3"
-
-		if you want to skip verifing SSL (please use this at your own risk)
-			export REVIEWDOG_INSECURE_SKIP_VERIFY=true
-
-	GitLab.com/self hosted Gitlab:
-		You need to set REVIEWDOG_GITLAB_API_TOKEN environment variable.
-		Go to https://gitlab.com/profile/personal_access_tokens
-
-		For self hosted GitLab:
-			export GITLAB_API="https://example.gitlab.com/api/v4"
-
+	CI service ('travis', 'circle-ci', 'droneio'(OSS 0.4) or 'common')
 	"common" requires following environment variables
 		CI_PULL_REQUEST	Pull Request number (e.g. 14)
 		CI_COMMIT	SHA1 for the current build
 		CI_REPO_OWNER	repository owner (e.g. "haya14busa" for https://github.com/haya14busa/reviewdog)
 		CI_REPO_NAME	repository name (e.g. "reviewdog" for https://github.com/haya14busa/reviewdog)
 `
-	confDoc = `config file path`
+	confDoc     = `config file path`
+	reporterDoc = `reporter of reviewdog results. (local, github-pr-check, github-pr-review, gitlab-mr-review)
+	"local" (default)
+		Report results to stdout.
+
+	"github-pr-check" (experimental)
+		Report results to GitHub PullRequest Check tab.
+
+		1. Install reviedog Apps. https://github.com/apps/reviewdog
+		2. Set REVIEWDOG_TOKEN or run reviewdog CLI in trusted CI providers.
+		You can get token from https://reviewdog.app/gh/<owner>/<repo-name>.
+		$ export REVIEWDOG_TOKEN="xxxxx"
+
+		Note: Token is not required if you run reviewdog in Travis CI.
+
+	"github-pr-review"
+		Report results to GitHub review comments.
+
+		1. Set REVIEWDOG_GITHUB_API_TOKEN environment variable.
+		Go to https://github.com/settings/tokens and create new Personal access token with repo scope.
+
+		For GitHub Enterprise:
+			$ export GITHUB_API="https://example.githubenterprise.com/api/v3"
+
+		if you want to skip verifing SSL (please use this at your own risk)
+			$ export REVIEWDOG_INSECURE_SKIP_VERIFY=true
+
+	"gitlab-mr-review"
+		Report results to GitLab comments:
+
+		1. Set REVIEWDOG_GITLAB_API_TOKEN environment variable.
+		Go to https://gitlab.com/profile/personal_access_tokens
+
+		For self hosted GitLab:
+			$ export GITLAB_API="https://example.gitlab.com/api/v4"
+
+	For "github-pr-check" and "github-pr-review", "gitlab-mr-review", reviewdog
+	automatically get necessary data from environment variable in CI service 
+	('travis', 'circle-ci', 'droneio').
+	You can set necessary data with following environment variable manually if
+	you want (e.g. run reviewdog in Jenkins).
+
+		$ export CI_PULL_REQUEST=14 # Pull Request number (e.g. 14)
+		$ export CI_COMMIT="$(git rev-parse @)" # SHA1 for the current build
+		$ export CI_REPO_OWNER="haya14busa" # repository owner
+		$ export CI_REPO_NAME="reviewdog" # repository name
+`
 )
 
 var opt = &option{}
@@ -98,6 +125,7 @@ func init() {
 	flag.StringVar(&opt.name, "name", "", nameDoc)
 	flag.StringVar(&opt.ci, "ci", "", ciDoc)
 	flag.StringVar(&opt.conf, "conf", "", confDoc)
+	flag.StringVar(&opt.reporter, "reporter", "local", reporterDoc)
 }
 
 func usage() {
@@ -120,12 +148,18 @@ func run(r io.Reader, w io.Writer, opt *option) error {
 	ctx := context.Background()
 
 	if opt.version {
-		fmt.Fprintln(w, version)
+		fmt.Fprintln(w, reviewdog.Version)
 		return nil
 	}
 
 	if opt.list {
 		return runList(w)
+	}
+
+	// TODO(haya14busa): clean up when removing -ci flag from next release.
+	if opt.ci != "" {
+		return errors.New(`-ci flag is deprecated.
+See -reporter flag for migration and set -reporter="github-pr-review" or -reporter="github-pr-check" or -reporter="gitlab-mr-review"`)
 	}
 
 	// assume it's project based run when both -efm ane -f are not specified
@@ -140,35 +174,38 @@ func run(r io.Reader, w io.Writer, opt *option) error {
 		cs = reviewdog.NewRawCommentWriter(w)
 	}
 
-	if opt.ci != "" {
-		if os.Getenv("REVIEWDOG_GITHUB_API_TOKEN") != "" {
-			gs, isPR, err := githubService(ctx, opt.ci)
-			if err != nil {
-				return err
-			}
-			if !isPR {
-				fmt.Fprintf(os.Stderr, "this is not PullRequest build. CI: %v\n", opt.ci)
-				return nil
-			}
-			cs = reviewdog.MultiCommentService(gs, cs)
-			ds = gs
-		} else if os.Getenv("REVIEWDOG_GITLAB_API_TOKEN") != "" {
-			gs, isPR, err := gitlabService(ctx, opt.ci)
-			if err != nil {
-				return err
-			}
-			if !isPR {
-				fmt.Fprintf(os.Stderr, "this is not MergeRequest build. CI: %v\n", opt.ci)
-				return nil
-			}
-			cs = reviewdog.MultiCommentService(gs, cs)
-			ds = gs
-		} else {
+	switch opt.reporter {
+	default:
+		return fmt.Errorf("unknown -reporter: %s", opt.reporter)
+	case "github-pr-check":
+		return runDoghouse(ctx, r, opt, isProject)
+	case "github-pr-review":
+		if os.Getenv("REVIEWDOG_GITHUB_API_TOKEN") == "" {
 			fmt.Fprintf(os.Stderr, "REVIEWDOG_GITHUB_API_TOKEN is not set\n")
 			return nil
 		}
-	} else {
-		// local
+		gs, isPR, err := githubService(ctx)
+		if err != nil {
+			return err
+		}
+		if !isPR {
+			fmt.Fprintf(os.Stderr, "reviewdog: this is not PullRequest build. CI: %v\n", opt.ci)
+			return nil
+		}
+		cs = reviewdog.MultiCommentService(gs, cs)
+		ds = gs
+	case "gitlab-mr-review":
+		gs, isPR, err := gitlabService(ctx, opt.ci)
+		if err != nil {
+			return err
+		}
+		if !isPR {
+			fmt.Fprintf(os.Stderr, "this is not MergeRequest build. CI: %v\n", opt.ci)
+			return nil
+		}
+		cs = reviewdog.MultiCommentService(gs, cs)
+		ds = gs
+	case "local":
 		d, err := diffService(opt.diffCmd, opt.diffStrip)
 		if err != nil {
 			return err
@@ -177,29 +214,19 @@ func run(r io.Reader, w io.Writer, opt *option) error {
 	}
 
 	if isProject {
-		b, err := readConf(opt.conf)
+		conf, err := projectConfig(opt.conf)
 		if err != nil {
-			return fmt.Errorf("fail to open config: %v", err)
-		}
-		conf, err := project.Parse(b)
-		if err != nil {
-			return fmt.Errorf("config is invalid: %v", err)
+			return err
 		}
 		return project.Run(ctx, conf, cs, ds)
 	}
 
-	p, err := reviewdog.NewParser(&reviewdog.ParserOpt{FormatName: opt.f, Errorformat: opt.efms})
+	p, err := newParserFromOpt(opt)
 	if err != nil {
-		return fmt.Errorf("fail to create parser. use either -f or -efm: %v", err)
+		return err
 	}
 
-	// tool name
-	name := opt.name
-	if name == "" && opt.f != "" {
-		name = opt.f
-	}
-
-	app := reviewdog.NewReviewdog(name, p, cs, ds)
+	app := reviewdog.NewReviewdog(toolName(opt), p, cs, ds)
 	return app.Run(ctx, r)
 }
 
@@ -240,30 +267,12 @@ func diffService(s string, strip int) (reviewdog.DiffService, error) {
 	return d, nil
 }
 
-func getRequestInfo(ci string) (requestInfo *RequestInfo, isPR bool, err error) {
-	var info *RequestInfo
-	switch ci {
-	case "travis":
-		info, isPR, err = travis()
-	case "circle-ci":
-		info, isPR, err = circleci()
-	case "droneio":
-		info, isPR, err = droneio()
-	case "common":
-		info, isPR, err = commonci()
-	default:
-		return nil, isPR, fmt.Errorf("unsupported CI: %v", ci)
-	}
-	return info, isPR, err
-}
-
-func githubService(ctx context.Context, ci string) (githubservice *reviewdog.GitHubPullRequest, isPR bool, err error) {
+func githubService(ctx context.Context) (githubservice *reviewdog.GitHubPullRequest, isPR bool, err error) {
 	token, err := nonEmptyEnv("REVIEWDOG_GITHUB_API_TOKEN")
 	if err != nil {
 		return nil, isPR, err
 	}
-
-	g, isPR, err := getRequestInfo(ci)
+	g, isPR, err := cienv.GetPullRequestInfo()
 	if err != nil {
 		return nil, isPR, err
 	}
@@ -277,7 +286,7 @@ func githubService(ctx context.Context, ci string) (githubservice *reviewdog.Git
 		return nil, isPR, err
 	}
 
-	githubservice, err = reviewdog.NewGitHubPullReqest(client, g.owner, g.repo, g.pr, g.sha)
+	githubservice, err = reviewdog.NewGitHubPullReqest(client, g.Owner, g.Repo, g.PullRequest, g.SHA)
 	if err != nil {
 		return nil, isPR, err
 	}
@@ -321,7 +330,7 @@ func gitlabService(ctx context.Context, ci string) (gitlabservice *reviewdog.Git
 		return nil, isPR, err
 	}
 
-	g, isPR, err := getRequestInfo(ci)
+	g, isPR, err := cienv.GetPullRequestInfo()
 	if err != nil {
 		return nil, isPR, err
 	}
@@ -334,7 +343,7 @@ func gitlabService(ctx context.Context, ci string) (gitlabservice *reviewdog.Git
 		return nil, isPR, err
 	}
 
-	gitlabservice, err = reviewdog.NewGitLabMergeReqest(client, g.owner, g.repo, g.pr, g.sha)
+	gitlabservice, err = reviewdog.NewGitLabMergeReqest(client, g.Owner, g.Repo, g.PullRequest, g.SHA)
 	if err != nil {
 		return nil, isPR, err
 	}
@@ -371,172 +380,6 @@ func insecureSkipVerify() bool {
 	return os.Getenv("REVIEWDOG_INSECURE_SKIP_VERIFY") == "true"
 }
 
-func travis() (g *RequestInfo, isPR bool, err error) {
-	prs := os.Getenv("TRAVIS_PULL_REQUEST")
-	if prs == "false" {
-		return nil, false, nil
-	}
-	pr, err := strconv.Atoi(prs)
-	if err != nil {
-		return nil, true, fmt.Errorf("unexpected env variable. TRAVIS_PULL_REQUEST=%v", prs)
-	}
-	reposlug, err := nonEmptyEnv("TRAVIS_REPO_SLUG")
-	if err != nil {
-		return nil, true, err
-	}
-	rss := strings.SplitN(reposlug, "/", 2)
-	if len(rss) < 2 {
-		return nil, true, fmt.Errorf("unexpected env variable. TRAVIS_REPO_SLUG=%v", reposlug)
-	}
-	owner, repo := rss[0], rss[1]
-
-	sha, err := nonEmptyEnv("TRAVIS_PULL_REQUEST_SHA")
-	if err != nil {
-		return nil, true, err
-	}
-
-	g = &RequestInfo{
-		owner: owner,
-		repo:  repo,
-		pr:    pr,
-		sha:   sha,
-	}
-	return g, true, nil
-}
-
-// https://circleci.com/docs/environment-variables/
-func circleci() (g *RequestInfo, isPR bool, err error) {
-	var prs string // pull request number in string
-	// For Pull Request from a same repository (CircleCI 2.0)
-	// e.g. https: //github.com/haya14busa/reviewdog/pull/6
-	// it might be better to support CI_PULL_REQUESTS instead.
-	prs = os.Getenv("CIRCLE_PULL_REQUEST")
-	if prs == "" {
-		// For the backward compatibility with CircleCI 1.0.
-		prs = os.Getenv("CI_PULL_REQUEST")
-	}
-	if prs == "" {
-		// For Pull Request by a fork repository
-		// e.g. 6
-		prs = os.Getenv("CIRCLE_PR_NUMBER")
-	}
-	if prs == "" {
-		// not a pull-request build
-		return nil, false, nil
-	}
-	// regexp.MustCompile() in func intentionally because this func is called
-	// once for one run.
-	re := regexp.MustCompile(`[1-9]\d*$`)
-	prm := re.FindString(prs)
-	pr, err := strconv.Atoi(prm)
-	if err != nil {
-		return nil, true, fmt.Errorf("unexpected env variable (CI_PULL_REQUEST or CIRCLE_PR_NUMBER): %v", prs)
-	}
-	owner, err := nonEmptyEnv("CIRCLE_PROJECT_USERNAME")
-	if err != nil {
-		return nil, true, err
-	}
-	repo, err := nonEmptyEnv("CIRCLE_PROJECT_REPONAME")
-	if err != nil {
-		return nil, true, err
-	}
-	sha, err := nonEmptyEnv("CIRCLE_SHA1")
-	if err != nil {
-		return nil, true, err
-	}
-	g = &RequestInfo{
-		owner: owner,
-		repo:  repo,
-		pr:    pr,
-		sha:   sha,
-	}
-	return g, true, nil
-}
-
-// http://readme.drone.io/usage/variables/
-func droneio() (g *RequestInfo, isPR bool, err error) {
-	var prs string // pull request number in string
-	prs = os.Getenv("DRONE_PULL_REQUEST")
-	if prs == "" {
-		// not a pull-request build
-		return nil, false, nil
-	}
-	pr, err := strconv.Atoi(prs)
-	if err != nil {
-		return nil, true, fmt.Errorf("unexpected env variable (DRONE_PULL_REQUEST): %v", prs)
-	}
-
-	owner, errOwner := nonEmptyEnv("DRONE_REPO_OWNER")
-	repo, errRepo := nonEmptyEnv("DRONE_REPO_NAME")
-	repoSlug, errSlug := nonEmptyEnv("DRONE_REPO")
-
-	if (errOwner != nil || errRepo != nil) && errSlug != nil {
-		return nil, true, fmt.Errorf("unable to detect repo and owner\n - %v\n - %v\n - %v", errOwner, errRepo, errSlug)
-	}
-
-	// Try to detect using env variable available in drone<=0.4
-	if errSlug == nil {
-		rss := strings.SplitN(repoSlug, "/", 2)
-		if len(rss) < 2 {
-			return nil, true, fmt.Errorf("unexpected env variable. DRONE_REPO=%v", repoSlug)
-		}
-
-		owner, repo = rss[0], rss[1]
-	}
-
-	sha, err := nonEmptyEnv("DRONE_COMMIT")
-	if err != nil {
-		return nil, true, err
-	}
-	g = &RequestInfo{
-		owner: owner,
-		repo:  repo,
-		pr:    pr,
-		sha:   sha,
-	}
-	return g, true, nil
-}
-
-func commonci() (g *RequestInfo, isPR bool, err error) {
-	var prs string // pull request number in string
-	prs = os.Getenv("CI_PULL_REQUEST")
-	if prs == "" {
-		// not a pull-request build
-		return nil, false, nil
-	}
-	pr, err := strconv.Atoi(prs)
-	if err != nil {
-		return nil, true, fmt.Errorf("unexpected env variable (CI_PULL_REQUEST): %v", prs)
-	}
-	owner, err := nonEmptyEnv("CI_REPO_OWNER")
-	if err != nil {
-		return nil, true, err
-	}
-	repo, err := nonEmptyEnv("CI_REPO_NAME")
-	if err != nil {
-		return nil, true, err
-	}
-	sha, err := nonEmptyEnv("CI_COMMIT")
-	if err != nil {
-		return nil, true, err
-	}
-	g = &RequestInfo{
-		owner: owner,
-		repo:  repo,
-		pr:    pr,
-		sha:   sha,
-	}
-	return g, true, nil
-}
-
-// RequestInfo represents required information about GitHub PullRequest and Gitlab MergeRequest.
-type RequestInfo struct {
-	owner string
-	repo  string
-	pr    int
-	sha   string
-}
-
 func nonEmptyEnv(env string) (string, error) {
 	v := os.Getenv(env)
 	if v == "" {
@@ -554,6 +397,18 @@ func (ss *strslice) String() string {
 func (ss *strslice) Set(value string) error {
 	*ss = append(*ss, value)
 	return nil
+}
+
+func projectConfig(path string) (*project.Config, error) {
+	b, err := readConf(path)
+	if err != nil {
+		return nil, fmt.Errorf("fail to open config: %v", err)
+	}
+	conf, err := project.Parse(b)
+	if err != nil {
+		return nil, fmt.Errorf("config is invalid: %v", err)
+	}
+	return conf, nil
 }
 
 func readConf(conf string) ([]byte, error) {
@@ -575,4 +430,20 @@ func readConf(conf string) ([]byte, error) {
 		}
 	}
 	return nil, errors.New(".reviewdog.yml not found")
+}
+
+func newParserFromOpt(opt *option) (reviewdog.Parser, error) {
+	p, err := reviewdog.NewParser(&reviewdog.ParserOpt{FormatName: opt.f, Errorformat: opt.efms})
+	if err != nil {
+		return nil, fmt.Errorf("fail to create parser. use either -f or -efm: %v", err)
+	}
+	return p, err
+}
+
+func toolName(opt *option) string {
+	name := opt.name
+	if name == "" && opt.f != "" {
+		name = opt.f
+	}
+	return name
 }

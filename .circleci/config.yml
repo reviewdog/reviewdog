@@ -6,7 +6,7 @@ jobs:
     docker:
       - image: golang:latest
         environment:
-          REVIEWDOG_VERSION: 0.9.8
+          REVIEWDOG_VERSION: 0.9.9
     steps:
       - checkout
       - run:
@@ -14,7 +14,7 @@ jobs:
           command: |
             echo "Golang $(go version)"
       - run: curl -fSL https://github.com/haya14busa/reviewdog/releases/download/$REVIEWDOG_VERSION/reviewdog_linux_amd64 -o reviewdog && chmod +x ./reviewdog
-      - run: go tool vet -all -shadowstrict . 2>&1 | ./reviewdog -f=govet -ci="circle-ci"
+      - run: go vet ./... 2>&1 | ./reviewdog -f=govet -ci="circle-ci" || true
 
 notify:
   webhooks:

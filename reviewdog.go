@@ -6,11 +6,12 @@ import (
 	"fmt"
 	"io"
 	"os"
-	"path/filepath"
-	"strings"
 
 	"github.com/haya14busa/reviewdog/diff"
 )
+
+// Version is version of reviewdog CLI.
+const Version = "0.9.9"
 
 // Reviewdog represents review dog application which parses result of compiler
 // or linter, get diff and filter the results by diff, and report filtered
@@ -25,6 +26,11 @@ type Reviewdog struct {
 // NewReviewdog returns a new Reviewdog.
 func NewReviewdog(toolname string, p Parser, c CommentService, d DiffService) *Reviewdog {
 	return &Reviewdog{p: p, c: c, d: d, toolname: toolname}
+}
+
+func RunFromResult(ctx context.Context, c CommentService, results []*CheckResult,
+	filediffs []*diff.FileDiff, strip int, toolname string) error {
+	return (&Reviewdog{c: c, toolname: toolname}).runFromResult(ctx, results, filediffs, strip)
 }
 
 // CheckResult represents a checked result of static analysis tools.
@@ -69,6 +75,36 @@ type DiffService interface {
 	Strip() int
 }
 
+func (w *Reviewdog) runFromResult(ctx context.Context, results []*CheckResult,
+	filediffs []*diff.FileDiff, strip int) error {
+	wd, err := os.Getwd()
+	if err != nil {
+		return err
+	}
+
+	checks := FilterCheck(results, filediffs, strip, wd)
+	for _, check := range checks {
+		if !check.InDiff {
+			continue
+		}
+		comment := &Comment{
+			CheckResult: check.CheckResult,
+			Body:        check.Message, // TODO: format message
+			LnumDiff:    check.LnumDiff,
+			ToolName:    w.toolname,
+		}
+		if err := w.c.Post(ctx, comment); err != nil {
+			return err
+		}
+	}
+
+	if bulk, ok := w.c.(BulkCommentService); ok {
+		return bulk.Flush(ctx)
+	}
+
+	return nil
+}
+
 // Run runs Reviewdog application.
 func (w *Reviewdog) Run(ctx context.Context, r io.Reader) error {
 	results, err := w.p.Parse(r)
@@ -85,113 +121,6 @@ func (w *Reviewdog) Run(ctx context.Context, r io.Reader) error {
 	if err != nil {
 		return fmt.Errorf("fail to parse diff: %v", err)
 	}
-	addedlines := addedDiffLines(filediffs, w.d.Strip())
 
-	wd, err := os.Getwd()
-	if err != nil {
-		return err
-	}
-
-	for _, result := range results {
-		addedline := addedlines.Get(result.Path, result.Lnum)
-		if filepath.IsAbs(result.Path) {
-			relpath, err := filepath.Rel(wd, result.Path)
-			if err != nil {
-				return err
-			}
-			result.Path = relpath
-		}
-		result.Path = filepath.Clean(result.Path)
-		if addedline != nil {
-			comment := &Comment{
-				CheckResult: result,
-				Body:        result.Message, // TODO: format message
-				LnumDiff:    addedline.LnumDiff,
-				ToolName:    w.toolname,
-			}
-			if err := w.c.Post(ctx, comment); err != nil {
-				return err
-			}
-		}
-	}
-
-	if bulk, ok := w.c.(BulkCommentService); ok {
-		return bulk.Flush(ctx)
-	}
-
-	return nil
-}
-
-// AddedLine represents added line in diff.
-type AddedLine struct {
-	Path     string // path to new file
-	Lnum     int    // the line number in the new file
-	LnumDiff int    // the line number of the diff (Same as Lnumdiff of diff.Line)
-	Content  string // line content
-}
-
-// posToAddedLine is a hash table of normalized path to line number to AddedLine.
-type posToAddedLine map[string]map[int]*AddedLine
-
-func (p posToAddedLine) Get(path string, lnum int) *AddedLine {
-	npath, err := normalizePath(path)
-	if err != nil {
-		return nil
-	}
-	ltodiff, ok := p[npath]
-	if !ok {
-		return nil
-	}
-	diffline, ok := ltodiff[lnum]
-	if !ok {
-		return nil
-	}
-	return diffline
-}
-
-// addedDiffLines traverse []*diff.FileDiff and returns posToAddedLine.
-func addedDiffLines(filediffs []*diff.FileDiff, strip int) posToAddedLine {
-	r := make(posToAddedLine)
-	for _, filediff := range filediffs {
-		path := filediff.PathNew
-		ltodiff := make(map[int]*AddedLine)
-		if strip > 0 {
-			ps := strings.Split(filepath.ToSlash(filediff.PathNew), "/")
-			if len(ps) > strip {
-				path = filepath.Join(ps[strip:]...)
-			}
-		}
-		np, err := normalizePath(path)
-		if err != nil {
-			// FIXME(haya14busa): log or return error?
-			continue
-		}
-		path = np
-
-		for _, hunk := range filediff.Hunks {
-			for _, line := range hunk.Lines {
-				if line.Type == diff.LineAdded {
-					ltodiff[line.LnumNew] = &AddedLine{
-						Path:     path,
-						Lnum:     line.LnumNew,
-						LnumDiff: line.LnumDiff,
-						Content:  line.Content,
-					}
-				}
-			}
-		}
-		r[path] = ltodiff
-	}
-	return r
-}
-
-func normalizePath(p string) (string, error) {
-	if !filepath.IsAbs(p) {
-		path, err := filepath.Abs(p)
-		if err != nil {
-			return "", err
-		}
-		p = path
-	}
-	return filepath.ToSlash(p), nil
+	return w.runFromResult(ctx, results, filediffs, w.d.Strip())
 }
