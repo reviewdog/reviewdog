@@ -103,7 +103,7 @@ You can add supported pre-defined 'errorformat' by contributing to [haya14busa/e
 #### checkstyle format
 
 reviewdog also accepts [checkstyle XML format](http://checkstyle.sourceforge.net/) as well.
-If the linter supports checkstyle format as a report format, you can us
+If the linter supports checkstyle format as a report format, you can use
 -f=checkstyle instead of using 'errorformat'.
 
 ```
@@ -197,9 +197,9 @@ Note: Token not required if you run reviewdog in Travis or AppVeyor.
 
 #### *Caution:*
 
-As described above, github-pr-review reporter is depending on reviewdog GitHub
+As described above, github-pr-check reporter is depending on reviewdog GitHub
 App server.
-The server is running with haya14busa's pocket money for now and i may break
+The server is running with haya14busa's pocket money for now and I may break
 things, so I cannot ensure that the server is running 24h and 365 days.
 
 github-pr-check reporter is better than github-pr-review reporter in general
