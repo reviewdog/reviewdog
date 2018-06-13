@@ -8,6 +8,17 @@
   revision = "1909bc2f63dc92bb931deace8b8312c4db72d12f"
 
 [[projects]]
+  name = "github.com/google/go-cmp"
+  packages = [
+    "cmp",
+    "cmp/internal/diff",
+    "cmp/internal/function",
+    "cmp/internal/value"
+  ]
+  revision = "3af367b6b30c263d47e8895973edcca9a49cf029"
+  version = "v0.2.0"
+
+[[projects]]
   branch = "master"
   name = "github.com/google/go-github"
   packages = ["github"]
@@ -22,13 +33,19 @@
 [[projects]]
   branch = "master"
   name = "github.com/haya14busa/errorformat"
-  packages = [".","fmts"]
+  packages = [
+    ".",
+    "fmts"
+  ]
   revision = "793e2bf5248a576ef25094e00b41dc021cca0550"
 
 [[projects]]
   branch = "master"
   name = "github.com/kylelemons/godebug"
-  packages = ["diff","pretty"]
+  packages = [
+    "diff",
+    "pretty"
+  ]
   revision = "a616ab194758ae0a11290d87ca46ee8c440117b0"
 
 [[projects]]
@@ -40,19 +57,25 @@
 [[projects]]
   name = "github.com/xanzy/go-gitlab"
   packages = ["."]
-  revision = "109fd962a3876c6e486a5bc9507289d060e3c587"
-  version = "v0.9.0"
+  revision = "26ea551e8c159cea42a9f206bc18ae5884d44d0c"
+  version = "v0.10.5"
 
 [[projects]]
   branch = "master"
   name = "golang.org/x/net"
-  packages = ["context","context/ctxhttp"]
+  packages = [
+    "context",
+    "context/ctxhttp"
+  ]
   revision = "1c05540f6879653db88113bc4a2b70aec4bd491f"
 
 [[projects]]
   branch = "master"
   name = "golang.org/x/oauth2"
-  packages = [".","internal"]
+  packages = [
+    ".",
+    "internal"
+  ]
   revision = "9a379c6b3e95a790ffc43293c2a78dee0d7b6e20"
 
 [[projects]]
@@ -63,7 +86,18 @@
 
 [[projects]]
   name = "google.golang.org/appengine"
-  packages = [".","internal","internal/app_identity","internal/base","internal/datastore","internal/log","internal/modules","internal/remote_api","internal/urlfetch","urlfetch"]
+  packages = [
+    ".",
+    "internal",
+    "internal/app_identity",
+    "internal/base",
+    "internal/datastore",
+    "internal/log",
+    "internal/modules",
+    "internal/remote_api",
+    "internal/urlfetch",
+    "urlfetch"
+  ]
   revision = "150dc57a1b433e64154302bdc40b6bb8aefa313a"
   version = "v1.0.0"
 
@@ -76,6 +110,6 @@
 [solve-meta]
   analyzer-name = "dep"
   analyzer-version = 1
-  inputs-digest = "b599854e3899c3f4ac942c18e0df363d326baf00a78258a588e14838ed0a5fef"
+  inputs-digest = "a0d4ff7d637a89ff3209abd3d8fe9db4a6943c6ff50e783a48abf2297ddd97a1"
   solver-name = "gps-cdcl"
   solver-version = 1
