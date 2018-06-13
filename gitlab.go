@@ -141,7 +141,7 @@ func (g *GitLabMergeRequest) setPostedComment(ctx context.Context) error {
 }
 
 // Diff returns a diff of MergeRequest. It runs `git diff` locally instead of
-// diff_url of GitLab Pull Request because diff of diff_url is not suited for
+// diff_url of GitLab Merge Request because diff of diff_url is not suited for
 // comment API in a sense that diff of diff_url is equivalent to
 // `git diff --no-renames`, we want diff which is equivalent to
 // `git diff --find-renames`.
