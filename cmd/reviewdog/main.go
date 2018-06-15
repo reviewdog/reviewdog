@@ -343,7 +343,7 @@ func gitlabService() (gitlabservice *reviewdog.GitLabMergeRequest, isPR bool, er
 		return nil, isPR, err
 	}
 
-	gitlabservice, err = reviewdog.NewGitLabMergeReqest(client, g.Owner, g.Repo, g.PullRequest, g.SHA)
+	gitlabservice, err = reviewdog.NewGitLabMergeRequest(client, g.Owner, g.Repo, g.PullRequest, g.SHA)
 	if err != nil {
 		return nil, isPR, err
 	}

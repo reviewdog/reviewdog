@@ -37,9 +37,9 @@ type GitLabMergeRequest struct {
 	wd string
 }
 
-// NewGitLabMergeReqest returns a new GitLabMergeRequest service.
+// NewGitLabMergeRequest returns a new GitLabMergeRequest service.
 // GitLabMergeRequest service needs git command in $PATH.
-func NewGitLabMergeReqest(cli *gitlab.Client, owner, repo string, pr int, sha string) (*GitLabMergeRequest, error) {
+func NewGitLabMergeRequest(cli *gitlab.Client, owner, repo string, pr int, sha string) (*GitLabMergeRequest, error) {
 	workDir, err := gitRelWorkdir()
 	if err != nil {
 		return nil, fmt.Errorf("GitLabMergeRequest needs 'git' command: %v", err)

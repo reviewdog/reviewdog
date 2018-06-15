@@ -73,7 +73,7 @@ func TestGitLabPullRequest_Post_Flush_review_api(t *testing.T) {
 
 	cli := gitlab.NewClient(nil, "")
 	cli.SetBaseURL(ts.URL)
-	g, err := NewGitLabMergeReqest(cli, "o", "r", 14, "sha")
+	g, err := NewGitLabMergeRequest(cli, "o", "r", 14, "sha")
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -112,7 +112,7 @@ func TestGitLabPullReqest_workdir(t *testing.T) {
 	cwd, _ := os.Getwd()
 	defer os.Chdir(cwd)
 
-	g, err := NewGitLabMergeReqest(nil, "", "", 0, "")
+	g, err := NewGitLabMergeRequest(nil, "", "", 0, "")
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -130,7 +130,7 @@ func TestGitLabPullReqest_workdir(t *testing.T) {
 	if err := os.Chdir(subDir); err != nil {
 		t.Fatal(err)
 	}
-	g, _ = NewGitLabMergeReqest(nil, "", "", 0, "")
+	g, _ = NewGitLabMergeRequest(nil, "", "", 0, "")
 	if g.wd != subDir {
 		t.Fatalf("gitRelWorkdir() = %q, want %q", g.wd, subDir)
 	}
