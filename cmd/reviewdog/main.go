@@ -195,7 +195,7 @@ See -reporter flag for migration and set -reporter="github-pr-review" or -report
 		cs = reviewdog.MultiCommentService(gs, cs)
 		ds = gs
 	case "gitlab-mr-review":
-		gs, isPR, err := gitlabService(ctx, opt.ci)
+		gs, isPR, err := gitlabService()
 		if err != nil {
 			return err
 		}
@@ -324,7 +324,7 @@ func githubBaseURL() (*url.URL, error) {
 	return u, nil
 }
 
-func gitlabService(ctx context.Context, ci string) (gitlabservice *reviewdog.GitLabMergeRequest, isPR bool, err error) {
+func gitlabService() (gitlabservice *reviewdog.GitLabMergeRequest, isPR bool, err error) {
 	token, err := nonEmptyEnv("REVIEWDOG_GITLAB_API_TOKEN")
 	if err != nil {
 		return nil, isPR, err
@@ -338,7 +338,7 @@ func gitlabService(ctx context.Context, ci string) (gitlabservice *reviewdog.Git
 	if !isPR {
 		return nil, isPR, nil
 	}
-	client, err := gitlabClient(ctx, token)
+	client, err := gitlabClient(token)
 	if err != nil {
 		return nil, isPR, err
 	}
@@ -350,7 +350,7 @@ func gitlabService(ctx context.Context, ci string) (gitlabservice *reviewdog.Git
 	return gitlabservice, isPR, nil
 }
 
-func gitlabClient(_ context.Context, token string) (*gitlab.Client, error) {
+func gitlabClient(token string) (*gitlab.Client, error) {
 	client := gitlab.NewClient(nil, token)
 	baseURL, err := gitlabBaseURL()
 	if err != nil {
