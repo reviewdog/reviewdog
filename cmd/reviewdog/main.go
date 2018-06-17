@@ -24,6 +24,7 @@ import (
 	"github.com/haya14busa/reviewdog/cienv"
 	"github.com/haya14busa/reviewdog/project"
 	shellwords "github.com/mattn/go-shellwords"
+	"github.com/xanzy/go-gitlab"
 )
 
 const usageMessage = "" +
@@ -64,7 +65,7 @@ const (
 		CI_REPO_NAME	repository name (e.g. "reviewdog" for https://github.com/haya14busa/reviewdog)
 `
 	confDoc     = `config file path`
-	reporterDoc = `reporter of reviewdog results. (local, github-pr-check, github-pr-review)
+	reporterDoc = `reporter of reviewdog results. (local, github-pr-check, github-pr-review, gitlab-mr-review)
 	"local" (default)
 		Report results to stdout.
 
@@ -90,9 +91,18 @@ const (
 		if you want to skip verifing SSL (please use this at your own risk)
 			$ export REVIEWDOG_INSECURE_SKIP_VERIFY=true
 
-	For "github-pr-check" and "github-pr-review", reviewdog automatically get
-	necessary data from environment variable in CI service ('travis',
-	'circle-ci', 'droneio').
+	"gitlab-mr-review"
+		Report results to GitLab comments:
+
+		1. Set REVIEWDOG_GITLAB_API_TOKEN environment variable.
+		Go to https://gitlab.com/profile/personal_access_tokens
+
+		For self hosted GitLab:
+			$ export GITLAB_API="https://example.gitlab.com/api/v4"
+
+	For "github-pr-check" and "github-pr-review", "gitlab-mr-review", reviewdog
+	automatically get necessary data from environment variable in CI service 
+	('travis', 'circle-ci', 'droneio').
 	You can set necessary data with following environment variable manually if
 	you want (e.g. run reviewdog in Jenkins).
 
@@ -149,7 +159,7 @@ func run(r io.Reader, w io.Writer, opt *option) error {
 	// TODO(haya14busa): clean up when removing -ci flag from next release.
 	if opt.ci != "" {
 		return errors.New(`-ci flag is deprecated.
-See -reporter flag for migration and set -reporter="github-pr-review" or -reporter="github-pr-check"`)
+See -reporter flag for migration and set -reporter="github-pr-review" or -reporter="github-pr-check" or -reporter="gitlab-mr-review"`)
 	}
 
 	// assume it's project based run when both -efm ane -f are not specified
@@ -180,6 +190,17 @@ See -reporter flag for migration and set -reporter="github-pr-review" or -report
 		}
 		if !isPR {
 			fmt.Fprintf(os.Stderr, "reviewdog: this is not PullRequest build. CI: %v\n", opt.ci)
+			return nil
+		}
+		cs = reviewdog.MultiCommentService(gs, cs)
+		ds = gs
+	case "gitlab-mr-review":
+		gs, isPR, err := gitlabService()
+		if err != nil {
+			return err
+		}
+		if !isPR {
+			fmt.Fprintf(os.Stderr, "this is not MergeRequest build. CI: %v\n", opt.ci)
 			return nil
 		}
 		cs = reviewdog.MultiCommentService(gs, cs)
@@ -299,6 +320,58 @@ func githubBaseURL() (*url.URL, error) {
 	u, err := url.Parse(baseURL)
 	if err != nil {
 		return nil, fmt.Errorf("GitHub base URL is invalid: %v, %v", baseURL, err)
+	}
+	return u, nil
+}
+
+func gitlabService() (gitlabservice *reviewdog.GitLabMergeRequest, isPR bool, err error) {
+	token, err := nonEmptyEnv("REVIEWDOG_GITLAB_API_TOKEN")
+	if err != nil {
+		return nil, isPR, err
+	}
+
+	g, isPR, err := cienv.GetPullRequestInfo()
+	if err != nil {
+		return nil, isPR, err
+	}
+	// TODO: support commit build
+	if !isPR {
+		return nil, isPR, nil
+	}
+	client, err := gitlabClient(token)
+	if err != nil {
+		return nil, isPR, err
+	}
+
+	gitlabservice, err = reviewdog.NewGitLabMergeRequest(client, g.Owner, g.Repo, g.PullRequest, g.SHA)
+	if err != nil {
+		return nil, isPR, err
+	}
+	return gitlabservice, isPR, nil
+}
+
+func gitlabClient(token string) (*gitlab.Client, error) {
+	client := gitlab.NewClient(nil, token)
+	baseURL, err := gitlabBaseURL()
+	if err != nil {
+		return nil, err
+	}
+	if err := client.SetBaseURL(baseURL.String()); err != nil {
+		return nil, err
+	}
+	return client, nil
+}
+
+const defaultGitLabAPI = "https://gitlab.com/api/v4"
+
+func gitlabBaseURL() (*url.URL, error) {
+	baseURL := os.Getenv("GITLAB_API")
+	if baseURL == "" {
+		baseURL = defaultGitLabAPI
+	}
+	u, err := url.Parse(baseURL)
+	if err != nil {
+		return nil, fmt.Errorf("GitLab base URL is invalid: %v, %v", baseURL, err)
 	}
 	return u, nil
 }
