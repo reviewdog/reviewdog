@@ -334,13 +334,21 @@ func gitlabService() (gitlabservice *reviewdog.GitLabMergeRequest, isPR bool, er
 	if err != nil {
 		return nil, isPR, err
 	}
-	// TODO: support commit build
-	if !isPR {
-		return nil, isPR, nil
-	}
+
 	client, err := gitlabClient(token)
 	if err != nil {
 		return nil, isPR, err
+	}
+
+	if !isPR {
+		ok, prNr, err := fetchMergeRequestIDFromCommit(client, g.SHA)
+		if err != nil {
+			return nil, isPR, err
+		}
+		if !ok {
+			return nil, false, nil // TODO: support commit build
+		}
+		g.PullRequest = prNr
 	}
 
 	gitlabservice, err = reviewdog.NewGitLabMergeRequest(client, g.Owner, g.Repo, g.PullRequest, g.SHA)
@@ -348,6 +356,24 @@ func gitlabService() (gitlabservice *reviewdog.GitLabMergeRequest, isPR bool, er
 		return nil, isPR, err
 	}
 	return gitlabservice, isPR, nil
+}
+
+func fetchMergeRequestIDFromCommit(cli *gitlab.Client, sha string) (ok bool, id int, err error) {
+	// https://docs.gitlab.com/ce/api/merge_requests.html#list-merge-requests
+	opt := &gitlab.ListMergeRequestsOptions{
+		State:   gitlab.String("open"),
+		OrderBy: gitlab.String("updated_at"),
+	}
+	mrs, _, err := cli.MergeRequests.ListMergeRequests(opt)
+	if err != nil {
+		return false, 0, err
+	}
+	for _, mr := range mrs {
+		if mr.SHA == sha {
+			return true, mr.IID, nil
+		}
+	}
+	return false, 0, nil
 }
 
 func gitlabClient(token string) (*gitlab.Client, error) {
