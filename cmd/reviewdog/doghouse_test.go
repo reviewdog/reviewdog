@@ -182,7 +182,7 @@ func TestPostResultSet(t *testing.T) {
 		},
 	}
 
-	ghInfo := &cienv.PullRequestInfo{
+	ghInfo := &cienv.BuildInfo{
 		Owner:       owner,
 		Repo:        repo,
 		PullRequest: prNum,

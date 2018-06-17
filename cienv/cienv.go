@@ -9,19 +9,20 @@ import (
 	"strings"
 )
 
-// PullRequestInfo represents required information about GitHub PullRequest or
-// GitLab MergeRequest.
-type PullRequestInfo struct {
-	Owner       string
-	Repo        string
+// BuildInfo represents build information about GitHub or GitLab project.
+type BuildInfo struct {
+	Owner string
+	Repo  string
+	SHA   string
+
+	// Optional.
 	PullRequest int // MergeRequest for GitLab.
-	SHA         string
 
 	// Optional.
 	Branch string
 }
 
-// GetPullRequestInfo returns PullRequestInfo from environment variables.
+// GetBuildInfo returns BuildInfo from environment variables.
 //
 // Supporrted CI services' documents:
 // - Travis CI: https://docs.travis-ci.com/user/environment-variables/
@@ -29,7 +30,7 @@ type PullRequestInfo struct {
 // - Drone.io: http://docs.drone.io/environment-reference/
 // - GitLab CI: https://docs.gitlab.com/ee/ci/variables/#predefined-variables-environment-variables
 //   - GitLab CI doesn't export ID of Merge Request. https://gitlab.com/gitlab-org/gitlab-ce/issues/15280
-func GetPullRequestInfo() (prInfo *PullRequestInfo, isPR bool, err error) {
+func GetBuildInfo() (prInfo *BuildInfo, isPR bool, err error) {
 	owner, repo := getOwnerAndRepoFromSlug([]string{
 		"TRAVIS_REPO_SLUG",
 		"DRONE_REPO", // drone<=0.4
@@ -80,7 +81,7 @@ func GetPullRequestInfo() (prInfo *PullRequestInfo, isPR bool, err error) {
 
 	pr := getPullRequestNum()
 
-	return &PullRequestInfo{
+	return &BuildInfo{
 		Owner:       owner,
 		Repo:        repo,
 		PullRequest: pr,

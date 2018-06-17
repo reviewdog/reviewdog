@@ -272,7 +272,7 @@ func githubService(ctx context.Context) (githubservice *reviewdog.GitHubPullRequ
 	if err != nil {
 		return nil, isPR, err
 	}
-	g, isPR, err := cienv.GetPullRequestInfo()
+	g, isPR, err := cienv.GetBuildInfo()
 	if err != nil {
 		return nil, isPR, err
 	}
@@ -330,7 +330,7 @@ func gitlabService() (gitlabservice *reviewdog.GitLabMergeRequest, isPR bool, er
 		return nil, isPR, err
 	}
 
-	g, isPR, err := cienv.GetPullRequestInfo()
+	g, isPR, err := cienv.GetBuildInfo()
 	if err != nil {
 		return nil, isPR, err
 	}
