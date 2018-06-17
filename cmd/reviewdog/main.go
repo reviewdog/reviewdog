@@ -361,7 +361,7 @@ func gitlabService() (gitlabservice *reviewdog.GitLabMergeRequest, isPR bool, er
 func fetchMergeRequestIDFromCommit(cli *gitlab.Client, sha string) (ok bool, id int, err error) {
 	// https://docs.gitlab.com/ce/api/merge_requests.html#list-merge-requests
 	opt := &gitlab.ListMergeRequestsOptions{
-		State:   gitlab.String("open"),
+		State:   gitlab.String("opened"),
 		OrderBy: gitlab.String("updated_at"),
 	}
 	mrs, _, err := cli.MergeRequests.ListMergeRequests(opt)
