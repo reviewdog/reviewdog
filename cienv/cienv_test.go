@@ -8,26 +8,30 @@ import (
 
 func setupEnvs() (cleanup func()) {
 	var cleanEnvs = []string{
-		"TRAVIS_PULL_REQUEST",
-		"TRAVIS_REPO_SLUG",
-		"TRAVIS_PULL_REQUEST_SHA",
-		"CIRCLE_PR_NUMBER",
-		"CIRCLE_PROJECT_USERNAME",
+		"CIRCLE_BRANCH",
 		"CIRCLE_PROJECT_REPONAME",
+		"CIRCLE_PROJECT_USERNAME",
+		"CIRCLE_PR_NUMBER",
 		"CIRCLE_SHA1",
+		"CI_BRANCH",
+		"CI_COMMIT",
+		"CI_COMMIT_SHA",
+		"CI_PROJECT_NAME",
+		"CI_PROJECT_NAMESPACE",
+		"CI_PULL_REQUEST",
+		"CI_REPO_NAME",
+		"CI_REPO_OWNER",
+		"DRONE_COMMIT",
+		"DRONE_COMMIT_BRANCH",
 		"DRONE_PULL_REQUEST",
 		"DRONE_REPO",
-		"DRONE_REPO_OWNER",
 		"DRONE_REPO_NAME",
-		"DRONE_COMMIT",
-		"CI_PULL_REQUEST",
-		"CI_COMMIT",
-		"CI_REPO_OWNER",
-		"CI_REPO_NAME",
-		"CI_BRANCH",
+		"DRONE_REPO_OWNER",
+		"TRAVIS_COMMIT",
+		"TRAVIS_PULL_REQUEST",
 		"TRAVIS_PULL_REQUEST_BRANCH",
-		"CIRCLE_BRANCH",
-		"DRONE_COMMIT_BRANCH",
+		"TRAVIS_PULL_REQUEST_SHA",
+		"TRAVIS_REPO_SLUG",
 	}
 	saveEnvs := make(map[string]string)
 	for _, key := range cleanEnvs {
@@ -41,13 +45,31 @@ func setupEnvs() (cleanup func()) {
 	}
 }
 
-func TestGetPullRequestInfo_travis(t *testing.T) {
+func TestGetBuildInfo_travis(t *testing.T) {
 	cleanup := setupEnvs()
 	defer cleanup()
 
-	_, isPR, err := GetPullRequestInfo()
+	os.Setenv("TRAVIS_REPO_SLUG", "invalid repo slug")
+
+	if _, _, err := GetBuildInfo(); err == nil {
+		t.Error("error expected but got nil")
+	} else {
+		t.Log(err)
+	}
+
+	os.Setenv("TRAVIS_REPO_SLUG", "haya14busa/reviewdog")
+
+	if _, _, err := GetBuildInfo(); err == nil {
+		t.Error("error expected but got nil")
+	} else {
+		t.Log(err)
+	}
+
+	os.Setenv("TRAVIS_PULL_REQUEST_SHA", "sha")
+
+	_, isPR, err := GetBuildInfo()
 	if err != nil {
-		t.Errorf("got unexpected error: %v", err)
+		t.Errorf("got unexpected err: %v", err)
 	}
 	if isPR {
 		t.Errorf("isPR = %v, want false", isPR)
@@ -55,7 +77,7 @@ func TestGetPullRequestInfo_travis(t *testing.T) {
 
 	os.Setenv("TRAVIS_PULL_REQUEST", "str")
 
-	_, isPR, err = GetPullRequestInfo()
+	_, isPR, err = GetBuildInfo()
 	if err != nil {
 		t.Errorf("got unexpected error: %v", err)
 	}
@@ -65,41 +87,16 @@ func TestGetPullRequestInfo_travis(t *testing.T) {
 
 	os.Setenv("TRAVIS_PULL_REQUEST", "1")
 
-	if _, _, err := GetPullRequestInfo(); err == nil {
-		t.Error("error expected but got nil")
-	} else {
-		t.Log(err)
-	}
-
-	os.Setenv("TRAVIS_REPO_SLUG", "invalid repo slug")
-
-	if _, _, err := GetPullRequestInfo(); err == nil {
-		t.Error("error expected but got nil")
-	} else {
-		t.Log(err)
-	}
-
-	os.Setenv("TRAVIS_REPO_SLUG", "haya14busa/reviewdog")
-
-	if _, _, err := GetPullRequestInfo(); err == nil {
-		t.Error("error expected but got nil")
-	} else {
-		t.Log(err)
-	}
-
-	os.Setenv("TRAVIS_PULL_REQUEST_SHA", "sha")
-
-	_, isPR, err = GetPullRequestInfo()
-	if err != nil {
+	if _, isPR, err = GetBuildInfo(); err != nil {
 		t.Errorf("got unexpected err: %v", err)
 	}
 	if !isPR {
-		t.Errorf("isPR = %v, want true", isPR)
+		t.Error("should be pull request build")
 	}
 
 	os.Setenv("TRAVIS_PULL_REQUEST", "false")
 
-	_, isPR, err = GetPullRequestInfo()
+	_, isPR, err = GetBuildInfo()
 	if err != nil {
 		t.Errorf("got unexpected err: %v", err)
 	}
@@ -108,44 +105,44 @@ func TestGetPullRequestInfo_travis(t *testing.T) {
 	}
 }
 
-func TestGetPullRequestInfo_circleci(t *testing.T) {
+func TestGetBuildInfo_circleci(t *testing.T) {
 	cleanup := setupEnvs()
 	defer cleanup()
 
-	if _, isPR, err := GetPullRequestInfo(); isPR {
+	if _, isPR, err := GetBuildInfo(); isPR {
 		t.Errorf("should be non pull-request build. error: %v", err)
 	}
 
 	os.Setenv("CIRCLE_PR_NUMBER", "1")
-	if _, _, err := GetPullRequestInfo(); err == nil {
+	if _, _, err := GetBuildInfo(); err == nil {
 		t.Error("error expected but got nil")
 	} else {
 		t.Log(err)
 	}
 
 	os.Setenv("CIRCLE_PROJECT_USERNAME", "haya14busa")
-	if _, _, err := GetPullRequestInfo(); err == nil {
+	if _, _, err := GetBuildInfo(); err == nil {
 		t.Error("error expected but got nil")
 	} else {
 		t.Log(err)
 	}
 
 	os.Setenv("CIRCLE_PROJECT_REPONAME", "reviewdog")
-	if _, _, err := GetPullRequestInfo(); err == nil {
+	if _, _, err := GetBuildInfo(); err == nil {
 		t.Error("error expected but got nil")
 	} else {
 		t.Log(err)
 	}
 
 	os.Setenv("CIRCLE_SHA1", "sha1")
-	g, isPR, err := GetPullRequestInfo()
+	g, isPR, err := GetBuildInfo()
 	if err != nil {
 		t.Errorf("unexpected error: %v", err)
 	}
 	if !isPR {
 		t.Error("should be pull request build")
 	}
-	want := &PullRequestInfo{
+	want := &BuildInfo{
 		Owner:       "haya14busa",
 		Repo:        "reviewdog",
 		PullRequest: 1,
@@ -156,16 +153,16 @@ func TestGetPullRequestInfo_circleci(t *testing.T) {
 	}
 }
 
-func TestGetPullRequestInfo_droneio(t *testing.T) {
+func TestGetBuildInfo_droneio(t *testing.T) {
 	cleanup := setupEnvs()
 	defer cleanup()
 
-	if _, isPR, err := GetPullRequestInfo(); isPR {
+	if _, isPR, err := GetBuildInfo(); isPR {
 		t.Errorf("should be non pull-request build. error: %v", err)
 	}
 
 	os.Setenv("DRONE_PULL_REQUEST", "1")
-	if _, _, err := GetPullRequestInfo(); err == nil {
+	if _, _, err := GetBuildInfo(); err == nil {
 		t.Error("error expected but got nil")
 	} else {
 		t.Log(err)
@@ -173,7 +170,7 @@ func TestGetPullRequestInfo_droneio(t *testing.T) {
 
 	// Drone <= 0.4 without valid repo
 	os.Setenv("DRONE_REPO", "invalid")
-	if _, _, err := GetPullRequestInfo(); err == nil {
+	if _, _, err := GetBuildInfo(); err == nil {
 		t.Error("error expected but got nil")
 	} else {
 		t.Log(err)
@@ -182,7 +179,7 @@ func TestGetPullRequestInfo_droneio(t *testing.T) {
 
 	// Drone > 0.4 without DRONE_REPO_NAME
 	os.Setenv("DRONE_REPO_OWNER", "haya14busa")
-	if _, _, err := GetPullRequestInfo(); err == nil {
+	if _, _, err := GetBuildInfo(); err == nil {
 		t.Error("error expected but got nil")
 	} else {
 		t.Log(err)
@@ -191,7 +188,7 @@ func TestGetPullRequestInfo_droneio(t *testing.T) {
 
 	// Drone > 0.4 without DRONE_REPO_OWNER
 	os.Setenv("DRONE_REPO_NAME", "reviewdog")
-	if _, _, err := GetPullRequestInfo(); err == nil {
+	if _, _, err := GetBuildInfo(); err == nil {
 		t.Error("error expected but got nil")
 	} else {
 		t.Log(err)
@@ -202,14 +199,14 @@ func TestGetPullRequestInfo_droneio(t *testing.T) {
 	os.Setenv("DRONE_REPO_OWNER", "haya14busa")
 
 	os.Setenv("DRONE_COMMIT", "sha1")
-	g, isPR, err := GetPullRequestInfo()
+	g, isPR, err := GetBuildInfo()
 	if err != nil {
 		t.Errorf("unexpected error: %v", err)
 	}
 	if !isPR {
 		t.Error("should be pull request build")
 	}
-	want := &PullRequestInfo{
+	want := &BuildInfo{
 		Owner:       "haya14busa",
 		Repo:        "reviewdog",
 		PullRequest: 1,
@@ -220,44 +217,44 @@ func TestGetPullRequestInfo_droneio(t *testing.T) {
 	}
 }
 
-func TestGetPullRequestInfo_common(t *testing.T) {
+func TestGetBuildInfo_common(t *testing.T) {
 	cleanup := setupEnvs()
 	defer cleanup()
 
-	if _, isPR, err := GetPullRequestInfo(); isPR {
+	if _, isPR, err := GetBuildInfo(); isPR {
 		t.Errorf("should be non pull-request build. error: %v", err)
 	}
 
 	os.Setenv("CI_PULL_REQUEST", "1")
-	if _, _, err := GetPullRequestInfo(); err == nil {
+	if _, _, err := GetBuildInfo(); err == nil {
 		t.Error("error expected but got nil")
 	} else {
 		t.Log(err)
 	}
 
 	os.Setenv("CI_REPO_OWNER", "haya14busa")
-	if _, _, err := GetPullRequestInfo(); err == nil {
+	if _, _, err := GetBuildInfo(); err == nil {
 		t.Error("error expected but got nil")
 	} else {
 		t.Log(err)
 	}
 
 	os.Setenv("CI_REPO_NAME", "reviewdog")
-	if _, _, err := GetPullRequestInfo(); err == nil {
+	if _, _, err := GetBuildInfo(); err == nil {
 		t.Error("error expected but got nil")
 	} else {
 		t.Log(err)
 	}
 
 	os.Setenv("CI_COMMIT", "sha1")
-	g, isPR, err := GetPullRequestInfo()
+	g, isPR, err := GetBuildInfo()
 	if err != nil {
 		t.Errorf("unexpected error: %v", err)
 	}
 	if !isPR {
 		t.Error("should be pull request build")
 	}
-	want := &PullRequestInfo{
+	want := &BuildInfo{
 		Owner:       "haya14busa",
 		Repo:        "reviewdog",
 		PullRequest: 1,

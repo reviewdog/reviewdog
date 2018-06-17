@@ -9,29 +9,28 @@ import (
 	"strings"
 )
 
-// PullRequestInfo represents required information about GitHub PullRequest.
-type PullRequestInfo struct {
-	Owner       string
-	Repo        string
-	PullRequest int
-	SHA         string
+// BuildInfo represents build information about GitHub or GitLab project.
+type BuildInfo struct {
+	Owner string
+	Repo  string
+	SHA   string
+
+	// Optional.
+	PullRequest int // MergeRequest for GitLab.
 
 	// Optional.
 	Branch string
 }
 
-// GetPullRequestInfo returns PullRequestInfo from environment variables.
+// GetBuildInfo returns BuildInfo from environment variables.
 //
 // Supporrted CI services' documents:
 // - Travis CI: https://docs.travis-ci.com/user/environment-variables/
 // - Circle CI: https://circleci.com/docs/environment-variables/
 // - Drone.io: http://docs.drone.io/environment-reference/
-func GetPullRequestInfo() (prInfo *PullRequestInfo, isPR bool, err error) {
-	pr := getPullRequestNum()
-	if pr == 0 {
-		return nil, false, nil
-	}
-
+// - GitLab CI: https://docs.gitlab.com/ee/ci/variables/#predefined-variables-environment-variables
+//   - GitLab CI doesn't export ID of Merge Request. https://gitlab.com/gitlab-org/gitlab-ce/issues/15280
+func GetBuildInfo() (prInfo *BuildInfo, isPR bool, err error) {
 	owner, repo := getOwnerAndRepoFromSlug([]string{
 		"TRAVIS_REPO_SLUG",
 		"DRONE_REPO", // drone<=0.4
@@ -41,6 +40,7 @@ func GetPullRequestInfo() (prInfo *PullRequestInfo, isPR bool, err error) {
 			"CI_REPO_OWNER", // common
 			"CIRCLE_PROJECT_USERNAME",
 			"DRONE_REPO_OWNER",
+			"CI_PROJECT_NAMESPACE", // GitLab CI
 		})
 	}
 	if owner == "" {
@@ -52,6 +52,7 @@ func GetPullRequestInfo() (prInfo *PullRequestInfo, isPR bool, err error) {
 			"CI_REPO_NAME", // common
 			"CIRCLE_PROJECT_REPONAME",
 			"DRONE_REPO_NAME",
+			"CI_PROJECT_NAME", // GitLab CI
 		})
 	}
 
@@ -62,8 +63,10 @@ func GetPullRequestInfo() (prInfo *PullRequestInfo, isPR bool, err error) {
 	sha := getOneEnvValue([]string{
 		"CI_COMMIT", // common
 		"TRAVIS_PULL_REQUEST_SHA",
+		"TRAVIS_COMMIT",
 		"CIRCLE_SHA1",
 		"DRONE_COMMIT",
+		"CI_COMMIT_SHA", // GitLab CI
 	})
 	if sha == "" {
 		return nil, false, errors.New("cannot get commit SHA from environment variable. Set CI_COMMIT?")
@@ -76,13 +79,15 @@ func GetPullRequestInfo() (prInfo *PullRequestInfo, isPR bool, err error) {
 		"DRONE_COMMIT_BRANCH",
 	})
 
-	return &PullRequestInfo{
+	pr := getPullRequestNum()
+
+	return &BuildInfo{
 		Owner:       owner,
 		Repo:        repo,
 		PullRequest: pr,
 		SHA:         sha,
 		Branch:      branch,
-	}, true, nil
+	}, pr != 0, nil
 }
 
 func getPullRequestNum() int {
