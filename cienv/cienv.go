@@ -9,11 +9,12 @@ import (
 	"strings"
 )
 
-// PullRequestInfo represents required information about GitHub PullRequest.
+// PullRequestInfo represents required information about GitHub PullRequest or
+// GitLab MergeRequest.
 type PullRequestInfo struct {
 	Owner       string
 	Repo        string
-	PullRequest int
+	PullRequest int // MergeRequest for GitLab.
 	SHA         string
 
 	// Optional.
@@ -26,12 +27,9 @@ type PullRequestInfo struct {
 // - Travis CI: https://docs.travis-ci.com/user/environment-variables/
 // - Circle CI: https://circleci.com/docs/environment-variables/
 // - Drone.io: http://docs.drone.io/environment-reference/
+// - GitLab CI: https://docs.gitlab.com/ee/ci/variables/#predefined-variables-environment-variables
+//   - GitLab CI doesn't export ID of Merge Request. https://gitlab.com/gitlab-org/gitlab-ce/issues/15280
 func GetPullRequestInfo() (prInfo *PullRequestInfo, isPR bool, err error) {
-	pr := getPullRequestNum()
-	if pr == 0 {
-		return nil, false, nil
-	}
-
 	owner, repo := getOwnerAndRepoFromSlug([]string{
 		"TRAVIS_REPO_SLUG",
 		"DRONE_REPO", // drone<=0.4
@@ -41,6 +39,7 @@ func GetPullRequestInfo() (prInfo *PullRequestInfo, isPR bool, err error) {
 			"CI_REPO_OWNER", // common
 			"CIRCLE_PROJECT_USERNAME",
 			"DRONE_REPO_OWNER",
+			"CI_PROJECT_NAMESPACE", // GitLab CI
 		})
 	}
 	if owner == "" {
@@ -52,6 +51,7 @@ func GetPullRequestInfo() (prInfo *PullRequestInfo, isPR bool, err error) {
 			"CI_REPO_NAME", // common
 			"CIRCLE_PROJECT_REPONAME",
 			"DRONE_REPO_NAME",
+			"CI_PROJECT_NAME", // GitLab CI
 		})
 	}
 
@@ -64,6 +64,7 @@ func GetPullRequestInfo() (prInfo *PullRequestInfo, isPR bool, err error) {
 		"TRAVIS_PULL_REQUEST_SHA",
 		"CIRCLE_SHA1",
 		"DRONE_COMMIT",
+		"CI_COMMIT_SHA", // GitLab CI
 	})
 	if sha == "" {
 		return nil, false, errors.New("cannot get commit SHA from environment variable. Set CI_COMMIT?")
@@ -76,13 +77,15 @@ func GetPullRequestInfo() (prInfo *PullRequestInfo, isPR bool, err error) {
 		"DRONE_COMMIT_BRANCH",
 	})
 
+	pr := getPullRequestNum()
+
 	return &PullRequestInfo{
 		Owner:       owner,
 		Repo:        repo,
 		PullRequest: pr,
 		SHA:         sha,
 		Branch:      branch,
-	}, true, nil
+	}, pr != 0, nil
 }
 
 func getPullRequestNum() int {

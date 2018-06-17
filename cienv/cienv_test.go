@@ -45,32 +45,6 @@ func TestGetPullRequestInfo_travis(t *testing.T) {
 	cleanup := setupEnvs()
 	defer cleanup()
 
-	_, isPR, err := GetPullRequestInfo()
-	if err != nil {
-		t.Errorf("got unexpected error: %v", err)
-	}
-	if isPR {
-		t.Errorf("isPR = %v, want false", isPR)
-	}
-
-	os.Setenv("TRAVIS_PULL_REQUEST", "str")
-
-	_, isPR, err = GetPullRequestInfo()
-	if err != nil {
-		t.Errorf("got unexpected error: %v", err)
-	}
-	if isPR {
-		t.Errorf("isPR = %v, want false", isPR)
-	}
-
-	os.Setenv("TRAVIS_PULL_REQUEST", "1")
-
-	if _, _, err := GetPullRequestInfo(); err == nil {
-		t.Error("error expected but got nil")
-	} else {
-		t.Log(err)
-	}
-
 	os.Setenv("TRAVIS_REPO_SLUG", "invalid repo slug")
 
 	if _, _, err := GetPullRequestInfo(); err == nil {
@@ -89,12 +63,31 @@ func TestGetPullRequestInfo_travis(t *testing.T) {
 
 	os.Setenv("TRAVIS_PULL_REQUEST_SHA", "sha")
 
-	_, isPR, err = GetPullRequestInfo()
+	_, isPR, err := GetPullRequestInfo()
 	if err != nil {
 		t.Errorf("got unexpected err: %v", err)
 	}
+	if isPR {
+		t.Errorf("isPR = %v, want false", isPR)
+	}
+
+	os.Setenv("TRAVIS_PULL_REQUEST", "str")
+
+	_, isPR, err = GetPullRequestInfo()
+	if err != nil {
+		t.Errorf("got unexpected error: %v", err)
+	}
+	if isPR {
+		t.Errorf("isPR = %v, want false", isPR)
+	}
+
+	os.Setenv("TRAVIS_PULL_REQUEST", "1")
+
+	if _, isPR, err = GetPullRequestInfo(); err != nil {
+		t.Errorf("got unexpected err: %v", err)
+	}
 	if !isPR {
-		t.Errorf("isPR = %v, want true", isPR)
+		t.Error("should be pull request build")
 	}
 
 	os.Setenv("TRAVIS_PULL_REQUEST", "false")
