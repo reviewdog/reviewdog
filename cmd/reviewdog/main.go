@@ -181,7 +181,7 @@ See -reporter flag for migration and set -reporter="github-pr-review" or -report
 		return runDoghouse(ctx, r, opt, isProject)
 	case "github-pr-review":
 		if os.Getenv("REVIEWDOG_GITHUB_API_TOKEN") == "" {
-			fmt.Fprintf(os.Stderr, "REVIEWDOG_GITHUB_API_TOKEN is not set\n")
+			fmt.Fprintln(os.Stderr, "REVIEWDOG_GITHUB_API_TOKEN is not set")
 			return nil
 		}
 		gs, isPR, err := githubService(ctx)
@@ -189,7 +189,7 @@ See -reporter flag for migration and set -reporter="github-pr-review" or -report
 			return err
 		}
 		if !isPR {
-			fmt.Fprintf(os.Stderr, "reviewdog: this is not PullRequest build. CI: %v\n", opt.ci)
+			fmt.Fprintln(os.Stderr, "reviewdog: this is not PullRequest build.")
 			return nil
 		}
 		cs = reviewdog.MultiCommentService(gs, cs)
@@ -200,7 +200,7 @@ See -reporter flag for migration and set -reporter="github-pr-review" or -report
 			return err
 		}
 		if !isPR {
-			fmt.Fprintf(os.Stderr, "this is not MergeRequest build. CI: %v\n", opt.ci)
+			fmt.Fprintln(os.Stderr, "this is not MergeRequest build.")
 			return nil
 		}
 		cs = reviewdog.MultiCommentService(gs, cs)
@@ -353,9 +353,9 @@ func gitlabService() (gitlabservice *reviewdog.GitLabMergeRequest, isPR bool, er
 
 	gitlabservice, err = reviewdog.NewGitLabMergeRequest(client, g.Owner, g.Repo, g.PullRequest, g.SHA)
 	if err != nil {
-		return nil, isPR, err
+		return nil, true, err
 	}
-	return gitlabservice, isPR, nil
+	return gitlabservice, true, nil
 }
 
 func fetchMergeRequestIDFromCommit(cli *gitlab.Client, sha string) (ok bool, id int, err error) {
