@@ -62,6 +62,7 @@ func GetPullRequestInfo() (prInfo *PullRequestInfo, isPR bool, err error) {
 	sha := getOneEnvValue([]string{
 		"CI_COMMIT", // common
 		"TRAVIS_PULL_REQUEST_SHA",
+		"TRAVIS_COMMIT",
 		"CIRCLE_SHA1",
 		"DRONE_COMMIT",
 		"CI_COMMIT_SHA", // GitLab CI
