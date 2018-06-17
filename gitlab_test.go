@@ -72,7 +72,7 @@ func TestGitLabPullRequest_Post_Flush_review_api(t *testing.T) {
 	defer ts.Close()
 
 	cli := gitlab.NewClient(nil, "")
-	cli.SetBaseURL(ts.URL)
+	cli.SetBaseURL(ts.URL + "/api/v4")
 	g, err := NewGitLabMergeRequest(cli, "o", "r", 14, "sha")
 	if err != nil {
 		t.Fatal(err)
