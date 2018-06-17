@@ -65,7 +65,7 @@ const (
 		CI_REPO_NAME	repository name (e.g. "reviewdog" for https://github.com/haya14busa/reviewdog)
 `
 	confDoc     = `config file path`
-	reporterDoc = `reporter of reviewdog results. (local, github-pr-check, github-pr-review, gitlab-mr-review)
+	reporterDoc = `reporter of reviewdog results. (local, github-pr-check, github-pr-review, gitlab-mr-commit)
 	"local" (default)
 		Report results to stdout.
 
@@ -91,8 +91,8 @@ const (
 		if you want to skip verifing SSL (please use this at your own risk)
 			$ export REVIEWDOG_INSECURE_SKIP_VERIFY=true
 
-	"gitlab-mr-review"
-		Report results to GitLab comments:
+	"gitlab-mr-commit"
+		Report results to GitLab comments for each commits in Merge Requests.
 
 		1. Set REVIEWDOG_GITLAB_API_TOKEN environment variable.
 		Go to https://gitlab.com/profile/personal_access_tokens
@@ -100,8 +100,8 @@ const (
 		For self hosted GitLab:
 			$ export GITLAB_API="https://example.gitlab.com/api/v4"
 
-	For "github-pr-check" and "github-pr-review", "gitlab-mr-review", reviewdog
-	automatically get necessary data from environment variable in CI service 
+	For "github-pr-check" and "github-pr-review", "gitlab-mr-commit", reviewdog
+	automatically get necessary data from environment variable in CI service
 	('travis', 'circle-ci', 'droneio').
 	You can set necessary data with following environment variable manually if
 	you want (e.g. run reviewdog in Jenkins).
@@ -159,7 +159,7 @@ func run(r io.Reader, w io.Writer, opt *option) error {
 	// TODO(haya14busa): clean up when removing -ci flag from next release.
 	if opt.ci != "" {
 		return errors.New(`-ci flag is deprecated.
-See -reporter flag for migration and set -reporter="github-pr-review" or -reporter="github-pr-check" or -reporter="gitlab-mr-review"`)
+See -reporter flag for migration and set -reporter="github-pr-review" or -reporter="github-pr-check" or -reporter="gitlab-mr-commit"`)
 	}
 
 	// assume it's project based run when both -efm ane -f are not specified
@@ -194,7 +194,7 @@ See -reporter flag for migration and set -reporter="github-pr-review" or -report
 		}
 		cs = reviewdog.MultiCommentService(gs, cs)
 		ds = gs
-	case "gitlab-mr-review":
+	case "gitlab-mr-commit":
 		gs, isPR, err := gitlabService()
 		if err != nil {
 			return err
