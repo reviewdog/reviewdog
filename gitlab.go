@@ -22,8 +22,6 @@ var _ DiffService = &GitLabMergeRequest{}
 //  POST /projects/:id/repository/commits/:sha/comments
 type GitLabMergeRequest struct {
 	cli      *gitlab.Client
-	owner    string
-	repo     string
 	pr       int
 	sha      string
 	projects string
@@ -46,8 +44,6 @@ func NewGitLabMergeRequest(cli *gitlab.Client, owner, repo string, pr int, sha s
 	}
 	return &GitLabMergeRequest{
 		cli:      cli,
-		owner:    owner,
-		repo:     repo,
 		pr:       pr,
 		sha:      sha,
 		projects: owner + "/" + repo,
