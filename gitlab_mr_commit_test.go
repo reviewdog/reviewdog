@@ -12,7 +12,7 @@ import (
 	"github.com/xanzy/go-gitlab"
 )
 
-func TestGitLabPullRequest_Post_Flush_review_api(t *testing.T) {
+func TestGitLabMergeRequestCommitCommenter_Post_Flush_review_api(t *testing.T) {
 	apiCalled := 0
 	mux := http.NewServeMux()
 	mux.HandleFunc("/api/v4/projects/o/r/merge_requests/14/commits", func(w http.ResponseWriter, r *http.Request) {
@@ -73,7 +73,7 @@ func TestGitLabPullRequest_Post_Flush_review_api(t *testing.T) {
 
 	cli := gitlab.NewClient(nil, "")
 	cli.SetBaseURL(ts.URL + "/api/v4")
-	g, err := NewGitLabMergeRequest(cli, "o", "r", 14, "sha")
+	g, err := NewGitLabMergeRequestCommitCommenter(cli, "o", "r", 14, "sha")
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -112,7 +112,7 @@ func TestGitLabPullReqest_workdir(t *testing.T) {
 	cwd, _ := os.Getwd()
 	defer os.Chdir(cwd)
 
-	g, err := NewGitLabMergeRequest(nil, "", "", 0, "")
+	g, err := NewGitLabMergeRequestCommitCommenter(nil, "", "", 0, "")
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -130,7 +130,7 @@ func TestGitLabPullReqest_workdir(t *testing.T) {
 	if err := os.Chdir(subDir); err != nil {
 		t.Fatal(err)
 	}
-	g, _ = NewGitLabMergeRequest(nil, "", "", 0, "")
+	g, _ = NewGitLabMergeRequestCommitCommenter(nil, "", "", 0, "")
 	if g.wd != subDir {
 		t.Fatalf("gitRelWorkdir() = %q, want %q", g.wd, subDir)
 	}
