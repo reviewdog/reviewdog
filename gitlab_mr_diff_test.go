@@ -25,7 +25,7 @@ func TestGitLabMergeRequestDiff_Diff(t *testing.T) {
 		if r.Method != "GET" {
 			t.Errorf("unexpected access: %v %v", r.Method, r.URL)
 		}
-		w.Write([]byte(`{"commit": {"id": "master"}}`))
+		w.Write([]byte(`{"commit": {"id": "HEAD~"}}`))
 	})
 
 	ts := httptest.NewServer(mux)
