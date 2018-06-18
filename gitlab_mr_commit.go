@@ -14,7 +14,7 @@ import (
 
 var _ CommentService = &GitLabMergeRequestCommitCommenter{}
 
-// GitLabMergeRequestCommitCommenter is a comment and diff service for GitLab MergeRequest.
+// GitLabMergeRequestCommitCommenter is a comment service for GitLab MergeRequest.
 //
 // API:
 //  https://docs.gitlab.com/ce/api/commits.html#post-comment-to-commit

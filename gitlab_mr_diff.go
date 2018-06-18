@@ -11,6 +11,7 @@ import (
 
 var _ DiffService = &GitLabMergeRequestDiff{}
 
+// GitLabMergeRequestDiff is a diff service for GitLab MergeRequest.
 type GitLabMergeRequestDiff struct {
 	cli      *gitlab.Client
 	pr       int
@@ -21,6 +22,8 @@ type GitLabMergeRequestDiff struct {
 	wd string
 }
 
+// NewGitLabMergeRequestDiff returns a new GitLabMergeRequestDiff service.
+// itLabMergeRequestDiff service needs git command in $PATH.
 func NewGitLabMergeRequestDiff(cli *gitlab.Client, owner, repo string, pr int, sha string) (*GitLabMergeRequestDiff, error) {
 	workDir, err := gitRelWorkdir()
 	if err != nil {
