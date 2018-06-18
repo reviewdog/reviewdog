@@ -195,16 +195,25 @@ See -reporter flag for migration and set -reporter="github-pr-review" or -report
 		cs = reviewdog.MultiCommentService(gs, cs)
 		ds = gs
 	case "gitlab-mr-commit":
-		gs, isPR, err := gitlabService()
+		build, cli, err := gitlabBuildWithClient()
 		if err != nil {
 			return err
 		}
-		if !isPR {
+		if build.PullRequest == 0 {
 			fmt.Fprintln(os.Stderr, "this is not MergeRequest build.")
 			return nil
 		}
-		cs = reviewdog.MultiCommentService(gs, cs)
-		ds = gs
+
+		gc, err := reviewdog.NewGitLabMergeRequestCommitCommenter(cli, build.Owner, build.Repo, build.PullRequest, build.SHA)
+		if err != nil {
+			return err
+		}
+
+		cs = reviewdog.MultiCommentService(gc, cs)
+		ds, err = reviewdog.NewGitLabMergeRequestDiff(cli, build.Owner, build.Repo, build.PullRequest, build.SHA)
+		if err != nil {
+			return err
+		}
 	case "local":
 		d, err := diffService(opt.diffCmd, opt.diffStrip)
 		if err != nil {
@@ -324,41 +333,36 @@ func githubBaseURL() (*url.URL, error) {
 	return u, nil
 }
 
-func gitlabService() (gitlabservice *reviewdog.GitLabMergeRequest, isPR bool, err error) {
+func gitlabBuildWithClient() (*cienv.BuildInfo, *gitlab.Client, error) {
 	token, err := nonEmptyEnv("REVIEWDOG_GITLAB_API_TOKEN")
 	if err != nil {
-		return nil, isPR, err
+		return nil, nil, err
 	}
 
-	g, isPR, err := cienv.GetBuildInfo()
+	g, _, err := cienv.GetBuildInfo()
 	if err != nil {
-		return nil, isPR, err
+		return nil, nil, err
 	}
 
 	client, err := gitlabClient(token)
 	if err != nil {
-		return nil, isPR, err
+		return nil, nil, err
 	}
 
-	if !isPR {
-		ok, prNr, err := fetchMergeRequestIDFromCommit(client, g.SHA)
+	if g.PullRequest == 0 {
+		prNr, err := fetchMergeRequestIDFromCommit(client, g.SHA)
 		if err != nil {
-			return nil, isPR, err
+			return nil, nil, err
 		}
-		if !ok {
-			return nil, false, nil // TODO: support commit build
+		if prNr != 0 {
+			g.PullRequest = prNr
 		}
-		g.PullRequest = prNr
 	}
 
-	gitlabservice, err = reviewdog.NewGitLabMergeRequest(client, g.Owner, g.Repo, g.PullRequest, g.SHA)
-	if err != nil {
-		return nil, true, err
-	}
-	return gitlabservice, true, nil
+	return g, client, err
 }
 
-func fetchMergeRequestIDFromCommit(cli *gitlab.Client, sha string) (ok bool, id int, err error) {
+func fetchMergeRequestIDFromCommit(cli *gitlab.Client, sha string) (id int, err error) {
 	// https://docs.gitlab.com/ce/api/merge_requests.html#list-merge-requests
 	opt := &gitlab.ListMergeRequestsOptions{
 		State:   gitlab.String("opened"),
@@ -366,14 +370,14 @@ func fetchMergeRequestIDFromCommit(cli *gitlab.Client, sha string) (ok bool, id 
 	}
 	mrs, _, err := cli.MergeRequests.ListMergeRequests(opt)
 	if err != nil {
-		return false, 0, err
+		return 0, err
 	}
 	for _, mr := range mrs {
 		if mr.SHA == sha {
-			return true, mr.IID, nil
+			return mr.IID, nil
 		}
 	}
-	return false, 0, nil
+	return 0, nil
 }
 
 func gitlabClient(token string) (*gitlab.Client, error) {

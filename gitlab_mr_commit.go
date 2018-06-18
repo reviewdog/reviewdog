@@ -12,15 +12,14 @@ import (
 	"golang.org/x/sync/errgroup"
 )
 
-var _ CommentService = &GitLabMergeRequest{}
-var _ DiffService = &GitLabMergeRequest{}
+var _ CommentService = &GitLabMergeRequestCommitCommenter{}
 
-// GitLabMergeRequest is a comment and diff service for GitLab MergeRequest.
+// GitLabMergeRequestCommitCommenter is a comment and diff service for GitLab MergeRequest.
 //
 // API:
 //  https://docs.gitlab.com/ce/api/commits.html#post-comment-to-commit
 //  POST /projects/:id/repository/commits/:sha/comments
-type GitLabMergeRequest struct {
+type GitLabMergeRequestCommitCommenter struct {
 	cli      *gitlab.Client
 	pr       int
 	sha      string
@@ -35,14 +34,14 @@ type GitLabMergeRequest struct {
 	wd string
 }
 
-// NewGitLabMergeRequest returns a new GitLabMergeRequest service.
-// GitLabMergeRequest service needs git command in $PATH.
-func NewGitLabMergeRequest(cli *gitlab.Client, owner, repo string, pr int, sha string) (*GitLabMergeRequest, error) {
+// NewGitLabMergeRequestCommitCommenter returns a new GitLabMergeRequestCommitCommenter service.
+// GitLabMergeRequestCommitCommenter service needs git command in $PATH.
+func NewGitLabMergeRequestCommitCommenter(cli *gitlab.Client, owner, repo string, pr int, sha string) (*GitLabMergeRequestCommitCommenter, error) {
 	workDir, err := gitRelWorkdir()
 	if err != nil {
-		return nil, fmt.Errorf("GitLabMergeRequest needs 'git' command: %v", err)
+		return nil, fmt.Errorf("GitLabMergeRequestCommitCommenter needs 'git' command: %v", err)
 	}
-	return &GitLabMergeRequest{
+	return &GitLabMergeRequestCommitCommenter{
 		cli:      cli,
 		pr:       pr,
 		sha:      sha,
@@ -53,7 +52,7 @@ func NewGitLabMergeRequest(cli *gitlab.Client, owner, repo string, pr int, sha s
 
 // Post accepts a comment and holds it. Flush method actually posts comments to
 // GitLab in parallel.
-func (g *GitLabMergeRequest) Post(_ context.Context, c *Comment) error {
+func (g *GitLabMergeRequestCommitCommenter) Post(_ context.Context, c *Comment) error {
 	c.Path = filepath.Join(g.wd, c.Path)
 	g.muComments.Lock()
 	defer g.muComments.Unlock()
@@ -62,7 +61,7 @@ func (g *GitLabMergeRequest) Post(_ context.Context, c *Comment) error {
 }
 
 // Flush posts comments which has not been posted yet.
-func (g *GitLabMergeRequest) Flush(ctx context.Context) error {
+func (g *GitLabMergeRequestCommitCommenter) Flush(ctx context.Context) error {
 	defer g.muComments.Unlock()
 	g.muComments.Lock()
 
@@ -73,7 +72,7 @@ func (g *GitLabMergeRequest) Flush(ctx context.Context) error {
 	return g.postCommentsForEach(ctx)
 }
 
-func (g *GitLabMergeRequest) postCommentsForEach(ctx context.Context) error {
+func (g *GitLabMergeRequestCommitCommenter) postCommentsForEach(ctx context.Context) error {
 	var eg errgroup.Group
 	for _, c := range g.postComments {
 		comment := c
@@ -100,7 +99,7 @@ func (g *GitLabMergeRequest) postCommentsForEach(ctx context.Context) error {
 	return eg.Wait()
 }
 
-func (g *GitLabMergeRequest) getLastCommitsID(path string, line int) (string, error) {
+func (g *GitLabMergeRequestCommitCommenter) getLastCommitsID(path string, line int) (string, error) {
 	lineFormat := fmt.Sprintf("%d,%d", line, line)
 	s, err := exec.Command("git", "blame", "-l", "-L", lineFormat, path).Output()
 	if err != nil {
@@ -110,7 +109,7 @@ func (g *GitLabMergeRequest) getLastCommitsID(path string, line int) (string, er
 	return commitID, nil
 }
 
-func (g *GitLabMergeRequest) setPostedComment(ctx context.Context) error {
+func (g *GitLabMergeRequestCommitCommenter) setPostedComment(ctx context.Context) error {
 	g.postedcs = make(postedcomments)
 	cs, err := g.comment(ctx)
 	if err != nil {
@@ -136,43 +135,7 @@ func (g *GitLabMergeRequest) setPostedComment(ctx context.Context) error {
 	return nil
 }
 
-// Diff returns a diff of MergeRequest. It runs `git diff` locally instead of
-// diff_url of GitLab Merge Request because diff of diff_url is not suited for
-// comment API in a sense that diff of diff_url is equivalent to
-// `git diff --no-renames`, we want diff which is equivalent to
-// `git diff --find-renames`.
-func (g *GitLabMergeRequest) Diff(ctx context.Context) ([]byte, error) {
-	mr, _, err := g.cli.MergeRequests.GetMergeRequest(g.projects, g.pr, nil)
-	if err != nil {
-		return nil, err
-	}
-	targetBranch, _, err := g.cli.Branches.GetBranch(mr.TargetProjectID, mr.TargetBranch, nil)
-	if err != nil {
-		return nil, err
-	}
-	return g.gitDiff(ctx, g.sha, targetBranch.Commit.ID)
-}
-
-func (g *GitLabMergeRequest) gitDiff(ctx context.Context, baseSha string, targetSha string) ([]byte, error) {
-	b, err := exec.Command("git", "merge-base", targetSha, baseSha).Output()
-	if err != nil {
-		return nil, fmt.Errorf("failed to get merge-base commit: %v", err)
-	}
-	mergeBase := strings.Trim(string(b), "\n")
-	relArg := fmt.Sprintf("--relative=%s", g.wd)
-	bytes, err := exec.Command("git", "diff", relArg, "--find-renames", mergeBase, baseSha).Output()
-	if err != nil {
-		return nil, fmt.Errorf("failed to run git diff: %v", err)
-	}
-	return bytes, nil
-}
-
-// Strip returns 1 as a strip of git diff.
-func (g *GitLabMergeRequest) Strip() int {
-	return 1
-}
-
-func (g *GitLabMergeRequest) comment(ctx context.Context) ([]*gitlab.CommitComment, error) {
+func (g *GitLabMergeRequestCommitCommenter) comment(ctx context.Context) ([]*gitlab.CommitComment, error) {
 	commits, _, err := g.cli.MergeRequests.GetMergeRequestCommits(g.projects, g.pr, nil)
 	if err != nil {
 		return nil, err
