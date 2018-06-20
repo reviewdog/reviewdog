@@ -68,7 +68,7 @@ func (g *GitLabMergeRequestDiscussionCommenter) Flush(ctx context.Context) error
 
 func (g *GitLabMergeRequestDiscussionCommenter) createPostedCommetns() (postedcomments, error) {
 	postedcs := make(postedcomments)
-	discussions, _, err := ListMergeRequestDiscussion(g.cli, g.projects, g.pr)
+	discussions, err := listAllMergeRequestDiscussion(g.cli, g.projects, g.pr, &ListMergeRequestDiscussionOptions{PerPage: 100})
 	if err != nil {
 		return nil, err
 	}
@@ -144,7 +144,8 @@ type GitLabMergeRequestDiscussion struct {
 }
 
 // CreateMergeRequestDiscussion creates new discussion on a merge request.
-// https://docs.gitlab.com/ee/api/discussions.html#create-new-merge-request-discussion
+//
+// GitLab API docs: https://docs.gitlab.com/ee/api/discussions.html#create-new-merge-request-discussion
 func CreateMergeRequestDiscussion(cli *gitlab.Client, projectID string, mergeRequest int, discussion *GitLabMergeRequestDiscussion) (*gitlab.Response, error) {
 	u := fmt.Sprintf("projects/%s/merge_requests/%d/discussions", url.QueryEscape(projectID), mergeRequest)
 	req, err := cli.NewRequest("POST", u, discussion, nil)
@@ -155,10 +156,11 @@ func CreateMergeRequestDiscussion(cli *gitlab.Client, projectID string, mergeReq
 }
 
 // ListMergeRequestDiscussion lists discussion on a merge request.
-// https://docs.gitlab.com/ee/api/discussions.html#list-project-merge-request-discussions
-func ListMergeRequestDiscussion(cli *gitlab.Client, projectID string, mergeRequest int) ([]*GitLabMergeRequestDiscussionList, *gitlab.Response, error) {
+//
+// GitLab API docs: https://docs.gitlab.com/ee/api/discussions.html#list-project-merge-request-discussions
+func ListMergeRequestDiscussion(cli *gitlab.Client, projectID string, mergeRequest int, opts *ListMergeRequestDiscussionOptions) ([]*GitLabMergeRequestDiscussionList, *gitlab.Response, error) {
 	u := fmt.Sprintf("projects/%s/merge_requests/%d/discussions", url.QueryEscape(projectID), mergeRequest)
-	req, err := cli.NewRequest("GET", u, nil, nil)
+	req, err := cli.NewRequest("GET", u, opts, nil)
 	if err != nil {
 		return nil, nil, err
 	}
@@ -168,4 +170,28 @@ func ListMergeRequestDiscussion(cli *gitlab.Client, projectID string, mergeReque
 		return nil, resp, err
 	}
 	return discussions, resp, nil
+}
+
+// ListMergeRequestDiscussionOptions represents the available ListMergeRequestDiscussion() options.
+//
+// GitLab API docs: https://docs.gitlab.com/ee/api/discussions.html#list-project-merge-request-discussions
+type ListMergeRequestDiscussionOptions gitlab.ListOptions
+
+func listAllMergeRequestDiscussion(cli *gitlab.Client, projectID string, mergeRequest int, opts *ListMergeRequestDiscussionOptions) ([]*GitLabMergeRequestDiscussionList, error) {
+	discussions, resp, err := ListMergeRequestDiscussion(cli, projectID, mergeRequest, opts)
+	if err != nil {
+		return nil, err
+	}
+	if resp.NextPage == 0 {
+		return discussions, nil
+	}
+	newOpts := &ListMergeRequestDiscussionOptions{
+		Page:    resp.NextPage,
+		PerPage: opts.PerPage,
+	}
+	nextDiscussions, err := listAllMergeRequestDiscussion(cli, projectID, mergeRequest, newOpts)
+	if err != nil {
+		return nil, err
+	}
+	return append(discussions, nextDiscussions...), nil
 }
