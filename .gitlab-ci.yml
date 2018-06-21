@@ -1,6 +1,7 @@
 image: golang:latest
 
 before_script:
+  - go get -d -v -t ./...
   - go install ./cmd/reviewdog
   - go get github.com/golang/lint/golint
   - go get github.com/kisielk/errcheck
