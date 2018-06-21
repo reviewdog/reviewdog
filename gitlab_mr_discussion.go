@@ -134,10 +134,14 @@ type GitLabMergeRequestDiscussionPosition struct {
 	OldLine int    `json:"old_line,omitempty"` // Line number before change (for 'text' diff notes)
 }
 
+// GitLabMergeRequestDiscussionList represents response of ListMergeRequestDiscussion API.
+//
+// GitLab API docs: https://docs.gitlab.com/ee/api/discussions.html#list-project-merge-request-discussions
 type GitLabMergeRequestDiscussionList struct {
 	Notes []*GitLabMergeRequestDiscussion
 }
 
+// GitLabMergeRequestDiscussion represents a discussion of MergeRequest.
 type GitLabMergeRequestDiscussion struct {
 	Body     string                                `json:"body"` // The content of a discussion
 	Position *GitLabMergeRequestDiscussionPosition `json:"position"`
