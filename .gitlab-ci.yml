@@ -1,8 +1,11 @@
 image: golang:latest
 
 before_script:
-  - go get -d -v -t ./...
+  # Set up $GOPATH and install reviewdog (Note that main repo is github.com)
+  - ln -s /builds /go/src/github.com
+  - cd /go/src/github.com/${CI_PROJECT_PATH}
   - go install ./cmd/reviewdog
+  # Intall linters
   - go get github.com/golang/lint/golint
   - go get github.com/kisielk/errcheck
   - go get honnef.co/go/tools/cmd/gosimple
