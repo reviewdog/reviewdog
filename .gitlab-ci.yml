@@ -2,7 +2,6 @@ image: golang:latest
 
 before_script:
   - go install ./cmd/reviewdog
-  # Install linters.
   - go get github.com/golang/lint/golint
   - go get github.com/kisielk/errcheck
   - go get honnef.co/go/tools/cmd/gosimple
