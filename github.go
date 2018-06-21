@@ -116,16 +116,7 @@ func (g *GitHubPullRequest) setPostedComment(ctx context.Context) error {
 			// "body".
 			continue
 		}
-		path := *c.Path
-		pos := *c.Position
-		body := *c.Body
-		if _, ok := g.postedcs[path]; !ok {
-			g.postedcs[path] = make(map[int][]string)
-		}
-		if _, ok := g.postedcs[path][pos]; !ok {
-			g.postedcs[path][pos] = make([]string, 0)
-		}
-		g.postedcs[path][pos] = append(g.postedcs[path][pos], body)
+		g.postedcs.AddPostedComment(c.GetPath(), c.GetPosition(), c.GetBody())
 	}
 	return nil
 }

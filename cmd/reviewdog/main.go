@@ -65,7 +65,7 @@ const (
 		CI_REPO_NAME	repository name (e.g. "reviewdog" for https://github.com/haya14busa/reviewdog)
 `
 	confDoc     = `config file path`
-	reporterDoc = `reporter of reviewdog results. (local, github-pr-check, github-pr-review, gitlab-mr-commit)
+	reporterDoc = `reporter of reviewdog results. (local, github-pr-check, github-pr-review, gitlab-mr-discussion, gitlab-mr-commit)
 	"local" (default)
 		Report results to stdout.
 
@@ -91,8 +91,8 @@ const (
 		if you want to skip verifing SSL (please use this at your own risk)
 			$ export REVIEWDOG_INSECURE_SKIP_VERIFY=true
 
-	"gitlab-mr-commit"
-		Report results to GitLab comments for each commits in Merge Requests.
+	"gitlab-mr-discussion"
+		Report results to GitLab MergeRequest discussion.
 
 		1. Set REVIEWDOG_GITLAB_API_TOKEN environment variable.
 		Go to https://gitlab.com/profile/personal_access_tokens
@@ -100,9 +100,12 @@ const (
 		For self hosted GitLab:
 			$ export GITLAB_API="https://example.gitlab.com/api/v4"
 
-	For "github-pr-check" and "github-pr-review", "gitlab-mr-commit", reviewdog
-	automatically get necessary data from environment variable in CI service
-	('travis', 'circle-ci', 'droneio').
+	"gitlab-mr-commit"
+		Same as gitlab-mr-discussion, but report results to GitLab comments for
+		each commits in Merge Requests.
+
+	For non-local reporters, reviewdog automatically get necessary data from
+	environment variable in CI service (Travis CI, Circle CI, dronel.io, GitLab CI).
 	You can set necessary data with following environment variable manually if
 	you want (e.g. run reviewdog in Jenkins).
 
@@ -194,6 +197,26 @@ See -reporter flag for migration and set -reporter="github-pr-review" or -report
 		}
 		cs = reviewdog.MultiCommentService(gs, cs)
 		ds = gs
+	case "gitlab-mr-discussion":
+		build, cli, err := gitlabBuildWithClient()
+		if err != nil {
+			return err
+		}
+		if build.PullRequest == 0 {
+			fmt.Fprintln(os.Stderr, "this is not MergeRequest build.")
+			return nil
+		}
+
+		gc, err := reviewdog.NewGitLabMergeRequestDiscussionCommenter(cli, build.Owner, build.Repo, build.PullRequest, build.SHA)
+		if err != nil {
+			return err
+		}
+
+		cs = reviewdog.MultiCommentService(gc, cs)
+		ds, err = reviewdog.NewGitLabMergeRequestDiff(cli, build.Owner, build.Repo, build.PullRequest, build.SHA)
+		if err != nil {
+			return err
+		}
 	case "gitlab-mr-commit":
 		build, cli, err := gitlabBuildWithClient()
 		if err != nil {

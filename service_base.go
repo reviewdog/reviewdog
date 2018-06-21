@@ -28,6 +28,16 @@ func (p postedcomments) IsPosted(c *Comment, lineNum int) bool {
 	return false
 }
 
+func (p postedcomments) AddPostedComment(path string, lineNum int, body string) {
+	if _, ok := p[path]; !ok {
+		p[path] = make(map[int][]string)
+	}
+	if _, ok := p[path][lineNum]; !ok {
+		p[path][lineNum] = make([]string, 0)
+	}
+	p[path][lineNum] = append(p[path][lineNum], body)
+}
+
 const bodyPrefix = `<sub>reported by [reviewdog](https://github.com/haya14busa/reviewdog) :dog:</sub>`
 
 func commentBody(c *Comment) string {

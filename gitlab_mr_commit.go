@@ -62,8 +62,8 @@ func (g *GitLabMergeRequestCommitCommenter) Post(_ context.Context, c *Comment) 
 
 // Flush posts comments which has not been posted yet.
 func (g *GitLabMergeRequestCommitCommenter) Flush(ctx context.Context) error {
-	defer g.muComments.Unlock()
 	g.muComments.Lock()
+	defer g.muComments.Unlock()
 
 	if err := g.setPostedComment(ctx); err != nil {
 		return err
@@ -121,16 +121,7 @@ func (g *GitLabMergeRequestCommitCommenter) setPostedComment(ctx context.Context
 			// "body".
 			continue
 		}
-		path := c.Path
-		pos := c.Line
-		body := c.Note
-		if _, ok := g.postedcs[path]; !ok {
-			g.postedcs[path] = make(map[int][]string)
-		}
-		if _, ok := g.postedcs[path][pos]; !ok {
-			g.postedcs[path][pos] = make([]string, 0)
-		}
-		g.postedcs[path][pos] = append(g.postedcs[path][pos], body)
+		g.postedcs.AddPostedComment(c.Path, c.Line, c.Note)
 	}
 	return nil
 }
