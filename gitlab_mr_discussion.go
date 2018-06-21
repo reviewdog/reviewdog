@@ -61,7 +61,7 @@ func (g *GitLabMergeRequestDiscussionCommenter) Flush(ctx context.Context) error
 	defer g.muComments.Unlock()
 	postedcs, err := g.createPostedCommetns()
 	if err != nil {
-		return err
+		return fmt.Errorf("failed to create posted comments: %v", err)
 	}
 	return g.postCommentsForEach(ctx, postedcs)
 }
@@ -70,7 +70,7 @@ func (g *GitLabMergeRequestDiscussionCommenter) createPostedCommetns() (postedco
 	postedcs := make(postedcomments)
 	discussions, err := listAllMergeRequestDiscussion(g.cli, g.projects, g.pr, &ListMergeRequestDiscussionOptions{PerPage: 100})
 	if err != nil {
-		return nil, err
+		return nil, fmt.Errorf("failed to list all merge request discussions: %v", err)
 	}
 	for _, d := range discussions {
 		for _, note := range d.Notes {
@@ -87,7 +87,7 @@ func (g *GitLabMergeRequestDiscussionCommenter) createPostedCommetns() (postedco
 func (g *GitLabMergeRequestDiscussionCommenter) postCommentsForEach(ctx context.Context, postedcs postedcomments) error {
 	mr, _, err := g.cli.MergeRequests.GetMergeRequest(g.projects, g.pr, nil)
 	if err != nil {
-		return err
+		return fmt.Errorf("failed to get merge request: %v", err)
 	}
 	targetBranch, _, err := g.cli.Branches.GetBranch(mr.TargetProjectID, mr.TargetBranch, nil)
 	if err != nil {
@@ -138,7 +138,7 @@ type GitLabMergeRequestDiscussionPosition struct {
 //
 // GitLab API docs: https://docs.gitlab.com/ee/api/discussions.html#list-project-merge-request-discussions
 type GitLabMergeRequestDiscussionList struct {
-	Notes []*GitLabMergeRequestDiscussion
+	Notes []*GitLabMergeRequestDiscussion `json:"notes"`
 }
 
 // GitLabMergeRequestDiscussion represents a discussion of MergeRequest.
