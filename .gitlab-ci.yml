@@ -1,0 +1,18 @@
+image: golang:latest
+
+before_script:
+  - go install ./cmd/reviewdog
+  # Install linters.
+  - go get github.com/golang/lint/golint
+  - go get github.com/kisielk/errcheck
+  - go get honnef.co/go/tools/cmd/gosimple
+  - go get honnef.co/go/tools/cmd/staticcheck
+  - go get honnef.co/go/tools/cmd/unused
+  - go get github.com/client9/misspell/cmd/misspell
+
+reviwedog:
+  environment:
+    name: reviewdog
+  script:
+    - reviewdog -reporter=gitlab-mr-discussion
+    - reviewdog -reporter=gitlab-mr-commit
