@@ -17,10 +17,10 @@
 
 "reviewdog" provides a way to post review comments to code hosting service,
 such as GitHub, automatically by integrating with any linter tools with ease.
-It uses any output of lint tools and post them as a comment if the file and
-line are in diff of patches to review.
+It uses an output of lint tools and posts them as a comment if findings are in
+diff of patches to review.
 
-reviewdog also supports run in local environment to filter output of lint tools
+reviewdog also supports run in the local environment to filter an output of lint tools
 by diff.
 
 [design doc](https://docs.google.com/document/d/1mGOX19SSqRowWGbXieBfGPtLnM0BdTkIc9JelTiu6wA/edit?usp=sharing)
@@ -34,7 +34,7 @@ Local run
 
 ![reviewdog-local-demo.gif](https://raw.githubusercontent.com/haya14busa/i/dc0ccb1e110515ea407c146d99b749018db05c45/reviewdog/reviewdog-local-demo.gif)
 
-### Installation
+## Installation
 
 Get [the binary release](https://github.com/haya14busa/reviewdog/releases) (recommended way)
 
@@ -73,15 +73,15 @@ $ golint ./... | reviewdog -efm="%f:%l:%c: %m" -diff="git diff master"
 
 Please see [haya14busa/errorformat](https://github.com/haya14busa/errorformat)
 and [:h errorformat](http://vimdoc.sourceforge.net/htmldoc/quickfix.html#errorformat)
-if you want to deal with more complex output. 'errorformat' can handle more
-complex output like multi-line error message.
+if you want to deal with a more complex output. 'errorformat' can handle more
+complex output like a multi-line error message.
 
 By this 'errorformat' feature, reviewdog can support any tools output with ease.
 
 ### Available pre-defined 'errorformat'
 
 But, you don't have to write 'errorformat' in many cases. reviewdog supports
-pre-defined errorformat for major compiler or linter tools.
+pre-defined errorformat for major compilers or linter tools.
 
 You can find available errorformat name by `reviewdog -list` and you can use it
 with `-f={name}`.
@@ -165,11 +165,11 @@ Output format for project config based run is one of following formats.
 
 reviewdog can find new introduced warnings or error by filtering linter results
 using diff. You can pass diff command as `-diff` arg, like `-diff="git diff"`,
-`-diff="git diff master"`, etc... when you use reviewdog in local environment.
+`-diff="git diff master"`, etc... when you use reviewdog in a local environment.
 
 ### Working with GitHub and CI services
 
-reviewdog can intergrate with CI service and post review comments to report
+reviewdog can integrate with CI service and post review comments to report
 results automatically as well!
 
 #### Supported code hosting (or code review) service
@@ -184,8 +184,8 @@ It may support [Gerrit](https://www.gerritcodereview.com/), [Bitbucket](https://
 [![github-pr-check sample](https://user-images.githubusercontent.com/3797062/40884858-6efd82a0-6756-11e8-9f1a-c6af4f920fb0.png)](https://github.com/haya14busa/reviewdog/pull/131/checks)
 
 github-pr-review reporter reports results as [GitHub Checks](https://help.github.com/articles/about-status-checks/).
-Since GitHub Checks API is only for GitHub Apps, reviewdoc cli send a request to
-reviewdog GitHub App server and the server post resutls as GitHub Checks.
+Since GitHub Checks API is only for GitHub Apps, reviewdog CLI send a request to
+reviewdog GitHub App server and the server post results as GitHub Checks.
 
 1. Install reviewdog Apps. https://github.com/apps/reviewdog
 2. Set `REVIEWDOG_TOKEN` or run reviewdog CLI in trusted CI providers.
@@ -206,7 +206,7 @@ github-pr-check reporter is better than github-pr-review reporter in general
 because it provides more rich feature and has less scope, but please bear in
 mind the above caution and please use it on your own risk.
 
-You can use github-pr-review reporter if you don't want to depens on reviewdog
+You can use github-pr-review reporter if you don't want to depend on reviewdog
 server.
 
 ### Reporter: GitHub PullRequest review comment (-reporter=github-pr-review)
@@ -237,7 +237,7 @@ $ export REVIEWDOG_INSECURE_SKIP_VERIFY=true # set this as you need
 
 ### Supported CI services and security of secret environment variable
 
-| Name | Pull Request from the same repository | Pull Request from forked repository |
+| Name | Pull Request from the same repository | Pull Request from forked repositories |
 | ---- | ------------------------------------- | ----------------------------------- |
 | [Travis CI](https://travis-ci.org/) | :o: | :x: (:o: for -reporter=github-pr-check)
 | [CircleCI](https://circleci.com/) | :o: | :x: (but possible with insecure way)
@@ -247,8 +247,8 @@ $ export REVIEWDOG_INSECURE_SKIP_VERIFY=true # set this as you need
 reviewdog can run in CI services which supports Pull Request build and secret
 environment variable feature for security reason.
 
-But, for the Pull Request from forked repository, most CI services restrict
-secret environment variable for security reason, to avoid leak of secret data
+But, for the Pull Request from forked repositories, most CI services restrict
+secret environment variable for security reason, to avoid the leak of secret data
 with malicious Pull Request. ([Travis CI](https://docs.travis-ci.com/user/pull-requests#Pull-Requests-and-Security-Restrictions), [CircleCI](https://circleci.com/docs/fork-pr-builds/#security-implications-of-running-builds-for-pull-requests-from-forks))
 
 
@@ -306,14 +306,14 @@ Examples
 Store GitHub API token as `REVIEWDOG_TOKEN` or `REVIEWDOG_GITHUB_API_TOKEN` in
 [Environment variables - CircleCI](https://circleci.com/docs/environment-variables/#setting-environment-variables-for-all-commands-without-adding-them-to-git)
 
-Pull Requests from fork repo cannot set environment variable for security reason.
+Pull Requests from fork repo cannot set an environment variable for security reason.
 However, if you want to run fork PR builds for private repositories or want to run
-reviewdog for forked PR to OSS project, CircleCI have an option to enable it.
+reviewdog for forked PR to OSS project, CircleCI has an option to enable it.
 [Unsafe fork PR builds](https://circleci.com/docs/fork-pr-builds/#unsafe-fork-pr-builds)
 
 If you use -reporter=github-pr-check and only set `REVIEWDOG_TOKEN`, it's safer
-because it has only small limited scope. As for `REVIEWDOG_GITHUB_API_TOKEN`,
-it has a bit larger scope at least even if you only set the scope repo:public.
+because it has the small limited scope. As for `REVIEWDOG_GITHUB_API_TOKEN`,
+it has a bit larger scope at least even if you only set the scope `repo:public`.
 
 Please use it at your own risk.
 
@@ -381,7 +381,7 @@ $ drone secure --repo {github-user-name}/{repo-name} --in .drone.sec.yaml
 ```
 
 drone.io supports encrypted environment variable for fork Pull Request build in
-secure way, but you have to read document carefully http://readme.drone.io/usage/secrets/
+secure way, but you have to read the document carefully http://readme.drone.io/usage/secrets/
 not to expose secret data unexpectedly.
 
 #### Common (Jenkins, local, etc...)
