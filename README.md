@@ -358,8 +358,6 @@ Store `REVIEWDOG_GITLAB_API_TOKEN` in [GitLab CI variable](https://docs.gitlab.c
 
 ```yaml
 reviwedog:
-  environment:
-    name: reviewdog
   script:
     - reviewdog -reporter=gitlab-mr-discussion
     # Or
