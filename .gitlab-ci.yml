@@ -15,8 +15,6 @@ before_script:
   - go get github.com/client9/misspell/cmd/misspell
 
 reviwedog:
-  environment:
-    name: reviewdog
   script:
     - reviewdog -reporter=gitlab-mr-discussion
     - reviewdog -reporter=gitlab-mr-commit
