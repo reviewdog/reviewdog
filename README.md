@@ -58,8 +58,8 @@ Get [the binary release](https://github.com/haya14busa/reviewdog/releases) (reco
 
 or
 
-```
-go get -u github.com/haya14busa/reviewdog/cmd/reviewdog
+```shell
+$ go get -u github.com/haya14busa/reviewdog/cmd/reviewdog
 ```
 
 ## Input Format
@@ -74,7 +74,7 @@ feature.
 For example, if the result format is `{file}:{line number}:{column number}: {message}`,
 errorformat should be `%f:%l:%c: %m` and you can pass it as `-efm` arguments.
 
-```
+```shell
 $ golint ./...
 comment_iowriter.go:11:6: exported type CommentWriter should have comment or be unexported
 $ golint ./... | reviewdog -efm="%f:%l:%c: %m" -diff="git diff master"
@@ -104,7 +104,7 @@ pre-defined errorformat for major tools.
 You can find available errorformat name by `reviewdog -list` and you can use it
 with `-f={name}`.
 
-```
+```shell
 $ reviewdog -list
 golint          linter for Go source code                                       - https://github.com/golang/lint
 govet           Vet examines Go source code and reports suspicious problems     - https://golang.org/cmd/vet/
@@ -124,7 +124,7 @@ reviewdog also accepts [checkstyle XML format](http://checkstyle.sourceforge.net
 If the linter supports checkstyle format as a report format, you can use
 -f=checkstyle instead of using 'errorformat'.
 
-```
+```shell
 # Local
 $ eslint -f checkstyle . | reviewdog -f=checkstyle -diff="git diff"
 
@@ -134,7 +134,7 @@ $ eslint -f checkstyle . | reviewdog -f=checkstyle -name="eslint" -reporter=gith
 
 Also, if you want to pass other Json/XML/etc... format to reviewdog, you can write a converter.
 
-```
+```shell
 $ <linter> | <convert-to-checkstyle> | reviewdog -f=checkstyle -name="<linter>" -reporter=github-pr-check
 ```
 
@@ -164,7 +164,7 @@ runner:
     cmd: go tool vet -all -shadowstrict .
 ```
 
-```
+```shell
 $ reviewdog -diff="git diff master"
 project/run_test.go:61:28: [golint] error strings should not end with punctuation
 project/run.go:57:18: [errcheck]        defer os.Setenv(name, os.Getenv(name))
@@ -244,7 +244,7 @@ $ reviewdog -reporter=github-pr-review`
 
 For GitHub Enterprise, set API endpoint by environment variable.
 
-```
+```shell
 $ export GITHUB_API="https://example.githubenterprise.com/api/v3/"
 $ export REVIEWDOG_INSECURE_SKIP_VERIFY=true # set this as you need
 ```
@@ -305,7 +305,7 @@ script:
 
 Store GitHub API token by [travis encryption keys](https://docs.travis-ci.com/user/encryption-keys/).
 
-```
+```shell
 $ gem install travis
 $ travis encrypt REVIEWDOG_GITHUB_API_TOKEN=<token> --add env.global
 ```
