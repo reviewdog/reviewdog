@@ -37,7 +37,9 @@ by diff.
 - [Reporters](#reporters)
   * [Reporter: Local (-reporter=github-pr-check) [default]](#reporter-local--reportergithub-pr-check-default)
   * [Reporter: GitHub Checks (-reporter=github-pr-check)](#reporter-github-checks--reportergithub-pr-check)
+  * [Reporter: GitHub PullRequest review comment (-reporter=github-pr-review)](#reporter-github-pullrequest-review-comment--reportergithub-pr-review)
   * [Reporter: GitLab MergeRequest discussions (-reporter=gitlab-mr-discussion)](#reporter-gitlab-mergerequest-discussions--reportergitlab-mr-discussion)
+  * [Reporter: GitLab MergeRequest commit (-reporter=gitlab-mr-commit)](#reporter-gitlab-mergerequest-commit--reportergitlab-mr-commit)
 - [Supported CI services](#supported-ci-services)
   * [Travis CI](#travis-ci)
     + [Travis CI (-reporter=github-pr-check)](#travis-ci--reportergithub-pr-check)
@@ -210,6 +212,7 @@ reviewdog GitHub App server and the server post results as GitHub Checks.
 ```shell
 $ export REVIEWDOG_TOKEN="<token>"
 $ reviewdog -reporter=github-pr-check
+```
 
 Note: Token is not required if you run reviewdog in Travis or AppVeyor.
 
@@ -254,7 +257,7 @@ $ export REVIEWDOG_INSECURE_SKIP_VERIFY=true # set this as you need
 
 [![gitlab-mr-discussion sample](https://user-images.githubusercontent.com/3797062/41810718-f91bc540-773d-11e8-8598-fbc09ce9b1c7.png)](https://gitlab.com/haya14busa/reviewdog/merge_requests/113#note_83411103)
 
-Required GitLab version: > v10.8.0
+Required GitLab version: >= v10.8.0
 
 gitlab-mr-discussion reporter reports results to GitLab MergeRequest discussions using
 GitLab Personal API Access token.
@@ -264,6 +267,19 @@ Get the token with `api` scope from https://gitlab.com/profile/personal_access_t
 $ export GITLAB_API="https://example.gitlab.com/api/v4" # for self-hosted GitLab.
 $ export REVIEWDOG_GITLAB_API_TOKEN="<token>"
 $ reviewdog -reporter=gitlab-mr-discussion
+```
+
+### Reporter: GitLab MergeRequest commit (-reporter=gitlab-mr-commit)
+
+gitlab-mr-commit is similar to [gitlab-mr-discussion](#reporter-gitlab-mergerequest-discussions--reportergitlab-mr-discussion) reporter but reports results to each commit in GitLab MergeRequest.
+
+gitlab-mr-discussion is recommended, but you can use gitlab-mr-commit reporter
+if your GitLab version is under v10.8.0.
+
+```shell
+$ export GITLAB_API="https://example.gitlab.com/api/v4" # for self-hosted GitLab.
+$ export REVIEWDOG_GITLAB_API_TOKEN="<token>"
+$ reviewdog -reporter=gitlab-mr-commit
 ```
 
 ## Supported CI services
