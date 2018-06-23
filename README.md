@@ -254,7 +254,7 @@ $ export REVIEWDOG_INSECURE_SKIP_VERIFY=true # set this as you need
 
 [![gitlab-mr-discussion sample](https://user-images.githubusercontent.com/3797062/41810718-f91bc540-773d-11e8-8598-fbc09ce9b1c7.png)](https://gitlab.com/haya14busa/reviewdog/merge_requests/113#note_83411103)
 
-Requried GitLab version: > v10.8.0
+Required GitLab version: > v10.8.0
 
 gitlab-mr-discussion reporter reports results to GitLab MergeRequest discussions using
 GitLab Personal API Access token.
