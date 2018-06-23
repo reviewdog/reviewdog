@@ -44,7 +44,7 @@ or
 go get -u github.com/haya14busa/reviewdog/cmd/reviewdog
 ```
 
-## Usage
+## Input Format
 
 ### 'errorformat'
 
@@ -81,7 +81,7 @@ By this 'errorformat' feature, reviewdog can support any tools output with ease.
 ### Available pre-defined 'errorformat'
 
 But, you don't have to write 'errorformat' in many cases. reviewdog supports
-pre-defined errorformat for major compilers or linter tools.
+pre-defined errorformat for major tools.
 
 You can find available errorformat name by `reviewdog -list` and you can use it
 with `-f={name}`.
@@ -94,13 +94,13 @@ sbt             the interactive build tool                                      
 ...
 ```
 
-```
+```shell
 $ golint ./... | reviewdog -f=golint -diff="git diff master"
 ```
 
 You can add supported pre-defined 'errorformat' by contributing to [haya14busa/errorformat](https://github.com/haya14busa/errorformat)
 
-#### checkstyle format
+### checkstyle format
 
 reviewdog also accepts [checkstyle XML format](http://checkstyle.sourceforge.net/) as well.
 If the linter supports checkstyle format as a report format, you can use
@@ -120,7 +120,7 @@ Also, if you want to pass other Json/XML/etc... format to reviewdog, you can wri
 $ <linter> | <convert-to-checkstyle> | reviewdog -f=checkstyle -name="<linter>" -reporter=github-pr-check
 ```
 
-### Project Configuration Based Run
+## reviewdog config file
 
 reviewdog can also be controlled via the .reviewdog.yml configuration file instead of "-f" or "-efm" arguments.
 
@@ -155,47 +155,45 @@ project/run.go:58:12: [errcheck]        os.Setenv(name, "")
 $ reviewdog -conf=./.reviewdog.yml -reporter=github-pr-check
 ```
 
-Output format for project config based run is one of following formats.
+Output format for project config based run is one of the following formats.
 
 - `<file>: [<tool name>] <message>`
 - `<file>:<lnum>: [<tool name>] <message>`
 - `<file>:<lnum>:<col>: [<tool name>] <message>`
 
-### Run locally
+## Reporters
 
-reviewdog can find new introduced warnings or error by filtering linter results
-using diff. You can pass diff command as `-diff` arg, like `-diff="git diff"`,
-`-diff="git diff master"`, etc... when you use reviewdog in a local environment.
+reviewdog can report results both in local environment and review services as
+continuous integration.
 
-### Working with GitHub and CI services
+### Reporter: Local (-reporter=github-pr-check) [default]
 
-reviewdog can integrate with CI service and post review comments to report
-results automatically as well!
+reviewdog can find newly introduced findings by filtering linter results
+using diff. You can pass diff command as `-diff` arg.
 
-#### Supported code hosting (or code review) service
-At the time of writing, reviewdog supports [GitHub](https://github.com/) and
-[GitHub Enterprise](https://enterprise.github.com/home) as a code hosting service for posting comments.
-
-It may support [Gerrit](https://www.gerritcodereview.com/), [Bitbucket](https://bitbucket.org/product), or other services later.
+```shell
+$ golint ./... | reviewdog -f=golint -diff="git diff master"
+```
 
 ### Reporter: GitHub Checks (-reporter=github-pr-check)
-[experimental]
 
 [![github-pr-check sample](https://user-images.githubusercontent.com/3797062/40884858-6efd82a0-6756-11e8-9f1a-c6af4f920fb0.png)](https://github.com/haya14busa/reviewdog/pull/131/checks)
 
-github-pr-review reporter reports results as [GitHub Checks](https://help.github.com/articles/about-status-checks/).
+github-pr-review reporter reports results to [GitHub Checks](https://help.github.com/articles/about-status-checks/).
 Since GitHub Checks API is only for GitHub Apps, reviewdog CLI send a request to
 reviewdog GitHub App server and the server post results as GitHub Checks.
 
 1. Install reviewdog Apps. https://github.com/apps/reviewdog
 2. Set `REVIEWDOG_TOKEN` or run reviewdog CLI in trusted CI providers.
   - Get token from `https://reviewdog.app/gh/{owner}/{repo-name}`.
-  - `$ export REVIEWDOG_TOKEN="xxxxx"`
-3. `$ reviewdog -conf=.reviewdog.yml -reporter=github-pr-check`
 
-Note: Token not required if you run reviewdog in Travis or AppVeyor.
+```shell
+$ export REVIEWDOG_TOKEN="<token>"
+$ reviewdog -reporter=github-pr-check
 
-#### *Caution:*
+Note: Token is not required if you run reviewdog in Travis or AppVeyor.
+
+#### *Caution*
 
 As described above, github-pr-check reporter is depending on reviewdog GitHub
 App server.
@@ -213,19 +211,16 @@ server.
 
 [![sample-comment.png](https://raw.githubusercontent.com/haya14busa/i/dc0ccb1e110515ea407c146d99b749018db05c45/reviewdog/sample-comment.png)](https://github.com/haya14busa/reviewdog/pull/24#discussion_r84599728)
 
-github-pr-review reporter reports results as GitHub PullRequest review comments
+github-pr-review reporter reports results to GitHub PullRequest review comments
 using GitHub Personal API Access Token.
+[GitHub Enterprise](https://enterprise.github.com/home) is supported too.
 
-1. Get GitHub Personal API Access token
-  - Go to https://github.com/settings/tokens and generate new API token.
-  - Check `repo` for private repositories or `public_repo` for public repositories.
-2. Export the token environment variable
-  - `export REVIEWDOG_GITHUB_API_TOKEN="xxxxx"`
-3. `$ reviewdog -conf=.reviewdog.yml -reporter=github-pr-review`
+- Go to https://github.com/settings/tokens and generate new API token.
+- Check `repo` for private repositories or `public_repo` for public repositories.
 
-```
-$ export GITHUB_API="https://example.githubenterprise.com/api/v3/"
-$ export REVIEWDOG_INSECURE_SKIP_VERIFY=true # set this as you need
+```shell
+$ export REVIEWDOG_GITHUB_API_TOKEN="<token>"
+$ reviewdog -reporter=github-pr-review`
 ```
 
 For GitHub Enterprise, set API endpoint by environment variable.
@@ -235,26 +230,27 @@ $ export GITHUB_API="https://example.githubenterprise.com/api/v3/"
 $ export REVIEWDOG_INSECURE_SKIP_VERIFY=true # set this as you need
 ```
 
-### Supported CI services and security of secret environment variable
+### Reporter: GitLab MergeRequest discussions (-reporter=gitlab-mr-discussion)
 
-| Name | Pull Request from the same repository | Pull Request from forked repositories |
-| ---- | ------------------------------------- | ----------------------------------- |
-| [Travis CI](https://travis-ci.org/) | :o: | :x: (:o: for -reporter=github-pr-check)
-| [CircleCI](https://circleci.com/) | :o: | :x: (but possible with insecure way)
-| [drone.io](https://github.com/drone/drone) (OSS) v0.4 | :o: | :o:
-| common (Your managed CI server like Jenkins) | :o: | :o:
+[![gitlab-mr-discussion sample](https://user-images.githubusercontent.com/3797062/41810718-f91bc540-773d-11e8-8598-fbc09ce9b1c7.png)](https://gitlab.com/haya14busa/reviewdog/merge_requests/113#note_83411103)
 
-reviewdog can run in CI services which supports Pull Request build and secret
-environment variable feature for security reason.
+Requried GitLab version: > v10.8.0
 
-But, for the Pull Request from forked repositories, most CI services restrict
-secret environment variable for security reason, to avoid the leak of secret data
-with malicious Pull Request. ([Travis CI](https://docs.travis-ci.com/user/pull-requests#Pull-Requests-and-Security-Restrictions), [CircleCI](https://circleci.com/docs/fork-pr-builds/#security-implications-of-running-builds-for-pull-requests-from-forks))
+gitlab-mr-discussion reporter reports results to GitLab MergeRequest discussions using
+GitLab Personal API Access token.
+Get the token with `api` scope from https://gitlab.com/profile/personal_access_tokens.
 
+```shell
+$ export GITLAB_API="https://example.gitlab.com/api/v4" # for self-hosted GitLab.
+$ export REVIEWDOG_GITLAB_API_TOKEN="<token>"
+$ reviewdog -reporter=gitlab-mr-discussion
+```
 
-#### Travis CI
+## Supported CI services
 
-##### Travis CI (-reporter=github-pr-check)
+### Travis CI
+
+#### Travis CI (-reporter=github-pr-check)
 
 If you use -reporter=github-pr-check in Travis CI, you don't need to set `REVIEWDOG_TOKEN`.
 
@@ -273,20 +269,20 @@ script:
   - reviewdog -conf=.reviewdog.yml -reporter=github-pr-check
 ```
 
-##### Travis CI (-reporter=github-pr-review)
+#### Travis CI (-reporter=github-pr-review)
 
 Store GitHub API token by [travis encryption keys](https://docs.travis-ci.com/user/encryption-keys/).
 
 ```
 $ gem install travis
-$ travis encrypt REVIEWDOG_GITHUB_API_TOKEN=<your token> --add env.global
+$ travis encrypt REVIEWDOG_GITHUB_API_TOKEN=<token> --add env.global
 ```
 Example:
 
 ```yaml
 env:
   global:
-    - secure: xxxxxxxxxxxxx
+    - secure: <token><token>xxx
     - REVIEWDOG_VERSION=0.9.9
 
 install:
@@ -301,23 +297,12 @@ script:
 Examples
 - https://github.com/azu/textlint-reviewdog-example
 
-#### Circle CI
+### Circle CI
 
-Store GitHub API token as `REVIEWDOG_TOKEN` or `REVIEWDOG_GITHUB_API_TOKEN` in
+Store `REVIEWDOG_TOKEN` or `REVIEWDOG_GITHUB_API_TOKEN` in
 [Environment variables - CircleCI](https://circleci.com/docs/environment-variables/#setting-environment-variables-for-all-commands-without-adding-them-to-git)
 
-Pull Requests from fork repo cannot set an environment variable for security reason.
-However, if you want to run fork PR builds for private repositories or want to run
-reviewdog for forked PR to OSS project, CircleCI has an option to enable it.
-[Unsafe fork PR builds](https://circleci.com/docs/fork-pr-builds/#unsafe-fork-pr-builds)
-
-If you use -reporter=github-pr-check and only set `REVIEWDOG_TOKEN`, it's safer
-because it has the small limited scope. As for `REVIEWDOG_GITHUB_API_TOKEN`,
-it has a bit larger scope at least even if you only set the scope `repo:public`.
-
-Please use it at your own risk.
-
-circle.yml sample
+#### .circleci/config.yml sample
 
 ```yaml
 version: 2
@@ -335,57 +320,24 @@ jobs:
       - run: go vet ./... 2>&1 | ./reviewdog -f=govet -reporter=github-pr-review
 ```
 
-#### drone.io
-Store GitHub API token in environment variable.  [Secrets · Drone](http://readme.drone.io/usage/secrets/)
+### GitLab CI
 
-Install 'drone' cli command http://readme.drone.io/devs/cli/ and setup configuration.
-
-```
-echo '.drone.sec.yaml' >> .gitignore
-```
-
-.drone.sec.yaml
+Store `REVIEWDOG_GITLAB_API_TOKEN` in [GitLab CI variable](https://docs.gitlab.com/ee/ci/variables/#variables).
 
 ```yaml
-environment:
-  REVIEWDOG_TOKEN: <your token>
-  # OR
-  REVIEWDOG_GITHUB_API_TOKEN: <your token>
+reviwedog:
+  environment:
+    name: reviewdog
+  script:
+    - reviewdog -reporter=gitlab-mr-discussion
+    # Or
+    - reviewdog -reporter=gitlab-mr-commit
 ```
 
-.drone.yaml example
+### Common (Jenkins, local, etc...)
 
-```yaml
-build:
-  lint:
-    image: golang
-    environment:
-      - REVIEWDOG_TOKEN=$$REVIEWDOG_TOKEN
-      # Or
-      - REVIEWDOG_GITHUB_API_TOKEN=$$REVIEWDOG_GITHUB_API_TOKEN
-    commands:
-      - go get github.com/haya14busa/reviewdog/cmd/reviewdog
-      - |
-        go tool vet -all -shadowstrict . 2>&1 | reviewdog -f=govet -reporter=github-pr-check
-      # Or
-      - |
-        go tool vet -all -shadowstrict . 2>&1 | reviewdog -f=govet -reporter=github-pr-review
-    when:
-      event: pull_request
-```
-
-Finally, run `drone secure` to encrypt the .drone.sec.yaml file and generate a .drone.sec file
-
-```
-$ drone secure --repo {github-user-name}/{repo-name} --in .drone.sec.yaml
-```
-
-drone.io supports encrypted environment variable for fork Pull Request build in
-secure way, but you have to read the document carefully http://readme.drone.io/usage/secrets/
-not to expose secret data unexpectedly.
-
-#### Common (Jenkins, local, etc...)
-You can use reviewdog to post review comments anywhere with following environment variables.
+You can use reviewdog to post review comments from anywhere with following
+environment variables.
 
 | name | description |
 | ---- | ----------- |
@@ -395,28 +347,32 @@ You can use reviewdog to post review comments anywhere with following environmen
 | `CI_REPO_NAME`    | repository name (e.g. "reviewdog" for https://github.com/haya14busa/reviewdog) |
 | `CI_BRANCH`       | [optional] branch of the commit |
 
-```sh
+```shell
 $ export CI_PULL_REQUEST=14
 $ export CI_REPO_OWNER=haya14busa
 $ export CI_REPO_NAME=reviewdog
 $ export CI_COMMIT=$(git rev-parse HEAD)
-$ REVIEWDOG_TOKEN="<your token>" golint ./... | reviewdog -f=golint -target=github-pr-check
-Or
-$ REVIEWDOG_GITHUB_API_TOKEN="<your token>" golint ./... | reviewdog -f=golint -target=github-pr-review
+```
+and set a token if required.
+
+```shell
+$ REVIEWDOG_TOKEN="<token>"
+$ REVIEWDOG_GITHUB_API_TOKEN="<token>"
+$ REVIEWDOG_GITLAB_API_TOKEN="<token>"
 ```
 
-##### Jenkins with Github pull request builder plugin
+#### Jenkins with Github pull request builder plugin
 - [GitHub pull request builder plugin - Jenkins - Jenkins Wiki](https://wiki.jenkins-ci.org/display/JENKINS/GitHub+pull+request+builder+plugin)
 
-```sh
+```shell
 $ export CI_PULL_REQUEST=${ghprbPullId}
 $ export CI_REPO_OWNER=haya14busa
 $ export CI_REPO_NAME=reviewdog
 $ export CI_COMMIT=${ghprbActualCommit}
 $ export REVIEWDOG_INSECURE_SKIP_VERIFY=true # set this as you need
-$ REVIEWDOG_TOKEN="<your token>" reviewdog -conf=.reviewdog.yml -reporter=github-pr-check
+$ REVIEWDOG_TOKEN="<token>" reviewdog -reporter=github-pr-check
 # Or
-$ REVIEWDOG_GITHUB_API_TOKEN="<your token>" reviewdog -conf=.reviewdog.yml -reporter=github-pr-review
+$ REVIEWDOG_GITHUB_API_TOKEN="<token>" reviewdog -reporter=github-pr-review
 ```
 
 ## :bird: Author
