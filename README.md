@@ -314,7 +314,7 @@ Example:
 ```yaml
 env:
   global:
-    - secure: <token><token>xxx
+    - secure: <token>
     - REVIEWDOG_VERSION=0.9.9
 
 install:
