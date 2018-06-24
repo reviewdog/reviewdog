@@ -56,7 +56,7 @@ func GetBuildInfo() (prInfo *BuildInfo, isPR bool, err error) {
 		})
 	}
 
-	if owner == "" {
+	if repo == "" {
 		return nil, false, errors.New("cannot get repo name from environment variable. Set CI_REPO_NAME?")
 	}
 
