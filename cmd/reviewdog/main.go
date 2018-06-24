@@ -127,6 +127,8 @@ func usage() {
 	fmt.Fprintln(os.Stderr, usageMessage)
 	fmt.Fprintln(os.Stderr, "Flags:")
 	flag.PrintDefaults()
+	fmt.Fprintln(os.Stderr, "")
+	fmt.Fprintln(os.Stderr, "GitHub: https://github.com/haya14busa/reviewdog")
 	os.Exit(2)
 }
 
