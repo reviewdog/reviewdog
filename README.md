@@ -45,6 +45,7 @@ by diff.
   * [GitLab CI](#gitlab-ci)
   * [Common (Jenkins, local, etc...)](#common-jenkins-local-etc)
     + [Jenkins with Github pull request builder plugin](#jenkins-with-github-pull-request-builder-plugin)
+- [Articles](#articles)
 
 [![github-pr-check sample](https://user-images.githubusercontent.com/3797062/40884858-6efd82a0-6756-11e8-9f1a-c6af4f920fb0.png)](https://github.com/haya14busa/reviewdog/pull/131/checks)
 ![comment in pull-request](https://user-images.githubusercontent.com/3797062/40941822-1d775064-6887-11e8-98e9-4775d37d47f8.png)
@@ -404,6 +405,10 @@ $ REVIEWDOG_TOKEN="<token>" reviewdog -reporter=github-pr-check
 # Or
 $ REVIEWDOG_GITHUB_API_TOKEN="<token>" reviewdog -reporter=github-pr-review
 ```
+
+## Articles
+- [reviewdog — A code review dog who keeps your codebase healthy ](https://medium.com/@haya14busa/reviewdog-a-code-review-dog-who-keeps-your-codebase-healthy-d957c471938b)
+- [reviewdog ♡ GitHub Check — improved automated review experience](https://medium.com/@haya14busa/reviewdog-github-check-improved-automated-review-experience-58f89e0c95f3)
 
 ## :bird: Author
 haya14busa (https://github.com/haya14busa)
