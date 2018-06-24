@@ -165,26 +165,42 @@ func TestGitHubPullRequest_comment(t *testing.T) {
 }
 
 func TestGitHubPullRequest_Post_Flush_review_api(t *testing.T) {
-	apiCalled := 0
+	listCommentsAPICalled := 0
+	postCommentsAPICalled := 0
 	mux := http.NewServeMux()
 	mux.HandleFunc("/repos/o/r/pulls/14/comments", func(w http.ResponseWriter, r *http.Request) {
-		apiCalled++
+		listCommentsAPICalled++
 		if r.Method != "GET" {
 			t.Errorf("unexpected access: %v %v", r.Method, r.URL)
 		}
-		cs := []*github.PullRequestComment{
-			{
-				Path:     github.String("reviewdog.go"),
-				Position: github.Int(1),
-				Body:     github.String(bodyPrefix + "\nalready commented"),
-			},
-		}
-		if err := json.NewEncoder(w).Encode(cs); err != nil {
-			t.Fatal(err)
+		switch r.URL.Query().Get("page") {
+		default:
+			cs := []*github.PullRequestComment{
+				{
+					Path:     github.String("reviewdog.go"),
+					Position: github.Int(1),
+					Body:     github.String(bodyPrefix + "\nalready commented"),
+				},
+			}
+			w.Header().Add("Link", `<https://api.github.com/repos/o/r/pulls/14/comments?page=2>; rel="next"`)
+			if err := json.NewEncoder(w).Encode(cs); err != nil {
+				t.Fatal(err)
+			}
+		case "2":
+			cs := []*github.PullRequestComment{
+				{
+					Path:     github.String("reviewdog.go"),
+					Position: github.Int(14),
+					Body:     github.String(bodyPrefix + "\nalready commented 2"),
+				},
+			}
+			if err := json.NewEncoder(w).Encode(cs); err != nil {
+				t.Fatal(err)
+			}
 		}
 	})
 	mux.HandleFunc("/repos/o/r/pulls/14/reviews", func(w http.ResponseWriter, r *http.Request) {
-		apiCalled++
+		postCommentsAPICalled++
 		if r.Method != "POST" {
 			t.Errorf("unexpected access: %v %v", r.Method, r.URL)
 		}
@@ -234,6 +250,13 @@ func TestGitHubPullRequest_Post_Flush_review_api(t *testing.T) {
 				Path: "reviewdog.go",
 			},
 			LnumDiff: 14,
+			Body:     "already commented 2",
+		},
+		{
+			CheckResult: &CheckResult{
+				Path: "reviewdog.go",
+			},
+			LnumDiff: 14,
 			Body:     "new comment",
 		},
 	}
@@ -245,8 +268,11 @@ func TestGitHubPullRequest_Post_Flush_review_api(t *testing.T) {
 	if err := g.Flush(context.Background()); err != nil {
 		t.Error(err)
 	}
-	if apiCalled != 2 {
-		t.Errorf("GitHub API should be called once; called %v times", apiCalled)
+	if listCommentsAPICalled != 2 {
+		t.Errorf("GitHub List PullRequest comments API called %v times, want 2 times", listCommentsAPICalled)
+	}
+	if postCommentsAPICalled != 1 {
+		t.Errorf("GitHub post PullRequest comments API called %v times, want 1 times", postCommentsAPICalled)
 	}
 }
 

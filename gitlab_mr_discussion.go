@@ -193,9 +193,9 @@ func listAllMergeRequestDiscussion(cli *gitlab.Client, projectID string, mergeRe
 		Page:    resp.NextPage,
 		PerPage: opts.PerPage,
 	}
-	nextDiscussions, err := listAllMergeRequestDiscussion(cli, projectID, mergeRequest, newOpts)
+	restDiscussions, err := listAllMergeRequestDiscussion(cli, projectID, mergeRequest, newOpts)
 	if err != nil {
 		return nil, err
 	}
-	return append(discussions, nextDiscussions...), nil
+	return append(discussions, restDiscussions...), nil
 }
