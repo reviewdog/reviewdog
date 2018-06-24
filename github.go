@@ -18,7 +18,7 @@ var _ DiffService = &GitHubPullRequest{}
 //
 // API:
 //	https://developer.github.com/v3/pulls/comments/#create-a-comment
-// 	POST /repos/:owner/:repo/pulls/:number/comments
+//	POST /repos/:owner/:repo/pulls/:number/comments
 type GitHubPullRequest struct {
 	cli   *github.Client
 	owner string
@@ -137,9 +137,37 @@ func (g *GitHubPullRequest) Strip() int {
 }
 
 func (g *GitHubPullRequest) comment(ctx context.Context) ([]*github.PullRequestComment, error) {
-	comments, _, err := g.cli.PullRequests.ListComments(ctx, g.owner, g.repo, g.pr, nil)
+	// https://developer.github.com/v3/guides/traversing-with-pagination/
+	opts := &github.PullRequestListCommentsOptions{
+		ListOptions: github.ListOptions{
+			PerPage: 100,
+		},
+	}
+	comments, err := listAllPullRequestsComments(ctx, g.cli, g.owner, g.repo, g.pr, opts)
 	if err != nil {
 		return nil, err
 	}
 	return comments, nil
+}
+
+func listAllPullRequestsComments(ctx context.Context, cli *github.Client,
+	owner, repo string, pr int, opts *github.PullRequestListCommentsOptions) ([]*github.PullRequestComment, error) {
+	comments, resp, err := cli.PullRequests.ListComments(ctx, owner, repo, pr, opts)
+	if err != nil {
+		return nil, err
+	}
+	if resp.NextPage == 0 {
+		return comments, nil
+	}
+	newOpts := &github.PullRequestListCommentsOptions{
+		ListOptions: github.ListOptions{
+			Page:    resp.NextPage,
+			PerPage: opts.PerPage,
+		},
+	}
+	restComments, err := listAllPullRequestsComments(ctx, cli, owner, repo, pr, newOpts)
+	if err != nil {
+		return nil, err
+	}
+	return append(comments, restComments...), nil
 }
