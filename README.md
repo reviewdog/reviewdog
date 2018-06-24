@@ -13,6 +13,7 @@
 | [Travis CI](https://travis-ci.org/haya14busa/reviewdog) | [![Travis Build Status][travis-badge]](https://travis-ci.org/haya14busa/reviewdog) |
 | [CircleCI](https://circleci.com/gh/haya14busa/reviewdog) | [![CircleCI][circleci-badge]](https://circleci.com/gh/haya14busa/reviewdog) |
 | [drone.io](http://droneio.haya14busa.com/haya14busa/reviewdog) | [![drone.io Build Status](http://droneio.haya14busa.com/api/badges/haya14busa/reviewdog/status.svg)](http://droneio.haya14busa.com/haya14busa/reviewdog) |
+| [GitLab CI](https://gitlab.com/haya14busa/reviewdog) | [![pipeline status](https://gitlab.com/haya14busa/reviewdog/badges/master/pipeline.svg)](https://gitlab.com/haya14busa/reviewdog/commits/master) |
 | [codecov](https://codecov.io/gh/haya14busa/reviewdog) | [![codecov][codecov-badge]](https://codecov.io/gh/haya14busa/reviewdog) |
 
 "reviewdog" provides a way to post review comments to code hosting service,
