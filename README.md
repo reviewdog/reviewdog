@@ -362,6 +362,8 @@ jobs:
 
 Store `REVIEWDOG_GITLAB_API_TOKEN` in [GitLab CI variable](https://docs.gitlab.com/ee/ci/variables/#variables).
 
+#### .gitlab-ci.yml sample
+
 ```yaml
 reviwedog:
   script:
