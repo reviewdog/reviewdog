@@ -14,8 +14,8 @@ jobs:
           command: |
             echo "Golang $(go version)"
       - run: curl -fSL https://github.com/haya14busa/reviewdog/releases/download/$REVIEWDOG_VERSION/reviewdog_linux_amd64 -o reviewdog && chmod +x ./reviewdog
-      - run: go get github.com/golang/lint/golint
-      - run: golint ./... | ./reviewdog -f=golint -reporter=github-pr-review
+      - run: go get honnef.co/go/tools/cmd/unused
+      - run: unused ./... | ./reviewdog -efm="%f:%l:%c: %m" -name=unused -reporter=github-pr-review
 
 notify:
   webhooks:
