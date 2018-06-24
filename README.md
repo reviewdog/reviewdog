@@ -247,7 +247,7 @@ For GitHub Enterprise, set API endpoint by environment variable.
 
 ```shell
 $ export GITHUB_API="https://example.githubenterprise.com/api/v3/"
-$ export REVIEWDOG_INSECURE_SKIP_VERIFY=true # set this as you need
+$ export REVIEWDOG_INSECURE_SKIP_VERIFY=true # set this as you need to skip verifying SLL
 ```
 
 ### Reporter: GitLab MergeRequest discussions (-reporter=gitlab-mr-discussion)
@@ -261,9 +261,15 @@ GitLab Personal API Access token.
 Get the token with `api` scope from https://gitlab.com/profile/personal_access_tokens.
 
 ```shell
-$ export GITLAB_API="https://example.gitlab.com/api/v4" # for self-hosted GitLab.
 $ export REVIEWDOG_GITLAB_API_TOKEN="<token>"
 $ reviewdog -reporter=gitlab-mr-discussion
+```
+
+For self-hosted GitLab, set API endpoint by environment variable.
+
+```shell
+$ export GITLAB_API="https://example.gitlab.com/api/v4"
+$ export REVIEWDOG_INSECURE_SKIP_VERIFY=true # set this as you need to skip verifying SLL
 ```
 
 ### Reporter: GitLab MergeRequest commit (-reporter=gitlab-mr-commit)
@@ -274,7 +280,6 @@ gitlab-mr-discussion is recommended, but you can use gitlab-mr-commit reporter
 if your GitLab version is under v10.8.0.
 
 ```shell
-$ export GITLAB_API="https://example.gitlab.com/api/v4" # for self-hosted GitLab.
 $ export REVIEWDOG_GITLAB_API_TOKEN="<token>"
 $ reviewdog -reporter=gitlab-mr-commit
 ```

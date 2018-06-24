@@ -80,9 +80,6 @@ const (
 		For GitHub Enterprise:
 			$ export GITHUB_API="https://example.githubenterprise.com/api/v3"
 
-		If you want to skip verifying SSL (please use this at your own risk)
-			$ export REVIEWDOG_INSECURE_SKIP_VERIFY=true
-
 	"gitlab-mr-discussion"
 		Report results to GitLab MergeRequest discussion.
 
@@ -95,6 +92,10 @@ const (
 	"gitlab-mr-commit"
 		Same as gitlab-mr-discussion, but report results to GitLab comments for
 		each commits in Merge Requests.
+
+	For GitHub Enterprise and self hosted GitLab, set
+	REVIEWDOG_INSECURE_SKIP_VERIFY to skip verifying SSL (please use this at your own risk)
+		$ export REVIEWDOG_INSECURE_SKIP_VERIFY=true
 
 	For non-local reporters, reviewdog automatically get necessary data from
 	environment variable in CI service (Travis CI, Circle CI, dronel.io, GitLab CI).
@@ -293,6 +294,18 @@ func diffService(s string, strip int) (reviewdog.DiffService, error) {
 	return d, nil
 }
 
+func newHTTPClient() *http.Client {
+	tr := &http.Transport{
+		Proxy:           http.ProxyFromEnvironment,
+		TLSClientConfig: &tls.Config{InsecureSkipVerify: insecureSkipVerify()},
+	}
+	return &http.Client{Transport: tr}
+}
+
+func insecureSkipVerify() bool {
+	return os.Getenv("REVIEWDOG_INSECURE_SKIP_VERIFY") == "true"
+}
+
 func githubService(ctx context.Context) (githubservice *reviewdog.GitHubPullRequest, isPR bool, err error) {
 	token, err := nonEmptyEnv("REVIEWDOG_GITHUB_API_TOKEN")
 	if err != nil {
@@ -320,12 +333,7 @@ func githubService(ctx context.Context) (githubservice *reviewdog.GitHubPullRequ
 }
 
 func githubClient(ctx context.Context, token string) (*github.Client, error) {
-	tr := &http.Transport{
-		Proxy:           http.ProxyFromEnvironment,
-		TLSClientConfig: &tls.Config{InsecureSkipVerify: insecureSkipVerify()},
-	}
-	sslcli := &http.Client{Transport: tr}
-	ctx = context.WithValue(ctx, oauth2.HTTPClient, sslcli)
+	ctx = context.WithValue(ctx, oauth2.HTTPClient, newHTTPClient())
 	ts := oauth2.StaticTokenSource(
 		&oauth2.Token{AccessToken: token},
 	)
@@ -398,7 +406,7 @@ func fetchMergeRequestIDFromCommit(cli *gitlab.Client, sha string) (id int, err 
 }
 
 func gitlabClient(token string) (*gitlab.Client, error) {
-	client := gitlab.NewClient(nil, token)
+	client := gitlab.NewClient(newHTTPClient(), token)
 	baseURL, err := gitlabBaseURL()
 	if err != nil {
 		return nil, err
@@ -421,10 +429,6 @@ func gitlabBaseURL() (*url.URL, error) {
 		return nil, fmt.Errorf("GitLab base URL is invalid: %v, %v", baseURL, err)
 	}
 	return u, nil
-}
-
-func insecureSkipVerify() bool {
-	return os.Getenv("REVIEWDOG_INSECURE_SKIP_VERIFY") == "true"
 }
 
 func nonEmptyEnv(env string) (string, error) {
