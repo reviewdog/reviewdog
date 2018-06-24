@@ -55,17 +55,9 @@ const (
 	fDoc         = `format name (run -list to see supported format name) for input. It's also used as tool name in review comment if -name is empty`
 	listDoc      = `list supported pre-defined format names which can be used as -f arg`
 	nameDoc      = `tool name in review comment. -f is used as tool name if -name is empty`
-	ciDoc        = `[deprecated] reviewdog automatically get necessary data. See also -reporter for migration
-
-	CI service ('travis', 'circle-ci', 'droneio'(OSS 0.4) or 'common')
-	"common" requires following environment variables
-		CI_PULL_REQUEST	Pull Request number (e.g. 14)
-		CI_COMMIT	SHA1 for the current build
-		CI_REPO_OWNER	repository owner (e.g. "haya14busa" for https://github.com/haya14busa/reviewdog)
-		CI_REPO_NAME	repository name (e.g. "reviewdog" for https://github.com/haya14busa/reviewdog)
-`
-	confDoc     = `config file path`
-	reporterDoc = `reporter of reviewdog results. (local, github-pr-check, github-pr-review, gitlab-mr-discussion, gitlab-mr-commit)
+	ciDoc        = `[deprecated] reviewdog automatically get necessary data. See also -reporter for migration`
+	confDoc      = `config file path`
+	reporterDoc  = `reporter of reviewdog results. (local, github-pr-check, github-pr-review, gitlab-mr-discussion, gitlab-mr-commit)
 	"local" (default)
 		Report results to stdout.
 
@@ -88,7 +80,7 @@ const (
 		For GitHub Enterprise:
 			$ export GITHUB_API="https://example.githubenterprise.com/api/v3"
 
-		if you want to skip verifing SSL (please use this at your own risk)
+		If you want to skip verifying SSL (please use this at your own risk)
 			$ export REVIEWDOG_INSECURE_SKIP_VERIFY=true
 
 	"gitlab-mr-discussion"
@@ -135,6 +127,8 @@ func usage() {
 	fmt.Fprintln(os.Stderr, usageMessage)
 	fmt.Fprintln(os.Stderr, "Flags:")
 	flag.PrintDefaults()
+	fmt.Fprintln(os.Stderr, "")
+	fmt.Fprintln(os.Stderr, "GitHub: https://github.com/haya14busa/reviewdog")
 	os.Exit(2)
 }
 
