@@ -9,8 +9,6 @@ import (
 	"github.com/google/go-github/github"
 )
 
-var _ = github.ScopeAdminOrg
-
 var _ CommentService = &GitHubPullRequest{}
 var _ DiffService = &GitHubPullRequest{}
 
