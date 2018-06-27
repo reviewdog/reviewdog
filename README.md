@@ -34,7 +34,7 @@ by diff.
   * [checkstyle format](#checkstyle-format)
 - [reviewdog config file](#reviewdog-config-file)
 - [Reporters](#reporters)
-  * [Reporter: Local (-reporter=github-pr-check) [default]](#reporter-local--reportergithub-pr-check-default)
+  * [Reporter: Local (-reporter=local) [default]](#reporter-local--reporterlocal-default)
   * [Reporter: GitHub Checks (-reporter=github-pr-check)](#reporter-github-checks--reportergithub-pr-check)
   * [Reporter: GitHub PullRequest review comment (-reporter=github-pr-review)](#reporter-github-pullrequest-review-comment--reportergithub-pr-review)
   * [Reporter: GitLab MergeRequest discussions (-reporter=gitlab-mr-discussion)](#reporter-gitlab-mergerequest-discussions--reportergitlab-mr-discussion)
@@ -185,7 +185,7 @@ Output format for project config based run is one of the following formats.
 reviewdog can report results both in local environment and review services as
 continuous integration.
 
-### Reporter: Local (-reporter=github-pr-check) [default]
+### Reporter: Local (-reporter=local) [default]
 
 reviewdog can find newly introduced findings by filtering linter results
 using diff. You can pass diff command as `-diff` arg.
@@ -198,7 +198,7 @@ $ golint ./... | reviewdog -f=golint -diff="git diff master"
 
 [![github-pr-check sample](https://user-images.githubusercontent.com/3797062/40884858-6efd82a0-6756-11e8-9f1a-c6af4f920fb0.png)](https://github.com/haya14busa/reviewdog/pull/131/checks)
 
-github-pr-review reporter reports results to [GitHub Checks](https://help.github.com/articles/about-status-checks/).
+github-pr-check reporter reports results to [GitHub Checks](https://help.github.com/articles/about-status-checks/).
 Since GitHub Checks API is only for GitHub Apps, reviewdog CLI send a request to
 reviewdog GitHub App server and the server post results as GitHub Checks.
 
@@ -247,7 +247,7 @@ For GitHub Enterprise, set API endpoint by environment variable.
 
 ```shell
 $ export GITHUB_API="https://example.githubenterprise.com/api/v3/"
-$ export REVIEWDOG_INSECURE_SKIP_VERIFY=true # set this as you need to skip verifying SLL
+$ export REVIEWDOG_INSECURE_SKIP_VERIFY=true # set this as you need to skip verifying SSL
 ```
 
 ### Reporter: GitLab MergeRequest discussions (-reporter=gitlab-mr-discussion)
@@ -269,7 +269,7 @@ For self-hosted GitLab, set API endpoint by environment variable.
 
 ```shell
 $ export GITLAB_API="https://example.gitlab.com/api/v4"
-$ export REVIEWDOG_INSECURE_SKIP_VERIFY=true # set this as you need to skip verifying SLL
+$ export REVIEWDOG_INSECURE_SKIP_VERIFY=true # set this as you need to skip verifying SSL
 ```
 
 ### Reporter: GitLab MergeRequest commit (-reporter=gitlab-mr-commit)
