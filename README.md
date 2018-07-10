@@ -15,8 +15,8 @@
   <a href="https://github.com/haya14busa/reviewdog/blob/master/LICENSE">
     <img alt="LICENSE" src="https://img.shields.io/badge/license-MIT-blue.svg">
   </a>
-  <a href="https://goreportcard.com/badge/github.com/haya14busa/reviewdog">
-    <img alt="Go Report Card" src="https://goreportcard.com/report/github.com/haya14busa/reviewdog">
+  <a href="https://goreportcard.com/report/github.com/haya14busa/reviewdog">
+    <img alt="Go Report Card" src="https://goreportcard.com/badge/github.com/haya14busa/reviewdog">
   </a>
   <a href="https://godoc.org/github.com/haya14busa/reviewdog">
     <img alt="GoDoc" src="https://godoc.org/github.com/haya14busa/reviewdog?status.svg">
