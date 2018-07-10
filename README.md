@@ -9,11 +9,24 @@
 </h2>
 
 <p align="center">
-  [![Gitter](https://badges.gitter.im/haya14busa/reviewdog.svg)](https://gitter.im/haya14busa/reviewdog?utm_source=badge&utm_medium=badge&utm_campaign=pr-badge)
-  [![LICENSE](https://img.shields.io/badge/license-MIT-blue.svg)](LICENSE)
-  [![Go Report Card](https://goreportcard.com/badge/github.com/haya14busa/reviewdog)](https://goreportcard.com/report/github.com/haya14busa/reviewdog)
-  [![GoDoc](https://godoc.org/github.com/haya14busa/reviewdog?status.svg)](https://godoc.org/github.com/haya14busa/reviewdog)
-  [![releases](https://img.shields.io/github/release/haya14busa/reviewdog.svg)](https://github.com/haya14busa/reviewdog/releases)
+  <a href="https://gitter.im/haya14busa/reviewdog?utm_source=badge&utm_medium=badge&utm_campaign=pr-badge">
+    <img alt="Gitter" src="https://badges.gitter.im/haya14busa/reviewdog.svg">
+  </a>
+  <a href="https://github.com/haya14busa/reviewdog/blob/master/LICENSE">
+    <img alt="LICENSE" src="https://img.shields.io/badge/license-MIT-blue.svg">
+  </a>
+  <a href="https://goreportcard.com/badge/github.com/haya14busa/reviewdog">
+    <img alt="Go Report Card" src="https://goreportcard.com/report/github.com/haya14busa/reviewdog">
+  </a>
+  <a href="https://godoc.org/github.com/haya14busa/reviewdog">
+    <img alt="GoDoc" src="https://godoc.org/github.com/haya14busa/reviewdog?status.svg">
+  </a>
+  <a href="https://github.com/haya14busa/reviewdog/releases">
+    <img alt="releases" src="https://img.shields.io/github/release/haya14busa/reviewdog.svg">
+  </a>
+  <a href="https://github.com/haya14busa/reviewdog/releases">
+    <img alt="Github All Releases" src="https://img.shields.io/github/downloads/atom/atom/total.svg">
+  </a>
 </p>
 
 | CI | Status |
@@ -426,7 +439,7 @@ $ REVIEWDOG_GITHUB_API_TOKEN="<token>" reviewdog -reporter=github-pr-review
 - [reviewdog ♡ GitHub Check — improved automated review experience](https://medium.com/@haya14busa/reviewdog-github-check-improved-automated-review-experience-58f89e0c95f3)
 
 ## :bird: Author
-haya14busa (https://github.com/haya14busa)
+haya14busa [![GitHub followers](https://img.shields.io/github/followers/haya14busa.svg?style=social&label=Follow)](https://github.com/haya14busa)
 
 [travis-badge]: https://travis-ci.org/haya14busa/reviewdog.svg?branch=master
 [circleci-badge]: https://circleci.com/gh/haya14busa/reviewdog/tree/master.svg?style=svg
