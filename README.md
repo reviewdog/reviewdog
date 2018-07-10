@@ -15,11 +15,8 @@
   <a href="https://github.com/haya14busa/reviewdog/blob/master/LICENSE">
     <img alt="LICENSE" src="https://img.shields.io/badge/license-MIT-blue.svg?maxAge=43200">
   </a>
-  <a href="https://goreportcard.com/report/github.com/haya14busa/reviewdog">
-    <img alt="Go Report Card" src="https://goreportcard.com/badge/github.com/haya14busa/reviewdog">
-  </a>
   <a href="https://godoc.org/github.com/haya14busa/reviewdog">
-    <img alt="GoDoc" src="https://godoc.org/github.com/haya14busa/reviewdog?status.svg">
+    <img alt="GoDoc" src="https://img.shields.io/badge/godoc-reference-4F73B3.svg?label=godoc.org&maxAge=43200">
   </a>
   <a href="https://github.com/haya14busa/reviewdog/releases">
     <img alt="releases" src="https://img.shields.io/github/release/haya14busa/reviewdog.svg?maxAge=43200">
