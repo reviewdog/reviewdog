@@ -13,7 +13,7 @@
     <img alt="Gitter" src="https://badges.gitter.im/haya14busa/reviewdog.svg">
   </a>
   <a href="https://github.com/haya14busa/reviewdog/blob/master/LICENSE">
-    <img alt="LICENSE" src="https://img.shields.io/badge/license-MIT-blue.svg">
+    <img alt="LICENSE" src="https://img.shields.io/badge/license-MIT-blue.svg?maxAge=43200">
   </a>
   <a href="https://goreportcard.com/report/github.com/haya14busa/reviewdog">
     <img alt="Go Report Card" src="https://goreportcard.com/badge/github.com/haya14busa/reviewdog">
@@ -22,10 +22,10 @@
     <img alt="GoDoc" src="https://godoc.org/github.com/haya14busa/reviewdog?status.svg">
   </a>
   <a href="https://github.com/haya14busa/reviewdog/releases">
-    <img alt="releases" src="https://img.shields.io/github/release/haya14busa/reviewdog.svg">
+    <img alt="releases" src="https://img.shields.io/github/release/haya14busa/reviewdog.svg?maxAge=43200">
   </a>
   <a href="https://github.com/haya14busa/reviewdog/releases">
-    <img alt="Github All Releases" src="https://img.shields.io/github/downloads/atom/atom/total.svg">
+    <img alt="Github All Releases" src="https://img.shields.io/github/downloads/atom/atom/total.svg?maxAge=43200">
   </a>
 </p>
 
