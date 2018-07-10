@@ -10,7 +10,7 @@
 
 <p align="center">
   <a href="https://gitter.im/haya14busa/reviewdog?utm_source=badge&utm_medium=badge&utm_campaign=pr-badge">
-    <img alt="Gitter" src="https://badges.gitter.im/haya14busa/reviewdog.svg">
+    <img alt="Gitter" src="https://img.shields.io/badge/chat-gitter-1DCE73.svg?label=chat&maxAge=43200">
   </a>
   <a href="https://github.com/haya14busa/reviewdog/blob/master/LICENSE">
     <img alt="LICENSE" src="https://img.shields.io/badge/license-MIT-blue.svg?maxAge=43200">
