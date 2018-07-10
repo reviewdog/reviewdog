@@ -22,7 +22,7 @@
     <img alt="releases" src="https://img.shields.io/github/release/haya14busa/reviewdog.svg?maxAge=43200">
   </a>
   <a href="https://github.com/haya14busa/reviewdog/releases">
-    <img alt="Github All Releases" src="https://img.shields.io/github/downloads/atom/atom/total.svg?maxAge=43200">
+    <img alt="Github All Releases" src="https://img.shields.io/github/downloads/haya14busa/reviewdog/total.svg?maxAge=43200">
   </a>
 </p>
 
