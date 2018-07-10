@@ -1,19 +1,37 @@
-## reviewdog - A code review dog who keeps your codebase healthy
+<p align="center">
+  <a href="https://github.com/haya14busa/reviewdog">
+    <img alt="reviewdog" src="https://raw.githubusercontent.com/haya14busa/i/d598ed7dc49fefb0018e422e4c43e5ab8f207a6b/reviewdog/reviewdog.logo.png">
+  </a>
+</p>
 
-[![Gitter](https://badges.gitter.im/haya14busa/reviewdog.svg)](https://gitter.im/haya14busa/reviewdog?utm_source=badge&utm_medium=badge&utm_campaign=pr-badge)
-[![LICENSE](https://img.shields.io/badge/license-MIT-blue.svg)](LICENSE)
-[![Go Report Card](https://goreportcard.com/badge/github.com/haya14busa/reviewdog)](https://goreportcard.com/report/github.com/haya14busa/reviewdog)
-[![GoDoc](https://godoc.org/github.com/haya14busa/reviewdog?status.svg)](https://godoc.org/github.com/haya14busa/reviewdog)
-[![releases](https://img.shields.io/github/release/haya14busa/reviewdog.svg)](https://github.com/haya14busa/reviewdog/releases)
+<h2 align="center">
+  reviewdog - A code review dog who keeps your codebase healthy.
+</h2>
 
-![reviewdog logo](https://raw.githubusercontent.com/haya14busa/i/d598ed7dc49fefb0018e422e4c43e5ab8f207a6b/reviewdog/reviewdog.logo.png)
+<p align="center">
+  <a href="https://gitter.im/haya14busa/reviewdog?utm_source=badge&utm_medium=badge&utm_campaign=pr-badge">
+    <img alt="Gitter" src="https://img.shields.io/badge/chat-gitter-1DCE73.svg?label=chat&maxAge=43200">
+  </a>
+  <a href="https://github.com/haya14busa/reviewdog/blob/master/LICENSE">
+    <img alt="LICENSE" src="https://img.shields.io/badge/license-MIT-blue.svg?maxAge=43200">
+  </a>
+  <a href="https://godoc.org/github.com/haya14busa/reviewdog">
+    <img alt="GoDoc" src="https://img.shields.io/badge/godoc-reference-4F73B3.svg?label=godoc.org&maxAge=43200">
+  </a>
+  <a href="https://github.com/haya14busa/reviewdog/releases">
+    <img alt="releases" src="https://img.shields.io/github/release/haya14busa/reviewdog.svg?maxAge=43200">
+  </a>
+  <a href="https://github.com/haya14busa/reviewdog/releases">
+    <img alt="Github All Releases" src="https://img.shields.io/github/downloads/atom/atom/total.svg?maxAge=43200">
+  </a>
+</p>
 
-| CI | Status |
-| ---- | ----------- |
-| [Travis CI](https://travis-ci.org/haya14busa/reviewdog) | [![Travis Build Status][travis-badge]](https://travis-ci.org/haya14busa/reviewdog) |
-| [CircleCI](https://circleci.com/gh/haya14busa/reviewdog) | [![CircleCI][circleci-badge]](https://circleci.com/gh/haya14busa/reviewdog) |
-| [drone.io](http://droneio.haya14busa.com/haya14busa/reviewdog) | [![drone.io Build Status](http://droneio.haya14busa.com/api/badges/haya14busa/reviewdog/status.svg)](http://droneio.haya14busa.com/haya14busa/reviewdog) |
-| [codecov](https://codecov.io/gh/haya14busa/reviewdog) | [![codecov][codecov-badge]](https://codecov.io/gh/haya14busa/reviewdog) |
+<p align="center">
+  <a href="https://travis-ci.org/haya14busa/reviewdog"><img alt="Travis Status" src="https://img.shields.io/travis/haya14busa/reviewdog/master.svg?label=travis&maxAge=43200"></a>
+  <a href="https://circleci.com/gh/haya14busa/reviewdog"><img alt="CircleCI Status" src="https://img.shields.io/circleci/project/github/haya14busa/reviewdog/master.svg?label=circle&maxAge=43200"></a>
+  <a href="https://codecov.io/github/haya14busa/reviewdog"><img alt="Coverage Status" src="https://img.shields.io/codecov/c/github/haya14busa/reviewdog/master.svg?maxAge=43200"></a>
+  <a href="http://droneio.haya14busa.com/haya14busa/reviewdog"><img alt="drone.io Build Status" src="http://droneio.haya14busa.com/api/badges/haya14busa/reviewdog/status.svg"></a>
+</p>
 
 "reviewdog" provides a way to post review comments to code hosting service,
 such as GitHub, automatically by integrating with any linter tools with ease.
@@ -418,11 +436,4 @@ $ REVIEWDOG_GITHUB_API_TOKEN="<token>" reviewdog -reporter=github-pr-review
 - [reviewdog ♡ GitHub Check — improved automated review experience](https://medium.com/@haya14busa/reviewdog-github-check-improved-automated-review-experience-58f89e0c95f3)
 
 ## :bird: Author
-haya14busa (https://github.com/haya14busa)
-
-[travis-badge]: https://travis-ci.org/haya14busa/reviewdog.svg?branch=master
-[circleci-badge]: https://circleci.com/gh/haya14busa/reviewdog/tree/master.svg?style=svg
-
-<!-- From https://github.com/zchee/template -->
-[godoc-badge]: https://img.shields.io/badge/godoc-reference-4F73B3.svg?style=flat-square&label=%20godoc.org
-[codecov-badge]: https://img.shields.io/codecov/c/github/haya14busa/reviewdog.svg?style=flat-square&label=%20%20Codecov%2Eio&logo=data%3Aimage%2Fsvg%2Bxml%3Bcharset%3Dutf-8%3Bbase64%2CPHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHdpZHRoPSI0MCIgaGVpZ2h0PSI0MCIgdmlld0JveD0iMCAwIDI1NiAyODEiPjxwYXRoIGZpbGw9IiNFRUUiIGQ9Ik0yMTguNTUxIDM3LjQxOUMxOTQuNDE2IDEzLjI4OSAxNjIuMzMgMCAxMjguMDk3IDAgNTcuNTM3LjA0Ny4wOTEgNTcuNTI3LjA0IDEyOC4xMjFMMCAxNDkuODEzbDE2Ljg1OS0xMS40OWMxMS40NjgtNy44MTQgMjQuNzUtMTEuOTQ0IDM4LjQxNy0xMS45NDQgNC4wNzkgMCA4LjE5OC4zNzMgMTIuMjQgMS4xMSAxMi43NDIgMi4zMiAyNC4xNjUgOC4wODkgMzMuNDE0IDE2Ljc1OCAyLjEyLTQuNjcgNC42MTQtOS4yMDkgNy41Ni0xMy41MzZhODguMDgxIDg4LjA4MSAwIDAgMSAzLjgwNS01LjE1Yy0xMS42NTItOS44NC0yNS42NDktMTYuNDYzLTQwLjkyNi0xOS4yNDVhOTAuMzUgOTAuMzUgMCAwIDAtMTYuMTItMS40NTkgODguMzc3IDg4LjM3NyAwIDAgMC0zMi4yOSA2LjA3YzguMzYtNTEuMjIyIDUyLjg1LTg5LjM3IDEwNS4yMy04OS40MDggMjguMzkyIDAgNTUuMDc4IDExLjA1MyA3NS4xNDkgMzEuMTE3IDE2LjAxMSAxNi4wMSAyNi4yNTQgMzYuMDMzIDI5Ljc4OCA1OC4xMTctMTAuMzI5LTQuMDM1LTIxLjIxMi02LjEtMzIuNDAzLTYuMTQ0bC0xLjU2OC0uMDA3YTkwLjk1NyA5MC45NTcgMCAwIDAtMy40MDEuMTExYy0xLjk1NS4xLTMuODk4LjI3Ny01LjgyMS41LS41NzQuMDYzLTEuMTM5LjE1My0xLjcwNy4yMzEtMS4zNzguMTg2LTIuNzUuMzk1LTQuMTA5LjYzOS0uNjAzLjExLTEuMjAzLjIzMS0xLjguMzUxYTkwLjUxNyA5MC41MTcgMCAwIDAtNC4xMTQuOTM3Yy0uNDkyLjEyNi0uOTgzLjI0My0xLjQ3LjM3NGE5MC4xODMgOTAuMTgzIDAgMCAwLTUuMDkgMS41MzhjLS4xLjAzNS0uMjA0LjA2My0uMzA0LjA5NmE4Ny41MzIgODcuNTMyIDAgMCAwLTExLjA1NyA0LjY0OWMtLjA5Ny4wNS0uMTkzLjEwMS0uMjkzLjE1MWE4Ni43IDg2LjcgMCAwIDAtNC45MTIgMi43MDFsLS4zOTguMjM4YTg2LjA5IDg2LjA5IDAgMCAwLTIyLjMwMiAxOS4yNTNjLS4yNjIuMzE4LS41MjQuNjM1LS43ODQuOTU4LTEuMzc2IDEuNzI1LTIuNzE4IDMuNDktMy45NzYgNS4zMzZhOTEuNDEyIDkxLjQxMiAwIDAgMC0zLjY3MiA1LjkxMyA5MC4yMzUgOTAuMjM1IDAgMCAwLTIuNDk2IDQuNjM4Yy0uMDQ0LjA5LS4wODkuMTc1LS4xMzMuMjY1YTg4Ljc4NiA4OC43ODYgMCAwIDAtNC42MzcgMTEuMjcybC0uMDAyLjAwOXYuMDA0YTg4LjAwNiA4OC4wMDYgMCAwIDAtNC41MDkgMjkuMzEzYy4wMDUuMzk3LjAwNS43OTQuMDE5IDEuMTkyLjAyMS43NzcuMDYgMS41NTcuMTA0IDIuMzM4YTk4LjY2IDk4LjY2IDAgMCAwIC4yODkgMy44MzRjLjA3OC44MDQuMTc0IDEuNjA2LjI3NSAyLjQxLjA2My41MTIuMTE5IDEuMDI2LjE5NSAxLjUzNGE5MC4xMSA5MC4xMSAwIDAgMCAuNjU4IDQuMDFjNC4zMzkgMjIuOTM4IDE3LjI2MSA0Mi45MzcgMzYuMzkgNTYuMzE2bDIuNDQ2IDEuNTY0LjAyLS4wNDhhODguNTcyIDg4LjU3MiAwIDAgMCAzNi4yMzIgMTMuNDVsMS43NDYuMjM2IDEyLjk3NC0yMC44MjItNC42NjQtLjEyN2MtMzUuODk4LS45ODUtNjUuMS0zMS4wMDMtNjUuMS02Ni45MTcgMC0zNS4zNDggMjcuNjI0LTY0LjcwMiA2Mi44NzYtNjYuODI5bDIuMjMtLjA4NWMxNC4yOTItLjM2MiAyOC4zNzIgMy44NTkgNDAuMzI1IDExLjk5N2wxNi43ODEgMTEuNDIxLjAzNi0yMS41OGMuMDI3LTM0LjIxOS0xMy4yNzItNjYuMzc5LTM3LjQ0OS05MC41NTQiLz48L3N2Zz4=
+haya14busa [![GitHub followers](https://img.shields.io/github/followers/haya14busa.svg?style=social&label=Follow)](https://github.com/haya14busa)
