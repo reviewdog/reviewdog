@@ -238,6 +238,9 @@ App server.
 The server is running with haya14busa's pocket money for now and I may break
 things, so I cannot ensure that the server is running 24h and 365 days.
 
+**UPDATE:** Started getting support by [opencollective](https://opencollective.com/reviewdog).
+See [Supporting reviewdog](#supporting-reviewdog)
+
 github-pr-check reporter is better than github-pr-review reporter in general
 because it provides more rich feature and has less scope, but please bear in
 mind the above caution and please use it on your own risk.
@@ -437,3 +440,13 @@ $ REVIEWDOG_GITHUB_API_TOKEN="<token>" reviewdog -reporter=github-pr-review
 
 ## :bird: Author
 haya14busa [![GitHub followers](https://img.shields.io/github/followers/haya14busa.svg?style=social&label=Follow)](https://github.com/haya14busa)
+
+## Contributors
+
+[![Contributors](https://opencollective.com/reviewdog/contributors.svg?width=890)](https://github.com/haya14busa/reviewdog/graphs/contributors)
+
+### Supporting reviewdog
+Become a backer or sponsor and get your logo on our README on Github with a link to your site.
+
+[![Become a backer](https://opencollective.com/reviewdog/tiers/backer.svg?avatarHeight=64)](https://opencollective.com/reviewdog#backers)
+[![Become a sponsor](https://opencollective.com/reviewdog/tiers/sponsor.svg?avatarHeight=64)](https://opencollective.com/reviewdog#sponsor)
