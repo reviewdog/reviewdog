@@ -39,4 +39,4 @@ runner:
     errorformat:
       - '%E%f:%l:%c: %m'
       - '%E%f:%l: %m'
-      - '%C%m'
+      - '%C%.%#'
