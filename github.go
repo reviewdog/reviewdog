@@ -60,8 +60,6 @@ func (g *GitHubPullRequest) Post(_ context.Context, c *Comment) error {
 	return nil
 }
 
-var githubAPIHost = "api.github.com"
-
 // Flush posts comments which has not been posted yet.
 func (g *GitHubPullRequest) Flush(ctx context.Context) error {
 	g.muComments.Lock()
