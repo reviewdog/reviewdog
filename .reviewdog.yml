@@ -34,3 +34,6 @@ runner:
   revive:
     cmd: revive -config=.revive.toml $(go list ./... | grep -v /vendor/)
     format: golint
+  golangci:
+    cmd: golangci-lint run --out-format=checkstyle $(go list ./... | grep -v /vendor/)
+    format: checkstyle
