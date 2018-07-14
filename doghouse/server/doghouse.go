@@ -109,7 +109,7 @@ func (ch *Checker) postCheck(ctx context.Context, branch string, checks []*revie
 		HeadSHA:     ch.req.SHA,
 		Status:      github.String("completed"),
 		Conclusion:  github.String(conclusion),
-		CompletedAt: &github.Timestamp{time.Now()},
+		CompletedAt: &github.Timestamp{Time: time.Now()},
 		Output: &github.CheckRunOutput{
 			Title:       github.String(title),
 			Summary:     github.String(ch.summary(checks)),

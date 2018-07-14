@@ -361,7 +361,7 @@ func (g *GitHubHandler) handleRepo(ctx context.Context, ghcli *github.Client, w 
 	if r.Method == "POST" {
 		if _, err := server.RegenerateRepoToken(ctx, g.repoTokenStore, repo.Owner.GetLogin(), repo.GetName(), repo.GetID()); err != nil {
 			w.WriteHeader(http.StatusInternalServerError)
-			fmt.Fprintln(w, "failed to update repository token: %v", err)
+			fmt.Fprintf(w, "failed to update repository token: %v", err)
 			return
 		}
 		http.Redirect(w, r, r.URL.String(), http.StatusFound)

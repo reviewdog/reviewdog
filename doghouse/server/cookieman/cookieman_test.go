@@ -120,7 +120,7 @@ func TestCookieOption(t *testing.T) {
 	}
 
 	if cookieLen := len(w.Result().Cookies()); cookieLen != 1 {
-		t.Fatal("got %d cookies, want 1 cookie")
+		t.Fatalf("got %d cookies, want 1 cookie")
 	}
 	cookie := w.Result().Cookies()[0]
 

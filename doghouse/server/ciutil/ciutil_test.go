@@ -12,13 +12,13 @@ func TestIsFromCI(t *testing.T) {
 	const allowedIP = "67.225.139.254"
 	r.RemoteAddr = allowedIP
 	if !IsFromCI(r) {
-		t.Error("IsFromCI(%q) = false, want true", allowedIP)
+		t.Errorf("IsFromCI(%q) = false, want true", allowedIP)
 	}
 
 	const notAllowedIP = "93.184.216.34"
 	r.RemoteAddr = notAllowedIP
 	if IsFromCI(r) {
-		t.Error("IsFromCI(%q) = true, want false", notAllowedIP)
+		t.Errorf("IsFromCI(%q) = true, want false", notAllowedIP)
 	}
 }
 
@@ -49,7 +49,7 @@ func TestIsFromTravisCI(t *testing.T) {
 	const notAllowedIP = "93.184.216.34"
 	r.RemoteAddr = notAllowedIP
 	if IsFromTravisCI(r) {
-		t.Error("IsFromTravisCI(%q) = true, want false", notAllowedIP)
+		t.Errorf("IsFromTravisCI(%q) = true, want false", notAllowedIP)
 	}
 }
 
@@ -59,12 +59,12 @@ func TestIsFromAppveyor(t *testing.T) {
 	const allowedIP = "67.225.139.254"
 	r.RemoteAddr = allowedIP
 	if !IsFromAppveyor(r) {
-		t.Error("IsFromAppveyor(%q) = false, want true", allowedIP)
+		t.Errorf("IsFromAppveyor(%q) = false, want true", allowedIP)
 	}
 
 	const notAllowedIP = "93.184.216.34"
 	r.RemoteAddr = notAllowedIP
 	if IsFromAppveyor(r) {
-		t.Error("IsFromAppveyor(%q) = true, want false", notAllowedIP)
+		t.Errorf("IsFromAppveyor(%q) = true, want false", notAllowedIP)
 	}
 }
