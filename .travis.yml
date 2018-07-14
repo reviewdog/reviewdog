@@ -30,6 +30,7 @@ install:
   - go get github.com/client9/misspell/cmd/misspell
   - go get mvdan.cc/unparam
   - go get github.com/mgechev/revive
+  - curl -sfL https://install.goreleaser.com/github.com/golangci/golangci-lint.sh | bash -s -- -b $GOPATH/bin
   - npm install
 
 before_script:
