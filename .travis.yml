@@ -3,8 +3,12 @@ language: go
 go:
   - "1.10.x"
   - "1.9.x"
-  - "1.8.x"
   - master
+
+matrix:
+  allow_failures:
+    - go: master
+  fast_finish: true
 
 env:
   global:
@@ -23,6 +27,8 @@ install:
   - go get honnef.co/go/tools/cmd/gosimple
   - go get honnef.co/go/tools/cmd/staticcheck
   - go get honnef.co/go/tools/cmd/unused
+  - go get github.com/client9/misspell/cmd/misspell
+  - npm install
 
 before_script:
   - echo $TRAVIS
@@ -36,6 +42,7 @@ before_script:
 
 script:
   - reviewdog -reporter=github-pr-check
+  - $(npm bin)/textlint -f checkstyle README.md | reviewdog -f=checkstyle -name="textlint" -reporter=github-pr-check
   - go test -v -race $(go list ./... | grep -v "/vendor/")
   - goverage -coverprofile=coverage.txt ./...
 

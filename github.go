@@ -3,46 +3,20 @@ package reviewdog
 import (
 	"context"
 	"fmt"
-	"os/exec"
 	"path/filepath"
-	"strings"
 	"sync"
 
 	"github.com/google/go-github/github"
 )
 
-var _ = github.ScopeAdminOrg
-
 var _ CommentService = &GitHubPullRequest{}
 var _ DiffService = &GitHubPullRequest{}
-
-// `path` to `position`(Lnum for new file) to comment `body`s
-type postedcomments map[string]map[int][]string
-
-// IsPosted returns true if a given comment has been posted in GitHub already,
-// otherwise returns false. It sees comments with same path, same position,
-// and same body as same comments.
-func (p postedcomments) IsPosted(c *Comment) bool {
-	if _, ok := p[c.Path]; !ok {
-		return false
-	}
-	bodys, ok := p[c.Path][c.LnumDiff]
-	if !ok {
-		return false
-	}
-	for _, body := range bodys {
-		if body == commentBody(c) {
-			return true
-		}
-	}
-	return false
-}
 
 // GitHubPullRequest is a comment and diff service for GitHub PullRequest.
 //
 // API:
 //	https://developer.github.com/v3/pulls/comments/#create-a-comment
-// 	POST /repos/:owner/:repo/pulls/:number/comments
+//	POST /repos/:owner/:repo/pulls/:number/comments
 type GitHubPullRequest struct {
 	cli   *github.Client
 	owner string
@@ -86,16 +60,6 @@ func (g *GitHubPullRequest) Post(_ context.Context, c *Comment) error {
 	return nil
 }
 
-const bodyPrefix = `<sub>reported by [reviewdog](https://github.com/haya14busa/reviewdog) :dog:</sub>`
-
-func commentBody(c *Comment) string {
-	tool := ""
-	if c.ToolName != "" {
-		tool = fmt.Sprintf("**[%s]** ", c.ToolName)
-	}
-	return tool + bodyPrefix + "\n" + c.Body
-}
-
 var githubAPIHost = "api.github.com"
 
 // Flush posts comments which has not been posted yet.
@@ -112,7 +76,7 @@ func (g *GitHubPullRequest) Flush(ctx context.Context) error {
 func (g *GitHubPullRequest) postAsReviewComment(ctx context.Context) error {
 	comments := make([]*github.DraftReviewComment, 0, len(g.postComments))
 	for _, c := range g.postComments {
-		if g.postedcs.IsPosted(c) {
+		if g.postedcs.IsPosted(c, c.LnumDiff) {
 			continue
 		}
 		cbody := commentBody(c)
@@ -150,16 +114,7 @@ func (g *GitHubPullRequest) setPostedComment(ctx context.Context) error {
 			// "body".
 			continue
 		}
-		path := *c.Path
-		pos := *c.Position
-		body := *c.Body
-		if _, ok := g.postedcs[path]; !ok {
-			g.postedcs[path] = make(map[int][]string)
-		}
-		if _, ok := g.postedcs[path][pos]; !ok {
-			g.postedcs[path][pos] = make([]string, 0)
-		}
-		g.postedcs[path][pos] = append(g.postedcs[path][pos], body)
+		g.postedcs.AddPostedComment(c.GetPath(), c.GetPosition(), c.GetBody())
 	}
 	return nil
 }
@@ -180,17 +135,37 @@ func (g *GitHubPullRequest) Strip() int {
 }
 
 func (g *GitHubPullRequest) comment(ctx context.Context) ([]*github.PullRequestComment, error) {
-	comments, _, err := g.cli.PullRequests.ListComments(ctx, g.owner, g.repo, g.pr, nil)
+	// https://developer.github.com/v3/guides/traversing-with-pagination/
+	opts := &github.PullRequestListCommentsOptions{
+		ListOptions: github.ListOptions{
+			PerPage: 100,
+		},
+	}
+	comments, err := listAllPullRequestsComments(ctx, g.cli, g.owner, g.repo, g.pr, opts)
 	if err != nil {
 		return nil, err
 	}
 	return comments, nil
 }
 
-func gitRelWorkdir() (string, error) {
-	b, err := exec.Command("git", "rev-parse", "--show-prefix").Output()
+func listAllPullRequestsComments(ctx context.Context, cli *github.Client,
+	owner, repo string, pr int, opts *github.PullRequestListCommentsOptions) ([]*github.PullRequestComment, error) {
+	comments, resp, err := cli.PullRequests.ListComments(ctx, owner, repo, pr, opts)
 	if err != nil {
-		return "", fmt.Errorf("failed to run 'git rev-parse --show-prefix': %v", err)
+		return nil, err
 	}
-	return strings.Trim(string(b), "\n"), nil
+	if resp.NextPage == 0 {
+		return comments, nil
+	}
+	newOpts := &github.PullRequestListCommentsOptions{
+		ListOptions: github.ListOptions{
+			Page:    resp.NextPage,
+			PerPage: opts.PerPage,
+		},
+	}
+	restComments, err := listAllPullRequestsComments(ctx, cli, owner, repo, pr, newOpts)
+	if err != nil {
+		return nil, err
+	}
+	return append(comments, restComments...), nil
 }

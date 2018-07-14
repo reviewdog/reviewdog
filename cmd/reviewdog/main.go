@@ -24,6 +24,7 @@ import (
 	"github.com/haya14busa/reviewdog/cienv"
 	"github.com/haya14busa/reviewdog/project"
 	shellwords "github.com/mattn/go-shellwords"
+	"github.com/xanzy/go-gitlab"
 )
 
 const usageMessage = "" +
@@ -54,17 +55,9 @@ const (
 	fDoc         = `format name (run -list to see supported format name) for input. It's also used as tool name in review comment if -name is empty`
 	listDoc      = `list supported pre-defined format names which can be used as -f arg`
 	nameDoc      = `tool name in review comment. -f is used as tool name if -name is empty`
-	ciDoc        = `[deprecated] reviewdog automatically get necessary data. See also -reporter for migration
-
-	CI service ('travis', 'circle-ci', 'droneio'(OSS 0.4) or 'common')
-	"common" requires following environment variables
-		CI_PULL_REQUEST	Pull Request number (e.g. 14)
-		CI_COMMIT	SHA1 for the current build
-		CI_REPO_OWNER	repository owner (e.g. "haya14busa" for https://github.com/haya14busa/reviewdog)
-		CI_REPO_NAME	repository name (e.g. "reviewdog" for https://github.com/haya14busa/reviewdog)
-`
-	confDoc     = `config file path`
-	reporterDoc = `reporter of reviewdog results. (local, github-pr-check, github-pr-review)
+	ciDoc        = `[deprecated] reviewdog automatically get necessary data. See also -reporter for migration`
+	confDoc      = `config file path`
+	reporterDoc  = `reporter of reviewdog results. (local, github-pr-check, github-pr-review, gitlab-mr-discussion, gitlab-mr-commit)
 	"local" (default)
 		Report results to stdout.
 
@@ -87,12 +80,25 @@ const (
 		For GitHub Enterprise:
 			$ export GITHUB_API="https://example.githubenterprise.com/api/v3"
 
-		if you want to skip verifing SSL (please use this at your own risk)
-			$ export REVIEWDOG_INSECURE_SKIP_VERIFY=true
+	"gitlab-mr-discussion"
+		Report results to GitLab MergeRequest discussion.
 
-	For "github-pr-check" and "github-pr-review", reviewdog automatically get
-	necessary data from environment variable in CI service ('travis',
-	'circle-ci', 'droneio').
+		1. Set REVIEWDOG_GITLAB_API_TOKEN environment variable.
+		Go to https://gitlab.com/profile/personal_access_tokens
+
+		For self hosted GitLab:
+			$ export GITLAB_API="https://example.gitlab.com/api/v4"
+
+	"gitlab-mr-commit"
+		Same as gitlab-mr-discussion, but report results to GitLab comments for
+		each commits in Merge Requests.
+
+	For GitHub Enterprise and self hosted GitLab, set
+	REVIEWDOG_INSECURE_SKIP_VERIFY to skip verifying SSL (please use this at your own risk)
+		$ export REVIEWDOG_INSECURE_SKIP_VERIFY=true
+
+	For non-local reporters, reviewdog automatically get necessary data from
+	environment variable in CI service (Travis CI, Circle CI, dronel.io, GitLab CI).
 	You can set necessary data with following environment variable manually if
 	you want (e.g. run reviewdog in Jenkins).
 
@@ -122,6 +128,8 @@ func usage() {
 	fmt.Fprintln(os.Stderr, usageMessage)
 	fmt.Fprintln(os.Stderr, "Flags:")
 	flag.PrintDefaults()
+	fmt.Fprintln(os.Stderr, "")
+	fmt.Fprintln(os.Stderr, "GitHub: https://github.com/haya14busa/reviewdog")
 	os.Exit(2)
 }
 
@@ -149,7 +157,7 @@ func run(r io.Reader, w io.Writer, opt *option) error {
 	// TODO(haya14busa): clean up when removing -ci flag from next release.
 	if opt.ci != "" {
 		return errors.New(`-ci flag is deprecated.
-See -reporter flag for migration and set -reporter="github-pr-review" or -reporter="github-pr-check"`)
+See -reporter flag for migration and set -reporter="github-pr-review" or -reporter="github-pr-check" or -reporter="gitlab-mr-commit"`)
 	}
 
 	// assume it's project based run when both -efm ane -f are not specified
@@ -171,7 +179,7 @@ See -reporter flag for migration and set -reporter="github-pr-review" or -report
 		return runDoghouse(ctx, r, opt, isProject)
 	case "github-pr-review":
 		if os.Getenv("REVIEWDOG_GITHUB_API_TOKEN") == "" {
-			fmt.Fprintf(os.Stderr, "REVIEWDOG_GITHUB_API_TOKEN is not set\n")
+			fmt.Fprintln(os.Stderr, "REVIEWDOG_GITHUB_API_TOKEN is not set")
 			return nil
 		}
 		gs, isPR, err := githubService(ctx)
@@ -179,11 +187,51 @@ See -reporter flag for migration and set -reporter="github-pr-review" or -report
 			return err
 		}
 		if !isPR {
-			fmt.Fprintf(os.Stderr, "reviewdog: this is not PullRequest build. CI: %v\n", opt.ci)
+			fmt.Fprintln(os.Stderr, "reviewdog: this is not PullRequest build.")
 			return nil
 		}
 		cs = reviewdog.MultiCommentService(gs, cs)
 		ds = gs
+	case "gitlab-mr-discussion":
+		build, cli, err := gitlabBuildWithClient()
+		if err != nil {
+			return err
+		}
+		if build.PullRequest == 0 {
+			fmt.Fprintln(os.Stderr, "this is not MergeRequest build.")
+			return nil
+		}
+
+		gc, err := reviewdog.NewGitLabMergeRequestDiscussionCommenter(cli, build.Owner, build.Repo, build.PullRequest, build.SHA)
+		if err != nil {
+			return err
+		}
+
+		cs = reviewdog.MultiCommentService(gc, cs)
+		ds, err = reviewdog.NewGitLabMergeRequestDiff(cli, build.Owner, build.Repo, build.PullRequest, build.SHA)
+		if err != nil {
+			return err
+		}
+	case "gitlab-mr-commit":
+		build, cli, err := gitlabBuildWithClient()
+		if err != nil {
+			return err
+		}
+		if build.PullRequest == 0 {
+			fmt.Fprintln(os.Stderr, "this is not MergeRequest build.")
+			return nil
+		}
+
+		gc, err := reviewdog.NewGitLabMergeRequestCommitCommenter(cli, build.Owner, build.Repo, build.PullRequest, build.SHA)
+		if err != nil {
+			return err
+		}
+
+		cs = reviewdog.MultiCommentService(gc, cs)
+		ds, err = reviewdog.NewGitLabMergeRequestDiff(cli, build.Owner, build.Repo, build.PullRequest, build.SHA)
+		if err != nil {
+			return err
+		}
 	case "local":
 		d, err := diffService(opt.diffCmd, opt.diffStrip)
 		if err != nil {
@@ -246,12 +294,24 @@ func diffService(s string, strip int) (reviewdog.DiffService, error) {
 	return d, nil
 }
 
+func newHTTPClient() *http.Client {
+	tr := &http.Transport{
+		Proxy:           http.ProxyFromEnvironment,
+		TLSClientConfig: &tls.Config{InsecureSkipVerify: insecureSkipVerify()},
+	}
+	return &http.Client{Transport: tr}
+}
+
+func insecureSkipVerify() bool {
+	return os.Getenv("REVIEWDOG_INSECURE_SKIP_VERIFY") == "true"
+}
+
 func githubService(ctx context.Context) (githubservice *reviewdog.GitHubPullRequest, isPR bool, err error) {
 	token, err := nonEmptyEnv("REVIEWDOG_GITHUB_API_TOKEN")
 	if err != nil {
 		return nil, isPR, err
 	}
-	g, isPR, err := cienv.GetPullRequestInfo()
+	g, isPR, err := cienv.GetBuildInfo()
 	if err != nil {
 		return nil, isPR, err
 	}
@@ -273,12 +333,7 @@ func githubService(ctx context.Context) (githubservice *reviewdog.GitHubPullRequ
 }
 
 func githubClient(ctx context.Context, token string) (*github.Client, error) {
-	tr := &http.Transport{
-		Proxy:           http.ProxyFromEnvironment,
-		TLSClientConfig: &tls.Config{InsecureSkipVerify: insecureSkipVerify()},
-	}
-	sslcli := &http.Client{Transport: tr}
-	ctx = context.WithValue(ctx, oauth2.HTTPClient, sslcli)
+	ctx = context.WithValue(ctx, oauth2.HTTPClient, newHTTPClient())
 	ts := oauth2.StaticTokenSource(
 		&oauth2.Token{AccessToken: token},
 	)
@@ -303,8 +358,77 @@ func githubBaseURL() (*url.URL, error) {
 	return u, nil
 }
 
-func insecureSkipVerify() bool {
-	return os.Getenv("REVIEWDOG_INSECURE_SKIP_VERIFY") == "true"
+func gitlabBuildWithClient() (*cienv.BuildInfo, *gitlab.Client, error) {
+	token, err := nonEmptyEnv("REVIEWDOG_GITLAB_API_TOKEN")
+	if err != nil {
+		return nil, nil, err
+	}
+
+	g, _, err := cienv.GetBuildInfo()
+	if err != nil {
+		return nil, nil, err
+	}
+
+	client, err := gitlabClient(token)
+	if err != nil {
+		return nil, nil, err
+	}
+
+	if g.PullRequest == 0 {
+		prNr, err := fetchMergeRequestIDFromCommit(client, g.SHA)
+		if err != nil {
+			return nil, nil, err
+		}
+		if prNr != 0 {
+			g.PullRequest = prNr
+		}
+	}
+
+	return g, client, err
+}
+
+func fetchMergeRequestIDFromCommit(cli *gitlab.Client, sha string) (id int, err error) {
+	// https://docs.gitlab.com/ce/api/merge_requests.html#list-merge-requests
+	opt := &gitlab.ListMergeRequestsOptions{
+		State:   gitlab.String("opened"),
+		OrderBy: gitlab.String("updated_at"),
+	}
+	mrs, _, err := cli.MergeRequests.ListMergeRequests(opt)
+	if err != nil {
+		return 0, err
+	}
+	for _, mr := range mrs {
+		if mr.SHA == sha {
+			return mr.IID, nil
+		}
+	}
+	return 0, nil
+}
+
+func gitlabClient(token string) (*gitlab.Client, error) {
+	client := gitlab.NewClient(newHTTPClient(), token)
+	baseURL, err := gitlabBaseURL()
+	if err != nil {
+		return nil, err
+	}
+	if err := client.SetBaseURL(baseURL.String()); err != nil {
+		return nil, err
+	}
+	return client, nil
+}
+
+const defaultGitLabAPI = "https://gitlab.com/api/v4"
+
+func gitlabBaseURL() (*url.URL, error) {
+	baseURL := os.Getenv("GITLAB_API")
+	if baseURL == "" {
+		baseURL = defaultGitLabAPI
+	}
+	u, err := url.Parse(baseURL)
+	if err != nil {
+		return nil, fmt.Errorf("GitLab base URL is invalid: %v, %v", baseURL, err)
+	}
+	return u, nil
 }
 
 func nonEmptyEnv(env string) (string, error) {
