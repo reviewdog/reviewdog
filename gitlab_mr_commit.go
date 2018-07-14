@@ -92,7 +92,7 @@ func (g *GitLabMergeRequestCommitCommenter) postCommentsForEach(ctx context.Cont
 				Line:     &comment.Lnum,
 				LineType: &ltype,
 			}
-			_, _, err = g.cli.Commits.PostCommitComment(g.projects, commitID, prcomment, nil)
+			_, _, err = g.cli.Commits.PostCommitComment(g.projects, commitID, prcomment, gitlab.WithContext(ctx))
 			return err
 		})
 	}
@@ -127,13 +127,15 @@ func (g *GitLabMergeRequestCommitCommenter) setPostedComment(ctx context.Context
 }
 
 func (g *GitLabMergeRequestCommitCommenter) comment(ctx context.Context) ([]*gitlab.CommitComment, error) {
-	commits, _, err := g.cli.MergeRequests.GetMergeRequestCommits(g.projects, g.pr, nil)
+	commits, _, err := g.cli.MergeRequests.GetMergeRequestCommits(
+		g.projects, g.pr, nil, gitlab.WithContext(ctx))
 	if err != nil {
 		return nil, err
 	}
 	comments := make([]*gitlab.CommitComment, 0)
 	for _, c := range commits {
-		tmpComments, _, err := g.cli.Commits.GetCommitComments(g.projects, c.ID, nil)
+		tmpComments, _, err := g.cli.Commits.GetCommitComments(
+			g.projects, c.ID, nil, gitlab.WithContext(ctx))
 		if err != nil {
 			continue
 		}
