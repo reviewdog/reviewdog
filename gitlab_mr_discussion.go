@@ -85,7 +85,7 @@ func (g *GitLabMergeRequestDiscussionCommenter) createPostedCommetns() (postedco
 }
 
 func (g *GitLabMergeRequestDiscussionCommenter) postCommentsForEach(ctx context.Context, postedcs postedcomments) error {
-	mr, _, err := g.cli.MergeRequests.GetMergeRequest(g.projects, g.pr, nil)
+	mr, _, err := g.cli.MergeRequests.GetMergeRequest(g.projects, g.pr, nil, gitlab.WithContext(ctx))
 	if err != nil {
 		return fmt.Errorf("failed to get merge request: %v", err)
 	}
