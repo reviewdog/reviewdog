@@ -2,6 +2,7 @@ package cookieman
 
 import (
 	"encoding/base64"
+	"errors"
 	"fmt"
 	"net/http"
 	"net/http/httptest"
@@ -29,6 +30,15 @@ func (f *fakeCipher) Decrypt(ciphertext []byte) ([]byte, error) {
 	return ciphertext, nil
 }
 
+func GetRequestWithCookie(w *httptest.ResponseRecorder) *http.Request {
+	response := w.Result()
+	req, _ := http.NewRequest("", "", nil)
+	for _, c := range response.Cookies() {
+		req.AddCookie(c)
+	}
+	return req
+}
+
 func TestCookieStore_Set_Get(t *testing.T) {
 	opt := CookieOption{}
 	cookieman := New(&fakeCipher{}, opt)
@@ -47,22 +57,13 @@ func TestCookieStore_Set_Get(t *testing.T) {
 	}
 
 	response := w.Result()
-
 	gotSetCookie := response.Header.Get("Set-Cookie")
 	wantSetCookie := fmt.Sprintf("%s=%s", name, base64.URLEncoding.EncodeToString([]byte(value)))
 	if gotSetCookie != wantSetCookie {
 		t.Errorf("CookieStore.Get: Set-Cookie value: got %q, want %q", gotSetCookie, wantSetCookie)
 	}
 
-	req, err := http.NewRequest("", "", nil)
-	if err != nil {
-		t.Fatal(err)
-	}
-
-	for _, c := range response.Cookies() {
-		req.AddCookie(c)
-	}
-
+	req := GetRequestWithCookie(w)
 	b, err := vimStore.Get(req)
 	if err != nil {
 		t.Fatal(err)
@@ -70,6 +71,72 @@ func TestCookieStore_Set_Get(t *testing.T) {
 
 	if got := string(b); got != value {
 		t.Errorf("CookieStore.Get: got %q, want %q", got, value)
+	}
+}
+
+func TestCookieStore_Set_encrypt_failure(t *testing.T) {
+	cipher := &fakeCipher{
+		fakeEncrypt: func(plaintext []byte) ([]byte, error) {
+			return nil, errors.New("test encrypt failure")
+		},
+	}
+
+	opt := CookieOption{}
+	cookieman := New(cipher, opt)
+	w := httptest.NewRecorder()
+	store := cookieman.NewCookieStore("n", nil)
+	if err := store.Set(w, []byte("v")); err == nil {
+		t.Error("got nil, but want error")
+	}
+}
+
+func TestCookieStore_Get_decrypt_failure(t *testing.T) {
+	cipher := &fakeCipher{
+		fakeDecrypt: func(ciphertext []byte) ([]byte, error) {
+			return nil, errors.New("test decrypt failure")
+		},
+	}
+
+	opt := CookieOption{}
+	cookieman := New(cipher, opt)
+	w := httptest.NewRecorder()
+	store := cookieman.NewCookieStore("n", nil)
+	if err := store.Set(w, []byte("v")); err != nil {
+		t.Error(err)
+	}
+
+	req := GetRequestWithCookie(w)
+	if _, err := store.Get(req); err == nil {
+		t.Error("got nil, but want error")
+	}
+}
+
+func TestCookieStore_Get_decode_base64_error(t *testing.T) {
+	cipher := &fakeCipher{}
+	opt := CookieOption{}
+	cookieman := New(cipher, opt)
+	w := httptest.NewRecorder()
+	store := cookieman.NewCookieStore("n", nil)
+
+	http.SetCookie(w, &http.Cookie{
+		Name:  "n",
+		Value: "zzz: non base64 encoding",
+	})
+
+	req := GetRequestWithCookie(w)
+	if _, err := store.Get(req); err == nil {
+		t.Error("got nil, but want error")
+	}
+}
+
+func TestCookieStore_Get_not_found(t *testing.T) {
+	cipher := &fakeCipher{}
+	opt := CookieOption{}
+	cookieman := New(cipher, opt)
+	store := cookieman.NewCookieStore("n", nil)
+	req, _ := http.NewRequest("", "", nil)
+	if _, err := store.Get(req); err == nil {
+		t.Error("got nil, but want error")
 	}
 }
 
