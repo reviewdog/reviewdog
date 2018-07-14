@@ -29,6 +29,7 @@ install:
   - go get honnef.co/go/tools/cmd/unused
   - go get github.com/client9/misspell/cmd/misspell
   - go get mvdan.cc/unparam
+  - go get github.com/mgechev/revive
   - npm install
 
 before_script:
