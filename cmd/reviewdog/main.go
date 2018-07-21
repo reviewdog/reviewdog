@@ -375,7 +375,7 @@ func gitlabBuildWithClient() (*cienv.BuildInfo, *gitlab.Client, error) {
 	}
 
 	if g.PullRequest == 0 {
-		prNr, err := fetchMergeRequestIDFromCommit(client, g.Owner + "/" + g.Repo, g.SHA)
+		prNr, err := fetchMergeRequestIDFromCommit(client, g.Owner+"/"+g.Repo, g.SHA)
 		if err != nil {
 			return nil, nil, err
 		}
