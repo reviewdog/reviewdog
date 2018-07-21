@@ -375,7 +375,7 @@ func gitlabBuildWithClient() (*cienv.BuildInfo, *gitlab.Client, error) {
 	}
 
 	if g.PullRequest == 0 {
-		prNr, err := fetchMergeRequestIDFromCommit(client, g.SHA)
+		prNr, err := fetchMergeRequestIDFromCommit(client, g.Owner + "/" + g.Repo, g.SHA)
 		if err != nil {
 			return nil, nil, err
 		}
@@ -387,13 +387,13 @@ func gitlabBuildWithClient() (*cienv.BuildInfo, *gitlab.Client, error) {
 	return g, client, err
 }
 
-func fetchMergeRequestIDFromCommit(cli *gitlab.Client, sha string) (id int, err error) {
+func fetchMergeRequestIDFromCommit(cli *gitlab.Client, repoSlug string, sha string) (id int, err error) {
 	// https://docs.gitlab.com/ce/api/merge_requests.html#list-merge-requests
-	opt := &gitlab.ListMergeRequestsOptions{
+	opt := &gitlab.ListProjectMergeRequestsOptions{
 		State:   gitlab.String("opened"),
 		OrderBy: gitlab.String("updated_at"),
 	}
-	mrs, _, err := cli.MergeRequests.ListMergeRequests(opt)
+	mrs, _, err := cli.MergeRequests.ListProjectMergeRequests(repoSlug, opt)
 	if err != nil {
 		return 0, err
 	}
