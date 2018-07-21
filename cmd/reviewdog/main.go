@@ -388,7 +388,7 @@ func gitlabBuildWithClient() (*cienv.BuildInfo, *gitlab.Client, error) {
 }
 
 func fetchMergeRequestIDFromCommit(cli *gitlab.Client, projectID string, sha string) (id int, err error) {
-	// https://docs.gitlab.com/ce/api/merge_requests.html#list-merge-requests
+	// https://docs.gitlab.com/ce/api/merge_requests.html#list-project-merge-requests
 	opt := &gitlab.ListProjectMergeRequestsOptions{
 		State:   gitlab.String("opened"),
 		OrderBy: gitlab.String("updated_at"),
