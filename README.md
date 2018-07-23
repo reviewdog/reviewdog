@@ -318,7 +318,7 @@ Example:
 ```yaml
 env:
   global:
-    - REVIEWDOG_VERSION="0.9.10"
+    - REVIEWDOG_VERSION="0.9.11"
 
 install:
   - mkdir -p ~/bin/ && export export PATH="~/bin/:$PATH"
@@ -342,7 +342,7 @@ Example:
 env:
   global:
     - secure: <token>
-    - REVIEWDOG_VERSION="0.9.10"
+    - REVIEWDOG_VERSION="0.9.11"
 
 install:
   - mkdir -p ~/bin/ && export export PATH="~/bin/:$PATH"
@@ -370,7 +370,7 @@ jobs:
     docker:
       - image: golang:latest
         environment:
-          REVIEWDOG_VERSION: "0.9.10"
+          REVIEWDOG_VERSION: "0.9.11"
     steps:
       - checkout
       - run: curl -fSL https://github.com/haya14busa/reviewdog/releases/download/$REVIEWDOG_VERSION/reviewdog_linux_amd64 -o reviewdog && chmod +x ./reviewdog
