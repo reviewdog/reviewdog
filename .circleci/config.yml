@@ -6,7 +6,7 @@ jobs:
     docker:
       - image: golang:latest
         environment:
-          REVIEWDOG_VERSION: "0.9.10"
+          REVIEWDOG_VERSION: "0.9.11"
     steps:
       - checkout
       - run:
