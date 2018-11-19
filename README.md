@@ -261,7 +261,7 @@ using GitHub Personal API Access Token.
 
 ```shell
 $ export REVIEWDOG_GITHUB_API_TOKEN="<token>"
-$ reviewdog -reporter=github-pr-review`
+$ reviewdog -reporter=github-pr-review
 ```
 
 For GitHub Enterprise, set API endpoint by environment variable.
