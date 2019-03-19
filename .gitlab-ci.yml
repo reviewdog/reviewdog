@@ -7,7 +7,7 @@ before_script:
   - go get -d -v -t ./...
   - go install ./cmd/reviewdog
   # Intall linters
-  - go get github.com/golang/lint/golint
+  - go get golang.org/x/lint/golint
   - go get github.com/kisielk/errcheck
   - go get honnef.co/go/tools/cmd/gosimple
   - go get honnef.co/go/tools/cmd/staticcheck
