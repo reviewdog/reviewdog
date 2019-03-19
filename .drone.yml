@@ -3,12 +3,12 @@
 #
 build:
   test:
-    image: golang:1.12
+    image: golang:1.9
     commands:
       - go get -u github.com/golang/dep/...
       - dep ensure
-      - go build -v ./...
-      - go test -v -race ./...
+      - go build -v $(go list ./... | grep -v "/vendor/")
+      - go test -v -race $(go list ./... | grep -v "/vendor/")
       - (! gofmt -s -d *.go cmd diff project | grep '^')
   lint:
     image: golang
