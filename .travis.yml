@@ -22,7 +22,7 @@ install:
   # Install CI tools.
   - go get github.com/haya14busa/goverage
   # Install linters.
-  - go get github.com/golang/lint/golint
+  - go get golang.org/x/lint/golint
   - go get github.com/kisielk/errcheck
   - go get honnef.co/go/tools/cmd/gosimple
   - go get honnef.co/go/tools/cmd/staticcheck
