@@ -163,27 +163,6 @@
   revision = "6c81ef8f67ca3f42fc9cd71dfbd5f35b0c4b5771"
 
 [[projects]]
-  digest = "1:bc09e719c4e2a15d17163f5272d9a3131c45d77542b7fdc53ff518815bc19ab3"
-  name = "google.golang.org/appengine"
-  packages = [
-    ".",
-    "datastore",
-    "internal",
-    "internal/app_identity",
-    "internal/base",
-    "internal/datastore",
-    "internal/log",
-    "internal/modules",
-    "internal/remote_api",
-    "internal/urlfetch",
-    "log",
-    "urlfetch",
-  ]
-  pruneopts = ""
-  revision = "e9657d882bb81064595ca3b56cbe2546bbabf7b1"
-  version = "v1.4.0"
-
-[[projects]]
   digest = "1:cedccf16b71e86db87a24f8d4c70b0a855872eb967cb906a66b95de56aefbd0d"
   name = "gopkg.in/yaml.v2"
   packages = ["."]
@@ -208,10 +187,6 @@
     "golang.org/x/net/context",
     "golang.org/x/oauth2",
     "golang.org/x/sync/errgroup",
-    "google.golang.org/appengine",
-    "google.golang.org/appengine/datastore",
-    "google.golang.org/appengine/log",
-    "google.golang.org/appengine/urlfetch",
     "gopkg.in/yaml.v2",
   ]
   solver-name = "gps-cdcl"
