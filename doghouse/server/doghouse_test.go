@@ -110,14 +110,14 @@ func TestCheck_OK(t *testing.T) {
 		annotations := opt.Output.Annotations
 		wantAnnotaions := []*github.CheckRunAnnotation{
 			{
-				FileName:     github.String("sample.new.txt"),
-				BlobHRef:     github.String("http://github.com/haya14busa/reviewdog/blob/1414/sample.new.txt"),
-				StartLine:    github.Int(2),
-				EndLine:      github.Int(2),
-				WarningLevel: github.String("warning"),
-				Message:      github.String("test message"),
-				Title:        github.String("[haya14busa-linter] sample.new.txt#L2"),
-				RawDetails:   github.String("raw test message"),
+				Path:            github.String("sample.new.txt"),
+				BlobHRef:        github.String("http://github.com/haya14busa/reviewdog/blob/1414/sample.new.txt"),
+				StartLine:       github.Int(2),
+				EndLine:         github.Int(2),
+				AnnotationLevel: github.String("warning"),
+				Message:         github.String("test message"),
+				Title:           github.String("[haya14busa-linter] sample.new.txt#L2"),
+				RawDetails:      github.String("raw test message"),
 			},
 		}
 		if d := cmp.Diff(annotations, wantAnnotaions); d != "" {
