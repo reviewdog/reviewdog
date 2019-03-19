@@ -2,4 +2,3 @@
 vendor/
 node_modules/
 package-lock.json
-doghouse/appengine/appengine

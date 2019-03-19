@@ -3,18 +3,16 @@
 #
 build:
   test:
-    image: golang:1.11.1
-    environment:
-      - GO111MODULE=on
+    image: golang:1.9
     commands:
-      - go mod download
+      - go get -u github.com/golang/dep/...
+      - dep ensure
       - go build -v $(go list ./... | grep -v "/vendor/")
       - go test -v -race $(go list ./... | grep -v "/vendor/")
       - (! gofmt -s -d *.go cmd diff project | grep '^')
   lint:
     image: golang
     environment:
-      - GO111MODULE=on
       - REVIEWDOG_GITHUB_API_TOKEN=$$REVIEWDOG_GITHUB_API_TOKEN
     commands:
       - go install ./cmd/reviewdog
