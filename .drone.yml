@@ -11,7 +11,7 @@ build:
       - go test -v -race ./...
       - (! gofmt -s -d *.go cmd diff project | grep '^')
   lint:
-    image: golang
+    image: golang:1.12
     environment:
       - REVIEWDOG_GITHUB_API_TOKEN=$$REVIEWDOG_GITHUB_API_TOKEN
     commands:
