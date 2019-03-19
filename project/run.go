@@ -15,8 +15,8 @@ import (
 )
 
 // RunAndParse runs commands and parse results. Returns map of tool name to check results.
-func RunAndParse(ctx context.Context, conf *Config) (map[string][]*reviewdog.CheckResult, error) {
-	results := make(map[string][]*reviewdog.CheckResult)
+func RunAndParse(ctx context.Context, conf *Config) (*reviewdog.ResultMap, error) {
+	var results reviewdog.ResultMap
 	// environment variables for each commands
 	envs := filteredEnviron()
 	var g errgroup.Group
@@ -49,14 +49,14 @@ func RunAndParse(ctx context.Context, conf *Config) (map[string][]*reviewdog.Che
 			if err != nil {
 				return err
 			}
-			results[runner.Name] = rs
+			results.Store(runner.Name, rs)
 			return nil
 		})
 	}
 	if err := g.Wait(); err != nil {
 		return nil, fmt.Errorf("fail to run reviewdog: %v", err)
 	}
-	return results, nil
+	return &results, nil
 }
 
 // Run runs reviewdog tasks based on Config.
@@ -65,7 +65,7 @@ func Run(ctx context.Context, conf *Config, c reviewdog.CommentService, d review
 	if err != nil {
 		return err
 	}
-	if len(results) == 0 {
+	if results.Len() == 0 {
 		return nil
 	}
 	b, err := d.Diff(ctx)
@@ -77,13 +77,11 @@ func Run(ctx context.Context, conf *Config, c reviewdog.CommentService, d review
 		return err
 	}
 	var g errgroup.Group
-	for toolname, rs := range results {
-		toolname := toolname
-		rs := rs
+	results.Range(func(toolname string, rs []*reviewdog.CheckResult) {
 		g.Go(func() error {
 			return reviewdog.RunFromResult(ctx, c, rs, filediffs, d.Strip(), toolname)
 		})
-	}
+	})
 	return g.Wait()
 }
 
