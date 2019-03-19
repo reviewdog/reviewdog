@@ -6,16 +6,15 @@ jobs:
     docker:
       - image: golang:latest
         environment:
-          REVIEWDOG_VERSION: "0.9.10"
+          REVIEWDOG_VERSION: "0.9.11"
     steps:
       - checkout
       - run:
           name: System information
           command: 'echo "Golang $(go version)"'
       - run: 'curl -fSL https://github.com/haya14busa/reviewdog/releases/download/$REVIEWDOG_VERSION/reviewdog_linux_amd64 -o reviewdog && chmod +x ./reviewdog'
-      - run: 'go get honnef.co/go/tools/cmd/unused'
-      - run: 'go get -d -v -t ./...'
-      - run: 'unused ./... || true | ./reviewdog -efm="%f:%l:%c: %m" -name=unused -reporter=github-pr-review'
+      - run: 'go get golang.org/x/lint/golint'
+      - run: 'golint ./... || true | ./reviewdog -f=golint -name=golint-circleci -reporter=github-pr-review'
 
 notify:
   webhooks:

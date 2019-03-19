@@ -22,12 +22,15 @@ install:
   # Install CI tools.
   - go get github.com/haya14busa/goverage
   # Install linters.
-  - go get github.com/golang/lint/golint
+  - go get golang.org/x/lint/golint
   - go get github.com/kisielk/errcheck
   - go get honnef.co/go/tools/cmd/gosimple
   - go get honnef.co/go/tools/cmd/staticcheck
   - go get honnef.co/go/tools/cmd/unused
   - go get github.com/client9/misspell/cmd/misspell
+  - go get mvdan.cc/unparam
+  - go get github.com/mgechev/revive
+  - curl -sfL https://install.goreleaser.com/github.com/golangci/golangci-lint.sh | bash -s -- -b $GOPATH/bin
   - npm install
 
 before_script:
@@ -44,7 +47,7 @@ script:
   - reviewdog -reporter=github-pr-check
   - $(npm bin)/textlint -f checkstyle README.md | reviewdog -f=checkstyle -name="textlint" -reporter=github-pr-check
   - go test -v -race $(go list ./... | grep -v "/vendor/")
-  - goverage -coverprofile=coverage.txt ./...
+  - if [[ "${TRAVIS_GO_VERSION}" == "1.10.x" ]] ; then goverage -coverprofile=coverage.txt ./... ; fi
 
 after_success:
   - bash <(curl -s https://codecov.io/bash)

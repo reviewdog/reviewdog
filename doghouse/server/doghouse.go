@@ -177,12 +177,12 @@ func (ch *Checker) buildFindingLink(c *reviewdog.FilteredCheck) string {
 
 func (ch *Checker) toCheckRunAnnotation(c *reviewdog.FilteredCheck) *github.CheckRunAnnotation {
 	a := &github.CheckRunAnnotation{
-		FileName:     github.String(c.Path),
-		BlobHRef:     github.String(ch.brobHRef(c.Path)),
-		StartLine:    github.Int(c.Lnum),
-		EndLine:      github.Int(c.Lnum),
-		WarningLevel: github.String("warning"),
-		Message:      github.String(c.Message),
+		Path:            github.String(c.Path),
+		BlobHRef:        github.String(ch.brobHRef(c.Path)),
+		StartLine:       github.Int(c.Lnum),
+		EndLine:         github.Int(c.Lnum),
+		AnnotationLevel: github.String("warning"),
+		Message:         github.String(c.Message),
 	}
 	if ch.req.Name != "" {
 		a.Title = github.String(fmt.Sprintf("[%s] %s#L%d", ch.req.Name, c.Path, c.Lnum))

@@ -38,23 +38,22 @@ func TestNewDoghouseCli(t *testing.T) {
 }
 
 func TestCheckResultSet_Project(t *testing.T) {
-	defer func(f func(ctx context.Context, conf *project.Config) (map[string][]*reviewdog.CheckResult, error)) {
+	defer func(f func(ctx context.Context, conf *project.Config) (*reviewdog.ResultMap, error)) {
 		projectRunAndParse = f
 	}(projectRunAndParse)
 
-	wantCheckResult := map[string][]*reviewdog.CheckResult{
-		"name1": {
-			&reviewdog.CheckResult{
-				Lnum:    1,
-				Col:     14,
-				Message: "msg",
-				Path:    "reviewdog.go",
-			},
+	var wantCheckResult reviewdog.ResultMap
+	wantCheckResult.Store("name1", []*reviewdog.CheckResult{
+		{
+			Lnum:    1,
+			Col:     14,
+			Message: "msg",
+			Path:    "reviewdog.go",
 		},
-	}
+	})
 
-	projectRunAndParse = func(ctx context.Context, conf *project.Config) (map[string][]*reviewdog.CheckResult, error) {
-		return wantCheckResult, nil
+	projectRunAndParse = func(ctx context.Context, conf *project.Config) (*reviewdog.ResultMap, error) {
+		return &wantCheckResult, nil
 	}
 
 	tmp, err := ioutil.TempFile("", "")
@@ -67,9 +66,16 @@ func TestCheckResultSet_Project(t *testing.T) {
 	if err != nil {
 		t.Fatal(err)
 	}
-	if diff := cmp.Diff(got, wantCheckResult); diff != "" {
-		t.Errorf("result has diff:\n%s", diff)
+
+	if got.Len() != wantCheckResult.Len() {
+		t.Errorf("length of results is different. got = %d, want = %d\n", got.Len(), wantCheckResult.Len())
 	}
+	got.Range(func(k string, v []*reviewdog.CheckResult) {
+		w, _ := wantCheckResult.Load(k)
+		if diff := cmp.Diff(v, w); diff != "" {
+			t.Errorf("result has diff:\n%s", diff)
+		}
+	})
 }
 
 func TestCheckResultSet_NonProject(t *testing.T) {
@@ -81,20 +87,26 @@ func TestCheckResultSet_NonProject(t *testing.T) {
 	if err != nil {
 		t.Fatal(err)
 	}
-	want := map[string][]*reviewdog.CheckResult{
-		"golint": {
-			&reviewdog.CheckResult{
-				Lnum:    14,
-				Col:     14,
-				Message: "test message",
-				Path:    "reviewdog.go",
-				Lines:   []string{input},
-			},
+	var want reviewdog.ResultMap
+	want.Store("golint", []*reviewdog.CheckResult{
+		{
+			Lnum:    14,
+			Col:     14,
+			Message: "test message",
+			Path:    "reviewdog.go",
+			Lines:   []string{input},
 		},
+	})
+
+	if got.Len() != want.Len() {
+		t.Errorf("length of results is different. got = %d, want = %d\n", got.Len(), want.Len())
 	}
-	if diff := cmp.Diff(got, want); diff != "" {
-		t.Errorf("result has diff:\n%s", diff)
-	}
+	got.Range(func(k string, v []*reviewdog.CheckResult) {
+		w, _ := want.Load(k)
+		if diff := cmp.Diff(v, w); diff != "" {
+			t.Errorf("result has diff:\n%s", diff)
+		}
+	})
 }
 
 type fakeDoghouseCli struct {
@@ -160,27 +172,26 @@ func TestPostResultSet(t *testing.T) {
 		return &doghouse.CheckResponse{}, nil
 	}
 
-	resultSet := map[string][]*reviewdog.CheckResult{
-		"name1": {
-			&reviewdog.CheckResult{
-				Lnum:    14,
-				Message: "name1: test 1",
-				Path:    "reviewdog.go",
-				Lines:   []string{"L1", "L2"},
-			},
-			&reviewdog.CheckResult{
-				Message: "name1: test 2",
-				Path:    "reviewdog.go",
-			},
+	var resultSet reviewdog.ResultMap
+	resultSet.Store("name1", []*reviewdog.CheckResult{
+		{
+			Lnum:    14,
+			Message: "name1: test 1",
+			Path:    "reviewdog.go",
+			Lines:   []string{"L1", "L2"},
 		},
-		"name2": {
-			&reviewdog.CheckResult{
-				Lnum:    14,
-				Message: "name2: test 1",
-				Path:    "cmd/reviewdog/doghouse.go",
-			},
+		{
+			Message: "name1: test 2",
+			Path:    "reviewdog.go",
 		},
-	}
+	})
+	resultSet.Store("name2", []*reviewdog.CheckResult{
+		{
+			Lnum:    14,
+			Message: "name2: test 1",
+			Path:    "cmd/reviewdog/doghouse.go",
+		},
+	})
 
 	ghInfo := &cienv.BuildInfo{
 		Owner:       owner,
@@ -189,7 +200,7 @@ func TestPostResultSet(t *testing.T) {
 		SHA:         sha,
 	}
 
-	if err := postResultSet(context.Background(), resultSet, ghInfo, fakeCli); err != nil {
+	if err := postResultSet(context.Background(), &resultSet, ghInfo, fakeCli); err != nil {
 		t.Fatal(err)
 	}
 }

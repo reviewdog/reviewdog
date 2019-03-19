@@ -3,15 +3,15 @@
 #
 build:
   test:
-    image: golang:1.9
+    image: golang:1.12
     commands:
-      - go get -u github.com/golang/dep/...
+      - mkdir -p $GOPATH/bin && curl https://raw.githubusercontent.com/golang/dep/master/install.sh | sh
       - dep ensure
-      - go build -v $(go list ./... | grep -v "/vendor/")
-      - go test -v -race $(go list ./... | grep -v "/vendor/")
+      - go build -v ./...
+      - go test -v -race ./...
       - (! gofmt -s -d *.go cmd diff project | grep '^')
   lint:
-    image: golang
+    image: golang:1.12
     environment:
       - REVIEWDOG_GITHUB_API_TOKEN=$$REVIEWDOG_GITHUB_API_TOKEN
     commands:

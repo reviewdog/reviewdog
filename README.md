@@ -261,7 +261,7 @@ using GitHub Personal API Access Token.
 
 ```shell
 $ export REVIEWDOG_GITHUB_API_TOKEN="<token>"
-$ reviewdog -reporter=github-pr-review`
+$ reviewdog -reporter=github-pr-review
 ```
 
 For GitHub Enterprise, set API endpoint by environment variable.
@@ -318,7 +318,7 @@ Example:
 ```yaml
 env:
   global:
-    - REVIEWDOG_VERSION="0.9.10"
+    - REVIEWDOG_VERSION="0.9.11"
 
 install:
   - mkdir -p ~/bin/ && export export PATH="~/bin/:$PATH"
@@ -342,7 +342,7 @@ Example:
 env:
   global:
     - secure: <token>
-    - REVIEWDOG_VERSION="0.9.10"
+    - REVIEWDOG_VERSION="0.9.11"
 
 install:
   - mkdir -p ~/bin/ && export export PATH="~/bin/:$PATH"
@@ -370,7 +370,7 @@ jobs:
     docker:
       - image: golang:latest
         environment:
-          REVIEWDOG_VERSION: "0.9.10"
+          REVIEWDOG_VERSION: "0.9.11"
     steps:
       - checkout
       - run: curl -fSL https://github.com/haya14busa/reviewdog/releases/download/$REVIEWDOG_VERSION/reviewdog_linux_amd64 -o reviewdog && chmod +x ./reviewdog
@@ -386,7 +386,7 @@ Store `REVIEWDOG_GITLAB_API_TOKEN` in [GitLab CI variable](https://docs.gitlab.c
 #### .gitlab-ci.yml sample
 
 ```yaml
-reviwedog:
+reviewdog:
   script:
     - reviewdog -reporter=gitlab-mr-discussion
     # Or

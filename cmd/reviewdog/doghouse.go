@@ -24,7 +24,7 @@ func runDoghouse(ctx context.Context, r io.Reader, opt *option, isProject bool) 
 		return err
 	}
 	if !isPr {
-		fmt.Fprintf(os.Stderr, "reviewdog: this is not PullRequest build.")
+		fmt.Fprintln(os.Stderr, "reviewdog: this is not PullRequest build.")
 		return nil
 	}
 	resultSet, err := checkResultSet(ctx, r, opt, isProject)
@@ -48,8 +48,8 @@ func newDoghouseCli(ctx context.Context) *client.DogHouseClient {
 
 var projectRunAndParse = project.RunAndParse
 
-func checkResultSet(ctx context.Context, r io.Reader, opt *option, isProject bool) (map[string][]*reviewdog.CheckResult, error) {
-	resultSet := make(map[string][]*reviewdog.CheckResult)
+func checkResultSet(ctx context.Context, r io.Reader, opt *option, isProject bool) (*reviewdog.ResultMap, error) {
+	resultSet := new(reviewdog.ResultMap)
 	if isProject {
 		conf, err := projectConfig(opt.conf)
 		if err != nil {
@@ -68,16 +68,15 @@ func checkResultSet(ctx context.Context, r io.Reader, opt *option, isProject boo
 		if err != nil {
 			return nil, err
 		}
-		resultSet[toolName(opt)] = rs
+		resultSet.Store(toolName(opt), rs)
 	}
 	return resultSet, nil
 }
 
-func postResultSet(ctx context.Context, resultSet map[string][]*reviewdog.CheckResult, ghInfo *cienv.BuildInfo, cli client.DogHouseClientInterface) error {
+func postResultSet(ctx context.Context, resultSet *reviewdog.ResultMap, ghInfo *cienv.BuildInfo, cli client.DogHouseClientInterface) error {
 	var g errgroup.Group
 	wd, _ := os.Getwd()
-	for name, results := range resultSet {
-		name := name
+	resultSet.Range(func(name string, results []*reviewdog.CheckResult) {
 		as := make([]*doghouse.Annotation, 0, len(results))
 		for _, r := range results {
 			as = append(as, checkResultToAnnotation(r, wd))
@@ -99,7 +98,7 @@ func postResultSet(ctx context.Context, resultSet map[string][]*reviewdog.CheckR
 			log.Printf("[%s] reported: %s", name, res.ReportURL)
 			return nil
 		})
-	}
+	})
 	return g.Wait()
 }
 
