@@ -24,7 +24,7 @@ func runDoghouse(ctx context.Context, r io.Reader, opt *option, isProject bool) 
 		return err
 	}
 	if !isPr {
-		fmt.Fprintf(os.Stderr, "reviewdog: this is not PullRequest build.")
+		fmt.Fprintln(os.Stderr, "reviewdog: this is not PullRequest build.")
 		return nil
 	}
 	resultSet, err := checkResultSet(ctx, r, opt, isProject)
