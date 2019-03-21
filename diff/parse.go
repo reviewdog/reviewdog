@@ -136,12 +136,12 @@ func parseFileHeader(line string) (filename, timestamp string) {
 	ss := line[len(tokenOldFile)+1:]
 	tabi := strings.LastIndex(ss, "\t")
 	if tabi == -1 {
-		return unescapeCString(ss), ""
+		return unquoteCStyle(ss), ""
 	}
-	return unescapeCString(ss[:tabi]), ss[tabi+1:]
+	return unquoteCStyle(ss[:tabi]), ss[tabi+1:]
 }
 
-func unescapeCString(str string) string {
+func unquoteCStyle(str string) string {
 	if !strings.HasPrefix(str, `"`) {
 		// no need to unescape
 		return str
