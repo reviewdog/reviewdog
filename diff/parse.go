@@ -141,6 +141,8 @@ func parseFileHeader(line string) (filename, timestamp string) {
 	return unquoteCStyle(ss[:tabi]), ss[tabi+1:]
 }
 
+// C-style name unquoting.
+// it is from https://github.com/git/git/blob/77556354bb7ac50450e3b28999e3576969869068/quote.c#L345-L413
 func unquoteCStyle(str string) string {
 	if !strings.HasPrefix(str, `"`) {
 		// no need to unescape

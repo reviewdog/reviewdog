@@ -471,3 +471,33 @@ line3`
 		}
 	}
 }
+
+func TestUnquoteCStyle(t *testing.T) {
+	tests := []struct {
+		in  string
+		out string
+	}{
+		{in: `no need to unquote`, out: `no need to unquote`},
+		{in: `"C-escapes \a\b\t\n\v\f\r\"\\"`, out: "C-escapes \a\b\t\n\v\f\r\"\\"},
+
+		// from https://github.com/git/git/blob/041f5ea1cf987a4068ef5f39ba0a09be85952064/t/t3902-quoted.sh#L48-L76
+		{in: `Name`, out: `Name`},
+		{in: `"Name and a\nLF"`, out: "Name and a\nLF"},
+		{in: `"Name and an\tHT"`, out: "Name and an\tHT"},
+		{in: `"Name\""`, out: `Name"`},
+		{in: `With SP in it`, out: `With SP in it`},
+		{in: `"\346\277\261\351\207\216\t\347\264\224"`, out: "濱野\t純"},
+		{in: `"\346\277\261\351\207\216\n\347\264\224"`, out: "濱野\n純"},
+		{in: `"\346\277\261\351\207\216 \347\264\224"`, out: `濱野 純`},
+		{in: `"\346\277\261\351\207\216\"\347\264\224"`, out: "濱野\"純"},
+		{in: `"\346\277\261\351\207\216/file"`, out: `濱野/file`},
+		{in: `"\346\277\261\351\207\216\347\264\224"`, out: `濱野純`},
+	}
+
+	for _, tt := range tests {
+		got := unquoteCStyle(tt.in)
+		if got != tt.out {
+			t.Errorf("unquoteCStyle(%s) = %s, want %s", tt.in, got, tt.out)
+		}
+	}
+}
