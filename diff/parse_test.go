@@ -495,8 +495,7 @@ func TestUnquoteCStyle(t *testing.T) {
 	}
 
 	for _, tt := range tests {
-		got := unquoteCStyle(tt.in)
-		if got != tt.out {
+		if got := unquoteCStyle(tt.in); got != tt.out {
 			t.Errorf("unquoteCStyle(%q) = %q, want %q", tt.in, got, tt.out)
 		}
 	}
