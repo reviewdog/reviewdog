@@ -492,6 +492,11 @@ func TestUnquoteCStyle(t *testing.T) {
 		{in: `"\346\277\261\351\207\216\"\347\264\224"`, out: "濱野\"純"},
 		{in: `"\346\277\261\351\207\216/file"`, out: `濱野/file`},
 		{in: `"\346\277\261\351\207\216\347\264\224"`, out: `濱野純`},
+
+		// Edge cases of ill-formed diff file name.
+		{in: `\347\264\224`, out: `\347\264\224`}, // no need to unquote
+		{in: `"\34a"`, out: "34a"},
+		{in: `"\14"`, out: `14`},
 	}
 
 	for _, tt := range tests {
