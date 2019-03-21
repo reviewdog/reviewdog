@@ -145,7 +145,7 @@ func parseFileHeader(line string) (filename, timestamp string) {
 // it is from https://github.com/git/git/blob/77556354bb7ac50450e3b28999e3576969869068/quote.c#L345-L413
 func unquoteCStyle(str string) string {
 	if !strings.HasPrefix(str, `"`) {
-		// no need to unescape
+		// no need to unquote
 		return str
 	}
 	str = strings.TrimPrefix(strings.TrimSuffix(str, `"`), `"`)
