@@ -1,7 +1,6 @@
 package ciutil
 
 import (
-	"fmt"
 	"net/http/httptest"
 	"testing"
 )
@@ -40,7 +39,7 @@ func TestIsFromTravisCI(t *testing.T) {
 	}
 	r := httptest.NewRequest("GET", "/", nil)
 	for addr := range travisIPAddrs {
-		r.RemoteAddr = fmt.Sprintf("%s", addr)
+		r.RemoteAddr = addr
 		if !IsFromTravisCI(r) {
 			t.Errorf("IsIsFromTravisCI(%q) = false, want true", r.RemoteAddr)
 		}

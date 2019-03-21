@@ -106,8 +106,7 @@ type tmplRepo struct {
 }
 
 func (g *GitHubHandler) buildGithubAuthURL(r *http.Request, state string) string {
-	var redirURL url.URL
-	redirURL = *r.URL
+	redirURL := *r.URL
 	redirURL.Path = "/gh/_auth/callback"
 	redirURL.RawQuery = ""
 	redirURL.Fragment = ""
@@ -389,10 +388,6 @@ func (g *GitHubHandler) handleRepo(ctx context.Context, ghcli *github.Client, w 
 		},
 		CSRFToken: nosurf.Token(r),
 	})
-}
-
-func (g *GitHubHandler) handleRegenerateToken(w http.ResponseWriter, r *http.Request) {
-	fmt.Fprintln(w, "handleRegenerateToken")
 }
 
 func NewAuthClient(ctx context.Context, base http.RoundTripper, token oauth2.TokenSource) *http.Client {

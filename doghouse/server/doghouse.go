@@ -164,7 +164,7 @@ func (ch *Checker) buildFindingLink(c *reviewdog.FilteredCheck) string {
 		return c.Message
 	}
 	loc := c.Path
-	link := fmt.Sprintf("%s", ch.brobHRef(c.Path))
+	link := ch.brobHRef(c.Path)
 	if c.Lnum != 0 {
 		loc = fmt.Sprintf("%s:%d", loc, c.Lnum)
 		link = fmt.Sprintf("%s#L%d", link, c.Lnum)
