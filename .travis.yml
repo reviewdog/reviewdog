@@ -47,7 +47,7 @@ script:
   - reviewdog -reporter=github-pr-check
   - $(npm bin)/textlint -f checkstyle README.md | reviewdog -f=checkstyle -name="textlint" -reporter=github-pr-check
   - go test -v -race $(go list ./... | grep -v "/vendor/")
-  - goverage -coverprofile=coverage.txt ./...
+  - if [[ "${TRAVIS_GO_VERSION}" == "1.10.x" ]] ; then goverage -coverprofile=coverage.txt ./... ; fi
 
 after_success:
   - bash <(curl -s https://codecov.io/bash)

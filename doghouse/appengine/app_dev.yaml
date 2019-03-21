@@ -1,0 +1,13 @@
+# reviewdog-dev app config: https://github.com/settings/apps/reviewdog-dev
+
+# https://cloud.google.com/appengine/docs/standard/go/config/appref
+runtime: go
+api_version: go1.9
+
+# https://cloud.google.com/appengine/docs/standard/go/warmup-requests/configuring
+inbound_services:
+- warmup
+
+includes:
+- handlers.yaml
+- secret/secret_dev.yaml

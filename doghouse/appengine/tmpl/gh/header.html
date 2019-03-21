@@ -1,0 +1,30 @@
+{{define "header"}}
+
+<header class="mdl-layout__header">
+  <div class="mdl-layout__header-row" style="padding-left: 10px;">
+    <!-- Title -->
+    <span class="mdl-layout-title">{{ .Title }}</span>
+    <!-- Add spacer, to align navigation to the right -->
+    <div class="mdl-layout-spacer"></div>
+    <!-- Navigation. -->
+    <nav class="mdl-navigation">
+      <!-- Right aligned menu below button -->
+      <button id="demo-menu-lower-right"
+        class="mdl-button mdl-js-button mdl-button--icon">
+        <img src="{{ .User.IconURL }}" height="100%">
+      </button>
+
+      <ul class="mdl-menu mdl-menu--bottom-right mdl-js-menu mdl-js-ripple-effect"
+        for="demo-menu-lower-right">
+        <li class="mdl-menu__item" style="padding: 0;">
+          <a style="display: block; padding: 0 16px;" href="{{ .User.GitHubURL }}">GitHub</a>
+        </li>
+        <li class="mdl-menu__item" style="padding: 0;">
+          <a style="display: block; padding: 0 16px;" href="/gh_/logout">Log out</a>
+        </li>
+      </ul>
+    </nav>
+  </div>
+</header>
+
+{{end}}
