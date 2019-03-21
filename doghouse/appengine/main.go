@@ -23,7 +23,7 @@ func mustCookieMan() *cookieman.CookieMan {
 		log.Fatalf("failed to create secretbox: %v", err)
 	}
 	c := cookieman.CookieOption{
-		http.Cookie{
+		Cookie: http.Cookie{
 			HttpOnly: true,
 			Secure:   !appengine.IsDevAppServer(),
 			Path:     "/",
