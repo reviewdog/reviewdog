@@ -1,0 +1,58 @@
+[
+  {
+    "PathOld": "a/日本語.old.txt",
+    "PathNew": "b/日本語.new.txt",
+    "TimeOld": "",
+    "TimeNew": "",
+    "Hunks": [
+      {
+        "StartLineOld": 1,
+        "LineLengthOld": 3,
+        "StartLineNew": 1,
+        "LineLengthNew": 4,
+        "Section": "",
+        "Lines": [
+          {
+            "Type": 0,
+            "Content": "変更なし",
+            "LnumDiff": 1,
+            "LnumOld": 1,
+            "LnumNew": 1
+          },
+          {
+            "Type": 2,
+            "Content": "行削除",
+            "LnumDiff": 2,
+            "LnumOld": 2,
+            "LnumNew": 0
+          },
+          {
+            "Type": 1,
+            "Content": "行追加",
+            "LnumDiff": 3,
+            "LnumOld": 0,
+            "LnumNew": 2
+          },
+          {
+            "Type": 1,
+            "Content": "行追加",
+            "LnumDiff": 4,
+            "LnumOld": 0,
+            "LnumNew": 3
+          },
+          {
+            "Type": 0,
+            "Content": "変更なし",
+            "LnumDiff": 5,
+            "LnumOld": 3,
+            "LnumNew": 4
+          }
+        ]
+      }
+    ],
+    "Extended": [
+      "diff --git \"a/\\346\\227\\245\\346\\234\\254\\350\\252\\236.old.txt\" \"b/\\346\\227\\245\\346\\234\\254\\350\\252\\236.new.txt\"",
+      "index 5f5a9e4..feeb01f 100644"
+    ]
+  }
+]

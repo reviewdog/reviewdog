@@ -136,9 +136,77 @@ func parseFileHeader(line string) (filename, timestamp string) {
 	ss := line[len(tokenOldFile)+1:]
 	tabi := strings.LastIndex(ss, "\t")
 	if tabi == -1 {
-		return ss, ""
+		return unquoteCStyle(ss), ""
 	}
-	return ss[:tabi], ss[tabi+1:]
+	return unquoteCStyle(ss[:tabi]), ss[tabi+1:]
+}
+
+// C-style name unquoting.
+// it is from https://github.com/git/git/blob/77556354bb7ac50450e3b28999e3576969869068/quote.c#L345-L413
+func unquoteCStyle(str string) string {
+	if !strings.HasPrefix(str, `"`) {
+		// no need to unquote
+		return str
+	}
+	str = strings.TrimPrefix(strings.TrimSuffix(str, `"`), `"`)
+
+	res := make([]byte, 0, len(str))
+	r := strings.NewReader(str)
+LOOP:
+	for {
+		ch, err := r.ReadByte()
+		if err != nil {
+			break
+		}
+		if ch != '\\' {
+			res = append(res, ch)
+			continue
+		}
+
+		ch, err = r.ReadByte()
+		if err != nil {
+			break
+		}
+		switch ch {
+		case 'a':
+			res = append(res, '\a')
+		case 'b':
+			res = append(res, '\b')
+		case 't':
+			res = append(res, '\t')
+		case 'n':
+			res = append(res, '\n')
+		case 'v':
+			res = append(res, '\v')
+		case 'f':
+			res = append(res, '\f')
+		case 'r':
+			res = append(res, '\r')
+		case '"':
+			res = append(res, '"')
+		case '\\':
+			res = append(res, '\\')
+		case '0', '1', '2', '3', '4', '5', '6', '7', '8', '9':
+			if err := r.UnreadByte(); err != nil {
+				break LOOP
+			}
+			var oct [3]byte
+			if n, _ := r.Read(oct[:]); n < 3 {
+				res = append(res, oct[:n]...)
+				break LOOP
+			}
+			ch, err := strconv.ParseUint(string(oct[:]), 8, 8)
+			if err != nil {
+				res = append(res, oct[:]...)
+				break
+			}
+			res = append(res, byte(ch))
+		default:
+			res = append(res, ch)
+		}
+	}
+
+	return string(res)
 }
 
 func parseExtendedHeader(r *bufio.Reader) []string {
