@@ -13,6 +13,8 @@ import (
 // Version is version of reviewdog CLI.
 const Version = "0.9.11"
 
+var X = 14
+
 // Reviewdog represents review dog application which parses result of compiler
 // or linter, get diff and filter the results by diff, and report filtered
 // results.
