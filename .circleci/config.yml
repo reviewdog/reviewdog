@@ -15,6 +15,61 @@ jobs:
       - run: 'curl -fSL https://github.com/reviewdog/reviewdog/releases/download/$REVIEWDOG_VERSION/reviewdog_linux_amd64 -o reviewdog && chmod +x ./reviewdog'
       - run: 'go get golang.org/x/lint/golint'
       - run: 'golint ./... || true | ./reviewdog -f=golint -name=golint-circleci -reporter=github-pr-review'
+  deploy:
+    working_directory: ~/reviewdog/doghouse/appengine/
+    docker:
+      - image: mercari/appengine-go:1.11
+        environment:
+          GAE_DEPLOY_ACCOUNT: review-dog@appspot.gserviceaccount.com
+          GAE_DEPLOY_PROJECT: review-dog
+          GAE_KEYRING_NAME: reviewdog-doghouse-deploy
+          GAE_KEY_NAME: secret-env
+    steps:
+      - checkout
+      - run:
+          name: System information
+          command: 'echo "Golang $(go version)"'
+      - run:
+          name: Activate Service Account
+          command: |-
+            echo $GAE_DEPLOY_KEY_FILE > service_account_key.json
+            gcloud auth activate-service-account "$GAE_DEPLOY_ACCOUNT" --key-file=service_account_key.json --project "$GAE_DEPLOY_PROJECT"
+      - run:
+          name: Decrypt keys
+          command: |-
+            gcloud kms decrypt --location=global \
+              --keyring="$GAE_KEYRING_NAME" \
+              --key="$GAE_KEY_NAME" \
+              --ciphertext-file=secret/encrypted-reviewdog.private-key.pem.bin \
+              --plaintext-file=secret/reviewdog.private-key.pem
+            gcloud kms decrypt --location=global \
+              --keyring="$GAE_KEYRING_NAME" \
+              --key="$GAE_KEY_NAME" \
+              --ciphertext-file=secret/encrypted-secret.yaml.bin \
+              --plaintext-file=secret/secret.yaml
+      - run:
+          name: Deploy
+          command: |-
+            gcloud --quiet --project $GAE_DEPLOY_PROJECT app deploy app.yaml
+      - run:
+          name: Cleanup
+          command: |-
+            rm service_account_key.json
+            rm secret/reviewdog.private-key.pem
+            rm secret/secret.yaml
+
+workflows:
+  version: 2
+  build_and_deploy:
+    jobs:
+      - build
+      - deploy:
+          requires:
+            - build
+          # TODO(haya14busa): uncomment this.
+          # filters:
+          #   branches:
+          #     only: master
 
 notify:
   webhooks:
