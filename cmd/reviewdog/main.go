@@ -19,7 +19,7 @@ import (
 	"golang.org/x/oauth2"
 
 	"github.com/google/go-github/github"
-	"github.com/haya14busa/errorformat/fmts"
+	"github.com/reviewdog/errorformat/fmts"
 	shellwords "github.com/mattn/go-shellwords"
 	"github.com/reviewdog/reviewdog"
 	"github.com/reviewdog/reviewdog/cienv"
@@ -53,7 +53,7 @@ type option struct {
 const (
 	diffCmdDoc   = `diff command (e.g. "git diff"). diff flag is ignored if you pass "ci" flag`
 	diffStripDoc = "strip NUM leading components from diff file names (equivalent to 'patch -p') (default is 1 for git diff)"
-	efmsDoc      = `list of errorformat (https://github.com/haya14busa/errorformat)`
+	efmsDoc      = `list of errorformat (https://github.com/reviewdog/errorformat)`
 	fDoc         = `format name (run -list to see supported format name) for input. It's also used as tool name in review comment if -name is empty`
 	listDoc      = `list supported pre-defined format names which can be used as -f arg`
 	nameDoc      = `tool name in review comment. -f is used as tool name if -name is empty`
