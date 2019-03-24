@@ -57,7 +57,7 @@
 [[projects]]
   branch = "master"
   digest = "1:825151fc1df14d134ca4e18bac531030ab718b329ef2464846bbe004547d5220"
-  name = "github.com/haya14busa/errorformat"
+  name = "github.com/reviewdog/errorformat"
   packages = [
     ".",
     "fmts",
@@ -177,8 +177,8 @@
     "github.com/bradleyfalzon/ghinstallation",
     "github.com/google/go-cmp/cmp",
     "github.com/google/go-github/github",
-    "github.com/haya14busa/errorformat",
-    "github.com/haya14busa/errorformat/fmts",
+    "github.com/reviewdog/errorformat",
+    "github.com/reviewdog/errorformat/fmts",
     "github.com/haya14busa/secretbox",
     "github.com/justinas/nosurf",
     "github.com/kylelemons/godebug/pretty",

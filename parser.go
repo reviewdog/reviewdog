@@ -6,8 +6,8 @@ import (
 	"fmt"
 	"io"
 
-	"github.com/haya14busa/errorformat"
-	"github.com/haya14busa/errorformat/fmts"
+	"github.com/reviewdog/errorformat"
+	"github.com/reviewdog/errorformat/fmts"
 )
 
 // ParserOpt represents option to create Parser. Either FormatName or
@@ -32,7 +32,7 @@ func NewParser(opt *ParserOpt) (Parser, error) {
 	if name != "" {
 		efm, ok := fmts.DefinedFmts()[name]
 		if !ok {
-			return nil, fmt.Errorf("%q is not supported. consider to add new errrorformat to https://github.com/haya14busa/errorformat", name)
+			return nil, fmt.Errorf("%q is not supported. consider to add new errrorformat to https://github.com/reviewdog/errorformat", name)
 		}
 		opt.Errorformat = efm.Errorformat
 	}

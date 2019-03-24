@@ -6,7 +6,7 @@ import (
 	"strings"
 	"testing"
 
-	"github.com/haya14busa/errorformat"
+	"github.com/reviewdog/errorformat"
 )
 
 var _ CommentService = &testWriter{}

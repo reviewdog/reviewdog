@@ -86,7 +86,7 @@ $ go get -u github.com/reviewdog/reviewdog/cmd/reviewdog
 ### 'errorformat'
 
 reviewdog accepts any compiler or linter result from stdin and parses it with
-scan-f like [**'errorformat'**](https://github.com/haya14busa/errorformat),
+scan-f like [**'errorformat'**](https://github.com/reviewdog/errorformat),
 which is the port of Vim's [errorformat](http://vimdoc.sourceforge.net/htmldoc/quickfix.html#errorformat)
 feature.
 
@@ -108,7 +108,7 @@ $ golint ./... | reviewdog -efm="%f:%l:%c: %m" -diff="git diff master"
 | %% | the single '%' character |
 | ... | ... |
 
-Please see [haya14busa/errorformat](https://github.com/haya14busa/errorformat)
+Please see [reviewdog/errorformat](https://github.com/reviewdog/errorformat)
 and [:h errorformat](http://vimdoc.sourceforge.net/htmldoc/quickfix.html#errorformat)
 if you want to deal with a more complex output. 'errorformat' can handle more
 complex output like a multi-line error message.
@@ -135,7 +135,7 @@ sbt             the interactive build tool                                      
 $ golint ./... | reviewdog -f=golint -diff="git diff master"
 ```
 
-You can add supported pre-defined 'errorformat' by contributing to [haya14busa/errorformat](https://github.com/haya14busa/errorformat)
+You can add supported pre-defined 'errorformat' by contributing to [reviewdog/errorformat](https://github.com/reviewdog/errorformat)
 
 ### checkstyle format
 
