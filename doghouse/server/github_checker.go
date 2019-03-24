@@ -3,7 +3,7 @@ package server
 import (
 	"context"
 
-	"github.com/google/go-github/github"
+	"github.com/google/go-github/v24/github"
 )
 
 type checkerGitHubClientInterface interface {

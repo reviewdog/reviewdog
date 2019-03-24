@@ -14,7 +14,7 @@ import (
 	"net/url"
 	"strings"
 
-	"github.com/google/go-github/github"
+	"github.com/google/go-github/v24/github"
 	"github.com/reviewdog/reviewdog/doghouse/server"
 	"github.com/reviewdog/reviewdog/doghouse/server/cookieman"
 	"github.com/reviewdog/reviewdog/doghouse/server/storage"
