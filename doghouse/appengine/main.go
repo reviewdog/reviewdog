@@ -1,17 +1,16 @@
 package main
 
 import (
-	"html/template"
 	"io/ioutil"
 	"log"
 	"net/http"
 	"os"
 	"strconv"
 
-	"github.com/reviewdog/reviewdog/doghouse/server/cookieman"
-	"github.com/reviewdog/reviewdog/doghouse/server/storage"
 	"github.com/haya14busa/secretbox"
 	"github.com/justinas/nosurf"
+	"github.com/reviewdog/reviewdog/doghouse/server/cookieman"
+	"github.com/reviewdog/reviewdog/doghouse/server/storage"
 	"google.golang.org/appengine"
 )
 
@@ -62,6 +61,8 @@ func mustIntEnv(name string) int {
 }
 
 func main() {
+	initTemplates()
+
 	integrationID := mustIntEnv("GITHUB_INTEGRATION_ID")
 	ghPrivateKey := mustGitHubAppsPrivateKey()
 
@@ -103,12 +104,6 @@ func main() {
 	http.Handle("/", mu)
 	appengine.Main()
 }
-
-var topTmpl = template.Must(
-	template.ParseFiles(
-		"tmpl/base.html",
-		"tmpl/index.html",
-	))
 
 func handleTop(w http.ResponseWriter, r *http.Request) {
 	var data struct {

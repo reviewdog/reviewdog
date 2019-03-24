@@ -7,7 +7,7 @@ import (
 	"strings"
 	"time"
 
-	"github.com/google/go-github/github"
+	"github.com/google/go-github/v24/github"
 	"github.com/reviewdog/reviewdog"
 	"github.com/reviewdog/reviewdog/diff"
 	"github.com/reviewdog/reviewdog/doghouse"

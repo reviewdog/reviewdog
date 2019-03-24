@@ -1,15 +1,15 @@
 handlers:
 - url: /secret/*
   secure: always
-  script: _go_app
+  script: auto
 
 - url: /static
   static_dir: static
 
 - url: /.*
-  script: _go_app
+  script: auto
 
 - url: /_ah/warmup
-  script: _go_app
+  script: auto
   login: admin
 

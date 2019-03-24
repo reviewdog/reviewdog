@@ -7,18 +7,17 @@ import (
 	"encoding/json"
 	"errors"
 	"fmt"
-	"html/template"
 	"io"
 	"io/ioutil"
 	"net/http"
 	"net/url"
 	"strings"
 
-	"github.com/google/go-github/github"
+	"github.com/google/go-github/v24/github"
+	"github.com/justinas/nosurf"
 	"github.com/reviewdog/reviewdog/doghouse/server"
 	"github.com/reviewdog/reviewdog/doghouse/server/cookieman"
 	"github.com/reviewdog/reviewdog/doghouse/server/storage"
-	"github.com/justinas/nosurf"
 	"golang.org/x/oauth2"
 	"google.golang.org/appengine"
 	"google.golang.org/appengine/log"
@@ -51,20 +50,6 @@ func NewGitHubHandler(clientID, clientSecret string, c *cookieman.CookieMan, pri
 		privateKey:     privateKey,
 	}
 }
-
-var ghTopTmpl = template.Must(
-	template.ParseFiles(
-		"tmpl/gh/base.html",
-		"tmpl/gh/header.html",
-		"tmpl/gh/top.html",
-	))
-
-var ghRepoTmpl = template.Must(
-	template.ParseFiles(
-		"tmpl/gh/base.html",
-		"tmpl/gh/header.html",
-		"tmpl/gh/repo.html",
-	))
 
 type ghTopTmplData struct {
 	Title string
