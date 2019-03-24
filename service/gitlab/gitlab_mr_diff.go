@@ -6,10 +6,12 @@ import (
 	"os/exec"
 	"strings"
 
+	"github.com/reviewdog/reviewdog"
+	"github.com/reviewdog/reviewdog/service/serviceutil"
 	gitlab "github.com/xanzy/go-gitlab"
 )
 
-var _ DiffService = &GitLabMergeRequestDiff{}
+var _ reviewdog.DiffService = &GitLabMergeRequestDiff{}
 
 // GitLabMergeRequestDiff is a diff service for GitLab MergeRequest.
 type GitLabMergeRequestDiff struct {
@@ -25,7 +27,7 @@ type GitLabMergeRequestDiff struct {
 // NewGitLabMergeRequestDiff returns a new GitLabMergeRequestDiff service.
 // itLabMergeRequestDiff service needs git command in $PATH.
 func NewGitLabMergeRequestDiff(cli *gitlab.Client, owner, repo string, pr int, sha string) (*GitLabMergeRequestDiff, error) {
-	workDir, err := gitRelWorkdir()
+	workDir, err := serviceutil.GitRelWorkdir()
 	if err != nil {
 		return nil, fmt.Errorf("GitLabMergeRequestCommitCommenter needs 'git' command: %v", err)
 	}

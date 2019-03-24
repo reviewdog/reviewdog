@@ -1,18 +1,20 @@
-package reviewdog
+package serviceutil
 
 import (
 	"fmt"
 	"os/exec"
 	"strings"
+
+	"github.com/reviewdog/reviewdog"
 )
 
 // `path` to `position`(Lnum for new file) to comment `body`s
-type postedcomments map[string]map[int][]string
+type PostedComments map[string]map[int][]string
 
 // IsPosted returns true if a given comment has been posted in code review service already,
 // otherwise returns false. It sees comments with same path, same position,
 // and same body as same comments.
-func (p postedcomments) IsPosted(c *Comment, lineNum int) bool {
+func (p PostedComments) IsPosted(c *reviewdog.Comment, lineNum int) bool {
 	if _, ok := p[c.Path]; !ok {
 		return false
 	}
@@ -21,14 +23,14 @@ func (p postedcomments) IsPosted(c *Comment, lineNum int) bool {
 		return false
 	}
 	for _, body := range bodys {
-		if body == commentBody(c) {
+		if body == CommentBody(c) {
 			return true
 		}
 	}
 	return false
 }
 
-func (p postedcomments) AddPostedComment(path string, lineNum int, body string) {
+func (p PostedComments) AddPostedComment(path string, lineNum int, body string) {
 	if _, ok := p[path]; !ok {
 		p[path] = make(map[int][]string)
 	}
@@ -38,17 +40,17 @@ func (p postedcomments) AddPostedComment(path string, lineNum int, body string) 
 	p[path][lineNum] = append(p[path][lineNum], body)
 }
 
-const bodyPrefix = `<sub>reported by [reviewdog](https://github.com/reviewdog/reviewdog) :dog:</sub>`
+const BodyPrefix = `<sub>reported by [reviewdog](https://github.com/reviewdog/reviewdog) :dog:</sub>`
 
-func commentBody(c *Comment) string {
+func CommentBody(c *reviewdog.Comment) string {
 	tool := ""
 	if c.ToolName != "" {
 		tool = fmt.Sprintf("**[%s]** ", c.ToolName)
 	}
-	return tool + bodyPrefix + "\n" + c.Body
+	return tool + BodyPrefix + "\n" + c.Body
 }
 
-func gitRelWorkdir() (string, error) {
+func GitRelWorkdir() (string, error) {
 	b, err := exec.Command("git", "rev-parse", "--show-prefix").Output()
 	if err != nil {
 		return "", fmt.Errorf("failed to run 'git rev-parse --show-prefix': %v", err)

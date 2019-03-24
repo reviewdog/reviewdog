@@ -7,10 +7,9 @@ import (
 	"sync"
 
 	"github.com/google/go-github/github"
+	"github.com/reviewdog/reviewdog"
+	"github.com/reviewdog/reviewdog/service/serviceutil"
 )
-
-var _ CommentService = &GitHubPullRequest{}
-var _ DiffService = &GitHubPullRequest{}
 
 // GitHubPullRequest is a comment and diff service for GitHub PullRequest.
 //
@@ -25,9 +24,9 @@ type GitHubPullRequest struct {
 	sha   string
 
 	muComments   sync.Mutex
-	postComments []*Comment
+	postComments []*reviewdog.Comment
 
-	postedcs postedcomments
+	postedcs serviceutil.PostedComments
 
 	// wd is working directory relative to root of repository.
 	wd string
@@ -36,7 +35,7 @@ type GitHubPullRequest struct {
 // NewGitHubPullReqest returns a new GitHubPullRequest service.
 // GitHubPullRequest service needs git command in $PATH.
 func NewGitHubPullReqest(cli *github.Client, owner, repo string, pr int, sha string) (*GitHubPullRequest, error) {
-	workDir, err := gitRelWorkdir()
+	workDir, err := serviceutil.GitRelWorkdir()
 	if err != nil {
 		return nil, fmt.Errorf("GitHubPullRequest needs 'git' command: %v", err)
 	}
@@ -52,7 +51,7 @@ func NewGitHubPullReqest(cli *github.Client, owner, repo string, pr int, sha str
 
 // Post accepts a comment and holds it. Flush method actually posts comments to
 // GitHub in parallel.
-func (g *GitHubPullRequest) Post(_ context.Context, c *Comment) error {
+func (g *GitHubPullRequest) Post(_ context.Context, c *reviewdog.Comment) error {
 	c.Path = filepath.Join(g.wd, c.Path)
 	g.muComments.Lock()
 	defer g.muComments.Unlock()
@@ -77,7 +76,7 @@ func (g *GitHubPullRequest) postAsReviewComment(ctx context.Context) error {
 		if g.postedcs.IsPosted(c, c.LnumDiff) {
 			continue
 		}
-		cbody := commentBody(c)
+		cbody := serviceutil.CommentBody(c)
 		comments = append(comments, &github.DraftReviewComment{
 			Path:     &c.Path,
 			Position: &c.LnumDiff,
@@ -101,7 +100,7 @@ func (g *GitHubPullRequest) postAsReviewComment(ctx context.Context) error {
 }
 
 func (g *GitHubPullRequest) setPostedComment(ctx context.Context) error {
-	g.postedcs = make(postedcomments)
+	g.postedcs = make(serviceutil.PostedComments)
 	cs, err := g.comment(ctx)
 	if err != nil {
 		return err

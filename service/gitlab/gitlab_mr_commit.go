@@ -8,11 +8,13 @@ import (
 	"strings"
 	"sync"
 
+	"github.com/reviewdog/reviewdog"
+	"github.com/reviewdog/reviewdog/service/serviceutil"
 	"github.com/xanzy/go-gitlab"
 	"golang.org/x/sync/errgroup"
 )
 
-var _ CommentService = &GitLabMergeRequestCommitCommenter{}
+var _ reviewdog.CommentService = &GitLabMergeRequestCommitCommenter{}
 
 // GitLabMergeRequestCommitCommenter is a comment service for GitLab MergeRequest.
 //
@@ -26,9 +28,9 @@ type GitLabMergeRequestCommitCommenter struct {
 	projects string
 
 	muComments   sync.Mutex
-	postComments []*Comment
+	postComments []*reviewdog.Comment
 
-	postedcs postedcomments
+	postedcs serviceutil.PostedComments
 
 	// wd is working directory relative to root of repository.
 	wd string
@@ -37,7 +39,7 @@ type GitLabMergeRequestCommitCommenter struct {
 // NewGitLabMergeRequestCommitCommenter returns a new GitLabMergeRequestCommitCommenter service.
 // GitLabMergeRequestCommitCommenter service needs git command in $PATH.
 func NewGitLabMergeRequestCommitCommenter(cli *gitlab.Client, owner, repo string, pr int, sha string) (*GitLabMergeRequestCommitCommenter, error) {
-	workDir, err := gitRelWorkdir()
+	workDir, err := serviceutil.GitRelWorkdir()
 	if err != nil {
 		return nil, fmt.Errorf("GitLabMergeRequestCommitCommenter needs 'git' command: %v", err)
 	}
@@ -52,7 +54,7 @@ func NewGitLabMergeRequestCommitCommenter(cli *gitlab.Client, owner, repo string
 
 // Post accepts a comment and holds it. Flush method actually posts comments to
 // GitLab in parallel.
-func (g *GitLabMergeRequestCommitCommenter) Post(_ context.Context, c *Comment) error {
+func (g *GitLabMergeRequestCommitCommenter) Post(_ context.Context, c *reviewdog.Comment) error {
 	c.Path = filepath.Join(g.wd, c.Path)
 	g.muComments.Lock()
 	defer g.muComments.Unlock()
@@ -84,7 +86,7 @@ func (g *GitLabMergeRequestCommitCommenter) postCommentsForEach(ctx context.Cont
 			if err != nil {
 				commitID = g.sha
 			}
-			body := commentBody(comment)
+			body := serviceutil.CommentBody(comment)
 			ltype := "new"
 			prcomment := &gitlab.PostCommitCommentOptions{
 				Note:     &body,
@@ -110,7 +112,7 @@ func (g *GitLabMergeRequestCommitCommenter) getLastCommitsID(path string, line i
 }
 
 func (g *GitLabMergeRequestCommitCommenter) setPostedComment(ctx context.Context) error {
-	g.postedcs = make(postedcomments)
+	g.postedcs = make(serviceutil.PostedComments)
 	cs, err := g.comment(ctx)
 	if err != nil {
 		return err

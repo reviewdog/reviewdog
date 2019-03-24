@@ -9,10 +9,16 @@ import (
 	"testing"
 
 	"github.com/kylelemons/godebug/pretty"
+	"github.com/reviewdog/reviewdog"
+	"github.com/reviewdog/reviewdog/service/serviceutil"
 	"github.com/xanzy/go-gitlab"
 )
 
 func TestGitLabMergeRequestCommitCommenter_Post_Flush_review_api(t *testing.T) {
+	cwd, _ := os.Getwd()
+	defer os.Chdir(cwd)
+	os.Chdir("../..")
+
 	apiCalled := 0
 	mux := http.NewServeMux()
 	mux.HandleFunc("/api/v4/projects/o/r/merge_requests/14/commits", func(w http.ResponseWriter, r *http.Request) {
@@ -39,7 +45,7 @@ func TestGitLabMergeRequestCommitCommenter_Post_Flush_review_api(t *testing.T) {
 			{
 				Path: "notExistFile.go",
 				Line: 1,
-				Note: bodyPrefix + "\nalready commented",
+				Note: serviceutil.BodyPrefix + "\nalready commented",
 			},
 		}
 		if err := json.NewEncoder(w).Encode(cs); err != nil {
@@ -58,7 +64,7 @@ func TestGitLabMergeRequestCommitCommenter_Post_Flush_review_api(t *testing.T) {
 		want := gitlab.CommitComment{
 			Path:     "notExistFile.go",
 			Line:     14,
-			Note:     bodyPrefix + "\nnew comment",
+			Note:     serviceutil.BodyPrefix + "\nnew comment",
 			LineType: "new",
 		}
 		if diff := pretty.Compare(want, req); diff != "" {
@@ -79,16 +85,16 @@ func TestGitLabMergeRequestCommitCommenter_Post_Flush_review_api(t *testing.T) {
 	}
 	// Path is set to non existing file path for mock test not to use last commit id of the line.
 	// If setting exists file path, sha is changed by last commit id.
-	comments := []*Comment{
+	comments := []*reviewdog.Comment{
 		{
-			CheckResult: &CheckResult{
+			CheckResult: &reviewdog.CheckResult{
 				Path: "notExistFile.go",
 				Lnum: 1,
 			},
 			Body: "already commented",
 		},
 		{
-			CheckResult: &CheckResult{
+			CheckResult: &reviewdog.CheckResult{
 				Path: "notExistFile.go",
 				Lnum: 14,
 			},
@@ -111,6 +117,7 @@ func TestGitLabMergeRequestCommitCommenter_Post_Flush_review_api(t *testing.T) {
 func TestGitLabPullReqest_workdir(t *testing.T) {
 	cwd, _ := os.Getwd()
 	defer os.Chdir(cwd)
+	os.Chdir("../..")
 
 	g, err := NewGitLabMergeRequestCommitCommenter(nil, "", "", 0, "")
 	if err != nil {
@@ -121,7 +128,7 @@ func TestGitLabPullReqest_workdir(t *testing.T) {
 	}
 	ctx := context.Background()
 	want := "a/b/c"
-	g.Post(ctx, &Comment{CheckResult: &CheckResult{Path: want}})
+	g.Post(ctx, &reviewdog.Comment{CheckResult: &reviewdog.CheckResult{Path: want}})
 	if got := g.postComments[0].Path; got != want {
 		t.Errorf("wd=%q path=%q, want %q", g.wd, got, want)
 	}
@@ -136,7 +143,7 @@ func TestGitLabPullReqest_workdir(t *testing.T) {
 	}
 	path := "a/b/c"
 	wantPath := "cmd/" + path
-	g.Post(ctx, &Comment{CheckResult: &CheckResult{Path: path}})
+	g.Post(ctx, &reviewdog.Comment{CheckResult: &reviewdog.CheckResult{Path: path}})
 	if got := g.postComments[0].Path; got != wantPath {
 		t.Errorf("wd=%q path=%q, want %q", g.wd, got, wantPath)
 	}
