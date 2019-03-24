@@ -1,7 +1,7 @@
 version: 2
 
 jobs:
-  build:
+  lint:
     working_directory: ~/reviewdog
     docker:
       - image: golang:latest
@@ -15,6 +15,15 @@ jobs:
       - run: 'curl -fSL https://github.com/reviewdog/reviewdog/releases/download/$REVIEWDOG_VERSION/reviewdog_linux_amd64 -o reviewdog && chmod +x ./reviewdog'
       - run: 'go get golang.org/x/lint/golint'
       - run: 'golint ./... || true | ./reviewdog -f=golint -name=golint-circleci -reporter=github-pr-review'
+  test:
+    working_directory: ~/reviewdog
+    docker:
+      - image: golang:latest
+        environment:
+          REVIEWDOG_VERSION: "0.9.11"
+    steps:
+      - checkout
+      - run: 'go test -v ./...'
   deploy:
     working_directory: ~/reviewdog/doghouse/appengine/
     docker:
@@ -66,12 +75,14 @@ jobs:
 
 workflows:
   version: 2
-  build_and_deploy:
+  lint_test_deploy:
     jobs:
-      - build
+      - lint
+      - test
       - deploy:
           requires:
-            - build
+            - lint
+            - test
           filters:
             branches:
               only: master
