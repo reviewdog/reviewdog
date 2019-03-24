@@ -54,7 +54,8 @@ jobs:
       - run:
           name: Deploy
           command: |-
-            gcloud info --run-diagnostics
+            # Remove files which contains multibyte characters to avoid gcloud error...
+            rm -rf ../../diff/testdata/
             gcloud --quiet --project $GAE_DEPLOY_PROJECT app deploy app.yaml
       - run:
           name: Cleanup
