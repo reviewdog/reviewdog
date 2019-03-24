@@ -11,6 +11,7 @@ require (
 	github.com/justinas/nosurf v0.0.0-20190118163749-6453469bdcc9
 	github.com/kylelemons/godebug v0.0.0-20170820004349-d65d576e9348
 	github.com/mattn/go-shellwords v1.0.5
+	github.com/rakyll/statik v0.1.6
 	github.com/reviewdog/errorformat v0.0.0-20190324140416-e1294664b9b7
 	github.com/xanzy/go-gitlab v0.16.1
 	golang.org/x/net v0.0.0-20190322120337-addf6b3196f6
