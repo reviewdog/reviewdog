@@ -7,7 +7,7 @@ import (
 
 	"github.com/google/go-cmp/cmp"
 	"github.com/google/go-github/github"
-	"github.com/haya14busa/reviewdog/doghouse"
+	"github.com/reviewdog/reviewdog/doghouse"
 )
 
 type fakeCheckerGitHubCli struct {

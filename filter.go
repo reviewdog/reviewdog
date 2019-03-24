@@ -4,7 +4,7 @@ import (
 	"path/filepath"
 	"strings"
 
-	"github.com/haya14busa/reviewdog/diff"
+	"github.com/reviewdog/reviewdog/diff"
 )
 
 // FilteredCheck represents CheckResult with filtering info.

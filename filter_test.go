@@ -9,7 +9,7 @@ import (
 	"testing"
 
 	"github.com/google/go-cmp/cmp"
-	"github.com/haya14busa/reviewdog/diff"
+	"github.com/reviewdog/reviewdog/diff"
 )
 
 const diffContent = `--- sample.old.txt	2016-10-13 05:09:35.820791185 +0900

@@ -9,11 +9,11 @@ import (
 	"os"
 	"strings"
 
-	"github.com/haya14busa/reviewdog"
-	"github.com/haya14busa/reviewdog/cienv"
-	"github.com/haya14busa/reviewdog/doghouse"
-	"github.com/haya14busa/reviewdog/doghouse/client"
-	"github.com/haya14busa/reviewdog/project"
+	"github.com/reviewdog/reviewdog"
+	"github.com/reviewdog/reviewdog/cienv"
+	"github.com/reviewdog/reviewdog/doghouse"
+	"github.com/reviewdog/reviewdog/doghouse/client"
+	"github.com/reviewdog/reviewdog/project"
 	"golang.org/x/oauth2"
 	"golang.org/x/sync/errgroup"
 )

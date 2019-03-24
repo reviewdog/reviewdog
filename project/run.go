@@ -9,8 +9,8 @@ import (
 	"os/exec"
 	"runtime"
 
-	"github.com/haya14busa/reviewdog"
-	"github.com/haya14busa/reviewdog/diff"
+	"github.com/reviewdog/reviewdog"
+	"github.com/reviewdog/reviewdog/diff"
 	"golang.org/x/sync/errgroup"
 )
 

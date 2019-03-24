@@ -3,7 +3,7 @@ package main
 import (
 	"net/http"
 
-	"github.com/haya14busa/reviewdog/doghouse/server/ciutil"
+	"github.com/reviewdog/reviewdog/doghouse/server/ciutil"
 	"google.golang.org/appengine"
 	"google.golang.org/appengine/log"
 	"google.golang.org/appengine/urlfetch"

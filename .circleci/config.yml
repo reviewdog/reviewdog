@@ -12,7 +12,7 @@ jobs:
       - run:
           name: System information
           command: 'echo "Golang $(go version)"'
-      - run: 'curl -fSL https://github.com/haya14busa/reviewdog/releases/download/$REVIEWDOG_VERSION/reviewdog_linux_amd64 -o reviewdog && chmod +x ./reviewdog'
+      - run: 'curl -fSL https://github.com/reviewdog/reviewdog/releases/download/$REVIEWDOG_VERSION/reviewdog_linux_amd64 -o reviewdog && chmod +x ./reviewdog'
       - run: 'go get golang.org/x/lint/golint'
       - run: 'golint ./... || true | ./reviewdog -f=golint -name=golint-circleci -reporter=github-pr-review'
 

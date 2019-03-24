@@ -8,9 +8,9 @@ import (
 	"time"
 
 	"github.com/google/go-github/github"
-	"github.com/haya14busa/reviewdog"
-	"github.com/haya14busa/reviewdog/diff"
-	"github.com/haya14busa/reviewdog/doghouse"
+	"github.com/reviewdog/reviewdog"
+	"github.com/reviewdog/reviewdog/diff"
+	"github.com/reviewdog/reviewdog/doghouse"
 	"golang.org/x/sync/errgroup"
 )
 
@@ -126,7 +126,7 @@ func (ch *Checker) postCheck(ctx context.Context, branch string, checks []*revie
 
 func (ch *Checker) summary(checks []*reviewdog.FilteredCheck) string {
 	var lines []string
-	lines = append(lines, "reported by [reviewdog](https://github.com/haya14busa/reviewdog) :dog:")
+	lines = append(lines, "reported by [reviewdog](https://github.com/reviewdog/reviewdog) :dog:")
 
 	var findings []*reviewdog.FilteredCheck
 	var filteredFindings []*reviewdog.FilteredCheck

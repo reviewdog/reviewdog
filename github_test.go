@@ -36,7 +36,7 @@ func TestGitHubPullRequest_Post(t *testing.T) {
 		t.Skip(notokenSkipTestMes)
 	}
 
-	// https://github.com/haya14busa/reviewdog/pull/2
+	// https://github.com/reviewdog/reviewdog/pull/2
 	owner := "haya14busa"
 	repo := "reviewdog"
 	pr := 2
@@ -53,7 +53,7 @@ func TestGitHubPullRequest_Post(t *testing.T) {
 		LnumDiff: 17,
 		Body:     "[reviewdog] test",
 	}
-	// https://github.com/haya14busa/reviewdog/pull/2/files#diff-ed1d019a10f54464cfaeaf6a736b7d27L20
+	// https://github.com/reviewdog/reviewdog/pull/2/files#diff-ed1d019a10f54464cfaeaf6a736b7d27L20
 	if err := g.Post(context.Background(), comment); err != nil {
 		t.Error(err)
 	}
@@ -90,7 +90,7 @@ index 61450f3..f63f149 100644
 --- a/reviewdog.go
 +++ b/reviewdog.go
 @@ -10,18 +10,18 @@ import (
- 	"github.com/haya14busa/reviewdog/diff"
+ 	"github.com/reviewdog/reviewdog/diff"
  )
  
 +var TestExportedVarWithoutComment = 1
@@ -116,7 +116,7 @@ index 61450f3..f63f149 100644
  	Lnum    int      // line number
 `
 
-	// https://github.com/haya14busa/reviewdog/pull/2
+	// https://github.com/reviewdog/reviewdog/pull/2
 	owner := "haya14busa"
 	repo := "reviewdog"
 	pr := 2
@@ -141,7 +141,7 @@ func TestGitHubPullRequest_comment(t *testing.T) {
 	if client == nil {
 		t.Skip(notokenSkipTestMes)
 	}
-	// https://github.com/haya14busa/reviewdog/pull/2
+	// https://github.com/reviewdog/reviewdog/pull/2
 	owner := "haya14busa"
 	repo := "reviewdog"
 	pr := 2
