@@ -1,20 +1,35 @@
-image: golang:latest
+# Open merge request automatically and run reviewdog against created MR.
+stages:
+  - openMr
+  - reviewdog
 
-before_script:
-  # Set up $GOPATH and install reviewdog (Note that main repo is github.com)
-  - ln -s /builds /go/src/github.com
-  - cd /go/src/github.com/${CI_PROJECT_PATH}
-  - go get -d -v -t ./...
-  - go install ./cmd/reviewdog
-  # Intall linters
-  - go get golang.org/x/lint/golint
-  - go get github.com/kisielk/errcheck
-  - go get honnef.co/go/tools/cmd/gosimple
-  - go get honnef.co/go/tools/cmd/staticcheck
-  - go get honnef.co/go/tools/cmd/unused
-  - go get github.com/client9/misspell/cmd/misspell
-
-reviewdog:
+# https://github.com/tmaier/gitlab-auto-merge-request
+Open Merge Request:
+  stage: openMr
+  image: tmaier/gitlab-auto-merge-request:1
+  before_script: []
+  variables:
+    GIT_STRATEGY: none
   script:
-    - reviewdog -reporter=gitlab-mr-discussion
-    - reviewdog -reporter=gitlab-mr-commit
+    - merge-request.sh
+
+Reviewdog:
+  stage: reviewdog
+  image: golang:latest
+  before_script:
+    # Set up $GOPATH and install reviewdog (Note that main repo is github.com)
+    - ln -s /builds /go/src/github.com
+    - cd /go/src/github.com/${CI_PROJECT_PATH}
+    - go get -d -v -t ./...
+    - go install ./cmd/reviewdog
+    # Intall linters
+    - go get golang.org/x/lint/golint
+    - go get github.com/kisielk/errcheck
+    - go get honnef.co/go/tools/cmd/gosimple
+    - go get honnef.co/go/tools/cmd/staticcheck
+    - go get honnef.co/go/tools/cmd/unused
+    - go get github.com/client9/misspell/cmd/misspell
+  reviewdog:
+    script:
+      - reviewdog -reporter=gitlab-mr-discussion
+      - reviewdog -reporter=gitlab-mr-commit
