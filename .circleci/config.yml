@@ -28,10 +28,13 @@ jobs:
       - checkout:
           path: ~/reviewdog
       - run:
+          name: Update Google Cloud SDK
+          command: 'gcloud --quiet components update'
+      - run:
           name: System information
           command: 'echo "Golang $(go version)"'
       - run:
-          name: gloud command information
+          name: gcloud command information
           command: 'gcloud version'
       - run:
           name: Activate Service Account
