@@ -12,6 +12,7 @@ func setupEnvs() (cleanup func()) {
 		"CIRCLE_PROJECT_REPONAME",
 		"CIRCLE_PROJECT_USERNAME",
 		"CIRCLE_PR_NUMBER",
+		"CIRCLE_PULL_REQUEST",
 		"CIRCLE_SHA1",
 		"CI_BRANCH",
 		"CI_COMMIT",
