@@ -1,4 +1,4 @@
-package reviewdog
+package gitlab
 
 import (
 	"context"
