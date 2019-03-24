@@ -1,4 +1,0 @@
-# copy this file to .drone.sec.yaml and insert <REVIEWDOG_GITHUB_API_TOKEN>
-#   cp .drone.sec.sample.yaml .drone.sec.yaml
-environment:
-  REVIEWDOG_GITHUB_API_TOKEN: <REVIEWDOG_GITHUB_API_TOKEN>

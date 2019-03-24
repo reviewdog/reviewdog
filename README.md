@@ -30,7 +30,6 @@
   <a href="https://travis-ci.org/reviewdog/reviewdog"><img alt="Travis Status" src="https://img.shields.io/travis/reviewdog/reviewdog/master.svg?label=travis&maxAge=43200"></a>
   <a href="https://circleci.com/gh/reviewdog/reviewdog"><img alt="CircleCI Status" src="https://img.shields.io/circleci/project/github/reviewdog/reviewdog/master.svg?label=circle&maxAge=43200"></a>
   <a href="https://codecov.io/github/reviewdog/reviewdog"><img alt="Coverage Status" src="https://img.shields.io/codecov/c/github/reviewdog/reviewdog/master.svg?maxAge=43200"></a>
-  <a href="http://droneio.haya14busa.com/reviewdog/reviewdog"><img alt="drone.io Build Status" src="http://droneio.haya14busa.com/api/badges/reviewdog/reviewdog/status.svg"></a>
 </p>
 
 "reviewdog" provides a way to post review comments to code hosting service,
