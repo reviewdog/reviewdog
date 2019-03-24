@@ -327,7 +327,7 @@ func githubService(ctx context.Context) (gs *githubservice.GitHubPullRequest, is
 		return nil, isPR, err
 	}
 
-	gs, err = githubservice.NewGitHubPullReqest(client, g.Owner, g.Repo, g.PullRequest, g.SHA)
+	gs, err = githubservice.NewGitHubPullRequest(client, g.Owner, g.Repo, g.PullRequest, g.SHA)
 	if err != nil {
 		return nil, isPR, err
 	}

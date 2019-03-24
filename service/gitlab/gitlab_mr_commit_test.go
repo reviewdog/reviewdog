@@ -114,7 +114,7 @@ func TestGitLabMergeRequestCommitCommenter_Post_Flush_review_api(t *testing.T) {
 	}
 }
 
-func TestGitLabPullReqest_workdir(t *testing.T) {
+func TestGitLabPullRequest_workdir(t *testing.T) {
 	cwd, _ := os.Getwd()
 	defer os.Chdir(cwd)
 	os.Chdir("../..")

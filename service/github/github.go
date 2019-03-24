@@ -35,9 +35,9 @@ type GitHubPullRequest struct {
 	wd string
 }
 
-// NewGitHubPullReqest returns a new GitHubPullRequest service.
+// NewGitHubPullRequest returns a new GitHubPullRequest service.
 // GitHubPullRequest service needs git command in $PATH.
-func NewGitHubPullReqest(cli *github.Client, owner, repo string, pr int, sha string) (*GitHubPullRequest, error) {
+func NewGitHubPullRequest(cli *github.Client, owner, repo string, pr int, sha string) (*GitHubPullRequest, error) {
 	workDir, err := serviceutil.GitRelWorkdir()
 	if err != nil {
 		return nil, fmt.Errorf("GitHubPullRequest needs 'git' command: %v", err)
