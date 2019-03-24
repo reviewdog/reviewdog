@@ -31,6 +31,9 @@ jobs:
           name: System information
           command: 'echo "Golang $(go version)"'
       - run:
+          name: gloud command information
+          command: 'gcloud version'
+      - run:
           name: Activate Service Account
           command: |-
             echo $GAE_DEPLOY_KEY_FILE > service_account_key.json
