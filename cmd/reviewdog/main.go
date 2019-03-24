@@ -20,9 +20,9 @@ import (
 
 	"github.com/google/go-github/github"
 	"github.com/haya14busa/errorformat/fmts"
-	"github.com/haya14busa/reviewdog"
-	"github.com/haya14busa/reviewdog/cienv"
-	"github.com/haya14busa/reviewdog/project"
+	"github.com/reviewdog/reviewdog"
+	"github.com/reviewdog/reviewdog/cienv"
+	"github.com/reviewdog/reviewdog/project"
 	shellwords "github.com/mattn/go-shellwords"
 	"github.com/xanzy/go-gitlab"
 )
@@ -129,7 +129,7 @@ func usage() {
 	fmt.Fprintln(os.Stderr, "Flags:")
 	flag.PrintDefaults()
 	fmt.Fprintln(os.Stderr, "")
-	fmt.Fprintln(os.Stderr, "GitHub: https://github.com/haya14busa/reviewdog")
+	fmt.Fprintln(os.Stderr, "GitHub: https://github.com/reviewdog/reviewdog")
 	os.Exit(2)
 }
 

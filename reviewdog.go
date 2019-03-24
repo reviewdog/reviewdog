@@ -7,7 +7,7 @@ import (
 	"io"
 	"os"
 
-	"github.com/haya14busa/reviewdog/diff"
+	"github.com/reviewdog/reviewdog/diff"
 )
 
 // Version is version of reviewdog CLI.

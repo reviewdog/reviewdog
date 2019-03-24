@@ -8,7 +8,7 @@ import (
 	"strings"
 	"testing"
 
-	"github.com/haya14busa/reviewdog"
+	"github.com/reviewdog/reviewdog"
 )
 
 func TestRun_local(t *testing.T) {

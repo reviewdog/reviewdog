@@ -8,8 +8,8 @@ import (
 	"os"
 	"strconv"
 
-	"github.com/haya14busa/reviewdog/doghouse/server/cookieman"
-	"github.com/haya14busa/reviewdog/doghouse/server/storage"
+	"github.com/reviewdog/reviewdog/doghouse/server/cookieman"
+	"github.com/reviewdog/reviewdog/doghouse/server/storage"
 	"github.com/haya14busa/secretbox"
 	"github.com/justinas/nosurf"
 	"google.golang.org/appengine"

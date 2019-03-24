@@ -8,7 +8,7 @@ import (
 	"net/http"
 
 	"github.com/google/go-github/github"
-	"github.com/haya14busa/reviewdog/doghouse/server/storage"
+	"github.com/reviewdog/reviewdog/doghouse/server/storage"
 	"google.golang.org/appengine"
 )
 

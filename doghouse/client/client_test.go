@@ -7,7 +7,7 @@ import (
 	"net/url"
 	"testing"
 
-	"github.com/haya14busa/reviewdog/doghouse"
+	"github.com/reviewdog/reviewdog/doghouse"
 )
 
 func TestDogHouseClient_Check(t *testing.T) {

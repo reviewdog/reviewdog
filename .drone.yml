@@ -1,5 +1,5 @@
 # Run the below command when you edit .drone.yml
-#   drone secure --repo haya14busa/reviewdog --in .drone.sec.yaml
+#   drone secure --repo reviewdog/reviewdog --in .drone.sec.yaml
 #
 build:
   test:

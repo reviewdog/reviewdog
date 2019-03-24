@@ -15,9 +15,9 @@ import (
 	"strings"
 
 	"github.com/google/go-github/github"
-	"github.com/haya14busa/reviewdog/doghouse/server"
-	"github.com/haya14busa/reviewdog/doghouse/server/cookieman"
-	"github.com/haya14busa/reviewdog/doghouse/server/storage"
+	"github.com/reviewdog/reviewdog/doghouse/server"
+	"github.com/reviewdog/reviewdog/doghouse/server/cookieman"
+	"github.com/reviewdog/reviewdog/doghouse/server/storage"
 	"github.com/justinas/nosurf"
 	"golang.org/x/oauth2"
 	"google.golang.org/appengine"

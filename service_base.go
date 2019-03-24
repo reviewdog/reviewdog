@@ -38,7 +38,7 @@ func (p postedcomments) AddPostedComment(path string, lineNum int, body string) 
 	p[path][lineNum] = append(p[path][lineNum], body)
 }
 
-const bodyPrefix = `<sub>reported by [reviewdog](https://github.com/haya14busa/reviewdog) :dog:</sub>`
+const bodyPrefix = `<sub>reported by [reviewdog](https://github.com/reviewdog/reviewdog) :dog:</sub>`
 
 func commentBody(c *Comment) string {
 	tool := ""

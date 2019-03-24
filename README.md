@@ -1,5 +1,5 @@
 <p align="center">
-  <a href="https://github.com/haya14busa/reviewdog">
+  <a href="https://github.com/reviewdog/reviewdog">
     <img alt="reviewdog" src="https://raw.githubusercontent.com/haya14busa/i/d598ed7dc49fefb0018e422e4c43e5ab8f207a6b/reviewdog/reviewdog.logo.png">
   </a>
 </p>
@@ -9,28 +9,28 @@
 </h2>
 
 <p align="center">
-  <a href="https://gitter.im/haya14busa/reviewdog?utm_source=badge&utm_medium=badge&utm_campaign=pr-badge">
+  <a href="https://gitter.im/reviewdog/reviewdog?utm_source=badge&utm_medium=badge&utm_campaign=pr-badge">
     <img alt="Gitter" src="https://img.shields.io/badge/chat-gitter-1DCE73.svg?label=chat&maxAge=43200">
   </a>
-  <a href="https://github.com/haya14busa/reviewdog/blob/master/LICENSE">
+  <a href="https://github.com/reviewdog/reviewdog/blob/master/LICENSE">
     <img alt="LICENSE" src="https://img.shields.io/badge/license-MIT-blue.svg?maxAge=43200">
   </a>
-  <a href="https://godoc.org/github.com/haya14busa/reviewdog">
+  <a href="https://godoc.org/github.com/reviewdog/reviewdog">
     <img alt="GoDoc" src="https://img.shields.io/badge/godoc-reference-4F73B3.svg?label=godoc.org&maxAge=43200">
   </a>
-  <a href="https://github.com/haya14busa/reviewdog/releases">
-    <img alt="releases" src="https://img.shields.io/github/release/haya14busa/reviewdog.svg?maxAge=43200">
+  <a href="https://github.com/reviewdog/reviewdog/releases">
+    <img alt="releases" src="https://img.shields.io/github/release/reviewdog/reviewdog.svg?maxAge=43200">
   </a>
-  <a href="https://github.com/haya14busa/reviewdog/releases">
-    <img alt="Github All Releases" src="https://img.shields.io/github/downloads/haya14busa/reviewdog/total.svg?maxAge=43200">
+  <a href="https://github.com/reviewdog/reviewdog/releases">
+    <img alt="Github All Releases" src="https://img.shields.io/github/downloads/reviewdog/reviewdog/total.svg?maxAge=43200">
   </a>
 </p>
 
 <p align="center">
-  <a href="https://travis-ci.org/haya14busa/reviewdog"><img alt="Travis Status" src="https://img.shields.io/travis/haya14busa/reviewdog/master.svg?label=travis&maxAge=43200"></a>
-  <a href="https://circleci.com/gh/haya14busa/reviewdog"><img alt="CircleCI Status" src="https://img.shields.io/circleci/project/github/haya14busa/reviewdog/master.svg?label=circle&maxAge=43200"></a>
-  <a href="https://codecov.io/github/haya14busa/reviewdog"><img alt="Coverage Status" src="https://img.shields.io/codecov/c/github/haya14busa/reviewdog/master.svg?maxAge=43200"></a>
-  <a href="http://droneio.haya14busa.com/haya14busa/reviewdog"><img alt="drone.io Build Status" src="http://droneio.haya14busa.com/api/badges/haya14busa/reviewdog/status.svg"></a>
+  <a href="https://travis-ci.org/reviewdog/reviewdog"><img alt="Travis Status" src="https://img.shields.io/travis/reviewdog/reviewdog/master.svg?label=travis&maxAge=43200"></a>
+  <a href="https://circleci.com/gh/reviewdog/reviewdog"><img alt="CircleCI Status" src="https://img.shields.io/circleci/project/github/reviewdog/reviewdog/master.svg?label=circle&maxAge=43200"></a>
+  <a href="https://codecov.io/github/reviewdog/reviewdog"><img alt="Coverage Status" src="https://img.shields.io/codecov/c/github/reviewdog/reviewdog/master.svg?maxAge=43200"></a>
+  <a href="http://droneio.haya14busa.com/reviewdog/reviewdog"><img alt="drone.io Build Status" src="http://droneio.haya14busa.com/api/badges/reviewdog/reviewdog/status.svg"></a>
 </p>
 
 "reviewdog" provides a way to post review comments to code hosting service,
@@ -65,20 +65,20 @@ by diff.
     + [Jenkins with Github pull request builder plugin](#jenkins-with-github-pull-request-builder-plugin)
 - [Articles](#articles)
 
-[![github-pr-check sample](https://user-images.githubusercontent.com/3797062/40884858-6efd82a0-6756-11e8-9f1a-c6af4f920fb0.png)](https://github.com/haya14busa/reviewdog/pull/131/checks)
+[![github-pr-check sample](https://user-images.githubusercontent.com/3797062/40884858-6efd82a0-6756-11e8-9f1a-c6af4f920fb0.png)](https://github.com/reviewdog/reviewdog/pull/131/checks)
 ![comment in pull-request](https://user-images.githubusercontent.com/3797062/40941822-1d775064-6887-11e8-98e9-4775d37d47f8.png)
 ![commit status](https://user-images.githubusercontent.com/3797062/40941738-d62acb0a-6886-11e8-858d-7b97aded2a42.png)
-[![sample-comment.png](https://raw.githubusercontent.com/haya14busa/i/dc0ccb1e110515ea407c146d99b749018db05c45/reviewdog/sample-comment.png)](https://github.com/haya14busa/reviewdog/pull/24#discussion_r84599728)
+[![sample-comment.png](https://raw.githubusercontent.com/haya14busa/i/dc0ccb1e110515ea407c146d99b749018db05c45/reviewdog/sample-comment.png)](https://github.com/reviewdog/reviewdog/pull/24#discussion_r84599728)
 ![reviewdog-local-demo.gif](https://raw.githubusercontent.com/haya14busa/i/dc0ccb1e110515ea407c146d99b749018db05c45/reviewdog/reviewdog-local-demo.gif)
 
 ## Installation
 
-Get [the binary release](https://github.com/haya14busa/reviewdog/releases) (recommended way)
+Get [the binary release](https://github.com/reviewdog/reviewdog/releases) (recommended way)
 
 or
 
 ```shell
-$ go get -u github.com/haya14busa/reviewdog/cmd/reviewdog
+$ go get -u github.com/reviewdog/reviewdog/cmd/reviewdog
 ```
 
 ## Input Format
@@ -214,7 +214,7 @@ $ golint ./... | reviewdog -f=golint -diff="git diff master"
 
 ### Reporter: GitHub Checks (-reporter=github-pr-check)
 
-[![github-pr-check sample](https://user-images.githubusercontent.com/3797062/40884858-6efd82a0-6756-11e8-9f1a-c6af4f920fb0.png)](https://github.com/haya14busa/reviewdog/pull/131/checks)
+[![github-pr-check sample](https://user-images.githubusercontent.com/3797062/40884858-6efd82a0-6756-11e8-9f1a-c6af4f920fb0.png)](https://github.com/reviewdog/reviewdog/pull/131/checks)
 
 github-pr-check reporter reports results to [GitHub Checks](https://help.github.com/articles/about-status-checks/).
 Since GitHub Checks API is only for GitHub Apps, reviewdog CLI send a request to
@@ -250,7 +250,7 @@ server.
 
 ### Reporter: GitHub PullRequest review comment (-reporter=github-pr-review)
 
-[![sample-comment.png](https://raw.githubusercontent.com/haya14busa/i/dc0ccb1e110515ea407c146d99b749018db05c45/reviewdog/sample-comment.png)](https://github.com/haya14busa/reviewdog/pull/24#discussion_r84599728)
+[![sample-comment.png](https://raw.githubusercontent.com/haya14busa/i/dc0ccb1e110515ea407c146d99b749018db05c45/reviewdog/sample-comment.png)](https://github.com/reviewdog/reviewdog/pull/24#discussion_r84599728)
 
 github-pr-review reporter reports results to GitHub PullRequest review comments
 using GitHub Personal API Access Token.
@@ -322,7 +322,7 @@ env:
 
 install:
   - mkdir -p ~/bin/ && export export PATH="~/bin/:$PATH"
-  - curl -fSL https://github.com/haya14busa/reviewdog/releases/download/$REVIEWDOG_VERSION/reviewdog_linux_amd64 -o ~/bin/reviewdog && chmod +x ~/bin/reviewdog
+  - curl -fSL https://github.com/reviewdog/reviewdog/releases/download/$REVIEWDOG_VERSION/reviewdog_linux_amd64 -o ~/bin/reviewdog && chmod +x ~/bin/reviewdog
 
 script:
   - reviewdog -conf=.reviewdog.yml -reporter=github-pr-check
@@ -346,7 +346,7 @@ env:
 
 install:
   - mkdir -p ~/bin/ && export export PATH="~/bin/:$PATH"
-  - curl -fSL https://github.com/haya14busa/reviewdog/releases/download/$REVIEWDOG_VERSION/reviewdog_linux_amd64 -o ~/bin/reviewdog && chmod +x ~/bin/reviewdog
+  - curl -fSL https://github.com/reviewdog/reviewdog/releases/download/$REVIEWDOG_VERSION/reviewdog_linux_amd64 -o ~/bin/reviewdog && chmod +x ~/bin/reviewdog
 
 script:
   - >-
@@ -373,7 +373,7 @@ jobs:
           REVIEWDOG_VERSION: "0.9.11"
     steps:
       - checkout
-      - run: curl -fSL https://github.com/haya14busa/reviewdog/releases/download/$REVIEWDOG_VERSION/reviewdog_linux_amd64 -o reviewdog && chmod +x ./reviewdog
+      - run: curl -fSL https://github.com/reviewdog/reviewdog/releases/download/$REVIEWDOG_VERSION/reviewdog_linux_amd64 -o reviewdog && chmod +x ./reviewdog
       - run: go vet ./... 2>&1 | ./reviewdog -f=govet -reporter=github-pr-check
       # or
       - run: go vet ./... 2>&1 | ./reviewdog -f=govet -reporter=github-pr-review
@@ -443,7 +443,7 @@ haya14busa [![GitHub followers](https://img.shields.io/github/followers/haya14bu
 
 ## Contributors
 
-[![Contributors](https://opencollective.com/reviewdog/contributors.svg?width=890)](https://github.com/haya14busa/reviewdog/graphs/contributors)
+[![Contributors](https://opencollective.com/reviewdog/contributors.svg?width=890)](https://github.com/reviewdog/reviewdog/graphs/contributors)
 
 ### Supporting reviewdog
 Become a backer or sponsor and get your logo on our README on Github with a link to your site.
