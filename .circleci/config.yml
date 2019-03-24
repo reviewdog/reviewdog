@@ -54,6 +54,7 @@ jobs:
       - run:
           name: Deploy
           command: |-
+            gcloud info --run-diagnostics
             gcloud --quiet --project $GAE_DEPLOY_PROJECT app deploy app.yaml
       - run:
           name: Cleanup
