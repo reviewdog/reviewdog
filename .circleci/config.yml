@@ -18,7 +18,7 @@ jobs:
   deploy:
     working_directory: ~/reviewdog/doghouse/appengine/
     docker:
-      - image: gcr.io/gcpug-container/appengine-go:1.11
+      - image: gcr.io/gcpug-container/appengine-go:1.11-slim
         environment:
           GAE_DEPLOY_ACCOUNT: review-dog@appspot.gserviceaccount.com
           GAE_DEPLOY_PROJECT: review-dog
@@ -27,9 +27,6 @@ jobs:
     steps:
       - checkout:
           path: ~/reviewdog
-      - run:
-          name: Update Google Cloud SDK
-          command: 'gcloud --quiet components update'
       - run:
           name: System information
           command: 'echo "Golang $(go version)"'
