@@ -1,8 +1,8 @@
 language: go
 
 go:
-  - "1.10.x"
-  - "1.9.x"
+  - "1.12.x"
+  - "1.9.x" # for doghouse server which runs on AppEngine with Go 1.9
   - master
 
 matrix:
