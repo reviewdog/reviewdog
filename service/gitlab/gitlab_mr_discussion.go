@@ -1,4 +1,4 @@
-package reviewdog
+package gitlab
 
 import (
 	"context"
@@ -7,6 +7,8 @@ import (
 	"path/filepath"
 	"sync"
 
+	"github.com/reviewdog/reviewdog"
+	"github.com/reviewdog/reviewdog/service/serviceutil"
 	gitlab "github.com/xanzy/go-gitlab"
 	"golang.org/x/sync/errgroup"
 )
@@ -23,7 +25,7 @@ type GitLabMergeRequestDiscussionCommenter struct {
 	projects string
 
 	muComments   sync.Mutex
-	postComments []*Comment
+	postComments []*reviewdog.Comment
 
 	// wd is working directory relative to root of repository.
 	wd string
@@ -32,7 +34,7 @@ type GitLabMergeRequestDiscussionCommenter struct {
 // NewGitLabMergeRequestDiscussionCommenter returns a new GitLabMergeRequestDiscussionCommenter service.
 // GitLabMergeRequestDiscussionCommenter service needs git command in $PATH.
 func NewGitLabMergeRequestDiscussionCommenter(cli *gitlab.Client, owner, repo string, pr int, sha string) (*GitLabMergeRequestDiscussionCommenter, error) {
-	workDir, err := gitRelWorkdir()
+	workDir, err := serviceutil.GitRelWorkdir()
 	if err != nil {
 		return nil, fmt.Errorf("GitLabMergeRequestDiscussionCommenter needs 'git' command: %v", err)
 	}
@@ -47,7 +49,7 @@ func NewGitLabMergeRequestDiscussionCommenter(cli *gitlab.Client, owner, repo st
 
 // Post accepts a comment and holds it. Flush method actually posts comments to
 // GitLab in parallel.
-func (g *GitLabMergeRequestDiscussionCommenter) Post(_ context.Context, c *Comment) error {
+func (g *GitLabMergeRequestDiscussionCommenter) Post(_ context.Context, c *reviewdog.Comment) error {
 	c.Path = filepath.Join(g.wd, c.Path)
 	g.muComments.Lock()
 	defer g.muComments.Unlock()
@@ -66,8 +68,8 @@ func (g *GitLabMergeRequestDiscussionCommenter) Flush(ctx context.Context) error
 	return g.postCommentsForEach(ctx, postedcs)
 }
 
-func (g *GitLabMergeRequestDiscussionCommenter) createPostedCommetns() (postedcomments, error) {
-	postedcs := make(postedcomments)
+func (g *GitLabMergeRequestDiscussionCommenter) createPostedCommetns() (serviceutil.PostedComments, error) {
+	postedcs := make(serviceutil.PostedComments)
 	discussions, err := listAllMergeRequestDiscussion(g.cli, g.projects, g.pr, &ListMergeRequestDiscussionOptions{PerPage: 100})
 	if err != nil {
 		return nil, fmt.Errorf("failed to list all merge request discussions: %v", err)
@@ -84,7 +86,7 @@ func (g *GitLabMergeRequestDiscussionCommenter) createPostedCommetns() (postedco
 	return postedcs, nil
 }
 
-func (g *GitLabMergeRequestDiscussionCommenter) postCommentsForEach(ctx context.Context, postedcs postedcomments) error {
+func (g *GitLabMergeRequestDiscussionCommenter) postCommentsForEach(ctx context.Context, postedcs serviceutil.PostedComments) error {
 	mr, _, err := g.cli.MergeRequests.GetMergeRequest(g.projects, g.pr, nil, gitlab.WithContext(ctx))
 	if err != nil {
 		return fmt.Errorf("failed to get merge request: %v", err)
@@ -102,7 +104,7 @@ func (g *GitLabMergeRequestDiscussionCommenter) postCommentsForEach(ctx context.
 		}
 		eg.Go(func() error {
 			discussion := &GitLabMergeRequestDiscussion{
-				Body: commentBody(comment),
+				Body: serviceutil.CommentBody(comment),
 				Position: &GitLabMergeRequestDiscussionPosition{
 					StartSHA:     targetBranch.Commit.ID,
 					HeadSHA:      g.sha,

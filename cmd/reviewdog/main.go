@@ -20,10 +20,12 @@ import (
 
 	"github.com/google/go-github/github"
 	"github.com/haya14busa/errorformat/fmts"
+	shellwords "github.com/mattn/go-shellwords"
 	"github.com/reviewdog/reviewdog"
 	"github.com/reviewdog/reviewdog/cienv"
 	"github.com/reviewdog/reviewdog/project"
-	shellwords "github.com/mattn/go-shellwords"
+	githubservice "github.com/reviewdog/reviewdog/service/github"
+	gitlabservice "github.com/reviewdog/reviewdog/service/gitlab"
 	"github.com/xanzy/go-gitlab"
 )
 
@@ -202,13 +204,13 @@ See -reporter flag for migration and set -reporter="github-pr-review" or -report
 			return nil
 		}
 
-		gc, err := reviewdog.NewGitLabMergeRequestDiscussionCommenter(cli, build.Owner, build.Repo, build.PullRequest, build.SHA)
+		gc, err := gitlabservice.NewGitLabMergeRequestDiscussionCommenter(cli, build.Owner, build.Repo, build.PullRequest, build.SHA)
 		if err != nil {
 			return err
 		}
 
 		cs = reviewdog.MultiCommentService(gc, cs)
-		ds, err = reviewdog.NewGitLabMergeRequestDiff(cli, build.Owner, build.Repo, build.PullRequest, build.SHA)
+		ds, err = gitlabservice.NewGitLabMergeRequestDiff(cli, build.Owner, build.Repo, build.PullRequest, build.SHA)
 		if err != nil {
 			return err
 		}
@@ -222,13 +224,13 @@ See -reporter flag for migration and set -reporter="github-pr-review" or -report
 			return nil
 		}
 
-		gc, err := reviewdog.NewGitLabMergeRequestCommitCommenter(cli, build.Owner, build.Repo, build.PullRequest, build.SHA)
+		gc, err := gitlabservice.NewGitLabMergeRequestCommitCommenter(cli, build.Owner, build.Repo, build.PullRequest, build.SHA)
 		if err != nil {
 			return err
 		}
 
 		cs = reviewdog.MultiCommentService(gc, cs)
-		ds, err = reviewdog.NewGitLabMergeRequestDiff(cli, build.Owner, build.Repo, build.PullRequest, build.SHA)
+		ds, err = gitlabservice.NewGitLabMergeRequestDiff(cli, build.Owner, build.Repo, build.PullRequest, build.SHA)
 		if err != nil {
 			return err
 		}
@@ -306,7 +308,7 @@ func insecureSkipVerify() bool {
 	return os.Getenv("REVIEWDOG_INSECURE_SKIP_VERIFY") == "true"
 }
 
-func githubService(ctx context.Context) (githubservice *reviewdog.GitHubPullRequest, isPR bool, err error) {
+func githubService(ctx context.Context) (gs *githubservice.GitHubPullRequest, isPR bool, err error) {
 	token, err := nonEmptyEnv("REVIEWDOG_GITHUB_API_TOKEN")
 	if err != nil {
 		return nil, isPR, err
@@ -325,11 +327,11 @@ func githubService(ctx context.Context) (githubservice *reviewdog.GitHubPullRequ
 		return nil, isPR, err
 	}
 
-	githubservice, err = reviewdog.NewGitHubPullReqest(client, g.Owner, g.Repo, g.PullRequest, g.SHA)
+	gs, err = githubservice.NewGitHubPullReqest(client, g.Owner, g.Repo, g.PullRequest, g.SHA)
 	if err != nil {
 		return nil, isPR, err
 	}
-	return githubservice, isPR, nil
+	return gs, isPR, nil
 }
 
 func githubClient(ctx context.Context, token string) (*github.Client, error) {

@@ -1,47 +1,54 @@
-package reviewdog
+package gitlab
 
 import (
 	"context"
 	"encoding/json"
 	"net/http"
 	"net/http/httptest"
+	"os"
 	"testing"
 
 	"github.com/google/go-cmp/cmp"
+	"github.com/reviewdog/reviewdog"
+	"github.com/reviewdog/reviewdog/service/serviceutil"
 	gitlab "github.com/xanzy/go-gitlab"
 )
 
 func TestGitLabMergeRequestDiscussionCommenter_Post_Flush_review_api(t *testing.T) {
-	alreadyCommented1 := &Comment{
-		CheckResult: &CheckResult{
+	cwd, _ := os.Getwd()
+	defer os.Chdir(cwd)
+	os.Chdir("../..")
+
+	alreadyCommented1 := &reviewdog.Comment{
+		CheckResult: &reviewdog.CheckResult{
 			Path: "file.go",
 			Lnum: 1,
 		},
 		Body: "already commented",
 	}
-	alreadyCommented2 := &Comment{
-		CheckResult: &CheckResult{
+	alreadyCommented2 := &reviewdog.Comment{
+		CheckResult: &reviewdog.CheckResult{
 			Path: "another/file.go",
 			Lnum: 14,
 		},
 		Body: "already commented 2",
 	}
-	newComment1 := &Comment{
-		CheckResult: &CheckResult{
+	newComment1 := &reviewdog.Comment{
+		CheckResult: &reviewdog.CheckResult{
 			Path: "file.go",
 			Lnum: 14,
 		},
 		Body: "new comment",
 	}
-	newComment2 := &Comment{
-		CheckResult: &CheckResult{
+	newComment2 := &reviewdog.Comment{
+		CheckResult: &reviewdog.CheckResult{
 			Path: "file2.go",
 			Lnum: 15,
 		},
 		Body: "new comment 2",
 	}
 
-	comments := []*Comment{
+	comments := []*reviewdog.Comment{
 		alreadyCommented1,
 		alreadyCommented2,
 		newComment1,
@@ -58,7 +65,7 @@ func TestGitLabMergeRequestDiscussionCommenter_Post_Flush_review_api(t *testing.
 					{
 						Notes: []*GitLabMergeRequestDiscussion{
 							{
-								Body: commentBody(alreadyCommented1),
+								Body: serviceutil.CommentBody(alreadyCommented1),
 								Position: &GitLabMergeRequestDiscussionPosition{
 									NewPath: alreadyCommented1.Path,
 									NewLine: alreadyCommented1.Lnum,
@@ -83,7 +90,7 @@ func TestGitLabMergeRequestDiscussionCommenter_Post_Flush_review_api(t *testing.
 					{
 						Notes: []*GitLabMergeRequestDiscussion{
 							{
-								Body: commentBody(alreadyCommented2),
+								Body: serviceutil.CommentBody(alreadyCommented2),
 								Position: &GitLabMergeRequestDiscussionPosition{
 									NewPath: alreadyCommented2.Path,
 									NewLine: alreadyCommented2.Lnum,
@@ -105,7 +112,7 @@ func TestGitLabMergeRequestDiscussionCommenter_Post_Flush_review_api(t *testing.
 			switch got.Position.NewPath {
 			case "file.go":
 				want := &GitLabMergeRequestDiscussion{
-					Body: commentBody(newComment1),
+					Body: serviceutil.CommentBody(newComment1),
 					Position: &GitLabMergeRequestDiscussionPosition{
 						BaseSHA: "sha", StartSHA: "xxx", HeadSHA: "sha", PositionType: "text", NewPath: "file.go", NewLine: 14},
 				}
@@ -114,7 +121,7 @@ func TestGitLabMergeRequestDiscussionCommenter_Post_Flush_review_api(t *testing.
 				}
 			case "file2.go":
 				want := &GitLabMergeRequestDiscussion{
-					Body: commentBody(newComment2),
+					Body: serviceutil.CommentBody(newComment2),
 					Position: &GitLabMergeRequestDiscussionPosition{
 						BaseSHA: "sha", StartSHA: "xxx", HeadSHA: "sha", PositionType: "text", NewPath: "file2.go", NewLine: 15},
 				}
