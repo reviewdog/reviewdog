@@ -11,3 +11,4 @@
 /diff/testdata
 
 node_modules/
+*.bin
