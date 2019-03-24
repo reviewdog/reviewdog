@@ -25,7 +25,8 @@ jobs:
           GAE_KEYRING_NAME: reviewdog-doghouse-deploy
           GAE_KEY_NAME: secret-env
     steps:
-      - checkout
+      - checkout:
+          path: ~/reviewdog
       - run:
           name: System information
           command: 'echo "Golang $(go version)"'
