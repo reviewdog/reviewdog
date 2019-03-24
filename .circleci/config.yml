@@ -72,10 +72,9 @@ workflows:
       - deploy:
           requires:
             - build
-          # TODO(haya14busa): uncomment this.
-          # filters:
-          #   branches:
-          #     only: master
+          filters:
+            branches:
+              only: master
 
 notify:
   webhooks:
