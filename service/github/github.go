@@ -11,6 +11,9 @@ import (
 	"github.com/reviewdog/reviewdog/service/serviceutil"
 )
 
+var _ reviewdog.CommentService = &GitHubPullRequest{}
+var _ reviewdog.DiffService = &GitHubPullRequest{}
+
 // GitHubPullRequest is a comment and diff service for GitHub PullRequest.
 //
 // API:
