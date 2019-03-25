@@ -51,7 +51,7 @@ func CleanPath(path, workdir string) string {
 	if p == "." {
 		return ""
 	}
-	return p
+	return filepath.ToSlash(p)
 }
 
 // addedLine represents added line in diff.

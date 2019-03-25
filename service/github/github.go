@@ -55,7 +55,7 @@ func NewGitHubPullRequest(cli *github.Client, owner, repo string, pr int, sha st
 // Post accepts a comment and holds it. Flush method actually posts comments to
 // GitHub in parallel.
 func (g *GitHubPullRequest) Post(_ context.Context, c *reviewdog.Comment) error {
-	c.Path = filepath.Join(g.wd, c.Path)
+	c.Path = filepath.ToSlash(filepath.Join(g.wd, c.Path))
 	g.muComments.Lock()
 	defer g.muComments.Unlock()
 	g.postComments = append(g.postComments, c)

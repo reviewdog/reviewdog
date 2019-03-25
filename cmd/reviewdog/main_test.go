@@ -5,6 +5,7 @@ import (
 	"fmt"
 	"io/ioutil"
 	"os"
+	"path/filepath"
 	"strings"
 	"testing"
 
@@ -50,7 +51,7 @@ line3
 		want = fname + "(2,1): message1"
 	)
 
-	diffCmd := fmt.Sprintf("diff -u %s %s", beforef.Name(), afterf.Name())
+	diffCmd := fmt.Sprintf("diff -u %s %s", filepath.ToSlash(beforef.Name()), filepath.ToSlash(afterf.Name()))
 
 	opt := &option{
 		diffCmd:   diffCmd,
