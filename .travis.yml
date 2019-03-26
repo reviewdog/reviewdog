@@ -17,8 +17,6 @@ env:
 
 install:
   - go install ./cmd/reviewdog
-  # Install CI tools.
-  - go get github.com/haya14busa/goverage
   # Install linters.
   - go get golang.org/x/lint/golint
   - go get github.com/kisielk/errcheck
@@ -44,8 +42,8 @@ before_script:
 script:
   - reviewdog -reporter=github-pr-check
   - $(npm bin)/textlint -f checkstyle README.md | reviewdog -f=checkstyle -name="textlint" -reporter=github-pr-check
-  - go test -v -race $(go list ./... | grep -v "/vendor/")
-  - if [[ "${TRAVIS_GO_VERSION}" == "1.10.x" ]] ; then goverage -coverprofile=coverage.txt ./... ; fi
+  - go test -v -race ./...
+  - go test -coverpkg=./... -coverprofile=coverage.txt ./...
 
 after_success:
   - bash <(curl -s https://codecov.io/bash)
