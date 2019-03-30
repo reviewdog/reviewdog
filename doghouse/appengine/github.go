@@ -252,7 +252,7 @@ func notfound(w http.ResponseWriter) {
 	fmt.Fprintln(w, "404 Not Found")
 }
 
-func (g *GitHubHandler) getUserOrBadRequest(ctx context.Context, ghcli *github.Client, w http.ResponseWriter, r *http.Request) (bool, *github.User) {
+func (g *GitHubHandler) getUserOrBadRequest(ctx context.Context, ghcli *github.Client, w http.ResponseWriter) (bool, *github.User) {
 	u, _, err := ghcli.Users.Get(ctx, "")
 	if err != nil {
 		// Token seeims invalid. Clear it before returning BadRequest status.
@@ -265,7 +265,7 @@ func (g *GitHubHandler) getUserOrBadRequest(ctx context.Context, ghcli *github.C
 }
 
 func (g *GitHubHandler) handleTop(ctx context.Context, ghcli *github.Client, w http.ResponseWriter, r *http.Request) {
-	ok, u := g.getUserOrBadRequest(ctx, ghcli, w, r)
+	ok, u := g.getUserOrBadRequest(ctx, ghcli, w)
 	if !ok {
 		return
 	}
@@ -336,7 +336,7 @@ func (g *GitHubHandler) handleRepo(ctx context.Context, ghcli *github.Client, w 
 		return
 	}
 
-	ok, u := g.getUserOrBadRequest(ctx, ghcli, w, r)
+	ok, u := g.getUserOrBadRequest(ctx, ghcli, w)
 	if !ok {
 		return
 	}
