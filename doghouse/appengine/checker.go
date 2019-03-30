@@ -25,7 +25,7 @@ type githubChecker struct {
 }
 
 func (gc *githubChecker) handleCheck(w http.ResponseWriter, r *http.Request) {
-	if r.Method != "POST" {
+	if r.Method != http.MethodPost {
 		w.WriteHeader(http.StatusMethodNotAllowed)
 		return
 	}

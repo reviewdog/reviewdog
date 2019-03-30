@@ -1,12 +1,13 @@
 package ciutil
 
 import (
+	"net/http"
 	"net/http/httptest"
 	"testing"
 )
 
 func TestIsFromCI(t *testing.T) {
-	r := httptest.NewRequest("GET", "/", nil)
+	r := httptest.NewRequest(http.MethodGet, "/", nil)
 
 	const allowedIP = "67.225.139.254"
 	r.RemoteAddr = allowedIP
@@ -37,7 +38,7 @@ func TestIsFromTravisCI(t *testing.T) {
 	if err := UpdateTravisCIIPAddrs(nil); err != nil {
 		t.Fatal(err)
 	}
-	r := httptest.NewRequest("GET", "/", nil)
+	r := httptest.NewRequest(http.MethodGet, "/", nil)
 	for addr := range travisIPAddrs {
 		r.RemoteAddr = addr
 		if !IsFromTravisCI(r) {
@@ -53,7 +54,7 @@ func TestIsFromTravisCI(t *testing.T) {
 }
 
 func TestIsFromAppveyor(t *testing.T) {
-	r := httptest.NewRequest("GET", "/", nil)
+	r := httptest.NewRequest(http.MethodGet, "/", nil)
 
 	const allowedIP = "67.225.139.254"
 	r.RemoteAddr = allowedIP

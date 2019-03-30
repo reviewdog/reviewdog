@@ -181,7 +181,7 @@ func (g *GitHubHandler) requestAccessToken(ctx context.Context, code, state stri
 	data.Set("code", code)
 	data.Set("state", state)
 
-	req, err := http.NewRequest("POST", u, strings.NewReader(data.Encode()))
+	req, err := http.NewRequest(http.MethodPost, u, strings.NewReader(data.Encode()))
 	if err != nil {
 		return "", fmt.Errorf("failed to create request: %v", err)
 	}
@@ -342,7 +342,7 @@ func (g *GitHubHandler) handleRepo(ctx context.Context, ghcli *github.Client, w 
 	}
 
 	// Regenerate Token.
-	if r.Method == "POST" {
+	if r.Method == http.MethodPost {
 		if _, err := server.RegenerateRepoToken(ctx, g.repoTokenStore, repo.Owner.GetLogin(), repo.GetName(), repo.GetID()); err != nil {
 			w.WriteHeader(http.StatusInternalServerError)
 			fmt.Fprintf(w, "failed to update repository token: %v", err)

@@ -3,6 +3,7 @@ package gitlab
 import (
 	"context"
 	"fmt"
+	"net/http"
 	"net/url"
 	"path/filepath"
 	"sync"
@@ -154,7 +155,7 @@ type GitLabMergeRequestDiscussion struct {
 // GitLab API docs: https://docs.gitlab.com/ee/api/discussions.html#create-new-merge-request-discussion
 func CreateMergeRequestDiscussion(cli *gitlab.Client, projectID string, mergeRequest int, discussion *GitLabMergeRequestDiscussion) (*gitlab.Response, error) {
 	u := fmt.Sprintf("projects/%s/merge_requests/%d/discussions", url.QueryEscape(projectID), mergeRequest)
-	req, err := cli.NewRequest("POST", u, discussion, nil)
+	req, err := cli.NewRequest(http.MethodPost, u, discussion, nil)
 	if err != nil {
 		return nil, err
 	}
@@ -166,7 +167,7 @@ func CreateMergeRequestDiscussion(cli *gitlab.Client, projectID string, mergeReq
 // GitLab API docs: https://docs.gitlab.com/ee/api/discussions.html#list-project-merge-request-discussions
 func ListMergeRequestDiscussion(cli *gitlab.Client, projectID string, mergeRequest int, opts *ListMergeRequestDiscussionOptions) ([]*GitLabMergeRequestDiscussionList, *gitlab.Response, error) {
 	u := fmt.Sprintf("projects/%s/merge_requests/%d/discussions", url.QueryEscape(projectID), mergeRequest)
-	req, err := cli.NewRequest("GET", u, opts, nil)
+	req, err := cli.NewRequest(http.MethodGet, u, opts, nil)
 	if err != nil {
 		return nil, nil, err
 	}

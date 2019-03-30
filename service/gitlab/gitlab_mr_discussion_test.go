@@ -58,7 +58,7 @@ func TestGitLabMergeRequestDiscussionCommenter_Post_Flush_review_api(t *testing.
 	mux := http.NewServeMux()
 	mux.HandleFunc("/api/v4/projects/o/r/merge_requests/14/discussions", func(w http.ResponseWriter, r *http.Request) {
 		switch r.Method {
-		case "GET":
+		case http.MethodGet:
 			switch r.URL.Query().Get("page") {
 			default:
 				dls := []*GitLabMergeRequestDiscussionList{
@@ -104,7 +104,7 @@ func TestGitLabMergeRequestDiscussionCommenter_Post_Flush_review_api(t *testing.
 				}
 			}
 
-		case "POST":
+		case http.MethodPost:
 			got := new(GitLabMergeRequestDiscussion)
 			if err := json.NewDecoder(r.Body).Decode(got); err != nil {
 				t.Error(err)
@@ -136,13 +136,13 @@ func TestGitLabMergeRequestDiscussionCommenter_Post_Flush_review_api(t *testing.
 		}
 	})
 	mux.HandleFunc("/api/v4/projects/o/r/merge_requests/14", func(w http.ResponseWriter, r *http.Request) {
-		if r.Method != "GET" {
+		if r.Method != http.MethodGet {
 			t.Errorf("unexpected access: %v %v", r.Method, r.URL)
 		}
 		w.Write([]byte(`{"target_project_id": 14, "target_branch": "test-branch"}`))
 	})
 	mux.HandleFunc("/api/v4/projects/14/repository/branches/test-branch", func(w http.ResponseWriter, r *http.Request) {
-		if r.Method != "GET" {
+		if r.Method != http.MethodGet {
 			t.Errorf("unexpected access: %v %v", r.Method, r.URL)
 		}
 		w.Write([]byte(`{"commit": {"id": "xxx"}}`))
