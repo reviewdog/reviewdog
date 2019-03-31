@@ -57,7 +57,7 @@ func (g *GitLabMergeRequestDiff) Diff(ctx context.Context) ([]byte, error) {
 	return g.gitDiff(ctx, g.sha, targetBranch.Commit.ID)
 }
 
-func (g *GitLabMergeRequestDiff) gitDiff(_ context.Context, baseSha string, targetSha string) ([]byte, error) {
+func (g *GitLabMergeRequestDiff) gitDiff(_ context.Context, baseSha, targetSha string) ([]byte, error) {
 	b, err := exec.Command("git", "merge-base", targetSha, baseSha).Output()
 	if err != nil {
 		return nil, fmt.Errorf("failed to get merge-base commit: %v", err)
