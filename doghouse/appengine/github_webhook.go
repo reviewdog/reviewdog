@@ -18,7 +18,7 @@ type githubWebhookHandler struct {
 }
 
 func (g *githubWebhookHandler) handleWebhook(w http.ResponseWriter, r *http.Request) {
-	if r.Method != "POST" {
+	if r.Method != http.MethodPost {
 		w.WriteHeader(http.StatusMethodNotAllowed)
 		return
 	}

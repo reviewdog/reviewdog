@@ -13,7 +13,7 @@ import (
 func TestDogHouseClient_Check(t *testing.T) {
 	mux := http.NewServeMux()
 	mux.HandleFunc("/check", func(w http.ResponseWriter, r *http.Request) {
-		if r.Method != "POST" {
+		if r.Method != http.MethodPost {
 			t.Errorf("unexpected access: %v %v", r.Method, r.URL)
 		}
 		w.Write([]byte(`{"report_url": "http://report_url"}`))

@@ -15,14 +15,14 @@ func TestGitLabMergeRequestDiff_Diff(t *testing.T) {
 	mux := http.NewServeMux()
 	mux.HandleFunc("/api/v4/projects/o/r/merge_requests/14", func(w http.ResponseWriter, r *http.Request) {
 		getMRAPICall++
-		if r.Method != "GET" {
+		if r.Method != http.MethodGet {
 			t.Errorf("unexpected access: %v %v", r.Method, r.URL)
 		}
 		w.Write([]byte(`{"target_project_id": 14, "target_branch": "test-branch"}`))
 	})
 	mux.HandleFunc("/api/v4/projects/14/repository/branches/test-branch", func(w http.ResponseWriter, r *http.Request) {
 		getBranchAPICall++
-		if r.Method != "GET" {
+		if r.Method != http.MethodGet {
 			t.Errorf("unexpected access: %v %v", r.Method, r.URL)
 		}
 		w.Write([]byte(`{"commit": {"id": "HEAD~"}}`))

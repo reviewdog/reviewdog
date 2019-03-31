@@ -180,7 +180,7 @@ func TestGitHubPullRequest_Post_Flush_review_api(t *testing.T) {
 	mux := http.NewServeMux()
 	mux.HandleFunc("/repos/o/r/pulls/14/comments", func(w http.ResponseWriter, r *http.Request) {
 		listCommentsAPICalled++
-		if r.Method != "GET" {
+		if r.Method != http.MethodGet {
 			t.Errorf("unexpected access: %v %v", r.Method, r.URL)
 		}
 		switch r.URL.Query().Get("page") {
@@ -211,7 +211,7 @@ func TestGitHubPullRequest_Post_Flush_review_api(t *testing.T) {
 	})
 	mux.HandleFunc("/repos/o/r/pulls/14/reviews", func(w http.ResponseWriter, r *http.Request) {
 		postCommentsAPICalled++
-		if r.Method != "POST" {
+		if r.Method != http.MethodPost {
 			t.Errorf("unexpected access: %v %v", r.Method, r.URL)
 		}
 		var req github.PullRequestReviewRequest
@@ -326,7 +326,7 @@ func TestGitHubPullRequest_Diff_fake(t *testing.T) {
 	mux := http.NewServeMux()
 	mux.HandleFunc("/repos/o/r/pulls/14", func(w http.ResponseWriter, r *http.Request) {
 		apiCalled++
-		if r.Method != "GET" {
+		if r.Method != http.MethodGet {
 			t.Errorf("unexpected access: %v %v", r.Method, r.URL)
 		}
 		if accept := r.Header.Get("Accept"); !strings.Contains(accept, "diff") {
