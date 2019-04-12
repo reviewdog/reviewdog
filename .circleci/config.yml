@@ -4,7 +4,7 @@ jobs:
   lint:
     working_directory: ~/reviewdog
     docker:
-      - image: golang:latest
+      - image: circleci/golang:1.12
         environment:
           REVIEWDOG_VERSION: "0.9.11"
     steps:
@@ -18,7 +18,7 @@ jobs:
   test:
     working_directory: ~/reviewdog
     docker:
-      - image: golang:latest
+      - image: circleci/golang:1.12
         environment:
           REVIEWDOG_VERSION: "0.9.11"
     steps:
