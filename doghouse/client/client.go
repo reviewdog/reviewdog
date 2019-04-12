@@ -11,7 +11,7 @@ import (
 	"net/url"
 	"os"
 
-	"github.com/reviewdog/reviewdog"
+	"github.com/reviewdog/reviewdog/commands"
 	"github.com/reviewdog/reviewdog/doghouse"
 )
 
@@ -60,7 +60,7 @@ func (c *DogHouseClient) Check(ctx context.Context, req *doghouse.CheckRequest) 
 	}
 	httpReq = httpReq.WithContext(ctx)
 	httpReq.Header.Set("Content-Type", "application/json")
-	httpReq.Header.Set("User-Agent", fmt.Sprintf("reviewdog/%s", reviewdog.Version))
+	httpReq.Header.Set("User-Agent", fmt.Sprintf("reviewdog/%s", commands.Version))
 
 	httpResp, err := c.Client.Do(httpReq)
 	if err != nil {

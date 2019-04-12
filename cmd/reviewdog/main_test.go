@@ -9,7 +9,7 @@ import (
 	"strings"
 	"testing"
 
-	"github.com/reviewdog/reviewdog"
+	"github.com/reviewdog/reviewdog/commands"
 )
 
 func TestRun_local(t *testing.T) {
@@ -159,7 +159,7 @@ func TestRun_version(t *testing.T) {
 	if err := run(nil, stdout, &option{version: true}); err != nil {
 		t.Error(err)
 	}
-	if got := strings.TrimRight(stdout.String(), "\n"); got != reviewdog.Version {
-		t.Errorf("version = %v, want %v", got, reviewdog.Version)
+	if got := strings.TrimRight(stdout.String(), "\n"); got != commands.Version {
+		t.Errorf("version = %v, want %v", got, commands.Version)
 	}
 }

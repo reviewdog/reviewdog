@@ -23,6 +23,7 @@ import (
 	"github.com/reviewdog/errorformat/fmts"
 	"github.com/reviewdog/reviewdog"
 	"github.com/reviewdog/reviewdog/cienv"
+	"github.com/reviewdog/reviewdog/commands"
 	"github.com/reviewdog/reviewdog/project"
 	githubservice "github.com/reviewdog/reviewdog/service/github"
 	gitlabservice "github.com/reviewdog/reviewdog/service/gitlab"
@@ -148,7 +149,7 @@ func run(r io.Reader, w io.Writer, opt *option) error {
 	ctx := context.Background()
 
 	if opt.version {
-		fmt.Fprintln(w, reviewdog.Version)
+		fmt.Fprintln(w, commands.Version)
 		return nil
 	}
 
