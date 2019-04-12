@@ -5,22 +5,18 @@ jobs:
     working_directory: ~/reviewdog
     docker:
       - image: circleci/golang:1.12
-        environment:
-          REVIEWDOG_VERSION: "0.9.11"
     steps:
       - checkout
       - run:
           name: System information
           command: 'echo "Golang $(go version)"'
-      - run: 'curl -fSL https://github.com/reviewdog/reviewdog/releases/download/$REVIEWDOG_VERSION/reviewdog_linux_amd64 -o reviewdog && chmod +x ./reviewdog'
+      - run: 'curl -sfL https://raw.githubusercontent.com/reviewdog/reviewdog/master/install.sh| sh -s -- -b $(go env GOPATH)/bin'
       - run: 'go get golang.org/x/lint/golint'
-      - run: 'golint ./... || true | ./reviewdog -f=golint -name=golint-circleci -reporter=github-pr-review'
+      - run: 'golint ./... || true | reviewdog -f=golint -name=golint-circleci -reporter=github-pr-review'
   test:
     working_directory: ~/reviewdog
     docker:
       - image: circleci/golang:1.12
-        environment:
-          REVIEWDOG_VERSION: "0.9.11"
     steps:
       - checkout
       - run: 'go test -v ./...'
