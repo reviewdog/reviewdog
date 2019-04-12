@@ -1,7 +1,7 @@
 language: go
 
 go:
-  - "1.12.x"
+  - "1.12.x" # Change deploy go version too.
   - "1.11.x" # for doghouse server which runs on AppEngine with Go 1.11
   - master
 
@@ -77,7 +77,7 @@ deploy:
   skip_cleanup: true
   on:
     tags: true
-    go: "1.10.x"
+    go: "1.12.x"
 
 notifications:
   webhooks:
