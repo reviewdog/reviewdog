@@ -322,13 +322,9 @@ If you use -reporter=github-pr-check in Travis CI, you don't need to set `REVIEW
 Example:
 
 ```yaml
-env:
-  global:
-    - REVIEWDOG_VERSION="0.9.11"
-
 install:
   - mkdir -p ~/bin/ && export export PATH="~/bin/:$PATH"
-  - curl -fSL https://github.com/reviewdog/reviewdog/releases/download/$REVIEWDOG_VERSION/reviewdog_linux_amd64 -o ~/bin/reviewdog && chmod +x ~/bin/reviewdog
+  - curl -sfL https://raw.githubusercontent.com/reviewdog/reviewdog/master/install.sh| sh -s -- -b ~/bin
 
 script:
   - reviewdog -conf=.reviewdog.yml -reporter=github-pr-check
@@ -348,11 +344,10 @@ Example:
 env:
   global:
     - secure: <token>
-    - REVIEWDOG_VERSION="0.9.11"
 
 install:
   - mkdir -p ~/bin/ && export export PATH="~/bin/:$PATH"
-  - curl -fSL https://github.com/reviewdog/reviewdog/releases/download/$REVIEWDOG_VERSION/reviewdog_linux_amd64 -o ~/bin/reviewdog && chmod +x ~/bin/reviewdog
+  - curl -sfL https://raw.githubusercontent.com/reviewdog/reviewdog/master/install.sh| sh -s -- -b ~/bin
 
 script:
   - >-
@@ -375,14 +370,12 @@ jobs:
   build:
     docker:
       - image: golang:latest
-        environment:
-          REVIEWDOG_VERSION: "0.9.11"
     steps:
       - checkout
-      - run: curl -fSL https://github.com/reviewdog/reviewdog/releases/download/$REVIEWDOG_VERSION/reviewdog_linux_amd64 -o reviewdog && chmod +x ./reviewdog
-      - run: go vet ./... 2>&1 | ./reviewdog -f=govet -reporter=github-pr-check
+      - run: curl -sfL https://raw.githubusercontent.com/reviewdog/reviewdog/master/install.sh| sh -s -- -b ./bin
+      - run: go vet ./... 2>&1 | ./bin/reviewdog -f=govet -reporter=github-pr-check
       # or
-      - run: go vet ./... 2>&1 | ./reviewdog -f=govet -reporter=github-pr-review
+      - run: go vet ./... 2>&1 | ./bin/reviewdog -f=govet -reporter=github-pr-review
 ```
 
 ### GitLab CI
