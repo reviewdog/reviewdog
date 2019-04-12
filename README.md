@@ -70,7 +70,16 @@ by diff.
 
 ## Installation
 
-Get [the binary release](https://github.com/reviewdog/reviewdog/releases) (recommended way)
+```shell
+# Install latest version. (Install it into ./bin/ by default).
+$ curl -sfL https://raw.githubusercontent.com/reviewdog/reviewdog/master/install.sh| sh -s
+
+# Specify installation directory ($(go env GOPATH)/bin/) and version.
+$ curl -sfL https://raw.githubusercontent.com/reviewdog/reviewdog/master/install.sh| sh -s -- -b $(go env GOPATH)/bin [vX.Y.Z]
+
+# In alpine linux (as it does not come with curl by default)
+$ wget -O - -q https://raw.githubusercontent.com/reviewdog/reviewdog/master/install.sh| sh -s [vX.Y.Z]
+```
 
 or
 
