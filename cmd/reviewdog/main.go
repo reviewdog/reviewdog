@@ -18,7 +18,7 @@ import (
 
 	"golang.org/x/oauth2"
 
-	"github.com/google/go-github/v24/github"
+	"github.com/google/go-github/v25/github"
 	shellwords "github.com/mattn/go-shellwords"
 	"github.com/reviewdog/errorformat/fmts"
 	"github.com/reviewdog/reviewdog"
