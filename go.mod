@@ -8,7 +8,7 @@ require (
 	github.com/dgrijalva/jwt-go v3.2.0+incompatible // indirect
 	github.com/golang/protobuf v1.3.1 // indirect
 	github.com/google/go-cmp v0.2.0
-	github.com/google/go-github/v25 v25.0.0
+	github.com/google/go-github/v26 v26.0.2
 	github.com/haya14busa/secretbox v0.0.0-20180525171038-07c7ecf409f5
 	github.com/justinas/nosurf v0.0.0-20190416172904-05988550ea18
 	github.com/kr/pretty v0.1.0 // indirect

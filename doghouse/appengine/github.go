@@ -13,7 +13,7 @@ import (
 	"net/url"
 	"strings"
 
-	"github.com/google/go-github/v25/github"
+	"github.com/google/go-github/v26/github"
 	"github.com/justinas/nosurf"
 	"github.com/reviewdog/reviewdog/doghouse/server"
 	"github.com/reviewdog/reviewdog/doghouse/server/cookieman"
