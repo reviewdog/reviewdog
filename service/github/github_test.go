@@ -10,7 +10,7 @@ import (
 	"strings"
 	"testing"
 
-	"github.com/google/go-github/v25/github"
+	"github.com/google/go-github/v26/github"
 	"github.com/kylelemons/godebug/pretty"
 	"github.com/reviewdog/reviewdog"
 	"github.com/reviewdog/reviewdog/service/serviceutil"

@@ -7,7 +7,7 @@ import (
 	"io/ioutil"
 	"net/http"
 
-	"github.com/google/go-github/v25/github"
+	"github.com/google/go-github/v26/github"
 	"github.com/reviewdog/reviewdog/doghouse/server/storage"
 	"google.golang.org/appengine"
 )
