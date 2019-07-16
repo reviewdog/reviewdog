@@ -17,6 +17,7 @@ Reviewdog:
   stage: reviewdog
   image: golang:latest
   before_script:
+    - export GO111MODULE=ON
     # Set up $GOPATH and install reviewdog (Note that main repo is github.com)
     - ln -s /builds /go/src/github.com
     - cd /go/src/github.com/${CI_PROJECT_PATH}
