@@ -22,13 +22,7 @@ Reviewdog:
     - ln -s /builds /go/src/github.com
     - cd /go/src/github.com/${CI_PROJECT_PATH}
     - go install ./cmd/reviewdog
-    # Intall linters
     - go get golang.org/x/lint/golint
-    - go get github.com/kisielk/errcheck
-    - go get honnef.co/go/tools/cmd/gosimple
-    - go get honnef.co/go/tools/cmd/staticcheck
-    - go get honnef.co/go/tools/cmd/unused
-    - go get github.com/client9/misspell/cmd/misspell
   script:
-    - reviewdog -reporter=gitlab-mr-discussion
-    - reviewdog -reporter=gitlab-mr-commit
+    - golint ./... | reviewdog -f=golint -name=golint-discussion -reporter=gitlab-mr-discussion
+    - golint ./... | reviewdog -f=golint -name=golint-commit -reporter=gitlab-mr-commit
