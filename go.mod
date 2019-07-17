@@ -13,7 +13,7 @@ require (
 	github.com/haya14busa/secretbox v0.0.0-20180525171038-07c7ecf409f5
 	github.com/justinas/nosurf v0.0.0-20190416172904-05988550ea18
 	github.com/kr/pretty v0.1.0 // indirect
-	github.com/kylelemons/godebug v0.0.0-20170820004349-d65d576e9348
+	github.com/kylelemons/godebug v1.1.0
 	github.com/mattn/go-shellwords v1.0.5
 	github.com/rakyll/statik v0.1.6
 	github.com/reviewdog/errorformat v0.0.0-20190330094451-c8010a9cc20d
