@@ -16,7 +16,7 @@ require (
 	github.com/kylelemons/godebug v1.1.0
 	github.com/mattn/go-shellwords v1.0.5
 	github.com/rakyll/statik v0.1.6
-	github.com/reviewdog/errorformat v0.0.0-20190330094451-c8010a9cc20d
+	github.com/reviewdog/errorformat v0.0.0-20190717122822-b91f67eef36b
 	github.com/xanzy/go-gitlab v0.19.0
 	golang.org/x/crypto v0.0.0-20190701094942-4def268fd1a4 // indirect
 	golang.org/x/exp v0.0.0-20190627132806-fd42eb6b336f // indirect
