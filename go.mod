@@ -19,7 +19,7 @@ require (
 	github.com/reviewdog/errorformat v0.0.0-20190717122822-b91f67eef36b
 	github.com/xanzy/go-gitlab v0.19.0
 	golang.org/x/crypto v0.0.0-20190701094942-4def268fd1a4 // indirect
-	golang.org/x/exp v0.0.0-20190627132806-fd42eb6b336f // indirect
+	golang.org/x/exp v0.0.0-20190801013919-ec7cb31e5a56 // indirect
 	golang.org/x/image v0.0.0-20190703141733-d6a02ce849c9 // indirect
 	golang.org/x/mobile v0.0.0-20190711165009-e47acb2ca7f9 // indirect
 	golang.org/x/net v0.0.0-20190628185345-da137c7871d7
