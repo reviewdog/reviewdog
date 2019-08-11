@@ -7,18 +7,10 @@ runner:
   govet:
     cmd: go vet $(go list ./... | grep -v /vendor/)
     format: govet
-  unused:
-    cmd: unused $(go list ./... | grep -v /vendor/)
-    errorformat:
-      - "%f:%l:%c: %m"
   errcheck:
     cmd: errcheck -asserts -ignoretests -blank $(go list ./... | grep -v /vendor/)
     errorformat:
       - "%f:%l:%c:%m"
-  gosimple:
-    cmd: gosimple $(go list ./... | grep -v /vendor/)
-    errorformat:
-      - "%f:%l:%c: %m"
   staticcheck:
     cmd: staticcheck $(go list ./... | grep -v /vendor/)
     errorformat:
