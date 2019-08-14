@@ -17,14 +17,15 @@ env:
 install:
   - go install ./cmd/reviewdog
   # Install linters.
-  - go get golang.org/x/lint/golint
-  - go get github.com/kisielk/errcheck
-  - go get honnef.co/go/tools/cmd/gosimple@2019.1.1
-  - go get honnef.co/go/tools/cmd/staticcheck@2019.1.1
-  - go get honnef.co/go/tools/cmd/unused@2019.1.1
-  - go get github.com/client9/misspell/cmd/misspell
-  - go get mvdan.cc/unparam
-  - go get github.com/mgechev/revive
+  - (
+      cd linters
+      go get golang.org/x/lint/golint
+      go get github.com/kisielk/errcheck
+      go get honnef.co/go/tools/cmd/staticcheck
+      go get github.com/client9/misspell/cmd/misspell
+      go get mvdan.cc/unparam
+      go get github.com/mgechev/revive
+    )
   - curl -sfL https://install.goreleaser.com/github.com/golangci/golangci-lint.sh | bash -s -- -b $GOPATH/bin
   - npm install
 

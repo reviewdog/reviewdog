@@ -22,7 +22,7 @@ Reviewdog:
     - ln -s /builds /go/src/github.com
     - cd /go/src/github.com/${CI_PROJECT_PATH}
     - go install ./cmd/reviewdog
-    - go get golang.org/x/lint/golint
+    - ( cd linters && go get golang.org/x/lint/golint )
   script:
     - golint ./... | reviewdog -f=golint -name=golint-discussion -reporter=gitlab-mr-discussion
     - golint ./... | reviewdog -f=golint -name=golint-commit -reporter=gitlab-mr-commit

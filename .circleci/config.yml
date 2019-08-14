@@ -11,7 +11,7 @@ jobs:
           name: System information
           command: 'echo "Golang $(go version)"'
       - run: 'curl -sfL https://raw.githubusercontent.com/reviewdog/reviewdog/master/install.sh| sh -s -- -b $(go env GOPATH)/bin'
-      - run: 'go get golang.org/x/lint/golint'
+      - run: '( cd linters && go get golang.org/x/lint/golint )'
       - run: 'golint ./... || true | reviewdog -f=golint -name=golint-circleci -reporter=github-pr-review'
   test:
     working_directory: ~/reviewdog
