@@ -29,7 +29,7 @@ require (
 	golang.org/x/tools v0.0.0-20190716161735-919acb9f1ffd // indirect
 	google.golang.org/appengine v1.6.1
 	google.golang.org/genproto v0.0.0-20190708153700-3bdd9d9f5532 // indirect
-	google.golang.org/grpc v1.22.0 // indirect
+	google.golang.org/grpc v1.23.0 // indirect
 	gopkg.in/check.v1 v1.0.0-20180628173108-788fd7840127 // indirect
 	gopkg.in/yaml.v2 v2.2.2
 )
