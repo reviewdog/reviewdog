@@ -3,11 +3,10 @@ module github.com/reviewdog/reviewdog
 go 1.12
 
 require (
-	cloud.google.com/go v0.41.0 // indirect
+	cloud.google.com/go v0.44.3 // indirect
 	github.com/bradleyfalzon/ghinstallation v0.1.2
 	github.com/davecgh/go-spew v1.1.1 // indirect
 	github.com/dgrijalva/jwt-go v3.2.0+incompatible // indirect
-	github.com/golang/protobuf v1.3.2 // indirect
 	github.com/google/go-cmp v0.3.1
 	github.com/google/go-github/v27 v27.0.0
 	github.com/haya14busa/secretbox v0.0.0-20180525171038-07c7ecf409f5
@@ -28,7 +27,6 @@ require (
 	golang.org/x/sys v0.0.0-20190712062909-fae7ac547cb7 // indirect
 	golang.org/x/tools v0.0.0-20190716161735-919acb9f1ffd // indirect
 	google.golang.org/appengine v1.6.1
-	google.golang.org/genproto v0.0.0-20190708153700-3bdd9d9f5532 // indirect
 	google.golang.org/grpc v1.22.0 // indirect
 	gopkg.in/check.v1 v1.0.0-20180628173108-788fd7840127 // indirect
 	gopkg.in/yaml.v2 v2.2.2
