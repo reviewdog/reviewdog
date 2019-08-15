@@ -13,7 +13,7 @@ require (
 	github.com/justinas/nosurf v0.0.0-20190416172904-05988550ea18
 	github.com/kr/pretty v0.1.0 // indirect
 	github.com/kylelemons/godebug v1.1.0
-	github.com/mattn/go-shellwords v1.0.5
+	github.com/mattn/go-shellwords v1.0.6
 	github.com/rakyll/statik v0.1.6
 	github.com/reviewdog/errorformat v0.0.0-20190717122822-b91f67eef36b
 	github.com/xanzy/go-gitlab v0.19.0
