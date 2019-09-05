@@ -67,7 +67,7 @@ const (
 	"github-pr-check" (experimental)
 		Report results to GitHub PullRequest Check tab.
 
-		1. Install reviedog Apps. https://github.com/apps/reviewdog
+		1. Install reviewdog Apps. https://github.com/apps/reviewdog
 		2. Set REVIEWDOG_TOKEN or run reviewdog CLI in trusted CI providers.
 		You can get token from https://reviewdog.app/gh/<owner>/<repo-name>.
 		$ export REVIEWDOG_TOKEN="xxxxx"
@@ -101,7 +101,7 @@ const (
 		$ export REVIEWDOG_INSECURE_SKIP_VERIFY=true
 
 	For non-local reporters, reviewdog automatically get necessary data from
-	environment variable in CI service (Travis CI, Circle CI, dronel.io, GitLab CI).
+	environment variable in CI service (Travis CI, Circle CI, drone.io, GitLab CI).
 	You can set necessary data with following environment variable manually if
 	you want (e.g. run reviewdog in Jenkins).
 
@@ -163,7 +163,7 @@ func run(r io.Reader, w io.Writer, opt *option) error {
 See -reporter flag for migration and set -reporter="github-pr-review" or -reporter="github-pr-check" or -reporter="gitlab-mr-commit"`)
 	}
 
-	// assume it's project based run when both -efm ane -f are not specified
+	// assume it's project based run when both -efm and -f are not specified
 	isProject := len(opt.efms) == 0 && opt.f == ""
 
 	var cs reviewdog.CommentService
