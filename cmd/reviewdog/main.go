@@ -18,7 +18,7 @@ import (
 
 	"golang.org/x/oauth2"
 
-	"github.com/google/go-github/v27/github"
+	"github.com/google/go-github/v28/github"
 	shellwords "github.com/mattn/go-shellwords"
 	"github.com/reviewdog/errorformat/fmts"
 	"github.com/reviewdog/reviewdog"
@@ -27,7 +27,7 @@ import (
 	"github.com/reviewdog/reviewdog/project"
 	githubservice "github.com/reviewdog/reviewdog/service/github"
 	gitlabservice "github.com/reviewdog/reviewdog/service/gitlab"
-	"github.com/xanzy/go-gitlab"
+	gitlab "github.com/xanzy/go-gitlab"
 )
 
 const usageMessage = "" +
