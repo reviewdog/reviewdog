@@ -9,7 +9,9 @@ require (
 	github.com/google/go-github/v28 v28.0.1
 	github.com/haya14busa/secretbox v0.0.0-20180525171038-07c7ecf409f5
 	github.com/justinas/nosurf v0.0.0-20190416172904-05988550ea18
+	github.com/k0kubun/pp v3.0.1+incompatible
 	github.com/kylelemons/godebug v1.1.0
+	github.com/mattn/go-colorable v0.1.2 // indirect
 	github.com/mattn/go-shellwords v1.0.6
 	github.com/rakyll/statik v0.1.6
 	github.com/reviewdog/errorformat v0.0.0-20190716162959-b91f67eef36b

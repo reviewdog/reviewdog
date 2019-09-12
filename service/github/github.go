@@ -7,6 +7,7 @@ import (
 	"sync"
 
 	"github.com/google/go-github/v28/github"
+	"github.com/k0kubun/pp"
 	"github.com/reviewdog/reviewdog"
 	"github.com/reviewdog/reviewdog/service/serviceutil"
 )
@@ -98,6 +99,7 @@ func (g *GitHubPullRequest) postAsReviewComment(ctx context.Context) error {
 		Event:    github.String("COMMENT"),
 		Comments: comments,
 	}
+	pp.Print(review)
 	_, _, err := g.cli.PullRequests.CreateReview(ctx, g.owner, g.repo, g.pr, review)
 	return err
 }
