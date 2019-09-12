@@ -18,7 +18,9 @@ import (
 	"golang.org/x/sync/errgroup"
 )
 
-func runDoghouse(ctx context.Context, r io.Reader, opt *option, isProject bool) error {
+// If skipDoghouseServer is true, run doghouse code directly instead of talking to
+// the doghouse server.
+func runDoghouse(ctx context.Context, r io.Reader, opt *option, isProject bool, skipDoghouseServer bool) error {
 	ghInfo, isPr, err := cienv.GetBuildInfo()
 	if err != nil {
 		return err
@@ -31,7 +33,20 @@ func runDoghouse(ctx context.Context, r io.Reader, opt *option, isProject bool) 
 	if err != nil {
 		return err
 	}
-	cli := newDoghouseCli(ctx)
+	var cli client.DogHouseClientInterface
+	if skipDoghouseServer {
+		token, err := nonEmptyEnv("REVIEWDOG_GITHUB_API_TOKEN")
+		if err != nil {
+			return err
+		}
+		ghcli, err := githubClient(ctx, token)
+		if err != nil {
+			return err
+		}
+		cli = &client.GitHubClient{Client: ghcli}
+	} else {
+		cli = newDoghouseCli(ctx)
+	}
 	return postResultSet(ctx, resultSet, ghInfo, cli)
 }
 
