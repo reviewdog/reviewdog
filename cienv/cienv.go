@@ -67,6 +67,10 @@ func GetBuildInfo() (prInfo *BuildInfo, isPR bool, err error) {
 		"CIRCLE_SHA1",
 		"DRONE_COMMIT",
 		"CI_COMMIT_SHA", // GitLab CI
+		// GitHub Action. It's not always correct SHA for reviewdog.
+		// e.g. Wrong target SHA for Pull Request Event.
+		// it's correct value for re-run checks.
+		"GITHUB_SHA",
 	})
 	if sha == "" {
 		return nil, false, errors.New("cannot get commit SHA from environment variable. Set CI_COMMIT?")
