@@ -13,4 +13,4 @@ jobs:
 
     - name: Check GitHub Event Json
       run: |
-        cat $GITHUB_EVENT_PATH | jq
+        cat $GITHUB_EVENT_PATH | jq .
