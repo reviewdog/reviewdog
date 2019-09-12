@@ -43,6 +43,7 @@ func runDoghouse(ctx context.Context, r io.Reader, opt *option, isProject bool, 
 		if err != nil {
 			return err
 		}
+		log.Println("[debug] use GitHub client for Doghouse run")
 		cli = &client.GitHubClient{Client: ghcli}
 	} else {
 		cli = newDoghouseCli(ctx)
@@ -92,6 +93,7 @@ func postResultSet(ctx context.Context, resultSet *reviewdog.ResultMap, ghInfo *
 	var g errgroup.Group
 	wd, _ := os.Getwd()
 	resultSet.Range(func(name string, results []*reviewdog.CheckResult) {
+		log.Println("[debug] post: " + name)
 		as := make([]*doghouse.Annotation, 0, len(results))
 		for _, r := range results {
 			as = append(as, checkResultToAnnotation(r, wd))
