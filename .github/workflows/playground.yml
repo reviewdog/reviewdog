@@ -7,34 +7,10 @@ jobs:
     runs-on: ubuntu-latest
     steps:
 
-    - name: Set up jq
-      run: |
-        sudo apt -y install jq
-
     - name: Check GitHub Event Json
       run: |
         cat $GITHUB_EVENT_PATH | jq .
 
-    - name: Extract PR Information
-      run: |
-        cat $GITHUB_EVENT_PATH | jq .number
-        echo $GITHUB_REPOSITORY
-        echo $GITHUB_SHA
-    - name: Set up environment variables
-      run: |
-        export CI_PULL_REQUEST=$(cat $GITHUB_EVENT_PATH | jq -r .number)
-        export CI_COMMIT=$GITHUB_SHA
-        export CI_REPO_OWNER=$(cat $GITHUB_EVENT_PATH | jq -r .repository.owner.login)
-        export CI_REPO_NAME=$(cat $GITHUB_EVENT_PATH | jq -r .repository.name)
-        export CI_BRANCH=$(cat $GITHUB_EVENT_PATH | jq -r .pull_request.head.ref)
-        export REVIEWDOG_GITHUB_API_TOKEN=$GITHUB_TOKEN
-    - name: Check environment variables
-      run: |
-        echo $CI_PULL_REQUEST
-        echo $CI_COMMIT
-        echo $CI_REPO_OWNER
-        echo $CI_REPO_NAME
-        echo $CI_BRANCH
     - name: Use Context Input
       env:
         CI_PULL_REQUEST: ${{ github.event.number }}
@@ -50,3 +26,36 @@ jobs:
         echo $CI_REPO_NAME
         echo $CI_REPOSITORY
         echo $CI_BRANCH
+
+  reviewdog:
+    name: reviewdog check
+    runs-on: ubuntu-latest
+    steps:
+
+    - name: Set up Go 1.12
+      uses: actions/setup-go@v1
+      with:
+        go-version: 1.12
+      id: go
+
+    - name: Check out code into the Go module directory
+      uses: actions/checkout@v1
+
+    - name: Install linters
+      run: '( cd linters && go get golang.org/x/lint/golint )'
+
+    - name: Setup reviewdog
+      run: |
+        curl -sfL https://raw.githubusercontent.com/reviewdog/reviewdog/master/install.sh| sh -s -- -b $(go env GOPATH)/bin
+
+    - name: Run reviewdog
+      env:
+        CI_PULL_REQUEST: ${{ github.event.number }}
+        CI_COMMIT: ${{ github.sha }}
+        CI_REPO_OWNER: ${{ github.event.repository.owner.login }}
+        CI_REPO_NAME: ${{ github.event.repository.name }}
+        CI_REPOSITORY: ${{ github.repository }}
+        CI_BRANCH: ${{ github.event.pull_request.head.ref }}
+        REVIEWDOG_GITHUB_API_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+      run: |
+        golint ./... | reviewdog -f=golint -name=golint-via-github-actions -reporter=github-pr-review
