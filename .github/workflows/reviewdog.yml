@@ -5,6 +5,11 @@ jobs:
     name: reviewdog
     runs-on: ubuntu-latest
     steps:
+      - name: Dump GitHub Context
+        env:
+          GITHUB_CONTEXT: ${{ toJson(github) }}
+        run: echo "${GITHUB_CONTEXT}"
+
       - name: Set up Go
         uses: actions/setup-go@v1
         with:
