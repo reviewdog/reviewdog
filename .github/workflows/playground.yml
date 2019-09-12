@@ -35,3 +35,18 @@ jobs:
         echo $CI_REPO_OWNER
         echo $CI_REPO_NAME
         echo $CI_BRANCH
+    - name: Use Context Input
+      env:
+        CI_PULL_REQUEST: ${{ github.event.number }}
+        CI_COMMIT: ${{ github.sha }}
+        CI_REPO_OWNER: ${{ github.event.repository.owner.login }}
+        CI_REPO_NAME: ${{ github.event.repository.name }}
+        CI_REPOSITORY: ${{ github.repository }}
+        CI_BRANCH: ${{ github.event.pull_request.head.ref }}
+      run: |
+        echo $CI_PULL_REQUEST
+        echo $CI_COMMIT
+        echo $CI_REPO_OWNER
+        echo $CI_REPO_NAME
+        echo $CI_REPOSITORY
+        echo $CI_BRANCH
