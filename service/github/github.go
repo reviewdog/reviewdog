@@ -3,6 +3,7 @@ package github
 import (
 	"context"
 	"fmt"
+	"io/ioutil"
 	"path/filepath"
 	"sync"
 
@@ -100,7 +101,10 @@ func (g *GitHubPullRequest) postAsReviewComment(ctx context.Context) error {
 		Comments: comments,
 	}
 	pp.Print(review)
-	_, _, err := g.cli.PullRequests.CreateReview(ctx, g.owner, g.repo, g.pr, review)
+	_, resp, err := g.cli.PullRequests.CreateReview(ctx, g.owner, g.repo, g.pr, review)
+	b, e := ioutil.ReadAll(resp.Body)
+	pp.Print(b)
+	pp.Print(e)
 	return err
 }
 
