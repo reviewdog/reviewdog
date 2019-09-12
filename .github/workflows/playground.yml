@@ -20,3 +20,18 @@ jobs:
         cat $GITHUB_EVENT_PATH | jq .number
         echo $GITHUB_REPOSITORY
         echo $GITHUB_SHA
+    - name: Set up environment variables
+      run:
+        export CI_PULL_REQUEST=$(cat $GITHUB_EVENT_PATH | jq -r .number)
+        export CI_COMMIT=$GITHUB_SHA
+        export CI_REPO_OWNER=$(cat $GITHUB_EVENT_PATH | jq -r .repository.owner.login)
+        export CI_REPO_NAME=$(cat $GITHUB_EVENT_PATH | jq -r .repository.name)
+        export CI_BRANCH=$(cat $GITHUB_EVENT_PATH | jq -r .pull_request.head.ref)
+        export REVIEWDOG_GITHUB_API_TOKEN=$GITHUB_TOKEN
+    - name: Check environment variables
+      run:
+        echo $CI_PULL_REQUEST
+        echo $CI_COMMIT
+        echo $CI_REPO_OWNER
+        echo $CI_REPO_NAME
+        echo $CI_BRANCH
