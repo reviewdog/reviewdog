@@ -79,10 +79,10 @@ workflows:
   version: 2
   lint_test_deploy:
     jobs:
-      - lint:
-          filters: # required since `release` has tag filters AND requires `lint`
-            tags:
-              only: /.*/
+      # - lint:
+      #     filters: # required since `release` has tag filters AND requires `lint`
+      #       tags:
+      #         only: /.*/
       - test:
           filters: # required since `release` has tag filters AND requires `test`
             tags:
