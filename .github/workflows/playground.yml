@@ -68,5 +68,6 @@ jobs:
         CI_BRANCH: ${{ github.event.pull_request.head.ref }}
         REVIEWDOG_GITHUB_API_TOKEN: ${{ secrets.GITHUB_TOKEN }}
       run: |
-        PATH=$(go env GOPATH):$PATH
+        PATH=$(go env GOPATH)/bin:$PATH
+        echo $PATH
         golint ./... | reviewdog -f=golint -name=golint-via-github-actions -reporter=github-pr-review
