@@ -1,0 +1,40 @@
+name: reviewdog on GitHub Action
+on: [pull_request]
+jobs:
+  reviewdog:
+    name: reviewdog
+    runs-on: ubuntu-latest
+    steps:
+      - name: Dump GitHub Context
+        env:
+          GITHUB_CONTEXT: ${{ toJson(github) }}
+        run: echo "${GITHUB_CONTEXT}"
+
+      - name: Set up Go
+        uses: actions/setup-go@v1
+        with:
+          go-version: 1.12
+        id: go
+
+      - name: Check out code into the Go module directory
+        uses: actions/checkout@v1
+
+      - name: Install linters
+        run: '( cd linters && go get golang.org/x/lint/golint )'
+
+      - name: Setup reviewdog
+        run: |
+          # curl -sfL https://raw.githubusercontent.com/reviewdog/reviewdog/master/install.sh| sh -s -- -b $(go env GOPATH)/bin
+          go install ./cmd/reviewdog
+
+      - name: Run reviewdog
+        env:
+          CI_PULL_REQUEST: ${{ github.event.number }}
+          CI_COMMIT: ${{ github.event.pull_request.head.sha }}
+          CI_REPO_OWNER: ${{ github.event.repository.owner.login }}
+          CI_REPO_NAME: ${{ github.event.repository.name }}
+          CI_BRANCH: ${{ github.event.pull_request.head.ref }}
+          REVIEWDOG_GITHUB_API_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          PATH=$(go env GOPATH)/bin:$PATH
+          golint ./... | reviewdog -f=golint -name=golint-via-github-actions -reporter=github-pr-review
