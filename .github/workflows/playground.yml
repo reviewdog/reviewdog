@@ -52,6 +52,12 @@ jobs:
       run: |
         curl -sfL https://raw.githubusercontent.com/reviewdog/reviewdog/master/install.sh| sh -s -- -b $(go env GOPATH)/bin
 
+    - name: Check environment
+      run: |
+        which go
+        go env
+        echo $PATH
+
     - name: Run reviewdog
       env:
         CI_PULL_REQUEST: ${{ github.event.number }}
