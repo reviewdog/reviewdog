@@ -14,3 +14,9 @@ jobs:
     - name: Check GitHub Event Json
       run: |
         cat $GITHUB_EVENT_PATH | jq .
+
+    - name: Extract PR Information
+      run: |
+        cat $GITHUB_EVENT_PATH | jq .number
+        echo $GITHUB_REPOSITORY
+        echo $GITHUB_SHA
