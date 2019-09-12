@@ -7,6 +7,10 @@ jobs:
     runs-on: ubuntu-latest
     steps:
 
+    - name: Check PATH
+      run: |
+        echo $PATH
+
     - name: Check GitHub Event Json
       run: |
         cat $GITHUB_EVENT_PATH | jq .
@@ -58,4 +62,5 @@ jobs:
         CI_BRANCH: ${{ github.event.pull_request.head.ref }}
         REVIEWDOG_GITHUB_API_TOKEN: ${{ secrets.GITHUB_TOKEN }}
       run: |
+        PATH=$(go env GOPATH):$PATH
         golint ./... | reviewdog -f=golint -name=golint-via-github-actions -reporter=github-pr-review
