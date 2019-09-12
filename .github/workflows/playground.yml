@@ -50,7 +50,8 @@ jobs:
 
     - name: Setup reviewdog
       run: |
-        curl -sfL https://raw.githubusercontent.com/reviewdog/reviewdog/master/install.sh| sh -s -- -b $(go env GOPATH)/bin
+        # curl -sfL https://raw.githubusercontent.com/reviewdog/reviewdog/master/install.sh| sh -s -- -b $(go env GOPATH)/bin
+        go install ./cmd/reviewdog
 
     - name: Check environment
       run: |
