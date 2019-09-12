@@ -108,7 +108,7 @@ func postResultSet(ctx context.Context, resultSet *reviewdog.ResultMap, ghInfo *
 		g.Go(func() error {
 			res, err := cli.Check(ctx, req)
 			if err != nil {
-				return err
+				return fmt.Errorf("post failed for %s: %v", name, err)
 			}
 			log.Printf("[%s] reported: %s", name, res.ReportURL)
 			return nil

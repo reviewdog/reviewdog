@@ -58,14 +58,14 @@ func (ch *Checker) Check(ctx context.Context) (*doghouse.CheckResponse, error) {
 		return nil
 	})
 	if err := eg.Wait(); err != nil {
-		return nil, err
+		return nil, fmt.Errorf("failed to get branch/diff: %v", err)
 	}
 
 	results := annotationsToCheckResults(ch.req.Annotations)
 	filtered := reviewdog.FilterCheck(results, filediffs, 1, "")
 	checkRun, err := ch.postCheck(ctx, branch, filtered)
 	if err != nil {
-		return nil, err
+		return nil, fmt.Errorf("failed to post result: %v", err)
 	}
 	res := &doghouse.CheckResponse{
 		ReportURL: checkRun.GetHTMLURL(),
@@ -116,12 +116,7 @@ func (ch *Checker) postCheck(ctx context.Context, branch string, checks []*revie
 			Annotations: annotations,
 		},
 	}
-
-	checkRun, err := ch.gh.CreateCheckRun(ctx, ch.req.Owner, ch.req.Repo, opt)
-	if err != nil {
-		return nil, err
-	}
-	return checkRun, nil
+	return ch.gh.CreateCheckRun(ctx, ch.req.Owner, ch.req.Repo, opt)
 }
 
 func (ch *Checker) summary(checks []*reviewdog.FilteredCheck) string {
