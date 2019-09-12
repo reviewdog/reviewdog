@@ -37,9 +37,9 @@ func (ch *Checker) Check(ctx context.Context) (*doghouse.CheckResponse, error) {
 
 	// Get branch from PullRequest API and PullRequest diff from diff API
 	// concurrently.
-	eg, ctx := errgroup.WithContext(ctx)
+	eg, ctx4eg := errgroup.WithContext(ctx)
 	eg.Go(func() error {
-		br, err := ch.getBranch(ctx)
+		br, err := ch.getBranch(ctx4eg)
 		if err != nil {
 			return err
 		}
@@ -50,7 +50,7 @@ func (ch *Checker) Check(ctx context.Context) (*doghouse.CheckResponse, error) {
 		return nil
 	})
 	eg.Go(func() error {
-		fd, err := ch.diff(ctx)
+		fd, err := ch.diff(ctx4eg)
 		if err != nil {
 			return fmt.Errorf("fail to parse diff: %v", err)
 		}
