@@ -1,0 +1,16 @@
+name: Playground
+on: [push, pull_request]
+jobs:
+
+  playground:
+    name: Play!
+    runs-on: ubuntu-latest
+    steps:
+
+    - name: Set up jq
+      run: |
+        sudo apt -y install jq
+
+    - name: Check GitHub Event Json
+      run: |
+        cat $GITHUB_EVENT_PATH | jq
