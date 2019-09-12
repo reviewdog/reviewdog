@@ -62,7 +62,8 @@ jobs:
     - name: Run reviewdog
       env:
         CI_PULL_REQUEST: ${{ github.event.number }}
-        CI_COMMIT: ${{ github.sha }}
+        # CI_COMMIT: ${{ github.sha }}
+        CI_COMMIT: ${{ github.event.after }}
         CI_REPO_OWNER: ${{ github.event.repository.owner.login }}
         CI_REPO_NAME: ${{ github.event.repository.name }}
         CI_REPOSITORY: ${{ github.repository }}
@@ -71,4 +72,5 @@ jobs:
       run: |
         PATH=$(go env GOPATH)/bin:$PATH
         echo $PATH
+        echo $CI_COMMIT
         golint ./... | reviewdog -f=golint -name=golint-via-github-actions -reporter=github-pr-review
