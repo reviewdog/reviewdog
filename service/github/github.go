@@ -82,10 +82,11 @@ func (g *GitHubPullRequest) postAsReviewComment(ctx context.Context) error {
 			continue
 		}
 		cbody := serviceutil.CommentBody(c)
+		_ = cbody
 		comments = append(comments, &github.DraftReviewComment{
 			Path:     &c.Path,
 			Position: &c.LnumDiff,
-			Body:     &cbody,
+			Body:     github.String("test plain text comment"),
 		})
 	}
 
