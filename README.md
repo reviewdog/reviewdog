@@ -251,7 +251,7 @@ Example: [.github/workflows/reviewdog.yml](.github/workflows/reviewdog.yml)
     golint ./... | reviewdog -f=golint -reporter=github-pr-check
 ```
 
-You don't need to specify `CI_*` environtment variables once
+You don't need to specify `CI_*` environment variables once
 [#279](https://github.com/reviewdog/reviewdog/issues/279) is fixed.
 
 Note that it won't work for Pull Requests from fork repository due to
