@@ -232,7 +232,7 @@ $ golint ./... | reviewdog -f=golint -diff="git diff master"
 [![github-pr-check sample](https://user-images.githubusercontent.com/3797062/40884858-6efd82a0-6756-11e8-9f1a-c6af4f920fb0.png)](https://github.com/reviewdog/reviewdog/pull/131/checks)
 
 github-pr-check reporter reports results to [GitHub Checks](https://help.github.com/articles/about-status-checks/).
-Two ptions to use this reporter.
+Two options to use this reporter.
 
 #### Option 1) Run reviewdog from GitHub Actions w/ secrets.GITHUB_TOKEN (experimental)
 
