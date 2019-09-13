@@ -486,4 +486,5 @@ haya14busa [![GitHub followers](https://img.shields.io/github/followers/haya14bu
 Become a backer or sponsor and get your logo on our README on Github with a link to your site.
 
 [![Become a backer](https://opencollective.com/reviewdog/tiers/backer.svg?avatarHeight=64)](https://opencollective.com/reviewdog#backers)
+[![Become a onetime backer](https://opencollective.com/reviewdog/tiers/onetime-backer.svg?avatarHeight=64)](https://opencollective.com/reviewdog#backers)
 [![Become a sponsor](https://opencollective.com/reviewdog/tiers/sponsor.svg?avatarHeight=64)](https://opencollective.com/reviewdog#sponsor)
