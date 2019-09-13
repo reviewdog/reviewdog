@@ -37,4 +37,4 @@ jobs:
           REVIEWDOG_GITHUB_API_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         run: |
           PATH=$(go env GOPATH)/bin:$PATH
-          golint ./... | reviewdog -f=golint -name=golint-via-github-actions -reporter=github-pr-check-action
+          golint ./... | reviewdog -f=golint -name=golint-via-github-actions -reporter=github-pr-check
