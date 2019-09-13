@@ -16,23 +16,94 @@ import (
 	"golang.org/x/oauth2"
 )
 
-func TestNewDoghouseCli(t *testing.T) {
-	if _, ok := newDoghouseCli(context.Background()).Client.Transport.(*oauth2.Transport); ok {
+func setupEnvs(testEnvs map[string]string) (cleanup func()) {
+	saveEnvs := make(map[string]string)
+	for key, value := range testEnvs {
+		saveEnvs[key] = os.Getenv(key)
+		if value == "" {
+			os.Unsetenv(key)
+		} else {
+			os.Setenv(key, value)
+		}
+	}
+	return func() {
+		for key, value := range saveEnvs {
+			os.Setenv(key, value)
+		}
+	}
+}
+
+func TestNewDoghouseCli_returnGitHubClient(t *testing.T) {
+	cleanup := setupEnvs(map[string]string{
+		"REVIEWDOG_TOKEN":            "",
+		"GITHUB_ACTION":              "xxx",
+		"REVIEWDOG_GITHUB_API_TOKEN": "xxx",
+	})
+	defer cleanup()
+	cli, err := newDoghouseCli(context.Background())
+	if err != nil {
+		t.Fatalf("failed to create new client: %v", err)
+	}
+	if _, ok := cli.(*client.GitHubClient); !ok {
+		t.Errorf("got %T client, want *client.GitHubClient client", cli)
+	}
+}
+
+func TestNewDoghouseCli_returnErrorForGitHubClient(t *testing.T) {
+	cleanup := setupEnvs(map[string]string{
+		"REVIEWDOG_TOKEN":            "",
+		"GITHUB_ACTION":              "xxx",
+		"REVIEWDOG_GITHUB_API_TOKEN": "", // missing
+	})
+	defer cleanup()
+	if _, err := newDoghouseCli(context.Background()); err == nil {
+		t.Error("got no error but want REVIEWDOG_GITHUB_API_TOKEN missing error")
+	}
+}
+
+func TestNewDoghouseCli_returnDogHouseClientWithReviewdogToken(t *testing.T) {
+	cleanup := setupEnvs(map[string]string{
+		"REVIEWDOG_TOKEN":            "xxx",
+		"GITHUB_ACTION":              "xxx",
+		"REVIEWDOG_GITHUB_API_TOKEN": "xxx",
+	})
+	defer cleanup()
+	cli, err := newDoghouseCli(context.Background())
+	if err != nil {
+		t.Fatalf("failed to create new client: %v", err)
+	}
+	if _, ok := cli.(*client.DogHouseClient); !ok {
+		t.Errorf("got %T client, want *client.DogHouseClient client", cli)
+	}
+}
+
+func TestNewDoghouseCli_returnDogHouseClient(t *testing.T) {
+	cleanup := setupEnvs(map[string]string{
+		"REVIEWDOG_TOKEN":            "",
+		"GITHUB_ACTION":              "",
+		"REVIEWDOG_GITHUB_API_TOKEN": "",
+	})
+	defer cleanup()
+	cli, err := newDoghouseCli(context.Background())
+	if err != nil {
+		t.Fatalf("failed to create new client: %v", err)
+	}
+	if _, ok := cli.(*client.DogHouseClient); !ok {
+		t.Errorf("got %T client, want *client.DogHouseClient client", cli)
+	}
+}
+
+func TestNewDoghouseServerCli(t *testing.T) {
+	if _, ok := newDoghouseServerCli(context.Background()).Client.Transport.(*oauth2.Transport); ok {
 		t.Error("got oauth2 http client, want default client")
 	}
 
-	const tokenEnv = "REVIEWDOG_TOKEN"
-	saveToken := os.Getenv(tokenEnv)
-	defer func() {
-		if saveToken != "" {
-			os.Setenv(tokenEnv, saveToken)
-		} else {
-			os.Unsetenv(tokenEnv)
-		}
-	}()
-	os.Setenv(tokenEnv, "xxx")
+	cleanup := setupEnvs(map[string]string{
+		"REVIEWDOG_TOKEN": "xxx",
+	})
+	defer cleanup()
 
-	if _, ok := newDoghouseCli(context.Background()).Client.Transport.(*oauth2.Transport); !ok {
+	if _, ok := newDoghouseServerCli(context.Background()).Client.Transport.(*oauth2.Transport); !ok {
 		t.Error("w/ TOKEN: got unexpected http client, want oauth client")
 	}
 }
@@ -109,12 +180,12 @@ func TestCheckResultSet_NonProject(t *testing.T) {
 	})
 }
 
-type fakeDoghouseCli struct {
+type fakeDoghouseServerCli struct {
 	client.DogHouseClientInterface
 	FakeCheck func(context.Context, *doghouse.CheckRequest) (*doghouse.CheckResponse, error)
 }
 
-func (f *fakeDoghouseCli) Check(ctx context.Context, req *doghouse.CheckRequest) (*doghouse.CheckResponse, error) {
+func (f *fakeDoghouseServerCli) Check(ctx context.Context, req *doghouse.CheckRequest) (*doghouse.CheckResponse, error) {
 	return f.FakeCheck(ctx, req)
 }
 
@@ -126,7 +197,7 @@ func TestPostResultSet(t *testing.T) {
 		sha   = "1414"
 	)
 
-	fakeCli := &fakeDoghouseCli{}
+	fakeCli := &fakeDoghouseServerCli{}
 	fakeCli.FakeCheck = func(ctx context.Context, req *doghouse.CheckRequest) (*doghouse.CheckResponse, error) {
 		if req.Owner != owner {
 			t.Errorf("req.Owner = %q, want %q", req.Owner, owner)

@@ -31,11 +31,32 @@ func runDoghouse(ctx context.Context, r io.Reader, opt *option, isProject bool) 
 	if err != nil {
 		return err
 	}
-	cli := newDoghouseCli(ctx)
+	cli, err := newDoghouseCli(ctx)
+	if err != nil {
+		return err
+	}
 	return postResultSet(ctx, resultSet, ghInfo, cli)
 }
 
-func newDoghouseCli(ctx context.Context) *client.DogHouseClient {
+func newDoghouseCli(ctx context.Context) (client.DogHouseClientInterface, error) {
+	// If skipDoghouseServer is true, run doghouse code directly instead of talking to
+	// the doghouse server because provided GitHub API Token has Check API scope.
+	skipDoghouseServer := isInGitHubAction() && os.Getenv("REVIEWDOG_TOKEN") == ""
+	if skipDoghouseServer {
+		token, err := nonEmptyEnv("REVIEWDOG_GITHUB_API_TOKEN")
+		if err != nil {
+			return nil, err
+		}
+		ghcli, err := githubClient(ctx, token)
+		if err != nil {
+			return nil, err
+		}
+		return &client.GitHubClient{Client: ghcli}, nil
+	}
+	return newDoghouseServerCli(ctx), nil
+}
+
+func newDoghouseServerCli(ctx context.Context) *client.DogHouseClient {
 	httpCli := http.DefaultClient
 	if token := os.Getenv("REVIEWDOG_TOKEN"); token != "" {
 		ts := oauth2.StaticTokenSource(
@@ -93,7 +114,7 @@ func postResultSet(ctx context.Context, resultSet *reviewdog.ResultMap, ghInfo *
 		g.Go(func() error {
 			res, err := cli.Check(ctx, req)
 			if err != nil {
-				return err
+				return fmt.Errorf("post failed for %s: %v", name, err)
 			}
 			log.Printf("[%s] reported: %s", name, res.ReportURL)
 			return nil
@@ -109,4 +130,9 @@ func checkResultToAnnotation(c *reviewdog.CheckResult, wd string) *doghouse.Anno
 		Message:    c.Message,
 		RawMessage: strings.Join(c.Lines, "\n"),
 	}
+}
+
+func isInGitHubAction() bool {
+	// https://help.github.com/en/articles/virtual-environments-for-github-actions#default-environment-variables
+	return os.Getenv("GITHUB_ACTION") != ""
 }

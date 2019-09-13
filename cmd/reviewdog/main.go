@@ -66,13 +66,23 @@ const (
 
 	"github-pr-check" (experimental)
 		Report results to GitHub PullRequest Check tab.
+		There are two options to use this reporter.
 
-		1. Install reviewdog Apps. https://github.com/apps/reviewdog
-		2. Set REVIEWDOG_TOKEN or run reviewdog CLI in trusted CI providers.
-		You can get token from https://reviewdog.app/gh/<owner>/<repo-name>.
-		$ export REVIEWDOG_TOKEN="xxxxx"
+		Option 1) Run reviewdog from GitHub Actions w/ secrets.GITHUB_TOKEN
+			Note that it won't work for Pull Requests from fork repository due to
+			GitHub Actions restriction.
+			https://help.github.com/en/articles/virtual-environments-for-github-actions#github_token-secret
 
-		Note: Token is not required if you run reviewdog in Travis CI.
+			Set REVIEWDOG_GITHUB_API_TOKEN with secrets.GITHUB_TOKEN. e.g.
+					REVIEWDOG_GITHUB_API_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+
+		Option 2) Install reviewdog GitHub Apps
+			1. Install reviewdog Apps. https://github.com/apps/reviewdog
+			2. Set REVIEWDOG_TOKEN or run reviewdog CLI in trusted CI providers.
+			You can get token from https://reviewdog.app/gh/<owner>/<repo-name>.
+			$ export REVIEWDOG_TOKEN="xxxxx"
+
+			Note: Token is not required if you run reviewdog in Travis CI.
 
 	"github-pr-review"
 		Report results to GitHub review comments.
@@ -132,7 +142,7 @@ func usage() {
 	fmt.Fprintln(os.Stderr, "Flags:")
 	flag.PrintDefaults()
 	fmt.Fprintln(os.Stderr, "")
-	fmt.Fprintln(os.Stderr, "GitHub: https://github.com/reviewdog/reviewdog")
+	fmt.Fprintln(os.Stderr, "See https://github.com/reviewdog/reviewdog for more detail.")
 	os.Exit(2)
 }
 
