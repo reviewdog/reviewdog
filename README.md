@@ -231,8 +231,34 @@ $ golint ./... | reviewdog -f=golint -diff="git diff master"
 [![github-pr-check sample](https://user-images.githubusercontent.com/3797062/40884858-6efd82a0-6756-11e8-9f1a-c6af4f920fb0.png)](https://github.com/reviewdog/reviewdog/pull/131/checks)
 
 github-pr-check reporter reports results to [GitHub Checks](https://help.github.com/articles/about-status-checks/).
-Since GitHub Checks API is only for GitHub Apps, reviewdog CLI send a request to
-reviewdog GitHub App server and the server post results as GitHub Checks.
+
+There are two options to use this reporter.
+
+#### Option 1) Run reviewdog from GitHub Actions w/ secrets.GITHUB_TOKEN (experimental)
+
+```yaml
+- name: Run reviewdog
+  env:
+    CI_PULL_REQUEST: ${{ github.event.number }}
+    CI_COMMIT: ${{ github.event.pull_request.head.sha }}
+    CI_REPO_OWNER: ${{ github.event.repository.owner.login }}
+    CI_REPO_NAME: ${{ github.event.repository.name }}
+    CI_BRANCH: ${{ github.event.pull_request.head.ref }}
+    REVIEWDOG_GITHUB_API_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+  run: |
+    golint ./... | reviewdog -f=golint -reporter=github-pr-check
+```
+
+You don't need to specify `CI_*` environtment variables once #279 is fixed.
+
+Note that it won't work for Pull Requests from fork repository due to
+[GitHub Actions restriction](https://help.github.com/en/articles/virtual-environments-for-github-actions#github_token-secret).
+Could show results to GitHub Action log console as a fallback in the future (#280).
+
+#### Option 2) Install reviewdog GitHub Apps
+reviewdog CLI send a request to reviewdog GitHub App server and the server post
+results as GitHub Checks, because Check API only supported for GitHub App and
+GitHub Actions.
 
 1. Install reviewdog Apps. https://github.com/apps/reviewdog
 2. Set `REVIEWDOG_TOKEN` or run reviewdog CLI in trusted CI providers.
@@ -245,10 +271,10 @@ $ reviewdog -reporter=github-pr-check
 
 Note: Token is not required if you run reviewdog in Travis or AppVeyor.
 
-#### *Caution*
+*Caution*
 
-As described above, github-pr-check reporter is depending on reviewdog GitHub
-App server.
+As described above, github-pr-check reporter with Option 2 is depending on
+reviewdog GitHub App server.
 The server is running with haya14busa's pocket money for now and I may break
 things, so I cannot ensure that the server is running 24h and 365 days.
 
