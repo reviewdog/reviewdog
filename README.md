@@ -231,10 +231,11 @@ $ golint ./... | reviewdog -f=golint -diff="git diff master"
 [![github-pr-check sample](https://user-images.githubusercontent.com/3797062/40884858-6efd82a0-6756-11e8-9f1a-c6af4f920fb0.png)](https://github.com/reviewdog/reviewdog/pull/131/checks)
 
 github-pr-check reporter reports results to [GitHub Checks](https://help.github.com/articles/about-status-checks/).
-
-There are two options to use this reporter.
+Two ptions to use this reporter.
 
 #### Option 1) Run reviewdog from GitHub Actions w/ secrets.GITHUB_TOKEN (experimental)
+
+Example: [.github/workflows/reviewdog.yml](.github/workflows/reviewdog.yml)
 
 ```yaml
 - name: Run reviewdog
@@ -249,11 +250,13 @@ There are two options to use this reporter.
     golint ./... | reviewdog -f=golint -reporter=github-pr-check
 ```
 
-You don't need to specify `CI_*` environtment variables once #279 is fixed.
+You don't need to specify `CI_*` environtment variables once
+[#279](https://github.com/reviewdog/reviewdog/issues/279) is fixed.
 
 Note that it won't work for Pull Requests from fork repository due to
 [GitHub Actions restriction](https://help.github.com/en/articles/virtual-environments-for-github-actions#github_token-secret).
-Could show results to GitHub Action log console as a fallback in the future (#280).
+Could show results to GitHub Action log console as a fallback in the future
+([#280](https://github.com/reviewdog/reviewdog/issues/280)).
 
 #### Option 2) Install reviewdog GitHub Apps
 reviewdog CLI send a request to reviewdog GitHub App server and the server post
