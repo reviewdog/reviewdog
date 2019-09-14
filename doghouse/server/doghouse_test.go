@@ -53,13 +53,14 @@ const sampleDiff = `--- sample.old.txt	2016-10-13 05:09:35.820791185 +0900
 
 func TestCheck_OK(t *testing.T) {
 	const (
-		name      = "haya14busa-linter"
-		owner     = "haya14busa"
-		repo      = "reviewdog"
-		prNum     = 14
-		sha       = "1414"
-		reportURL = "http://example.com/report_url"
-		branch    = "test-branch"
+		name       = "haya14busa-linter"
+		owner      = "haya14busa"
+		repo       = "reviewdog"
+		prNum      = 14
+		sha        = "1414"
+		reportURL  = "http://example.com/report_url"
+		branch     = "test-branch"
+		conclusion = "neutral"
 	)
 
 	req := &doghouse.CheckRequest{
@@ -82,6 +83,7 @@ func TestCheck_OK(t *testing.T) {
 				RawMessage: "raw test message outside diff",
 			},
 		},
+		ReportLevel: "warning",
 	}
 
 	cli := &fakeCheckerGitHubCli{}
@@ -107,6 +109,9 @@ func TestCheck_OK(t *testing.T) {
 		}
 		if opt.HeadSHA != sha {
 			t.Errorf("CreateCheckRunOptions.HeadSHA = %q, want %q", opt.HeadSHA, sha)
+		}
+		if *opt.Conclusion != conclusion {
+			t.Errorf("CreateCheckRunOptions.Conclusion = %q, want %q", *opt.Conclusion, conclusion)
 		}
 		annotations := opt.Output.Annotations
 		wantAnnotaions := []*github.CheckRunAnnotation{
