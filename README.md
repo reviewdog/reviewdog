@@ -202,6 +202,9 @@ $ reviewdog -diff="git diff master"
 project/run_test.go:61:28: [golint] error strings should not end with punctuation
 project/run.go:57:18: [errcheck]        defer os.Setenv(name, os.Getenv(name))
 project/run.go:58:12: [errcheck]        os.Setenv(name, "")
+# You can use -runners to run only specified runners.
+$ reviewdog -diff="git diff master" -runners=golint,govet
+project/run_test.go:61:28: [golint] error strings should not end with punctuation
 # You can use -conf to specify config file path.
 $ reviewdog -conf=./.reviewdog.yml -reporter=github-pr-check
 ```
