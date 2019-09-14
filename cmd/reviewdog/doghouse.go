@@ -175,8 +175,10 @@ func reportResults(w io.Writer, filteredResultSet *reviewdog.FilteredCheckMap) b
 		}
 		fmt.Fprintf(w, "reviwedog: Reporting results for %q\n", name)
 		foundResultPerName := false
+		filteredNum := 0
 		for _, result := range results {
 			if !result.InDiff {
+				filteredNum += 1
 				continue
 			}
 			foundInDiff = true
@@ -187,7 +189,7 @@ func reportResults(w io.Writer, filteredResultSet *reviewdog.FilteredCheckMap) b
 			}
 		}
 		if !foundResultPerName {
-			fmt.Fprintf(w, "reviwedog: No results found for %q\n", name)
+			fmt.Fprintf(w, "reviwedog: No results found for %q. %d results found outside diff.\n", name, filteredNum)
 		}
 	}
 	return foundInDiff
