@@ -104,7 +104,7 @@ func (ch *Checker) postCheck(ctx context.Context, branch string, checks []*revie
 	}
 	conclusion := "success"
 	if len(annotations) > 0 {
-		conclusion = "action_required"
+		conclusion = ch.conclusion()
 	}
 	name := "reviewdog"
 	title := "reviewdog report"
@@ -127,6 +127,28 @@ func (ch *Checker) postCheck(ctx context.Context, branch string, checks []*revie
 		},
 	}
 	return ch.gh.CreateCheckRun(ctx, ch.req.Owner, ch.req.Repo, opt)
+}
+
+// https://developer.github.com/v3/checks/runs/#parameters-1
+func (ch *Checker) conclusion() string {
+	switch strings.ToLower(ch.req.Level) {
+	case "info", "warning":
+		return "neutral"
+	}
+	return "failure"
+}
+
+// https://developer.github.com/v3/checks/runs/#annotations-object
+func (ch *Checker) annotationLevel() string {
+	switch strings.ToLower(ch.req.Level) {
+	case "info":
+		return "notice"
+	case "warning":
+		return "warning"
+	case "failure":
+		return "failure"
+	}
+	return "failure"
 }
 
 func (ch *Checker) summary(checks []*reviewdog.FilteredCheck) string {
@@ -186,7 +208,7 @@ func (ch *Checker) toCheckRunAnnotation(c *reviewdog.FilteredCheck) *github.Chec
 		BlobHRef:        github.String(ch.brobHRef(c.Path)),
 		StartLine:       github.Int(c.Lnum),
 		EndLine:         github.Int(c.Lnum),
-		AnnotationLevel: github.String("warning"),
+		AnnotationLevel: github.String(ch.annotationLevel()),
 		Message:         github.String(c.Message),
 	}
 	if ch.req.Name != "" {

@@ -11,19 +11,24 @@ type ResultMap struct {
 	sm sync.Map
 }
 
-// Store saves a new []*CheckResult into ResultMap.
-func (rm *ResultMap) Store(key string, crs []*CheckResult) {
-	rm.sm.Store(key, crs)
+type Result struct {
+	Level        string
+	CheckResults []*CheckResult
 }
 
-// Load fetches []*CheckResult from ResultMap
-func (rm *ResultMap) Load(key string) ([]*CheckResult, error) {
+// Store saves a new *Result into ResultMap.
+func (rm *ResultMap) Store(key string, r *Result) {
+	rm.sm.Store(key, r)
+}
+
+// Load fetches *Result from ResultMap
+func (rm *ResultMap) Load(key string) (*Result, error) {
 	v, ok := rm.sm.Load(key)
 	if !ok {
 		return nil, fmt.Errorf("fail to get the value of key %q from results", key)
 	}
 
-	t, ok := v.([]*CheckResult)
+	t, ok := v.(*Result)
 	if !ok {
 		return nil, errors.New("stored type in ResultMap is invalid")
 	}
@@ -32,9 +37,9 @@ func (rm *ResultMap) Load(key string) ([]*CheckResult, error) {
 }
 
 // Range retrieves `key` and `values` from ResultMap iteratively.
-func (rm *ResultMap) Range(f func(key string, val []*CheckResult)) {
+func (rm *ResultMap) Range(f func(key string, val *Result)) {
 	rm.sm.Range(func(k, v interface{}) bool {
-		f(k.(string), v.([]*CheckResult))
+		f(k.(string), v.(*Result))
 		return true
 	})
 }
@@ -55,8 +60,8 @@ type FilteredCheckMap struct {
 }
 
 // Store saves a new []*FilteredCheck into FilteredCheckMap.
-func (rm *FilteredCheckMap) Store(key string, crs []*FilteredCheck) {
-	rm.sm.Store(key, crs)
+func (rm *FilteredCheckMap) Store(key string, r []*FilteredCheck) {
+	rm.sm.Store(key, r)
 }
 
 // Load fetches []*FilteredCheck from FilteredCheckMap

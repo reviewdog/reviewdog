@@ -85,7 +85,7 @@ func checkResultSet(ctx context.Context, r io.Reader, opt *option, isProject boo
 		if err != nil {
 			return nil, err
 		}
-		resultSet, err = projectRunAndParse(ctx, conf, buildRunnersMap(opt.runners))
+		resultSet, err = projectRunAndParse(ctx, conf, buildRunnersMap(opt.runners), opt.level)
 		if err != nil {
 			return nil, err
 		}
@@ -98,7 +98,10 @@ func checkResultSet(ctx context.Context, r io.Reader, opt *option, isProject boo
 		if err != nil {
 			return nil, err
 		}
-		resultSet.Store(toolName(opt), rs)
+		resultSet.Store(toolName(opt), &reviewdog.Result{
+			Level:        opt.level,
+			CheckResults: rs,
+		})
 	}
 	return resultSet, nil
 }
@@ -107,9 +110,10 @@ func postResultSet(ctx context.Context, resultSet *reviewdog.ResultMap, ghInfo *
 	var g errgroup.Group
 	wd, _ := os.Getwd()
 	filteredResultSet := new(reviewdog.FilteredCheckMap)
-	resultSet.Range(func(name string, results []*reviewdog.CheckResult) {
-		as := make([]*doghouse.Annotation, 0, len(results))
-		for _, r := range results {
+	resultSet.Range(func(name string, result *reviewdog.Result) {
+		checkResults := result.CheckResults
+		as := make([]*doghouse.Annotation, 0, len(checkResults))
+		for _, r := range checkResults {
 			as = append(as, checkResultToAnnotation(r, wd))
 		}
 		req := &doghouse.CheckRequest{
@@ -120,6 +124,7 @@ func postResultSet(ctx context.Context, resultSet *reviewdog.ResultMap, ghInfo *
 			SHA:         ghInfo.SHA,
 			Branch:      ghInfo.Branch,
 			Annotations: as,
+			Level:       result.Level,
 		}
 		g.Go(func() error {
 			res, err := cli.Check(ctx, req)
