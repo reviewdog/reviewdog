@@ -74,6 +74,13 @@ func (gc *githubChecker) handleCheck(w http.ResponseWriter, r *http.Request) {
 }
 
 func (gc *githubChecker) validateCheckRequest(ctx context.Context, w http.ResponseWriter, r *http.Request, owner, repo string) bool {
+	if extractBearerToken(r) == "" {
+		// Update Travis IP Addresss before checking IP to reduce the # of
+		// flaky errors when token is not present.
+		if err := ciutil.UpdateTravisCIIPAddrs(urlfetch.Client(ctx)); err != nil {
+			log.Errorf(ctx, "failed to update travis CI IP addresses: %v", err)
+		}
+	}
 	log.Infof(ctx, "Remote Addr: %s", r.RemoteAddr)
 	if ciutil.IsFromCI(r) {
 		// Skip token validation if it's from trusted CI providers.
