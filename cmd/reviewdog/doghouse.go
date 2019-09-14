@@ -37,7 +37,7 @@ func runDoghouse(ctx context.Context, r io.Reader, w io.Writer, opt *option, isP
 	if err != nil {
 		return err
 	}
-	filteredResultSet, err := postResultSet(ctx, resultSet, ghInfo, cli, opt.reportLevel)
+	filteredResultSet, err := postResultSet(ctx, resultSet, ghInfo, cli)
 	if err != nil {
 		return err
 	}
@@ -98,19 +98,22 @@ func checkResultSet(ctx context.Context, r io.Reader, opt *option, isProject boo
 		if err != nil {
 			return nil, err
 		}
-		resultSet.Store(toolName(opt), rs)
+		resultSet.Store(toolName(opt), &reviewdog.Result{
+			Level:        opt.reportLevel,
+			CheckResults: rs,
+		})
 	}
 	return resultSet, nil
 }
 
-func postResultSet(ctx context.Context, resultSet *reviewdog.ResultMap,
-	ghInfo *cienv.BuildInfo, cli client.DogHouseClientInterface, reportLevel string) (*reviewdog.FilteredCheckMap, error) {
+func postResultSet(ctx context.Context, resultSet *reviewdog.ResultMap, ghInfo *cienv.BuildInfo, cli client.DogHouseClientInterface) (*reviewdog.FilteredCheckMap, error) {
 	var g errgroup.Group
 	wd, _ := os.Getwd()
 	filteredResultSet := new(reviewdog.FilteredCheckMap)
-	resultSet.Range(func(name string, results []*reviewdog.CheckResult) {
-		as := make([]*doghouse.Annotation, 0, len(results))
-		for _, r := range results {
+	resultSet.Range(func(name string, result *reviewdog.Result) {
+		checkResults := result.CheckResults
+		as := make([]*doghouse.Annotation, 0, len(checkResults))
+		for _, r := range checkResults {
 			as = append(as, checkResultToAnnotation(r, wd))
 		}
 		req := &doghouse.CheckRequest{
@@ -121,7 +124,7 @@ func postResultSet(ctx context.Context, resultSet *reviewdog.ResultMap,
 			SHA:         ghInfo.SHA,
 			Branch:      ghInfo.Branch,
 			Annotations: as,
-			ReportLevel: reportLevel,
+			ReportLevel: result.Level,
 		}
 		g.Go(func() error {
 			res, err := cli.Check(ctx, req)

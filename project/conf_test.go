@@ -13,15 +13,18 @@ func TestParse(t *testing.T) {
 runner:
   golint:
     cmd: golint ./...
+    level: info
     errorformat:
       - "%f:%l:%c: %m"
   govet:
     cmd: go tool vet -all -shadowstrict .
     format: govet
+    level: warning
   namekey:
     cmd: echo 'name'
     name: nameoverwritten
     format: checkstyle
+    level: error
 `
 
 	want := &Config{
@@ -30,16 +33,19 @@ runner:
 				Cmd:         "golint ./...",
 				Errorformat: []string{`%f:%l:%c: %m`},
 				Name:        "golint",
+				Level:       "info",
 			},
 			"govet": {
 				Cmd:    "go tool vet -all -shadowstrict .",
 				Format: "govet",
 				Name:   "govet",
+				Level:  "warning",
 			},
 			"namekey": {
 				Cmd:    "echo 'name'",
 				Format: "checkstyle",
 				Name:   "nameoverwritten",
+				Level:  "error",
 			},
 		},
 	}

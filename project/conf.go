@@ -20,6 +20,8 @@ type Runner struct {
 	Format string
 	// errorformat. (e.g. `%f:%l:%c:%m`, `%-G%.%#`)
 	Errorformat []string
+	// Report Level for this runner. ("info", "warning", "error")
+	Level string
 }
 
 // Parse parses reviewdog config in yaml format.

@@ -58,7 +58,7 @@ func RunAndParse(ctx context.Context, conf *Config, runners map[string]bool) (*r
 				return err
 			}
 			log.Printf("reviewdog: [finish]\trunner=%s", runner.Name)
-			results.Store(runner.Name, rs)
+			results.Store(runner.Name, &reviewdog.Result{Level: runner.Level, CheckResults: rs})
 			return nil
 		})
 	}
@@ -89,7 +89,8 @@ func Run(ctx context.Context, conf *Config, runners map[string]bool, c reviewdog
 		return err
 	}
 	var g errgroup.Group
-	results.Range(func(toolname string, rs []*reviewdog.CheckResult) {
+	results.Range(func(toolname string, result *reviewdog.Result) {
+		rs := result.CheckResults
 		g.Go(func() error {
 			return reviewdog.RunFromResult(ctx, c, rs, filediffs, d.Strip(), toolname)
 		})

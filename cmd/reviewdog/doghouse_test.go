@@ -115,14 +115,14 @@ func TestCheckResultSet_Project(t *testing.T) {
 	}(projectRunAndParse)
 
 	var wantCheckResult reviewdog.ResultMap
-	wantCheckResult.Store("name1", []*reviewdog.CheckResult{
+	wantCheckResult.Store("name1", &reviewdog.Result{CheckResults: []*reviewdog.CheckResult{
 		{
 			Lnum:    1,
 			Col:     14,
 			Message: "msg",
 			Path:    "reviewdog.go",
 		},
-	})
+	}})
 
 	projectRunAndParse = func(ctx context.Context, conf *project.Config, runners map[string]bool) (*reviewdog.ResultMap, error) {
 		return &wantCheckResult, nil
@@ -142,9 +142,9 @@ func TestCheckResultSet_Project(t *testing.T) {
 	if got.Len() != wantCheckResult.Len() {
 		t.Errorf("length of results is different. got = %d, want = %d\n", got.Len(), wantCheckResult.Len())
 	}
-	got.Range(func(k string, v []*reviewdog.CheckResult) {
+	got.Range(func(k string, r *reviewdog.Result) {
 		w, _ := wantCheckResult.Load(k)
-		if diff := cmp.Diff(v, w); diff != "" {
+		if diff := cmp.Diff(r, w); diff != "" {
 			t.Errorf("result has diff:\n%s", diff)
 		}
 	})
@@ -160,7 +160,7 @@ func TestCheckResultSet_NonProject(t *testing.T) {
 		t.Fatal(err)
 	}
 	var want reviewdog.ResultMap
-	want.Store("golint", []*reviewdog.CheckResult{
+	want.Store("golint", &reviewdog.Result{CheckResults: []*reviewdog.CheckResult{
 		{
 			Lnum:    14,
 			Col:     14,
@@ -168,14 +168,14 @@ func TestCheckResultSet_NonProject(t *testing.T) {
 			Path:    "reviewdog.go",
 			Lines:   []string{input},
 		},
-	})
+	}})
 
 	if got.Len() != want.Len() {
 		t.Errorf("length of results is different. got = %d, want = %d\n", got.Len(), want.Len())
 	}
-	got.Range(func(k string, v []*reviewdog.CheckResult) {
+	got.Range(func(k string, r *reviewdog.Result) {
 		w, _ := want.Load(k)
-		if diff := cmp.Diff(v, w); diff != "" {
+		if diff := cmp.Diff(r, w); diff != "" {
 			t.Errorf("result has diff:\n%s", diff)
 		}
 	})
@@ -245,7 +245,7 @@ func TestPostResultSet_withReportURL(t *testing.T) {
 	}
 
 	var resultSet reviewdog.ResultMap
-	resultSet.Store("name1", []*reviewdog.CheckResult{
+	resultSet.Store("name1", &reviewdog.Result{CheckResults: []*reviewdog.CheckResult{
 		{
 			Lnum:    14,
 			Message: "name1: test 1",
@@ -256,14 +256,14 @@ func TestPostResultSet_withReportURL(t *testing.T) {
 			Message: "name1: test 2",
 			Path:    "reviewdog.go",
 		},
-	})
-	resultSet.Store("name2", []*reviewdog.CheckResult{
+	}})
+	resultSet.Store("name2", &reviewdog.Result{CheckResults: []*reviewdog.CheckResult{
 		{
 			Lnum:    14,
 			Message: "name2: test 1",
 			Path:    "cmd/reviewdog/doghouse.go",
 		},
-	})
+	}})
 
 	ghInfo := &cienv.BuildInfo{
 		Owner:       owner,
@@ -272,7 +272,7 @@ func TestPostResultSet_withReportURL(t *testing.T) {
 		SHA:         sha,
 	}
 
-	if _, err := postResultSet(context.Background(), &resultSet, ghInfo, fakeCli, "error"); err != nil {
+	if _, err := postResultSet(context.Background(), &resultSet, ghInfo, fakeCli); err != nil {
 		t.Fatal(err)
 	}
 }
@@ -292,11 +292,11 @@ func TestPostResultSet_withoutReportURL(t *testing.T) {
 	}
 
 	var resultSet reviewdog.ResultMap
-	resultSet.Store("name1", []*reviewdog.CheckResult{})
+	resultSet.Store("name1", &reviewdog.Result{CheckResults: []*reviewdog.CheckResult{}})
 
 	ghInfo := &cienv.BuildInfo{Owner: owner, Repo: repo, PullRequest: prNum, SHA: sha}
 
-	resp, err := postResultSet(context.Background(), &resultSet, ghInfo, fakeCli, "error")
+	resp, err := postResultSet(context.Background(), &resultSet, ghInfo, fakeCli)
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -326,11 +326,11 @@ func TestPostResultSet_withEmptyResponse(t *testing.T) {
 	}
 
 	var resultSet reviewdog.ResultMap
-	resultSet.Store("name1", []*reviewdog.CheckResult{})
+	resultSet.Store("name1", &reviewdog.Result{CheckResults: []*reviewdog.CheckResult{}})
 
 	ghInfo := &cienv.BuildInfo{Owner: owner, Repo: repo, PullRequest: prNum, SHA: sha}
 
-	if _, err := postResultSet(context.Background(), &resultSet, ghInfo, fakeCli, "error"); err == nil {
+	if _, err := postResultSet(context.Background(), &resultSet, ghInfo, fakeCli); err == nil {
 		t.Error("got no error but want report missing error")
 	}
 }
