@@ -2,11 +2,13 @@ package main
 
 import (
 	"context"
+	"errors"
 	"fmt"
 	"io"
 	"log"
 	"net/http"
 	"os"
+	"sort"
 	"strings"
 
 	"github.com/reviewdog/reviewdog"
@@ -18,7 +20,7 @@ import (
 	"golang.org/x/sync/errgroup"
 )
 
-func runDoghouse(ctx context.Context, r io.Reader, opt *option, isProject bool) error {
+func runDoghouse(ctx context.Context, r io.Reader, w io.Writer, opt *option, isProject bool) error {
 	ghInfo, isPr, err := cienv.GetBuildInfo()
 	if err != nil {
 		return err
@@ -35,7 +37,14 @@ func runDoghouse(ctx context.Context, r io.Reader, opt *option, isProject bool) 
 	if err != nil {
 		return err
 	}
-	return postResultSet(ctx, resultSet, ghInfo, cli)
+	filteredResultSet, err := postResultSet(ctx, resultSet, ghInfo, cli)
+	if err != nil {
+		return err
+	}
+	if foundResultInDiff := reportResults(w, filteredResultSet); foundResultInDiff {
+		return errors.New("found at least one result in diff")
+	}
+	return nil
 }
 
 func newDoghouseCli(ctx context.Context) (client.DogHouseClientInterface, error) {
@@ -94,9 +103,10 @@ func checkResultSet(ctx context.Context, r io.Reader, opt *option, isProject boo
 	return resultSet, nil
 }
 
-func postResultSet(ctx context.Context, resultSet *reviewdog.ResultMap, ghInfo *cienv.BuildInfo, cli client.DogHouseClientInterface) error {
+func postResultSet(ctx context.Context, resultSet *reviewdog.ResultMap, ghInfo *cienv.BuildInfo, cli client.DogHouseClientInterface) (*reviewdog.FilteredCheckMap, error) {
 	var g errgroup.Group
 	wd, _ := os.Getwd()
+	filteredResultSet := new(reviewdog.FilteredCheckMap)
 	resultSet.Range(func(name string, results []*reviewdog.CheckResult) {
 		as := make([]*doghouse.Annotation, 0, len(results))
 		for _, r := range results {
@@ -116,11 +126,16 @@ func postResultSet(ctx context.Context, resultSet *reviewdog.ResultMap, ghInfo *
 			if err != nil {
 				return fmt.Errorf("post failed for %s: %v", name, err)
 			}
-			log.Printf("[%s] reported: %s", name, res.ReportURL)
+			if res.ReportURL != "" {
+				log.Printf("[%s] reported: %s", name, res.ReportURL)
+			}
+			if res.CheckedResults != nil {
+				filteredResultSet.Store(name, res.CheckedResults)
+			}
 			return nil
 		})
 	})
-	return g.Wait()
+	return filteredResultSet, g.Wait()
 }
 
 func checkResultToAnnotation(c *reviewdog.CheckResult, wd string) *doghouse.Annotation {
@@ -135,4 +150,42 @@ func checkResultToAnnotation(c *reviewdog.CheckResult, wd string) *doghouse.Anno
 func isInGitHubAction() bool {
 	// https://help.github.com/en/articles/virtual-environments-for-github-actions#default-environment-variables
 	return os.Getenv("GITHUB_ACTION") != ""
+}
+
+// reportResults reports results to given io.Writer and return true if at least
+// one annotation result is in diff.
+func reportResults(w io.Writer, filteredResultSet *reviewdog.FilteredCheckMap) bool {
+	// Get sorted names to get determinisitic result.
+	var names []string
+	filteredResultSet.Range(func(name string, results []*reviewdog.FilteredCheck) {
+		names = append(names, name)
+	})
+	sort.Strings(names)
+
+	foundInDiff := false
+	for _, name := range names {
+		results, err := filteredResultSet.Load(name)
+		if err != nil {
+			// Should not happen.
+			log.Printf("reviewdog: result not found for %q", name)
+			continue
+		}
+		fmt.Fprintf(w, "reviwedog: Reporting results for %q\n", name)
+		foundResultPerName := false
+		for _, result := range results {
+			if !result.InDiff {
+				continue
+			}
+			foundInDiff = true
+			foundResultPerName = true
+			// Output original lines.
+			for _, line := range result.Lines {
+				fmt.Fprintln(w, line)
+			}
+		}
+		if !foundResultPerName {
+			fmt.Fprintf(w, "reviwedog: No results found for %q\n", name)
+		}
+	}
+	return foundInDiff
 }

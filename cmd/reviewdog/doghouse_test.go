@@ -1,6 +1,7 @@
 package main
 
 import (
+	"bytes"
 	"context"
 	"io/ioutil"
 	"os"
@@ -271,7 +272,86 @@ func TestPostResultSet(t *testing.T) {
 		SHA:         sha,
 	}
 
-	if err := postResultSet(context.Background(), &resultSet, ghInfo, fakeCli); err != nil {
+	if _, err := postResultSet(context.Background(), &resultSet, ghInfo, fakeCli); err != nil {
 		t.Fatal(err)
+	}
+}
+
+func TestReportResults(t *testing.T) {
+	filteredResultSet := new(reviewdog.FilteredCheckMap)
+	filteredResultSet.Store("name1", []*reviewdog.FilteredCheck{
+		{
+			CheckResult: &reviewdog.CheckResult{
+				Lines: []string{"name1-L1", "name1-L2"},
+			},
+			InDiff: true,
+		},
+		{
+			CheckResult: &reviewdog.CheckResult{
+				Lines: []string{"name1.2-L1", "name1.2-L2"},
+			},
+			InDiff: false,
+		},
+	})
+	filteredResultSet.Store("name2", []*reviewdog.FilteredCheck{
+		{
+			CheckResult: &reviewdog.CheckResult{
+				Lines: []string{"name1-L1", "name1-L2"},
+			},
+			InDiff: false,
+		},
+	})
+	stdout := new(bytes.Buffer)
+	foundResultInDiff := reportResults(stdout, filteredResultSet)
+	if !foundResultInDiff {
+		t.Errorf("foundResultInDiff = %v, want true", foundResultInDiff)
+	}
+	want := `reviwedog: Reporting results for "name1"
+name1-L1
+name1-L2
+reviwedog: Reporting results for "name2"
+reviwedog: No results found for "name2"
+`
+	if got := stdout.String(); got != want {
+		t.Errorf("diff found for report:\ngot:\n%s\nwant:\n%s", got, want)
+	}
+}
+
+func TestReportResults_noResultsInDiff(t *testing.T) {
+	filteredResultSet := new(reviewdog.FilteredCheckMap)
+	filteredResultSet.Store("name1", []*reviewdog.FilteredCheck{
+		{
+			CheckResult: &reviewdog.CheckResult{
+				Lines: []string{"name1-L1", "name1-L2"},
+			},
+			InDiff: false,
+		},
+		{
+			CheckResult: &reviewdog.CheckResult{
+				Lines: []string{"name1.2-L1", "name1.2-L2"},
+			},
+			InDiff: false,
+		},
+	})
+	filteredResultSet.Store("name2", []*reviewdog.FilteredCheck{
+		{
+			CheckResult: &reviewdog.CheckResult{
+				Lines: []string{"name1-L1", "name1-L2"},
+			},
+			InDiff: false,
+		},
+	})
+	stdout := new(bytes.Buffer)
+	foundResultInDiff := reportResults(stdout, filteredResultSet)
+	if foundResultInDiff {
+		t.Errorf("foundResultInDiff = %v, want false", foundResultInDiff)
+	}
+	want := `reviwedog: Reporting results for "name1"
+reviwedog: No results found for "name1"
+reviwedog: Reporting results for "name2"
+reviwedog: No results found for "name2"
+`
+	if got := stdout.String(); got != want {
+		t.Errorf("diff found for report:\ngot:\n%s\nwant:\n%s", got, want)
 	}
 }
