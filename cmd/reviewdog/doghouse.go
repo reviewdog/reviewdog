@@ -85,7 +85,7 @@ func checkResultSet(ctx context.Context, r io.Reader, opt *option, isProject boo
 		if err != nil {
 			return nil, err
 		}
-		resultSet, err = projectRunAndParse(ctx, conf, buildRunnersMap(opt.runners))
+		resultSet, err = projectRunAndParse(ctx, conf, buildRunnersMap(opt.runners), opt.level)
 		if err != nil {
 			return nil, err
 		}
@@ -124,7 +124,7 @@ func postResultSet(ctx context.Context, resultSet *reviewdog.ResultMap, ghInfo *
 			SHA:         ghInfo.SHA,
 			Branch:      ghInfo.Branch,
 			Annotations: as,
-			Level: result.Level,
+			Level:       result.Level,
 		}
 		g.Go(func() error {
 			res, err := cli.Check(ctx, req)

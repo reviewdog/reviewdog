@@ -17,7 +17,7 @@ import (
 )
 
 // RunAndParse runs commands and parse results. Returns map of tool name to check results.
-func RunAndParse(ctx context.Context, conf *Config, runners map[string]bool) (*reviewdog.ResultMap, error) {
+func RunAndParse(ctx context.Context, conf *Config, runners map[string]bool, defaultLevel string) (*reviewdog.ResultMap, error) {
 	var results reviewdog.ResultMap
 	// environment variables for each commands
 	envs := filteredEnviron()
@@ -58,7 +58,11 @@ func RunAndParse(ctx context.Context, conf *Config, runners map[string]bool) (*r
 				return err
 			}
 			log.Printf("reviewdog: [finish]\trunner=%s", runner.Name)
-			results.Store(runner.Name, &reviewdog.Result{Level: runner.Level, CheckResults: rs})
+			level := runner.Level
+			if level == "" {
+				level = defaultLevel
+			}
+			results.Store(runner.Name, &reviewdog.Result{Level: level, CheckResults: rs})
 			return nil
 		})
 	}
@@ -73,7 +77,7 @@ func RunAndParse(ctx context.Context, conf *Config, runners map[string]bool) (*r
 
 // Run runs reviewdog tasks based on Config.
 func Run(ctx context.Context, conf *Config, runners map[string]bool, c reviewdog.CommentService, d reviewdog.DiffService) error {
-	results, err := RunAndParse(ctx, conf, runners)
+	results, err := RunAndParse(ctx, conf, runners, "") // Level is not used.
 	if err != nil {
 		return err
 	}
