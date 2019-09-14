@@ -178,7 +178,7 @@ func reportResults(w io.Writer, filteredResultSet *reviewdog.FilteredCheckMap) b
 		filteredNum := 0
 		for _, result := range results {
 			if !result.InDiff {
-				filteredNum += 1
+				filteredNum++
 				continue
 			}
 			foundInDiff = true
