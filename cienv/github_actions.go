@@ -27,14 +27,14 @@ type GitHubContext struct {
 	} `json:"event"`
 }
 
-func getBuildInfoFromGitHubAction() (prInfo *BuildInfo, isPR bool, err error) {
+func getBuildInfoFromGitHubAction() (*BuildInfo, bool, error) {
 	eventPath := os.Getenv("GITHUB_EVENT_PATH")
 	if eventPath == "" {
 		return nil, false, errors.New("GITHUB_EVENT_PATH not found")
 	}
 	return getBuildInfoFromGitHubActionEventPath(eventPath)
 }
-func getBuildInfoFromGitHubActionEventPath(eventPath string) (prInfo *BuildInfo, isPR bool, err error) {
+func getBuildInfoFromGitHubActionEventPath(eventPath string) (*BuildInfo, bool, error) {
 	f, err := os.Open(eventPath)
 	if err != nil {
 		return nil, false, err
