@@ -190,7 +190,7 @@ func (f *fakeDoghouseServerCli) Check(ctx context.Context, req *doghouse.CheckRe
 	return f.FakeCheck(ctx, req)
 }
 
-func TestPostResultSet(t *testing.T) {
+func TestPostResultSet_withReportURL(t *testing.T) {
 	const (
 		owner = "haya14busa"
 		repo  = "reviewdog"
@@ -241,7 +241,7 @@ func TestPostResultSet(t *testing.T) {
 		default:
 			t.Errorf("unexpected req.Name: %s", req.Name)
 		}
-		return &doghouse.CheckResponse{}, nil
+		return &doghouse.CheckResponse{ReportURL: "xxx"}, nil
 	}
 
 	var resultSet reviewdog.ResultMap
@@ -274,6 +274,64 @@ func TestPostResultSet(t *testing.T) {
 
 	if _, err := postResultSet(context.Background(), &resultSet, ghInfo, fakeCli); err != nil {
 		t.Fatal(err)
+	}
+}
+
+func TestPostResultSet_withoutReportURL(t *testing.T) {
+	const (
+		owner = "haya14busa"
+		repo  = "reviewdog"
+		prNum = 14
+		sha   = "1414"
+	)
+
+	wantResults := []*reviewdog.FilteredCheck{{LnumDiff: 1}}
+	fakeCli := &fakeDoghouseServerCli{}
+	fakeCli.FakeCheck = func(ctx context.Context, req *doghouse.CheckRequest) (*doghouse.CheckResponse, error) {
+		return &doghouse.CheckResponse{CheckedResults: wantResults}, nil
+	}
+
+	var resultSet reviewdog.ResultMap
+	resultSet.Store("name1", []*reviewdog.CheckResult{})
+
+	ghInfo := &cienv.BuildInfo{Owner: owner, Repo: repo, PullRequest: prNum, SHA: sha}
+
+	resp, err := postResultSet(context.Background(), &resultSet, ghInfo, fakeCli)
+	if err != nil {
+		t.Fatal(err)
+	}
+	if resp.Len() == 0 {
+		t.Fatal("result should not be empty")
+	}
+	results, err := resp.Load("name1")
+	if err != nil {
+		t.Fatalf("should have result for name1: %v", err)
+	}
+	if diff := cmp.Diff(results, wantResults); diff != "" {
+		t.Errorf("results has diff:\n%s", diff)
+	}
+}
+
+func TestPostResultSet_withEmptyResponse(t *testing.T) {
+	const (
+		owner = "haya14busa"
+		repo  = "reviewdog"
+		prNum = 14
+		sha   = "1414"
+	)
+
+	fakeCli := &fakeDoghouseServerCli{}
+	fakeCli.FakeCheck = func(ctx context.Context, req *doghouse.CheckRequest) (*doghouse.CheckResponse, error) {
+		return &doghouse.CheckResponse{}, nil
+	}
+
+	var resultSet reviewdog.ResultMap
+	resultSet.Store("name1", []*reviewdog.CheckResult{})
+
+	ghInfo := &cienv.BuildInfo{Owner: owner, Repo: repo, PullRequest: prNum, SHA: sha}
+
+	if _, err := postResultSet(context.Background(), &resultSet, ghInfo, fakeCli); err == nil {
+		t.Error("got no error but want report missing error")
 	}
 }
 
