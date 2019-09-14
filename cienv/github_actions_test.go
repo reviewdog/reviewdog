@@ -7,7 +7,7 @@ import (
 )
 
 func TestGetBuildInfoFromGitHubActionEventPath(t *testing.T) {
-	got, _, err := getBuildInfoFromGitHubActionEventPath("_testdata/github_context_pull_request.json")
+	got, _, err := getBuildInfoFromGitHubActionEventPath("_testdata/github_event_pull_request.json")
 	if err != nil {
 		t.Fatal(err)
 	}
