@@ -248,7 +248,7 @@ check result with this feature. (default: error)
 | `warning` | neutral       |
 | `error`   | failure       |
 
-Two options to use this reporter.
+There are two options to use this reporter.
 
 #### Option 1) Run reviewdog from GitHub Actions w/ secrets.GITHUB_TOKEN (experimental)
 
@@ -477,7 +477,7 @@ $ REVIEWDOG_GITLAB_API_TOKEN="<token>"
 
 If a CI service doesn't provide information such as Pull Request ID - reviewdog can guess it by branch name and commit SHA.
 Just pass the flag `guess`:
- 
+
 ```shell
 $ reviewdog -conf=.reviewdog.yml -reporter=github-pr-check -guess
 ```
