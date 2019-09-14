@@ -83,7 +83,7 @@ func TestCheck_OK(t *testing.T) {
 				RawMessage: "raw test message outside diff",
 			},
 		},
-		ReportLevel: "warning",
+		Level: "warning",
 	}
 
 	cli := &fakeCheckerGitHubCli{}

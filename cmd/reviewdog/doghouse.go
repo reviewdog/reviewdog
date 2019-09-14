@@ -99,7 +99,7 @@ func checkResultSet(ctx context.Context, r io.Reader, opt *option, isProject boo
 			return nil, err
 		}
 		resultSet.Store(toolName(opt), &reviewdog.Result{
-			Level:        opt.reportLevel,
+			Level:        opt.level,
 			CheckResults: rs,
 		})
 	}
@@ -124,7 +124,7 @@ func postResultSet(ctx context.Context, resultSet *reviewdog.ResultMap, ghInfo *
 			SHA:         ghInfo.SHA,
 			Branch:      ghInfo.Branch,
 			Annotations: as,
-			ReportLevel: result.Level,
+			Level: result.Level,
 		}
 		g.Go(func() error {
 			res, err := cli.Check(ctx, req)

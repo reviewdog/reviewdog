@@ -131,7 +131,7 @@ func (ch *Checker) postCheck(ctx context.Context, branch string, checks []*revie
 
 // https://developer.github.com/v3/checks/runs/#parameters-1
 func (ch *Checker) conclusion() string {
-	switch strings.ToLower(ch.req.ReportLevel) {
+	switch strings.ToLower(ch.req.Level) {
 	case "info", "warning":
 		return "neutral"
 	}
@@ -140,7 +140,7 @@ func (ch *Checker) conclusion() string {
 
 // https://developer.github.com/v3/checks/runs/#annotations-object
 func (ch *Checker) annotationLevel() string {
-	switch strings.ToLower(ch.req.ReportLevel) {
+	switch strings.ToLower(ch.req.Level) {
 	case "info":
 		return "notice"
 	case "warning":
