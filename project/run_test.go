@@ -37,7 +37,7 @@ func TestRun(t *testing.T) {
 
 	t.Run("empty", func(t *testing.T) {
 		conf := &Config{}
-		if err := Run(ctx, conf, nil, nil); err != nil {
+		if err := Run(ctx, conf, nil, nil, nil); err != nil {
 			t.Error(err)
 		}
 	})
@@ -48,7 +48,7 @@ func TestRun(t *testing.T) {
 				"test": {},
 			},
 		}
-		if err := Run(ctx, conf, nil, nil); err == nil {
+		if err := Run(ctx, conf, nil, nil, nil); err == nil {
 			t.Error("want error, got nil")
 		} else {
 			t.Log(err)
@@ -69,7 +69,7 @@ func TestRun(t *testing.T) {
 				},
 			},
 		}
-		if err := Run(ctx, conf, nil, ds); err == nil {
+		if err := Run(ctx, conf, nil, nil, ds); err == nil {
 			t.Error("want error, got nil")
 		} else {
 			t.Log(err)
@@ -95,7 +95,7 @@ func TestRun(t *testing.T) {
 				},
 			},
 		}
-		if err := Run(ctx, conf, cs, ds); err != nil {
+		if err := Run(ctx, conf, nil, cs, ds); err != nil {
 			t.Error(err)
 		}
 	})
@@ -119,8 +119,73 @@ func TestRun(t *testing.T) {
 				},
 			},
 		}
-		if err := Run(ctx, conf, cs, ds); err != nil {
+		if err := Run(ctx, conf, nil, cs, ds); err != nil {
 			t.Error(err)
+		}
+	})
+
+	t.Run("runners", func(t *testing.T) {
+		called := 0
+		ds := &fakeDiffService{
+			FakeDiff: func() ([]byte, error) {
+				called++
+				return []byte(""), nil
+			},
+		}
+		cs := &fakeCommentService{
+			FakePost: func(c *reviewdog.Comment) error {
+				return nil
+			},
+		}
+		conf := &Config{
+			Runner: map[string]*Runner{
+				"test1": {
+					Name:        "test1",
+					Cmd:         "echo 'test1'",
+					Errorformat: []string{`%f:%l:%c:%m`},
+				},
+				"test2": {
+					Name:        "test2",
+					Cmd:         "echo 'test2'",
+					Errorformat: []string{`%f:%l:%c:%m`},
+				},
+			},
+		}
+		if err := Run(ctx, conf, map[string]bool{"test2": true}, cs, ds); err != nil {
+			t.Error(err)
+		}
+		if called != 1 {
+			t.Errorf("Diff service called %d times, want 1 time", called)
+		}
+	})
+
+	t.Run("unknown runners", func(t *testing.T) {
+		ds := &fakeDiffService{
+			FakeDiff: func() ([]byte, error) {
+				return []byte(""), nil
+			},
+		}
+		cs := &fakeCommentService{
+			FakePost: func(c *reviewdog.Comment) error {
+				return nil
+			},
+		}
+		conf := &Config{
+			Runner: map[string]*Runner{
+				"test1": {
+					Name:        "test1",
+					Cmd:         "echo 'test1'",
+					Errorformat: []string{`%f:%l:%c:%m`},
+				},
+				"test2": {
+					Name:        "test2",
+					Cmd:         "echo 'test2'",
+					Errorformat: []string{`%f:%l:%c:%m`},
+				},
+			},
+		}
+		if err := Run(ctx, conf, map[string]bool{"hoge": true}, cs, ds); err == nil {
+			t.Error("got no error but want runner not found error")
 		}
 	})
 
