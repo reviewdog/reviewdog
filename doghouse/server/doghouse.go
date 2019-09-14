@@ -104,7 +104,7 @@ func (ch *Checker) postCheck(ctx context.Context, branch string, checks []*revie
 	}
 	conclusion := "success"
 	if len(annotations) > 0 {
-		conclusion = "action_required"
+		conclusion = "neutral"
 	}
 	name := "reviewdog"
 	title := "reviewdog report"
