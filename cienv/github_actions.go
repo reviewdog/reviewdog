@@ -55,7 +55,7 @@ func getBuildInfoFromGitHubActionEventPath(eventPath string) (prInfo *BuildInfo,
 	} else {
 		info.SHA = ghCtx.Sha
 	}
-	return info, false, nil
+	return info, info.PullRequest != 0, nil
 }
 
 func IsInGitHubAction() bool {
