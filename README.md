@@ -187,12 +187,14 @@ runner:
     errorformat: # (optional if there is supporeted format for <tool-name>. see reviewdog -list)
       - <list of errorformat>
     name: <tool-name> # (optional. you can overwrite <tool-name> defined by runner key)
+    level: <level> # (optional. same as -level flag. [info,warning,error])
 
   # examples
   golint:
     cmd: golint ./...
     errorformat:
       - "%f:%l:%c: %m"
+    level: warning
   govet:
     cmd: go tool vet -all -shadowstrict .
 ```
@@ -235,6 +237,17 @@ $ golint ./... | reviewdog -f=golint -diff="git diff master"
 [![github-pr-check sample](https://user-images.githubusercontent.com/3797062/40884858-6efd82a0-6756-11e8-9f1a-c6af4f920fb0.png)](https://github.com/reviewdog/reviewdog/pull/131/checks)
 
 github-pr-check reporter reports results to [GitHub Checks](https://help.github.com/articles/about-status-checks/).
+
+You can change report level for this reporter by `level` field in [config
+file](#reviewdog-config-file) or `-level` flag. You can control GitHub status
+check result with this feature. (default: error)
+
+| Level     | GitHub Status |
+| --------- | ------------- |
+| `info`    | neutral       |
+| `warning` | neutral       |
+| `error`   | failure       |
+
 Two options to use this reporter.
 
 #### Option 1) Run reviewdog from GitHub Actions w/ secrets.GITHUB_TOKEN (experimental)
