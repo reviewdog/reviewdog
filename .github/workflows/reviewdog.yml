@@ -10,6 +10,9 @@ jobs:
           GITHUB_CONTEXT: ${{ toJson(github) }}
         run: echo "${GITHUB_CONTEXT}"
 
+      - name: Dump GitHub Event
+        run: cat "${GITHUB_EVENT_PATH}"
+
       - name: Set up Go
         uses: actions/setup-go@v1
         with:
