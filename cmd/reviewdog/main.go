@@ -69,8 +69,8 @@ const (
 		There are two options to use this reporter.
 
 		Option 1) Run reviewdog from GitHub Actions w/ secrets.GITHUB_TOKEN
-			Note that it won't work for Pull Requests from fork repository due to
-			GitHub Actions restriction.
+			Note that it reports result to GitHub Actions log consle for Pull
+			Requests from fork repository due to GitHub Actions restriction.
 			https://help.github.com/en/articles/virtual-environments-for-github-actions#github_token-secret
 
 			Set REVIEWDOG_GITHUB_API_TOKEN with secrets.GITHUB_TOKEN. e.g.
