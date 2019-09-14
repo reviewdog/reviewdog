@@ -26,6 +26,10 @@ type CheckRequest struct {
 	// Name of the annotation tool.
 	// Optional.
 	Name string `json:"name,omitempty"`
+
+	// ReportLevel is report level for this request.
+	// One of ["info", "warning", "error"]. Default is "error".
+	ReportLevel string `json:"report_level"`
 }
 
 // CheckResponse represents doghouse GitHub check response.

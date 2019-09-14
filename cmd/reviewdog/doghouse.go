@@ -37,7 +37,7 @@ func runDoghouse(ctx context.Context, r io.Reader, w io.Writer, opt *option, isP
 	if err != nil {
 		return err
 	}
-	filteredResultSet, err := postResultSet(ctx, resultSet, ghInfo, cli)
+	filteredResultSet, err := postResultSet(ctx, resultSet, ghInfo, cli, opt.reportLevel)
 	if err != nil {
 		return err
 	}
@@ -103,7 +103,8 @@ func checkResultSet(ctx context.Context, r io.Reader, opt *option, isProject boo
 	return resultSet, nil
 }
 
-func postResultSet(ctx context.Context, resultSet *reviewdog.ResultMap, ghInfo *cienv.BuildInfo, cli client.DogHouseClientInterface) (*reviewdog.FilteredCheckMap, error) {
+func postResultSet(ctx context.Context, resultSet *reviewdog.ResultMap,
+	ghInfo *cienv.BuildInfo, cli client.DogHouseClientInterface, reportLevel string) (*reviewdog.FilteredCheckMap, error) {
 	var g errgroup.Group
 	wd, _ := os.Getwd()
 	filteredResultSet := new(reviewdog.FilteredCheckMap)
@@ -120,6 +121,7 @@ func postResultSet(ctx context.Context, resultSet *reviewdog.ResultMap, ghInfo *
 			SHA:         ghInfo.SHA,
 			Branch:      ghInfo.Branch,
 			Annotations: as,
+			ReportLevel: reportLevel,
 		}
 		g.Go(func() error {
 			res, err := cli.Check(ctx, req)

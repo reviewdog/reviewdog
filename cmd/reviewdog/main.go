@@ -50,6 +50,7 @@ type option struct {
 	conf             string
 	runners          string
 	reporter         string
+	reportLevel      string
 	guessPullRequest bool
 }
 
@@ -64,6 +65,7 @@ const (
 	ciDoc               = `[deprecated] reviewdog automatically get necessary data. See also -reporter for migration`
 	confDoc             = `config file path`
 	runnersDoc          = `comma separated runners name to run in config file. default: run all runners`
+	reportLevelDoc      = `report level currently used for github-pr-check reporter ("info","warning","error").`
 	guessPullRequestDoc = `guess Pull Request ID by branch name and commit SHA`
 	reporterDoc         = `reporter of reviewdog results. (local, github-pr-check, github-pr-review, gitlab-mr-discussion, gitlab-mr-commit)
 	"local" (default)
@@ -141,6 +143,7 @@ func init() {
 	flag.StringVar(&opt.conf, "conf", "", confDoc)
 	flag.StringVar(&opt.runners, "runners", "", runnersDoc)
 	flag.StringVar(&opt.reporter, "reporter", "local", reporterDoc)
+	flag.StringVar(&opt.reportLevel, "report-level", "error", reportLevelDoc)
 	flag.BoolVar(&opt.guessPullRequest, "guess", false, guessPullRequestDoc)
 }
 
