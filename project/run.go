@@ -5,9 +5,11 @@ import (
 	"context"
 	"fmt"
 	"io"
+	"log"
 	"os"
 	"os/exec"
 	"runtime"
+	"strings"
 
 	"github.com/reviewdog/reviewdog"
 	"github.com/reviewdog/reviewdog/diff"
@@ -15,15 +17,21 @@ import (
 )
 
 // RunAndParse runs commands and parse results. Returns map of tool name to check results.
-func RunAndParse(ctx context.Context, conf *Config) (*reviewdog.ResultMap, error) {
+func RunAndParse(ctx context.Context, conf *Config, runners map[string]bool) (*reviewdog.ResultMap, error) {
 	var results reviewdog.ResultMap
 	// environment variables for each commands
 	envs := filteredEnviron()
+	var usedRunners []string
 	var g errgroup.Group
 	semaphore := make(chan int, runtime.NumCPU())
 	for _, runner := range conf.Runner {
 		runner := runner
+		if len(runners) != 0 && !runners[runner.Name] {
+			continue // Skip this runner.
+		}
+		usedRunners = append(usedRunners, runner.Name)
 		semaphore <- 1
+		log.Printf("reviewdog: [start]\trunner=%s", runner.Name)
 		fname := runner.Format
 		if fname == "" && len(runner.Errorformat) == 0 {
 			fname = runner.Name
@@ -49,6 +57,7 @@ func RunAndParse(ctx context.Context, conf *Config) (*reviewdog.ResultMap, error
 			if err != nil {
 				return err
 			}
+			log.Printf("reviewdog: [finish]\trunner=%s", runner.Name)
 			results.Store(runner.Name, rs)
 			return nil
 		})
@@ -56,12 +65,15 @@ func RunAndParse(ctx context.Context, conf *Config) (*reviewdog.ResultMap, error
 	if err := g.Wait(); err != nil {
 		return nil, fmt.Errorf("fail to run reviewdog: %v", err)
 	}
+	if err := checkUnknownRunner(runners, usedRunners); err != nil {
+		return nil, err
+	}
 	return &results, nil
 }
 
 // Run runs reviewdog tasks based on Config.
-func Run(ctx context.Context, conf *Config, c reviewdog.CommentService, d reviewdog.DiffService) error {
-	results, err := RunAndParse(ctx, conf)
+func Run(ctx context.Context, conf *Config, runners map[string]bool, c reviewdog.CommentService, d reviewdog.DiffService) error {
+	results, err := RunAndParse(ctx, conf, runners)
 	if err != nil {
 		return err
 	}
@@ -101,4 +113,21 @@ func filteredEnviron() []string {
 		os.Unsetenv(name)
 	}
 	return os.Environ()
+}
+
+func checkUnknownRunner(specifiedRunners map[string]bool, usedRunners []string) error {
+	if len(specifiedRunners) == 0 {
+		return nil
+	}
+	for _, r := range usedRunners {
+		delete(specifiedRunners, r)
+	}
+	var rs []string
+	for r := range specifiedRunners {
+		rs = append(rs, r)
+	}
+	if len(specifiedRunners) != 0 {
+		return fmt.Errorf("runner not found: [%s]", strings.Join(rs, ","))
+	}
+	return nil
 }

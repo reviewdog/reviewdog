@@ -48,6 +48,7 @@ type option struct {
 	name             string // tool name which is used in comment
 	ci               string
 	conf             string
+	runners          string
 	reporter         string
 	guessPullRequest bool
 }
@@ -62,6 +63,7 @@ const (
 	nameDoc             = `tool name in review comment. -f is used as tool name if -name is empty`
 	ciDoc               = `[deprecated] reviewdog automatically get necessary data. See also -reporter for migration`
 	confDoc             = `config file path`
+	runnersDoc          = `comma separated runners name to run in config file. default: run all runners`
 	guessPullRequestDoc = `guess Pull Request ID by branch name and commit SHA`
 	reporterDoc         = `reporter of reviewdog results. (local, github-pr-check, github-pr-review, gitlab-mr-discussion, gitlab-mr-commit)
 	"local" (default)
@@ -137,6 +139,7 @@ func init() {
 	flag.StringVar(&opt.name, "name", "", nameDoc)
 	flag.StringVar(&opt.ci, "ci", "", ciDoc)
 	flag.StringVar(&opt.conf, "conf", "", confDoc)
+	flag.StringVar(&opt.runners, "runners", "", runnersDoc)
 	flag.StringVar(&opt.reporter, "reporter", "local", reporterDoc)
 	flag.BoolVar(&opt.guessPullRequest, "guess", false, guessPullRequestDoc)
 }
@@ -262,7 +265,7 @@ See -reporter flag for migration and set -reporter="github-pr-review" or -report
 		if err != nil {
 			return err
 		}
-		return project.Run(ctx, conf, cs, ds)
+		return project.Run(ctx, conf, buildRunnersMap(opt.runners), cs, ds)
 	}
 
 	p, err := newParserFromOpt(opt)
@@ -558,4 +561,14 @@ func toolName(opt *option) string {
 		name = opt.f
 	}
 	return name
+}
+
+func buildRunnersMap(runners string) map[string]bool {
+	m := make(map[string]bool)
+	for _, r := range strings.Split(runners, ",") {
+		if name := strings.TrimSpace(r); name != "" {
+			m[name] = true
+		}
+	}
+	return m
 }

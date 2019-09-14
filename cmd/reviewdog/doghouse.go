@@ -85,7 +85,7 @@ func checkResultSet(ctx context.Context, r io.Reader, opt *option, isProject boo
 		if err != nil {
 			return nil, err
 		}
-		resultSet, err = projectRunAndParse(ctx, conf)
+		resultSet, err = projectRunAndParse(ctx, conf, buildRunnersMap(opt.runners))
 		if err != nil {
 			return nil, err
 		}
