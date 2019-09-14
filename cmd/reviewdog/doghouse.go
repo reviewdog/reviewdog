@@ -50,7 +50,7 @@ func runDoghouse(ctx context.Context, r io.Reader, w io.Writer, opt *option, isP
 func newDoghouseCli(ctx context.Context) (client.DogHouseClientInterface, error) {
 	// If skipDoghouseServer is true, run doghouse code directly instead of talking to
 	// the doghouse server because provided GitHub API Token has Check API scope.
-	skipDoghouseServer := isInGitHubAction() && os.Getenv("REVIEWDOG_TOKEN") == ""
+	skipDoghouseServer := cienv.IsInGitHubAction() && os.Getenv("REVIEWDOG_TOKEN") == ""
 	if skipDoghouseServer {
 		token, err := nonEmptyEnv("REVIEWDOG_GITHUB_API_TOKEN")
 		if err != nil {
@@ -148,11 +148,6 @@ func checkResultToAnnotation(c *reviewdog.CheckResult, wd string) *doghouse.Anno
 		Message:    c.Message,
 		RawMessage: strings.Join(c.Lines, "\n"),
 	}
-}
-
-func isInGitHubAction() bool {
-	// https://help.github.com/en/articles/virtual-environments-for-github-actions#default-environment-variables
-	return os.Getenv("GITHUB_ACTION") != ""
 }
 
 // reportResults reports results to given io.Writer and return true if at least
