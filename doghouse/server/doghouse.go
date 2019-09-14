@@ -4,6 +4,7 @@ import (
 	"bytes"
 	"context"
 	"fmt"
+	"net/http"
 	"strings"
 	"time"
 
@@ -65,6 +66,15 @@ func (ch *Checker) Check(ctx context.Context) (*doghouse.CheckResponse, error) {
 	filtered := reviewdog.FilterCheck(results, filediffs, 1, "")
 	checkRun, err := ch.postCheck(ctx, branch, filtered)
 	if err != nil {
+		// If this error is StatusForbidden (403) here, it means reviewdog is
+		// running on GitHub Actions and has only read permission (because it's
+		// running for Pull Requests from forked repository). If the token itself
+		// is invalid, reviewdog should return an error earlier (e.g. when reading
+		// Pull Requests diff), so it should be ok not to return error here and
+		// return results instead.
+		if err, ok := err.(*github.ErrorResponse); ok && err.Response.StatusCode == http.StatusForbidden {
+			return &doghouse.CheckResponse{CheckedResults: filtered}, nil
+		}
 		return nil, fmt.Errorf("failed to post result: %v", err)
 	}
 	res := &doghouse.CheckResponse{

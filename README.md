@@ -254,10 +254,12 @@ Example: [.github/workflows/reviewdog.yml](.github/workflows/reviewdog.yml)
 You don't need to specify `CI_*` environment variables once
 [#279](https://github.com/reviewdog/reviewdog/issues/279) is fixed.
 
-Note that it won't work for Pull Requests from fork repository due to
-[GitHub Actions restriction](https://help.github.com/en/articles/virtual-environments-for-github-actions#github_token-secret).
-Could show results to GitHub Action log console as a fallback in the future
-([#280](https://github.com/reviewdog/reviewdog/issues/280)).
+Note that it reports result to GitHub Actions log consle for Pull
+Requests from fork repository because due to [GitHub Actions
+restriction](https://help.github.com/en/articles/virtual-environments-for-github-actions#github_token-secret),
+`GITHUB_TOKEN` for PullRequest from forked repository doesn't have write access
+to Check API.
+[![github-pr-check from forked repo example](https://user-images.githubusercontent.com/3797062/64907277-2a044800-d72b-11e9-82b1-f739414f9d48.png)](https://github.com/reviewdog/reviewdog/pull/281/checks?check_run_id=222108016#step:7:15)
 
 #### Option 2) Install reviewdog GitHub Apps
 reviewdog CLI send a request to reviewdog GitHub App server and the server post

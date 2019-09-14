@@ -72,8 +72,8 @@ const (
 		There are two options to use this reporter.
 
 		Option 1) Run reviewdog from GitHub Actions w/ secrets.GITHUB_TOKEN
-			Note that it won't work for Pull Requests from fork repository due to
-			GitHub Actions restriction.
+			Note that it reports result to GitHub Actions log consle for Pull
+			Requests from fork repository due to GitHub Actions restriction.
 			https://help.github.com/en/articles/virtual-environments-for-github-actions#github_token-secret
 
 			Set REVIEWDOG_GITHUB_API_TOKEN with secrets.GITHUB_TOKEN. e.g.
@@ -193,7 +193,7 @@ See -reporter flag for migration and set -reporter="github-pr-review" or -report
 	default:
 		return fmt.Errorf("unknown -reporter: %s", opt.reporter)
 	case "github-pr-check":
-		return runDoghouse(ctx, r, opt, isProject)
+		return runDoghouse(ctx, r, w, opt, isProject)
 	case "github-pr-review":
 		if os.Getenv("REVIEWDOG_GITHUB_API_TOKEN") == "" {
 			fmt.Fprintln(os.Stderr, "REVIEWDOG_GITHUB_API_TOKEN is not set")

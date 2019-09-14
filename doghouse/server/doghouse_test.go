@@ -3,6 +3,7 @@ package server
 import (
 	"context"
 	"errors"
+	"net/http"
 	"testing"
 
 	"github.com/google/go-cmp/cmp"
@@ -295,5 +296,36 @@ func TestCheck_fail_check(t *testing.T) {
 		t.Fatalf("got no error, want some error")
 	} else {
 		t.Log(err)
+	}
+}
+
+func TestCheck_fail_check_with_403(t *testing.T) {
+	req := &doghouse.CheckRequest{}
+	cli := &fakeCheckerGitHubCli{}
+	cli.FakeGetPullRequest = func(ctx context.Context, owner, repo string, number int) (*github.PullRequest, error) {
+		return &github.PullRequest{
+			Head: &github.PullRequestBranch{
+				Ref: github.String("branch"),
+			},
+		}, nil
+	}
+	cli.FakeGetPullRequestDiff = func(ctx context.Context, owner, repo string, number int) ([]byte, error) {
+		return []byte(sampleDiff), nil
+	}
+	cli.FakeCreateCheckRun = func(ctx context.Context, owner, repo string, opt github.CreateCheckRunOptions) (*github.CheckRun, error) {
+		return nil, &github.ErrorResponse{
+			Response: &http.Response{
+				StatusCode: http.StatusForbidden,
+			},
+		}
+	}
+	checker := &Checker{req: req, gh: cli}
+
+	resp, err := checker.Check(context.Background())
+	if err != nil {
+		t.Fatalf("got unexpected error: %v", err)
+	}
+	if resp.CheckedResults == nil {
+		t.Error("resp.CheckedResults should not be nil")
 	}
 }
