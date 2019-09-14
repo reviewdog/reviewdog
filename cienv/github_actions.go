@@ -63,6 +63,7 @@ func getBuildInfoFromGitHubActionEventPath(eventPath string) (*BuildInfo, bool, 
 	return info, info.PullRequest != 0, nil
 }
 
+// IsInGitHubAction returns true if reviewdog is running in GitHub Actions.
 func IsInGitHubAction() bool {
 	// https://help.github.com/en/articles/virtual-environments-for-github-actions#default-environment-variables
 	return os.Getenv("GITHUB_ACTION") != ""
