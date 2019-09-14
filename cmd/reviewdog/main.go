@@ -12,6 +12,7 @@ import (
 	"os"
 	"os/exec"
 	"sort"
+	"strings"
 	"text/tabwriter"
 
 	"golang.org/x/net/context" // "context"
@@ -38,29 +39,31 @@ const usageMessage = "" +
 `
 
 type option struct {
-	version   bool
-	diffCmd   string
-	diffStrip int
-	efms      strslice
-	f         string // errorformat name
-	list      bool   // list supported errorformat name
-	name      string // tool name which is used in comment
-	ci        string
-	conf      string
-	reporter  string
+	version          bool
+	diffCmd          string
+	diffStrip        int
+	efms             strslice
+	f                string // errorformat name
+	list             bool   // list supported errorformat name
+	name             string // tool name which is used in comment
+	ci               string
+	conf             string
+	reporter         string
+	guessPullRequest bool
 }
 
 // flags doc
 const (
-	diffCmdDoc   = `diff command (e.g. "git diff"). diff flag is ignored if you pass "ci" flag`
-	diffStripDoc = "strip NUM leading components from diff file names (equivalent to 'patch -p') (default is 1 for git diff)"
-	efmsDoc      = `list of errorformat (https://github.com/reviewdog/errorformat)`
-	fDoc         = `format name (run -list to see supported format name) for input. It's also used as tool name in review comment if -name is empty`
-	listDoc      = `list supported pre-defined format names which can be used as -f arg`
-	nameDoc      = `tool name in review comment. -f is used as tool name if -name is empty`
-	ciDoc        = `[deprecated] reviewdog automatically get necessary data. See also -reporter for migration`
-	confDoc      = `config file path`
-	reporterDoc  = `reporter of reviewdog results. (local, github-pr-check, github-pr-review, gitlab-mr-discussion, gitlab-mr-commit)
+	diffCmdDoc          = `diff command (e.g. "git diff"). diff flag is ignored if you pass "ci" flag`
+	diffStripDoc        = "strip NUM leading components from diff file names (equivalent to 'patch -p') (default is 1 for git diff)"
+	efmsDoc             = `list of errorformat (https://github.com/reviewdog/errorformat)`
+	fDoc                = `format name (run -list to see supported format name) for input. It's also used as tool name in review comment if -name is empty`
+	listDoc             = `list supported pre-defined format names which can be used as -f arg`
+	nameDoc             = `tool name in review comment. -f is used as tool name if -name is empty`
+	ciDoc               = `[deprecated] reviewdog automatically get necessary data. See also -reporter for migration`
+	confDoc             = `config file path`
+	guessPullRequestDoc = `guess Pull Request ID by branch name and commit SHA`
+	reporterDoc         = `reporter of reviewdog results. (local, github-pr-check, github-pr-review, gitlab-mr-discussion, gitlab-mr-commit)
 	"local" (default)
 		Report results to stdout.
 
@@ -135,6 +138,7 @@ func init() {
 	flag.StringVar(&opt.ci, "ci", "", ciDoc)
 	flag.StringVar(&opt.conf, "conf", "", confDoc)
 	flag.StringVar(&opt.reporter, "reporter", "local", reporterDoc)
+	flag.BoolVar(&opt.guessPullRequest, "guess", false, guessPullRequestDoc)
 }
 
 func usage() {
@@ -195,7 +199,7 @@ See -reporter flag for migration and set -reporter="github-pr-review" or -report
 			fmt.Fprintln(os.Stderr, "REVIEWDOG_GITHUB_API_TOKEN is not set")
 			return nil
 		}
-		gs, isPR, err := githubService(ctx)
+		gs, isPR, err := githubService(ctx, opt)
 		if err != nil {
 			return err
 		}
@@ -319,7 +323,7 @@ func insecureSkipVerify() bool {
 	return os.Getenv("REVIEWDOG_INSECURE_SKIP_VERIFY") == "true"
 }
 
-func githubService(ctx context.Context) (gs *githubservice.GitHubPullRequest, isPR bool, err error) {
+func githubService(ctx context.Context, opt *option) (gs *githubservice.GitHubPullRequest, isPR bool, err error) {
 	token, err := nonEmptyEnv("REVIEWDOG_GITHUB_API_TOKEN")
 	if err != nil {
 		return nil, isPR, err
@@ -328,21 +332,65 @@ func githubService(ctx context.Context) (gs *githubservice.GitHubPullRequest, is
 	if err != nil {
 		return nil, isPR, err
 	}
-	// TODO: support commit build
-	if !isPR {
-		return nil, isPR, nil
-	}
 
 	client, err := githubClient(ctx, token)
 	if err != nil {
 		return nil, isPR, err
 	}
 
+	if !isPR {
+		if !opt.guessPullRequest {
+			return nil, false, nil
+		}
+
+		if g.Branch == "" && g.SHA == "" {
+			return nil, false, nil
+		}
+
+		prID, err := getPullRequestIDByBranchOrCommit(ctx, client, g)
+		if err != nil {
+			fmt.Fprintln(os.Stderr, err)
+			return nil, false, nil
+		}
+		g.PullRequest = prID
+	}
+
 	gs, err = githubservice.NewGitHubPullRequest(client, g.Owner, g.Repo, g.PullRequest, g.SHA)
 	if err != nil {
-		return nil, isPR, err
+		return nil, false, err
 	}
-	return gs, isPR, nil
+	return gs, true, nil
+}
+
+func getPullRequestIDByBranchOrCommit(ctx context.Context, client *github.Client, info *cienv.BuildInfo) (int, error) {
+	options := &github.SearchOptions{
+		Sort:  "updated",
+		Order: "desc",
+	}
+
+	query := []string{
+		"type:pr",
+		"state:open",
+		fmt.Sprintf("repo:%s/%s", info.Owner, info.Repo),
+	}
+	if info.Branch != "" {
+		query = append(query, fmt.Sprintf("head:%s", info.Branch))
+	}
+	if info.SHA != "" {
+		query = append(query, info.SHA)
+	}
+
+	preparedQuery := strings.Join(query, " ")
+	pullRequests, _, err := client.Search.Issues(ctx, preparedQuery, options)
+	if err != nil {
+		return 0, err
+	}
+
+	if *pullRequests.Total == 0 {
+		return 0, fmt.Errorf("reviewdog: PullRequest not found, query: %s", preparedQuery)
+	}
+
+	return *pullRequests.Issues[0].Number, nil
 }
 
 func githubClient(ctx context.Context, token string) (*github.Client, error) {

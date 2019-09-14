@@ -457,6 +457,13 @@ $ REVIEWDOG_GITHUB_API_TOKEN="<token>"
 $ REVIEWDOG_GITLAB_API_TOKEN="<token>"
 ```
 
+If a CI service doesn't provide information such as Pull Request ID - reviewdog can guess it by branch name and commit SHA.
+Just pass the flag `guess`:
+ 
+```shell
+$ reviewdog -conf=.reviewdog.yml -reporter=github-pr-check -guess
+```
+
 #### Jenkins with Github pull request builder plugin
 - [GitHub pull request builder plugin - Jenkins - Jenkins Wiki](https://wiki.jenkins-ci.org/display/JENKINS/GitHub+pull+request+builder+plugin)
 
