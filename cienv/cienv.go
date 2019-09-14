@@ -31,6 +31,9 @@ type BuildInfo struct {
 // - GitLab CI: https://docs.gitlab.com/ee/ci/variables/#predefined-variables-environment-variables
 //   - GitLab CI doesn't export ID of Merge Request. https://gitlab.com/gitlab-org/gitlab-ce/issues/15280
 func GetBuildInfo() (prInfo *BuildInfo, isPR bool, err error) {
+	if IsInGitHubAction() {
+		return getBuildInfoFromGitHubAction()
+	}
 	owner, repo := getOwnerAndRepoFromSlug([]string{
 		"TRAVIS_REPO_SLUG",
 		"DRONE_REPO", // drone<=0.4
