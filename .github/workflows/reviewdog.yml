@@ -28,7 +28,7 @@ jobs:
       - name: Setup reviewdog
         run: |
           echo $PATH
-          curl -sfL https://raw.githubusercontent.com/reviewdog/reviewdog/master/install.sh| sh -s -- -b /usr/local/bin
+          sudo curl -sfL https://raw.githubusercontent.com/reviewdog/reviewdog/master/install.sh| sh -s -- -b /usr/local/bin
           # go install ./cmd/reviewdog
 
       - name: Run reviewdog
