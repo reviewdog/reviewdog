@@ -89,8 +89,8 @@ or
 $ go get -u github.com/reviewdog/reviewdog/cmd/reviewdog
 ```
 
-### MacOS
-You can also install it on MacOS using brew:
+### homebrew / linuxbrew
+You can also install reviewdog using brew:
 
 ```shell
 $ brew install reviewdog/tap/reviewdog
