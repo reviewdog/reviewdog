@@ -33,6 +33,7 @@ func setupEnvs() (cleanup func()) {
 		"TRAVIS_PULL_REQUEST_BRANCH",
 		"TRAVIS_PULL_REQUEST_SHA",
 		"TRAVIS_REPO_SLUG",
+		"GITHUB_ACTION",
 	}
 	saveEnvs := make(map[string]string)
 	for _, key := range cleanEnvs {
