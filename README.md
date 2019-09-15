@@ -365,7 +365,7 @@ $ reviewdog -reporter=gitlab-mr-commit
 
 ## Supported CI services
 
-### GitHub Actions
+### [GitHub Actions](https://github.com/features/actions)
 
 Example: [.github/workflows/reviewdog.yml](.github/workflows/reviewdog.yml)
 
