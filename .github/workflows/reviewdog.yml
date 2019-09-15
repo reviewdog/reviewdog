@@ -25,6 +25,11 @@ jobs:
       - name: Install linters
         run: '( cd linters && go get golang.org/x/lint/golint )'
 
+      - name: Add $GOPATH/bin
+        run: |
+          echo ::add-path::$(go env GOPATH)
+          echo $PATH
+
       - name: Setup reviewdog
         run: |
           echo $PATH
