@@ -158,7 +158,7 @@ func checkResultToAnnotation(c *reviewdog.CheckResult, wd string) *doghouse.Anno
 // reportResults reports results to given io.Writer and return true if at least
 // one annotation result is in diff.
 func reportResults(w io.Writer, filteredResultSet *reviewdog.FilteredCheckMap) bool {
-	// Get sorted names to get determinisitic result.
+	// Sort names to get determinisitic result.
 	var names []string
 	filteredResultSet.Range(func(name string, results []*reviewdog.FilteredCheck) {
 		names = append(names, name)
