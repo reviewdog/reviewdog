@@ -257,18 +257,10 @@ Example: [.github/workflows/reviewdog.yml](.github/workflows/reviewdog.yml)
 ```yaml
 - name: Run reviewdog
   env:
-    CI_PULL_REQUEST: ${{ github.event.number }}
-    CI_COMMIT: ${{ github.event.pull_request.head.sha }}
-    CI_REPO_OWNER: ${{ github.event.repository.owner.login }}
-    CI_REPO_NAME: ${{ github.event.repository.name }}
-    CI_BRANCH: ${{ github.event.pull_request.head.ref }}
     REVIEWDOG_GITHUB_API_TOKEN: ${{ secrets.GITHUB_TOKEN }}
   run: |
     golint ./... | reviewdog -f=golint -reporter=github-pr-check
 ```
-
-You don't need to specify `CI_*` environment variables once
-[#279](https://github.com/reviewdog/reviewdog/issues/279) is fixed.
 
 Note that it reports result to GitHub Actions log consle for Pull
 Requests from fork repository because due to [GitHub Actions
@@ -368,6 +360,26 @@ $ reviewdog -reporter=gitlab-mr-commit
 ```
 
 ## Supported CI services
+
+### GitHub Actions
+
+Example: [.github/workflows/reviewdog.yml](.github/workflows/reviewdog.yml)
+
+```yaml
+name: reviewdog
+on: [pull_request]
+jobs:
+  reviewdog:
+    name: reviewdog
+    runs-on: ubuntu-latest
+    steps:
+      # ...
+      - name: Run reviewdog
+        env:
+          REVIEWDOG_GITHUB_API_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          reviewdog -reporter=github-pr-check -runners=golint,govet
+```
 
 ### Travis CI
 
