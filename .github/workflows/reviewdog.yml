@@ -19,6 +19,10 @@ jobs:
           go-version: 1.13
         id: go
 
+      - name: Add $GOPATH/bin
+        run: |
+          echo ::add-path::$(go env GOPATH)/bin
+
       - name: Check out code into the Go module directory
         uses: actions/checkout@v1
 
@@ -27,12 +31,12 @@ jobs:
 
       - name: Setup reviewdog
         run: |
-          # curl -sfL https://raw.githubusercontent.com/reviewdog/reviewdog/master/install.sh| sh -s -- -b $(go env GOPATH)/bin
+          # mkdir -p $HOME/bin && curl -sfL https://raw.githubusercontent.com/reviewdog/reviewdog/master/install.sh| sh -s -- -b $HOME/bin
+          # echo ::add-path::$HOME/bin
           go install ./cmd/reviewdog
 
       - name: Run reviewdog
         env:
           REVIEWDOG_GITHUB_API_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         run: |
-          PATH=$(go env GOPATH)/bin:$PATH
           reviewdog -reporter=github-pr-check -runners=golint,govet
