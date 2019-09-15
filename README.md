@@ -397,8 +397,10 @@ You can also use public GitHub Actions to start using reviewdog with ease! :tada
 Please open a Pull Request to add your created reviedog actions here :sparkles:.
 I can also consider to put your created repositories under reviewdog org and co-maintain the actions.
 
+- Common
+  - [reviewdog/action-misspell](https://github.com/reviewdog/action-misspell) - Run [misspell](https://github.com/client9/misspell).
 - Go
-  - [reviewdog/action-golangci-lint](https://github.com/reviewdog/action-golangci-lint)
+  - [reviewdog/action-golangci-lint](https://github.com/reviewdog/action-golangci-lint) - Run [golangci-lint](https://github.com/golangci/golangci-lint) and supported linters individually by golangci-lint.
 
 ### Travis CI
 
