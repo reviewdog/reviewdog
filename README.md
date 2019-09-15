@@ -55,6 +55,7 @@ by diff.
   * [Reporter: GitLab MergeRequest discussions (-reporter=gitlab-mr-discussion)](#reporter-gitlab-mergerequest-discussions--reportergitlab-mr-discussion)
   * [Reporter: GitLab MergeRequest commit (-reporter=gitlab-mr-commit)](#reporter-gitlab-mergerequest-commit--reportergitlab-mr-commit)
 - [Supported CI services](#supported-ci-services)
+  * [GitHub Actions](#github-actions)
   * [Travis CI](#travis-ci)
   * [Circle CI](#circle-ci)
   * [GitLab CI](#gitlab-ci)
@@ -262,6 +263,9 @@ Example: [.github/workflows/reviewdog.yml](.github/workflows/reviewdog.yml)
     golint ./... | reviewdog -f=golint -reporter=github-pr-check
 ```
 
+See [GitHub Actions](#github-actions) section too. You can also use public
+reviewdog GitHub Actions.
+
 Note that it reports result to GitHub Actions log consle for Pull
 Requests from fork repository because due to [GitHub Actions
 restriction](https://help.github.com/en/articles/virtual-environments-for-github-actions#github_token-secret),
@@ -380,6 +384,15 @@ jobs:
         run: |
           reviewdog -reporter=github-pr-check -runners=golint,govet
 ```
+
+#### Pubilc Reviewdog GitHub Actions
+You can also use public GitHub Actions to start using reviewdog with ease! :tada: :arrow_forward: :tada:
+
+Please open a Pull Request to add your created reviedog actions here :sparkles:.
+I can also consider to put your created repositories under reviewdog org and co-maintain the actions.
+
+- Go
+  - [reviewdog/action-golangci-lint](https://github.com/reviewdog/action-golangci-lint)
 
 ### Travis CI
 
