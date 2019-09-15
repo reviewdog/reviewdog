@@ -27,8 +27,9 @@ jobs:
 
       - name: Setup reviewdog
         run: |
-          # curl -sfL https://raw.githubusercontent.com/reviewdog/reviewdog/master/install.sh| sh -s -- -b $(go env GOPATH)/bin
-          go install ./cmd/reviewdog
+          echo $PATH
+          curl -sfL https://raw.githubusercontent.com/reviewdog/reviewdog/master/install.sh| sh -s -- -b /usr/local/bin
+          # go install ./cmd/reviewdog
 
       - name: Run reviewdog
         env:
