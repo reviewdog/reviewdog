@@ -118,7 +118,7 @@ const (
 		$ export REVIEWDOG_INSECURE_SKIP_VERIFY=true
 
 	For non-local reporters, reviewdog automatically get necessary data from
-	environment variable in CI service (Travis CI, Circle CI, drone.io, GitLab CI).
+	environment variable in CI service (GitHub Actions, Travis CI, Circle CI, drone.io, GitLab CI).
 	You can set necessary data with following environment variable manually if
 	you want (e.g. run reviewdog in Jenkins).
 
