@@ -5,6 +5,8 @@ stages:
 
 # https://github.com/tmaier/gitlab-auto-merge-request
 Open Merge Request:
+  except:
+    - master
   stage: openMr
   image: tmaier/gitlab-auto-merge-request:1
   before_script: []
@@ -14,6 +16,8 @@ Open Merge Request:
     - merge-request.sh
 
 Reviewdog:
+  except:
+    - master
   stage: reviewdog
   image: golang:latest
   before_script:
