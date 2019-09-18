@@ -11,7 +11,6 @@ import (
 	"github.com/justinas/nosurf"
 	"github.com/reviewdog/reviewdog/doghouse/server/cookieman"
 	"github.com/reviewdog/reviewdog/doghouse/server/storage"
-	"google.golang.org/appengine"
 )
 
 func mustCookieMan() *cookieman.CookieMan {
@@ -24,7 +23,7 @@ func mustCookieMan() *cookieman.CookieMan {
 	c := cookieman.CookieOption{
 		Cookie: http.Cookie{
 			HttpOnly: true,
-			Secure:   !appengine.IsDevAppServer(),
+			Secure:   true,
 			Path:     "/",
 		},
 	}
@@ -102,7 +101,7 @@ func main() {
 	mu.Handle("/gh/", nosurf.New(ghHandler.LogInHandler(http.HandlerFunc(ghHandler.HandleGitHubTop))))
 
 	http.Handle("/", mu)
-	appengine.Main()
+	log.Fatal(http.ListenAndServe(":"+os.Getenv("PORT"), nil))
 }
 
 func handleTop(w http.ResponseWriter, r *http.Request) {

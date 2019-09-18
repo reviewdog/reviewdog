@@ -4,6 +4,7 @@ import (
 	"context"
 	"encoding/json"
 	"fmt"
+	"log"
 	"net/http"
 	"net/url"
 	"strings"
@@ -12,9 +13,6 @@ import (
 	"github.com/reviewdog/reviewdog/doghouse/server"
 	"github.com/reviewdog/reviewdog/doghouse/server/ciutil"
 	"github.com/reviewdog/reviewdog/doghouse/server/storage"
-	"google.golang.org/appengine"
-	"google.golang.org/appengine/log"
-	"google.golang.org/appengine/urlfetch"
 )
 
 type githubChecker struct {
@@ -29,7 +27,7 @@ func (gc *githubChecker) handleCheck(w http.ResponseWriter, r *http.Request) {
 		w.WriteHeader(http.StatusMethodNotAllowed)
 		return
 	}
-	ctx := appengine.NewContext(r)
+	ctx := r.Context()
 
 	var req doghouse.CheckRequest
 	if err := json.NewDecoder(r.Body).Decode(&req); err != nil {
@@ -47,13 +45,13 @@ func (gc *githubChecker) handleCheck(w http.ResponseWriter, r *http.Request) {
 		PrivateKey:        gc.privateKey,
 		IntegrationID:     gc.integrationID,
 		RepoOwner:         req.Owner,
-		Client:            urlfetch.Client(ctx),
+		Client:            &http.Client{},
 		InstallationStore: gc.ghInstStore,
 	}
 
 	gh, err := server.NewGitHubClient(ctx, opt)
 	if err != nil {
-		log.Errorf(ctx, "failed to create GitHub client: %v", err)
+		log.Printf("[ERROR] failed to create GitHub client: %v\n", err)
 		w.WriteHeader(http.StatusBadRequest)
 		fmt.Fprintln(w, err)
 		return
@@ -61,7 +59,7 @@ func (gc *githubChecker) handleCheck(w http.ResponseWriter, r *http.Request) {
 
 	res, err := server.NewChecker(&req, gh).Check(ctx)
 	if err != nil {
-		log.Errorf(ctx, "failed to run checker: %v", err)
+		log.Printf("[ERROR] failed to run checker: %v\n", err)
 		w.WriteHeader(http.StatusBadRequest)
 		fmt.Fprintln(w, err)
 		return
@@ -77,11 +75,11 @@ func (gc *githubChecker) validateCheckRequest(ctx context.Context, w http.Respon
 	if extractBearerToken(r) == "" {
 		// Update Travis IP Addresss before checking IP to reduce the # of
 		// flaky errors when token is not present.
-		if err := ciutil.UpdateTravisCIIPAddrs(urlfetch.Client(ctx)); err != nil {
-			log.Errorf(ctx, "failed to update travis CI IP addresses: %v", err)
+		if err := ciutil.UpdateTravisCIIPAddrs(&http.Client{}); err != nil {
+			log.Printf("[ERROR] failed to update travis CI IP addresses: %v\n", err)
 		}
 	}
-	log.Infof(ctx, "Remote Addr: %s", r.RemoteAddr)
+	log.Printf("[INFO] Remote Addr: %s\n", r.RemoteAddr)
 	if ciutil.IsFromCI(r) {
 		// Skip token validation if it's from trusted CI providers.
 		return true
@@ -99,7 +97,7 @@ func (gc *githubChecker) validateCheckToken(ctx context.Context, w http.Response
 	}
 	_, wantToken, err := gc.ghRepoTokenStore.Get(ctx, owner, repo)
 	if err != nil {
-		log.Errorf(ctx, "failed to get repository (%s/%s) token: %v", owner, repo, err)
+		log.Printf("[ERROR] failed to get repository (%s/%s) token: %v\n", owner, repo, err)
 	}
 	if wantToken == nil {
 		w.WriteHeader(http.StatusNotFound)
@@ -127,13 +125,10 @@ func doghouseBaseURL(ctx context.Context, r *http.Request) *url.URL {
 	}
 	if scheme == "" {
 		scheme = "https"
-		if appengine.IsDevAppServer() {
-			scheme = "http"
-		}
 	}
 	u, err := url.Parse(scheme + "://" + r.Host)
 	if err != nil {
-		log.Errorf(ctx, "%v", err)
+		log.Printf("[ERROR] %v\n", err)
 	}
 	return u
 }

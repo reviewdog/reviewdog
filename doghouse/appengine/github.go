@@ -9,6 +9,7 @@ import (
 	"fmt"
 	"io"
 	"io/ioutil"
+	"log"
 	"net/http"
 	"net/url"
 	"strings"
@@ -19,9 +20,6 @@ import (
 	"github.com/reviewdog/reviewdog/doghouse/server/cookieman"
 	"github.com/reviewdog/reviewdog/doghouse/server/storage"
 	"golang.org/x/oauth2"
-	"google.golang.org/appengine"
-	"google.golang.org/appengine/log"
-	"google.golang.org/appengine/urlfetch"
 )
 
 type GitHubHandler struct {
@@ -102,7 +100,7 @@ func (g *GitHubHandler) buildGithubAuthURL(r *http.Request, state string) string
 }
 
 func (g *GitHubHandler) HandleAuthCallback(w http.ResponseWriter, r *http.Request) {
-	ctx := appengine.NewContext(r)
+	ctx := r.Context()
 	code, state := r.FormValue("code"), r.FormValue("state")
 	if code == "" || state == "" {
 		w.WriteHeader(http.StatusBadRequest)
@@ -122,7 +120,7 @@ func (g *GitHubHandler) HandleAuthCallback(w http.ResponseWriter, r *http.Reques
 	// Request and save access token.
 	token, err := g.requestAccessToken(ctx, code, state)
 	if err != nil {
-		log.Errorf(ctx, "failed to get access token: %v", err)
+		log.Printf("[ERROR] failed to get access token: %v\n", err)
 		w.WriteHeader(http.StatusBadRequest)
 		fmt.Fprintln(w, "failed to get GitHub access token")
 		return
@@ -145,13 +143,12 @@ func (g *GitHubHandler) HandleLogout(w http.ResponseWriter, r *http.Request) {
 
 func (g *GitHubHandler) LogInHandler(h http.Handler) http.Handler {
 	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
-		ctx := appengine.NewContext(r)
 		if g.isLoggedIn(r) {
 			h.ServeHTTP(w, r)
 			return
 		}
 		// Not logged in yet.
-		log.Debugf(ctx, "Not logged in yet.")
+		log.Println("[DEBUG] Not logged in yet.")
 		state := securerandom(16)
 		g.redirURLStore.Set(w, []byte(r.URL.RequestURI()))
 		g.authStateStore.Set(w, []byte(state))
@@ -174,7 +171,7 @@ func securerandom(n int) string {
 // POST https://github.com/login/oauth/access_token
 func (g *GitHubHandler) requestAccessToken(ctx context.Context, code, state string) (string, error) {
 	const u = "https://github.com/login/oauth/access_token"
-	cli := urlfetch.Client(ctx)
+	cli := &http.Client{}
 	data := url.Values{}
 	data.Set("client_id", g.clientID)
 	data.Set("client_secret", g.clientSecret)
@@ -206,7 +203,7 @@ func (g *GitHubHandler) requestAccessToken(ctx context.Context, code, state stri
 	}
 
 	if token.AccessToken == "" {
-		log.Errorf(ctx, "response doesn't contain token (resopnse: %s)", b)
+		log.Printf("[ERROR] response doesn't contain token (response: %s)\n", b)
 		return "", errors.New("response doesn't contain GitHub access token")
 	}
 
@@ -222,7 +219,7 @@ func (g *GitHubHandler) token(r *http.Request) (bool, string) {
 }
 
 func (g *GitHubHandler) HandleGitHubTop(w http.ResponseWriter, r *http.Request) {
-	ctx := appengine.NewContext(r)
+	ctx := r.Context()
 
 	ok, token := g.token(r)
 	if !ok {
@@ -233,7 +230,7 @@ func (g *GitHubHandler) HandleGitHubTop(w http.ResponseWriter, r *http.Request) 
 	ts := oauth2.StaticTokenSource(
 		&oauth2.Token{AccessToken: token},
 	)
-	ghcli := github.NewClient(NewAuthClient(ctx, urlfetch.Client(ctx).Transport, ts))
+	ghcli := github.NewClient(NewAuthClient(ctx, http.DefaultTransport, ts))
 
 	// /gh/{owner}/{repo}
 	paths := strings.Split(strings.Trim(r.URL.Path, "/"), "/")
@@ -280,7 +277,7 @@ func (g *GitHubHandler) handleTop(ctx context.Context, ghcli *github.Client, w h
 	}
 
 	ghAppCli, err := server.NewGitHubClient(ctx, &server.NewGitHubClientOption{
-		Client:        urlfetch.Client(ctx),
+		Client:        &http.Client{},
 		IntegrationID: g.integrationID,
 		PrivateKey:    g.privateKey,
 	})
