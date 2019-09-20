@@ -17,6 +17,6 @@ require (
 	golang.org/x/net v0.0.0-20190912160710-24e19bdeb0f2
 	golang.org/x/oauth2 v0.0.0-20190604053449-0f29369cfe45
 	golang.org/x/sync v0.0.0-20190911185100-cd5d95a43a6e
-	google.golang.org/appengine v1.6.2
+	google.golang.org/appengine v1.6.3
 	gopkg.in/yaml.v2 v2.2.2
 )
