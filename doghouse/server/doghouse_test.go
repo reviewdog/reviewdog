@@ -117,7 +117,6 @@ func TestCheck_OK(t *testing.T) {
 		wantAnnotaions := []*github.CheckRunAnnotation{
 			{
 				Path:            github.String("sample.new.txt"),
-				BlobHRef:        github.String("http://github.com/haya14busa/reviewdog/blob/1414/sample.new.txt"),
 				StartLine:       github.Int(2),
 				EndLine:         github.Int(2),
 				AnnotationLevel: github.String("warning"),
