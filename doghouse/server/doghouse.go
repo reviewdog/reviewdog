@@ -205,7 +205,6 @@ func (ch *Checker) buildFindingLink(c *reviewdog.FilteredCheck) string {
 func (ch *Checker) toCheckRunAnnotation(c *reviewdog.FilteredCheck) *github.CheckRunAnnotation {
 	a := &github.CheckRunAnnotation{
 		Path:            github.String(c.Path),
-		BlobHRef:        github.String(ch.brobHRef(c.Path)),
 		StartLine:       github.Int(c.Lnum),
 		EndLine:         github.Int(c.Lnum),
 		AnnotationLevel: github.String(ch.annotationLevel()),
