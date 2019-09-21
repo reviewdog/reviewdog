@@ -5,8 +5,6 @@ jobs:
     working_directory: ~/reviewdog
     docker:
       - image: circleci/golang:1.13
-        environment:
-          REVIEWDOG_GITHUB_APP_URL: https://reviewdog-dev.appspot.com
     steps:
       - checkout
       - run:
