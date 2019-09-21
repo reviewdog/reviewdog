@@ -23,6 +23,8 @@ import (
 //  Only 65535 characters are allowed; 250684 were supplied. []
 const maxFilteredFinding = 150
 
+const reviewdogImageURL = "https://raw.githubusercontent.com/haya14busa/i/d598ed7dc49fefb0018e422e4c43e5ab8f207a6b/reviewdog/reviewdog.logo.png"
+
 type Checker struct {
 	req *doghouse.CheckRequest
 	gh  checkerGitHubClientInterface
@@ -124,6 +126,12 @@ func (ch *Checker) postCheck(ctx context.Context, branch string, checks []*revie
 			Title:       github.String(title),
 			Summary:     github.String(ch.summary(checks)),
 			Annotations: annotations,
+			Images: []*github.CheckRunImage{
+				{
+					Alt:      github.String("reviewdog"),
+					ImageURL: github.String(reviewdogImageURL),
+				},
+			},
 		},
 	}
 	return ch.gh.CreateCheckRun(ctx, ch.req.Owner, ch.req.Repo, opt)
