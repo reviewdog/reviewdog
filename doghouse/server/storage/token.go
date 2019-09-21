@@ -4,7 +4,7 @@ import (
 	"context"
 	"fmt"
 
-	"google.golang.org/appengine/datastore"
+	"cloud.google.com/go/datastore"
 )
 
 // GitHubRepositoryToken represents token data for aunthenticating reviewdog CLI
@@ -34,20 +34,28 @@ type GitHubRepoTokenDatastore struct{}
 
 func (g *GitHubRepoTokenDatastore) newKey(ctx context.Context, owner, repo string) *datastore.Key {
 	kind := "GitHubRepositoryToken"
-	return datastore.NewKey(ctx, kind, fmt.Sprintf("%s/%s", owner, repo), 0, nil)
+	return datastore.NameKey(kind, fmt.Sprintf("%s/%s", owner, repo), nil)
 }
 
 // Put upserts GitHubRepositoryToken.
 func (g *GitHubRepoTokenDatastore) Put(ctx context.Context, token *GitHubRepositoryToken) error {
 	key := g.newKey(ctx, token.RepositoryOwner, token.RepositoryName)
-	_, err := datastore.Put(ctx, key, token)
+	d, err := datastoreClient(ctx)
+	if err != nil {
+		return err
+	}
+	_, err = d.Put(ctx, key, token)
 	return err
 }
 
 func (g *GitHubRepoTokenDatastore) Get(ctx context.Context, owner, repo string) (ok bool, token *GitHubRepositoryToken, err error) {
 	key := g.newKey(ctx, owner, repo)
 	token = new(GitHubRepositoryToken)
-	if err := datastore.Get(ctx, key, token); err != nil {
+	d, err := datastoreClient(ctx)
+	if err != nil {
+		return false, nil, err
+	}
+	if err := d.Get(ctx, key, token); err != nil {
 		if err == datastore.ErrNoSuchEntity {
 			return false, nil, nil
 		}

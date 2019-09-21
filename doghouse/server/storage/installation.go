@@ -3,7 +3,7 @@ package storage
 import (
 	"context"
 
-	"google.golang.org/appengine/datastore"
+	"cloud.google.com/go/datastore"
 )
 
 // GitHubInstallation represents GitHub Apps Installation data.
@@ -32,34 +32,43 @@ type GitHubInstallationDatastore struct{}
 
 func (g *GitHubInstallationDatastore) newKey(ctx context.Context, accountName string) *datastore.Key {
 	const kind = "GitHubInstallation"
-	return datastore.NewKey(ctx, kind, accountName, 0, nil)
+	return datastore.NameKey(kind, accountName, nil)
 }
 
 // Put save GitHubInstallation. It reduces datastore write call as much as possible.
 func (g *GitHubInstallationDatastore) Put(ctx context.Context, inst *GitHubInstallation) error {
-	return datastore.RunInTransaction(ctx, func(ctx context.Context) error {
-		ok, foundInst, err := g.Get(ctx, inst.AccountName)
+	d, err := datastoreClient(ctx)
+	if err != nil {
+		return err
+	}
+	_, err = d.RunInTransaction(ctx, func(t *datastore.Transaction) error {
+		var foundInst GitHubInstallation
+		var ok bool
+		err := t.Get(g.newKey(ctx, inst.AccountName), &foundInst)
+		if err != datastore.ErrNoSuchEntity {
+			ok = true
+		}
 		if err != nil {
 			return err
 		}
 		// Insert if not found or installation ID is different.
 		if !ok || foundInst.InstallationID != inst.InstallationID {
-			return g.put(ctx, inst)
+			_, err = t.Put(g.newKey(ctx, inst.AccountName), inst)
+			return err
 		}
 		return nil // Do nothing.
 	}, nil)
-}
-
-func (g *GitHubInstallationDatastore) put(ctx context.Context, inst *GitHubInstallation) error {
-	key := g.newKey(ctx, inst.AccountName)
-	_, err := datastore.Put(ctx, key, inst)
 	return err
 }
 
 func (g *GitHubInstallationDatastore) Get(ctx context.Context, accountName string) (ok bool, inst *GitHubInstallation, err error) {
 	key := g.newKey(ctx, accountName)
 	inst = new(GitHubInstallation)
-	if err := datastore.Get(ctx, key, inst); err != nil {
+	d, err := datastoreClient(ctx)
+	if err != nil {
+		return false, nil, err
+	}
+	if err := d.Get(ctx, key, inst); err != nil {
 		if err == datastore.ErrNoSuchEntity {
 			return false, nil, nil
 		}

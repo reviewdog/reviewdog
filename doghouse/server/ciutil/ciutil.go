@@ -5,6 +5,7 @@ import (
 	"fmt"
 	"net"
 	"net/http"
+	"strings"
 	"sync"
 )
 
@@ -103,6 +104,15 @@ func IsFromAppveyor(r *http.Request) bool {
 }
 
 func ipFromReq(r *http.Request) string {
+	if f := r.Header.Get("Forwarded"); f != "" {
+		for _, kv := range strings.Split(f, ";") {
+			if kvPair := strings.SplitN(kv, "=", 2); len(kvPair) == 2 &&
+				strings.ToLower(strings.TrimSpace(kvPair[0])) == "for" {
+				return strings.Trim(kvPair[1], ` "`)
+			}
+		}
+	}
+
 	ip, _, err := net.SplitHostPort(r.RemoteAddr)
 	if err != nil {
 		return r.RemoteAddr

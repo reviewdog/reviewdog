@@ -4,12 +4,10 @@ import (
 	"context"
 	"encoding/json"
 	"fmt"
-	"io/ioutil"
 	"net/http"
 
 	"github.com/google/go-github/v28/github"
 	"github.com/reviewdog/reviewdog/doghouse/server/storage"
-	"google.golang.org/appengine"
 )
 
 type githubWebhookHandler struct {
@@ -22,7 +20,7 @@ func (g *githubWebhookHandler) handleWebhook(w http.ResponseWriter, r *http.Requ
 		w.WriteHeader(http.StatusMethodNotAllowed)
 		return
 	}
-	ctx := appengine.NewContext(r)
+	ctx := r.Context()
 	payload, err := g.validatePayload(r)
 	if err != nil {
 		w.WriteHeader(http.StatusUnauthorized)
@@ -50,9 +48,6 @@ func (g *githubWebhookHandler) handleWebhook(w http.ResponseWriter, r *http.Requ
 }
 
 func (g *githubWebhookHandler) validatePayload(r *http.Request) (payload []byte, err error) {
-	if appengine.IsDevAppServer() {
-		return ioutil.ReadAll(r.Body)
-	}
 	return github.ValidatePayload(r, g.secret)
 }
 
