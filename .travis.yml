@@ -30,6 +30,7 @@ install:
   - npm install
 
 before_script:
+  - go env
   - echo $TRAVIS
   - echo $TRAVIS_PULL_REQUEST
   - echo $TRAVIS_PULL_REQUEST_BRANCH
@@ -40,6 +41,7 @@ before_script:
   - curl httpbin.org/ip
 
 script:
+  - export PATH=$GOBIN:$PATH
   - export REVIEWDOG_GITHUB_APP_URL=https://reviewdog-dev.appspot.com
   - reviewdog -reporter=github-pr-check
   - golint ./... | reviewdog -f=golint -name=golint-travisci -reporter=github-pr-check
