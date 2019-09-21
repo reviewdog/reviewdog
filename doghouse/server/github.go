@@ -41,7 +41,7 @@ func githubAppTransport(ctx context.Context, client *http.Client, opt *NewGitHub
 	if opt.RepoOwner == "" {
 		return ghinstallation.NewAppsTransport(getTransport(client), opt.IntegrationID, opt.PrivateKey)
 	}
-	installationID, err := findInstallationID(ctx, client, opt)
+	installationID, err := findInstallationID(ctx, opt)
 	if err != nil {
 		return nil, err
 	}
@@ -55,11 +55,11 @@ func getTransport(client *http.Client) http.RoundTripper {
 	return http.DefaultTransport
 }
 
-func findInstallationID(ctx context.Context, client *http.Client, opt *NewGitHubClientOption) (int64, error) {
+func findInstallationID(ctx context.Context, opt *NewGitHubClientOption) (int64, error) {
 	appCli, err := NewGitHubClient(ctx, &NewGitHubClientOption{
 		PrivateKey:    opt.PrivateKey,
 		IntegrationID: opt.IntegrationID,
-		Client:        client,
+		Client:        &http.Client{}, // Use different client to get installation.
 		// Do no set RepoOwner.
 	})
 	if err != nil {
