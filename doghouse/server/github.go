@@ -2,13 +2,11 @@ package server
 
 import (
 	"context"
-	"errors"
 	"fmt"
 	"net/http"
 
 	"github.com/bradleyfalzon/ghinstallation"
 	"github.com/google/go-github/v28/github"
-	"github.com/reviewdog/reviewdog/doghouse/server/storage"
 )
 
 type NewGitHubClientOption struct {
@@ -17,9 +15,8 @@ type NewGitHubClientOption struct {
 	// Required
 	IntegrationID int
 
-	// RepoOwner AND InstallationStore is required for installation API.
-	RepoOwner         string
-	InstallationStore storage.GitHubInstallationStore
+	// RepoOwner is required for installation API.
+	RepoOwner string
 
 	// Optional
 	Client *http.Client
@@ -42,29 +39,35 @@ func NewGitHubClient(ctx context.Context, opt *NewGitHubClientOption) (*github.C
 
 func githubAppTransport(ctx context.Context, client *http.Client, opt *NewGitHubClientOption) (http.RoundTripper, error) {
 	if opt.RepoOwner == "" {
-		return ghinstallation.NewAppsTransport(client.Transport, opt.IntegrationID, opt.PrivateKey)
+		return ghinstallation.NewAppsTransport(getTransport(client), opt.IntegrationID, opt.PrivateKey)
 	}
-
-	installationID, err := installationIDFromOpt(ctx, opt)
+	installationID, err := findInstallationID(ctx, client, opt)
 	if err != nil {
 		return nil, err
 	}
-	return ghinstallation.New(client.Transport, opt.IntegrationID, int(installationID), opt.PrivateKey)
+	return ghinstallation.New(getTransport(client), opt.IntegrationID, int(installationID), opt.PrivateKey)
 }
 
-func installationIDFromOpt(ctx context.Context, opt *NewGitHubClientOption) (int64, error) {
-	if opt.RepoOwner == "" {
-		return 0, errors.New("repo owner is required")
+func getTransport(client *http.Client) http.RoundTripper {
+	if client.Transport != nil {
+		return client.Transport
 	}
-	if opt.InstallationStore == nil {
-		return 0, errors.New("instllation store is not provided")
-	}
-	ok, inst, err := opt.InstallationStore.Get(ctx, opt.RepoOwner)
+	return http.DefaultTransport
+}
+
+func findInstallationID(ctx context.Context, client *http.Client, opt *NewGitHubClientOption) (int64, error) {
+	appCli, err := NewGitHubClient(ctx, &NewGitHubClientOption{
+		PrivateKey:    opt.PrivateKey,
+		IntegrationID: opt.IntegrationID,
+		Client:        client,
+		// Do no set RepoOwner.
+	})
 	if err != nil {
-		return 0, fmt.Errorf("failed to retrieve installation ID: %v", err)
+		return 0, err
 	}
-	if !ok {
-		return 0, fmt.Errorf("installation ID not found for %s", opt.RepoOwner)
+	inst, _, err := appCli.Apps.FindUserInstallation(ctx, opt.RepoOwner)
+	if err != nil {
+		return 0, err
 	}
-	return inst.InstallationID, nil
+	return inst.GetID(), nil
 }

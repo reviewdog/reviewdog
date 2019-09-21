@@ -42,11 +42,10 @@ func (gc *githubChecker) handleCheck(w http.ResponseWriter, r *http.Request) {
 	}
 
 	opt := &server.NewGitHubClientOption{
-		PrivateKey:        gc.privateKey,
-		IntegrationID:     gc.integrationID,
-		RepoOwner:         req.Owner,
-		Client:            &http.Client{},
-		InstallationStore: gc.ghInstStore,
+		PrivateKey:    gc.privateKey,
+		IntegrationID: gc.integrationID,
+		RepoOwner:     req.Owner,
+		Client:        &http.Client{},
 	}
 
 	gh, err := server.NewGitHubClient(ctx, opt)
