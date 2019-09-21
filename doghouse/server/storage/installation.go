@@ -57,7 +57,7 @@ func (g *GitHubInstallationDatastore) Put(ctx context.Context, inst *GitHubInsta
 			return err
 		}
 		return nil // Do nothing.
-	}, nil)
+	})
 	return err
 }
 
