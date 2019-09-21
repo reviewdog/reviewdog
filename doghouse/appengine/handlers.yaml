@@ -11,5 +11,4 @@ handlers:
 
 - url: /_ah/warmup
   script: auto
-  login: admin
 
