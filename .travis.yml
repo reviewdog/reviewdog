@@ -31,6 +31,7 @@ install:
 
 before_script:
   - go list -f {{.Target}} golang.org/x/lint/golint
+  - which golint
   - go env
   - echo $TRAVIS
   - echo $TRAVIS_PULL_REQUEST
@@ -44,6 +45,8 @@ before_script:
 script:
   - export PATH=$GOBIN:$PATH
   - export REVIEWDOG_GITHUB_APP_URL=https://reviewdog-dev.appspot.com
+  - go list -f {{.Target}} golang.org/x/lint/golint
+  - which golint
   - reviewdog -reporter=github-pr-check
   - golint ./... | reviewdog -f=golint -name=golint-travisci -reporter=github-pr-check
   - golint ./...
