@@ -30,6 +30,7 @@ install:
   - npm install
 
 before_script:
+  - go list -f {{.Target}} golang.org/x/lint/golint
   - go env
   - echo $TRAVIS
   - echo $TRAVIS_PULL_REQUEST
