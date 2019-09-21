@@ -31,6 +31,8 @@ install:
 
 before_script:
   - go list -f {{.Target}} golang.org/x/lint/golint
+  - echo $PATH
+  - ls ${GOPATH}/bin
   - which golint
   - go env
   - echo $TRAVIS
