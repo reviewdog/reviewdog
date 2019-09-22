@@ -103,7 +103,7 @@ $ brew upgrade reviewdog/tap/reviewdog
 
 reviewdog accepts any compiler or linter result from stdin and parses it with
 scan-f like [**'errorformat'**](https://github.com/reviewdog/errorformat),
-which is the port of Vim's [errorformat](http://vimdoc.sourceforge.net/htmldoc/quickfix.html#errorformat)
+which is the port of Vim's [errorformat](https://vim-jp.org/vimdoc-en/quickfix.html#error-file-format)
 feature.
 
 For example, if the result format is `{file}:{line number}:{column number}: {message}`,
@@ -125,9 +125,11 @@ $ golint ./... | reviewdog -efm="%f:%l:%c: %m" -diff="git diff master"
 | ... | ... |
 
 Please see [reviewdog/errorformat](https://github.com/reviewdog/errorformat)
-and [:h errorformat](http://vimdoc.sourceforge.net/htmldoc/quickfix.html#errorformat)
+and [:h errorformat](https://vim-jp.org/vimdoc-en/quickfix.html#error-file-format)
 if you want to deal with a more complex output. 'errorformat' can handle more
 complex output like a multi-line error message.
+
+You can also try errorformat on [the Playground](https://reviewdog.github.io/errorformat-playground/)!
 
 By this 'errorformat' feature, reviewdog can support any tools output with ease.
 
