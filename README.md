@@ -399,6 +399,8 @@ You can also use public GitHub Actions to start using reviewdog with ease! :tada
 Please open a Pull Request to add your created reviedog actions here :sparkles:.
 I can also consider to put your created repositories under reviewdog org and co-maintain the actions.
 
+[Marketplace](https://github.com/marketplace?utf8=✓&type=actions&query=reviewdog)
+
 - Common
   - [reviewdog/action-misspell](https://github.com/reviewdog/action-misspell) - Run [misspell](https://github.com/client9/misspell).
 - Go
