@@ -413,6 +413,8 @@ I can also consider to put your created repositories under reviewdog org and co-
   - [reviewdog/action-stylelint](https://github.com/reviewdog/action-stylelint) - Run [stylelint](https://github.com/stylelint/stylelint).
 - Vim script
   - [reviewdog/action-vint](https://github.com/reviewdog/action-vint) - Run [vint](https://github.com/Kuniwak/vint).
+- Terraform
+  - [reviewdog/action-tflint](https://github.com/reviewdog/action-tflint) - Run [tflint](https://github.com/wata727/tflint).
 
 ### Travis CI
 
