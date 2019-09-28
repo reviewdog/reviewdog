@@ -16,6 +16,7 @@ import (
 	"fmt"
 	"io"
 	"io/ioutil"
+	"log"
 	"net/http"
 	"net/url"
 	"reflect"
@@ -751,6 +752,7 @@ func CheckResponse(r *http.Response) error {
 	if err == nil && data != nil {
 		json.Unmarshal(data, errorResponse)
 	}
+	log.Println(string(data))
 	switch {
 	case r.StatusCode == http.StatusUnauthorized && strings.HasPrefix(r.Header.Get(headerOTP), "required"):
 		return (*TwoFactorAuthError)(errorResponse)
