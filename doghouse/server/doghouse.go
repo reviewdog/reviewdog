@@ -85,17 +85,12 @@ func (ch *Checker) postCheck(ctx context.Context, checkID int64, checks []*revie
 	if len(annotations) > 0 {
 		conclusion = ch.conclusion()
 	}
-	name := ch.checkName()
-	title := "reviewdog report"
-	if name != "reviewdog" {
-		title = fmt.Sprintf("reviewdog [%s] report", name)
-	}
 	opt := github.UpdateCheckRunOptions{
 		Status:      github.String("completed"),
 		Conclusion:  github.String(conclusion),
 		CompletedAt: &github.Timestamp{Time: time.Now()},
 		Output: &github.CheckRunOutput{
-			Title:   github.String(title),
+			Title:   github.String(ch.checkTitle()),
 			Summary: github.String(ch.summary(checks)),
 		},
 	}
@@ -114,6 +109,8 @@ func (ch *Checker) createCheck(ctx context.Context) (*github.CheckRun, error) {
 func (ch *Checker) postAnnotations(ctx context.Context, checkID int64, annotations []*github.CheckRunAnnotation) error {
 	opt := github.UpdateCheckRunOptions{
 		Output: &github.CheckRunOutput{
+			Title:       github.String(ch.checkTitle()),
+			Summary:     github.String(""), // Post summary with the last reqeust.
 			Annotations: annotations[:min(maxAnnotationsPerRequest, len(annotations))],
 		},
 	}
@@ -131,6 +128,13 @@ func (ch *Checker) checkName() string {
 		return ch.req.Name
 	}
 	return "reviewdog"
+}
+
+func (ch *Checker) checkTitle() string {
+	if name := ch.checkName(); name != "reviewdog" {
+		return fmt.Sprintf("reviewdog [%s] report", name)
+	}
+	return "reviewdog report"
 }
 
 // https://developer.github.com/v3/checks/runs/#parameters-1
