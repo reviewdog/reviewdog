@@ -22,6 +22,11 @@ import (
 //  Only 65535 characters are allowed; 250684 were supplied. []
 const maxFilteredFinding = 150
 
+// > The Checks API limits the number of annotations to a maximum of 50 per API
+// > request.
+// https://developer.github.com/v3/checks/runs/#output-object
+const maxAnnotationsPerRequest = 50
+
 type Checker struct {
 	req *doghouse.CheckRequest
 	gh  checkerGitHubClientInterface
@@ -39,7 +44,8 @@ func (ch *Checker) Check(ctx context.Context) (*doghouse.CheckResponse, error) {
 
 	results := annotationsToCheckResults(ch.req.Annotations)
 	filtered := reviewdog.FilterCheck(results, filediffs, 1, "")
-	checkRun, err := ch.postCheck(ctx, filtered)
+
+	check, err := ch.createCheck(ctx)
 	if err != nil {
 		// If this error is StatusForbidden (403) here, it means reviewdog is
 		// running on GitHub Actions and has only read permission (because it's
@@ -50,6 +56,11 @@ func (ch *Checker) Check(ctx context.Context) (*doghouse.CheckResponse, error) {
 		if err, ok := err.(*github.ErrorResponse); ok && err.Response.StatusCode == http.StatusForbidden {
 			return &doghouse.CheckResponse{CheckedResults: filtered}, nil
 		}
+		return nil, fmt.Errorf("failed to create check: %v", err)
+	}
+
+	checkRun, err := ch.postCheck(ctx, check.GetID(), filtered)
+	if err != nil {
 		return nil, fmt.Errorf("failed to post result: %v", err)
 	}
 	res := &doghouse.CheckResponse{
@@ -58,7 +69,7 @@ func (ch *Checker) Check(ctx context.Context) (*doghouse.CheckResponse, error) {
 	return res, nil
 }
 
-func (ch *Checker) postCheck(ctx context.Context, checks []*reviewdog.FilteredCheck) (*github.CheckRun, error) {
+func (ch *Checker) postCheck(ctx context.Context, checkID int64, checks []*reviewdog.FilteredCheck) (*github.CheckRun, error) {
 	var annotations []*github.CheckRunAnnotation
 	for _, c := range checks {
 		if !c.InDiff {
@@ -66,30 +77,60 @@ func (ch *Checker) postCheck(ctx context.Context, checks []*reviewdog.FilteredCh
 		}
 		annotations = append(annotations, ch.toCheckRunAnnotation(c))
 	}
+	if err := ch.postAnnotations(ctx, checkID, annotations); err != nil {
+		return nil, fmt.Errorf("failed to post annotations: %v", err)
+	}
+
 	conclusion := "success"
 	if len(annotations) > 0 {
 		conclusion = ch.conclusion()
 	}
-	name := "reviewdog"
+	name := ch.checkName()
 	title := "reviewdog report"
-	if ch.req.Name != "" {
-		name = ch.req.Name
+	if name != "reviewdog" {
 		title = fmt.Sprintf("reviewdog [%s] report", name)
 	}
-	opt := github.CreateCheckRunOptions{
-		Name:        name,
-		ExternalID:  github.String(name),
-		HeadSHA:     ch.req.SHA,
+	opt := github.UpdateCheckRunOptions{
 		Status:      github.String("completed"),
 		Conclusion:  github.String(conclusion),
 		CompletedAt: &github.Timestamp{Time: time.Now()},
 		Output: &github.CheckRunOutput{
-			Title:       github.String(title),
-			Summary:     github.String(ch.summary(checks)),
-			Annotations: annotations,
+			Title:   github.String(title),
+			Summary: github.String(ch.summary(checks)),
 		},
 	}
+	return ch.gh.UpdateCheckRun(ctx, ch.req.Owner, ch.req.Repo, checkID, opt)
+}
+
+func (ch *Checker) createCheck(ctx context.Context) (*github.CheckRun, error) {
+	opt := github.CreateCheckRunOptions{
+		Name:    ch.checkName(),
+		HeadSHA: ch.req.SHA,
+		Status:  github.String("in_progress"),
+	}
 	return ch.gh.CreateCheckRun(ctx, ch.req.Owner, ch.req.Repo, opt)
+}
+
+func (ch *Checker) postAnnotations(ctx context.Context, checkID int64, annotations []*github.CheckRunAnnotation) error {
+	opt := github.UpdateCheckRunOptions{
+		Output: &github.CheckRunOutput{
+			Annotations: annotations[:min(maxAnnotationsPerRequest, len(annotations))],
+		},
+	}
+	if _, err := ch.gh.UpdateCheckRun(ctx, ch.req.Owner, ch.req.Repo, checkID, opt); err != nil {
+		return err
+	}
+	if len(annotations) > maxAnnotationsPerRequest {
+		return ch.postAnnotations(ctx, checkID, annotations[maxAnnotationsPerRequest:])
+	}
+	return nil
+}
+
+func (ch *Checker) checkName() string {
+	if ch.req.Name != "" {
+		return ch.req.Name
+	}
+	return "reviewdog"
 }
 
 // https://developer.github.com/v3/checks/runs/#parameters-1
@@ -217,4 +258,11 @@ func annotationsToCheckResults(as []*doghouse.Annotation) []*reviewdog.CheckResu
 		})
 	}
 	return cs
+}
+
+func min(x, y int) int {
+	if x > y {
+		return y
+	}
+	return x
 }
