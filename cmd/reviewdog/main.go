@@ -7,6 +7,7 @@ import (
 	"fmt"
 	"io"
 	"io/ioutil"
+	"log"
 	"net/http"
 	"net/url"
 	"os"
@@ -343,6 +344,13 @@ func githubService(ctx context.Context, opt *option) (gs *githubservice.GitHubPu
 	if err != nil {
 		return nil, isPR, err
 	}
+
+	// client.
+	l, _, err := client.RateLimits(ctx)
+	if err != nil {
+		return nil, false, err
+	}
+	log.Println(l)
 
 	if !isPR {
 		if !opt.guessPullRequest {
