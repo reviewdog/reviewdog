@@ -6,6 +6,7 @@ import (
 	"log"
 	"path/filepath"
 	"sync"
+	"time"
 
 	"github.com/google/go-github/v28/github"
 	"github.com/reviewdog/reviewdog"
@@ -14,6 +15,8 @@ import (
 
 var _ reviewdog.CommentService = &GitHubPullRequest{}
 var _ reviewdog.DiffService = &GitHubPullRequest{}
+
+const maxCommentsPerRequest = 25
 
 // GitHubPullRequest is a comment and diff service for GitHub PullRequest.
 //
@@ -106,6 +109,36 @@ func (g *GitHubPullRequest) postAsReviewComment(ctx context.Context) error {
 	return err
 }
 
+func (g *GitHubPullRequest) postGitHubComments(ctx context.Context, comments []*github.DraftReviewComment) error {
+	if len(comments) == 0 {
+		return nil
+	}
+	// TODO(haya14busa): it might be useful to report overview results by "body"
+	// field.
+	review := &github.PullRequestReviewRequest{
+		CommitID: &g.sha,
+		Event:    github.String("COMMENT"),
+		Comments: comments[:min(maxCommentsPerRequest, len(comments))],
+	}
+	_, _, err := g.cli.PullRequests.CreateReview(ctx, g.owner, g.repo, g.pr, review)
+	if err != nil {
+		return err
+	}
+	// Post reamaining comments after sleeping 3 secs to avoid rate limit.
+	//
+	// > 403 You have triggered an abuse detection mechanism and have been
+	// > temporarily blocked from content creation. Please retry your request
+	// > again later.
+	// https://developer.github.com/v3/#abuse-rate-limits
+	if len(comments) > maxCommentsPerRequest {
+		log.Println("reviewdog: too many comments to posts. waiting 3 secs to posts remaining %d comments",
+			len(comments)-maxCommentsPerRequest)
+		time.Sleep(3 * time.Second)
+		return g.postGitHubComments(ctx, comments[maxCommentsPerRequest:])
+	}
+	return nil
+}
+
 func (g *GitHubPullRequest) setPostedComment(ctx context.Context) error {
 	g.postedcs = make(serviceutil.PostedComments)
 	cs, err := g.comment(ctx)
@@ -172,4 +205,11 @@ func listAllPullRequestsComments(ctx context.Context, cli *github.Client,
 		return nil, err
 	}
 	return append(comments, restComments...), nil
+}
+
+func min(x, y int) int {
+	if x > y {
+		return y
+	}
+	return x
 }
