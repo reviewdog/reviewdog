@@ -752,7 +752,7 @@ func CheckResponse(r *http.Response) error {
 	if err == nil && data != nil {
 		json.Unmarshal(data, errorResponse)
 	}
-	log.Println(string(data))
+	log.Printf("reviewdog: go-github error=%s", string(data))
 	switch {
 	case r.StatusCode == http.StatusUnauthorized && strings.HasPrefix(r.Header.Get(headerOTP), "required"):
 		return (*TwoFactorAuthError)(errorResponse)
