@@ -12,7 +12,6 @@ import (
 	"github.com/reviewdog/reviewdog"
 	"github.com/reviewdog/reviewdog/diff"
 	"github.com/reviewdog/reviewdog/doghouse"
-	"golang.org/x/sync/errgroup"
 )
 
 // GitHub check runs API cannot handle too large requests.
@@ -33,38 +32,14 @@ func NewChecker(req *doghouse.CheckRequest, gh *github.Client) *Checker {
 }
 
 func (ch *Checker) Check(ctx context.Context) (*doghouse.CheckResponse, error) {
-	var branch string
-	var filediffs []*diff.FileDiff
-
-	// Get branch from PullRequest API and PullRequest diff from diff API
-	// concurrently.
-	eg, ctx4eg := errgroup.WithContext(ctx)
-	eg.Go(func() error {
-		br, err := ch.getBranch(ctx4eg)
-		if err != nil {
-			return err
-		}
-		if br == "" {
-			return fmt.Errorf("failed to get branch")
-		}
-		branch = br
-		return nil
-	})
-	eg.Go(func() error {
-		fd, err := ch.diff(ctx4eg)
-		if err != nil {
-			return fmt.Errorf("fail to parse diff: %v", err)
-		}
-		filediffs = fd
-		return nil
-	})
-	if err := eg.Wait(); err != nil {
-		return nil, fmt.Errorf("failed to get branch/diff: %v", err)
+	filediffs, err := ch.diff(ctx)
+	if err != nil {
+		return nil, fmt.Errorf("fail to parse diff: %v", err)
 	}
 
 	results := annotationsToCheckResults(ch.req.Annotations)
 	filtered := reviewdog.FilterCheck(results, filediffs, 1, "")
-	checkRun, err := ch.postCheck(ctx, branch, filtered)
+	checkRun, err := ch.postCheck(ctx, filtered)
 	if err != nil {
 		// If this error is StatusForbidden (403) here, it means reviewdog is
 		// running on GitHub Actions and has only read permission (because it's
@@ -83,18 +58,7 @@ func (ch *Checker) Check(ctx context.Context) (*doghouse.CheckResponse, error) {
 	return res, nil
 }
 
-func (ch *Checker) getBranch(ctx context.Context) (string, error) {
-	if ch.req.Branch != "" {
-		return ch.req.Branch, nil
-	}
-	pr, err := ch.gh.GetPullRequest(ctx, ch.req.Owner, ch.req.Repo, ch.req.PullRequest)
-	if err != nil {
-		return "", fmt.Errorf("failed to get pr: %v", err)
-	}
-	return pr.GetHead().GetRef(), nil
-}
-
-func (ch *Checker) postCheck(ctx context.Context, branch string, checks []*reviewdog.FilteredCheck) (*github.CheckRun, error) {
+func (ch *Checker) postCheck(ctx context.Context, checks []*reviewdog.FilteredCheck) (*github.CheckRun, error) {
 	var annotations []*github.CheckRunAnnotation
 	for _, c := range checks {
 		if !c.InDiff {
@@ -115,7 +79,6 @@ func (ch *Checker) postCheck(ctx context.Context, branch string, checks []*revie
 	opt := github.CreateCheckRunOptions{
 		Name:        name,
 		ExternalID:  github.String(name),
-		HeadBranch:  branch,
 		HeadSHA:     ch.req.SHA,
 		Status:      github.String("completed"),
 		Conclusion:  github.String(conclusion),
