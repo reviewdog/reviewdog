@@ -4,7 +4,6 @@ import (
 	"context"
 	"fmt"
 	"log"
-	"math"
 	"path/filepath"
 	"sync"
 	"time"
@@ -119,7 +118,7 @@ func (g *GitHubPullRequest) postGitHubComments(ctx context.Context, comments []*
 	// https://developer.github.com/v3/#abuse-rate-limits
 	if len(comments) > maxCommentsPerRequest {
 		cnt++
-		sec := min(int(math.Pow(float64(2), float64(cnt))), 30)
+		sec := min(int(5*cnt), 30)
 		log.Printf("reviewdog: too many comments to posts. waiting %d secs to posts remaining %d comments",
 			sec, len(comments)-maxCommentsPerRequest)
 		sleep(time.Duration(sec) * time.Second)
