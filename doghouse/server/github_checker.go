@@ -9,6 +9,7 @@ import (
 type checkerGitHubClientInterface interface {
 	GetPullRequestDiff(ctx context.Context, owner, repo string, number int) ([]byte, error)
 	CreateCheckRun(ctx context.Context, owner, repo string, opt github.CreateCheckRunOptions) (*github.CheckRun, error)
+	UpdateCheckRun(ctx context.Context, owner, repo string, checkID int64, opt github.UpdateCheckRunOptions) (*github.CheckRun, error)
 }
 
 type checkerGitHubClient struct {
@@ -23,5 +24,10 @@ func (c *checkerGitHubClient) GetPullRequestDiff(ctx context.Context, owner, rep
 
 func (c *checkerGitHubClient) CreateCheckRun(ctx context.Context, owner, repo string, opt github.CreateCheckRunOptions) (*github.CheckRun, error) {
 	checkRun, _, err := c.Checks.CreateCheckRun(ctx, owner, repo, opt)
+	return checkRun, err
+}
+
+func (c *checkerGitHubClient) UpdateCheckRun(ctx context.Context, owner, repo string, checkID int64, opt github.UpdateCheckRunOptions) (*github.CheckRun, error) {
+	checkRun, _, err := c.Checks.UpdateCheckRun(ctx, owner, repo, checkID, opt)
 	return checkRun, err
 }

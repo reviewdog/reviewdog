@@ -15,6 +15,7 @@ type fakeCheckerGitHubCli struct {
 	checkerGitHubClientInterface
 	FakeGetPullRequestDiff func(ctx context.Context, owner, repo string, number int) ([]byte, error)
 	FakeCreateCheckRun     func(ctx context.Context, owner, repo string, opt github.CreateCheckRunOptions) (*github.CheckRun, error)
+	FakeUpdateCheckRun     func(ctx context.Context, owner, repo string, checkID int64, opt github.UpdateCheckRunOptions) (*github.CheckRun, error)
 }
 
 func (f *fakeCheckerGitHubCli) GetPullRequestDiff(ctx context.Context, owner, repo string, number int) ([]byte, error) {
@@ -23,6 +24,10 @@ func (f *fakeCheckerGitHubCli) GetPullRequestDiff(ctx context.Context, owner, re
 
 func (f *fakeCheckerGitHubCli) CreateCheckRun(ctx context.Context, owner, repo string, opt github.CreateCheckRunOptions) (*github.CheckRun, error) {
 	return f.FakeCreateCheckRun(ctx, owner, repo, opt)
+}
+
+func (f *fakeCheckerGitHubCli) UpdateCheckRun(ctx context.Context, owner, repo string, checkID int64, opt github.UpdateCheckRunOptions) (*github.CheckRun, error) {
+	return f.FakeUpdateCheckRun(ctx, owner, repo, checkID, opt)
 }
 
 const sampleDiff = `--- sample.old.txt	2016-10-13 05:09:35.820791185 +0900
@@ -48,13 +53,14 @@ const sampleDiff = `--- sample.old.txt	2016-10-13 05:09:35.820791185 +0900
 
 func TestCheck_OK(t *testing.T) {
 	const (
-		name       = "haya14busa-linter"
-		owner      = "haya14busa"
-		repo       = "reviewdog"
-		prNum      = 14
-		sha        = "1414"
-		reportURL  = "http://example.com/report_url"
-		conclusion = "neutral"
+		name        = "haya14busa-linter"
+		owner       = "haya14busa"
+		repo        = "reviewdog"
+		prNum       = 14
+		sha         = "1414"
+		reportURL   = "http://example.com/report_url"
+		conclusion  = "neutral"
+		wantCheckID = 1414
 	)
 
 	req := &doghouse.CheckRequest{
@@ -91,23 +97,32 @@ func TestCheck_OK(t *testing.T) {
 		if opt.HeadSHA != sha {
 			t.Errorf("CreateCheckRunOptions.HeadSHA = %q, want %q", opt.HeadSHA, sha)
 		}
-		if *opt.Conclusion != conclusion {
-			t.Errorf("CreateCheckRunOptions.Conclusion = %q, want %q", *opt.Conclusion, conclusion)
+		return &github.CheckRun{ID: github.Int64(wantCheckID)}, nil
+	}
+	cli.FakeUpdateCheckRun = func(ctx context.Context, owner, repo string, checkID int64, opt github.UpdateCheckRunOptions) (*github.CheckRun, error) {
+		if checkID != wantCheckID {
+			t.Errorf("UpdateCheckRun: checkID = %d, want %d", checkID, wantCheckID)
 		}
 		annotations := opt.Output.Annotations
-		wantAnnotaions := []*github.CheckRunAnnotation{
-			{
-				Path:            github.String("sample.new.txt"),
-				StartLine:       github.Int(2),
-				EndLine:         github.Int(2),
-				AnnotationLevel: github.String("warning"),
-				Message:         github.String("test message"),
-				Title:           github.String("[haya14busa-linter] sample.new.txt#L2"),
-				RawDetails:      github.String("raw test message"),
-			},
-		}
-		if d := cmp.Diff(annotations, wantAnnotaions); d != "" {
-			t.Errorf("Annotation diff found:\n%s", d)
+		if len(annotations) == 0 {
+			if *opt.Conclusion != conclusion {
+				t.Errorf("UpdateCheckRunOptions.Conclusion = %q, want %q", *opt.Conclusion, conclusion)
+			}
+		} else {
+			wantAnnotaions := []*github.CheckRunAnnotation{
+				{
+					Path:            github.String("sample.new.txt"),
+					StartLine:       github.Int(2),
+					EndLine:         github.Int(2),
+					AnnotationLevel: github.String("warning"),
+					Message:         github.String("test message"),
+					Title:           github.String("[haya14busa-linter] sample.new.txt#L2"),
+					RawDetails:      github.String("raw test message"),
+				},
+			}
+			if d := cmp.Diff(annotations, wantAnnotaions); d != "" {
+				t.Errorf("Annotation diff found:\n%s", d)
+			}
 		}
 		return &github.CheckRun{HTMLURL: github.String(reportURL)}, nil
 	}
@@ -119,6 +134,70 @@ func TestCheck_OK(t *testing.T) {
 
 	if res.ReportURL != reportURL {
 		t.Errorf("res.reportURL = %q, want %q", res.ReportURL, reportURL)
+	}
+}
+
+func TestCheck_OK_multiple_update_runs(t *testing.T) {
+	const (
+		name        = "haya14busa-linter"
+		owner       = "haya14busa"
+		repo        = "reviewdog"
+		prNum       = 14
+		sha         = "1414"
+		reportURL   = "http://example.com/report_url"
+		conclusion  = "neutral"
+		wantCheckID = 1414
+	)
+
+	req := &doghouse.CheckRequest{
+		Name:        name,
+		Owner:       owner,
+		Repo:        repo,
+		PullRequest: prNum,
+		SHA:         sha,
+		Level:       "warning",
+	}
+	for i := 0; i < 101; i++ {
+		req.Annotations = append(req.Annotations, &doghouse.Annotation{
+			Path:       "sample.new.txt",
+			Line:       2,
+			Message:    "test message",
+			RawMessage: "raw test message",
+		})
+	}
+
+	cli := &fakeCheckerGitHubCli{}
+	cli.FakeGetPullRequestDiff = func(ctx context.Context, owner, repo string, number int) ([]byte, error) {
+		return []byte(sampleDiff), nil
+	}
+	cli.FakeCreateCheckRun = func(ctx context.Context, owner, repo string, opt github.CreateCheckRunOptions) (*github.CheckRun, error) {
+		if opt.Name != name {
+			t.Errorf("CreateCheckRunOptions.Name = %q, want %q", opt.Name, name)
+		}
+		if opt.HeadSHA != sha {
+			t.Errorf("CreateCheckRunOptions.HeadSHA = %q, want %q", opt.HeadSHA, sha)
+		}
+		return &github.CheckRun{ID: github.Int64(wantCheckID)}, nil
+	}
+	cli.FakeUpdateCheckRun = func(ctx context.Context, owner, repo string, checkID int64, opt github.UpdateCheckRunOptions) (*github.CheckRun, error) {
+		if checkID != wantCheckID {
+			t.Errorf("UpdateCheckRun: checkID = %d, want %d", checkID, wantCheckID)
+		}
+		annotations := opt.Output.Annotations
+		switch len(annotations) {
+		case 0:
+			if *opt.Conclusion != conclusion {
+				t.Errorf("UpdateCheckRunOptions.Conclusion = %q, want %q", *opt.Conclusion, conclusion)
+			}
+		case maxAnnotationsPerRequest, 1: // Expected
+		default:
+			t.Errorf("UpdateCheckRun: len(annotations) = %d, but it's unexpected", len(annotations))
+		}
+		return &github.CheckRun{HTMLURL: github.String(reportURL)}, nil
+	}
+	checker := &Checker{req: req, gh: cli}
+	if _, err := checker.Check(context.Background()); err != nil {
+		t.Fatal(err)
 	}
 }
 
