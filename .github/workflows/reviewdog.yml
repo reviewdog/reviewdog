@@ -33,7 +33,7 @@ jobs:
         run: |
           # mkdir -p $HOME/bin && curl -sfL https://raw.githubusercontent.com/reviewdog/reviewdog/master/install.sh| sh -s -- -b $HOME/bin
           # echo ::add-path::$HOME/bin
-          go install ./cmd/reviewdog
+          go install -mod=vendor ./cmd/reviewdog
 
       - name: Run reviewdog
         env:
