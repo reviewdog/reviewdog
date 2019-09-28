@@ -94,7 +94,7 @@ func (g *GitHubPullRequest) postAsReviewComment(ctx context.Context) error {
 		// > temporarily blocked from content creation. Please retry your request
 		// > again later.
 		// https://developer.github.com/v3/#abuse-rate-limits
-		if len(comments) >= maxCommentsPerRequest {
+		if len(comments) >= maxCommentsPerRequest && false { // disable
 			remaining = append(remaining, c)
 			continue
 		}
@@ -106,23 +106,7 @@ func (g *GitHubPullRequest) postAsReviewComment(ctx context.Context) error {
 		})
 	}
 
-	if len(comments) == 0 {
-		return nil
-	}
-
-	// TODO(haya14busa): it might be useful to report overview results by "body"
-	// field.
-	review := &github.PullRequestReviewRequest{
-		CommitID: &g.sha,
-		Event:    github.String("COMMENT"),
-		Comments: comments,
-		Body:     github.String(g.remainingCommentsSummary(remaining)),
-	}
-	_, _, err := g.cli.PullRequests.CreateReview(ctx, g.owner, g.repo, g.pr, review)
-	if limitErr, ok := err.(*github.RateLimitError); ok {
-		log.Printf("reviewdog-rate-limit: %s", limitErr.Error())
-	}
-	return err
+	return g.postGitHubComments(ctx, comments)
 }
 
 func (g *GitHubPullRequest) remainingCommentsSummary(remaining []*reviewdog.Comment) string {
