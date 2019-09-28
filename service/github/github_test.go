@@ -221,7 +221,7 @@ func TestGitHubPullRequest_Post_Flush_review_api(t *testing.T) {
 		if *req.Event != "COMMENT" {
 			t.Errorf("PullRequestReviewRequest.Event = %v, want COMMENT", *req.Event)
 		}
-		if req.Body != nil {
+		if req.Body != nil && *req.Body != "" {
 			t.Errorf("PullRequestReviewRequest.Body = %v, want empty", *req.Body)
 		}
 		if *req.CommitID != "sha" {

@@ -5,11 +5,13 @@ import (
 	"fmt"
 	"log"
 	"path/filepath"
+	"strings"
 	"sync"
 	"time"
 
 	"github.com/google/go-github/v28/github"
 	"github.com/reviewdog/reviewdog"
+	"github.com/reviewdog/reviewdog/service/github/githubutils"
 	"github.com/reviewdog/reviewdog/service/serviceutil"
 )
 
@@ -79,8 +81,21 @@ func (g *GitHubPullRequest) Flush(ctx context.Context) error {
 
 func (g *GitHubPullRequest) postAsReviewComment(ctx context.Context) error {
 	comments := make([]*github.DraftReviewComment, 0, len(g.postComments))
+	remaining := make([]*reviewdog.Comment, 0)
 	for _, c := range g.postComments {
 		if g.postedcs.IsPosted(c, c.LnumDiff) {
+			continue
+		}
+		// Only posts maxCommentsPerRequest comments per 1 request to avoid spammy
+		// review comments. An example GitHub error if we don't limit the # of
+		// review comments.
+		//
+		// > 403 You have triggered an abuse detection mechanism and have been
+		// > temporarily blocked from content creation. Please retry your request
+		// > again later.
+		// https://developer.github.com/v3/#abuse-rate-limits
+		if len(comments) >= maxCommentsPerRequest {
+			remaining = append(remaining, c)
 			continue
 		}
 		cbody := serviceutil.CommentBody(c)
@@ -101,12 +116,30 @@ func (g *GitHubPullRequest) postAsReviewComment(ctx context.Context) error {
 		CommitID: &g.sha,
 		Event:    github.String("COMMENT"),
 		Comments: comments,
+		Body:     github.String(g.remainingCommentsSummary(remaining)),
 	}
 	_, _, err := g.cli.PullRequests.CreateReview(ctx, g.owner, g.repo, g.pr, review)
 	if limitErr, ok := err.(*github.RateLimitError); ok {
 		log.Printf("reviewdog-rate-limit: %s", limitErr.Error())
 	}
 	return err
+}
+
+func (g *GitHubPullRequest) remainingCommentsSummary(remaining []*reviewdog.Comment) string {
+	perTool := make(map[string][]*reviewdog.Comment)
+	for _, c := range remaining {
+		perTool[c.ToolName] = append(perTool[c.ToolName], c)
+	}
+	var sb strings.Builder
+	for tool, comments := range perTool {
+		sb.WriteString("Remaining comments which cannot be posted as a review comment to avoid GitHub abuse Rate Limit\n")
+		sb.WriteString(fmt.Sprintf("### %s\n", tool))
+		for _, c := range comments {
+			sb.WriteString(githubutils.LinkedMarkdownCheckResult(g.owner, g.repo, g.sha, c.CheckResult))
+			sb.WriteString("\n")
+		}
+	}
+	return sb.String()
 }
 
 func (g *GitHubPullRequest) postGitHubComments(ctx context.Context, comments []*github.DraftReviewComment) error {
@@ -131,7 +164,7 @@ func (g *GitHubPullRequest) postGitHubComments(ctx context.Context, comments []*
 	// > again later.
 	// https://developer.github.com/v3/#abuse-rate-limits
 	if len(comments) > maxCommentsPerRequest {
-		log.Println("reviewdog: too many comments to posts. waiting 3 secs to posts remaining %d comments",
+		log.Printf("reviewdog: too many comments to posts. waiting 3 secs to posts remaining %d comments",
 			len(comments)-maxCommentsPerRequest)
 		time.Sleep(3 * time.Second)
 		return g.postGitHubComments(ctx, comments[maxCommentsPerRequest:])
