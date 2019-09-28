@@ -13,13 +13,8 @@ import (
 
 type fakeCheckerGitHubCli struct {
 	checkerGitHubClientInterface
-	FakeGetPullRequest     func(ctx context.Context, owner, repo string, number int) (*github.PullRequest, error)
 	FakeGetPullRequestDiff func(ctx context.Context, owner, repo string, number int) ([]byte, error)
 	FakeCreateCheckRun     func(ctx context.Context, owner, repo string, opt github.CreateCheckRunOptions) (*github.CheckRun, error)
-}
-
-func (f *fakeCheckerGitHubCli) GetPullRequest(ctx context.Context, owner, repo string, number int) (*github.PullRequest, error) {
-	return f.FakeGetPullRequest(ctx, owner, repo, number)
 }
 
 func (f *fakeCheckerGitHubCli) GetPullRequestDiff(ctx context.Context, owner, repo string, number int) ([]byte, error) {
@@ -59,7 +54,6 @@ func TestCheck_OK(t *testing.T) {
 		prNum      = 14
 		sha        = "1414"
 		reportURL  = "http://example.com/report_url"
-		branch     = "test-branch"
 		conclusion = "neutral"
 	)
 
@@ -87,25 +81,12 @@ func TestCheck_OK(t *testing.T) {
 	}
 
 	cli := &fakeCheckerGitHubCli{}
-	cli.FakeGetPullRequest = func(ctx context.Context, owner, repo string, number int) (*github.PullRequest, error) {
-		if number != prNum {
-			t.Errorf("PullRequest number = %d, want %d", number, prNum)
-		}
-		return &github.PullRequest{
-			Head: &github.PullRequestBranch{
-				Ref: github.String(branch),
-			},
-		}, nil
-	}
 	cli.FakeGetPullRequestDiff = func(ctx context.Context, owner, repo string, number int) ([]byte, error) {
 		return []byte(sampleDiff), nil
 	}
 	cli.FakeCreateCheckRun = func(ctx context.Context, owner, repo string, opt github.CreateCheckRunOptions) (*github.CheckRun, error) {
 		if opt.Name != name {
 			t.Errorf("CreateCheckRunOptions.Name = %q, want %q", opt.Name, name)
-		}
-		if opt.HeadBranch != branch {
-			t.Errorf("CreateCheckRunOptions.HeadBranch = %q, want %q", opt.HeadBranch, branch)
 		}
 		if opt.HeadSHA != sha {
 			t.Errorf("CreateCheckRunOptions.HeadSHA = %q, want %q", opt.HeadSHA, sha)
@@ -141,102 +122,9 @@ func TestCheck_OK(t *testing.T) {
 	}
 }
 
-func TestCheck_branch_in_req(t *testing.T) {
-	const (
-		name      = "haya14busa-linter"
-		owner     = "haya14busa"
-		repo      = "reviewdog"
-		prNum     = 14
-		sha       = "1414"
-		reportURL = "http://example.com/report_url"
-		branch    = "test-branch"
-	)
-
-	req := &doghouse.CheckRequest{
-		Name:        name,
-		Owner:       owner,
-		Repo:        repo,
-		PullRequest: prNum,
-		SHA:         sha,
-		Branch:      branch,
-	}
-
-	cli := &fakeCheckerGitHubCli{}
-	cli.FakeGetPullRequest = func(ctx context.Context, owner, repo string, number int) (*github.PullRequest, error) {
-		t.Fatal("GetPullRequest should not be called")
-		return nil, nil
-	}
-	cli.FakeGetPullRequestDiff = func(ctx context.Context, owner, repo string, number int) ([]byte, error) {
-		return []byte(sampleDiff), nil
-	}
-	cli.FakeCreateCheckRun = func(ctx context.Context, owner, repo string, opt github.CreateCheckRunOptions) (*github.CheckRun, error) {
-		if opt.HeadBranch != branch {
-			t.Errorf("CreateCheckRunOptions.HeadBranch = %q, want %q", opt.HeadBranch, branch)
-		}
-		return &github.CheckRun{HTMLURL: github.String(reportURL)}, nil
-	}
-	checker := &Checker{req: req, gh: cli}
-	if _, err := checker.Check(context.Background()); err != nil {
-		t.Fatal(err)
-	}
-}
-
-func TestCheck_fail_get_pullrequest(t *testing.T) {
-	req := &doghouse.CheckRequest{}
-	cli := &fakeCheckerGitHubCli{}
-	cli.FakeGetPullRequest = func(ctx context.Context, owner, repo string, number int) (*github.PullRequest, error) {
-		return nil, errors.New("test failrue")
-	}
-	cli.FakeGetPullRequestDiff = func(ctx context.Context, owner, repo string, number int) ([]byte, error) {
-		return []byte(sampleDiff), nil
-	}
-	cli.FakeCreateCheckRun = func(ctx context.Context, owner, repo string, opt github.CreateCheckRunOptions) (*github.CheckRun, error) {
-		return &github.CheckRun{}, nil
-	}
-	checker := &Checker{req: req, gh: cli}
-
-	if _, err := checker.Check(context.Background()); err == nil {
-		t.Fatalf("got no error, want some error")
-	} else {
-		t.Log(err)
-	}
-}
-
-func TestCheck_fail_empty_branch(t *testing.T) {
-	req := &doghouse.CheckRequest{}
-	cli := &fakeCheckerGitHubCli{}
-	cli.FakeGetPullRequest = func(ctx context.Context, owner, repo string, number int) (*github.PullRequest, error) {
-		return &github.PullRequest{
-			Head: &github.PullRequestBranch{
-				Ref: github.String(""),
-			},
-		}, nil
-	}
-	cli.FakeGetPullRequestDiff = func(ctx context.Context, owner, repo string, number int) ([]byte, error) {
-		return []byte(sampleDiff), nil
-	}
-	cli.FakeCreateCheckRun = func(ctx context.Context, owner, repo string, opt github.CreateCheckRunOptions) (*github.CheckRun, error) {
-		return &github.CheckRun{}, nil
-	}
-	checker := &Checker{req: req, gh: cli}
-
-	if _, err := checker.Check(context.Background()); err == nil {
-		t.Fatalf("got no error, want some error")
-	} else {
-		t.Log(err)
-	}
-}
-
 func TestCheck_fail_diff(t *testing.T) {
 	req := &doghouse.CheckRequest{}
 	cli := &fakeCheckerGitHubCli{}
-	cli.FakeGetPullRequest = func(ctx context.Context, owner, repo string, number int) (*github.PullRequest, error) {
-		return &github.PullRequest{
-			Head: &github.PullRequestBranch{
-				Ref: github.String("branch"),
-			},
-		}, nil
-	}
 	cli.FakeGetPullRequestDiff = func(ctx context.Context, owner, repo string, number int) ([]byte, error) {
 		return nil, errors.New("test diff failure")
 	}
@@ -256,13 +144,6 @@ func TestCheck_fail_invalid_diff(t *testing.T) {
 	t.Skip("Parse invalid diff function somehow doesn't return error")
 	req := &doghouse.CheckRequest{}
 	cli := &fakeCheckerGitHubCli{}
-	cli.FakeGetPullRequest = func(ctx context.Context, owner, repo string, number int) (*github.PullRequest, error) {
-		return &github.PullRequest{
-			Head: &github.PullRequestBranch{
-				Ref: github.String("branch"),
-			},
-		}, nil
-	}
 	cli.FakeGetPullRequestDiff = func(ctx context.Context, owner, repo string, number int) ([]byte, error) {
 		return []byte("invalid diff"), nil
 	}
@@ -281,13 +162,6 @@ func TestCheck_fail_invalid_diff(t *testing.T) {
 func TestCheck_fail_check(t *testing.T) {
 	req := &doghouse.CheckRequest{}
 	cli := &fakeCheckerGitHubCli{}
-	cli.FakeGetPullRequest = func(ctx context.Context, owner, repo string, number int) (*github.PullRequest, error) {
-		return &github.PullRequest{
-			Head: &github.PullRequestBranch{
-				Ref: github.String("branch"),
-			},
-		}, nil
-	}
 	cli.FakeGetPullRequestDiff = func(ctx context.Context, owner, repo string, number int) ([]byte, error) {
 		return []byte(sampleDiff), nil
 	}
@@ -306,13 +180,6 @@ func TestCheck_fail_check(t *testing.T) {
 func TestCheck_fail_check_with_403(t *testing.T) {
 	req := &doghouse.CheckRequest{}
 	cli := &fakeCheckerGitHubCli{}
-	cli.FakeGetPullRequest = func(ctx context.Context, owner, repo string, number int) (*github.PullRequest, error) {
-		return &github.PullRequest{
-			Head: &github.PullRequestBranch{
-				Ref: github.String("branch"),
-			},
-		}, nil
-	}
 	cli.FakeGetPullRequestDiff = func(ctx context.Context, owner, repo string, number int) ([]byte, error) {
 		return []byte(sampleDiff), nil
 	}

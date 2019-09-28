@@ -16,8 +16,10 @@ type CheckRequest struct {
 	// Repository name.
 	// Required.
 	Repo string `json:"repo,omitempty"`
+
 	// Branch name.
 	// Optional.
+	// DEPRECATED: No need to fill this field.
 	Branch string `json:"branch,omitempty"`
 
 	// Annotations associated with the repository's commit and Pull Request.
