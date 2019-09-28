@@ -3,8 +3,11 @@ package github
 import (
 	"context"
 	"fmt"
+	"log"
+	"math"
 	"path/filepath"
 	"sync"
+	"time"
 
 	"github.com/google/go-github/v28/github"
 	"github.com/reviewdog/reviewdog"
@@ -13,6 +16,8 @@ import (
 
 var _ reviewdog.CommentService = &GitHubPullRequest{}
 var _ reviewdog.DiffService = &GitHubPullRequest{}
+
+const maxCommentsPerRequest = 30
 
 // GitHubPullRequest is a comment and diff service for GitHub PullRequest.
 //
@@ -86,20 +91,41 @@ func (g *GitHubPullRequest) postAsReviewComment(ctx context.Context) error {
 			Body:     &cbody,
 		})
 	}
+	return g.postGitHubComments(ctx, comments, 0)
+}
 
+var sleep = time.Sleep
+
+func (g *GitHubPullRequest) postGitHubComments(ctx context.Context, comments []*github.DraftReviewComment, cnt int) error {
 	if len(comments) == 0 {
 		return nil
 	}
-
 	// TODO(haya14busa): it might be useful to report overview results by "body"
 	// field.
 	review := &github.PullRequestReviewRequest{
 		CommitID: &g.sha,
 		Event:    github.String("COMMENT"),
-		Comments: comments,
+		Comments: comments[:min(maxCommentsPerRequest, len(comments))],
 	}
 	_, _, err := g.cli.PullRequests.CreateReview(ctx, g.owner, g.repo, g.pr, review)
-	return err
+	if err != nil {
+		return err
+	}
+	// Post reamaining comments after sleeping 2**cnt secs to avoid rate limit.
+	//
+	// > 403 You have triggered an abuse detection mechanism and have been
+	// > temporarily blocked from content creation. Please retry your request
+	// > again later.
+	// https://developer.github.com/v3/#abuse-rate-limits
+	if len(comments) > maxCommentsPerRequest {
+		cnt++
+		sec := min(int(math.Pow(float64(2), float64(cnt))), 30)
+		log.Printf("reviewdog: too many comments to posts. waiting %d secs to posts remaining %d comments",
+			sec, len(comments)-maxCommentsPerRequest)
+		sleep(time.Duration(sec) * time.Second)
+		return g.postGitHubComments(ctx, comments[maxCommentsPerRequest:], cnt)
+	}
+	return nil
 }
 
 func (g *GitHubPullRequest) setPostedComment(ctx context.Context) error {
@@ -168,4 +194,11 @@ func listAllPullRequestsComments(ctx context.Context, cli *github.Client,
 		return nil, err
 	}
 	return append(comments, restComments...), nil
+}
+
+func min(x, y int) int {
+	if x > y {
+		return y
+	}
+	return x
 }
