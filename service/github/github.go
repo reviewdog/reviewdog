@@ -3,6 +3,7 @@ package github
 import (
 	"context"
 	"fmt"
+	"log"
 	"path/filepath"
 	"sync"
 
@@ -99,6 +100,9 @@ func (g *GitHubPullRequest) postAsReviewComment(ctx context.Context) error {
 		Comments: comments,
 	}
 	_, _, err := g.cli.PullRequests.CreateReview(ctx, g.owner, g.repo, g.pr, review)
+	if limitErr, ok := err.(*github.RateLimitError); ok {
+		log.Printf("reviewdog-rate-limit: %s", limitErr.Error())
+	}
 	return err
 }
 
