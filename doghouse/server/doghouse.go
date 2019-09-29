@@ -110,6 +110,7 @@ func (ch *Checker) createCheck(ctx context.Context) (*github.CheckRun, error) {
 
 func (ch *Checker) postAnnotations(ctx context.Context, checkID int64, annotations []*github.CheckRunAnnotation) error {
 	opt := github.UpdateCheckRunOptions{
+		Name: ch.checkName(),
 		Output: &github.CheckRunOutput{
 			Title:       github.String(ch.checkTitle()),
 			Summary:     github.String(""), // Post summary with the last reqeust.
