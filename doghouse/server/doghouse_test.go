@@ -103,6 +103,9 @@ func TestCheck_OK(t *testing.T) {
 		if checkID != wantCheckID {
 			t.Errorf("UpdateCheckRun: checkID = %d, want %d", checkID, wantCheckID)
 		}
+		if opt.Name != name {
+			t.Errorf("UpdateCheckRunOptions.Name = %q, want %q", opt.Name, name)
+		}
 		annotations := opt.Output.Annotations
 		if len(annotations) == 0 {
 			if *opt.Conclusion != conclusion {
