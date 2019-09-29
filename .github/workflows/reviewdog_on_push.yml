@@ -31,5 +31,5 @@ jobs:
         env:
           REVIEWDOG_GITHUB_API_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         run: |
-          reviewdog -reporter=github-check -runners=golint,govet
+          golint ./... | reviewdog -f=golint -name=golint-on-push -reporter=github-check
 
