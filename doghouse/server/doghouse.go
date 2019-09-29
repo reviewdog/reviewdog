@@ -12,6 +12,7 @@ import (
 	"github.com/reviewdog/reviewdog"
 	"github.com/reviewdog/reviewdog/diff"
 	"github.com/reviewdog/reviewdog/doghouse"
+	"github.com/reviewdog/reviewdog/service/github/githubutils"
 )
 
 // GitHub check runs API cannot handle too large requests.
@@ -188,26 +189,11 @@ func (ch *Checker) summaryFindings(name string, checks []*reviewdog.FilteredChec
 			lines = append(lines, "... (Too many findings. Dropped some findings)")
 			break
 		}
-		lines = append(lines, ch.buildFindingLink(c))
+		lines = append(lines, githubutils.LinkedMarkdownCheckResult(
+			ch.req.Owner, ch.req.Repo, ch.req.SHA, c.CheckResult))
 	}
 	lines = append(lines, "</details>")
 	return lines
-}
-
-func (ch *Checker) buildFindingLink(c *reviewdog.FilteredCheck) string {
-	if c.Path == "" {
-		return c.Message
-	}
-	loc := c.Path
-	link := ch.brobHRef(c.Path)
-	if c.Lnum != 0 {
-		loc = fmt.Sprintf("%s:%d", loc, c.Lnum)
-		link = fmt.Sprintf("%s#L%d", link, c.Lnum)
-	}
-	if c.Col != 0 {
-		loc = fmt.Sprintf("%s:%d", loc, c.Col)
-	}
-	return fmt.Sprintf("[%s](%s): %s", loc, link, c.Message)
 }
 
 func (ch *Checker) toCheckRunAnnotation(c *reviewdog.FilteredCheck) *github.CheckRunAnnotation {
@@ -225,10 +211,6 @@ func (ch *Checker) toCheckRunAnnotation(c *reviewdog.FilteredCheck) *github.Chec
 		a.RawDetails = github.String(s)
 	}
 	return a
-}
-
-func (ch *Checker) brobHRef(path string) string {
-	return fmt.Sprintf("http://github.com/%s/%s/blob/%s/%s", ch.req.Owner, ch.req.Repo, ch.req.SHA, path)
 }
 
 func (ch *Checker) diff(ctx context.Context) ([]*diff.FileDiff, error) {
