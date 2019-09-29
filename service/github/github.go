@@ -128,11 +128,15 @@ func (g *GitHubPullRequest) remainingCommentsSummary(remaining []*reviewdog.Comm
 	var sb strings.Builder
 	for tool, comments := range perTool {
 		sb.WriteString("Remaining comments which cannot be posted as a review comment to avoid GitHub abuse Rate Limit\n")
-		sb.WriteString(fmt.Sprintf("### %s\n", tool))
+		sb.WriteString("\n")
+		sb.WriteString("<details>\n")
+		sb.WriteString(fmt.Sprintf("<summary>%s</summary>\n", tool))
+		sb.WriteString("\n")
 		for _, c := range comments {
 			sb.WriteString(githubutils.LinkedMarkdownCheckResult(g.owner, g.repo, g.sha, c.CheckResult))
 			sb.WriteString("\n")
 		}
+		sb.WriteString("</details>\n")
 	}
 	return sb.String()
 }
