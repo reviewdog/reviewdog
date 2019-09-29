@@ -1,8 +1,8 @@
 name: reviewdog on Push
 on: [push]
 jobs:
-  reviewdog-on-push:
-    name: reviewdog-on-push
+  reviewdog-:
+    name: reviewdog-
     runs-on: ubuntu-latest
     steps:
       - name: Dump GitHub Context
@@ -36,4 +36,4 @@ jobs:
         env:
           REVIEWDOG_GITHUB_API_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         run: |
-          golint ./... | reviewdog -f=golint -name=golint-on-push -reporter=github-check -level=warning
+          golint ./... | reviewdog -f=golint -name=golint-github-check -reporter=github-check -level=warning
