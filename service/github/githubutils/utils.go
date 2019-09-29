@@ -14,7 +14,7 @@ func LinkedMarkdownCheckResult(owner, repo, sha string, c *reviewdog.CheckResult
 	}
 	loc := BasicLocationFormat(c)
 	link := PathLink(owner, repo, sha, c.Path, c.Lnum)
-	return fmt.Sprintf("[%s](%s): %s", loc, link, c.Message)
+	return fmt.Sprintf("[%s](%s) %s", loc, link, c.Message)
 }
 
 // PathLink build a link to GitHub path to given sha, file, and line.
@@ -30,14 +30,14 @@ func PathLink(owner, repo, sha, path string, line int) string {
 		owner, repo, sha, path, fragment)
 }
 
-// BasicLocationFormat format chec CheckResult to %f:%l:%c erorformat.
+// BasicLocationFormat format chec CheckResult to %f|%l col %c| erorformat.
 func BasicLocationFormat(c *reviewdog.CheckResult) string {
 	loc := c.Path
 	if c.Lnum != 0 {
-		loc = fmt.Sprintf("%s:%d", loc, c.Lnum)
+		loc = fmt.Sprintf("%s|%d", loc, c.Lnum)
 		if c.Col != 0 {
-			loc = fmt.Sprintf("%s:%d", loc, c.Col)
+			loc = fmt.Sprintf("%s col %d", loc, c.Col)
 		}
 	}
-	return loc
+	return loc + "|"
 }
