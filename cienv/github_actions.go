@@ -19,6 +19,9 @@ type GitHubEvent struct {
 		After        string              `json:"after"`
 		PullRequests []GitHubPullRequest `json:"pull_requests"`
 	} `json:"check_suite"`
+	HeadCommit struct {
+		ID string `json:"id"`
+	} `json:"head_commit"`
 }
 
 type GitHubPullRequest struct {
@@ -59,6 +62,9 @@ func getBuildInfoFromGitHubActionEventPath(eventPath string) (*BuildInfo, bool, 
 		info.PullRequest = pr.Number
 		info.Branch = pr.Head.Ref
 		info.SHA = pr.Head.Sha
+	}
+	if info.SHA == "" {
+		info.SHA = event.HeadCommit.ID
 	}
 	return info, info.PullRequest != 0, nil
 }
