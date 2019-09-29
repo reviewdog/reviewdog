@@ -1,5 +1,7 @@
-name: reviewdog on Push
-on: [push]
+name: reviewdog check
+# Run on pull_request too to run the workflow on Pull Rquests from forked
+# repositories.
+on: [push, pull_request]
 jobs:
   reviewdog:
     name: reviewdog
