@@ -32,9 +32,9 @@ func PathLink(owner, repo, sha, path string, line int) string {
 
 // BasicLocationFormat format chec CheckResult to %f|%l col %c| erorformat.
 func BasicLocationFormat(c *reviewdog.CheckResult) string {
-	loc := c.Path
+	loc := c.Path + "|"
 	if c.Lnum != 0 {
-		loc = fmt.Sprintf("%s|%d", loc, c.Lnum)
+		loc = fmt.Sprintf("%s%d", loc, c.Lnum)
 		if c.Col != 0 {
 			loc = fmt.Sprintf("%s col %d", loc, c.Col)
 		}
