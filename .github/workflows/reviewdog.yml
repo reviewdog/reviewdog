@@ -52,6 +52,7 @@ jobs:
         with:
           github_token: ${{ secrets.github_token }}
           golangci_lint_flags: "--enable-all --exclude-use-default=false"
+          level: "warning"
 
   misspell:
     name: runner / misspell
