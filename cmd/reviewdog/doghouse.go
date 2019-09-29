@@ -20,12 +20,12 @@ import (
 	"golang.org/x/sync/errgroup"
 )
 
-func runDoghouse(ctx context.Context, r io.Reader, w io.Writer, opt *option, isProject bool) error {
+func runDoghouse(ctx context.Context, r io.Reader, w io.Writer, opt *option, isProject bool, allowNonPR bool) error {
 	ghInfo, isPr, err := cienv.GetBuildInfo()
 	if err != nil {
 		return err
 	}
-	if !isPr {
+	if !isPr && !allowNonPR {
 		fmt.Fprintln(os.Stderr, "reviewdog: this is not PullRequest build.")
 		return nil
 	}

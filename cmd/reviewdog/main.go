@@ -67,12 +67,15 @@ const (
 	runnersDoc          = `comma separated runners name to run in config file. default: run all runners`
 	levelDoc            = `report level currently used for github-pr-check reporter ("info","warning","error").`
 	guessPullRequestDoc = `guess Pull Request ID by branch name and commit SHA`
-	reporterDoc         = `reporter of reviewdog results. (local, github-pr-check, github-pr-review, gitlab-mr-discussion, gitlab-mr-commit)
+	reporterDoc         = `reporter of reviewdog results. (local, github-check, github-pr-check, github-pr-review, gitlab-mr-discussion, gitlab-mr-commit)
 	"local" (default)
 		Report results to stdout.
 
-	"github-pr-check" (experimental)
-		Report results to GitHub PullRequest Check tab.
+	"github-check" (experimental)
+		Report results to GitHub Check. It works both for Pull Requests and commits
+		and this reporter reports all results regardless of it's new result or not.
+		You can see report results in GitHub PullRequest Check tab for Pull Request.
+
 		There are two options to use this reporter.
 
 		Option 1) Run reviewdog from GitHub Actions w/ secrets.GITHUB_TOKEN
@@ -90,6 +93,10 @@ const (
 			$ export REVIEWDOG_TOKEN="xxxxx"
 
 			Note: Token is not required if you run reviewdog in Travis CI.
+
+	"github-pr-check" (experimental)
+		Same as github-check reporter but it only supports Pull Requests and
+		reports only new results which is in diff.
 
 	"github-pr-review"
 		Report results to GitHub review comments.
@@ -198,8 +205,10 @@ See -reporter flag for migration and set -reporter="github-pr-review" or -report
 	switch opt.reporter {
 	default:
 		return fmt.Errorf("unknown -reporter: %s", opt.reporter)
+	case "github-check":
+		return runDoghouse(ctx, r, w, opt, isProject, true)
 	case "github-pr-check":
-		return runDoghouse(ctx, r, w, opt, isProject)
+		return runDoghouse(ctx, r, w, opt, isProject, false)
 	case "github-pr-review":
 		if os.Getenv("REVIEWDOG_GITHUB_API_TOKEN") == "" {
 			fmt.Fprintln(os.Stderr, "REVIEWDOG_GITHUB_API_TOKEN is not set")
