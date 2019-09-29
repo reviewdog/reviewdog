@@ -1,4 +1,4 @@
-name: reviewdog on GitHub Action
+name: reviewdog on Pull Request
 on: [pull_request]
 jobs:
   reviewdog:

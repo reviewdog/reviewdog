@@ -8,7 +8,7 @@ type CheckRequest struct {
 	// Required.
 	SHA string `json:"sha,omitempty"`
 	// PullRequest number.
-	// Required.
+	// Optional.
 	PullRequest int `json:"pull_request,omitempty"`
 	// Owner of the repository.
 	// Required.

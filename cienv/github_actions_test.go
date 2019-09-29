@@ -27,3 +27,14 @@ func TestGetBuildInfoFromGitHubActionEventPath_rerunevent(t *testing.T) {
 		t.Errorf("result has diff:\n%s", diff)
 	}
 }
+
+func TestGetBuildInfoFromGitHubActionEventPath_pushevent(t *testing.T) {
+	got, _, err := getBuildInfoFromGitHubActionEventPath("_testdata/github_event_push.json")
+	if err != nil {
+		t.Fatal(err)
+	}
+	want := &BuildInfo{Owner: "reviewdog", Repo: "reviewdog", SHA: "febdd4bf26c6e8856c792303cfc66fa5e7bc975b"}
+	if diff := cmp.Diff(got, want); diff != "" {
+		t.Errorf("result has diff:\n%s", diff)
+	}
+}

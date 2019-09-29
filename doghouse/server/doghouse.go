@@ -38,9 +38,16 @@ func NewChecker(req *doghouse.CheckRequest, gh *github.Client) *Checker {
 }
 
 func (ch *Checker) Check(ctx context.Context) (*doghouse.CheckResponse, error) {
-	filediffs, err := ch.diff(ctx)
-	if err != nil {
-		return nil, fmt.Errorf("fail to parse diff: %v", err)
+
+	filterByDiff := ch.req.PullRequest != 0
+
+	var filediffs []*diff.FileDiff
+	if ch.req.PullRequest != 0 {
+		var err error
+		filediffs, err = ch.pullRequestDiff(ctx, ch.req.PullRequest)
+		if err != nil {
+			return nil, fmt.Errorf("fail to parse diff: %v", err)
+		}
 	}
 
 	results := annotationsToCheckResults(ch.req.Annotations)
@@ -60,7 +67,7 @@ func (ch *Checker) Check(ctx context.Context) (*doghouse.CheckResponse, error) {
 		return nil, fmt.Errorf("failed to create check: %v", err)
 	}
 
-	checkRun, err := ch.postCheck(ctx, check.GetID(), filtered)
+	checkRun, err := ch.postCheck(ctx, check.GetID(), filtered, filterByDiff)
 	if err != nil {
 		return nil, fmt.Errorf("failed to post result: %v", err)
 	}
@@ -70,10 +77,10 @@ func (ch *Checker) Check(ctx context.Context) (*doghouse.CheckResponse, error) {
 	return res, nil
 }
 
-func (ch *Checker) postCheck(ctx context.Context, checkID int64, checks []*reviewdog.FilteredCheck) (*github.CheckRun, error) {
+func (ch *Checker) postCheck(ctx context.Context, checkID int64, checks []*reviewdog.FilteredCheck, filterByDiff bool) (*github.CheckRun, error) {
 	var annotations []*github.CheckRunAnnotation
 	for _, c := range checks {
-		if !c.InDiff {
+		if !c.InDiff && filterByDiff {
 			continue
 		}
 		annotations = append(annotations, ch.toCheckRunAnnotation(c))
@@ -215,8 +222,8 @@ func (ch *Checker) toCheckRunAnnotation(c *reviewdog.FilteredCheck) *github.Chec
 	return a
 }
 
-func (ch *Checker) diff(ctx context.Context) ([]*diff.FileDiff, error) {
-	d, err := ch.rawDiff(ctx)
+func (ch *Checker) pullRequestDiff(ctx context.Context, pr int) ([]*diff.FileDiff, error) {
+	d, err := ch.rawPullRequestDiff(ctx, pr)
 	if err != nil {
 		return nil, err
 	}
@@ -227,8 +234,8 @@ func (ch *Checker) diff(ctx context.Context) ([]*diff.FileDiff, error) {
 	return filediffs, nil
 }
 
-func (ch *Checker) rawDiff(ctx context.Context) ([]byte, error) {
-	d, err := ch.gh.GetPullRequestDiff(ctx, ch.req.Owner, ch.req.Repo, ch.req.PullRequest)
+func (ch *Checker) rawPullRequestDiff(ctx context.Context, pr int) ([]byte, error) {
+	d, err := ch.gh.GetPullRequestDiff(ctx, ch.req.Owner, ch.req.Repo, pr)
 	if err != nil {
 		return nil, err
 	}
