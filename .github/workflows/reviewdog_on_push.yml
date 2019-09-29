@@ -1,8 +1,8 @@
 name: reviewdog on Push
 on: [push]
 jobs:
-  reviewdog:
-    name: reviewdog
+  reviewdog-on-push:
+    name: reviewdog-on-push
     runs-on: ubuntu-latest
     steps:
       - name: Dump GitHub Context
