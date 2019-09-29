@@ -87,6 +87,7 @@ func (ch *Checker) postCheck(ctx context.Context, checkID int64, checks []*revie
 		conclusion = ch.conclusion()
 	}
 	opt := github.UpdateCheckRunOptions{
+		Name:        ch.checkName(),
 		Status:      github.String("completed"),
 		Conclusion:  github.String(conclusion),
 		CompletedAt: &github.Timestamp{Time: time.Now()},
