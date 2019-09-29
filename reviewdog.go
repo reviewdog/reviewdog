@@ -10,7 +10,7 @@ import (
 	"github.com/reviewdog/reviewdog/diff"
 )
 
-var X = 16
+var X = 17
 
 // Reviewdog represents review dog application which parses result of compiler
 // or linter, get diff and filter the results by diff, and report filtered
