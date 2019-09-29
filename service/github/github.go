@@ -121,14 +121,17 @@ func (g *GitHubPullRequest) postAsReviewComment(ctx context.Context) error {
 }
 
 func (g *GitHubPullRequest) remainingCommentsSummary(remaining []*reviewdog.Comment) string {
+	if len(remaining) == 0 {
+		return ""
+	}
 	perTool := make(map[string][]*reviewdog.Comment)
 	for _, c := range remaining {
 		perTool[c.ToolName] = append(perTool[c.ToolName], c)
 	}
 	var sb strings.Builder
+	sb.WriteString("Remaining comments which cannot be posted as a review comment to avoid GitHub Rate Limit\n")
+	sb.WriteString("\n")
 	for tool, comments := range perTool {
-		sb.WriteString("Remaining comments which cannot be posted as a review comment to avoid GitHub Rate Limit\n")
-		sb.WriteString("\n")
 		sb.WriteString("<details>\n")
 		sb.WriteString(fmt.Sprintf("<summary>%s</summary>\n", tool))
 		sb.WriteString("\n")

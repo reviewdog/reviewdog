@@ -286,6 +286,69 @@ func TestGitHubPullRequest_Post_Flush_review_api(t *testing.T) {
 	}
 }
 
+func TestGitHubPullRequest_Post_toomany(t *testing.T) {
+	cwd, _ := os.Getwd()
+	defer os.Chdir(cwd)
+
+	moveToRootDir()
+
+	listCommentsAPICalled := 0
+	postCommentsAPICalled := 0
+
+	mux := http.NewServeMux()
+	mux.HandleFunc("/repos/o/r/pulls/14/comments", func(w http.ResponseWriter, r *http.Request) {
+		listCommentsAPICalled++
+		if err := json.NewEncoder(w).Encode([]*github.PullRequestComment{}); err != nil {
+			t.Fatal(err)
+		}
+	})
+	mux.HandleFunc("/repos/o/r/pulls/14/reviews", func(w http.ResponseWriter, r *http.Request) {
+		postCommentsAPICalled++
+		var req github.PullRequestReviewRequest
+		if err := json.NewDecoder(r.Body).Decode(&req); err != nil {
+			t.Error(err)
+		}
+		if req.GetBody() == "" {
+			t.Errorf("PullRequestReviewRequest.Body is empty but want some summary text")
+		}
+	})
+	ts := httptest.NewServer(mux)
+	defer ts.Close()
+
+	cli := github.NewClient(nil)
+	cli.BaseURL, _ = url.Parse(ts.URL + "/")
+	g, err := NewGitHubPullRequest(cli, "o", "r", 14, "sha")
+	if err != nil {
+		t.Fatal(err)
+	}
+	comments := []*reviewdog.Comment{}
+	for i := 0; i < 100; i++ {
+		comments = append(comments, &reviewdog.Comment{
+			CheckResult: &reviewdog.CheckResult{
+				Path: "reviewdog.go",
+				Lnum: i,
+			},
+			LnumDiff: i,
+			Body:     "comment",
+			ToolName: "tool",
+		})
+	}
+	for _, c := range comments {
+		if err := g.Post(context.Background(), c); err != nil {
+			t.Error(err)
+		}
+	}
+	if err := g.Flush(context.Background()); err != nil {
+		t.Error(err)
+	}
+	if want := 1; listCommentsAPICalled != want {
+		t.Errorf("GitHub List PullRequest comments API called %v times, want %d times", listCommentsAPICalled, want)
+	}
+	if want := 1; postCommentsAPICalled != want {
+		t.Errorf("GitHub post PullRequest comments API called %v times, want %d times", postCommentsAPICalled, want)
+	}
+}
+
 func TestGitHubPullRequest_workdir(t *testing.T) {
 	cwd, _ := os.Getwd()
 	defer os.Chdir(cwd)
