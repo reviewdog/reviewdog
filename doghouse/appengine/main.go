@@ -105,7 +105,7 @@ func main() {
 	log.Fatal(http.ListenAndServe(":"+os.Getenv("PORT"), nil))
 }
 
-func handleTop(w http.ResponseWriter, r *http.Request) {
+func handleTop(w http.ResponseWriter, _ *http.Request) {
 	var data struct {
 		Title string
 	}

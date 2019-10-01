@@ -117,7 +117,7 @@ func githubRepoURL(ctx context.Context, r *http.Request, owner, repo string) str
 	return u.String()
 }
 
-func doghouseBaseURL(ctx context.Context, r *http.Request) *url.URL {
+func doghouseBaseURL(_ context.Context, r *http.Request) *url.URL {
 	scheme := ""
 	if r.URL != nil && r.URL.Scheme != "" {
 		scheme = r.URL.Scheme
