@@ -17,7 +17,7 @@ import (
 )
 
 // GitHub check runs API cannot handle too large requests.
-// Set max number of filtered findings to be showen in check-run summary.
+// Set max number of filtered findings to be shown in check-run summary.
 // ERROR:
 //  https://api.github.com/repos/easymotion/vim-easymotion/check-runs: 422
 //  Invalid request.

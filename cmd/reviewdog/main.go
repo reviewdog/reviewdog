@@ -36,8 +36,7 @@ const usageMessage = "" +
 	`Usage:	reviewdog [flags]
 	reviewdog accepts any compiler or linter results from stdin and filters
 	them by diff for review. reviewdog also can posts the results as a comment to
-	GitHub if you use reviewdog in CI service.
-`
+	GitHub if you use reviewdog in CI service.`
 
 type option struct {
 	version          bool

@@ -7,7 +7,7 @@ import (
 	"cloud.google.com/go/datastore"
 )
 
-// GitHubRepositoryToken represents token data for aunthenticating reviewdog CLI
+// GitHubRepositoryToken represents token data for authenticating reviewdog CLI
 // to the target repository.
 type GitHubRepositoryToken struct {
 	Token string

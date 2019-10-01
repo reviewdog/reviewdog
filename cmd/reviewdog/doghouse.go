@@ -139,7 +139,7 @@ func postResultSet(ctx context.Context, resultSet *reviewdog.ResultMap, ghInfo *
 				filteredResultSet.Store(name, res.CheckedResults)
 			}
 			if res.ReportURL == "" && res.CheckedResults == nil {
-				return fmt.Errorf("No result found for %q", name)
+				return fmt.Errorf("no result found for %q", name)
 			}
 			return nil
 		})

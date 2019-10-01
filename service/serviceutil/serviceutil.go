@@ -18,11 +18,11 @@ func (p PostedComments) IsPosted(c *reviewdog.Comment, lineNum int) bool {
 	if _, ok := p[c.Path]; !ok {
 		return false
 	}
-	bodys, ok := p[c.Path][lineNum]
+	bodies, ok := p[c.Path][lineNum]
 	if !ok {
 		return false
 	}
-	for _, body := range bodys {
+	for _, body := range bodies {
 		if body == CommentBody(c) {
 			return true
 		}
