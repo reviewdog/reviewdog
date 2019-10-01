@@ -16,10 +16,11 @@ import (
 
 	"github.com/google/go-github/v28/github"
 	"github.com/justinas/nosurf"
+	"golang.org/x/oauth2"
+
 	"github.com/reviewdog/reviewdog/doghouse/server"
 	"github.com/reviewdog/reviewdog/doghouse/server/cookieman"
 	"github.com/reviewdog/reviewdog/doghouse/server/storage"
-	"golang.org/x/oauth2"
 )
 
 type GitHubHandler struct {

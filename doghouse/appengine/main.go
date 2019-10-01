@@ -9,6 +9,7 @@ import (
 
 	"github.com/haya14busa/secretbox"
 	"github.com/justinas/nosurf"
+
 	"github.com/reviewdog/reviewdog/doghouse/server/cookieman"
 	"github.com/reviewdog/reviewdog/doghouse/server/storage"
 )

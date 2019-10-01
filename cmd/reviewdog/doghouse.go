@@ -11,13 +11,14 @@ import (
 	"sort"
 	"strings"
 
+	"golang.org/x/oauth2"
+	"golang.org/x/sync/errgroup"
+
 	"github.com/reviewdog/reviewdog"
 	"github.com/reviewdog/reviewdog/cienv"
 	"github.com/reviewdog/reviewdog/doghouse"
 	"github.com/reviewdog/reviewdog/doghouse/client"
 	"github.com/reviewdog/reviewdog/project"
-	"golang.org/x/oauth2"
-	"golang.org/x/sync/errgroup"
 )
 
 func runDoghouse(ctx context.Context, r io.Reader, w io.Writer, opt *option, isProject bool, allowNonPR bool) error {

@@ -7,6 +7,7 @@ import (
 	"net/http"
 
 	"github.com/rakyll/statik/fs"
+
 	_ "github.com/reviewdog/reviewdog/doghouse/appengine/statik"
 )
 

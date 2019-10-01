@@ -8,10 +8,11 @@ import (
 	"path/filepath"
 	"sync"
 
-	"github.com/reviewdog/reviewdog"
-	"github.com/reviewdog/reviewdog/service/serviceutil"
 	gitlab "github.com/xanzy/go-gitlab"
 	"golang.org/x/sync/errgroup"
+
+	"github.com/reviewdog/reviewdog"
+	"github.com/reviewdog/reviewdog/service/serviceutil"
 )
 
 // GitLabMergeRequestDiscussionCommenter is a comment and diff service for GitLab MergeRequest.

@@ -6,9 +6,10 @@ import (
 	"os/exec"
 	"strings"
 
+	gitlab "github.com/xanzy/go-gitlab"
+
 	"github.com/reviewdog/reviewdog"
 	"github.com/reviewdog/reviewdog/service/serviceutil"
-	gitlab "github.com/xanzy/go-gitlab"
 )
 
 var _ reviewdog.DiffService = &GitLabMergeRequestDiff{}

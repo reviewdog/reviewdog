@@ -8,6 +8,7 @@ import (
 
 	"github.com/google/go-cmp/cmp"
 	"github.com/google/go-github/v28/github"
+
 	"github.com/reviewdog/reviewdog/doghouse"
 )
 

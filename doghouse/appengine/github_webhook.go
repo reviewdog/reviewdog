@@ -7,6 +7,7 @@ import (
 	"net/http"
 
 	"github.com/google/go-github/v28/github"
+
 	"github.com/reviewdog/reviewdog/doghouse/server/storage"
 )
 

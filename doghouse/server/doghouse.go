@@ -9,6 +9,7 @@ import (
 	"time"
 
 	"github.com/google/go-github/v28/github"
+
 	"github.com/reviewdog/reviewdog"
 	"github.com/reviewdog/reviewdog/diff"
 	"github.com/reviewdog/reviewdog/doghouse"

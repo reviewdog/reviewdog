@@ -12,9 +12,10 @@ import (
 
 	"github.com/google/go-github/v28/github"
 	"github.com/kylelemons/godebug/pretty"
+	"golang.org/x/oauth2"
+
 	"github.com/reviewdog/reviewdog"
 	"github.com/reviewdog/reviewdog/service/serviceutil"
-	"golang.org/x/oauth2"
 )
 
 const notokenSkipTestMes = "skipping test (requires actual Personal access tokens. export REVIEWDOG_TEST_GITHUB_API_TOKEN=<GitHub Personal Access Token>)"
