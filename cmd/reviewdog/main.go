@@ -20,9 +20,9 @@ import (
 	"golang.org/x/oauth2"
 
 	"github.com/google/go-github/v28/github"
-	shellwords "github.com/mattn/go-shellwords"
+	"github.com/mattn/go-shellwords"
 	"github.com/reviewdog/errorformat/fmts"
-	gitlab "github.com/xanzy/go-gitlab"
+	"github.com/xanzy/go-gitlab"
 
 	"github.com/reviewdog/reviewdog"
 	"github.com/reviewdog/reviewdog/cienv"

@@ -2,7 +2,7 @@
 // config.
 package project
 
-import yaml "gopkg.in/yaml.v2"
+import "gopkg.in/yaml.v2"
 
 // Config represents reviewdog config.
 type Config struct {

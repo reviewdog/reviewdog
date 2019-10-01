@@ -8,7 +8,7 @@ import (
 	"path/filepath"
 	"sync"
 
-	gitlab "github.com/xanzy/go-gitlab"
+	"github.com/xanzy/go-gitlab"
 	"golang.org/x/sync/errgroup"
 
 	"github.com/reviewdog/reviewdog"
