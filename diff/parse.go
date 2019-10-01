@@ -225,7 +225,7 @@ func parseExtendedHeader(r *bufio.Reader) []string {
 				break
 			}
 			line, _ := readline(r)
-			es = append(es, string(line))
+			es = append(es, line)
 		}
 	}
 	return es

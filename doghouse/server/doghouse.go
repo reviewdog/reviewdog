@@ -240,7 +240,7 @@ func (ch *Checker) rawPullRequestDiff(ctx context.Context, pr int) ([]byte, erro
 	if err != nil {
 		return nil, err
 	}
-	return []byte(d), nil
+	return d, nil
 }
 
 func annotationsToCheckResults(as []*doghouse.Annotation) []*reviewdog.CheckResult {
