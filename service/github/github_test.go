@@ -322,7 +322,7 @@ func TestGitHubPullRequest_Post_toomany(t *testing.T) {
 	if err != nil {
 		t.Fatal(err)
 	}
-	comments := []*reviewdog.Comment{}
+	var comments []*reviewdog.Comment
 	for i := 0; i < 100; i++ {
 		comments = append(comments, &reviewdog.Comment{
 			CheckResult: &reviewdog.CheckResult{
