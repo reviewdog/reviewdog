@@ -8,6 +8,7 @@ import (
 	"sync"
 
 	"github.com/google/go-github/v28/github"
+
 	"github.com/reviewdog/reviewdog"
 	"github.com/reviewdog/reviewdog/service/github/githubutils"
 	"github.com/reviewdog/reviewdog/service/serviceutil"

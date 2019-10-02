@@ -42,7 +42,7 @@ type CheckResponse struct {
 
 	// CheckedResults is checked annotations result.
 	// This field is expected to be filled for GitHub Actions integration and
-	// filled when ReportURL is not available. i.e. reviewdog doens't have write
+	// filled when ReportURL is not available. i.e. reviewdog doesn't have write
 	// permission to Check API.
 	// It's also not expected to be passed over network via JSON.
 	// TODO(haya14busa): Consider to move this type to this package to avoid
@@ -51,7 +51,7 @@ type CheckResponse struct {
 	CheckedResults []*reviewdog.FilteredCheck
 }
 
-// Annotation represents an annotaion to file or specific line.
+// Annotation represents an annotation to file or specific line.
 type Annotation struct {
 	// Relative file path
 	// Required.
@@ -62,7 +62,7 @@ type Annotation struct {
 	// Annotation message.
 	// Required.
 	Message string `json:"message,omitempty"`
-	// Original error message of this annotaion.
+	// Original error message of this annotation.
 	// Optional.
 	RawMessage string `json:"raw_message,omitempty"`
 }

@@ -7,7 +7,7 @@ import (
 	"github.com/reviewdog/reviewdog/doghouse/server/ciutil"
 )
 
-func warmupHandler(w http.ResponseWriter, r *http.Request) {
+func warmupHandler(_ http.ResponseWriter, _ *http.Request) {
 	log.Printf("[INFO] warming up server...\n")
 
 	if err := ciutil.UpdateTravisCIIPAddrs(&http.Client{}); err != nil {

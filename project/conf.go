@@ -2,7 +2,7 @@
 // config.
 package project
 
-import yaml "gopkg.in/yaml.v2"
+import "gopkg.in/yaml.v2"
 
 // Config represents reviewdog config.
 type Config struct {
@@ -11,9 +11,8 @@ type Config struct {
 
 // Runner represents config for a runner.
 type Runner struct {
-	// Runner comamnd. (e.g. `golint ./...`)
+	// Runner command. (e.g. `golint ./...`)
 	Cmd string
-
 	// tool name in review comment. (e.g. `golint`)
 	Name string
 	// errorformat name. (e.g. `checkstyle`)

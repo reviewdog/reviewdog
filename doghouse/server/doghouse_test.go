@@ -8,6 +8,7 @@ import (
 
 	"github.com/google/go-cmp/cmp"
 	"github.com/google/go-github/v28/github"
+
 	"github.com/reviewdog/reviewdog/doghouse"
 )
 
@@ -112,7 +113,7 @@ func TestCheck_OK(t *testing.T) {
 				t.Errorf("UpdateCheckRunOptions.Conclusion = %q, want %q", *opt.Conclusion, conclusion)
 			}
 		} else {
-			wantAnnotaions := []*github.CheckRunAnnotation{
+			wantAnnotations := []*github.CheckRunAnnotation{
 				{
 					Path:            github.String("sample.new.txt"),
 					StartLine:       github.Int(2),
@@ -123,7 +124,7 @@ func TestCheck_OK(t *testing.T) {
 					RawDetails:      github.String("raw test message"),
 				},
 			}
-			if d := cmp.Diff(annotations, wantAnnotaions); d != "" {
+			if d := cmp.Diff(annotations, wantAnnotations); d != "" {
 				t.Errorf("Annotation diff found:\n%s", d)
 			}
 		}
@@ -256,7 +257,7 @@ func TestCheck_OK_nonPullRequests(t *testing.T) {
 				t.Errorf("UpdateCheckRunOptions.Conclusion = %q, want %q", *opt.Conclusion, conclusion)
 			}
 		} else {
-			wantAnnotaions := []*github.CheckRunAnnotation{
+			wantAnnotations := []*github.CheckRunAnnotation{
 				{
 					Path:            github.String("sample.new.txt"),
 					StartLine:       github.Int(2),
@@ -276,7 +277,7 @@ func TestCheck_OK_nonPullRequests(t *testing.T) {
 					RawDetails:      github.String("raw test message2"),
 				},
 			}
-			if d := cmp.Diff(annotations, wantAnnotaions); d != "" {
+			if d := cmp.Diff(annotations, wantAnnotations); d != "" {
 				t.Errorf("Annotation diff found:\n%s", d)
 			}
 		}

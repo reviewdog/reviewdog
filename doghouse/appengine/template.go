@@ -7,20 +7,21 @@ import (
 	"net/http"
 
 	"github.com/rakyll/statik/fs"
+
 	_ "github.com/reviewdog/reviewdog/doghouse/appengine/statik"
 )
 
 var tmplFiles http.FileSystem
 
 func mustParseTemplatesFiles(filenames ...string) *template.Template {
-	t, err := parseTempaltesFiles(filenames...)
+	t, err := parseTemplatesFiles(filenames...)
 	if err != nil {
 		log.Fatal(err)
 	}
 	return t
 }
 
-func parseTempaltesFiles(filenames ...string) (*template.Template, error) {
+func parseTemplatesFiles(filenames ...string) (*template.Template, error) {
 	var t *template.Template
 	for _, filename := range filenames {
 		if t == nil {

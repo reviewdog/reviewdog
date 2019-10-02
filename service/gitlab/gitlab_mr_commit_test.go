@@ -9,9 +9,10 @@ import (
 	"testing"
 
 	"github.com/kylelemons/godebug/pretty"
+	"github.com/xanzy/go-gitlab"
+
 	"github.com/reviewdog/reviewdog"
 	"github.com/reviewdog/reviewdog/service/serviceutil"
-	"github.com/xanzy/go-gitlab"
 )
 
 func TestGitLabMergeRequestCommitCommenter_Post_Flush_review_api(t *testing.T) {

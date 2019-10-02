@@ -12,9 +12,10 @@ import (
 
 	"github.com/google/go-github/v28/github"
 	"github.com/kylelemons/godebug/pretty"
+	"golang.org/x/oauth2"
+
 	"github.com/reviewdog/reviewdog"
 	"github.com/reviewdog/reviewdog/service/serviceutil"
-	"golang.org/x/oauth2"
 )
 
 const notokenSkipTestMes = "skipping test (requires actual Personal access tokens. export REVIEWDOG_TEST_GITHUB_API_TOKEN=<GitHub Personal Access Token>)"
@@ -321,7 +322,7 @@ func TestGitHubPullRequest_Post_toomany(t *testing.T) {
 	if err != nil {
 		t.Fatal(err)
 	}
-	comments := []*reviewdog.Comment{}
+	var comments []*reviewdog.Comment
 	for i := 0; i < 100; i++ {
 		comments = append(comments, &reviewdog.Comment{
 			CheckResult: &reviewdog.CheckResult{

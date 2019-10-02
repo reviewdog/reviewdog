@@ -225,7 +225,7 @@ func parseExtendedHeader(r *bufio.Reader) []string {
 				break
 			}
 			line, _ := readline(r)
-			es = append(es, string(line))
+			es = append(es, line)
 		}
 	}
 	return es
@@ -298,7 +298,7 @@ endhunk:
 }
 
 func (p *hunkParser) done(lold, lnew int, hr *hunkrange) bool {
-	end := (lold >= hr.lold+hr.sold && lnew >= hr.lnew+hr.snew)
+	end := lold >= hr.lold+hr.sold && lnew >= hr.lnew+hr.snew
 	if b, err := p.r.Peek(1); err != nil || (string(b) != tokenNoNewlineAtEOF && end) {
 		return true
 	}

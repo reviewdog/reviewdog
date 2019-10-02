@@ -9,12 +9,13 @@ import (
 	"testing"
 
 	"github.com/google/go-cmp/cmp"
+	"golang.org/x/oauth2"
+
 	"github.com/reviewdog/reviewdog"
 	"github.com/reviewdog/reviewdog/cienv"
 	"github.com/reviewdog/reviewdog/doghouse"
 	"github.com/reviewdog/reviewdog/doghouse/client"
 	"github.com/reviewdog/reviewdog/project"
-	"golang.org/x/oauth2"
 )
 
 func setupEnvs(testEnvs map[string]string) (cleanup func()) {

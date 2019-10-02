@@ -24,12 +24,12 @@ type BuildInfo struct {
 
 // GetBuildInfo returns BuildInfo from environment variables.
 //
-// Supporrted CI services' documents:
+// Supported CI services' documents:
 // - Travis CI: https://docs.travis-ci.com/user/environment-variables/
 // - Circle CI: https://circleci.com/docs/environment-variables/
 // - Drone.io: http://docs.drone.io/environment-reference/
 // - GitLab CI: https://docs.gitlab.com/ee/ci/variables/#predefined-variables-environment-variables
-//   - GitLab CI doesn't export ID of Merge Request. https://gitlab.com/gitlab-org/gitlab-ce/issues/15280
+// - GitLab CI doesn't export ID of Merge Request. https://gitlab.com/gitlab-org/gitlab-ce/issues/15280
 func GetBuildInfo() (prInfo *BuildInfo, isPR bool, err error) {
 	if IsInGitHubAction() {
 		return getBuildInfoFromGitHubAction()

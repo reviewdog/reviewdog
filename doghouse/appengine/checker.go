@@ -72,7 +72,7 @@ func (gc *githubChecker) handleCheck(w http.ResponseWriter, r *http.Request) {
 
 func (gc *githubChecker) validateCheckRequest(ctx context.Context, w http.ResponseWriter, r *http.Request, owner, repo string) bool {
 	if extractBearerToken(r) == "" {
-		// Update Travis IP Addresss before checking IP to reduce the # of
+		// Update Travis IP Address before checking IP to reduce the # of
 		// flaky errors when token is not present.
 		if err := ciutil.UpdateTravisCIIPAddrs(&http.Client{}); err != nil {
 			log.Printf("[ERROR] failed to update travis CI IP addresses: %v\n", err)
@@ -117,7 +117,7 @@ func githubRepoURL(ctx context.Context, r *http.Request, owner, repo string) str
 	return u.String()
 }
 
-func doghouseBaseURL(ctx context.Context, r *http.Request) *url.URL {
+func doghouseBaseURL(_ context.Context, r *http.Request) *url.URL {
 	scheme := ""
 	if r.URL != nil && r.URL.Scheme != "" {
 		scheme = r.URL.Scheme

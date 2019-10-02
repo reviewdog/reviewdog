@@ -9,6 +9,7 @@ import (
 
 	"github.com/haya14busa/secretbox"
 	"github.com/justinas/nosurf"
+
 	"github.com/reviewdog/reviewdog/doghouse/server/cookieman"
 	"github.com/reviewdog/reviewdog/doghouse/server/storage"
 )
@@ -104,7 +105,7 @@ func main() {
 	log.Fatal(http.ListenAndServe(":"+os.Getenv("PORT"), nil))
 }
 
-func handleTop(w http.ResponseWriter, r *http.Request) {
+func handleTop(w http.ResponseWriter, _ *http.Request) {
 	var data struct {
 		Title string
 	}

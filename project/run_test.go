@@ -42,7 +42,7 @@ func TestRun(t *testing.T) {
 		}
 	})
 
-	t.Run("erorformat error", func(t *testing.T) {
+	t.Run("errorformat error", func(t *testing.T) {
 		conf := &Config{
 			Runner: map[string]*Runner{
 				"test": {},

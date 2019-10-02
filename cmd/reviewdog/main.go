@@ -20,23 +20,23 @@ import (
 	"golang.org/x/oauth2"
 
 	"github.com/google/go-github/v28/github"
-	shellwords "github.com/mattn/go-shellwords"
+	"github.com/mattn/go-shellwords"
 	"github.com/reviewdog/errorformat/fmts"
+	"github.com/xanzy/go-gitlab"
+
 	"github.com/reviewdog/reviewdog"
 	"github.com/reviewdog/reviewdog/cienv"
 	"github.com/reviewdog/reviewdog/commands"
 	"github.com/reviewdog/reviewdog/project"
 	githubservice "github.com/reviewdog/reviewdog/service/github"
 	gitlabservice "github.com/reviewdog/reviewdog/service/gitlab"
-	gitlab "github.com/xanzy/go-gitlab"
 )
 
 const usageMessage = "" +
 	`Usage:	reviewdog [flags]
 	reviewdog accepts any compiler or linter results from stdin and filters
 	them by diff for review. reviewdog also can posts the results as a comment to
-	GitHub if you use reviewdog in CI service.
-`
+	GitHub if you use reviewdog in CI service.`
 
 type option struct {
 	version          bool

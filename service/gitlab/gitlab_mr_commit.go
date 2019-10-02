@@ -8,10 +8,11 @@ import (
 	"strings"
 	"sync"
 
-	"github.com/reviewdog/reviewdog"
-	"github.com/reviewdog/reviewdog/service/serviceutil"
 	"github.com/xanzy/go-gitlab"
 	"golang.org/x/sync/errgroup"
+
+	"github.com/reviewdog/reviewdog"
+	"github.com/reviewdog/reviewdog/service/serviceutil"
 )
 
 var _ reviewdog.CommentService = &GitLabMergeRequestCommitCommenter{}

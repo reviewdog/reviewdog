@@ -11,13 +11,14 @@ import (
 	"sort"
 	"strings"
 
+	"golang.org/x/oauth2"
+	"golang.org/x/sync/errgroup"
+
 	"github.com/reviewdog/reviewdog"
 	"github.com/reviewdog/reviewdog/cienv"
 	"github.com/reviewdog/reviewdog/doghouse"
 	"github.com/reviewdog/reviewdog/doghouse/client"
 	"github.com/reviewdog/reviewdog/project"
-	"golang.org/x/oauth2"
-	"golang.org/x/sync/errgroup"
 )
 
 func runDoghouse(ctx context.Context, r io.Reader, w io.Writer, opt *option, isProject bool, allowNonPR bool) error {
@@ -138,7 +139,7 @@ func postResultSet(ctx context.Context, resultSet *reviewdog.ResultMap, ghInfo *
 				filteredResultSet.Store(name, res.CheckedResults)
 			}
 			if res.ReportURL == "" && res.CheckedResults == nil {
-				return fmt.Errorf("No result found for %q", name)
+				return fmt.Errorf("no result found for %q", name)
 			}
 			return nil
 		})

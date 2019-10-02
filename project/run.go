@@ -11,9 +11,10 @@ import (
 	"runtime"
 	"strings"
 
+	"golang.org/x/sync/errgroup"
+
 	"github.com/reviewdog/reviewdog"
 	"github.com/reviewdog/reviewdog/diff"
-	"golang.org/x/sync/errgroup"
 )
 
 // RunAndParse runs commands and parse results. Returns map of tool name to check results.
