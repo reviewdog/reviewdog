@@ -164,7 +164,7 @@ func (g *GitHubHandler) isLoggedIn(r *http.Request) bool {
 
 func securerandom(n int) string {
 	b := make([]byte, n)
-	io.ReadFull(rand.Reader, b[:])
+	io.ReadFull(rand.Reader, b)
 	return fmt.Sprintf("%x", b)
 }
 
@@ -237,7 +237,7 @@ func (g *GitHubHandler) HandleGitHubTop(w http.ResponseWriter, r *http.Request) 
 	paths := strings.Split(strings.Trim(r.URL.Path, "/"), "/")
 	switch len(paths) {
 	case 1:
-		g.handleTop(ctx, ghcli, w, r)
+		g.handleTop(ctx, ghcli, w)
 	case 3:
 		g.handleRepo(ctx, ghcli, w, r, paths[1], paths[2])
 	default:
@@ -262,7 +262,7 @@ func (g *GitHubHandler) getUserOrBadRequest(ctx context.Context, ghcli *github.C
 	return true, u
 }
 
-func (g *GitHubHandler) handleTop(ctx context.Context, ghcli *github.Client, w http.ResponseWriter, r *http.Request) {
+func (g *GitHubHandler) handleTop(ctx context.Context, ghcli *github.Client, w http.ResponseWriter) {
 	ok, u := g.getUserOrBadRequest(ctx, ghcli, w)
 	if !ok {
 		return

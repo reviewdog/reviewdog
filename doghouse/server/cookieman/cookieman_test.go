@@ -32,6 +32,7 @@ func (f *fakeCipher) Decrypt(ciphertext []byte) ([]byte, error) {
 
 func GetRequestWithCookie(w *httptest.ResponseRecorder) *http.Request {
 	response := w.Result()
+	defer response.Body.Close()
 	req, _ := http.NewRequest("", "", nil)
 	for _, c := range response.Cookies() {
 		req.AddCookie(c)
@@ -57,6 +58,7 @@ func TestCookieStore_Set_Get(t *testing.T) {
 	}
 
 	response := w.Result()
+	defer response.Body.Close()
 	gotSetCookie := response.Header.Get("Set-Cookie")
 	wantSetCookie := fmt.Sprintf("%s=%s", name, base64.URLEncoding.EncodeToString([]byte(value)))
 	if gotSetCookie != wantSetCookie {
@@ -149,10 +151,13 @@ func TestCookieStore_Clear(t *testing.T) {
 	vimStore := cookieman.NewCookieStore(name, nil)
 	vimStore.Clear(w)
 
-	if cookieLen := len(w.Result().Cookies()); cookieLen != 1 {
+	response := w.Result()
+	defer response.Body.Close()
+
+	if cookieLen := len(response.Cookies()); cookieLen != 1 {
 		t.Fatalf("got %d cookies, want 1 cookie", cookieLen)
 	}
-	cookie := w.Result().Cookies()[0]
+	cookie := response.Cookies()[0]
 
 	if cookie.Name != name {
 		t.Errorf("Cookie.Name = %q, want %q", cookie.Name, name)

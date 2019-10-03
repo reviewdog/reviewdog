@@ -188,7 +188,6 @@ func TestRun(t *testing.T) {
 			t.Error("got no error but want runner not found error")
 		}
 	})
-
 }
 
 func TestFilteredEnviron(t *testing.T) {

@@ -102,5 +102,4 @@ func TestCheckStyleParser(t *testing.T) {
 			t.Errorf("%d: got %v, want %v", i, got, want)
 		}
 	}
-
 }
