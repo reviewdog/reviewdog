@@ -12,6 +12,7 @@ runner:
     cmd: errcheck -asserts -ignoretests -blank $(go list ./... | grep -v /vendor/)
     errorformat:
       - "%f:%l:%c:%m"
+    level: warning
   staticcheck:
     cmd: staticcheck $(go list ./... | grep -v /vendor/)
     errorformat:
@@ -27,9 +28,11 @@ runner:
   revive:
     cmd: revive -config=.revive.toml $(go list ./... | grep -v /vendor/)
     format: golint
+    level: warning
   golangci:
     cmd: golangci-lint run --out-format=line-number ./...
     errorformat:
       - '%E%f:%l:%c: %m'
       - '%E%f:%l: %m'
       - '%C%.%#'
+    level: warning
