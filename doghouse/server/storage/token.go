@@ -32,14 +32,14 @@ type GitHubRepositoryTokenStore interface {
 // Google Appengine.
 type GitHubRepoTokenDatastore struct{}
 
-func (g *GitHubRepoTokenDatastore) newKey(ctx context.Context, owner, repo string) *datastore.Key {
+func (g *GitHubRepoTokenDatastore) newKey(owner, repo string) *datastore.Key {
 	kind := "GitHubRepositoryToken"
 	return datastore.NameKey(kind, fmt.Sprintf("%s/%s", owner, repo), nil)
 }
 
 // Put upserts GitHubRepositoryToken.
 func (g *GitHubRepoTokenDatastore) Put(ctx context.Context, token *GitHubRepositoryToken) error {
-	key := g.newKey(ctx, token.RepositoryOwner, token.RepositoryName)
+	key := g.newKey(token.RepositoryOwner, token.RepositoryName)
 	d, err := datastoreClient(ctx)
 	if err != nil {
 		return err
@@ -49,7 +49,7 @@ func (g *GitHubRepoTokenDatastore) Put(ctx context.Context, token *GitHubReposit
 }
 
 func (g *GitHubRepoTokenDatastore) Get(ctx context.Context, owner, repo string) (ok bool, token *GitHubRepositoryToken, err error) {
-	key := g.newKey(ctx, owner, repo)
+	key := g.newKey(owner, repo)
 	token = new(GitHubRepositoryToken)
 	d, err := datastoreClient(ctx)
 	if err != nil {

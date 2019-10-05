@@ -30,7 +30,7 @@ type GitHubInstallationStore interface {
 // Google Appengine.
 type GitHubInstallationDatastore struct{}
 
-func (g *GitHubInstallationDatastore) newKey(ctx context.Context, accountName string) *datastore.Key {
+func (g *GitHubInstallationDatastore) newKey(accountName string) *datastore.Key {
 	const kind = "GitHubInstallation"
 	return datastore.NameKey(kind, accountName, nil)
 }
@@ -44,7 +44,7 @@ func (g *GitHubInstallationDatastore) Put(ctx context.Context, inst *GitHubInsta
 	_, err = d.RunInTransaction(ctx, func(t *datastore.Transaction) error {
 		var foundInst GitHubInstallation
 		var ok bool
-		err := t.Get(g.newKey(ctx, inst.AccountName), &foundInst)
+		err := t.Get(g.newKey(inst.AccountName), &foundInst)
 		if err != datastore.ErrNoSuchEntity {
 			ok = true
 		}
@@ -53,7 +53,7 @@ func (g *GitHubInstallationDatastore) Put(ctx context.Context, inst *GitHubInsta
 		}
 		// Insert if not found or installation ID is different.
 		if !ok || foundInst.InstallationID != inst.InstallationID {
-			_, err = t.Put(g.newKey(ctx, inst.AccountName), inst)
+			_, err = t.Put(g.newKey(inst.AccountName), inst)
 			return err
 		}
 		return nil // Do nothing.
@@ -62,7 +62,7 @@ func (g *GitHubInstallationDatastore) Put(ctx context.Context, inst *GitHubInsta
 }
 
 func (g *GitHubInstallationDatastore) Get(ctx context.Context, accountName string) (ok bool, inst *GitHubInstallation, err error) {
-	key := g.newKey(ctx, accountName)
+	key := g.newKey(accountName)
 	inst = new(GitHubInstallation)
 	d, err := datastoreClient(ctx)
 	if err != nil {
