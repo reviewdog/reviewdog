@@ -9,7 +9,7 @@ require (
 	github.com/pkg/errors v0.8.1 // indirect
 	golang.org/x/lint v0.0.0-20190909230951-414d861bb4ac
 	golang.org/x/sys v0.0.0-20190913121621-c3b328c6e5a7 // indirect
-	golang.org/x/tools v0.0.0-20190914235951-31e00f45c22e // indirect
+	golang.org/x/tools v0.0.0-20191014205221-18e3458ac98b // indirect
 	honnef.co/go/tools v0.0.1-2019.2.2
 	mvdan.cc/unparam v0.0.0-20190720180237-d51796306d8f
 )
