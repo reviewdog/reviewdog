@@ -393,7 +393,7 @@ jobs:
           reviewdog -reporter=github-pr-check -runners=golint,govet
 ```
 
-#### Pubilc Reviewdog GitHub Actions
+#### Public Reviewdog GitHub Actions
 You can also use public GitHub Actions to start using reviewdog with ease! :tada: :arrow_forward: :tada:
 
 [Marketplace](https://github.com/marketplace?utf8=✓&type=actions&query=reviewdog)
