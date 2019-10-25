@@ -6,9 +6,10 @@ require (
 	cloud.google.com/go v0.46.3
 	cloud.google.com/go/datastore v1.0.0
 	cloud.google.com/go/storage v1.0.0 // indirect
-	github.com/bradleyfalzon/ghinstallation v0.1.2
+	github.com/bradleyfalzon/ghinstallation v0.1.3
 	github.com/dgrijalva/jwt-go v3.2.0+incompatible // indirect
 	github.com/google/go-cmp v0.3.1
+	github.com/google/go-github v17.0.0+incompatible // indirect
 	github.com/google/go-github/v28 v28.1.1
 	github.com/haya14busa/secretbox v0.0.0-20180525171038-07c7ecf409f5
 	github.com/justinas/nosurf v0.0.0-20190416172904-05988550ea18
