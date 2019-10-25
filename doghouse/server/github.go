@@ -39,13 +39,13 @@ func NewGitHubClient(ctx context.Context, opt *NewGitHubClientOption) (*github.C
 
 func githubAppTransport(ctx context.Context, client *http.Client, opt *NewGitHubClientOption) (http.RoundTripper, error) {
 	if opt.RepoOwner == "" {
-		return ghinstallation.NewAppsTransport(getTransport(client), opt.IntegrationID, opt.PrivateKey)
+		return ghinstallation.NewAppsTransport(getTransport(client), int64(opt.IntegrationID), opt.PrivateKey)
 	}
 	installationID, err := findInstallationID(ctx, opt)
 	if err != nil {
 		return nil, err
 	}
-	return ghinstallation.New(getTransport(client), opt.IntegrationID, int(installationID), opt.PrivateKey)
+	return ghinstallation.New(getTransport(client), int64(opt.IntegrationID), int64(installationID), opt.PrivateKey)
 }
 
 func getTransport(client *http.Client) http.RoundTripper {
