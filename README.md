@@ -188,7 +188,7 @@ environment including editor integration with ease.
 runner:
   <tool-name>:
     cmd: <command> # (required)
-    errorformat: # (optional if there is supporeted format for <tool-name>. see reviewdog -list)
+    errorformat: # (optional if there is supported format for <tool-name>. see reviewdog -list)
       - <list of errorformat>
     name: <tool-name> # (optional. you can overwrite <tool-name> defined by runner key)
     level: <level> # (optional. same as -level flag. [info,warning,error])
