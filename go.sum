@@ -17,8 +17,8 @@ cloud.google.com/go/storage v1.0.0/go.mod h1:IhtSnM/ZTZV8YYJWCY8RULGVqBDmpoyjwiy
 github.com/BurntSushi/toml v0.3.1 h1:WXkYYl6Yr3qBf1K79EBnL4mak0OimBfB0XUf9Vl28OQ=
 github.com/BurntSushi/toml v0.3.1/go.mod h1:xHWCNGjB5oqiDr8zfno3MHue2Ht5sIBksp03qcyfWMU=
 github.com/BurntSushi/xgb v0.0.0-20160522181843-27f122750802/go.mod h1:IVnqGOEym/WlBOVXweHU+Q+/VP0lqqI8lqeDx9IjBqo=
-github.com/bradleyfalzon/ghinstallation v0.1.2 h1:9fdqVadlvEX/EUts5/aIGvx2ujKnGNIMcuCuUrM6s6Q=
-github.com/bradleyfalzon/ghinstallation v0.1.2/go.mod h1:VQsLlCoNa54/CNXcc2DuCfNZrZxqQcyPeqKUugF/2h8=
+github.com/bradleyfalzon/ghinstallation v1.0.0 h1:8F5diEz1VN4EcEFuinqhLYMQ95jD8rzhxjJHIGqIWM8=
+github.com/bradleyfalzon/ghinstallation v1.0.0/go.mod h1:p7iD8KytOOKg2wCqbwvJlq4JGpYMjwjkiqdyUqOIHLI=
 github.com/client9/misspell v0.3.4/go.mod h1:qj6jICC3Q7zFZvVWo7KLAzC3yx5G7kyvSDkc90ppPyw=
 github.com/davecgh/go-spew v1.1.0 h1:ZDRjVQ15GmhC3fiQ8ni8+OwkZQO4DARzQgrnXU1Liz8=
 github.com/davecgh/go-spew v1.1.0/go.mod h1:J7Y8YcW2NihsgmVo/mv3lAwl/skON4iLHjSsI+c5H38=
