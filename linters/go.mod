@@ -10,5 +10,5 @@ require (
 	golang.org/x/lint v0.0.0-20191125180803-fdd1cda4f05f
 	golang.org/x/sys v0.0.0-20190913121621-c3b328c6e5a7 // indirect
 	honnef.co/go/tools v0.0.1-2019.2.2
-	mvdan.cc/unparam v0.0.0-20190720180237-d51796306d8f
+	mvdan.cc/unparam v0.0.0-20191111180625-960b1ec0f2c2
 )
