@@ -10,7 +10,7 @@ require (
 	github.com/google/go-cmp v0.3.1
 	github.com/google/go-github/v28 v28.1.1
 	github.com/haya14busa/secretbox v0.0.0-20180525171038-07c7ecf409f5
-	github.com/justinas/nosurf v0.0.0-20190416172904-05988550ea18
+	github.com/justinas/nosurf v1.1.0
 	github.com/kylelemons/godebug v1.1.0
 	github.com/mattn/go-shellwords v1.0.6
 	github.com/rakyll/statik v0.1.6
