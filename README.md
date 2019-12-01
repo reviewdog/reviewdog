@@ -309,6 +309,14 @@ mind the above caution and please use it on your own risk.
 You can use github-pr-review reporter if you don't want to depend on reviewdog
 server.
 
+#### Reporter: GitHub Checks (-reporter=github-check)
+
+It's basically same as `-reporter=github-pr-check` except it works not only for
+Pull Request but also for commit.
+Also, it reports results outside Pull Request diff too.
+
+[![sample comment outside diff](https://user-images.githubusercontent.com/3797062/69917921-e0680580-14ae-11ea-9a56-de9e3cbac005.png)](https://github.com/reviewdog/reviewdog/pull/364/files)
+
 ### Reporter: GitHub PullRequest review comment (-reporter=github-pr-review)
 
 [![sample-comment.png](https://raw.githubusercontent.com/haya14busa/i/dc0ccb1e110515ea407c146d99b749018db05c45/reviewdog/sample-comment.png)](https://github.com/reviewdog/reviewdog/pull/24#discussion_r84599728)
