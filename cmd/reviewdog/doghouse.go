@@ -21,14 +21,17 @@ import (
 	"github.com/reviewdog/reviewdog/project"
 )
 
-func runDoghouse(ctx context.Context, r io.Reader, w io.Writer, opt *option, isProject bool, allowNonPR bool) error {
+func runDoghouse(ctx context.Context, r io.Reader, w io.Writer, opt *option, isProject bool, forPr bool) error {
 	ghInfo, isPr, err := cienv.GetBuildInfo()
 	if err != nil {
 		return err
 	}
-	if !isPr && !allowNonPR {
+	if !isPr && forPr {
 		fmt.Fprintln(os.Stderr, "reviewdog: this is not PullRequest build.")
 		return nil
+	}
+	if !forPr {
+		ghInfo.PullRequest = 0
 	}
 	resultSet, err := checkResultSet(ctx, r, opt, isProject)
 	if err != nil {

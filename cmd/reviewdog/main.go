@@ -206,9 +206,9 @@ See -reporter flag for migration and set -reporter="github-pr-review" or -report
 	default:
 		return fmt.Errorf("unknown -reporter: %s", opt.reporter)
 	case "github-check":
-		return runDoghouse(ctx, r, w, opt, isProject, true)
-	case "github-pr-check":
 		return runDoghouse(ctx, r, w, opt, isProject, false)
+	case "github-pr-check":
+		return runDoghouse(ctx, r, w, opt, isProject, true)
 	case "github-pr-review":
 		if os.Getenv("REVIEWDOG_GITHUB_API_TOKEN") == "" {
 			fmt.Fprintln(os.Stderr, "REVIEWDOG_GITHUB_API_TOKEN is not set")
