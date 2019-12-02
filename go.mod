@@ -5,7 +5,7 @@ go 1.13
 require (
 	cloud.google.com/go v0.49.0
 	cloud.google.com/go/datastore v1.0.0
-	github.com/bradleyfalzon/ghinstallation v1.0.0
+	github.com/bradleyfalzon/ghinstallation v1.1.0
 	github.com/google/go-cmp v0.3.1
 	github.com/google/go-github/v28 v28.1.1
 	github.com/haya14busa/secretbox v0.0.0-20180525171038-07c7ecf409f5
