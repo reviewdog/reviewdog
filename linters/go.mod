@@ -5,7 +5,7 @@ go 1.13
 require (
 	github.com/client9/misspell v0.3.4
 	github.com/kisielk/errcheck v1.2.0
-	github.com/mgechev/revive v0.0.0-20191203172002-03a82c7df346
+	github.com/mgechev/revive v0.0.0-20191204011248-0422c5ce0031
 	golang.org/x/lint v0.0.0-20191125180803-fdd1cda4f05f
 	golang.org/x/sys v0.0.0-20190913121621-c3b328c6e5a7 // indirect
 	honnef.co/go/tools v0.0.1-2019.2.2
