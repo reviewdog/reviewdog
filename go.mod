@@ -15,7 +15,7 @@ require (
 	github.com/rakyll/statik v0.1.6
 	github.com/reviewdog/errorformat v0.0.0-20191205145527-74f85e16e317
 	github.com/xanzy/go-gitlab v0.22.2
-	golang.org/x/net v0.0.0-20191204025024-5ee1b9f4859a
+	golang.org/x/net v0.0.0-20191206103017-1ddd1de85cb0
 	golang.org/x/oauth2 v0.0.0-20191202225959-858c2ad4c8b6
 	golang.org/x/sync v0.0.0-20190911185100-cd5d95a43a6e
 	gopkg.in/yaml.v2 v2.2.7
