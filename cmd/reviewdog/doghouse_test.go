@@ -365,11 +365,11 @@ func TestReportResults(t *testing.T) {
 	if !foundResultInDiff {
 		t.Errorf("foundResultInDiff = %v, want true", foundResultInDiff)
 	}
-	want := `reviwedog: Reporting results for "name1"
+	want := `reviewdog: Reporting results for "name1"
 name1-L1
 name1-L2
-reviwedog: Reporting results for "name2"
-reviwedog: No results found for "name2". 1 results found outside diff.
+reviewdog: Reporting results for "name2"
+reviewdog: No results found for "name2". 1 results found outside diff.
 `
 	if got := stdout.String(); got != want {
 		t.Errorf("diff found for report:\ngot:\n%s\nwant:\n%s", got, want)
@@ -405,10 +405,10 @@ func TestReportResults_noResultsInDiff(t *testing.T) {
 	if foundResultInDiff {
 		t.Errorf("foundResultInDiff = %v, want false", foundResultInDiff)
 	}
-	want := `reviwedog: Reporting results for "name1"
-reviwedog: No results found for "name1". 2 results found outside diff.
-reviwedog: Reporting results for "name2"
-reviwedog: No results found for "name2". 1 results found outside diff.
+	want := `reviewdog: Reporting results for "name1"
+reviewdog: No results found for "name1". 2 results found outside diff.
+reviewdog: Reporting results for "name2"
+reviewdog: No results found for "name2". 1 results found outside diff.
 `
 	if got := stdout.String(); got != want {
 		t.Errorf("diff found for report:\ngot:\n%s\nwant:\n%s", got, want)
