@@ -177,7 +177,7 @@ func reportResults(w io.Writer, filteredResultSet *reviewdog.FilteredCheckMap) b
 			log.Printf("reviewdog: result not found for %q", name)
 			continue
 		}
-		fmt.Fprintf(w, "reviwedog: Reporting results for %q\n", name)
+		fmt.Fprintf(w, "reviewdog: Reporting results for %q\n", name)
 		foundResultPerName := false
 		filteredNum := 0
 		for _, result := range results {
@@ -193,7 +193,7 @@ func reportResults(w io.Writer, filteredResultSet *reviewdog.FilteredCheckMap) b
 			}
 		}
 		if !foundResultPerName {
-			fmt.Fprintf(w, "reviwedog: No results found for %q. %d results found outside diff.\n", name, filteredNum)
+			fmt.Fprintf(w, "reviewdog: No results found for %q. %d results found outside diff.\n", name, filteredNum)
 		}
 	}
 	return foundInDiff
