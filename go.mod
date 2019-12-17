@@ -3,7 +3,7 @@ module github.com/reviewdog/reviewdog
 go 1.13
 
 require (
-	cloud.google.com/go v0.49.0
+	cloud.google.com/go v0.50.0
 	cloud.google.com/go/datastore v1.0.0
 	github.com/bradleyfalzon/ghinstallation v1.1.0
 	github.com/google/go-cmp v0.3.1
