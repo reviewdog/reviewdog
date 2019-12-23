@@ -40,6 +40,7 @@ github.com/mgechev/revive v0.0.0-20191216190638-612cfd2e7323/go.mod h1:q5oTVd4m7
 github.com/mgechev/revive v0.0.0-20191217214733-bc0debcfefa4/go.mod h1:SAyXW51KeYem5Nz/PArqutvMpTubGTy+9gBUJy0p4B4=
 github.com/mgechev/revive v0.0.0-20191219005728-7eac02b48333/go.mod h1:Mgx2QdsmoUepeJNuVg9oHarTfvRqq1V7VAiGWEsJcXc=
 github.com/mgechev/revive v0.0.0-20191220001943-ab7c6da42320/go.mod h1:9oXRe46QQKkuY+1rvWZQj6TSZzzGwY/ErXSG4yj/eRk=
+github.com/mgechev/revive v0.0.0-20191221201751-9d5ed110c939/go.mod h1:33Jv5B7aIixHHezs3rWyIQw85cjlKSatDRISxl9o4MQ=
 github.com/mitchellh/go-homedir v1.1.0/go.mod h1:SfyaCUpYCn1Vlf4IUYiD9fPX4A5wJrkLzIz1N1q0pr0=
 github.com/olekukonko/tablewriter v0.0.1/go.mod h1:vsDQFd/mU46D+Z4whnwzcISnGGzXWMclvtLoiIKAKIo=
 github.com/olekukonko/tablewriter v0.0.3/go.mod h1:YZeBtGzYYEsCHp2LST/u/0NDwGkRoBtmn1cIWCJiS6M=
@@ -91,6 +92,7 @@ golang.org/x/tools v0.0.0-20191216173652-a0e659d51361/go.mod h1:TB2adYChydJhpapK
 golang.org/x/tools v0.0.0-20191217203850-210e553fe1f6/go.mod h1:TB2adYChydJhpapKDTa4BR/hXlZSLoq2Wpct/0txZ28=
 golang.org/x/tools v0.0.0-20191218225520-84f0c7cf60ea/go.mod h1:TB2adYChydJhpapKDTa4BR/hXlZSLoq2Wpct/0txZ28=
 golang.org/x/tools v0.0.0-20191219230827-5e752206af05/go.mod h1:TB2adYChydJhpapKDTa4BR/hXlZSLoq2Wpct/0txZ28=
+golang.org/x/tools v0.0.0-20191220234730-f13409bbebaf/go.mod h1:TB2adYChydJhpapKDTa4BR/hXlZSLoq2Wpct/0txZ28=
 golang.org/x/xerrors v0.0.0-20190717185122-a985d3407aa7/go.mod h1:I/5z698sn9Ka8TeJc9MKroUUfqBBauWjQqLJ2OPfmY0=
 golang.org/x/xerrors v0.0.0-20191011141410-1b5146add898/go.mod h1:I/5z698sn9Ka8TeJc9MKroUUfqBBauWjQqLJ2OPfmY0=
 gopkg.in/check.v1 v1.0.0-20180628173108-788fd7840127/go.mod h1:Co6ibVJAznAaIkqp8huTwlJQCZ016jof/cbN4VW5Yz0=
