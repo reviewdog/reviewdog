@@ -43,6 +43,7 @@ github.com/mgechev/revive v0.0.0-20191220001943-ab7c6da42320/go.mod h1:9oXRe46QQ
 github.com/mgechev/revive v0.0.0-20191221201751-9d5ed110c939/go.mod h1:33Jv5B7aIixHHezs3rWyIQw85cjlKSatDRISxl9o4MQ=
 github.com/mgechev/revive v0.0.0-20191223195705-06cad11d045e/go.mod h1:nm/uuO/Hft0bDux8M4seTYp4E3cnxfJ3RDlUOm1K8GM=
 github.com/mgechev/revive v0.0.0-20191227193220-e083807fa1bf/go.mod h1:Vwga5U/ducQXkYcbsNPMIOA1kFBVY1NBPs5Fa4Nfceg=
+github.com/mgechev/revive v1.0.0/go.mod h1:Vwga5U/ducQXkYcbsNPMIOA1kFBVY1NBPs5Fa4Nfceg=
 github.com/mitchellh/go-homedir v1.1.0/go.mod h1:SfyaCUpYCn1Vlf4IUYiD9fPX4A5wJrkLzIz1N1q0pr0=
 github.com/olekukonko/tablewriter v0.0.1/go.mod h1:vsDQFd/mU46D+Z4whnwzcISnGGzXWMclvtLoiIKAKIo=
 github.com/olekukonko/tablewriter v0.0.3/go.mod h1:YZeBtGzYYEsCHp2LST/u/0NDwGkRoBtmn1cIWCJiS6M=
