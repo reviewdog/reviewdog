@@ -425,7 +425,7 @@ You can also use public GitHub Actions to start using reviewdog with ease! :tada
 - Python
   - [wemake-python-styleguide](https://github.com/wemake-services/wemake-python-styleguide) - Run wemake-python-styleguide
 
-Please open a Pull Request to add your created reviedog actions here :sparkles:.
+Please open a Pull Request to add your created reviewdog actions here :sparkles:.
 I can also consider to put your created repositories under reviewdog org and co-maintain the actions.
 Example: [action-tflint](https://github.com/reviewdog/reviewdog/issues/322).
 
