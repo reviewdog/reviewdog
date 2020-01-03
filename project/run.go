@@ -7,7 +7,6 @@ import (
 	"io"
 	"log"
 	"os"
-	"os/exec"
 	"runtime"
 	"strings"
 
@@ -18,13 +17,18 @@ import (
 )
 
 // RunAndParse runs commands and parse results. Returns map of tool name to check results.
-func RunAndParse(ctx context.Context, conf *Config, runners map[string]bool, defaultLevel string) (*reviewdog.ResultMap, error) {
+func RunAndParse(ctx context.Context, conf *Config, runners map[string]bool, defaultLevel string, teeMode bool) (*reviewdog.ResultMap, error) {
 	var results reviewdog.ResultMap
 	// environment variables for each commands
 	envs := filteredEnviron()
+	cmdBuilder := newCmdBuilder(envs, teeMode)
 	var usedRunners []string
 	var g errgroup.Group
-	semaphore := make(chan int, runtime.NumCPU())
+	semaphoreNum := runtime.NumCPU()
+	if teeMode {
+		semaphoreNum = 1
+	}
+	semaphore := make(chan int, semaphoreNum)
 	for _, runner := range conf.Runner {
 		runner := runner
 		if len(runners) != 0 && !runners[runner.Name] {
@@ -42,10 +46,7 @@ func RunAndParse(ctx context.Context, conf *Config, runners map[string]bool, def
 		if err != nil {
 			return nil, err
 		}
-		cmd := exec.CommandContext(ctx, "sh", "-c", runner.Cmd)
-		cmd.Env = envs
-		stdout, err := cmd.StdoutPipe()
-		stderr, err := cmd.StderrPipe()
+		cmd, stdout, stderr, err := cmdBuilder.build(ctx, runner.Cmd)
 		if err != nil {
 			return nil, err
 		}
@@ -77,8 +78,8 @@ func RunAndParse(ctx context.Context, conf *Config, runners map[string]bool, def
 }
 
 // Run runs reviewdog tasks based on Config.
-func Run(ctx context.Context, conf *Config, runners map[string]bool, c reviewdog.CommentService, d reviewdog.DiffService) error {
-	results, err := RunAndParse(ctx, conf, runners, "") // Level is not used.
+func Run(ctx context.Context, conf *Config, runners map[string]bool, c reviewdog.CommentService, d reviewdog.DiffService, teeMode bool) error {
+	results, err := RunAndParse(ctx, conf, runners, "", teeMode) // Level is not used.
 	if err != nil {
 		return err
 	}

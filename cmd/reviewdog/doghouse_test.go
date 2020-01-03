@@ -111,7 +111,7 @@ func TestNewDoghouseServerCli(t *testing.T) {
 }
 
 func TestCheckResultSet_Project(t *testing.T) {
-	defer func(f func(ctx context.Context, conf *project.Config, runners map[string]bool, level string) (*reviewdog.ResultMap, error)) {
+	defer func(f func(ctx context.Context, conf *project.Config, runners map[string]bool, level string, tee bool) (*reviewdog.ResultMap, error)) {
 		projectRunAndParse = f
 	}(projectRunAndParse)
 
@@ -125,7 +125,7 @@ func TestCheckResultSet_Project(t *testing.T) {
 		},
 	}})
 
-	projectRunAndParse = func(ctx context.Context, conf *project.Config, runners map[string]bool, level string) (*reviewdog.ResultMap, error) {
+	projectRunAndParse = func(ctx context.Context, conf *project.Config, runners map[string]bool, level string, tee bool) (*reviewdog.ResultMap, error) {
 		return &wantCheckResult, nil
 	}
 

@@ -52,6 +52,7 @@ type option struct {
 	reporter         string
 	level            string
 	guessPullRequest bool
+	tee              bool
 }
 
 // flags doc
@@ -67,6 +68,7 @@ const (
 	runnersDoc          = `comma separated runners name to run in config file. default: run all runners`
 	levelDoc            = `report level currently used for github-pr-check reporter ("info","warning","error").`
 	guessPullRequestDoc = `guess Pull Request ID by branch name and commit SHA`
+	teeDoc              = `enable "tee"-like mode which outputs tools's output as is while reporting results to -reporter. Useful for debugging as well.`
 	reporterDoc         = `reporter of reviewdog results. (local, github-check, github-pr-check, github-pr-review, gitlab-mr-discussion, gitlab-mr-commit)
 	"local" (default)
 		Report results to stdout.
@@ -152,6 +154,7 @@ func init() {
 	flag.StringVar(&opt.reporter, "reporter", "local", reporterDoc)
 	flag.StringVar(&opt.level, "level", "error", levelDoc)
 	flag.BoolVar(&opt.guessPullRequest, "guess", false, guessPullRequestDoc)
+	flag.BoolVar(&opt.tee, "tee", false, teeDoc)
 }
 
 func usage() {
@@ -188,6 +191,10 @@ func run(r io.Reader, w io.Writer, opt *option) error {
 	if opt.ci != "" {
 		return errors.New(`-ci flag is deprecated.
 See -reporter flag for migration and set -reporter="github-pr-review" or -reporter="github-pr-check" or -reporter="gitlab-mr-commit"`)
+	}
+
+	if opt.tee {
+		r = io.TeeReader(r, w)
 	}
 
 	// assume it's project based run when both -efm and -f are not specified
@@ -277,7 +284,7 @@ See -reporter flag for migration and set -reporter="github-pr-review" or -report
 		if err != nil {
 			return err
 		}
-		return project.Run(ctx, conf, buildRunnersMap(opt.runners), cs, ds)
+		return project.Run(ctx, conf, buildRunnersMap(opt.runners), cs, ds, opt.tee)
 	}
 
 	p, err := newParserFromOpt(opt)
