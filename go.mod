@@ -8,6 +8,7 @@ require (
 	github.com/bradleyfalzon/ghinstallation v1.1.0
 	github.com/google/go-cmp v0.3.1
 	github.com/google/go-github/v28 v28.1.1
+	github.com/haya14busa/go-actions-toolkit v0.0.0-20200105081403-ca0307860f01
 	github.com/haya14busa/secretbox v0.0.0-20180525171038-07c7ecf409f5
 	github.com/justinas/nosurf v1.1.0
 	github.com/kylelemons/godebug v1.1.0
