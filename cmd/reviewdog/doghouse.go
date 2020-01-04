@@ -190,9 +190,13 @@ func reportResults(w io.Writer, filteredResultSet *reviewdog.FilteredResultMap) 
 			}
 			foundInDiff = true
 			foundResultPerName = true
-			// Output original lines.
-			for _, line := range result.Lines {
-				fmt.Fprintln(w, line)
+			if cienv.IsInGitHubAction() {
+				reportResultsInGitHubActions(result)
+			} else {
+				// Output original lines.
+				for _, line := range result.Lines {
+					fmt.Fprintln(w, line)
+				}
 			}
 		}
 		if !foundResultPerName {
@@ -200,4 +204,14 @@ func reportResults(w io.Writer, filteredResultSet *reviewdog.FilteredResultMap) 
 		}
 	}
 	return foundInDiff
+}
+
+func reportResultsInGitHubActions(result *reviewdog.FilteredCheck) {
+	if result.Lnum == 0 {
+		fmt.Printf("::error file=%s::%s\n", result.Path, result.Message)
+	} else if result.Col == 0 {
+		fmt.Printf("::error file=%s,line=%d::%s\n", result.Path, result.Lnum, result.Message)
+	} else {
+		fmt.Printf("::error file=%s,line=%d,col=%d::%s\n", result.Path, result.Lnum, result.Col, result.Message)
+	}
 }
