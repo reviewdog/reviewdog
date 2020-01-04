@@ -16,7 +16,8 @@ jobs:
     - name: Check out code into the Go module directory
       uses: actions/checkout@v1
 
-    - name: Cache Modules
+    # https://github.com/actions/cache/blob/master/examples.md#go---modules
+    - name: Cache Go Modules
       id: cache
       uses: actions/cache@v1
       with:
@@ -25,7 +26,7 @@ jobs:
         restore-keys: |
           ${{ runner.os }}-go-
 
-    - name: Download Modules
+    - name: Download Go Modules
       if: steps.cache.outputs.cache-hit != 'true'
       run: go mod download
 
