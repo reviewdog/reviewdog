@@ -13,7 +13,7 @@ require (
 	github.com/kylelemons/godebug v1.1.0
 	github.com/mattn/go-shellwords v1.0.6
 	github.com/rakyll/statik v0.1.6
-	github.com/reviewdog/errorformat v0.0.0-20191205145527-74f85e16e317
+	github.com/reviewdog/errorformat v0.0.0-20200104154450-5b92f813bd0d
 	github.com/xanzy/go-gitlab v0.22.2
 	golang.org/x/net v0.0.0-20191209160850-c0dbc17a3553
 	golang.org/x/oauth2 v0.0.0-20191202225959-858c2ad4c8b6
