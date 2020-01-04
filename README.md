@@ -408,6 +408,7 @@ You can also use public GitHub Actions to start using reviewdog with ease! :tada
 
 - Common
   - [reviewdog/action-misspell](https://github.com/reviewdog/action-misspell) - Run [misspell](https://github.com/client9/misspell).
+  - [tsuyoshicho/action-textlint](https://github.com/tsuyoshicho/action-textlint) - Run [textlint](https://github.com/textlint/textlint)
 - Shell script
   - [reviewdog/action-shellcheck](https://github.com/reviewdog/action-shellcheck) - Run [shellcheck](https://github.com/koalaman/shellcheck).
 - Go
@@ -418,6 +419,7 @@ You can also use public GitHub Actions to start using reviewdog with ease! :tada
   - [reviewdog/action-stylelint](https://github.com/reviewdog/action-stylelint) - Run [stylelint](https://github.com/stylelint/stylelint).
 - Vim script
   - [reviewdog/action-vint](https://github.com/reviewdog/action-vint) - Run [vint](https://github.com/Kuniwak/vint).
+  - [tsuyoshicho/action-vimlint](https://github.com/tsuyoshicho/action-vimlint) - Run [vim-vimlint](https://github.com/syngan/vim-vimlint)
 - Terraform
   - [reviewdog/action-tflint](https://github.com/reviewdog/action-tflint) - Run [tflint](https://github.com/wata727/tflint).
 - Ruby
