@@ -10,17 +10,16 @@ import (
 	"os"
 	"sort"
 	"strings"
-	"sync"
 
 	"golang.org/x/oauth2"
 	"golang.org/x/sync/errgroup"
 
-	"github.com/haya14busa/go-actions-toolkit/core"
 	"github.com/reviewdog/reviewdog"
 	"github.com/reviewdog/reviewdog/cienv"
 	"github.com/reviewdog/reviewdog/doghouse"
 	"github.com/reviewdog/reviewdog/doghouse/client"
 	"github.com/reviewdog/reviewdog/project"
+	"github.com/reviewdog/reviewdog/service/github/githubutils"
 )
 
 func runDoghouse(ctx context.Context, r io.Reader, w io.Writer, opt *option, isProject bool, forPr bool) error {
@@ -209,14 +208,14 @@ report results via logging command [1].
 			shouldFail = shouldFail || !cienv.IsInGitHubAction() ||
 				!(results.Level == "warning" || results.Level == "info")
 
-			if foundNumOverall > 9 {
-				warnTooManyAnnotationOnce.Do(warnTooManyAnnotation)
+			if foundNumOverall == githubutils.MaxLoggingAnnotationsPerStep {
+				githubutils.WarnTooManyAnnotationOnce()
 				shouldFail = true
 			}
 
 			foundResultPerName = true
 			if cienv.IsInGitHubAction() {
-				reportResultsInGitHubActions(name, results.Level, result)
+				githubutils.ReportAsGitHubActionsLog(name, results.Level, result.CheckResult)
 			} else {
 				// Output original lines.
 				for _, line := range result.Lines {
@@ -229,42 +228,6 @@ report results via logging command [1].
 		}
 	}
 	return shouldFail
-}
-
-// Report results via logging command to create annotations.
-// https://help.github.com/en/actions/automating-your-workflow-with-github-actions/development-tools-for-github-actions#example-5
-func reportResultsInGitHubActions(toolName, level string, result *reviewdog.FilteredCheck) {
-	mes := fmt.Sprintf("[%s] reported by reviewdog 🐶\n%s\n\nRaw Output:\n%s",
-		toolName, result.Message, strings.Join(result.Lines, "\n"))
-	opt := &core.LogOption{
-		File: result.Path,
-		Line: result.Lnum,
-		Col:  result.Col,
-	}
-	switch level {
-	// no info command with location data.
-	case "warning", "info":
-		core.Warning(mes, opt)
-	case "error", "":
-		core.Error(mes, opt)
-	default:
-		core.Error(fmt.Sprintf("Unknown level: %s", level), nil)
-		core.Error(mes, opt)
-	}
-}
-
-var warnTooManyAnnotationOnce sync.Once
-
-func warnTooManyAnnotation() {
-	core.Error(`reviewdog: Too many results (annotations) in diff.
-You may miss some annotations due to GitHub limitation for annotation created by logging command.
-
-Limitation:
-- 10 warning annotations and 10 error annotations per step
-- 50 annotations per job (sum of annotations from all the steps)
-- 50 annotations per run (separate from the job annotations, these annotations aren't created by users)
-
-Source: https://github.community/t5/GitHub-Actions/Maximum-number-of-annotations-that-can-be-created-using-GitHub/m-p/39085`, nil)
 }
 
 func isPRFromForkedRepo() bool {
