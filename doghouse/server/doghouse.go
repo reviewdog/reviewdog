@@ -39,9 +39,6 @@ func NewChecker(req *doghouse.CheckRequest, gh *github.Client) *Checker {
 }
 
 func (ch *Checker) Check(ctx context.Context) (*doghouse.CheckResponse, error) {
-
-	filterByDiff := ch.req.PullRequest != 0
-
 	var filediffs []*diff.FileDiff
 	if ch.req.PullRequest != 0 {
 		var err error
@@ -68,7 +65,7 @@ func (ch *Checker) Check(ctx context.Context) (*doghouse.CheckResponse, error) {
 		return nil, fmt.Errorf("failed to create check: %v", err)
 	}
 
-	checkRun, err := ch.postCheck(ctx, check.GetID(), filtered, filterByDiff)
+	checkRun, err := ch.postCheck(ctx, check.GetID(), filtered)
 	if err != nil {
 		return nil, fmt.Errorf("failed to post result: %v", err)
 	}
@@ -78,7 +75,8 @@ func (ch *Checker) Check(ctx context.Context) (*doghouse.CheckResponse, error) {
 	return res, nil
 }
 
-func (ch *Checker) postCheck(ctx context.Context, checkID int64, checks []*reviewdog.FilteredCheck, filterByDiff bool) (*github.CheckRun, error) {
+func (ch *Checker) postCheck(ctx context.Context, checkID int64, checks []*reviewdog.FilteredCheck) (*github.CheckRun, error) {
+	filterByDiff := !ch.req.OutsideDiff
 	var annotations []*github.CheckRunAnnotation
 	for _, c := range checks {
 		if !c.InDiff && filterByDiff {

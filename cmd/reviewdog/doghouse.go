@@ -31,9 +31,6 @@ func runDoghouse(ctx context.Context, r io.Reader, w io.Writer, opt *option, isP
 		fmt.Fprintln(os.Stderr, "reviewdog: this is not PullRequest build.")
 		return nil
 	}
-	if !forPr {
-		ghInfo.PullRequest = 0
-	}
 	resultSet, err := checkResultSet(ctx, r, opt, isProject)
 	if err != nil {
 		return err
@@ -42,7 +39,7 @@ func runDoghouse(ctx context.Context, r io.Reader, w io.Writer, opt *option, isP
 	if err != nil {
 		return err
 	}
-	filteredResultSet, err := postResultSet(ctx, resultSet, ghInfo, cli)
+	filteredResultSet, err := postResultSet(ctx, resultSet, ghInfo, cli, forPr)
 	if err != nil {
 		return err
 	}
@@ -111,7 +108,8 @@ func checkResultSet(ctx context.Context, r io.Reader, opt *option, isProject boo
 	return resultSet, nil
 }
 
-func postResultSet(ctx context.Context, resultSet *reviewdog.ResultMap, ghInfo *cienv.BuildInfo, cli client.DogHouseClientInterface) (*reviewdog.FilteredResultMap, error) {
+func postResultSet(ctx context.Context, resultSet *reviewdog.ResultMap,
+	ghInfo *cienv.BuildInfo, cli client.DogHouseClientInterface, forPr bool) (*reviewdog.FilteredResultMap, error) {
 	var g errgroup.Group
 	wd, _ := os.Getwd()
 	filteredResultSet := new(reviewdog.FilteredResultMap)
@@ -130,6 +128,8 @@ func postResultSet(ctx context.Context, resultSet *reviewdog.ResultMap, ghInfo *
 			Branch:      ghInfo.Branch,
 			Annotations: as,
 			Level:       result.Level,
+			// If it's only for PR, do not report results outside diff.
+			OutsideDiff: !forPr,
 		}
 		g.Go(func() error {
 			res, err := cli.Check(ctx, req)
