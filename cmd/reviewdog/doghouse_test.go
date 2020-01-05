@@ -337,6 +337,10 @@ func TestPostResultSet_withEmptyResponse(t *testing.T) {
 }
 
 func TestReportResults(t *testing.T) {
+	cleanup := setupEnvs(map[string]string{
+		"GITHUB_ACTION": "",
+	})
+	defer cleanup()
 	filteredResultSet := new(reviewdog.FilteredResultMap)
 	filteredResultSet.Store("name1", &reviewdog.FilteredResult{
 		FilteredCheck: []*reviewdog.FilteredCheck{
@@ -380,7 +384,36 @@ reviewdog: No results found for "name2". 1 results found outside diff.
 	}
 }
 
+func TestReportResults_inGitHubAction(t *testing.T) {
+	cleanup := setupEnvs(map[string]string{
+		"GITHUB_ACTION": "xxx",
+	})
+	defer cleanup()
+	filteredResultSet := new(reviewdog.FilteredResultMap)
+	filteredResultSet.Store("name1", &reviewdog.FilteredResult{
+		FilteredCheck: []*reviewdog.FilteredCheck{
+			{
+				CheckResult: &reviewdog.CheckResult{
+					Lines: []string{"name1-L1", "name1-L2"},
+				},
+				InDiff: true,
+			},
+		},
+	})
+	stdout := new(bytes.Buffer)
+	_ = reportResults(stdout, filteredResultSet)
+	want := `reviewdog: Reporting results for "name1"
+`
+	if got := stdout.String(); got != want {
+		t.Errorf("diff found for report:\ngot:\n%s\nwant:\n%s", got, want)
+	}
+}
+
 func TestReportResults_noResultsInDiff(t *testing.T) {
+	cleanup := setupEnvs(map[string]string{
+		"GITHUB_ACTION": "",
+	})
+	defer cleanup()
 	filteredResultSet := new(reviewdog.FilteredResultMap)
 	filteredResultSet.Store("name1", &reviewdog.FilteredResult{
 		FilteredCheck: []*reviewdog.FilteredCheck{
