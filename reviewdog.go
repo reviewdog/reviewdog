@@ -10,6 +10,21 @@ import (
 	"github.com/reviewdog/reviewdog/diff"
 )
 
+var X1 = 14
+var X2 = 14
+var X3 = 14
+var X4 = 14
+var X5 = 14
+var X6 = 14
+var X7 = 14
+var X8 = 14
+var X9 = 14
+var X10 = 14
+var X11 = 14
+var X12 = 14
+var X13 = 14
+var X14 = 14
+
 // Reviewdog represents review dog application which parses result of compiler
 // or linter, get diff and filter the results by diff, and report filtered
 // results.
