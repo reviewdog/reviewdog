@@ -10,10 +10,12 @@ import (
 	"os"
 	"sort"
 	"strings"
+	"sync"
 
 	"golang.org/x/oauth2"
 	"golang.org/x/sync/errgroup"
 
+	"github.com/haya14busa/go-actions-toolkit/core"
 	"github.com/reviewdog/reviewdog"
 	"github.com/reviewdog/reviewdog/cienv"
 	"github.com/reviewdog/reviewdog/doghouse"
@@ -137,8 +139,9 @@ func postResultSet(ctx context.Context, resultSet *reviewdog.ResultMap, ghInfo *
 			}
 			if res.ReportURL != "" {
 				log.Printf("[%s] reported: %s", name, res.ReportURL)
-			}
-			if res.CheckedResults != nil {
+			} else if res.CheckedResults != nil {
+				// Fill results only when report URL is missing, which probably means
+				// it failed to report results with Check API.
 				filteredResultSet.Store(name, &reviewdog.FilteredResult{
 					Level:         result.Level,
 					FilteredCheck: res.CheckedResults,
@@ -162,9 +165,20 @@ func checkResultToAnnotation(c *reviewdog.CheckResult, wd string) *doghouse.Anno
 	}
 }
 
-// reportResults reports results to given io.Writer and return true if at least
-// one annotation result is in diff.
+// reportResults reports results to given io.Writer and possibly to GitHub
+// Actions log using logging command.
+//
+// It returns true if reviewdog should exit with 1.
+// e.g. At least one annotation result is in diff.
 func reportResults(w io.Writer, filteredResultSet *reviewdog.FilteredResultMap) bool {
+	if filteredResultSet.Len() != 0 && isPRFromForkedRepo() {
+		fmt.Fprintln(w, `reviewdog: This is Pull-Request from forked repository.
+GitHub token doesn't have write permission of Check API, so reviewdog will
+report results via logging command [1].
+
+[1]: https://help.github.com/en/actions/automating-your-workflow-with-github-actions/development-tools-for-github-actions#logging-commands`)
+	}
+
 	// Sort names to get deterministic result.
 	var names []string
 	filteredResultSet.Range(func(name string, results *reviewdog.FilteredResult) {
@@ -172,7 +186,8 @@ func reportResults(w io.Writer, filteredResultSet *reviewdog.FilteredResultMap) 
 	})
 	sort.Strings(names)
 
-	foundInDiff := false
+	shouldFail := false
+	foundNumOverall := 0
 	for _, name := range names {
 		results, err := filteredResultSet.Load(name)
 		if err != nil {
@@ -188,16 +203,74 @@ func reportResults(w io.Writer, filteredResultSet *reviewdog.FilteredResultMap) 
 				filteredNum++
 				continue
 			}
-			foundInDiff = true
+			foundNumOverall++
+			// If it's not running in GitHub Actions, reviewdog should exit with 1
+			// if there are at least one result in diff regardless of error level.
+			shouldFail = shouldFail || !cienv.IsInGitHubAction() ||
+				!(results.Level == "warning" || results.Level == "info")
+
+			if foundNumOverall > 9 {
+				warnTooManyAnnotationOnce.Do(warnTooManyAnnotation)
+				shouldFail = true
+			}
+
 			foundResultPerName = true
-			// Output original lines.
-			for _, line := range result.Lines {
-				fmt.Fprintln(w, line)
+			if cienv.IsInGitHubAction() {
+				reportResultsInGitHubActions(name, results.Level, result)
+			} else {
+				// Output original lines.
+				for _, line := range result.Lines {
+					fmt.Fprintln(w, line)
+				}
 			}
 		}
 		if !foundResultPerName {
 			fmt.Fprintf(w, "reviewdog: No results found for %q. %d results found outside diff.\n", name, filteredNum)
 		}
 	}
-	return foundInDiff
+	return shouldFail
+}
+
+// Report results via logging command to create annotations.
+// https://help.github.com/en/actions/automating-your-workflow-with-github-actions/development-tools-for-github-actions#example-5
+func reportResultsInGitHubActions(toolName, level string, result *reviewdog.FilteredCheck) {
+	mes := fmt.Sprintf("[%s] reported by reviewdog 🐶\n%s\n\nRaw Output:\n%s",
+		toolName, result.Message, strings.Join(result.Lines, "\n"))
+	opt := &core.LogOption{
+		File: result.Path,
+		Line: result.Lnum,
+		Col:  result.Col,
+	}
+	switch level {
+	// no info command with location data.
+	case "warning", "info":
+		core.Warning(mes, opt)
+	case "error", "":
+		core.Error(mes, opt)
+	default:
+		core.Error(fmt.Sprintf("Unknown level: %s", level), nil)
+		core.Error(mes, opt)
+	}
+}
+
+var warnTooManyAnnotationOnce sync.Once
+
+func warnTooManyAnnotation() {
+	core.Error(`reviewdog: Too many results (annotations) in diff.
+You may miss some annotations due to GitHub limitation for annotation created by logging command.
+
+Limitation:
+- 10 warning annotations and 10 error annotations per step
+- 50 annotations per job (sum of annotations from all the steps)
+- 50 annotations per run (separate from the job annotations, these annotations aren't created by users)
+
+Source: https://github.community/t5/GitHub-Actions/Maximum-number-of-annotations-that-can-be-created-using-GitHub/m-p/39085`, nil)
+}
+
+func isPRFromForkedRepo() bool {
+	event, err := cienv.LoadGitHubEvent()
+	if err != nil {
+		return false
+	}
+	return event.PullRequest.Head.Repo.Fork
 }
