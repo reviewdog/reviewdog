@@ -208,7 +208,7 @@ report results via logging command [1].
 			shouldFail = shouldFail || !cienv.IsInGitHubAction() ||
 				!(results.Level == "warning" || results.Level == "info")
 
-			if foundNumOverall == 10 {
+			if foundNumOverall == githubutils.MAX_LOGGING_ANNOTATIONS_PER_STEP {
 				githubutils.WarnTooManyAnnotationOnce()
 				shouldFail = true
 			}

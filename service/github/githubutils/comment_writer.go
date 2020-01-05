@@ -10,6 +10,8 @@ import (
 	"github.com/reviewdog/reviewdog"
 )
 
+const MAX_LOGGING_ANNOTATIONS_PER_STEP = 10
+
 var _ reviewdog.CommentService = &GitHubActionLogWriter{}
 
 // GitHubActionLogWriter reports results via logging command to create
@@ -27,7 +29,7 @@ func NewGitHubActionLogWriter(level string) *GitHubActionLogWriter {
 
 func (lw *GitHubActionLogWriter) Post(_ context.Context, c *reviewdog.Comment) error {
 	lw.reportNum++
-	if lw.reportNum == 10 {
+	if lw.reportNum == MAX_LOGGING_ANNOTATIONS_PER_STEP {
 		WarnTooManyAnnotationOnce()
 	}
 	ReportAsGitHubActionsLog(c.ToolName, lw.level, c.CheckResult)
