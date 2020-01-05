@@ -141,6 +141,88 @@ func TestCheck_OK(t *testing.T) {
 	}
 }
 
+func TestCheck_OK_outsidediff(t *testing.T) {
+	const (
+		name        = "haya14busa-linter"
+		owner       = "haya14busa"
+		repo        = "reviewdog"
+		prNum       = 14
+		sha         = "1414"
+		reportURL   = "http://example.com/report_url"
+		conclusion  = "neutral"
+		wantCheckID = 1414
+	)
+
+	req := &doghouse.CheckRequest{
+		Name:        name,
+		Owner:       owner,
+		Repo:        repo,
+		PullRequest: prNum,
+		SHA:         sha,
+		Annotations: []*doghouse.Annotation{
+			{
+				Path:       "sample.new.txt",
+				Line:       2,
+				Message:    "test message",
+				RawMessage: "raw test message",
+			},
+			{
+				Path:       "sample.new.txt",
+				Line:       14,
+				Message:    "test message outside diff",
+				RawMessage: "raw test message outside diff",
+			},
+		},
+		Level:       "warning",
+		OutsideDiff: true,
+	}
+
+	cli := &fakeCheckerGitHubCli{}
+	cli.FakeGetPullRequestDiff = func(ctx context.Context, owner, repo string, number int) ([]byte, error) {
+		return []byte(sampleDiff), nil
+	}
+	cli.FakeCreateCheckRun = func(ctx context.Context, owner, repo string, opt github.CreateCheckRunOptions) (*github.CheckRun, error) {
+		return &github.CheckRun{ID: github.Int64(wantCheckID)}, nil
+	}
+	cli.FakeUpdateCheckRun = func(ctx context.Context, owner, repo string, checkID int64, opt github.UpdateCheckRunOptions) (*github.CheckRun, error) {
+		annotations := opt.Output.Annotations
+		if len(annotations) == 0 {
+			if *opt.Conclusion != conclusion {
+				t.Errorf("UpdateCheckRunOptions.Conclusion = %q, want %q", *opt.Conclusion, conclusion)
+			}
+		} else {
+			wantAnnotations := []*github.CheckRunAnnotation{
+				{
+					Path:            github.String("sample.new.txt"),
+					StartLine:       github.Int(2),
+					EndLine:         github.Int(2),
+					AnnotationLevel: github.String("warning"),
+					Message:         github.String("test message"),
+					Title:           github.String("[haya14busa-linter] sample.new.txt#L2"),
+					RawDetails:      github.String("raw test message"),
+				},
+				{
+					Path:            github.String("sample.new.txt"),
+					StartLine:       github.Int(14),
+					EndLine:         github.Int(14),
+					AnnotationLevel: github.String("warning"),
+					Message:         github.String("test message outside diff"),
+					Title:           github.String("[haya14busa-linter] sample.new.txt#L14"),
+					RawDetails:      github.String("raw test message outside diff"),
+				},
+			}
+			if d := cmp.Diff(annotations, wantAnnotations); d != "" {
+				t.Errorf("Annotation diff found:\n%s", d)
+			}
+		}
+		return &github.CheckRun{HTMLURL: github.String(reportURL)}, nil
+	}
+	checker := &Checker{req: req, gh: cli}
+	if _, err := checker.Check(context.Background()); err != nil {
+		t.Fatal(err)
+	}
+}
+
 func TestCheck_OK_multiple_update_runs(t *testing.T) {
 	const (
 		name        = "haya14busa-linter"

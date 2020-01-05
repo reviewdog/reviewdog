@@ -76,7 +76,7 @@ func (ch *Checker) Check(ctx context.Context) (*doghouse.CheckResponse, error) {
 }
 
 func (ch *Checker) postCheck(ctx context.Context, checkID int64, checks []*reviewdog.FilteredCheck) (*github.CheckRun, error) {
-	filterByDiff := !ch.req.OutsideDiff
+	filterByDiff := ch.req.PullRequest != 0 && !ch.req.OutsideDiff
 	var annotations []*github.CheckRunAnnotation
 	for _, c := range checks {
 		if !c.InDiff && filterByDiff {

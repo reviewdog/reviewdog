@@ -273,7 +273,7 @@ func TestPostResultSet_withReportURL(t *testing.T) {
 		SHA:         sha,
 	}
 
-	if _, err := postResultSet(context.Background(), &resultSet, ghInfo, fakeCli); err != nil {
+	if _, err := postResultSet(context.Background(), &resultSet, ghInfo, fakeCli, true); err != nil {
 		t.Fatal(err)
 	}
 }
@@ -297,7 +297,7 @@ func TestPostResultSet_withoutReportURL(t *testing.T) {
 
 	ghInfo := &cienv.BuildInfo{Owner: owner, Repo: repo, PullRequest: prNum, SHA: sha}
 
-	resp, err := postResultSet(context.Background(), &resultSet, ghInfo, fakeCli)
+	resp, err := postResultSet(context.Background(), &resultSet, ghInfo, fakeCli, true)
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -331,7 +331,7 @@ func TestPostResultSet_withEmptyResponse(t *testing.T) {
 
 	ghInfo := &cienv.BuildInfo{Owner: owner, Repo: repo, PullRequest: prNum, SHA: sha}
 
-	if _, err := postResultSet(context.Background(), &resultSet, ghInfo, fakeCli); err == nil {
+	if _, err := postResultSet(context.Background(), &resultSet, ghInfo, fakeCli, true); err == nil {
 		t.Error("got no error but want report missing error")
 	}
 }
