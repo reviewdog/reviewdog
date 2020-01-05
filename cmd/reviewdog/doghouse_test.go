@@ -152,6 +152,11 @@ func TestCheckResultSet_Project(t *testing.T) {
 }
 
 func TestCheckResultSet_NonProject(t *testing.T) {
+	cleanup := setupEnvs(map[string]string{
+		"GITHUB_EVENT_PATH": "",
+	})
+	defer cleanup()
+
 	opt := &option{
 		f: "golint",
 	}
