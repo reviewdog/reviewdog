@@ -10,6 +10,7 @@ import (
 	"os"
 	"sort"
 	"strings"
+	"sync"
 
 	"golang.org/x/oauth2"
 	"golang.org/x/sync/errgroup"
@@ -175,6 +176,7 @@ func reportResults(w io.Writer, filteredResultSet *reviewdog.FilteredResultMap) 
 	sort.Strings(names)
 
 	shouldFail := false
+	foundNumOverall := 0
 	for _, name := range names {
 		results, err := filteredResultSet.Load(name)
 		if err != nil {
@@ -190,10 +192,17 @@ func reportResults(w io.Writer, filteredResultSet *reviewdog.FilteredResultMap) 
 				filteredNum++
 				continue
 			}
+			foundNumOverall++
 			// If it's not running in GitHub Actions, reviewdog should exit with 1
 			// if there are at least one result in diff regardless of error level.
 			shouldFail = shouldFail || !cienv.IsInGitHubAction() ||
 				!(results.Level == "warning" || results.Level == "info")
+
+			if foundNumOverall > 9 {
+				warnTooManyAnnotationOnce.Do(warnTooManyAnnotation)
+				shouldFail = true
+			}
+
 			foundResultPerName = true
 			if cienv.IsInGitHubAction() {
 				reportResultsInGitHubActions(name, results.Level, result)
@@ -231,4 +240,18 @@ func reportResultsInGitHubActions(toolName, level string, result *reviewdog.Filt
 		core.Error(fmt.Sprintf("Unknown level: %s", level), nil)
 		core.Error(mes, opt)
 	}
+}
+
+var warnTooManyAnnotationOnce sync.Once
+
+func warnTooManyAnnotation() {
+	core.Error(`reviewdog: Too many results (annotations) in diff.
+You may miss some annotations due to GitHub limitation for annotation created by logging command.
+
+Limitation:
+- 10 warning annotations and 10 error annotations per step
+- 50 annotations per job (sum of annotations from all the steps)
+- 50 annotations per run (separate from the job annotations, these annotations aren't created by users)
+
+Source: https://github.community/t5/GitHub-Actions/Maximum-number-of-annotations-that-can-be-created-using-GitHub/m-p/39085`, nil)
 }
