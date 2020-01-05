@@ -308,7 +308,7 @@ func TestPostResultSet_withoutReportURL(t *testing.T) {
 	if err != nil {
 		t.Fatalf("should have result for name1: %v", err)
 	}
-	if diff := cmp.Diff(results, wantResults); diff != "" {
+	if diff := cmp.Diff(results.FilteredCheck, wantResults); diff != "" {
 		t.Errorf("results has diff:\n%s", diff)
 	}
 }
@@ -337,27 +337,31 @@ func TestPostResultSet_withEmptyResponse(t *testing.T) {
 }
 
 func TestReportResults(t *testing.T) {
-	filteredResultSet := new(reviewdog.FilteredCheckMap)
-	filteredResultSet.Store("name1", []*reviewdog.FilteredCheck{
-		{
-			CheckResult: &reviewdog.CheckResult{
-				Lines: []string{"name1-L1", "name1-L2"},
+	filteredResultSet := new(reviewdog.FilteredResultMap)
+	filteredResultSet.Store("name1", &reviewdog.FilteredResult{
+		FilteredCheck: []*reviewdog.FilteredCheck{
+			{
+				CheckResult: &reviewdog.CheckResult{
+					Lines: []string{"name1-L1", "name1-L2"},
+				},
+				InDiff: true,
 			},
-			InDiff: true,
-		},
-		{
-			CheckResult: &reviewdog.CheckResult{
-				Lines: []string{"name1.2-L1", "name1.2-L2"},
+			{
+				CheckResult: &reviewdog.CheckResult{
+					Lines: []string{"name1.2-L1", "name1.2-L2"},
+				},
+				InDiff: false,
 			},
-			InDiff: false,
 		},
 	})
-	filteredResultSet.Store("name2", []*reviewdog.FilteredCheck{
-		{
-			CheckResult: &reviewdog.CheckResult{
-				Lines: []string{"name1-L1", "name1-L2"},
+	filteredResultSet.Store("name2", &reviewdog.FilteredResult{
+		FilteredCheck: []*reviewdog.FilteredCheck{
+			{
+				CheckResult: &reviewdog.CheckResult{
+					Lines: []string{"name1-L1", "name1-L2"},
+				},
+				InDiff: false,
 			},
-			InDiff: false,
 		},
 	})
 	stdout := new(bytes.Buffer)
@@ -377,27 +381,31 @@ reviewdog: No results found for "name2". 1 results found outside diff.
 }
 
 func TestReportResults_noResultsInDiff(t *testing.T) {
-	filteredResultSet := new(reviewdog.FilteredCheckMap)
-	filteredResultSet.Store("name1", []*reviewdog.FilteredCheck{
-		{
-			CheckResult: &reviewdog.CheckResult{
-				Lines: []string{"name1-L1", "name1-L2"},
+	filteredResultSet := new(reviewdog.FilteredResultMap)
+	filteredResultSet.Store("name1", &reviewdog.FilteredResult{
+		FilteredCheck: []*reviewdog.FilteredCheck{
+			{
+				CheckResult: &reviewdog.CheckResult{
+					Lines: []string{"name1-L1", "name1-L2"},
+				},
+				InDiff: false,
 			},
-			InDiff: false,
-		},
-		{
-			CheckResult: &reviewdog.CheckResult{
-				Lines: []string{"name1.2-L1", "name1.2-L2"},
+			{
+				CheckResult: &reviewdog.CheckResult{
+					Lines: []string{"name1.2-L1", "name1.2-L2"},
+				},
+				InDiff: false,
 			},
-			InDiff: false,
 		},
 	})
-	filteredResultSet.Store("name2", []*reviewdog.FilteredCheck{
-		{
-			CheckResult: &reviewdog.CheckResult{
-				Lines: []string{"name1-L1", "name1-L2"},
+	filteredResultSet.Store("name2", &reviewdog.FilteredResult{
+		FilteredCheck: []*reviewdog.FilteredCheck{
+			{
+				CheckResult: &reviewdog.CheckResult{
+					Lines: []string{"name1-L1", "name1-L2"},
+				},
+				InDiff: false,
 			},
-			InDiff: false,
 		},
 	})
 	stdout := new(bytes.Buffer)

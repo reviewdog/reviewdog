@@ -110,10 +110,10 @@ func checkResultSet(ctx context.Context, r io.Reader, opt *option, isProject boo
 	return resultSet, nil
 }
 
-func postResultSet(ctx context.Context, resultSet *reviewdog.ResultMap, ghInfo *cienv.BuildInfo, cli client.DogHouseClientInterface) (*reviewdog.FilteredCheckMap, error) {
+func postResultSet(ctx context.Context, resultSet *reviewdog.ResultMap, ghInfo *cienv.BuildInfo, cli client.DogHouseClientInterface) (*reviewdog.FilteredResultMap, error) {
 	var g errgroup.Group
 	wd, _ := os.Getwd()
-	filteredResultSet := new(reviewdog.FilteredCheckMap)
+	filteredResultSet := new(reviewdog.FilteredResultMap)
 	resultSet.Range(func(name string, result *reviewdog.Result) {
 		checkResults := result.CheckResults
 		as := make([]*doghouse.Annotation, 0, len(checkResults))
@@ -139,7 +139,10 @@ func postResultSet(ctx context.Context, resultSet *reviewdog.ResultMap, ghInfo *
 				log.Printf("[%s] reported: %s", name, res.ReportURL)
 			}
 			if res.CheckedResults != nil {
-				filteredResultSet.Store(name, res.CheckedResults)
+				filteredResultSet.Store(name, &reviewdog.FilteredResult{
+					Level:         result.Level,
+					FilteredCheck: res.CheckedResults,
+				})
 			}
 			if res.ReportURL == "" && res.CheckedResults == nil {
 				return fmt.Errorf("no result found for %q", name)
@@ -161,10 +164,10 @@ func checkResultToAnnotation(c *reviewdog.CheckResult, wd string) *doghouse.Anno
 
 // reportResults reports results to given io.Writer and return true if at least
 // one annotation result is in diff.
-func reportResults(w io.Writer, filteredResultSet *reviewdog.FilteredCheckMap) bool {
+func reportResults(w io.Writer, filteredResultSet *reviewdog.FilteredResultMap) bool {
 	// Sort names to get deterministic result.
 	var names []string
-	filteredResultSet.Range(func(name string, results []*reviewdog.FilteredCheck) {
+	filteredResultSet.Range(func(name string, results *reviewdog.FilteredResult) {
 		names = append(names, name)
 	})
 	sort.Strings(names)
@@ -180,7 +183,7 @@ func reportResults(w io.Writer, filteredResultSet *reviewdog.FilteredCheckMap) b
 		fmt.Fprintf(w, "reviewdog: Reporting results for %q\n", name)
 		foundResultPerName := false
 		filteredNum := 0
-		for _, result := range results {
+		for _, result := range results.FilteredCheck {
 			if !result.InDiff {
 				filteredNum++
 				continue
