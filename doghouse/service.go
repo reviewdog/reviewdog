@@ -31,7 +31,15 @@ type CheckRequest struct {
 
 	// Level is report level for this request.
 	// One of ["info", "warning", "error"]. Default is "error".
+	// Optional.
 	Level string `json:"level"`
+
+	// OutsideDiff represents whether it report results in outside diff or not as
+	// annotations. It's useful only when PullRequest != 0. If PullRequest is
+	// empty, it will always report results all resutls including outside diff
+	// (because there are no diff!).
+	// Optional.
+	OutsideDiff bool `json:"outside_diff"`
 }
 
 // CheckResponse represents doghouse GitHub check response.

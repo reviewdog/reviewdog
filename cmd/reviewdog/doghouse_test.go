@@ -273,7 +273,7 @@ func TestPostResultSet_withReportURL(t *testing.T) {
 		SHA:         sha,
 	}
 
-	if _, err := postResultSet(context.Background(), &resultSet, ghInfo, fakeCli); err != nil {
+	if _, err := postResultSet(context.Background(), &resultSet, ghInfo, fakeCli, true); err != nil {
 		t.Fatal(err)
 	}
 }
@@ -297,7 +297,7 @@ func TestPostResultSet_withoutReportURL(t *testing.T) {
 
 	ghInfo := &cienv.BuildInfo{Owner: owner, Repo: repo, PullRequest: prNum, SHA: sha}
 
-	resp, err := postResultSet(context.Background(), &resultSet, ghInfo, fakeCli)
+	resp, err := postResultSet(context.Background(), &resultSet, ghInfo, fakeCli, true)
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -331,14 +331,15 @@ func TestPostResultSet_withEmptyResponse(t *testing.T) {
 
 	ghInfo := &cienv.BuildInfo{Owner: owner, Repo: repo, PullRequest: prNum, SHA: sha}
 
-	if _, err := postResultSet(context.Background(), &resultSet, ghInfo, fakeCli); err == nil {
+	if _, err := postResultSet(context.Background(), &resultSet, ghInfo, fakeCli, true); err == nil {
 		t.Error("got no error but want report missing error")
 	}
 }
 
 func TestReportResults(t *testing.T) {
 	cleanup := setupEnvs(map[string]string{
-		"GITHUB_ACTION": "",
+		"GITHUB_ACTION":     "",
+		"GITHUB_EVENT_PATH": "",
 	})
 	defer cleanup()
 	filteredResultSet := new(reviewdog.FilteredResultMap)
@@ -386,7 +387,8 @@ reviewdog: No results found for "name2". 1 results found outside diff.
 
 func TestReportResults_inGitHubAction(t *testing.T) {
 	cleanup := setupEnvs(map[string]string{
-		"GITHUB_ACTION": "xxx",
+		"GITHUB_ACTION":     "xxx",
+		"GITHUB_EVENT_PATH": "",
 	})
 	defer cleanup()
 	filteredResultSet := new(reviewdog.FilteredResultMap)
@@ -411,7 +413,8 @@ func TestReportResults_inGitHubAction(t *testing.T) {
 
 func TestReportResults_noResultsInDiff(t *testing.T) {
 	cleanup := setupEnvs(map[string]string{
-		"GITHUB_ACTION": "",
+		"GITHUB_ACTION":     "",
+		"GITHUB_EVENT_PATH": "",
 	})
 	defer cleanup()
 	filteredResultSet := new(reviewdog.FilteredResultMap)

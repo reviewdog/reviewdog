@@ -52,6 +52,7 @@ by diff.
 - [Reporters](#reporters)
   * [Reporter: Local (-reporter=local) [default]](#reporter-local--reporterlocal-default)
   * [Reporter: GitHub Checks (-reporter=github-pr-check)](#reporter-github-checks--reportergithub-pr-check)
+  * [Reporter: GitHub Checks (-reporter=github-check)](#reporter-github-checks--reportergithub-check)
   * [Reporter: GitHub PullRequest review comment (-reporter=github-pr-review)](#reporter-github-pullrequest-review-comment--reportergithub-pr-review)
   * [Reporter: GitLab MergeRequest discussions (-reporter=gitlab-mr-discussion)](#reporter-gitlab-mergerequest-discussions--reportergitlab-mr-discussion)
   * [Reporter: GitLab MergeRequest commit (-reporter=gitlab-mr-commit)](#reporter-gitlab-mergerequest-commit--reportergitlab-mr-commit)
@@ -309,11 +310,11 @@ mind the above caution and please use it on your own risk.
 You can use github-pr-review reporter if you don't want to depend on reviewdog
 server.
 
-#### Reporter: GitHub Checks (-reporter=github-check)
+### Reporter: GitHub Checks (-reporter=github-check)
 
 It's basically same as `-reporter=github-pr-check` except it works not only for
-Pull Request but also for commit.
-Also, it reports results outside Pull Request diff too.
+Pull Request but also for commit and it reports results outside Pull Request
+diff too.
 
 [![sample comment outside diff](https://user-images.githubusercontent.com/3797062/69917921-e0680580-14ae-11ea-9a56-de9e3cbac005.png)](https://github.com/reviewdog/reviewdog/pull/364/files)
 
@@ -399,7 +400,39 @@ jobs:
           REVIEWDOG_GITHUB_API_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         run: |
           reviewdog -reporter=github-pr-check -runners=golint,govet
+          # or
+          reviewdog -reporter=github-pr-review -runners=golint,govet
 ```
+
+<details>
+<summary><strong>Example (github-check reporter):</strong></summary>
+
+[.github/workflows/reviewdog_github_check.yml](.github/workflows/reviewdog_github_check.yml)
+
+Only `github-check` reporter can run on push event too.
+
+```yaml
+name: reviewdog (github-check)
+on:
+  push:
+    branches:
+      - master
+  pull_request:
+
+jobs:
+  reviewdog:
+    name: reviewdog
+    runs-on: ubuntu-latest
+    steps:
+      # ...
+      - name: Run reviewdog
+        env:
+          REVIEWDOG_GITHUB_API_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          reviewdog -reporter=github-check -runners=golint,govet
+```
+
+</details>
 
 #### Public Reviewdog GitHub Actions
 You can also use public GitHub Actions to start using reviewdog with ease! :tada: :arrow_forward: :tada:
