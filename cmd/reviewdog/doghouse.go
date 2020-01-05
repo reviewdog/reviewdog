@@ -14,6 +14,7 @@ import (
 	"golang.org/x/oauth2"
 	"golang.org/x/sync/errgroup"
 
+	"github.com/haya14busa/go-actions-toolkit/core"
 	"github.com/reviewdog/reviewdog"
 	"github.com/reviewdog/reviewdog/cienv"
 	"github.com/reviewdog/reviewdog/doghouse"
@@ -191,7 +192,7 @@ func reportResults(w io.Writer, filteredResultSet *reviewdog.FilteredResultMap) 
 			foundInDiff = true
 			foundResultPerName = true
 			if cienv.IsInGitHubAction() {
-				reportResultsInGitHubActions(result)
+				reportResultsInGitHubActions(name, results.Level, result)
 			} else {
 				// Output original lines.
 				for _, line := range result.Lines {
@@ -206,12 +207,21 @@ func reportResults(w io.Writer, filteredResultSet *reviewdog.FilteredResultMap) 
 	return foundInDiff
 }
 
-func reportResultsInGitHubActions(result *reviewdog.FilteredCheck) {
-	if result.Lnum == 0 {
-		fmt.Printf("::error file=%s::%s\n", result.Path, result.Message)
-	} else if result.Col == 0 {
-		fmt.Printf("::error file=%s,line=%d::%s\n", result.Path, result.Lnum, result.Message)
-	} else {
-		fmt.Printf("::error file=%s,line=%d,col=%d::%s\n", result.Path, result.Lnum, result.Col, result.Message)
+// Report results via logging command to create annotations.
+// https://help.github.com/en/actions/automating-your-workflow-with-github-actions/development-tools-for-github-actions#example-5
+func reportResultsInGitHubActions(toolName, level string, result *reviewdog.FilteredCheck) {
+	mes := fmt.Sprintf("[%s] reported by reviewdog 🐶\n%s",
+		toolName, strings.Join(result.Lines, "\n"))
+	opt := &core.LogOption{
+		File: result.Path,
+		Line: result.Lnum,
+		Col:  result.Col,
+	}
+	// no info command with location data.
+	switch level {
+	case "error":
+		core.Error(mes, opt)
+	default:
+		core.Warning(mes, opt)
 	}
 }
