@@ -75,6 +75,7 @@ var warnTooManyAnnotationOnce sync.Once
 func warnTooManyAnnotation() {
 	core.Error(`reviewdog: Too many results (annotations) in diff.
 You may miss some annotations due to GitHub limitation for annotation created by logging command.
+Please check GitHub Actions log console to see all results.
 
 Limitation:
 - 10 warning annotations and 10 error annotations per step
