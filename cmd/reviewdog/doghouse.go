@@ -163,8 +163,9 @@ func checkResultToAnnotation(c *reviewdog.CheckResult, wd string) *doghouse.Anno
 	}
 }
 
-// reportResults reports results to given io.Writer and return true if at least
-// one annotation result is in diff.
+// reportResults reports results to given io.Writer and return true if
+// reviewdog should exit with 1.
+// e.g. At least one annotation result is in diff.
 func reportResults(w io.Writer, filteredResultSet *reviewdog.FilteredResultMap) bool {
 	// Sort names to get deterministic result.
 	var names []string
@@ -173,7 +174,7 @@ func reportResults(w io.Writer, filteredResultSet *reviewdog.FilteredResultMap) 
 	})
 	sort.Strings(names)
 
-	foundInDiff := false
+	shouldFail := false
 	for _, name := range names {
 		results, err := filteredResultSet.Load(name)
 		if err != nil {
@@ -189,7 +190,10 @@ func reportResults(w io.Writer, filteredResultSet *reviewdog.FilteredResultMap) 
 				filteredNum++
 				continue
 			}
-			foundInDiff = true
+			// If it's not running in GitHub Actions, reviewdog should exit with 1
+			// if there are at least one result in diff regardless of error level.
+			shouldFail = shouldFail || !cienv.IsInGitHubAction() ||
+				!(results.Level == "warning" || results.Level == "info")
 			foundResultPerName = true
 			if cienv.IsInGitHubAction() {
 				reportResultsInGitHubActions(name, results.Level, result)
@@ -204,7 +208,7 @@ func reportResults(w io.Writer, filteredResultSet *reviewdog.FilteredResultMap) 
 			fmt.Fprintf(w, "reviewdog: No results found for %q. %d results found outside diff.\n", name, filteredNum)
 		}
 	}
-	return foundInDiff
+	return shouldFail
 }
 
 // Report results via logging command to create annotations.
@@ -217,11 +221,14 @@ func reportResultsInGitHubActions(toolName, level string, result *reviewdog.Filt
 		Line: result.Lnum,
 		Col:  result.Col,
 	}
-	// no info command with location data.
 	switch level {
-	case "error":
+	// no info command with location data.
+	case "warning", "info":
+		core.Warning(mes, opt)
+	case "error", "":
 		core.Error(mes, opt)
 	default:
-		core.Warning(mes, opt)
+		core.Error(fmt.Sprintf("Unknown level: %s", level), nil)
+		core.Error(mes, opt)
 	}
 }
