@@ -35,7 +35,7 @@ func (lw *GitHubActionLogWriter) Post(_ context.Context, c *reviewdog.Comment) e
 }
 
 // Flush checks overall error at last.
-func (lw *GitHubActionLogWriter) Flush(ctx context.Context) error {
+func (lw *GitHubActionLogWriter) Flush(_ context.Context) error {
 	if lw.reportNum > 9 {
 		return fmt.Errorf("GitHubActionLogWriter: reported too many annotation (N=%d)", lw.reportNum)
 	}
@@ -53,6 +53,7 @@ func ReportAsGitHubActionsLog(toolName, level string, c *reviewdog.CheckResult) 
 		Line: c.Lnum,
 		Col:  c.Col,
 	}
+
 	switch level {
 	// no info command with location data.
 	case "warning", "info":
