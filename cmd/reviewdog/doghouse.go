@@ -139,8 +139,9 @@ func postResultSet(ctx context.Context, resultSet *reviewdog.ResultMap, ghInfo *
 			}
 			if res.ReportURL != "" {
 				log.Printf("[%s] reported: %s", name, res.ReportURL)
-			}
-			if res.CheckedResults != nil {
+			} else if res.CheckedResults != nil {
+				// Fill results only when report URL is missing, which probably means
+				// it failed to report results with Check API.
 				filteredResultSet.Store(name, &reviewdog.FilteredResult{
 					Level:         result.Level,
 					FilteredCheck: res.CheckedResults,
@@ -164,10 +165,20 @@ func checkResultToAnnotation(c *reviewdog.CheckResult, wd string) *doghouse.Anno
 	}
 }
 
-// reportResults reports results to given io.Writer and return true if
-// reviewdog should exit with 1.
+// reportResults reports results to given io.Writer and possibly to GitHub
+// Actions log using logging command.
+//
+// It returns true if reviewdog should exit with 1.
 // e.g. At least one annotation result is in diff.
 func reportResults(w io.Writer, filteredResultSet *reviewdog.FilteredResultMap) bool {
+	if filteredResultSet.Len() != 0 && isPRFromForkedRepo() {
+		fmt.Fprintln(w, `reviewdog: This is Pull-Request from forked repository.
+GitHub token doesn't have write permission of Check API, so reviewdog will
+report results via logging command [1].
+
+[1]: https://help.github.com/en/actions/automating-your-workflow-with-github-actions/development-tools-for-github-actions#logging-commands`)
+	}
+
 	// Sort names to get deterministic result.
 	var names []string
 	filteredResultSet.Range(func(name string, results *reviewdog.FilteredResult) {
@@ -254,4 +265,12 @@ Limitation:
 - 50 annotations per run (separate from the job annotations, these annotations aren't created by users)
 
 Source: https://github.community/t5/GitHub-Actions/Maximum-number-of-annotations-that-can-be-created-using-GitHub/m-p/39085`, nil)
+}
+
+func isPRFromForkedRepo() bool {
+	event, err := cienv.LoadGitHubEvent()
+	if err != nil {
+		return false
+	}
+	return event.PullRequest.Head.Repo.Fork
 }
