@@ -37,7 +37,7 @@ func (lw *GitHubActionLogWriter) Post(_ context.Context, c *reviewdog.Comment) e
 // Flush checks overall error at last.
 func (lw *GitHubActionLogWriter) Flush(ctx context.Context) error {
 	if lw.reportNum > 9 {
-		return fmt.Errorf("GitHubActionLogWriter: reported too many annotation (N=%d).", lw.reportNum)
+		return fmt.Errorf("GitHubActionLogWriter: reported too many annotation (N=%d)", lw.reportNum)
 	}
 	return nil
 }
