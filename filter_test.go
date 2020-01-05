@@ -34,7 +34,7 @@ const diffContent = `--- sample.old.txt	2016-10-13 05:09:35.820791185 +0900
 \ No newline at end of file
 `
 
-func TestFilterCheck(t *testing.T) {
+func TestFilterCheckByAddedLines(t *testing.T) {
 	results := []*CheckResult{
 		{
 			Path: "sample.new.txt",
@@ -86,7 +86,56 @@ func TestFilterCheck(t *testing.T) {
 		},
 	}
 	filediffs, _ := diff.ParseMultiFile(strings.NewReader(diffContent))
-	got := FilterCheck(results, filediffs, 0, "")
+	got := FilterCheck(results, filediffs, 0, "", FilterModeAdded)
+	if diff := cmp.Diff(got, want); diff != "" {
+		t.Error(diff)
+	}
+}
+
+// All lines that are in diff are taken into account
+func TestFilterCheckByDiffContext(t *testing.T) {
+	results := []*CheckResult{
+		{
+			Path: "sample.new.txt",
+			Lnum: 1,
+		},
+		{
+			Path: "sample.new.txt",
+			Lnum: 2,
+		},
+		{
+			Path: "sample.new.txt",
+			Lnum: 3,
+		},
+	}
+	want := []*FilteredCheck{
+		{
+			CheckResult: &CheckResult{
+				Path: "sample.new.txt",
+				Lnum: 1,
+			},
+			InDiff:   true,
+			LnumDiff: 1,
+		},
+		{
+			CheckResult: &CheckResult{
+				Path: "sample.new.txt",
+				Lnum: 2,
+			},
+			InDiff:   true,
+			LnumDiff: 3,
+		},
+		{
+			CheckResult: &CheckResult{
+				Path: "sample.new.txt",
+				Lnum: 3,
+			},
+			InDiff:   true,
+			LnumDiff: 4,
+		},
+	}
+	filediffs, _ := diff.ParseMultiFile(strings.NewReader(diffContent))
+	got := FilterCheck(results, filediffs, 0, "", FilterModeDiffContext)
 	if diff := cmp.Diff(got, want); diff != "" {
 		t.Error(diff)
 	}
@@ -102,7 +151,7 @@ func TestAddedDiffLines(t *testing.T) {
 		"nonewline.new.txt:4:(difflnum:6) b",
 	}
 	var gotlines []string
-	for path, ltol := range addedDiffLines(filediffs, 0) {
+	for path, ltol := range significantDiffLines(filediffs, isAddedLine, 0) {
 		for lnum, addedline := range ltol {
 			l := fmt.Sprintf("%v:%v:(difflnum:%v) %v", path[len(wd)+1:], lnum, addedline.LnumDiff, addedline.Content)
 			gotlines = append(gotlines, l)

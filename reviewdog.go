@@ -79,7 +79,7 @@ func (w *Reviewdog) runFromResult(ctx context.Context, results []*CheckResult,
 		return err
 	}
 
-	checks := FilterCheck(results, filediffs, strip, wd)
+	checks := FilterCheck(results, filediffs, strip, wd, true)
 	for _, check := range checks {
 		if !check.InDiff {
 			continue

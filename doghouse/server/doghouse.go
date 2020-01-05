@@ -49,7 +49,7 @@ func (ch *Checker) Check(ctx context.Context) (*doghouse.CheckResponse, error) {
 	}
 
 	results := annotationsToCheckResults(ch.req.Annotations)
-	filtered := reviewdog.FilterCheck(results, filediffs, 1, "")
+	filtered := reviewdog.FilterCheck(results, filediffs, 1, "", false)
 
 	check, err := ch.createCheck(ctx)
 	if err != nil {

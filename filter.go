@@ -7,6 +7,42 @@ import (
 	"github.com/reviewdog/reviewdog/diff"
 )
 
+// FilterMode represents enumeration of available filter modes
+type FilterMode int
+
+const (
+	// FilterModeDiffContext represents filtering by diff context
+	FilterModeDiffContext FilterMode = iota
+	// FilterModeAdded represents filtering by added diff lines
+	FilterModeAdded
+)
+
+// String implements the flag.Value interface
+func (mode *FilterMode) String() string {
+	names := [...]string{
+		"diff_context",
+		"added"}
+
+	if *mode < FilterModeDiffContext || *mode > FilterModeAdded {
+		return "Unknown"
+	}
+
+	return names[*mode]
+}
+
+// Set implements the flag.Value interface
+func (mode *FilterMode) Set(value string) error {
+	switch value {
+	case "added":
+		*mode = FilterModeAdded
+	case "diff_context":
+		*mode = FilterModeDiffContext
+	default:
+		*mode = FilterModeDiffContext
+	}
+	return nil
+}
+
 // FilteredCheck represents CheckResult with filtering info.
 type FilteredCheck struct {
 	*CheckResult
@@ -16,19 +52,28 @@ type FilteredCheck struct {
 
 // FilterCheck filters check results by diff. It doesn't drop check which
 // is not in diff but set FilteredCheck.InDiff field false.
-func FilterCheck(results []*CheckResult, diff []*diff.FileDiff, strip int, wd string) []*FilteredCheck {
+func FilterCheck(results []*CheckResult, diff []*diff.FileDiff, strip int, wd string, filterMode FilterMode) []*FilteredCheck {
 	checks := make([]*FilteredCheck, 0, len(results))
 
-	addedlines := addedDiffLines(diff, strip)
+	var filterFn lineComparator
+
+	switch filterMode {
+	case FilterModeAdded:
+		filterFn = isAddedLine
+	case FilterModeDiffContext:
+		filterFn = anyLine
+	}
+
+	significantlines := significantDiffLines(diff, filterFn, strip)
 
 	for _, result := range results {
 		check := &FilteredCheck{CheckResult: result}
 
-		addedline := addedlines.Get(result.Path, result.Lnum)
+		significantline := significantlines.Get(result.Path, result.Lnum)
 		result.Path = CleanPath(result.Path, wd)
-		if addedline != nil {
+		if significantline != nil {
 			check.InDiff = true
-			check.LnumDiff = addedline.LnumDiff
+			check.LnumDiff = significantline.LnumDiff
 		}
 
 		checks = append(checks, check)
@@ -54,18 +99,18 @@ func CleanPath(path, workdir string) string {
 	return filepath.ToSlash(p)
 }
 
-// addedLine represents added line in diff.
-type addedLine struct {
+// significantLine represents the line in diff we want to filter check results by.
+type significantLine struct {
 	Path     string // path to new file
 	Lnum     int    // the line number in the new file
 	LnumDiff int    // the line number of the diff (Same as Lnumdiff of diff.Line)
 	Content  string // line content
 }
 
-// posToAddedLine is a hash table of normalized path to line number to addedLine.
-type posToAddedLine map[string]map[int]*addedLine
+// posToSignificantLine is a hash table of normalized path to line number to significantLine.
+type posToSignificantLine map[string]map[int]*significantLine
 
-func (p posToAddedLine) Get(path string, lnum int) *addedLine {
+func (p posToSignificantLine) Get(path string, lnum int) *significantLine {
 	npath, err := normalizePath(path)
 	if err != nil {
 		return nil
@@ -81,12 +126,22 @@ func (p posToAddedLine) Get(path string, lnum int) *addedLine {
 	return diffline
 }
 
-// addedDiffLines traverse []*diff.FileDiff and returns posToAddedLine.
-func addedDiffLines(filediffs []*diff.FileDiff, strip int) posToAddedLine {
-	r := make(posToAddedLine)
+type lineComparator func(diff.Line) bool
+
+func isAddedLine(line diff.Line) bool {
+	return line.Type == diff.LineAdded
+}
+
+func anyLine(line diff.Line) bool {
+	return true
+}
+
+// significantDiffLines traverse []*diff.FileDiff and returns posToSignificantLine.
+func significantDiffLines(filediffs []*diff.FileDiff, isSignificantLine lineComparator, strip int) posToSignificantLine {
+	r := make(posToSignificantLine)
 	for _, filediff := range filediffs {
 		path := filediff.PathNew
-		ltodiff := make(map[int]*addedLine)
+		ltodiff := make(map[int]*significantLine)
 		if strip > 0 {
 			ps := strings.Split(filepath.ToSlash(filediff.PathNew), "/")
 			if len(ps) > strip {
@@ -102,8 +157,8 @@ func addedDiffLines(filediffs []*diff.FileDiff, strip int) posToAddedLine {
 
 		for _, hunk := range filediff.Hunks {
 			for _, line := range hunk.Lines {
-				if line.Type == diff.LineAdded {
-					ltodiff[line.LnumNew] = &addedLine{
+				if isSignificantLine(*line) {
+					ltodiff[line.LnumNew] = &significantLine{
 						Path:     path,
 						Lnum:     line.LnumNew,
 						LnumDiff: line.LnumDiff,
