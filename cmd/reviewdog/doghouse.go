@@ -19,6 +19,7 @@ import (
 	"github.com/reviewdog/reviewdog/doghouse"
 	"github.com/reviewdog/reviewdog/doghouse/client"
 	"github.com/reviewdog/reviewdog/project"
+	"github.com/reviewdog/reviewdog/service/github/githubutils"
 )
 
 func runDoghouse(ctx context.Context, r io.Reader, w io.Writer, opt *option, isProject bool, forPr bool) error {
@@ -30,9 +31,6 @@ func runDoghouse(ctx context.Context, r io.Reader, w io.Writer, opt *option, isP
 		fmt.Fprintln(os.Stderr, "reviewdog: this is not PullRequest build.")
 		return nil
 	}
-	if !forPr {
-		ghInfo.PullRequest = 0
-	}
 	resultSet, err := checkResultSet(ctx, r, opt, isProject)
 	if err != nil {
 		return err
@@ -41,7 +39,7 @@ func runDoghouse(ctx context.Context, r io.Reader, w io.Writer, opt *option, isP
 	if err != nil {
 		return err
 	}
-	filteredResultSet, err := postResultSet(ctx, resultSet, ghInfo, cli)
+	filteredResultSet, err := postResultSet(ctx, resultSet, ghInfo, cli, forPr)
 	if err != nil {
 		return err
 	}
@@ -110,10 +108,11 @@ func checkResultSet(ctx context.Context, r io.Reader, opt *option, isProject boo
 	return resultSet, nil
 }
 
-func postResultSet(ctx context.Context, resultSet *reviewdog.ResultMap, ghInfo *cienv.BuildInfo, cli client.DogHouseClientInterface) (*reviewdog.FilteredCheckMap, error) {
+func postResultSet(ctx context.Context, resultSet *reviewdog.ResultMap,
+	ghInfo *cienv.BuildInfo, cli client.DogHouseClientInterface, forPr bool) (*reviewdog.FilteredResultMap, error) {
 	var g errgroup.Group
 	wd, _ := os.Getwd()
-	filteredResultSet := new(reviewdog.FilteredCheckMap)
+	filteredResultSet := new(reviewdog.FilteredResultMap)
 	resultSet.Range(func(name string, result *reviewdog.Result) {
 		checkResults := result.CheckResults
 		as := make([]*doghouse.Annotation, 0, len(checkResults))
@@ -129,6 +128,8 @@ func postResultSet(ctx context.Context, resultSet *reviewdog.ResultMap, ghInfo *
 			Branch:      ghInfo.Branch,
 			Annotations: as,
 			Level:       result.Level,
+			// If it's only for PR, do not report results outside diff.
+			OutsideDiff: !forPr,
 		}
 		g.Go(func() error {
 			res, err := cli.Check(ctx, req)
@@ -137,9 +138,13 @@ func postResultSet(ctx context.Context, resultSet *reviewdog.ResultMap, ghInfo *
 			}
 			if res.ReportURL != "" {
 				log.Printf("[%s] reported: %s", name, res.ReportURL)
-			}
-			if res.CheckedResults != nil {
-				filteredResultSet.Store(name, res.CheckedResults)
+			} else if res.CheckedResults != nil {
+				// Fill results only when report URL is missing, which probably means
+				// it failed to report results with Check API.
+				filteredResultSet.Store(name, &reviewdog.FilteredResult{
+					Level:         result.Level,
+					FilteredCheck: res.CheckedResults,
+				})
 			}
 			if res.ReportURL == "" && res.CheckedResults == nil {
 				return fmt.Errorf("no result found for %q", name)
@@ -159,17 +164,29 @@ func checkResultToAnnotation(c *reviewdog.CheckResult, wd string) *doghouse.Anno
 	}
 }
 
-// reportResults reports results to given io.Writer and return true if at least
-// one annotation result is in diff.
-func reportResults(w io.Writer, filteredResultSet *reviewdog.FilteredCheckMap) bool {
+// reportResults reports results to given io.Writer and possibly to GitHub
+// Actions log using logging command.
+//
+// It returns true if reviewdog should exit with 1.
+// e.g. At least one annotation result is in diff.
+func reportResults(w io.Writer, filteredResultSet *reviewdog.FilteredResultMap) bool {
+	if filteredResultSet.Len() != 0 && isPRFromForkedRepo() {
+		fmt.Fprintln(w, `reviewdog: This is Pull-Request from forked repository.
+GitHub token doesn't have write permission of Check API, so reviewdog will
+report results via logging command [1].
+
+[1]: https://help.github.com/en/actions/automating-your-workflow-with-github-actions/development-tools-for-github-actions#logging-commands`)
+	}
+
 	// Sort names to get deterministic result.
 	var names []string
-	filteredResultSet.Range(func(name string, results []*reviewdog.FilteredCheck) {
+	filteredResultSet.Range(func(name string, results *reviewdog.FilteredResult) {
 		names = append(names, name)
 	})
 	sort.Strings(names)
 
-	foundInDiff := false
+	shouldFail := false
+	foundNumOverall := 0
 	for _, name := range names {
 		results, err := filteredResultSet.Load(name)
 		if err != nil {
@@ -180,21 +197,43 @@ func reportResults(w io.Writer, filteredResultSet *reviewdog.FilteredCheckMap) b
 		fmt.Fprintf(w, "reviewdog: Reporting results for %q\n", name)
 		foundResultPerName := false
 		filteredNum := 0
-		for _, result := range results {
+		for _, result := range results.FilteredCheck {
 			if !result.InDiff {
 				filteredNum++
 				continue
 			}
-			foundInDiff = true
+			foundNumOverall++
+			// If it's not running in GitHub Actions, reviewdog should exit with 1
+			// if there are at least one result in diff regardless of error level.
+			shouldFail = shouldFail || !cienv.IsInGitHubAction() ||
+				!(results.Level == "warning" || results.Level == "info")
+
+			if foundNumOverall == githubutils.MaxLoggingAnnotationsPerStep {
+				githubutils.WarnTooManyAnnotationOnce()
+				shouldFail = true
+			}
+
 			foundResultPerName = true
-			// Output original lines.
-			for _, line := range result.Lines {
-				fmt.Fprintln(w, line)
+			if cienv.IsInGitHubAction() {
+				githubutils.ReportAsGitHubActionsLog(name, results.Level, result.CheckResult)
+			} else {
+				// Output original lines.
+				for _, line := range result.Lines {
+					fmt.Fprintln(w, line)
+				}
 			}
 		}
 		if !foundResultPerName {
 			fmt.Fprintf(w, "reviewdog: No results found for %q. %d results found outside diff.\n", name, filteredNum)
 		}
 	}
-	return foundInDiff
+	return shouldFail
+}
+
+func isPRFromForkedRepo() bool {
+	event, err := cienv.LoadGitHubEvent()
+	if err != nil {
+		return false
+	}
+	return event.PullRequest.Head.Repo.Fork
 }

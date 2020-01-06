@@ -27,9 +27,34 @@ type GitHubEvent struct {
 type GitHubPullRequest struct {
 	Number int `json:"number"`
 	Head   struct {
-		Sha string `json:"sha"`
-		Ref string `json:"ref"`
+		Sha  string `json:"sha"`
+		Ref  string `json:"ref"`
+		Repo struct {
+			Fork bool `json:"fork"`
+		} `json:"repo"`
 	} `json:"head"`
+}
+
+// LoadGitHubEvent loads GitHubEvent if it's running in GitHub Actions.
+func LoadGitHubEvent() (*GitHubEvent, error) {
+	eventPath := os.Getenv("GITHUB_EVENT_PATH")
+	if eventPath == "" {
+		return nil, errors.New("GITHUB_EVENT_PATH not found")
+	}
+	return loadGitHubEventFromPath(eventPath)
+}
+
+func loadGitHubEventFromPath(eventPath string) (*GitHubEvent, error) {
+	f, err := os.Open(eventPath)
+	if err != nil {
+		return nil, err
+	}
+	defer f.Close()
+	var event GitHubEvent
+	if err := json.NewDecoder(f).Decode(&event); err != nil {
+		return nil, err
+	}
+	return &event, nil
 }
 
 func getBuildInfoFromGitHubAction() (*BuildInfo, bool, error) {
@@ -40,13 +65,8 @@ func getBuildInfoFromGitHubAction() (*BuildInfo, bool, error) {
 	return getBuildInfoFromGitHubActionEventPath(eventPath)
 }
 func getBuildInfoFromGitHubActionEventPath(eventPath string) (*BuildInfo, bool, error) {
-	f, err := os.Open(eventPath)
+	event, err := loadGitHubEventFromPath(eventPath)
 	if err != nil {
-		return nil, false, err
-	}
-	defer f.Close()
-	var event GitHubEvent
-	if err := json.NewDecoder(f).Decode(&event); err != nil {
 		return nil, false, err
 	}
 	info := &BuildInfo{

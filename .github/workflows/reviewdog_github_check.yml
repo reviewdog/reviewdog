@@ -1,5 +1,10 @@
-name: reviewdog on Push
-on: [push]
+name: reviewdog (github-check)
+on:
+  push:
+    branches:
+      - master
+  pull_request:
+
 jobs:
   reviewdog:
     name: reviewdog
