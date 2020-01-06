@@ -460,9 +460,9 @@ Please open a Pull Request to add your created reviewdog actions here :sparkles:
 I can also consider to put your created repositories under reviewdog org and co-maintain the actions.
 Example: [action-tflint](https://github.com/reviewdog/reviewdog/issues/322).
 
-#### Graceful Degradataion for Pull Requests from forked repositories
+#### Graceful Degradation for Pull Requests from forked repositories
 
-![Graceful Degradataion example](https://user-images.githubusercontent.com/3797062/71781334-e2266b00-3010-11ea-8a38-dee6e30c8162.png)
+![Graceful Degradation example](https://user-images.githubusercontent.com/3797062/71781334-e2266b00-3010-11ea-8a38-dee6e30c8162.png)
 
 `GITHUB_TOKEN` for Pull Requests from forked repository doesn't have write
 access to Check API nor Review API due to [GitHub Actions
