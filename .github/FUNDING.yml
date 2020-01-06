@@ -1,8 +1,13 @@
 # These are supported funding model platforms
 
 github: # Replace with up to 4 GitHub Sponsors-enabled usernames e.g., [user1, user2]
-patreon: # Replace with a single Patreon username
+  - haya14busa # Author
+  # See contributors page and sponsor them directly if not listed here.
+
+# Prefer github to directly contribute to each GitHub user.
 open_collective: reviewdog
+
+patreon: # Replace with a single Patreon username
 ko_fi: # Replace with a single Ko-fi username
 tidelift: # Replace with a single Tidelift platform-name/package-name e.g., npm/babel
 community_bridge: # Replace with a single Community Bridge project-name e.g., cloud-foundry
