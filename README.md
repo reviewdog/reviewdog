@@ -255,7 +255,7 @@ check result with this feature. (default: error)
 
 There are two options to use this reporter.
 
-#### Option 1) Run reviewdog from GitHub Actions w/ secrets.GITHUB_TOKEN (experimental)
+#### Option 1) Run reviewdog from GitHub Actions w/ secrets.GITHUB_TOKEN
 
 Example: [.github/workflows/reviewdog.yml](.github/workflows/reviewdog.yml)
 
@@ -463,6 +463,24 @@ You can also use public GitHub Actions to start using reviewdog with ease! :tada
 Please open a Pull Request to add your created reviewdog actions here :sparkles:.
 I can also consider to put your created repositories under reviewdog org and co-maintain the actions.
 Example: [action-tflint](https://github.com/reviewdog/reviewdog/issues/322).
+
+#### Graceful Degradataion for Pull Requests from forked repositories
+
+![Graceful Degradataion example](https://user-images.githubusercontent.com/3797062/71781334-e2266b00-3010-11ea-8a38-dee6e30c8162.png)
+
+`GITHUB_TOKEN` for Pull Requests from forked repository doesn't have write
+access to Check API nor Review API due to [GitHub Actions
+restriction](https://help.github.com/en/articles/virtual-environments-for-github-actions#github_token-secret).
+
+Instead, reviewdog uses [Logging commands of GitHub
+Actions](https://help.github.com/en/actions/automating-your-workflow-with-github-actions/development-tools-for-github-actions#set-an-error-message-error)
+to post results as
+[annotations](https://developer.github.com/v3/checks/runs/#annotations-object)
+similar to `github-pr-check` reporter.
+
+Note that there is a limitation for annotations created by logging commands,
+such as [max # of annotations per run](https://github.com/reviewdog/reviewdog/issues/411#issuecomment-570893427).
+You can check GitHub Actions log to see full results in such cases.
 
 ### Travis CI
 
