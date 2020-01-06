@@ -270,13 +270,6 @@ Example: [.github/workflows/reviewdog.yml](.github/workflows/reviewdog.yml)
 See [GitHub Actions](#github-actions) section too. You can also use public
 reviewdog GitHub Actions.
 
-Note that it reports result to GitHub Actions log consle for Pull
-Requests from fork repository because due to [GitHub Actions
-restriction](https://help.github.com/en/articles/virtual-environments-for-github-actions#github_token-secret),
-`GITHUB_TOKEN` for PullRequest from forked repository doesn't have write access
-to Check API.
-[![github-pr-check from forked repo example](https://user-images.githubusercontent.com/3797062/64907277-2a044800-d72b-11e9-82b1-f739414f9d48.png)](https://github.com/reviewdog/reviewdog/pull/281/checks?check_run_id=222108016#step:7:15)
-
 #### Option 2) Install reviewdog GitHub Apps
 reviewdog CLI send a request to reviewdog GitHub App server and the server post
 results as GitHub Checks, because Check API only supported for GitHub App and
@@ -340,6 +333,9 @@ For GitHub Enterprise, set API endpoint by environment variable.
 $ export GITHUB_API="https://example.githubenterprise.com/api/v3/"
 $ export REVIEWDOG_INSECURE_SKIP_VERIFY=true # set this as you need to skip verifying SSL
 ```
+
+See [GitHub Actions](#github-actions) section too if you can use GitHub
+Actions. You can also use public reviewdog GitHub Actions.
 
 ### Reporter: GitLab MergeRequest discussions (-reporter=gitlab-mr-discussion)
 
