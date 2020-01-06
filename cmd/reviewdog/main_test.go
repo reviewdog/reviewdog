@@ -71,6 +71,26 @@ line3
 
 }
 
+func TestRun_local_tee(t *testing.T) {
+	stdin := "tee test"
+	opt := &option{
+		diffCmd:   "git diff",
+		efms:      strslice([]string{`%f(%l,%c): %m`}),
+		diffStrip: 0,
+		reporter:  "local",
+		tee:       true,
+	}
+
+	stdout := new(bytes.Buffer)
+	if err := run(strings.NewReader(stdin), stdout, opt); err != nil {
+		t.Error(err)
+	}
+
+	if got := strings.Trim(stdout.String(), "\n"); got != stdin {
+		t.Errorf("raw: got %v, want %v", got, stdin)
+	}
+}
+
 func TestRun_project(t *testing.T) {
 	t.Run("diff command is empty", func(t *testing.T) {
 		opt := &option{
