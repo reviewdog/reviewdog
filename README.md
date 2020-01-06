@@ -255,7 +255,7 @@ check result with this feature. (default: error)
 
 There are two options to use this reporter.
 
-#### Option 1) Run reviewdog from GitHub Actions w/ secrets.GITHUB_TOKEN (experimental)
+#### Option 1) Run reviewdog from GitHub Actions w/ secrets.GITHUB_TOKEN
 
 Example: [.github/workflows/reviewdog.yml](.github/workflows/reviewdog.yml)
 
@@ -269,13 +269,6 @@ Example: [.github/workflows/reviewdog.yml](.github/workflows/reviewdog.yml)
 
 See [GitHub Actions](#github-actions) section too. You can also use public
 reviewdog GitHub Actions.
-
-Note that it reports result to GitHub Actions log consle for Pull
-Requests from fork repository because due to [GitHub Actions
-restriction](https://help.github.com/en/articles/virtual-environments-for-github-actions#github_token-secret),
-`GITHUB_TOKEN` for PullRequest from forked repository doesn't have write access
-to Check API.
-[![github-pr-check from forked repo example](https://user-images.githubusercontent.com/3797062/64907277-2a044800-d72b-11e9-82b1-f739414f9d48.png)](https://github.com/reviewdog/reviewdog/pull/281/checks?check_run_id=222108016#step:7:15)
 
 #### Option 2) Install reviewdog GitHub Apps
 reviewdog CLI send a request to reviewdog GitHub App server and the server post
@@ -340,6 +333,9 @@ For GitHub Enterprise, set API endpoint by environment variable.
 $ export GITHUB_API="https://example.githubenterprise.com/api/v3/"
 $ export REVIEWDOG_INSECURE_SKIP_VERIFY=true # set this as you need to skip verifying SSL
 ```
+
+See [GitHub Actions](#github-actions) section too if you can use GitHub
+Actions. You can also use public reviewdog GitHub Actions.
 
 ### Reporter: GitLab MergeRequest discussions (-reporter=gitlab-mr-discussion)
 
@@ -463,6 +459,24 @@ You can also use public GitHub Actions to start using reviewdog with ease! :tada
 Please open a Pull Request to add your created reviewdog actions here :sparkles:.
 I can also consider to put your created repositories under reviewdog org and co-maintain the actions.
 Example: [action-tflint](https://github.com/reviewdog/reviewdog/issues/322).
+
+#### Graceful Degradataion for Pull Requests from forked repositories
+
+![Graceful Degradataion example](https://user-images.githubusercontent.com/3797062/71781334-e2266b00-3010-11ea-8a38-dee6e30c8162.png)
+
+`GITHUB_TOKEN` for Pull Requests from forked repository doesn't have write
+access to Check API nor Review API due to [GitHub Actions
+restriction](https://help.github.com/en/articles/virtual-environments-for-github-actions#github_token-secret).
+
+Instead, reviewdog uses [Logging commands of GitHub
+Actions](https://help.github.com/en/actions/automating-your-workflow-with-github-actions/development-tools-for-github-actions#set-an-error-message-error)
+to post results as
+[annotations](https://developer.github.com/v3/checks/runs/#annotations-object)
+similar to `github-pr-check` reporter.
+
+Note that there is a limitation for annotations created by logging commands,
+such as [max # of annotations per run](https://github.com/reviewdog/reviewdog/issues/411#issuecomment-570893427).
+You can check GitHub Actions log to see full results in such cases.
 
 ### Travis CI
 
