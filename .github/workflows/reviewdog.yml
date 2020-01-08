@@ -1,30 +1,54 @@
-name: reviewdog on Pull Request
-on: [pull_request]
+name: reviewdog
+on:
+  push:
+    branches:
+      - master
+  pull_request:
+
 jobs:
-  reviewdog:
-    name: reviewdog
+  reviewdog-github-check:
+    name: reviewdog (github-check)
     runs-on: ubuntu-latest
     steps:
-      - name: Dump GitHub Context
-        env:
-          GITHUB_CONTEXT: ${{ toJson(github) }}
-        run: echo "${GITHUB_CONTEXT}"
-
-      - name: Dump GitHub Event
-        run: cat "${GITHUB_EVENT_PATH}"
-
-      - name: Set up Go
-        uses: actions/setup-go@v1
+      - uses: actions/setup-go@v1
         with:
           go-version: 1.13
-        id: go
 
       - name: Add $GOPATH/bin
         run: |
           echo ::add-path::$(go env GOPATH)/bin
 
-      - name: Check out code into the Go module directory
-        uses: actions/checkout@v1
+      - uses: actions/checkout@v2
+
+      - name: Install linters
+        run: '( cd linters && go get golang.org/x/lint/golint )'
+
+      - name: Setup reviewdog
+        run: |
+          # mkdir -p $HOME/bin && curl -sfL https://raw.githubusercontent.com/reviewdog/reviewdog/master/install.sh| sh -s -- -b $HOME/bin
+          # echo ::add-path::$HOME/bin
+          go install ./cmd/reviewdog
+
+      - name: Run reviewdog
+        env:
+          REVIEWDOG_GITHUB_API_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          golint ./... | reviewdog -f=golint -name=golint-github-check -reporter=github-check -level=warning
+
+  reviewdog-pr:
+    if: github.event_name == 'pull_request'
+    name: reviewdog on Pull Request
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/setup-go@v1
+        with:
+          go-version: 1.13
+
+      - name: Add $GOPATH/bin
+        run: |
+          echo ::add-path::$(go env GOPATH)/bin
+
+      - uses: actions/checkout@v2
 
       # https://github.com/actions/cache/blob/master/examples.md#go---modules
       - name: Cache Go Modules
@@ -67,37 +91,36 @@ jobs:
           golint ./... | reviewdog -f=golint -name=golint-pr-review -reporter=github-pr-review -tee
 
   golangci-lint:
+    if: github.event_name == 'pull_request'
     name: runner / golangci-lint
     runs-on: ubuntu-latest
     steps:
-      - name: Check out code into the Go module directory
-        uses: actions/checkout@v1
-      - name: golangci-lint
-        uses: reviewdog/action-golangci-lint@v1
+      - uses: actions/checkout@v2
+      - uses: reviewdog/action-golangci-lint@v1
         with:
           github_token: ${{ secrets.github_token }}
           golangci_lint_flags: "--enable-all --exclude-use-default=false"
           level: "warning"
+          reporter: github-pr-check
 
   misspell:
     name: runner / misspell
     runs-on: ubuntu-latest
     steps:
-      - name: Check out code.
-        uses: actions/checkout@v1
-      - name: misspell
-        uses: reviewdog/action-misspell@v1
+      - uses: actions/checkout@v2
+      - uses: reviewdog/action-misspell@v1
         with:
           github_token: ${{ secrets.github_token }}
           locale: "US"
+          reporter: github-check
 
   shellcheck:
+    if: github.event_name == 'pull_request'
     name: runner / shellcheck
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v1
-      - name: shellcheck
-        uses: reviewdog/action-shellcheck@v1
+      - uses: actions/checkout@v2
+      - uses: reviewdog/action-shellcheck@v1
         with:
           github_token: ${{ secrets.github_token }}
           reporter: github-pr-review
