@@ -24,7 +24,12 @@
 </p>
 
 <p align="center">
-  <a href="https://github.com/reviewdog/reviewdog/actions"><img alt="GitHub Actions" src="https://github.com/reviewdog/reviewdog/workflows/Go/badge.svg"></a>
+  <a href="https://github.com/reviewdog/reviewdog/actions?query=workflow%3AGo+event%3Apush+branch%3Amaster">
+    <img alt="GitHub Actions" src="https://github.com/reviewdog/reviewdog/workflows/Go/badge.svg">
+  </a>
+  <a href="https://github.com/reviewdog/reviewdog/actions?query=workflow%3Areviewdog+event%3Apush+branch%3Amaster">
+    <img alt="reviewdog" src="https://github.com/reviewdog/reviewdog/workflows/reviewdog/badge.svg?branch=master&event=push">
+  </a>
   <a href="https://travis-ci.org/reviewdog/reviewdog"><img alt="Travis Status" src="https://img.shields.io/travis/reviewdog/reviewdog/master.svg?label=travis&maxAge=43200"></a>
   <a href="https://circleci.com/gh/reviewdog/reviewdog"><img alt="CircleCI Status" src="https://img.shields.io/circleci/project/github/reviewdog/reviewdog/master.svg?label=circle&maxAge=43200"></a>
   <a href="https://codecov.io/github/reviewdog/reviewdog"><img alt="Coverage Status" src="https://img.shields.io/codecov/c/github/reviewdog/reviewdog/master.svg?maxAge=43200"></a>
@@ -312,6 +317,8 @@ diff too.
 
 [![sample comment outside diff](https://user-images.githubusercontent.com/3797062/69917921-e0680580-14ae-11ea-9a56-de9e3cbac005.png)](https://github.com/reviewdog/reviewdog/pull/364/files)
 
+You can create [reviewdog badge](#reviewdog-badge-) for this reporter.
+
 ### Reporter: GitHub PullRequest review comment (-reporter=github-pr-review)
 
 [![sample-comment.png](https://raw.githubusercontent.com/haya14busa/i/dc0ccb1e110515ea407c146d99b749018db05c45/reviewdog/sample-comment.png)](https://github.com/reviewdog/reviewdog/pull/24#discussion_r84599728)
@@ -478,6 +485,18 @@ similar to `github-pr-check` reporter.
 Note that there is a limitation for annotations created by logging commands,
 such as [max # of annotations per run](https://github.com/reviewdog/reviewdog/issues/411#issuecomment-570893427).
 You can check GitHub Actions log to see full results in such cases.
+
+#### reviewdog badge [![reviewdog](https://github.com/reviewdog/reviewdog/workflows/reviewdog/badge.svg?branch=master&event=push)](https://github.com/reviewdog/reviewdog/actions?query=workflow%3Areviewdog+event%3Apush+branch%3Amaster)
+
+As [`github-check` reporter](#reporter-github-checks--reportergithub-pr-check) support running on commit, we can create reviewdog
+[GitHub Action badge](https://help.github.com/en/actions/automating-your-workflow-with-github-actions/configuring-a-workflow#adding-a-workflow-status-badge-to-your-repository)
+to check the result against master commit for example. :tada:
+
+Example:
+```
+<!-- Replace <OWNWER> and <REPOSITORY>. It assumes workflow name is "reviewdog" -->
+[![reviewdog](https://github.com/<OWNER>/<REPOSITORY>/workflows/reviewdog/badge.svg?branch=master&event=push)](https://github.com/<OWNER>/<REPOSITORY>/actions?query=workflow%3Areviewdog+event%3Apush+branch%3Amaster)
+```
 
 ### Travis CI
 
