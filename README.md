@@ -404,7 +404,7 @@ jobs:
 <details>
 <summary><strong>Example (github-check reporter):</strong></summary>
 
-[.github/workflows/reviewdog_github_check.yml](.github/workflows/reviewdog_github_check.yml)
+[.github/workflows/reviewdog](.github/workflows/reviewdog.yml)
 
 Only `github-check` reporter can run on push event too.
 
