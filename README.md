@@ -317,6 +317,23 @@ diff too.
 
 [![sample comment outside diff](https://user-images.githubusercontent.com/3797062/69917921-e0680580-14ae-11ea-9a56-de9e3cbac005.png)](https://github.com/reviewdog/reviewdog/pull/364/files)
 
+
+#### reviewdog badge
+
+[![reviewdog](https://github.com/reviewdog/reviewdog/workflows/reviewdog/badge.svg?branch=master&event=push)](https://github.com/reviewdog/reviewdog/actions?query=workflow%3Areviewdog+event%3Apush+branch%3Amaster)
+
+As `github-check` reporter support running on commit, we can create reviewdog
+[GitHub Action badge](https://help.github.com/en/actions/automating-your-workflow-with-github-actions/configuring-a-workflow#adding-a-workflow-status-badge-to-your-repository) :tada:
+
+Example:
+```
+<!-- Replace <OWNWER> and <REPOSITORY>. It assumes workflow name is "reviewdog" -->
+[![reviewdog](https://github.com/<OWNER>/<REPOSITORY>/workflows/reviewdog/badge.svg?branch=master&event=push)](https://github.com/<OWNER>/<REPOSITORY>/actions?query=workflow%3Areviewdog+event%3Apush+branch%3Amaster)
+```
+
+You can check the existing findings by checking it for example.
+![Check existing finding with reviewdog badge](https://user-images.githubusercontent.com/3797062/72003148-1ce80780-328c-11ea-9576-147e56af680e.png)
+
 ### Reporter: GitHub PullRequest review comment (-reporter=github-pr-review)
 
 [![sample-comment.png](https://raw.githubusercontent.com/haya14busa/i/dc0ccb1e110515ea407c146d99b749018db05c45/reviewdog/sample-comment.png)](https://github.com/reviewdog/reviewdog/pull/24#discussion_r84599728)
