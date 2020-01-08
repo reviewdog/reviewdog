@@ -317,6 +317,7 @@ diff too.
 
 [![sample comment outside diff](https://user-images.githubusercontent.com/3797062/69917921-e0680580-14ae-11ea-9a56-de9e3cbac005.png)](https://github.com/reviewdog/reviewdog/pull/364/files)
 
+You can create [reviewdog badge](#reviewdog-badge-) for this reporter.
 
 ### Reporter: GitHub PullRequest review comment (-reporter=github-pr-review)
 
@@ -487,7 +488,7 @@ You can check GitHub Actions log to see full results in such cases.
 
 #### reviewdog badge [![reviewdog](https://github.com/reviewdog/reviewdog/workflows/reviewdog/badge.svg?branch=master&event=push)](https://github.com/reviewdog/reviewdog/actions?query=workflow%3Areviewdog+event%3Apush+branch%3Amaster)
 
-As `github-check` reporter support running on commit, we can create reviewdog
+As [`github-check` reporter](#reporter-github-checks--reportergithub-pr-check) support running on commit, we can create reviewdog
 [GitHub Action badge](https://help.github.com/en/actions/automating-your-workflow-with-github-actions/configuring-a-workflow#adding-a-workflow-status-badge-to-your-repository)
 to check the result against master commit for example. :tada:
 
