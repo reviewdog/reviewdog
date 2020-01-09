@@ -86,6 +86,7 @@ github.com/haya14busa/secretbox v0.0.0-20180525171038-07c7ecf409f5/go.mod h1:FGO
 github.com/ianlancetaylor/demangle v0.0.0-20181102032728-5e5cf60278f6/go.mod h1:aSSvb/t6k1mPoxDqO4vJh6VOCGPwU4O0C2/Eqndh1Sc=
 github.com/jstemmer/go-junit-report v0.0.0-20190106144839-af01ea7f8024 h1:rBMNdlhTLzJjJSDIjNEXX1Pz3Hmwmz91v+zycvx9PJc=
 github.com/jstemmer/go-junit-report v0.0.0-20190106144839-af01ea7f8024/go.mod h1:6v2b51hI/fHJwM22ozAgKL4VKDeJcHhJFhtBdhmNjmU=
+github.com/jstemmer/go-junit-report v0.9.1 h1:6QPYqodiu3GuPL+7mfx+NwDdp2eTkp9IfEUpgAwUN0o=
 github.com/jstemmer/go-junit-report v0.9.1/go.mod h1:Brl9GWCQeLvo8nXZwPNNblvFj/XSXhF0NWZEnDohbsk=
 github.com/justinas/nosurf v0.0.0-20190416172904-05988550ea18 h1:ci3v0mUqcCewO25ntt7hprt2ZMNA0AWI6s6qV0rSpc0=
 github.com/justinas/nosurf v0.0.0-20190416172904-05988550ea18/go.mod h1:Aucr5I5chr4OCuuVB4LTuHVrKHBuyRSo7vM2hqrcb7E=
@@ -116,6 +117,8 @@ github.com/reviewdog/errorformat v0.0.0-20191205145527-74f85e16e317 h1:gY7Zh3de/
 github.com/reviewdog/errorformat v0.0.0-20191205145527-74f85e16e317/go.mod h1:giYAXnpegRDPsXUO7TRpDKXJo1lFGYxyWRfEt5iQ+OA=
 github.com/reviewdog/errorformat v0.0.0-20200104154450-5b92f813bd0d h1:VpQ2UG6pFevKaDniSEVFs3pxbhZ/UrYw6+foL2e4dKo=
 github.com/reviewdog/errorformat v0.0.0-20200104154450-5b92f813bd0d/go.mod h1:giYAXnpegRDPsXUO7TRpDKXJo1lFGYxyWRfEt5iQ+OA=
+github.com/reviewdog/errorformat v0.0.0-20200109134752-8983be9bc7dd h1:fvaEkjpr2NJbtnFRCft7D6y/mQ5/2OQU0pKJLW8dwFA=
+github.com/reviewdog/errorformat v0.0.0-20200109134752-8983be9bc7dd/go.mod h1:giYAXnpegRDPsXUO7TRpDKXJo1lFGYxyWRfEt5iQ+OA=
 github.com/rogpeppe/go-internal v1.3.0/go.mod h1:M8bDsm7K2OlrFYOpmOWEs/qY81heoFRclV5y23lUDJ4=
 github.com/stretchr/objx v0.1.0/go.mod h1:HFkY916IF+rwdDfMAkV7OtwuqBVzrE8GR6GFx+wExME=
 github.com/stretchr/testify v1.3.0 h1:TivCn/peBQ7UY8ooIcPgZFpTNSz0Q2U6UrFlUfqbe0Q=
