@@ -7,7 +7,7 @@ import (
 	"testing"
 
 	"github.com/google/go-cmp/cmp"
-	"github.com/google/go-github/v28/github"
+	"github.com/google/go-github/v29/github"
 
 	"github.com/reviewdog/reviewdog/doghouse"
 )
