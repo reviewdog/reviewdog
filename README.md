@@ -446,6 +446,8 @@ You can also use public GitHub Actions to start using reviewdog with ease! :tada
 - Common
   - [reviewdog/action-misspell](https://github.com/reviewdog/action-misspell) - Run [misspell](https://github.com/client9/misspell).
   - [tsuyoshicho/action-textlint](https://github.com/tsuyoshicho/action-textlint) - Run [textlint](https://github.com/textlint/textlint)
+- Env
+  - [mgrachev/action-dotenv-linter](https://github.com/mgrachev/action-dotenv-linter) - Run [dotenv-linter](https://github.com/mgrachev/dotenv-linter) to lint `.env` files.
 - Shell script
   - [reviewdog/action-shellcheck](https://github.com/reviewdog/action-shellcheck) - Run [shellcheck](https://github.com/koalaman/shellcheck).
 - Go
