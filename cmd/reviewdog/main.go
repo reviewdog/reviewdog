@@ -54,6 +54,7 @@ type option struct {
 	level            string
 	guessPullRequest bool
 	tee              bool
+	filterMode       reviewdog.FilterMode
 }
 
 // flags doc
@@ -70,7 +71,13 @@ const (
 	levelDoc            = `report level currently used for github-pr-check reporter ("info","warning","error").`
 	guessPullRequestDoc = `guess Pull Request ID by branch name and commit SHA`
 	teeDoc              = `enable "tee"-like mode which outputs tools's output as is while reporting results to -reporter. Useful for debugging as well.`
-	reporterDoc         = `reporter of reviewdog results. (local, github-check, github-pr-check, github-pr-review, gitlab-mr-discussion, gitlab-mr-commit)
+	filterModeDoc       = `how to filter checks results. Possible values are: diff_context, added.
+    "diff_context" (default)
+        Filter by diff context, which can include unchanged lines.
+    "added"
+        Filter by added diff lines.
+`
+	reporterDoc = `reporter of reviewdog results. (local, github-check, github-pr-check, github-pr-review, gitlab-mr-discussion, gitlab-mr-commit)
 	"local" (default)
 		Report results to stdout.
 
@@ -156,6 +163,7 @@ func init() {
 	flag.StringVar(&opt.level, "level", "error", levelDoc)
 	flag.BoolVar(&opt.guessPullRequest, "guess", false, guessPullRequestDoc)
 	flag.BoolVar(&opt.tee, "tee", false, teeDoc)
+	flag.Var(&opt.filterMode, "filter-mode", filterModeDoc)
 }
 
 func usage() {
@@ -300,7 +308,7 @@ github-pr-check reporter as a fallback.
 		if err != nil {
 			return err
 		}
-		return project.Run(ctx, conf, buildRunnersMap(opt.runners), cs, ds, opt.tee)
+		return project.Run(ctx, conf, buildRunnersMap(opt.runners), cs, ds, opt.tee, opt.filterMode)
 	}
 
 	p, err := newParserFromOpt(opt)
@@ -308,7 +316,7 @@ github-pr-check reporter as a fallback.
 		return err
 	}
 
-	app := reviewdog.NewReviewdog(toolName(opt), p, cs, ds)
+	app := reviewdog.NewReviewdog(toolName(opt), p, cs, ds, opt.filterMode)
 	return app.Run(ctx, r)
 }
 

@@ -78,7 +78,7 @@ func RunAndParse(ctx context.Context, conf *Config, runners map[string]bool, def
 }
 
 // Run runs reviewdog tasks based on Config.
-func Run(ctx context.Context, conf *Config, runners map[string]bool, c reviewdog.CommentService, d reviewdog.DiffService, teeMode bool) error {
+func Run(ctx context.Context, conf *Config, runners map[string]bool, c reviewdog.CommentService, d reviewdog.DiffService, teeMode bool, filterMode reviewdog.FilterMode) error {
 	results, err := RunAndParse(ctx, conf, runners, "", teeMode) // Level is not used.
 	if err != nil {
 		return err
@@ -98,7 +98,7 @@ func Run(ctx context.Context, conf *Config, runners map[string]bool, c reviewdog
 	results.Range(func(toolname string, result *reviewdog.Result) {
 		rs := result.CheckResults
 		g.Go(func() error {
-			return reviewdog.RunFromResult(ctx, c, rs, filediffs, d.Strip(), toolname)
+			return reviewdog.RunFromResult(ctx, c, rs, filediffs, d.Strip(), toolname, filterMode)
 		})
 	})
 	return g.Wait()
