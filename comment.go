@@ -9,6 +9,10 @@ type multiCommentService struct {
 	services []CommentService
 }
 
+func test() int{
+	return 2
+}
+
 
 func (m *multiCommentService) Post(ctx context.Context, c *Comment) error {
 	for _, cs := range m.services {
