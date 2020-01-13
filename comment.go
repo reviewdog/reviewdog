@@ -1,3 +1,4 @@
+
 package reviewdog
 
 import "context"
@@ -7,6 +8,7 @@ var _ BulkCommentService = &multiCommentService{}
 type multiCommentService struct {
 	services []CommentService
 }
+
 
 func (m *multiCommentService) Post(ctx context.Context, c *Comment) error {
 	for _, cs := range m.services {
