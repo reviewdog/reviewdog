@@ -115,7 +115,7 @@ func TestGitLabMergeRequestDiscussionCommenter_Post_Flush_review_api(t *testing.
 				want := &GitLabMergeRequestDiscussion{
 					Body: serviceutil.CommentBody(newComment1),
 					Position: &GitLabMergeRequestDiscussionPosition{
-						BaseSHA: "sha", StartSHA: "xxx", HeadSHA: "sha", PositionType: "text", NewPath: "file.go", NewLine: 14},
+						BaseSHA: "xxx", StartSHA: "xxx", HeadSHA: "sha", PositionType: "text", NewPath: "file.go", NewLine: 14},
 				}
 				if diff := cmp.Diff(got, want); diff != "" {
 					t.Error(diff)
@@ -124,7 +124,7 @@ func TestGitLabMergeRequestDiscussionCommenter_Post_Flush_review_api(t *testing.
 				want := &GitLabMergeRequestDiscussion{
 					Body: serviceutil.CommentBody(newComment2),
 					Position: &GitLabMergeRequestDiscussionPosition{
-						BaseSHA: "sha", StartSHA: "xxx", HeadSHA: "sha", PositionType: "text", NewPath: "file2.go", NewLine: 15},
+						BaseSHA: "xxx", StartSHA: "xxx", HeadSHA: "sha", PositionType: "text", NewPath: "file2.go", NewLine: 15},
 				}
 				if diff := cmp.Diff(got, want); diff != "" {
 					t.Error(diff)

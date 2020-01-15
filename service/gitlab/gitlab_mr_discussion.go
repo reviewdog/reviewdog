@@ -110,7 +110,7 @@ func (g *GitLabMergeRequestDiscussionCommenter) postCommentsForEach(ctx context.
 				Position: &GitLabMergeRequestDiscussionPosition{
 					StartSHA:     targetBranch.Commit.ID,
 					HeadSHA:      g.sha,
-					BaseSHA:      g.sha,
+					BaseSHA:      targetBranch.Commit.ID,
 					PositionType: "text",
 					NewPath:      comment.Path,
 					NewLine:      comment.Lnum,
