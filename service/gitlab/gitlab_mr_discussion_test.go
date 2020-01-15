@@ -62,19 +62,19 @@ func TestGitLabMergeRequestDiscussionCommenter_Post_Flush_review_api(t *testing.
 		case http.MethodGet:
 			switch r.URL.Query().Get("page") {
 			default:
-				dls := []*GitLabMergeRequestDiscussionList{
+				dls := []*gitlab.Discussion{
 					{
-						Notes: []*GitLabMergeRequestDiscussion{
+						Notes: []*gitlab.Note{
 							{
 								Body: serviceutil.CommentBody(alreadyCommented1),
-								Position: &GitLabMergeRequestDiscussionPosition{
+								Position: &gitlab.NotePosition{
 									NewPath: alreadyCommented1.Path,
 									NewLine: alreadyCommented1.Lnum,
 								},
 							},
 							{
 								Body: "unrelated commented",
-								Position: &GitLabMergeRequestDiscussionPosition{
+								Position: &gitlab.NotePosition{
 									NewPath: "file.go",
 									NewLine: 1,
 								},
@@ -87,12 +87,12 @@ func TestGitLabMergeRequestDiscussionCommenter_Post_Flush_review_api(t *testing.
 					t.Fatal(err)
 				}
 			case "2":
-				dls := []*GitLabMergeRequestDiscussionList{
+				dls := []*gitlab.Discussion{
 					{
-						Notes: []*GitLabMergeRequestDiscussion{
+						Notes: []*gitlab.Note{
 							{
 								Body: serviceutil.CommentBody(alreadyCommented2),
-								Position: &GitLabMergeRequestDiscussionPosition{
+								Position: &gitlab.NotePosition{
 									NewPath: alreadyCommented2.Path,
 									NewLine: alreadyCommented2.Lnum,
 								},
@@ -106,24 +106,24 @@ func TestGitLabMergeRequestDiscussionCommenter_Post_Flush_review_api(t *testing.
 			}
 
 		case http.MethodPost:
-			got := new(GitLabMergeRequestDiscussion)
+			got := new(gitlab.CreateMergeRequestDiscussionOptions)
 			if err := json.NewDecoder(r.Body).Decode(got); err != nil {
 				t.Error(err)
 			}
 			switch got.Position.NewPath {
 			case "file.go":
-				want := &GitLabMergeRequestDiscussion{
-					Body: serviceutil.CommentBody(newComment1),
-					Position: &GitLabMergeRequestDiscussionPosition{
+				want := &gitlab.CreateMergeRequestDiscussionOptions{
+					Body: gitlab.String(serviceutil.CommentBody(newComment1)),
+					Position: &gitlab.NotePosition{
 						BaseSHA: "xxx", StartSHA: "xxx", HeadSHA: "sha", PositionType: "text", NewPath: "file.go", NewLine: 14},
 				}
 				if diff := cmp.Diff(got, want); diff != "" {
 					t.Error(diff)
 				}
 			case "file2.go":
-				want := &GitLabMergeRequestDiscussion{
-					Body: serviceutil.CommentBody(newComment2),
-					Position: &GitLabMergeRequestDiscussionPosition{
+				want := &gitlab.CreateMergeRequestDiscussionOptions{
+					Body: gitlab.String(serviceutil.CommentBody(newComment2)),
+					Position: &gitlab.NotePosition{
 						BaseSHA: "xxx", StartSHA: "xxx", HeadSHA: "sha", PositionType: "text", NewPath: "file2.go", NewLine: 15},
 				}
 				if diff := cmp.Diff(got, want); diff != "" {
@@ -131,6 +131,9 @@ func TestGitLabMergeRequestDiscussionCommenter_Post_Flush_review_api(t *testing.
 				}
 			default:
 				t.Errorf("got unexpected discussion: %#v", got)
+			}
+			if err := json.NewEncoder(w).Encode(gitlab.Discussion{}); err != nil {
+				t.Fatal(err)
 			}
 		default:
 			t.Errorf("unexpected access: %v %v", r.Method, r.URL)
@@ -166,6 +169,6 @@ func TestGitLabMergeRequestDiscussionCommenter_Post_Flush_review_api(t *testing.
 		}
 	}
 	if err := g.Flush(context.Background()); err != nil {
-		t.Error(err)
+		t.Errorf("%v", err)
 	}
 }

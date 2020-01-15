@@ -3,8 +3,6 @@ package gitlab
 import (
 	"context"
 	"fmt"
-	"net/http"
-	"net/url"
 	"path/filepath"
 	"sync"
 
@@ -72,7 +70,7 @@ func (g *GitLabMergeRequestDiscussionCommenter) Flush(ctx context.Context) error
 
 func (g *GitLabMergeRequestDiscussionCommenter) createPostedCommetns() (serviceutil.PostedComments, error) {
 	postedcs := make(serviceutil.PostedComments)
-	discussions, err := listAllMergeRequestDiscussion(g.cli, g.projects, g.pr, &ListMergeRequestDiscussionOptions{PerPage: 100})
+	discussions, err := listAllMergeRequestDiscussion(g.cli, g.projects, g.pr, &gitlab.ListMergeRequestDiscussionsOptions{PerPage: 100})
 	if err != nil {
 		return nil, fmt.Errorf("failed to list all merge request discussions: %v", err)
 	}
@@ -105,9 +103,9 @@ func (g *GitLabMergeRequestDiscussionCommenter) postCommentsForEach(ctx context.
 			continue
 		}
 		eg.Go(func() error {
-			discussion := &GitLabMergeRequestDiscussion{
-				Body: serviceutil.CommentBody(comment),
-				Position: &GitLabMergeRequestDiscussionPosition{
+			discussion := &gitlab.CreateMergeRequestDiscussionOptions{
+				Body: gitlab.String(serviceutil.CommentBody(comment)),
+				Position: &gitlab.NotePosition{
 					StartSHA:     targetBranch.Commit.ID,
 					HeadSHA:      g.sha,
 					BaseSHA:      targetBranch.Commit.ID,
@@ -116,84 +114,25 @@ func (g *GitLabMergeRequestDiscussionCommenter) postCommentsForEach(ctx context.
 					NewLine:      comment.Lnum,
 				},
 			}
-			_, err := CreateMergeRequestDiscussion(g.cli, g.projects, g.pr, discussion)
-			return err
+			_, _, err := g.cli.Discussions.CreateMergeRequestDiscussion(g.projects, g.pr, discussion)
+			if err != nil {
+				return fmt.Errorf("failed to create merge request discussion: %v", err)
+			}
+			return nil
 		})
 	}
 	return eg.Wait()
 }
 
-// GitLabMergeRequestDiscussionPosition represents position of GitLab MergeRequest Discussion.
-type GitLabMergeRequestDiscussionPosition struct {
-	// Required.
-	BaseSHA      string `json:"base_sha,omitempty"`      // Base commit SHA in the source branch
-	StartSHA     string `json:"start_sha,omitempty"`     // SHA referencing commit in target branch
-	HeadSHA      string `json:"head_sha,omitempty"`      // SHA referencing HEAD of this merge request
-	PositionType string `json:"position_type,omitempty"` // Type of the position reference', allowed values: 'text' or 'image'
-
-	// Optional.
-	NewPath string `json:"new_path,omitempty"` // File path after change
-	NewLine int    `json:"new_line,omitempty"` // Line number after change (for 'text' diff notes)
-	OldPath string `json:"old_path,omitempty"` // File path before change
-	OldLine int    `json:"old_line,omitempty"` // Line number before change (for 'text' diff notes)
-}
-
-// GitLabMergeRequestDiscussionList represents response of ListMergeRequestDiscussion API.
-//
-// GitLab API docs: https://docs.gitlab.com/ee/api/discussions.html#list-project-merge-request-discussions
-type GitLabMergeRequestDiscussionList struct {
-	Notes []*GitLabMergeRequestDiscussion `json:"notes"`
-}
-
-// GitLabMergeRequestDiscussion represents a discussion of MergeRequest.
-type GitLabMergeRequestDiscussion struct {
-	Body     string                                `json:"body"` // The content of a discussion
-	Position *GitLabMergeRequestDiscussionPosition `json:"position"`
-}
-
-// CreateMergeRequestDiscussion creates new discussion on a merge request.
-//
-// GitLab API docs: https://docs.gitlab.com/ee/api/discussions.html#create-new-merge-request-discussion
-func CreateMergeRequestDiscussion(cli *gitlab.Client, projectID string, mergeRequest int, discussion *GitLabMergeRequestDiscussion) (*gitlab.Response, error) {
-	u := fmt.Sprintf("projects/%s/merge_requests/%d/discussions", url.QueryEscape(projectID), mergeRequest)
-	req, err := cli.NewRequest(http.MethodPost, u, discussion, nil)
-	if err != nil {
-		return nil, err
-	}
-	return cli.Do(req, nil)
-}
-
-// ListMergeRequestDiscussion lists discussion on a merge request.
-//
-// GitLab API docs: https://docs.gitlab.com/ee/api/discussions.html#list-project-merge-request-discussions
-func ListMergeRequestDiscussion(cli *gitlab.Client, projectID string, mergeRequest int, opts *ListMergeRequestDiscussionOptions) ([]*GitLabMergeRequestDiscussionList, *gitlab.Response, error) {
-	u := fmt.Sprintf("projects/%s/merge_requests/%d/discussions", url.QueryEscape(projectID), mergeRequest)
-	req, err := cli.NewRequest(http.MethodGet, u, opts, nil)
-	if err != nil {
-		return nil, nil, err
-	}
-	var discussions []*GitLabMergeRequestDiscussionList
-	resp, err := cli.Do(req, &discussions)
-	if err != nil {
-		return nil, resp, err
-	}
-	return discussions, resp, nil
-}
-
-// ListMergeRequestDiscussionOptions represents the available ListMergeRequestDiscussion() options.
-//
-// GitLab API docs: https://docs.gitlab.com/ee/api/discussions.html#list-project-merge-request-discussions
-type ListMergeRequestDiscussionOptions gitlab.ListOptions
-
-func listAllMergeRequestDiscussion(cli *gitlab.Client, projectID string, mergeRequest int, opts *ListMergeRequestDiscussionOptions) ([]*GitLabMergeRequestDiscussionList, error) {
-	discussions, resp, err := ListMergeRequestDiscussion(cli, projectID, mergeRequest, opts)
+func listAllMergeRequestDiscussion(cli *gitlab.Client, projectID string, mergeRequest int, opts *gitlab.ListMergeRequestDiscussionsOptions) ([]*gitlab.Discussion, error) {
+	discussions, resp, err := cli.Discussions.ListMergeRequestDiscussions(projectID, mergeRequest, opts)
 	if err != nil {
 		return nil, err
 	}
 	if resp.NextPage == 0 {
 		return discussions, nil
 	}
-	newOpts := &ListMergeRequestDiscussionOptions{
+	newOpts := &gitlab.ListMergeRequestDiscussionsOptions{
 		Page:    resp.NextPage,
 		PerPage: opts.PerPage,
 	}
