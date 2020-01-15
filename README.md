@@ -21,6 +21,9 @@
   <a href="https://github.com/reviewdog/reviewdog/releases">
     <img alt="Github All Releases" src="https://img.shields.io/github/downloads/reviewdog/reviewdog/total.svg?maxAge=43200">
   </a>
+  <a href="https://gitlab.com/reviewdog/reviewdog/pipelines">
+    <img alt="GitLab Supported" src="https://img.shields.io/badge/GitLab%20-Supported-fc6d26?logo=gitlab">
+  </a>
 </p>
 
 <p align="center">
