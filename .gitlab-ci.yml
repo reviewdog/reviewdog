@@ -5,6 +5,8 @@ stages:
 
 # https://github.com/tmaier/gitlab-auto-merge-request
 Open Merge Request:
+  only:
+    - branches
   except:
     - master
   stage: openMr
@@ -16,6 +18,8 @@ Open Merge Request:
     - merge-request.sh
 
 Reviewdog:
+  only:
+    - branches
   except:
     - master
   stage: reviewdog
