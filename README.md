@@ -13,13 +13,13 @@
     <img alt="LICENSE" src="https://img.shields.io/badge/license-MIT-blue.svg?maxAge=43200">
   </a>
   <a href="https://godoc.org/github.com/reviewdog/reviewdog">
-    <img alt="GoDoc" src="https://img.shields.io/badge/godoc-reference-4F73B3.svg?label=godoc.org&maxAge=43200">
+    <img alt="GoDoc" src="https://img.shields.io/badge/godoc-reference-4F73B3.svg?label=godoc.org&maxAge=43200&logo=go">
   </a>
   <a href="https://github.com/reviewdog/reviewdog/releases">
-    <img alt="releases" src="https://img.shields.io/github/release/reviewdog/reviewdog.svg">
+    <img alt="releases" src="https://img.shields.io/github/release/reviewdog/reviewdog.svg?logo=github">
   </a>
-  <a href="https://github.com/reviewdog/reviewdog/releases">
-    <img alt="Github All Releases" src="https://img.shields.io/github/downloads/reviewdog/reviewdog/total.svg">
+  <a href="https://somsubhra.com/github-release-stats/?username=reviewdog&repository=reviewdog">
+    <img alt="Github Releases Stats" src="https://img.shields.io/github/downloads/reviewdog/reviewdog/total.svg?logo=github">
   </a>
   <a href="https://gitlab.com/reviewdog/reviewdog/pipelines">
     <img alt="GitLab Supported" src="https://img.shields.io/badge/GitLab%20-Supported-fc6d26?logo=gitlab">
