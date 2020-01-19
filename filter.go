@@ -33,10 +33,10 @@ func (mode *FilterMode) String() string {
 // Set implements the flag.Value interface
 func (mode *FilterMode) Set(value string) error {
 	switch value {
-	case "added":
-		*mode = FilterModeAdded
 	case "diff_context":
 		*mode = FilterModeDiffContext
+	case "added":
+		*mode = FilterModeAdded
 	default:
 		*mode = FilterModeDiffContext
 	}
@@ -58,10 +58,10 @@ func FilterCheck(results []*CheckResult, diff []*diff.FileDiff, strip int, wd st
 	var filterFn lineComparator
 
 	switch filterMode {
-	case FilterModeAdded:
-		filterFn = isAddedLine
 	case FilterModeDiffContext:
 		filterFn = anyLine
+	case FilterModeAdded:
+		filterFn = isAddedLine
 	}
 
 	significantlines := significantDiffLines(diff, filterFn, strip)
