@@ -470,6 +470,7 @@ You can also use public GitHub Actions to start using reviewdog with ease! :tada
 - YAML
   - [reviewdog/action-yamllint](https://github.com/reviewdog/action-yamllint) - Run [yamllint](https://github.com/adrienverge/yamllint).
 - Ruby
+  - [reviewdog/action-brakeman](https://github.com/reviewdog/action-brakeman) - Run [brakeman](https://github.com/presidentbeef/brakeman).
   - [reviewdog/action-rubocop](https://github.com/reviewdog/action-rubocop) - Run [rubocop](https://github.com/rubocop-hq/rubocop).
 - Python
   - [wemake-python-styleguide](https://github.com/wemake-services/wemake-python-styleguide) - Run wemake-python-styleguide
