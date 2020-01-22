@@ -40,6 +40,10 @@ type CheckRequest struct {
 	// (because there are no diff!).
 	// Optional.
 	OutsideDiff bool `json:"outside_diff"`
+
+	// FilterMode represents a way to filter checks results
+	// Optional.
+	FilterMode reviewdog.FilterMode `json:"filter_mode"`
 }
 
 // CheckResponse represents doghouse GitHub check response.

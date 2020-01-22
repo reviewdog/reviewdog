@@ -47,7 +47,7 @@ golint.new.go:11:1: comment on exported function F2 should be of the form "F2 ..
 	p := NewErrorformatParser(efm)
 	c := NewRawCommentWriter(os.Stdout)
 	d := NewDiffString(difftext, 1)
-	app := NewReviewdog("tool name", p, c, d)
+	app := NewReviewdog("tool name", p, c, d, FilterModeAdded)
 	app.Run(context.Background(), strings.NewReader(lintresult))
 	// Unordered output:
 	// golint.new.go:5:5: exported var NewError1 should have comment or be unexported
@@ -93,6 +93,6 @@ index 34cacb9..a727dd3 100644
 	efm, _ := errorformat.NewErrorformat([]string{`%f:%l:%c: %m`})
 	p := NewErrorformatParser(efm)
 	d := NewDiffString(difftext, 1)
-	app := NewReviewdog("tool name", p, c, d)
+	app := NewReviewdog("tool name", p, c, d, FilterModeAdded)
 	app.Run(context.Background(), strings.NewReader(lintresult))
 }

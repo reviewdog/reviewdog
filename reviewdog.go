@@ -14,20 +14,22 @@ import (
 // or linter, get diff and filter the results by diff, and report filtered
 // results.
 type Reviewdog struct {
-	toolname string
-	p        Parser
-	c        CommentService
-	d        DiffService
+	toolname   string
+	p          Parser
+	c          CommentService
+	d          DiffService
+	filterMode FilterMode
 }
 
 // NewReviewdog returns a new Reviewdog.
-func NewReviewdog(toolname string, p Parser, c CommentService, d DiffService) *Reviewdog {
-	return &Reviewdog{p: p, c: c, d: d, toolname: toolname}
+func NewReviewdog(toolname string, p Parser, c CommentService, d DiffService, filterMode FilterMode) *Reviewdog {
+	return &Reviewdog{p: p, c: c, d: d, toolname: toolname, filterMode: filterMode}
 }
 
+// RunFromResult creates a new Reviewdog and runs it with check results.
 func RunFromResult(ctx context.Context, c CommentService, results []*CheckResult,
-	filediffs []*diff.FileDiff, strip int, toolname string) error {
-	return (&Reviewdog{c: c, toolname: toolname}).runFromResult(ctx, results, filediffs, strip)
+	filediffs []*diff.FileDiff, strip int, toolname string, filterMode FilterMode) error {
+	return (&Reviewdog{c: c, toolname: toolname, filterMode: filterMode}).runFromResult(ctx, results, filediffs, strip)
 }
 
 // CheckResult represents a checked result of static analysis tools.
@@ -79,7 +81,8 @@ func (w *Reviewdog) runFromResult(ctx context.Context, results []*CheckResult,
 		return err
 	}
 
-	checks := FilterCheck(results, filediffs, strip, wd)
+	checks := FilterCheck(results, filediffs, strip, wd, w.filterMode)
+
 	for _, check := range checks {
 		if !check.InDiff {
 			continue

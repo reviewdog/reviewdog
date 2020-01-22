@@ -49,8 +49,7 @@ func (ch *Checker) Check(ctx context.Context) (*doghouse.CheckResponse, error) {
 	}
 
 	results := annotationsToCheckResults(ch.req.Annotations)
-	filtered := reviewdog.FilterCheck(results, filediffs, 1, "")
-
+	filtered := reviewdog.FilterCheck(results, filediffs, 1, "", ch.req.FilterMode)
 	check, err := ch.createCheck(ctx)
 	if err != nil {
 		// If this error is StatusForbidden (403) here, it means reviewdog is
