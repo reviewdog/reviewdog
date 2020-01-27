@@ -209,7 +209,7 @@ runner:
       - "%f:%l:%c: %m"
     level: warning
   govet:
-    cmd: go tool vet -all -shadowstrict .
+    cmd: go vet -all .
 ```
 
 ```shell
