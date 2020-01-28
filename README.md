@@ -442,9 +442,7 @@ jobs:
 </details>
 
 #### Public Reviewdog GitHub Actions
-You can also use public GitHub Actions to start using reviewdog with ease! :tada: :arrow_forward: :tada:
-
-[Marketplace](https://github.com/marketplace?utf8=✓&type=actions&query=reviewdog)
+You can use public GitHub Actions to start using reviewdog with ease! :tada: :arrow_forward: :tada:
 
 - Common
   - [reviewdog/action-misspell](https://github.com/reviewdog/action-misspell) - Run [misspell](https://github.com/client9/misspell).
@@ -475,8 +473,12 @@ You can also use public GitHub Actions to start using reviewdog with ease! :tada
 - Python
   - [wemake-python-styleguide](https://github.com/wemake-services/wemake-python-styleguide) - Run wemake-python-styleguide
 
+... and more on [GitHub Marketplace](https://github.com/marketplace?utf8=✓&type=actions&query=reviewdog).
+
+Missing actions? Check out [reviewdog/action-template](https://github.com/reviewdog/action-template) and create a new reviewdog action!
+
 Please open a Pull Request to add your created reviewdog actions here :sparkles:.
-I can also consider to put your created repositories under reviewdog org and co-maintain the actions.
+I can also put your repositories under reviewdog org and co-maintain the actions.
 Example: [action-tflint](https://github.com/reviewdog/reviewdog/issues/322).
 
 #### Graceful Degradation for Pull Requests from forked repositories
