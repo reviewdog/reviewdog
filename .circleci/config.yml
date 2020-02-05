@@ -32,7 +32,7 @@ jobs:
   deploy:
     working_directory: ~/reviewdog/doghouse/appengine/
     docker:
-      - image: gcr.io/gcpug-container/appengine-go:1.11-slim
+      - image: gcr.io/gcpug-container/appengine-go:1.13-slim
         environment:
           GAE_DEPLOY_ACCOUNT: review-dog@appspot.gserviceaccount.com
           GAE_DEPLOY_PROJECT: review-dog
