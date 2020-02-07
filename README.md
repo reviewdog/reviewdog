@@ -472,7 +472,9 @@ You can use public GitHub Actions to start using reviewdog with ease! :tada: :ar
   - [reviewdog/action-rubocop](https://github.com/reviewdog/action-rubocop) - Run [rubocop](https://github.com/rubocop-hq/rubocop).
 - Python
   - [wemake-python-styleguide](https://github.com/wemake-services/wemake-python-styleguide) - Run wemake-python-styleguide
-
+- Kotlin
+  - [ScaCap/action-ktlint](https://github.com/ScaCap/action-ktlint) - Run [ktlint](https://ktlint.github.io/).
+  
 ... and more on [GitHub Marketplace](https://github.com/marketplace?utf8=✓&type=actions&query=reviewdog).
 
 Missing actions? Check out [reviewdog/action-template](https://github.com/reviewdog/action-template) and create a new reviewdog action!
