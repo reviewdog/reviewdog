@@ -523,7 +523,7 @@ Example:
 
 ```yaml
 install:
-  - mkdir -p ~/bin/ && export export PATH="~/bin/:$PATH"
+  - mkdir -p ~/bin/ && export PATH="~/bin/:$PATH"
   - curl -sfL https://raw.githubusercontent.com/reviewdog/reviewdog/master/install.sh| sh -s -- -b ~/bin
 
 script:
@@ -546,7 +546,7 @@ env:
     - secure: <token>
 
 install:
-  - mkdir -p ~/bin/ && export export PATH="~/bin/:$PATH"
+  - mkdir -p ~/bin/ && export PATH="~/bin/:$PATH"
   - curl -sfL https://raw.githubusercontent.com/reviewdog/reviewdog/master/install.sh| sh -s -- -b ~/bin
 
 script:
