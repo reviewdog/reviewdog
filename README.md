@@ -82,7 +82,7 @@ by diff.
 ## Installation
 
 ```shell
-# Install latest version. (Install it into ./bin/ by default).
+# Install the latest version. (Install it into ./bin/ by default).
 $ curl -sfL https://raw.githubusercontent.com/reviewdog/reviewdog/master/install.sh| sh -s
 
 # Specify installation directory ($(go env GOPATH)/bin/) and version.
@@ -296,7 +296,7 @@ Note: Token is not required if you run reviewdog in Travis or AppVeyor.
 
 *Caution*
 
-As described above, github-pr-check reporter with Option 2 is depending on
+As described above, github-pr-check reporter with Option 2 depends on
 reviewdog GitHub App server.
 The server is running with haya14busa's pocket money for now and I may break
 things, so I cannot ensure that the server is running 24h and 365 days.
@@ -448,6 +448,7 @@ You can use public GitHub Actions to start using reviewdog with ease! :tada: :ar
   - [reviewdog/action-misspell](https://github.com/reviewdog/action-misspell) - Run [misspell](https://github.com/client9/misspell).
   - [tsuyoshicho/action-textlint](https://github.com/tsuyoshicho/action-textlint) - Run [textlint](https://github.com/textlint/textlint)
   - [tsuyoshicho/action-redpen](https://github.com/tsuyoshicho/action-redpen) - Run [redpen](https://github.com/redpen-cc/redpen)
+  - [reviewdog/action-languagetool](https://github.com/reviewdog/action-languagetool) - Run [languagetool](https://github.com/languagetool-org/languagetool).
 - Docker
   - [reviewdog/action-hadolint](https://github.com/reviewdog/action-hadolint) - Run [hadolint](https://github.com/hadolint/hadolint) to lint `Dockerfile`.
 - Env
@@ -523,7 +524,7 @@ Example:
 
 ```yaml
 install:
-  - mkdir -p ~/bin/ && export export PATH="~/bin/:$PATH"
+  - mkdir -p ~/bin/ && export PATH="~/bin/:$PATH"
   - curl -sfL https://raw.githubusercontent.com/reviewdog/reviewdog/master/install.sh| sh -s -- -b ~/bin
 
 script:
@@ -546,7 +547,7 @@ env:
     - secure: <token>
 
 install:
-  - mkdir -p ~/bin/ && export export PATH="~/bin/:$PATH"
+  - mkdir -p ~/bin/ && export PATH="~/bin/:$PATH"
   - curl -sfL https://raw.githubusercontent.com/reviewdog/reviewdog/master/install.sh| sh -s -- -b ~/bin
 
 script:
