@@ -124,6 +124,9 @@ jobs:
           github_token: ${{ secrets.github_token }}
           reporter: github-check
           level: info
+          patterns: |
+            **/*.md
+            !**/testdata/**
 
   shellcheck:
     if: github.event_name == 'pull_request'
