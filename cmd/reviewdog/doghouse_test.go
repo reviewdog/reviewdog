@@ -5,6 +5,7 @@ import (
 	"context"
 	"io/ioutil"
 	"os"
+	"path/filepath"
 	"strings"
 	"testing"
 
@@ -219,12 +220,12 @@ func TestPostResultSet_withReportURL(t *testing.T) {
 				{
 					Line:       14,
 					Message:    "name1: test 1",
-					Path:       "reviewdog.go",
+					Path:       "cmd/reviewdog/reviewdog.go",
 					RawMessage: "L1\nL2",
 				},
 				{
 					Message: "name1: test 2",
-					Path:    "reviewdog.go",
+					Path:    "cmd/reviewdog/reviewdog.go",
 				},
 			}); diff != "" {
 				t.Errorf("%s: req.Annotation have diff:\n%s", req.Name, diff)
@@ -245,24 +246,25 @@ func TestPostResultSet_withReportURL(t *testing.T) {
 		return &doghouse.CheckResponse{ReportURL: "xxx"}, nil
 	}
 
+	// It assumes the current dir is ./cmd/reviewdog/
 	var resultSet reviewdog.ResultMap
 	resultSet.Store("name1", &reviewdog.Result{CheckResults: []*reviewdog.CheckResult{
 		{
 			Lnum:    14,
 			Message: "name1: test 1",
-			Path:    "reviewdog.go",
+			Path:    "reviewdog.go", // test relative path
 			Lines:   []string{"L1", "L2"},
 		},
 		{
 			Message: "name1: test 2",
-			Path:    "reviewdog.go",
+			Path:    absPath(t, "reviewdog.go"), // test abs path
 		},
 	}})
 	resultSet.Store("name2", &reviewdog.Result{CheckResults: []*reviewdog.CheckResult{
 		{
 			Lnum:    14,
 			Message: "name2: test 1",
-			Path:    "cmd/reviewdog/doghouse.go",
+			Path:    "doghouse.go",
 		},
 	}})
 
@@ -457,4 +459,12 @@ reviewdog: No results found for "name2". 1 results found outside diff.
 	if got := stdout.String(); got != want {
 		t.Errorf("diff found for report:\ngot:\n%s\nwant:\n%s", got, want)
 	}
+}
+
+func absPath(t *testing.T, path string) string {
+	p, err := filepath.Abs(path)
+	if err != nil {
+		t.Errorf("filepath.Abs(%q) failed: %v", path, err)
+	}
+	return p
 }
