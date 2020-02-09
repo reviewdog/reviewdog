@@ -1,6 +1,7 @@
 package reviewdog
 
 import (
+	"log"
 	"path/filepath"
 	"strings"
 
@@ -150,7 +151,7 @@ func significantDiffLines(filediffs []*diff.FileDiff, isSignificantLine lineComp
 		}
 		np, err := normalizePath(path)
 		if err != nil {
-			// FIXME(haya14busa): log or return error?
+			log.Printf("reviewdog: failed to normalize path: %s", path)
 			continue
 		}
 		path = np
