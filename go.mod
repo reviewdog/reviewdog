@@ -13,7 +13,7 @@ require (
 	github.com/justinas/nosurf v1.1.0
 	github.com/kylelemons/godebug v1.1.0
 	github.com/mattn/go-shellwords v1.0.10
-	github.com/rakyll/statik v0.1.6
+	github.com/rakyll/statik v0.1.7
 	github.com/reviewdog/errorformat v0.0.0-20200221090154-574f5275f795
 	github.com/xanzy/go-gitlab v0.26.0
 	golang.org/x/net v0.0.0-20200222125558-5a598a2470a0
