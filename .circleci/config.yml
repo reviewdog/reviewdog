@@ -4,7 +4,7 @@ jobs:
   lint:
     working_directory: ~/reviewdog
     docker:
-      - image: circleci/golang:1.13
+      - image: circleci/golang:1.14
     steps:
       - checkout
       - run:
@@ -19,13 +19,13 @@ jobs:
   test:
     working_directory: ~/reviewdog
     docker:
-      - image: circleci/golang:1.13
+      - image: circleci/golang:1.14
     steps:
       - checkout
       - run: 'go test -v ./...'
   release:
     docker:
-      - image: circleci/golang:1.13
+      - image: circleci/golang:1.14
     steps:
       - checkout
       - run: curl -sL https://git.io/goreleaser | bash
