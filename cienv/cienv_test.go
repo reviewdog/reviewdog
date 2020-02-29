@@ -34,6 +34,9 @@ func setupEnvs() (cleanup func()) {
 		"TRAVIS_PULL_REQUEST_SHA",
 		"TRAVIS_REPO_SLUG",
 		"GITHUB_ACTION",
+		"GERRIT_CHANGE_ID",
+		"GERRIT_REVISION_ID",
+		"GERRIT_BRANCH",
 	}
 	saveEnvs := make(map[string]string)
 	for _, key := range cleanEnvs {
@@ -264,5 +267,36 @@ func TestGetBuildInfo_common(t *testing.T) {
 	}
 	if !reflect.DeepEqual(g, want) {
 		t.Errorf("got: %#v, want: %#v", g, want)
+	}
+}
+
+func TestGetGerritBuildInfo(t *testing.T) {
+	cleanup := setupEnvs()
+	defer cleanup()
+
+	// without any environment variables
+	if _, err := GetGerritBuildInfo(); err == nil {
+		t.Error("error expected but got nil")
+	} else {
+		t.Log(err)
+	}
+
+	os.Setenv("GERRIT_CHANGE_ID", "changedID1")
+	if _, err := GetGerritBuildInfo(); err == nil {
+		t.Error("error expected but got nil")
+	} else {
+		t.Log(err)
+	}
+
+	os.Setenv("GERRIT_REVISION_ID", "revisionID1")
+	if _, err := GetGerritBuildInfo(); err == nil {
+		t.Error("error expected but got nil")
+	} else {
+		t.Log(err)
+	}
+
+	os.Setenv("GERRIT_BRANCH", "master")
+	if _, err := GetGerritBuildInfo(); err != nil {
+		t.Error("nil expected but got err")
 	}
 }

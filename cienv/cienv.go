@@ -20,6 +20,10 @@ type BuildInfo struct {
 
 	// Optional.
 	Branch string
+
+	// Gerrit related params
+	GerritChangeID   string
+	GerritRevisionID string
 }
 
 // GetBuildInfo returns BuildInfo from environment variables.
@@ -91,6 +95,30 @@ func GetBuildInfo() (prInfo *BuildInfo, isPR bool, err error) {
 		SHA:         sha,
 		Branch:      branch,
 	}, pr != 0, nil
+}
+
+// GetGerritBuildInfo returns Gerrit specific build info
+func GetGerritBuildInfo() (*BuildInfo, error) {
+	changeID := os.Getenv("GERRIT_CHANGE_ID")
+	if changeID == "" {
+		return nil, errors.New("cannot get change id from environment variable. Set GERRIT_CHANGE_ID ?")
+	}
+
+	revisionID := os.Getenv("GERRIT_REVISION_ID")
+	if revisionID == "" {
+		return nil, errors.New("cannot get revision id from environment variable. Set GERRIT_REVISION_ID ?")
+	}
+
+	branch := os.Getenv("GERRIT_BRANCH")
+	if branch == "" {
+		return nil, errors.New("cannot get branch from environment variable. Set GERRIT_BRANCH ?")
+	}
+
+	return &BuildInfo{
+		GerritChangeID:   changeID,
+		GerritRevisionID: revisionID,
+		Branch:           branch,
+	}, nil
 }
 
 func getPullRequestNum() int {
