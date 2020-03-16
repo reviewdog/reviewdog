@@ -105,7 +105,7 @@ func getPullRequestNum() int {
 		// drone.io.
 		"DRONE_PULL_REQUEST",
 		// GitLab CI MergeTrains
-		"CI_MERGE_REQUEST_IID"
+		"CI_MERGE_REQUEST_IID",
 	}
 	// regexp.MustCompile() in func intentionally because this func is called
 	// once for one run.
