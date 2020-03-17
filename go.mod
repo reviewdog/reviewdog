@@ -18,6 +18,6 @@ require (
 	github.com/xanzy/go-gitlab v0.28.0
 	golang.org/x/net v0.0.0-20200301022130-244492dfa37a
 	golang.org/x/oauth2 v0.0.0-20200107190931-bf48bf16ab8d
-	golang.org/x/sync v0.0.0-20190911185100-cd5d95a43a6e
+	golang.org/x/sync v0.0.0-20200317015054-43a5402ce75a
 	gopkg.in/yaml.v2 v2.2.8
 )
