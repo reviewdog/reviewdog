@@ -55,6 +55,7 @@ type option struct {
 	guessPullRequest bool
 	tee              bool
 	filterMode       reviewdog.FilterMode
+	failOnError      bool
 }
 
 // flags doc
@@ -144,6 +145,7 @@ const (
 		$ export CI_REPO_OWNER="haya14busa" # repository owner
 		$ export CI_REPO_NAME="reviewdog" # repository name
 `
+    failOnErrorDoc = `Returns 1 as exit code if any errors/warnings found in input`
 )
 
 var opt = &option{}
@@ -164,6 +166,7 @@ func init() {
 	flag.BoolVar(&opt.guessPullRequest, "guess", false, guessPullRequestDoc)
 	flag.BoolVar(&opt.tee, "tee", false, teeDoc)
 	flag.Var(&opt.filterMode, "filter-mode", filterModeDoc)
+	flag.BoolVar(&opt.failOnError, "fail-on-error", false, failOnErrorDoc)
 }
 
 func usage() {
@@ -308,7 +311,7 @@ github-pr-check reporter as a fallback.
 		if err != nil {
 			return err
 		}
-		return project.Run(ctx, conf, buildRunnersMap(opt.runners), cs, ds, opt.tee, opt.filterMode)
+		return project.Run(ctx, conf, buildRunnersMap(opt.runners), cs, ds, opt.tee, opt.filterMode, opt.failOnError)
 	}
 
 	p, err := newParserFromOpt(opt)
@@ -316,7 +319,7 @@ github-pr-check reporter as a fallback.
 		return err
 	}
 
-	app := reviewdog.NewReviewdog(toolName(opt), p, cs, ds, opt.filterMode)
+	app := reviewdog.NewReviewdog(toolName(opt), p, cs, ds, opt.filterMode, opt.failOnError)
 	return app.Run(ctx, r)
 }
 
