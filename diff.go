@@ -16,7 +16,8 @@ type DiffString struct {
 	b     []byte
 	strip int
 }
-
+func test111(){
+}
 func NewDiffString(diff string, strip int) DiffService {
 	return &DiffString{b: []byte(diff), strip: strip}
 }
