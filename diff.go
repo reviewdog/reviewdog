@@ -65,3 +65,5 @@ func (d *DiffCmd) Diff(_ context.Context) ([]byte, error) {
 func (d *DiffCmd) Strip() int {
 	return d.strip
 }
+func test112(){
+}
