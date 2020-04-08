@@ -145,7 +145,7 @@ const (
 		$ export CI_REPO_OWNER="haya14busa" # repository owner
 		$ export CI_REPO_NAME="reviewdog" # repository name
 `
-    failOnErrorDoc = `Returns 1 as exit code if any errors/warnings found in input`
+	failOnErrorDoc = `Returns 1 as exit code if any errors/warnings found in input`
 )
 
 var opt = &option{}
