@@ -71,6 +71,7 @@ by diff.
   * [GitLab CI](#gitlab-ci)
   * [Common (Jenkins, local, etc...)](#common-jenkins-local-etc)
     + [Jenkins with Github pull request builder plugin](#jenkins-with-github-pull-request-builder-plugin)
+- [Exit codes](#exit-codes)
 - [Articles](#articles)
 
 [![github-pr-check sample](https://user-images.githubusercontent.com/3797062/40884858-6efd82a0-6756-11e8-9f1a-c6af4f920fb0.png)](https://github.com/reviewdog/reviewdog/pull/131/checks)
@@ -640,6 +641,12 @@ $ REVIEWDOG_TOKEN="<token>" reviewdog -reporter=github-pr-check
 # Or
 $ REVIEWDOG_GITHUB_API_TOKEN="<token>" reviewdog -reporter=github-pr-review
 ```
+
+## Exit codes
+By default Reviewdog will return `0` as exit code once all actions done (linter report analysed, comments posted and so on)
+
+Once `fail-on-error` flag passed - Reviewdog will return `1` as exit code if at least one violation was found/reported.
+This can be helpful when you are using it as a step in your CI pipeline and want to mark the step failed if any error found by linter 
 
 ## Articles
 - [reviewdog — A code review dog who keeps your codebase healthy ](https://medium.com/@haya14busa/reviewdog-a-code-review-dog-who-keeps-your-codebase-healthy-d957c471938b)
