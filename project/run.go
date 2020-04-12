@@ -74,7 +74,7 @@ func RunAndParse(ctx context.Context, conf *Config, runners map[string]bool, def
 			if cmdErr != nil {
 				msg += fmt.Sprintf("\terror=%v", cmdErr)
 			}
-			log.Printf(msg)
+			log.Println(msg)
 			return nil
 		})
 	}
@@ -162,7 +162,7 @@ func checkUnexpectedFailures(results *reviewdog.ResultMap) error {
 		}
 		if result.CmdErr != nil && len(result.CheckResults) == 0 {
 			err = fmt.Errorf("%s failed with zero findings: The command itself "+
-				"failed (%v) or reviewdog cannot parse the results.", toolname, result.CmdErr)
+				"failed (%v) or reviewdog cannot parse the results", toolname, result.CmdErr)
 		}
 	})
 	return err
