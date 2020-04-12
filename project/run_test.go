@@ -128,7 +128,7 @@ func TestRun(t *testing.T) {
 				},
 			},
 		}
-		if err := Run(ctx, conf, nil, cs, ds, false, reviewdog.FilterModeAdded); err == nil {
+		if err := Run(ctx, conf, nil, cs, ds, false, reviewdog.FilterModeAdded, false); err == nil {
 			t.Error("want error, got nil")
 		} else {
 			t.Log(err)
