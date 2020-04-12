@@ -14,6 +14,9 @@ type ResultMap struct {
 type Result struct {
 	Level        string
 	CheckResults []*CheckResult
+
+	// Optional. Report an error of the command execution.
+	CmdErr error
 }
 
 // Store saves a new *Result into ResultMap.

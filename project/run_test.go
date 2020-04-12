@@ -65,7 +65,7 @@ func TestRun(t *testing.T) {
 		conf := &Config{
 			Runner: map[string]*Runner{
 				"test": {
-					Cmd:         "not found",
+					Cmd:         "echo 'hi'",
 					Errorformat: []string{`%f:%l:%c:%m`},
 				},
 			},
@@ -77,7 +77,37 @@ func TestRun(t *testing.T) {
 		}
 	})
 
-	t.Run("cmd error (not for reviewdog to exit with error)", func(t *testing.T) {
+	t.Run("cmd error with findings (not for reviewdog to exit with error)", func(t *testing.T) {
+		buf := new(bytes.Buffer)
+		defaultTeeStderr = buf
+		ds := &fakeDiffService{
+			FakeDiff: func() ([]byte, error) {
+				return []byte(""), nil
+			},
+		}
+		cs := &fakeCommentService{
+			FakePost: func(c *reviewdog.Comment) error {
+				return nil
+			},
+		}
+		conf := &Config{
+			Runner: map[string]*Runner{
+				"test": {
+					Cmd:         "echo 'file:14:14:message'; exit 1",
+					Errorformat: []string{`%f:%l:%c:%m`},
+				},
+			},
+		}
+		if err := Run(ctx, conf, nil, cs, ds, false, reviewdog.FilterModeAdded, false); err != nil {
+			t.Error(err)
+		}
+		want := ""
+		if got := buf.String(); got != want {
+			t.Errorf("got stderr %q, want %q", got, want)
+		}
+	})
+
+	t.Run("unexpected cmd error (reviewdog exits with error)", func(t *testing.T) {
 		buf := new(bytes.Buffer)
 		defaultTeeStderr = buf
 		ds := &fakeDiffService{
@@ -98,12 +128,10 @@ func TestRun(t *testing.T) {
 				},
 			},
 		}
-		if err := Run(ctx, conf, nil, cs, ds, false, reviewdog.FilterModeAdded, false); err != nil {
-			t.Error(err)
-		}
-		want := ""
-		if got := buf.String(); got != want {
-			t.Errorf("got stderr %q, want %q", got, want)
+		if err := Run(ctx, conf, nil, cs, ds, false, reviewdog.FilterModeAdded); err == nil {
+			t.Error("want error, got nil")
+		} else {
+			t.Log(err)
 		}
 	})
 
@@ -128,8 +156,10 @@ func TestRun(t *testing.T) {
 				},
 			},
 		}
-		if err := Run(ctx, conf, nil, cs, ds, true, reviewdog.FilterModeAdded, false); err != nil {
-			t.Error(err)
+		if err := Run(ctx, conf, nil, cs, ds, true, reviewdog.FilterModeAdded, false); err == nil {
+			t.Error("want error, got nil")
+		} else {
+			t.Log(err)
 		}
 		want := "sh: 1: not: not found\n"
 		if got := buf.String(); got != want {
