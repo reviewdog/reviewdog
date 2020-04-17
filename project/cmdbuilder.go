@@ -5,6 +5,7 @@ import (
 	"io"
 	"os"
 	"os/exec"
+	"runtime"
 )
 
 var (
@@ -29,7 +30,23 @@ func newCmdBuilder(envs []string, enableTee bool) *cmdBuilder {
 }
 
 func (cb *cmdBuilder) build(ctx context.Context, command string) (*exec.Cmd, io.Reader, io.Reader, error) {
-	cmd := exec.CommandContext(ctx, "sh", "-c", command)
+	shell := "sh"
+	args := []string{"-c", command}
+	if runtime.GOOS == "windows" {
+		// Under Windows the executalbe sh is not always available
+		// If running under MinGW the environment variable SHELL would be set
+		SHELL := os.Getenv("SHELL")
+		// Otherwise use the environment variable COMSPEC (path to cmd.exe)
+		COMSPEC := os.Getenv("COMSPEC")
+		if SHELL != "" {
+			shell = SHELL
+		} else if COMSPEC != "" {
+			shell = COMSPEC
+			// cmd.exe uses "/c" instead of "-c"
+			args[0] = "/c"
+		}
+	}
+	cmd := exec.CommandContext(ctx, shell, args...)
 	cmd.Env = cb.envs
 	stdout, err := cmd.StdoutPipe()
 	if err != nil {
