@@ -512,7 +512,7 @@ to check the result against master commit for example. :tada:
 
 Example:
 ```
-<!-- Replace <OWNWER> and <REPOSITORY>. It assumes workflow name is "reviewdog" -->
+<!-- Replace <OWNER> and <REPOSITORY>. It assumes workflow name is "reviewdog" -->
 [![reviewdog](https://github.com/<OWNER>/<REPOSITORY>/workflows/reviewdog/badge.svg?branch=master&event=push)](https://github.com/<OWNER>/<REPOSITORY>/actions?query=workflow%3Areviewdog+event%3Apush+branch%3Amaster)
 ```
 
