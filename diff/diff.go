@@ -83,7 +83,7 @@ type Line struct {
 	// e.g. The line just below the "@@" line is position 1, the next line is
 	// position 2, and so on. The position in the file's diff continues to
 	// increase through lines of whitespace and additional hunks until a new file
-	// is reached. It's equivalent to the `position` field of input for cooment
+	// is reached. It's equivalent to the `position` field of input for comment
 	// API of GitHub https://developer.github.com/v3/pulls/comments/#input
 	LnumDiff int
 
