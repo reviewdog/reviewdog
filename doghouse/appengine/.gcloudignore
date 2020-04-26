@@ -7,7 +7,7 @@
 #   $ gcloud topic gcloudignore
 #
 
-# To prevent error of gloud SDK which cannot decode Unicode properly.
+# To prevent error of gcloud SDK which cannot decode Unicode properly.
 /diff/testdata
 
 node_modules/
