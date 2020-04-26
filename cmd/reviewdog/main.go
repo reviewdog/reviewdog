@@ -244,7 +244,7 @@ See -reporter flag for migration and set -reporter="github-pr-review" or -report
 		// If it's running in GitHub Actions and it's PR from forked repository,
 		// replace comment writer to GitHubActionLogWriter to create annotations
 		// instead of review comment because if it's PR from forked repository,
-		// GitHub token doen't have write permission due to security concern and
+		// GitHub token doesn't have write permission due to security concern and
 		// cannot post results via Review API.
 		if cienv.IsInGitHubAction() && isPRFromForkedRepo() {
 			fmt.Fprintln(w, `reviewdog: This is Pull-Request from forked repository.
