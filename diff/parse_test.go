@@ -269,7 +269,7 @@ func TestParseFileHeader(t *testing.T) {
 	}
 }
 
-func TestParseExtenedHeader(t *testing.T) {
+func TestParseExtendedHeader(t *testing.T) {
 	tests := []struct {
 		in   string
 		want []string
