@@ -118,7 +118,7 @@ func (ch *Checker) postAnnotations(ctx context.Context, checkID int64, annotatio
 		Name: ch.checkName(),
 		Output: &github.CheckRunOutput{
 			Title:       github.String(ch.checkTitle()),
-			Summary:     github.String(""), // Post summary with the last reqeust.
+			Summary:     github.String(""), // Post summary with the last request.
 			Annotations: annotations[:min(maxAnnotationsPerRequest, len(annotations))],
 		},
 	}
