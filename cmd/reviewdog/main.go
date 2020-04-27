@@ -90,7 +90,7 @@ const (
 		There are two options to use this reporter.
 
 		Option 1) Run reviewdog from GitHub Actions w/ secrets.GITHUB_TOKEN
-			Note that it reports result to GitHub Actions log consle for Pull
+			Note that it reports result to GitHub Actions log console for Pull
 			Requests from fork repository due to GitHub Actions restriction.
 			https://help.github.com/en/articles/virtual-environments-for-github-actions#github_token-secret
 
@@ -244,7 +244,7 @@ See -reporter flag for migration and set -reporter="github-pr-review" or -report
 		// If it's running in GitHub Actions and it's PR from forked repository,
 		// replace comment writer to GitHubActionLogWriter to create annotations
 		// instead of review comment because if it's PR from forked repository,
-		// GitHub token doen't have write permission due to security concern and
+		// GitHub token doesn't have write permission due to security concern and
 		// cannot post results via Review API.
 		if cienv.IsInGitHubAction() && isPRFromForkedRepo() {
 			fmt.Fprintln(w, `reviewdog: This is Pull-Request from forked repository.

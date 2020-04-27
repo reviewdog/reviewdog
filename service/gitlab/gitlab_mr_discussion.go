@@ -61,14 +61,14 @@ func (g *GitLabMergeRequestDiscussionCommenter) Post(_ context.Context, c *revie
 func (g *GitLabMergeRequestDiscussionCommenter) Flush(ctx context.Context) error {
 	g.muComments.Lock()
 	defer g.muComments.Unlock()
-	postedcs, err := g.createPostedCommetns()
+	postedcs, err := g.createPostedComments()
 	if err != nil {
 		return fmt.Errorf("failed to create posted comments: %v", err)
 	}
 	return g.postCommentsForEach(ctx, postedcs)
 }
 
-func (g *GitLabMergeRequestDiscussionCommenter) createPostedCommetns() (serviceutil.PostedComments, error) {
+func (g *GitLabMergeRequestDiscussionCommenter) createPostedComments() (serviceutil.PostedComments, error) {
 	postedcs := make(serviceutil.PostedComments)
 	discussions, err := listAllMergeRequestDiscussion(g.cli, g.projects, g.pr, &gitlab.ListMergeRequestDiscussionsOptions{PerPage: 100})
 	if err != nil {
