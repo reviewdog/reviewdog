@@ -169,6 +169,8 @@ github.com/reviewdog/errorformat v0.0.0-20200408071855-647712bd3734 h1:ys70aCE5D
 github.com/reviewdog/errorformat v0.0.0-20200408071855-647712bd3734/go.mod h1:giYAXnpegRDPsXUO7TRpDKXJo1lFGYxyWRfEt5iQ+OA=
 github.com/reviewdog/errorformat v0.0.0-20200419124905-333243aa47d9 h1:JbqTRWVEwN2J0oJVkKEAyuwQSjhfQCjtLFQN3to7iVs=
 github.com/reviewdog/errorformat v0.0.0-20200419124905-333243aa47d9/go.mod h1:giYAXnpegRDPsXUO7TRpDKXJo1lFGYxyWRfEt5iQ+OA=
+github.com/reviewdog/errorformat v0.0.0-20200501104359-d3e6dc22482a h1:EIdWiU1oKAgebSrULT0H/4FV4t/oLzsXso/W+qf6kVo=
+github.com/reviewdog/errorformat v0.0.0-20200501104359-d3e6dc22482a/go.mod h1:giYAXnpegRDPsXUO7TRpDKXJo1lFGYxyWRfEt5iQ+OA=
 github.com/rogpeppe/go-internal v1.3.0/go.mod h1:M8bDsm7K2OlrFYOpmOWEs/qY81heoFRclV5y23lUDJ4=
 github.com/stretchr/objx v0.1.0/go.mod h1:HFkY916IF+rwdDfMAkV7OtwuqBVzrE8GR6GFx+wExME=
 github.com/stretchr/testify v1.2.2/go.mod h1:a8OnRcib4nhh0OaRAV+Yts87kKdq0PP7pXfy6kDkUVs=
