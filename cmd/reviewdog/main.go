@@ -516,15 +516,12 @@ func fetchMergeRequestIDFromCommit(cli *gitlab.Client, projectID, sha string) (i
 }
 
 func gitlabClient(token string) (*gitlab.Client, error) {
-	client, err := gitlab.NewClient(token, gitlab.WithHTTPClient(newHTTPClient()))
-	if err != nil {
-		return nil, err
-	}
 	baseURL, err := gitlabBaseURL()
 	if err != nil {
 		return nil, err
 	}
-	if err := client.SetBaseURL(baseURL.String()); err != nil {
+	client, err := gitlab.NewClient(token, gitlab.WithHTTPClient(newHTTPClient()), gitlab.WithBaseURL(baseURL.String()))
+	if err != nil {
 		return nil, err
 	}
 	return client, nil
