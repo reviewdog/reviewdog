@@ -8,5 +8,5 @@ require (
 	github.com/mgechev/revive v1.0.2
 	golang.org/x/lint v0.0.0-20200302205851-738671d3881b
 	honnef.co/go/tools v0.0.1-2019.2.2
-	mvdan.cc/unparam v0.0.0-20200426200139-6e24660d5748
+	mvdan.cc/unparam v0.0.0-20200501210554-b37ab49443f7
 )
