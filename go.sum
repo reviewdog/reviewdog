@@ -194,6 +194,8 @@ github.com/xanzy/go-gitlab v0.28.0 h1:nsyjDVvBrP4KRXEN4b1m1ewiqmTNL4BOWW041nKGV7
 github.com/xanzy/go-gitlab v0.28.0/go.mod h1:t4Bmvnxj7k37S4Y17lfLx+nLqkf/oQwT2HagfWKv5Og=
 github.com/xanzy/go-gitlab v0.29.0 h1:9tMvAkG746eIlzcdpnRgpcKPA1woUDmldMIjR/E5OWM=
 github.com/xanzy/go-gitlab v0.29.0/go.mod h1:sPLojNBn68fMUWSxIJtdVVIP8uSBYqesTfDUseX11Ug=
+github.com/xanzy/go-gitlab v0.31.0 h1:+nHztQuCXGSMluKe5Q9IRaPdz6tO8O0gMkQ0vqGpiBk=
+github.com/xanzy/go-gitlab v0.31.0/go.mod h1:sPLojNBn68fMUWSxIJtdVVIP8uSBYqesTfDUseX11Ug=
 github.com/yuin/goldmark v1.1.25/go.mod h1:3hX8gzYuyVAZsxl0MRgGTJEmQBFcNTphYh9decYSb74=
 go.opencensus.io v0.21.0/go.mod h1:mSImk1erAIZhrmZN+AvHh14ztQfjbGwt4TtuofqLduU=
 go.opencensus.io v0.22.0 h1:C9hSCOW830chIVkdja34wa6Ky+IzWllkUinR+BtRZd4=
