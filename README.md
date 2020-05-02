@@ -562,7 +562,7 @@ Examples
 
 ### Circle CI
 
-Store `REVIEWDOG_TOKEN` or `REVIEWDOG_GITHUB_API_TOKEN` in
+Store `REVIEWDOG_GITHUB_API_TOKEN` (or `REVIEWDOG_TOKEN` for github-pr-check) in
 [Environment variables - CircleCI](https://circleci.com/docs/environment-variables/#setting-environment-variables-for-all-commands-without-adding-them-to-git)
 
 #### .circleci/config.yml sample
@@ -576,9 +576,10 @@ jobs:
     steps:
       - checkout
       - run: curl -sfL https://raw.githubusercontent.com/reviewdog/reviewdog/master/install.sh| sh -s -- -b ./bin
-      - run: go vet ./... 2>&1 | ./bin/reviewdog -f=govet -reporter=github-pr-check
-      # or
       - run: go vet ./... 2>&1 | ./bin/reviewdog -f=govet -reporter=github-pr-review
+
+      # Deprecated: prefer GitHub Actions to use github-pr-check reporter.
+      - run: go vet ./... 2>&1 | ./bin/reviewdog -f=govet -reporter=github-pr-check
 ```
 
 ### GitLab CI
