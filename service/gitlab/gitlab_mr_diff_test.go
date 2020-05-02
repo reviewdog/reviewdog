@@ -31,8 +31,10 @@ func TestGitLabMergeRequestDiff_Diff(t *testing.T) {
 	ts := httptest.NewServer(mux)
 	defer ts.Close()
 
-	cli := gitlab.NewClient(nil, "")
-	cli.SetBaseURL(ts.URL + "/api/v4")
+	cli, err := gitlab.NewClient("", gitlab.WithBaseURL(ts.URL+"/api/v4"))
+	if err != nil {
+		t.Fatal(err)
+	}
 
 	g, err := NewGitLabMergeRequestDiff(cli, "o", "r", 14, "HEAD")
 	if err != nil {

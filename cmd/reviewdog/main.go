@@ -19,7 +19,7 @@ import (
 
 	"golang.org/x/oauth2"
 
-	"github.com/google/go-github/v29/github"
+	"github.com/google/go-github/v31/github"
 	"github.com/mattn/go-shellwords"
 	"github.com/reviewdog/errorformat/fmts"
 	"github.com/xanzy/go-gitlab"
@@ -516,7 +516,10 @@ func fetchMergeRequestIDFromCommit(cli *gitlab.Client, projectID, sha string) (i
 }
 
 func gitlabClient(token string) (*gitlab.Client, error) {
-	client := gitlab.NewClient(newHTTPClient(), token)
+	client, err := gitlab.NewClient(token, gitlab.WithHTTPClient(newHTTPClient()))
+	if err != nil {
+		return nil, err
+	}
 	baseURL, err := gitlabBaseURL()
 	if err != nil {
 		return nil, err
