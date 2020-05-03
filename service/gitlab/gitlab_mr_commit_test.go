@@ -12,7 +12,7 @@ import (
 	"github.com/xanzy/go-gitlab"
 
 	"github.com/reviewdog/reviewdog"
-	"github.com/reviewdog/reviewdog/service/serviceutil"
+	"github.com/reviewdog/reviewdog/service/commentutil"
 )
 
 func TestGitLabMergeRequestCommitCommenter_Post_Flush_review_api(t *testing.T) {
@@ -46,7 +46,7 @@ func TestGitLabMergeRequestCommitCommenter_Post_Flush_review_api(t *testing.T) {
 			{
 				Path: "notExistFile.go",
 				Line: 1,
-				Note: serviceutil.BodyPrefix + "\nalready commented",
+				Note: commentutil.BodyPrefix + "\nalready commented",
 			},
 		}
 		if err := json.NewEncoder(w).Encode(cs); err != nil {
@@ -65,7 +65,7 @@ func TestGitLabMergeRequestCommitCommenter_Post_Flush_review_api(t *testing.T) {
 		want := gitlab.CommitComment{
 			Path:     "notExistFile.go",
 			Line:     14,
-			Note:     serviceutil.BodyPrefix + "\nnew comment",
+			Note:     commentutil.BodyPrefix + "\nnew comment",
 			LineType: "new",
 		}
 		if diff := pretty.Compare(want, req); diff != "" {

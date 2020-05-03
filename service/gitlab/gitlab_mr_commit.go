@@ -12,6 +12,7 @@ import (
 	"golang.org/x/sync/errgroup"
 
 	"github.com/reviewdog/reviewdog"
+	"github.com/reviewdog/reviewdog/service/commentutil"
 	"github.com/reviewdog/reviewdog/service/serviceutil"
 )
 
@@ -31,7 +32,7 @@ type GitLabMergeRequestCommitCommenter struct {
 	muComments   sync.Mutex
 	postComments []*reviewdog.Comment
 
-	postedcs serviceutil.PostedComments
+	postedcs commentutil.PostedComments
 
 	// wd is working directory relative to root of repository.
 	wd string
@@ -87,7 +88,7 @@ func (g *GitLabMergeRequestCommitCommenter) postCommentsForEach(ctx context.Cont
 			if err != nil {
 				commitID = g.sha
 			}
-			body := serviceutil.CommentBody(comment)
+			body := commentutil.CommentBody(comment)
 			ltype := "new"
 			prcomment := &gitlab.PostCommitCommentOptions{
 				Note:     &body,
@@ -113,7 +114,7 @@ func (g *GitLabMergeRequestCommitCommenter) getLastCommitsID(path string, line i
 }
 
 func (g *GitLabMergeRequestCommitCommenter) setPostedComment(ctx context.Context) error {
-	g.postedcs = make(serviceutil.PostedComments)
+	g.postedcs = make(commentutil.PostedComments)
 	cs, err := g.comment(ctx)
 	if err != nil {
 		return err

@@ -10,6 +10,7 @@ import (
 	"github.com/google/go-github/v29/github"
 
 	"github.com/reviewdog/reviewdog"
+	"github.com/reviewdog/reviewdog/service/commentutil"
 	"github.com/reviewdog/reviewdog/service/github/githubutils"
 	"github.com/reviewdog/reviewdog/service/serviceutil"
 )
@@ -34,7 +35,7 @@ type GitHubPullRequest struct {
 	muComments   sync.Mutex
 	postComments []*reviewdog.Comment
 
-	postedcs serviceutil.PostedComments
+	postedcs commentutil.PostedComments
 
 	// wd is working directory relative to root of repository.
 	wd string
@@ -97,7 +98,7 @@ func (g *GitHubPullRequest) postAsReviewComment(ctx context.Context) error {
 			remaining = append(remaining, c)
 			continue
 		}
-		cbody := serviceutil.CommentBody(c)
+		cbody := commentutil.CommentBody(c)
 		comments = append(comments, &github.DraftReviewComment{
 			Path:     &c.Path,
 			Position: &c.LnumDiff,
@@ -146,7 +147,7 @@ func (g *GitHubPullRequest) remainingCommentsSummary(remaining []*reviewdog.Comm
 }
 
 func (g *GitHubPullRequest) setPostedComment(ctx context.Context) error {
-	g.postedcs = make(serviceutil.PostedComments)
+	g.postedcs = make(commentutil.PostedComments)
 	cs, err := g.comment(ctx)
 	if err != nil {
 		return err
