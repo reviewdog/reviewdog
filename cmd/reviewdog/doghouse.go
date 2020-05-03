@@ -113,7 +113,7 @@ func checkResultSet(ctx context.Context, r io.Reader, opt *option, isProject boo
 }
 
 func postResultSet(ctx context.Context, resultSet *reviewdog.ResultMap,
-	ghInfo *cienv.BuildInfo, cli client.DogHouseClientInterface, forPr bool, filterMode difffilter.FilterMode) (*reviewdog.FilteredResultMap, error) {
+	ghInfo *cienv.BuildInfo, cli client.DogHouseClientInterface, forPr bool, filterMode difffilter.Mode) (*reviewdog.FilteredResultMap, error) {
 	var g errgroup.Group
 	wd, _ := os.Getwd()
 	gitRelWd, err := serviceutil.GitRelWorkdir()

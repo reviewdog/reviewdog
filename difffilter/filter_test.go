@@ -80,42 +80,42 @@ func TestDiffFilter_root(t *testing.T) {
 	tests := []struct {
 		path         string
 		lnum         int
-		mode         FilterMode
+		mode         Mode
 		want         bool
 		wantLnumDiff int
 	}{
 		{
 			path:         "sample.new.txt",
 			lnum:         2,
-			mode:         FilterModeAdded,
+			mode:         ModeAdded,
 			want:         true,
 			wantLnumDiff: 3,
 		},
 		{
 			path:         filepath.Join(getCwd(), "sample.new.txt"),
 			lnum:         2,
-			mode:         FilterModeAdded,
+			mode:         ModeAdded,
 			want:         true,
 			wantLnumDiff: 3,
 		},
 		{
 			path:         "sample.new.txt",
 			lnum:         1,
-			mode:         FilterModeAdded,
+			mode:         ModeAdded,
 			want:         false,
 			wantLnumDiff: 0,
 		},
 		{
 			path:         "sample.new.txt",
 			lnum:         1,
-			mode:         FilterModeDiffContext,
+			mode:         ModeDiffContext,
 			want:         true,
 			wantLnumDiff: 1,
 		},
 		{
 			path:         "subdir/nonewline.new.txt",
 			lnum:         3,
-			mode:         FilterModeAdded,
+			mode:         ModeAdded,
 			want:         true,
 			wantLnumDiff: 3,
 		},
@@ -137,28 +137,28 @@ func TestDiffFilter_subdir(t *testing.T) {
 	tests := []struct {
 		path         string
 		lnum         int
-		mode         FilterMode
+		mode         Mode
 		want         bool
 		wantLnumDiff int
 	}{
 		{
 			path:         "sample.new.txt",
 			lnum:         2,
-			mode:         FilterModeAdded,
+			mode:         ModeAdded,
 			want:         true,
 			wantLnumDiff: 3,
 		},
 		{
 			path:         filepath.Join(getCwd(), "sample.new.txt"),
 			lnum:         2,
-			mode:         FilterModeAdded,
+			mode:         ModeAdded,
 			want:         true,
 			wantLnumDiff: 3,
 		},
 		{
 			path:         "sample.new.txt",
 			lnum:         5,
-			mode:         FilterModeAdded,
+			mode:         ModeAdded,
 			want:         false,
 			wantLnumDiff: 0,
 		},

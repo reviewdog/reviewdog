@@ -83,7 +83,7 @@ func TestFilterCheckByAddedLines(t *testing.T) {
 		},
 	}
 	filediffs, _ := diff.ParseMultiFile(strings.NewReader(diffContent))
-	got := FilterCheck(results, filediffs, 0, "", difffilter.FilterModeAdded)
+	got := FilterCheck(results, filediffs, 0, "", difffilter.ModeAdded)
 	if diff := cmp.Diff(got, want); diff != "" {
 		t.Error(diff)
 	}
@@ -132,7 +132,7 @@ func TestFilterCheckByDiffContext(t *testing.T) {
 		},
 	}
 	filediffs, _ := diff.ParseMultiFile(strings.NewReader(diffContent))
-	got := FilterCheck(results, filediffs, 0, "", difffilter.FilterModeDiffContext)
+	got := FilterCheck(results, filediffs, 0, "", difffilter.ModeDiffContext)
 	if diff := cmp.Diff(got, want); diff != "" {
 		t.Error(diff)
 	}

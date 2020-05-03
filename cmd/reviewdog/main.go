@@ -56,7 +56,7 @@ type option struct {
 	level            string
 	guessPullRequest bool
 	tee              bool
-	filterMode       difffilter.FilterMode
+	filterMode       difffilter.Mode
 	failOnError      bool
 }
 

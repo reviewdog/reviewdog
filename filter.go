@@ -17,7 +17,7 @@ type FilteredCheck struct {
 // FilterCheck filters check results by diff. It doesn't drop check which
 // is not in diff but set FilteredCheck.InDiff field false.
 func FilterCheck(results []*CheckResult, diff []*diff.FileDiff, strip int,
-	cwd string, mode difffilter.FilterMode) []*FilteredCheck {
+	cwd string, mode difffilter.Mode) []*FilteredCheck {
 	checks := make([]*FilteredCheck, 0, len(results))
 	df := difffilter.New(diff, strip, cwd, mode)
 	for _, result := range results {

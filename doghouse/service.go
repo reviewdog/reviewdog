@@ -46,7 +46,7 @@ type CheckRequest struct {
 
 	// FilterMode represents a way to filter checks results
 	// Optional.
-	FilterMode difffilter.FilterMode `json:"filter_mode"`
+	FilterMode difffilter.Mode `json:"filter_mode"`
 }
 
 // CheckResponse represents doghouse GitHub check response.

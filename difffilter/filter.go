@@ -8,23 +8,23 @@ import (
 	"github.com/reviewdog/reviewdog/service/serviceutil"
 )
 
-// FilterMode represents enumeration of available filter modes
-type FilterMode int
+// Mode represents enumeration of available filter modes
+type Mode int
 
 const (
-	// FilterModeDiffContext represents filtering by diff context
-	FilterModeDiffContext FilterMode = iota
-	// FilterModeAdded represents filtering by added diff lines
-	FilterModeAdded
+	// ModeDiffContext represents filtering by diff context
+	ModeDiffContext Mode = iota
+	// ModeAdded represents filtering by added diff lines
+	ModeAdded
 )
 
 // String implements the flag.Value interface
-func (mode *FilterMode) String() string {
+func (mode *Mode) String() string {
 	names := [...]string{
 		"diff_context",
 		"added",
 	}
-	if *mode < FilterModeDiffContext || *mode > FilterModeAdded {
+	if *mode < ModeDiffContext || *mode > ModeAdded {
 		return "Unknown"
 	}
 
@@ -32,14 +32,14 @@ func (mode *FilterMode) String() string {
 }
 
 // Set implements the flag.Value interface
-func (mode *FilterMode) Set(value string) error {
+func (mode *Mode) Set(value string) error {
 	switch value {
 	case "diff_context":
-		*mode = FilterModeDiffContext
+		*mode = ModeDiffContext
 	case "added":
-		*mode = FilterModeAdded
+		*mode = ModeAdded
 	default:
-		*mode = FilterModeDiffContext
+		*mode = ModeDiffContext
 	}
 	return nil
 }
@@ -54,7 +54,7 @@ type DiffFilter struct {
 	relPathToProjectRoot string
 
 	strip int
-	mode  FilterMode
+	mode  Mode
 
 	difflines difflines
 }
@@ -63,7 +63,7 @@ type DiffFilter struct {
 type difflines map[normalizedPath]map[int]*diff.Line
 
 // New creates a new DiffFilter.
-func New(diff []*diff.FileDiff, strip int, cwd string, mode FilterMode) *DiffFilter {
+func New(diff []*diff.FileDiff, strip int, cwd string, mode Mode) *DiffFilter {
 	df := &DiffFilter{
 		strip:     strip,
 		cwd:       cwd,
@@ -111,9 +111,9 @@ func (df *DiffFilter) InDiff(path string, lnum int) (yes bool, lnumdiff int) {
 
 func (df *DiffFilter) isSignificantLine(line *diff.Line) bool {
 	switch df.mode {
-	case FilterModeDiffContext:
+	case ModeDiffContext:
 		return true // any lines in diff are significant.
-	case FilterModeAdded:
+	case ModeAdded:
 		return line.Type == diff.LineAdded
 	}
 	return false
