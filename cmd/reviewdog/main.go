@@ -15,8 +15,8 @@ import (
 	"strings"
 	"text/tabwriter"
 
+	"golang.org/x/build/gerrit"
 	"golang.org/x/net/context" // "context"
-
 	"golang.org/x/oauth2"
 
 	"github.com/google/go-github/v31/github"
@@ -28,6 +28,7 @@ import (
 	"github.com/reviewdog/reviewdog/cienv"
 	"github.com/reviewdog/reviewdog/commands"
 	"github.com/reviewdog/reviewdog/project"
+	gerritservice "github.com/reviewdog/reviewdog/service/gerrit"
 	githubservice "github.com/reviewdog/reviewdog/service/github"
 	"github.com/reviewdog/reviewdog/service/github/githubutils"
 	gitlabservice "github.com/reviewdog/reviewdog/service/gitlab"
@@ -130,6 +131,19 @@ const (
 	"gitlab-mr-commit"
 		Same as gitlab-mr-discussion, but report results to GitLab comments for
 		each commits in Merge Requests.
+
+	"gerrit-change-review"
+		Report results to Gerrit Change comments.
+
+		1. Set GERRIT_USERNAME and GERRIT_PASSWORD for basic authentication or
+		GIT_GITCOOKIE_PATH for git cookie based authentication.
+		2. Set GERRIT_CHANGE_ID, GERRIT_REVISION_ID GERRIT_BRANCH abd GERRIT_ADDRESS
+
+		For example:
+			$ export GERRIT_CHANGE_ID=myproject~master~I1293efab014de2
+			$ export GERRIT_REVISION_ID=ed318bf9a3c
+			$ export GERRIT_BRANCH=master
+			$ export GERRIT_ADDRESS=http://localhost:8080
 
 	For GitHub Enterprise and self hosted GitLab, set
 	REVIEWDOG_INSECURE_SKIP_VERIFY to skip verifying SSL (please use this at your own risk)
@@ -298,6 +312,22 @@ github-pr-check reporter as a fallback.
 		if err != nil {
 			return err
 		}
+	case "gerrit-change-review":
+		b, cli, err := gerritBuildWithClient()
+		if err != nil {
+			return err
+		}
+		gc, err := gerritservice.NewChangeReviewCommenter(cli, b.GerritChangeID, b.GerritRevisionID)
+		if err != nil {
+			return err
+		}
+		cs = gc
+
+		d, err := gerritservice.NewChangeDiff(cli, b.Branch, b.GerritChangeID)
+		if err != nil {
+			return err
+		}
+		ds = d
 	case "local":
 		d, err := diffService(opt.diffCmd, opt.diffStrip)
 		if err != nil {
@@ -495,6 +525,33 @@ func gitlabBuildWithClient() (*cienv.BuildInfo, *gitlab.Client, error) {
 	}
 
 	return g, client, err
+}
+
+func gerritBuildWithClient() (*cienv.BuildInfo, *gerrit.Client, error) {
+	buildInfo, err := cienv.GetGerritBuildInfo()
+	if err != nil {
+		return nil, nil, err
+	}
+
+	gerritAddr := os.Getenv("GERRIT_ADDRESS")
+	if gerritAddr == "" {
+		return nil, nil, errors.New("cannot get gerrit host address from environment variable. Set GERRIT_ADDRESS ?")
+	}
+
+	username := os.Getenv("GERRIT_USERNAME")
+	password := os.Getenv("GERRIT_PASSWORD")
+	if username != "" && password != "" {
+		client := gerrit.NewClient(gerritAddr, gerrit.BasicAuth(username, password))
+		return buildInfo, client, nil
+	}
+
+	if useGitCookiePath := os.Getenv("GERRIT_GIT_COOKIE_PATH"); useGitCookiePath != "" {
+		client := gerrit.NewClient(gerritAddr, gerrit.GitCookieFileAuth(useGitCookiePath))
+		return buildInfo, client, nil
+	}
+
+	client := gerrit.NewClient(gerritAddr, gerrit.NoAuth)
+	return buildInfo, client, nil
 }
 
 func fetchMergeRequestIDFromCommit(cli *gitlab.Client, projectID, sha string) (id int, err error) {
