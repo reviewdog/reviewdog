@@ -661,10 +661,12 @@ $ REVIEWDOG_GITHUB_API_TOKEN="<token>" reviewdog -reporter=github-pr-review
 ```
 
 ## Exit codes
-By default Reviewdog will return `0` as exit code once all actions done (linter report analyzed, comments posted and so on).
-
-Once `fail-on-error` flag passed - Reviewdog will return `1` as exit code if at least one violation was found/reported.
+By default reviewdog will return `0` as exit code even if it finds errors.
+If `-fail-on-error` flag is passed, reviewdog exits with `1` when at least one error was found/reported.
 This can be helpful when you are using it as a step in your CI pipeline and want to mark the step failed if any error found by linter.
+
+See also `-level` flag for [github-pr-check/github-check](#reporter-github-checks--reportergithub-pr-check) reporters.
+reviewdog will exit with `1` if reported check status is `failure` as well if `-fail-on-error=true`.
 
 ## Articles
 - [reviewdog — A code review dog who keeps your codebase healthy ](https://medium.com/@haya14busa/reviewdog-a-code-review-dog-who-keeps-your-codebase-healthy-d957c471938b)
