@@ -31,16 +31,16 @@ func (f *fakeCheckerGitHubCli) UpdateCheckRun(ctx context.Context, owner, repo s
 	return f.FakeUpdateCheckRun(ctx, owner, repo, checkID, opt)
 }
 
-const sampleDiff = `--- sample.old.txt	2016-10-13 05:09:35.820791185 +0900
-+++ sample.new.txt	2016-10-13 05:15:26.839245048 +0900
+const sampleDiff = `--- a/doghouse/server/sample.old.txt	2016-10-13 05:09:35.820791185 +0900
++++ b/doghouse/server/sample.new.txt	2016-10-13 05:15:26.839245048 +0900
 @@ -1,3 +1,4 @@
  unchanged, contextual line
 -deleted line
 +added line
 +added line
  unchanged, contextual line
---- nonewline.old.txt	2016-10-13 15:34:14.931778318 +0900
-+++ nonewline.new.txt	2016-10-13 15:34:14.868444672 +0900
+--- a/doghouse/server/nonewline.old.txt	2016-10-13 15:34:14.931778318 +0900
++++ b/doghouse/server/nonewline.new.txt	2016-10-13 15:34:14.868444672 +0900
 @@ -1,4 +1,4 @@
  " vim: nofixeol noendofline
  No newline at end of both the old and new file

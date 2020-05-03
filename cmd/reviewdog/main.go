@@ -27,6 +27,7 @@ import (
 	"github.com/reviewdog/reviewdog"
 	"github.com/reviewdog/reviewdog/cienv"
 	"github.com/reviewdog/reviewdog/commands"
+	"github.com/reviewdog/reviewdog/difffilter"
 	"github.com/reviewdog/reviewdog/project"
 	gerritservice "github.com/reviewdog/reviewdog/service/gerrit"
 	githubservice "github.com/reviewdog/reviewdog/service/github"
@@ -55,13 +56,13 @@ type option struct {
 	level            string
 	guessPullRequest bool
 	tee              bool
-	filterMode       reviewdog.FilterMode
+	filterMode       difffilter.Mode
 	failOnError      bool
 }
 
 // flags doc
 const (
-	diffCmdDoc          = `diff command (e.g. "git diff"). diff flag is ignored if you pass "ci" flag`
+	diffCmdDoc          = `diff command (e.g. "git diff") for local reporter. Do not use --relative flag for git command.`
 	diffStripDoc        = "strip NUM leading components from diff file names (equivalent to 'patch -p') (default is 1 for git diff)"
 	efmsDoc             = `list of errorformat (https://github.com/reviewdog/errorformat)`
 	fDoc                = `format name (run -list to see supported format name) for input. It's also used as tool name in review comment if -name is empty`

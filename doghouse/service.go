@@ -1,6 +1,9 @@
 package doghouse
 
-import "github.com/reviewdog/reviewdog"
+import (
+	"github.com/reviewdog/reviewdog"
+	"github.com/reviewdog/reviewdog/difffilter"
+)
 
 // CheckRequest represents doghouse GitHub check request.
 type CheckRequest struct {
@@ -43,7 +46,7 @@ type CheckRequest struct {
 
 	// FilterMode represents a way to filter checks results
 	// Optional.
-	FilterMode reviewdog.FilterMode `json:"filter_mode"`
+	FilterMode difffilter.Mode `json:"filter_mode"`
 }
 
 // CheckResponse represents doghouse GitHub check response.

@@ -15,7 +15,7 @@ import (
 	"golang.org/x/oauth2"
 
 	"github.com/reviewdog/reviewdog"
-	"github.com/reviewdog/reviewdog/service/serviceutil"
+	"github.com/reviewdog/reviewdog/service/commentutil"
 )
 
 const notokenSkipTestMes = "skipping test (requires actual Personal access tokens. export REVIEWDOG_TEST_GITHUB_API_TOKEN=<GitHub Personal Access Token>)"
@@ -190,7 +190,7 @@ func TestGitHubPullRequest_Post_Flush_review_api(t *testing.T) {
 				{
 					Path:     github.String("reviewdog.go"),
 					Position: github.Int(1),
-					Body:     github.String(serviceutil.BodyPrefix + "\nalready commented"),
+					Body:     github.String(commentutil.BodyPrefix + "\nalready commented"),
 				},
 			}
 			w.Header().Add("Link", `<https://api.github.com/repos/o/r/pulls/14/comments?page=2>; rel="next"`)
@@ -202,7 +202,7 @@ func TestGitHubPullRequest_Post_Flush_review_api(t *testing.T) {
 				{
 					Path:     github.String("reviewdog.go"),
 					Position: github.Int(14),
-					Body:     github.String(serviceutil.BodyPrefix + "\nalready commented 2"),
+					Body:     github.String(commentutil.BodyPrefix + "\nalready commented 2"),
 				},
 			}
 			if err := json.NewEncoder(w).Encode(cs); err != nil {
@@ -232,7 +232,7 @@ func TestGitHubPullRequest_Post_Flush_review_api(t *testing.T) {
 			{
 				Path:     github.String("reviewdog.go"),
 				Position: github.Int(14),
-				Body:     github.String(serviceutil.BodyPrefix + "\nnew comment"),
+				Body:     github.String(commentutil.BodyPrefix + "\nnew comment"),
 			},
 		}
 		if diff := pretty.Compare(want, req.Comments); diff != "" {

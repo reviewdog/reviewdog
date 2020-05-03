@@ -8,6 +8,7 @@ import (
 	"os"
 
 	"github.com/reviewdog/reviewdog/diff"
+	"github.com/reviewdog/reviewdog/difffilter"
 )
 
 // Reviewdog represents review dog application which parses result of compiler
@@ -18,18 +19,18 @@ type Reviewdog struct {
 	p           Parser
 	c           CommentService
 	d           DiffService
-	filterMode  FilterMode
+	filterMode  difffilter.Mode
 	failOnError bool
 }
 
 // NewReviewdog returns a new Reviewdog.
-func NewReviewdog(toolname string, p Parser, c CommentService, d DiffService, filterMode FilterMode, failOnError bool) *Reviewdog {
+func NewReviewdog(toolname string, p Parser, c CommentService, d DiffService, filterMode difffilter.Mode, failOnError bool) *Reviewdog {
 	return &Reviewdog{p: p, c: c, d: d, toolname: toolname, filterMode: filterMode, failOnError: failOnError}
 }
 
 // RunFromResult creates a new Reviewdog and runs it with check results.
 func RunFromResult(ctx context.Context, c CommentService, results []*CheckResult,
-	filediffs []*diff.FileDiff, strip int, toolname string, filterMode FilterMode, failOnError bool) error {
+	filediffs []*diff.FileDiff, strip int, toolname string, filterMode difffilter.Mode, failOnError bool) error {
 	return (&Reviewdog{c: c, toolname: toolname, filterMode: filterMode, failOnError: failOnError}).runFromResult(ctx, results, filediffs, strip, failOnError)
 }
 

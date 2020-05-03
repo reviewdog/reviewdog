@@ -12,7 +12,7 @@ import (
 	"github.com/xanzy/go-gitlab"
 
 	"github.com/reviewdog/reviewdog"
-	"github.com/reviewdog/reviewdog/service/serviceutil"
+	"github.com/reviewdog/reviewdog/service/commentutil"
 )
 
 func TestGitLabMergeRequestDiscussionCommenter_Post_Flush_review_api(t *testing.T) {
@@ -66,7 +66,7 @@ func TestGitLabMergeRequestDiscussionCommenter_Post_Flush_review_api(t *testing.
 					{
 						Notes: []*gitlab.Note{
 							{
-								Body: serviceutil.CommentBody(alreadyCommented1),
+								Body: commentutil.CommentBody(alreadyCommented1),
 								Position: &gitlab.NotePosition{
 									NewPath: alreadyCommented1.Path,
 									NewLine: alreadyCommented1.Lnum,
@@ -91,7 +91,7 @@ func TestGitLabMergeRequestDiscussionCommenter_Post_Flush_review_api(t *testing.
 					{
 						Notes: []*gitlab.Note{
 							{
-								Body: serviceutil.CommentBody(alreadyCommented2),
+								Body: commentutil.CommentBody(alreadyCommented2),
 								Position: &gitlab.NotePosition{
 									NewPath: alreadyCommented2.Path,
 									NewLine: alreadyCommented2.Lnum,
@@ -113,7 +113,7 @@ func TestGitLabMergeRequestDiscussionCommenter_Post_Flush_review_api(t *testing.
 			switch got.Position.NewPath {
 			case "file.go":
 				want := &gitlab.CreateMergeRequestDiscussionOptions{
-					Body: gitlab.String(serviceutil.CommentBody(newComment1)),
+					Body: gitlab.String(commentutil.CommentBody(newComment1)),
 					Position: &gitlab.NotePosition{
 						BaseSHA: "xxx", StartSHA: "xxx", HeadSHA: "sha", PositionType: "text", NewPath: "file.go", NewLine: 14},
 				}
@@ -122,7 +122,7 @@ func TestGitLabMergeRequestDiscussionCommenter_Post_Flush_review_api(t *testing.
 				}
 			case "file2.go":
 				want := &gitlab.CreateMergeRequestDiscussionOptions{
-					Body: gitlab.String(serviceutil.CommentBody(newComment2)),
+					Body: gitlab.String(commentutil.CommentBody(newComment2)),
 					Position: &gitlab.NotePosition{
 						BaseSHA: "xxx", StartSHA: "xxx", HeadSHA: "sha", PositionType: "text", NewPath: "file2.go", NewLine: 15},
 				}

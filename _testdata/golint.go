@@ -1,3 +1,3 @@
 package testdata
 
-var X = 1
+var X = 2

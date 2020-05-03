@@ -8,6 +8,7 @@ import (
 	"log"
 	"net/http"
 	"os"
+	"path/filepath"
 	"sort"
 	"strings"
 
@@ -16,10 +17,12 @@ import (
 
 	"github.com/reviewdog/reviewdog"
 	"github.com/reviewdog/reviewdog/cienv"
+	"github.com/reviewdog/reviewdog/difffilter"
 	"github.com/reviewdog/reviewdog/doghouse"
 	"github.com/reviewdog/reviewdog/doghouse/client"
 	"github.com/reviewdog/reviewdog/project"
 	"github.com/reviewdog/reviewdog/service/github/githubutils"
+	"github.com/reviewdog/reviewdog/service/serviceutil"
 )
 
 func runDoghouse(ctx context.Context, r io.Reader, w io.Writer, opt *option, isProject bool, forPr bool) error {
@@ -110,15 +113,19 @@ func checkResultSet(ctx context.Context, r io.Reader, opt *option, isProject boo
 }
 
 func postResultSet(ctx context.Context, resultSet *reviewdog.ResultMap,
-	ghInfo *cienv.BuildInfo, cli client.DogHouseClientInterface, forPr bool, filterMode reviewdog.FilterMode) (*reviewdog.FilteredResultMap, error) {
+	ghInfo *cienv.BuildInfo, cli client.DogHouseClientInterface, forPr bool, filterMode difffilter.Mode) (*reviewdog.FilteredResultMap, error) {
 	var g errgroup.Group
 	wd, _ := os.Getwd()
+	gitRelWd, err := serviceutil.GitRelWorkdir()
+	if err != nil {
+		return nil, err
+	}
 	filteredResultSet := new(reviewdog.FilteredResultMap)
 	resultSet.Range(func(name string, result *reviewdog.Result) {
 		checkResults := result.CheckResults
 		as := make([]*doghouse.Annotation, 0, len(checkResults))
 		for _, r := range checkResults {
-			as = append(as, checkResultToAnnotation(r, wd))
+			as = append(as, checkResultToAnnotation(r, wd, gitRelWd))
 		}
 		req := &doghouse.CheckRequest{
 			Name:        name,
@@ -157,9 +164,9 @@ func postResultSet(ctx context.Context, resultSet *reviewdog.ResultMap,
 	return filteredResultSet, g.Wait()
 }
 
-func checkResultToAnnotation(c *reviewdog.CheckResult, wd string) *doghouse.Annotation {
+func checkResultToAnnotation(c *reviewdog.CheckResult, wd, gitRelWd string) *doghouse.Annotation {
 	return &doghouse.Annotation{
-		Path:       reviewdog.CleanPath(c.Path, wd),
+		Path:       filepath.ToSlash(filepath.Join(gitRelWd, reviewdog.CleanPath(c.Path, wd))),
 		Line:       c.Lnum,
 		Message:    c.Message,
 		RawMessage: strings.Join(c.Lines, "\n"),

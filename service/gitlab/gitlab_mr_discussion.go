@@ -10,6 +10,7 @@ import (
 	"golang.org/x/sync/errgroup"
 
 	"github.com/reviewdog/reviewdog"
+	"github.com/reviewdog/reviewdog/service/commentutil"
 	"github.com/reviewdog/reviewdog/service/serviceutil"
 )
 
@@ -68,8 +69,8 @@ func (g *GitLabMergeRequestDiscussionCommenter) Flush(ctx context.Context) error
 	return g.postCommentsForEach(ctx, postedcs)
 }
 
-func (g *GitLabMergeRequestDiscussionCommenter) createPostedComments() (serviceutil.PostedComments, error) {
-	postedcs := make(serviceutil.PostedComments)
+func (g *GitLabMergeRequestDiscussionCommenter) createPostedComments() (commentutil.PostedComments, error) {
+	postedcs := make(commentutil.PostedComments)
 	discussions, err := listAllMergeRequestDiscussion(g.cli, g.projects, g.pr, &gitlab.ListMergeRequestDiscussionsOptions{PerPage: 100})
 	if err != nil {
 		return nil, fmt.Errorf("failed to list all merge request discussions: %v", err)
@@ -86,7 +87,7 @@ func (g *GitLabMergeRequestDiscussionCommenter) createPostedComments() (serviceu
 	return postedcs, nil
 }
 
-func (g *GitLabMergeRequestDiscussionCommenter) postCommentsForEach(ctx context.Context, postedcs serviceutil.PostedComments) error {
+func (g *GitLabMergeRequestDiscussionCommenter) postCommentsForEach(ctx context.Context, postedcs commentutil.PostedComments) error {
 	mr, _, err := g.cli.MergeRequests.GetMergeRequest(g.projects, g.pr, nil, gitlab.WithContext(ctx))
 	if err != nil {
 		return fmt.Errorf("failed to get merge request: %v", err)
@@ -104,7 +105,7 @@ func (g *GitLabMergeRequestDiscussionCommenter) postCommentsForEach(ctx context.
 		}
 		eg.Go(func() error {
 			discussion := &gitlab.CreateMergeRequestDiscussionOptions{
-				Body: gitlab.String(serviceutil.CommentBody(comment)),
+				Body: gitlab.String(commentutil.CommentBody(comment)),
 				Position: &gitlab.NotePosition{
 					StartSHA:     targetBranch.Commit.ID,
 					HeadSHA:      g.sha,
