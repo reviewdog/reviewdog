@@ -102,6 +102,12 @@ jobs:
         run: |
           cd ./_testdata/ && golint ./... | reviewdog -f=golint -name=golint-pr-review-subdir -reporter=github-pr-review -tee
 
+      - name: Run reviewdog with sub-dir (local+fail-on-error)
+        run: |
+          echo 'var LocalTest = 14' >> ./_testdata/golint.go
+          cd ./_testdata/ && golint ./... | reviewdog -f=golint -diff="git diff" -fail-on-error || EXIT_CODE=$?
+          test ${EXIT_CODE} = 1
+
   golangci-lint:
     if: github.event_name == 'pull_request'
     name: runner / golangci-lint
