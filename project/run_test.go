@@ -9,6 +9,7 @@ import (
 	"testing"
 
 	"github.com/reviewdog/reviewdog"
+	"github.com/reviewdog/reviewdog/difffilter"
 )
 
 type fakeDiffService struct {
@@ -38,7 +39,7 @@ func TestRun(t *testing.T) {
 
 	t.Run("empty", func(t *testing.T) {
 		conf := &Config{}
-		if err := Run(ctx, conf, nil, nil, nil, false, reviewdog.FilterModeAdded); err != nil {
+		if err := Run(ctx, conf, nil, nil, nil, false, difffilter.FilterModeAdded); err != nil {
 			t.Error(err)
 		}
 	})
@@ -49,7 +50,7 @@ func TestRun(t *testing.T) {
 				"test": {},
 			},
 		}
-		if err := Run(ctx, conf, nil, nil, nil, false, reviewdog.FilterModeAdded); err == nil {
+		if err := Run(ctx, conf, nil, nil, nil, false, difffilter.FilterModeAdded); err == nil {
 			t.Error("want error, got nil")
 		} else {
 			t.Log(err)
@@ -70,7 +71,7 @@ func TestRun(t *testing.T) {
 				},
 			},
 		}
-		if err := Run(ctx, conf, nil, nil, ds, false, reviewdog.FilterModeAdded); err == nil {
+		if err := Run(ctx, conf, nil, nil, ds, false, difffilter.FilterModeAdded); err == nil {
 			t.Error("want error, got nil")
 		} else {
 			t.Log(err)
@@ -98,7 +99,7 @@ func TestRun(t *testing.T) {
 				},
 			},
 		}
-		if err := Run(ctx, conf, nil, cs, ds, false, reviewdog.FilterModeAdded); err != nil {
+		if err := Run(ctx, conf, nil, cs, ds, false, difffilter.FilterModeAdded); err != nil {
 			t.Error(err)
 		}
 		want := ""
@@ -128,7 +129,7 @@ func TestRun(t *testing.T) {
 				},
 			},
 		}
-		if err := Run(ctx, conf, nil, cs, ds, true, reviewdog.FilterModeAdded); err != nil {
+		if err := Run(ctx, conf, nil, cs, ds, true, difffilter.FilterModeAdded); err != nil {
 			t.Error(err)
 		}
 		want := "sh: 1: not: not found\n"
@@ -156,7 +157,7 @@ func TestRun(t *testing.T) {
 				},
 			},
 		}
-		if err := Run(ctx, conf, nil, cs, ds, false, reviewdog.FilterModeAdded); err != nil {
+		if err := Run(ctx, conf, nil, cs, ds, false, difffilter.FilterModeAdded); err != nil {
 			t.Error(err)
 		}
 	})
@@ -182,7 +183,7 @@ func TestRun(t *testing.T) {
 				},
 			},
 		}
-		if err := Run(ctx, conf, nil, cs, ds, true, reviewdog.FilterModeAdded); err != nil {
+		if err := Run(ctx, conf, nil, cs, ds, true, difffilter.FilterModeAdded); err != nil {
 			t.Error(err)
 		}
 		want := "hi\n"
@@ -218,7 +219,7 @@ func TestRun(t *testing.T) {
 				},
 			},
 		}
-		if err := Run(ctx, conf, map[string]bool{"test2": true}, cs, ds, false, reviewdog.FilterModeAdded); err != nil {
+		if err := Run(ctx, conf, map[string]bool{"test2": true}, cs, ds, false, difffilter.FilterModeAdded); err != nil {
 			t.Error(err)
 		}
 		if called != 1 {
@@ -251,7 +252,7 @@ func TestRun(t *testing.T) {
 				},
 			},
 		}
-		if err := Run(ctx, conf, map[string]bool{"hoge": true}, cs, ds, false, reviewdog.FilterModeAdded); err == nil {
+		if err := Run(ctx, conf, map[string]bool{"hoge": true}, cs, ds, false, difffilter.FilterModeAdded); err == nil {
 			t.Error("got no error but want runner not found error")
 		}
 	})

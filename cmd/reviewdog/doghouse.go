@@ -17,6 +17,7 @@ import (
 
 	"github.com/reviewdog/reviewdog"
 	"github.com/reviewdog/reviewdog/cienv"
+	"github.com/reviewdog/reviewdog/difffilter"
 	"github.com/reviewdog/reviewdog/doghouse"
 	"github.com/reviewdog/reviewdog/doghouse/client"
 	"github.com/reviewdog/reviewdog/project"
@@ -111,7 +112,7 @@ func checkResultSet(ctx context.Context, r io.Reader, opt *option, isProject boo
 }
 
 func postResultSet(ctx context.Context, resultSet *reviewdog.ResultMap,
-	ghInfo *cienv.BuildInfo, cli client.DogHouseClientInterface, forPr bool, filterMode reviewdog.FilterMode) (*reviewdog.FilteredResultMap, error) {
+	ghInfo *cienv.BuildInfo, cli client.DogHouseClientInterface, forPr bool, filterMode difffilter.FilterMode) (*reviewdog.FilteredResultMap, error) {
 	var g errgroup.Group
 	wd, _ := os.Getwd()
 	gitRelWd, err := serviceutil.GitRelWorkdir()

@@ -27,6 +27,7 @@ import (
 	"github.com/reviewdog/reviewdog"
 	"github.com/reviewdog/reviewdog/cienv"
 	"github.com/reviewdog/reviewdog/commands"
+	"github.com/reviewdog/reviewdog/difffilter"
 	"github.com/reviewdog/reviewdog/project"
 	githubservice "github.com/reviewdog/reviewdog/service/github"
 	"github.com/reviewdog/reviewdog/service/github/githubutils"
@@ -54,7 +55,7 @@ type option struct {
 	level            string
 	guessPullRequest bool
 	tee              bool
-	filterMode       reviewdog.FilterMode
+	filterMode       difffilter.FilterMode
 }
 
 // flags doc
