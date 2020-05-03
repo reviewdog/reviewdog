@@ -69,7 +69,6 @@ func (g *ChangeDiff) gitDiff(_ context.Context, baseSha, targetSha string) ([]by
 	if err != nil {
 		return nil, fmt.Errorf("failed to run git diff: %v", err)
 	}
-	fmt.Println(string(bytes))
 	return bytes, nil
 }
 
