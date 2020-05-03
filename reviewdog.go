@@ -15,22 +15,23 @@ import (
 // or linter, get diff and filter the results by diff, and report filtered
 // results.
 type Reviewdog struct {
-	toolname   string
-	p          Parser
-	c          CommentService
-	d          DiffService
-	filterMode difffilter.FilterMode
+	toolname    string
+	p           Parser
+	c           CommentService
+	d           DiffService
+	filterMode  difffilter.FilterMode
+	failOnError bool
 }
 
 // NewReviewdog returns a new Reviewdog.
-func NewReviewdog(toolname string, p Parser, c CommentService, d DiffService, filterMode difffilter.FilterMode) *Reviewdog {
-	return &Reviewdog{p: p, c: c, d: d, toolname: toolname, filterMode: filterMode}
+func NewReviewdog(toolname string, p Parser, c CommentService, d DiffService, filterMode difffilter.FilterMode, failOnError bool) *Reviewdog {
+	return &Reviewdog{p: p, c: c, d: d, toolname: toolname, filterMode: filterMode, failOnError: failOnError}
 }
 
 // RunFromResult creates a new Reviewdog and runs it with check results.
 func RunFromResult(ctx context.Context, c CommentService, results []*CheckResult,
-	filediffs []*diff.FileDiff, strip int, toolname string, filterMode difffilter.FilterMode) error {
-	return (&Reviewdog{c: c, toolname: toolname, filterMode: filterMode}).runFromResult(ctx, results, filediffs, strip)
+	filediffs []*diff.FileDiff, strip int, toolname string, filterMode difffilter.FilterMode, failOnError bool) error {
+	return (&Reviewdog{c: c, toolname: toolname, filterMode: filterMode, failOnError: failOnError}).runFromResult(ctx, results, filediffs, strip, failOnError)
 }
 
 // CheckResult represents a checked result of static analysis tools.
@@ -76,13 +77,14 @@ type DiffService interface {
 }
 
 func (w *Reviewdog) runFromResult(ctx context.Context, results []*CheckResult,
-	filediffs []*diff.FileDiff, strip int) error {
+	filediffs []*diff.FileDiff, strip int, failOnError bool) error {
 	wd, err := os.Getwd()
 	if err != nil {
 		return err
 	}
 
 	checks := FilterCheck(results, filediffs, strip, wd, w.filterMode)
+	hasViolations := false
 
 	for _, check := range checks {
 		if !check.InDiff {
@@ -97,10 +99,15 @@ func (w *Reviewdog) runFromResult(ctx context.Context, results []*CheckResult,
 		if err := w.c.Post(ctx, comment); err != nil {
 			return err
 		}
+		hasViolations = true
 	}
 
 	if bulk, ok := w.c.(BulkCommentService); ok {
 		return bulk.Flush(ctx)
+	}
+
+	if failOnError && hasViolations {
+		return fmt.Errorf("input data has violations")
 	}
 
 	return nil
@@ -123,5 +130,5 @@ func (w *Reviewdog) Run(ctx context.Context, r io.Reader) error {
 		return fmt.Errorf("fail to parse diff: %v", err)
 	}
 
-	return w.runFromResult(ctx, results, filediffs, w.d.Strip())
+	return w.runFromResult(ctx, results, filediffs, w.d.Strip(), w.failOnError)
 }

@@ -55,7 +55,8 @@ func runDoghouse(ctx context.Context, r io.Reader, w io.Writer, opt *option, isP
 func newDoghouseCli(ctx context.Context) (client.DogHouseClientInterface, error) {
 	// If skipDoghouseServer is true, run doghouse code directly instead of talking to
 	// the doghouse server because provided GitHub API Token has Check API scope.
-	skipDoghouseServer := cienv.IsInGitHubAction() && os.Getenv("REVIEWDOG_TOKEN") == ""
+	// You can force skipping the doghouse server if you are generating your own application API token.
+	skipDoghouseServer := (os.Getenv("REVIEWDOG_SKIP_DOGHOUSE") == "true" || cienv.IsInGitHubAction()) && os.Getenv("REVIEWDOG_TOKEN") == ""
 	if skipDoghouseServer {
 		token, err := nonEmptyEnv("REVIEWDOG_GITHUB_API_TOKEN")
 		if err != nil {

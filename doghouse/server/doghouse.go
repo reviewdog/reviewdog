@@ -8,7 +8,7 @@ import (
 	"strings"
 	"time"
 
-	"github.com/google/go-github/v29/github"
+	"github.com/google/go-github/v31/github"
 
 	"github.com/reviewdog/reviewdog"
 	"github.com/reviewdog/reviewdog/diff"
@@ -120,7 +120,7 @@ func (ch *Checker) postAnnotations(ctx context.Context, checkID int64, annotatio
 		Name: ch.checkName(),
 		Output: &github.CheckRunOutput{
 			Title:       github.String(ch.checkTitle()),
-			Summary:     github.String(""), // Post summary with the last reqeust.
+			Summary:     github.String(""), // Post summary with the last request.
 			Annotations: annotations[:min(maxAnnotationsPerRequest, len(annotations))],
 		},
 	}

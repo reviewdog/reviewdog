@@ -69,7 +69,7 @@ var (
 	}
 )
 
-// IsFromCI returns true if given request is from tructed CI provider.
+// IsFromCI returns true if given request is from trusted CI provider.
 func IsFromCI(r *http.Request) bool {
 	return IsFromTravisCI(r) || IsFromAppveyor(r)
 }

@@ -54,7 +54,7 @@ func New(cipher Cipher, defaultOpt CookieOption) *CookieMan {
 	return &CookieMan{defaultOpt: defaultOpt, cipher: cipher}
 }
 
-// NewCookieStore returns new CookieStore which mangages cookie whose key is
+// NewCookieStore returns new CookieStore which manages cookie whose key is
 // given name and with given cookie option.
 func (c *CookieMan) NewCookieStore(name string, opt *CookieOption) *CookieStore {
 	return &CookieStore{

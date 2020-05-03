@@ -7,7 +7,7 @@ import (
 	"strings"
 	"sync"
 
-	"github.com/google/go-github/v29/github"
+	"github.com/google/go-github/v31/github"
 
 	"github.com/reviewdog/reviewdog"
 	"github.com/reviewdog/reviewdog/service/commentutil"
