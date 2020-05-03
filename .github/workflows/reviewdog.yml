@@ -84,7 +84,7 @@ jobs:
         env:
           REVIEWDOG_GITHUB_API_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         run: |
-          reviewdog -reporter=github-pr-check -runners=golint,govet
+          reviewdog -reporter=github-pr-check -runners=golint,govet -fail-on-error
 
       - name: Run reviewdog (github-pr-review with tee)
         env:
@@ -106,9 +106,11 @@ jobs:
         run: |
           echo 'var LocalTest = 14' >> ./_testdata/golint.go
           cd ./_testdata/ && golint ./... | reviewdog -f=golint -diff="git diff" -fail-on-error || EXIT_CODE=$?
+          git reset --hard @
           test ${EXIT_CODE} = 1
 
       - name: Run reviewdog (github-pr-check with fail-on-error)
+        continue-on-error: true
         env:
           REVIEWDOG_GITHUB_API_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         run: |
