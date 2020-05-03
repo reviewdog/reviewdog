@@ -345,6 +345,7 @@ func TestPostResultSet_conclusion(t *testing.T) {
 	}
 
 	for _, tt := range tests {
+		tt := tt
 		fakeCli.FakeCheck = func(ctx context.Context, req *doghouse.CheckRequest) (*doghouse.CheckResponse, error) {
 			return &doghouse.CheckResponse{ReportURL: "xxx", Conclusion: tt.conclusion}, nil
 		}
