@@ -51,7 +51,7 @@ type DiffFilter struct {
 
 	// Relative path to the project root (e.g. git) directory from current workdir.
 	// It can be empty if it doesn't find any project root directory.
-	relPathToProjectRoot string
+	projectRelPath string
 
 	strip int
 	mode  Mode
@@ -70,7 +70,10 @@ func New(diff []*diff.FileDiff, strip int, cwd string, mode Mode) *DiffFilter {
 		mode:      mode,
 		difflines: make(difflines),
 	}
-	df.relPathToProjectRoot, _ = serviceutil.GitRelWorkdir()
+	// If cwd is empty, projectRelPath should not have any meaningful data too.
+	if cwd != "" {
+		df.projectRelPath, _ = serviceutil.GitRelWorkdir()
+	}
 	df.addDiff(diff)
 	return df
 }
@@ -133,8 +136,8 @@ func (df *DiffFilter) normalizePath(path string) normalizedPath {
 			path = relPath
 		}
 	}
-	if !filepath.IsAbs(path) && df.relPathToProjectRoot != "" {
-		path = filepath.Join(df.relPathToProjectRoot, path)
+	if !filepath.IsAbs(path) && df.projectRelPath != "" {
+		path = filepath.Join(df.projectRelPath, path)
 	}
 	return normalizedPath{p: filepath.ToSlash(path)}
 }
