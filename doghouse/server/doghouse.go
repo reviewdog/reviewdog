@@ -64,17 +64,18 @@ func (ch *Checker) Check(ctx context.Context) (*doghouse.CheckResponse, error) {
 		return nil, fmt.Errorf("failed to create check: %v", err)
 	}
 
-	checkRun, err := ch.postCheck(ctx, check.GetID(), filtered)
+	checkRun, conclusion, err := ch.postCheck(ctx, check.GetID(), filtered)
 	if err != nil {
 		return nil, fmt.Errorf("failed to post result: %v", err)
 	}
 	res := &doghouse.CheckResponse{
-		ReportURL: checkRun.GetHTMLURL(),
+		ReportURL:  checkRun.GetHTMLURL(),
+		Conclusion: conclusion,
 	}
 	return res, nil
 }
 
-func (ch *Checker) postCheck(ctx context.Context, checkID int64, checks []*reviewdog.FilteredCheck) (*github.CheckRun, error) {
+func (ch *Checker) postCheck(ctx context.Context, checkID int64, checks []*reviewdog.FilteredCheck) (*github.CheckRun, string, error) {
 	filterByDiff := ch.req.PullRequest != 0 && !ch.req.OutsideDiff
 	var annotations []*github.CheckRunAnnotation
 	for _, c := range checks {
@@ -85,7 +86,7 @@ func (ch *Checker) postCheck(ctx context.Context, checkID int64, checks []*revie
 	}
 	if len(annotations) > 0 {
 		if err := ch.postAnnotations(ctx, checkID, annotations); err != nil {
-			return nil, fmt.Errorf("failed to post annotations: %v", err)
+			return nil, "", fmt.Errorf("failed to post annotations: %v", err)
 		}
 	}
 
@@ -103,7 +104,11 @@ func (ch *Checker) postCheck(ctx context.Context, checkID int64, checks []*revie
 			Summary: github.String(ch.summary(checks)),
 		},
 	}
-	return ch.gh.UpdateCheckRun(ctx, ch.req.Owner, ch.req.Repo, checkID, opt)
+	checkRun, err := ch.gh.UpdateCheckRun(ctx, ch.req.Owner, ch.req.Repo, checkID, opt)
+	if err != nil {
+		return nil, "", err
+	}
+	return checkRun, conclusion, nil
 }
 
 func (ch *Checker) createCheck(ctx context.Context) (*github.CheckRun, error) {

@@ -3,6 +3,7 @@ package main
 import (
 	"bytes"
 	"context"
+	"fmt"
 	"io/ioutil"
 	"os"
 	"path/filepath"
@@ -276,7 +277,8 @@ func TestPostResultSet_withReportURL(t *testing.T) {
 		SHA:         sha,
 	}
 
-	if _, err := postResultSet(context.Background(), &resultSet, ghInfo, fakeCli, true, difffilter.ModeAdded); err != nil {
+	opt := &option{filterMode: difffilter.ModeAdded}
+	if _, err := postResultSet(context.Background(), &resultSet, ghInfo, fakeCli, true, opt); err != nil {
 		t.Fatal(err)
 	}
 }
@@ -300,7 +302,8 @@ func TestPostResultSet_withoutReportURL(t *testing.T) {
 
 	ghInfo := &cienv.BuildInfo{Owner: owner, Repo: repo, PullRequest: prNum, SHA: sha}
 
-	resp, err := postResultSet(context.Background(), &resultSet, ghInfo, fakeCli, true, difffilter.ModeAdded)
+	opt := &option{filterMode: difffilter.ModeAdded}
+	resp, err := postResultSet(context.Background(), &resultSet, ghInfo, fakeCli, true, opt)
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -313,6 +316,46 @@ func TestPostResultSet_withoutReportURL(t *testing.T) {
 	}
 	if diff := cmp.Diff(results.FilteredCheck, wantResults); diff != "" {
 		t.Errorf("results has diff:\n%s", diff)
+	}
+}
+
+func TestPostResultSet_conclusion(t *testing.T) {
+	const (
+		owner = "haya14busa"
+		repo  = "reviewdog"
+		prNum = 14
+		sha   = "1414"
+	)
+
+	fakeCli := &fakeDoghouseServerCli{}
+	var resultSet reviewdog.ResultMap
+	resultSet.Store("name1", &reviewdog.Result{CheckResults: []*reviewdog.CheckResult{}})
+	ghInfo := &cienv.BuildInfo{Owner: owner, Repo: repo, PullRequest: prNum, SHA: sha}
+
+	tests := []struct {
+		conclusion  string
+		failOnError bool
+		wantErr     bool
+	}{
+		{conclusion: "failure", failOnError: true, wantErr: true},
+		{conclusion: "neutral", failOnError: true, wantErr: false},
+		{conclusion: "success", failOnError: true, wantErr: false},
+		{conclusion: "", failOnError: true, wantErr: false},
+		{conclusion: "failure", failOnError: false, wantErr: false},
+	}
+
+	for _, tt := range tests {
+		fakeCli.FakeCheck = func(ctx context.Context, req *doghouse.CheckRequest) (*doghouse.CheckResponse, error) {
+			return &doghouse.CheckResponse{ReportURL: "xxx", Conclusion: tt.conclusion}, nil
+		}
+		opt := &option{filterMode: difffilter.ModeAdded, failOnError: tt.failOnError}
+		id := fmt.Sprintf("[conclusion=%s, failOnError=%v]", tt.conclusion, tt.failOnError)
+		_, err := postResultSet(context.Background(), &resultSet, ghInfo, fakeCli, true, opt)
+		if tt.wantErr && err == nil {
+			t.Errorf("[%s] want err, but got nil.", id)
+		} else if !tt.wantErr && err != nil {
+			t.Errorf("[%s] got unexpected error: %v", id, err)
+		}
 	}
 }
 
@@ -334,7 +377,8 @@ func TestPostResultSet_withEmptyResponse(t *testing.T) {
 
 	ghInfo := &cienv.BuildInfo{Owner: owner, Repo: repo, PullRequest: prNum, SHA: sha}
 
-	if _, err := postResultSet(context.Background(), &resultSet, ghInfo, fakeCli, true, difffilter.ModeAdded); err == nil {
+	opt := &option{filterMode: difffilter.ModeAdded}
+	if _, err := postResultSet(context.Background(), &resultSet, ghInfo, fakeCli, true, opt); err == nil {
 		t.Error("got no error but want report missing error")
 	}
 }

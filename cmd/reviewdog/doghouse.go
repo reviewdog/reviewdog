@@ -17,7 +17,6 @@ import (
 
 	"github.com/reviewdog/reviewdog"
 	"github.com/reviewdog/reviewdog/cienv"
-	"github.com/reviewdog/reviewdog/difffilter"
 	"github.com/reviewdog/reviewdog/doghouse"
 	"github.com/reviewdog/reviewdog/doghouse/client"
 	"github.com/reviewdog/reviewdog/project"
@@ -42,7 +41,7 @@ func runDoghouse(ctx context.Context, r io.Reader, w io.Writer, opt *option, isP
 	if err != nil {
 		return err
 	}
-	filteredResultSet, err := postResultSet(ctx, resultSet, ghInfo, cli, forPr, opt.filterMode)
+	filteredResultSet, err := postResultSet(ctx, resultSet, ghInfo, cli, forPr, opt)
 	if err != nil {
 		return err
 	}
@@ -113,7 +112,7 @@ func checkResultSet(ctx context.Context, r io.Reader, opt *option, isProject boo
 }
 
 func postResultSet(ctx context.Context, resultSet *reviewdog.ResultMap,
-	ghInfo *cienv.BuildInfo, cli client.DogHouseClientInterface, forPr bool, filterMode difffilter.Mode) (*reviewdog.FilteredResultMap, error) {
+	ghInfo *cienv.BuildInfo, cli client.DogHouseClientInterface, forPr bool, opt *option) (*reviewdog.FilteredResultMap, error) {
 	var g errgroup.Group
 	wd, _ := os.Getwd()
 	gitRelWd, err := serviceutil.GitRelWorkdir()
@@ -138,7 +137,7 @@ func postResultSet(ctx context.Context, resultSet *reviewdog.ResultMap,
 			Level:       result.Level,
 			// If it's only for PR, do not report results outside diff.
 			OutsideDiff: !forPr,
-			FilterMode:  filterMode,
+			FilterMode:  opt.filterMode,
 		}
 		g.Go(func() error {
 			res, err := cli.Check(ctx, req)
@@ -146,7 +145,11 @@ func postResultSet(ctx context.Context, resultSet *reviewdog.ResultMap,
 				return fmt.Errorf("post failed for %s: %v", name, err)
 			}
 			if res.ReportURL != "" {
-				log.Printf("[%s] reported: %s", name, res.ReportURL)
+				conclusion := ""
+				if res.Conclusion != "" {
+					conclusion = fmt.Sprintf(" (conclusion=%s)", res.Conclusion)
+				}
+				log.Printf("[%s] reported: %s%s", name, res.ReportURL, conclusion)
 			} else if res.CheckedResults != nil {
 				// Fill results only when report URL is missing, which probably means
 				// it failed to report results with Check API.
@@ -156,7 +159,17 @@ func postResultSet(ctx context.Context, resultSet *reviewdog.ResultMap,
 				})
 			}
 			if res.ReportURL == "" && res.CheckedResults == nil {
-				return fmt.Errorf("no result found for %q", name)
+				return fmt.Errorf("[%s] no result found", name)
+			}
+			// If failOnError is on, return error when at least one report
+			// returns failure conclusion (status). Users can check this
+			// reviewdoc run status (#446) to merge PRs for example.
+			//
+			// Also, the individual report conclusions are associated to random check
+			// suite due to the GitHub bug (#403), so actually users cannot depends
+			// on each report as of writing.
+			if opt.failOnError && (res.Conclusion == "failure") {
+				return fmt.Errorf("[%s] Check conclusion is %q", name, res.Conclusion)
 			}
 			return nil
 		})

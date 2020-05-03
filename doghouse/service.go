@@ -63,7 +63,11 @@ type CheckResponse struct {
 	// TODO(haya14busa): Consider to move this type to this package to avoid
 	// (cyclic) import.
 	// Optional.
-	CheckedResults []*reviewdog.FilteredCheck
+	CheckedResults []*reviewdog.FilteredCheck `json:"checked_results"`
+
+	// Conclusion of check result, which is same as GitHub's conclusion of Check
+	// API. https://developer.github.com/v3/checks/runs/#parameters-1
+	Conclusion string `json:"conclusion,omitempty"`
 }
 
 // Annotation represents an annotation to file or specific line.
