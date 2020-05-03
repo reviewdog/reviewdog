@@ -93,7 +93,7 @@ func (df *DiffFilter) addDiff(filediffs []*diff.FileDiff) {
 	}
 }
 
-// InDiff returns true, if the given path is in diff. It also optinally return
+// InDiff returns true, if the given path is in diff. It also optionally return
 // LnumDiff[1].
 //
 // [1]: https://github.com/reviewdog/reviewdog/blob/73c40e69d937033b2cf20f2d6085fb7ef202e770/diff/diff.go#L81-L88
