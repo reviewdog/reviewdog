@@ -83,8 +83,10 @@ func (ch *Checker) postCheck(ctx context.Context, checkID int64, checks []*revie
 		}
 		annotations = append(annotations, ch.toCheckRunAnnotation(c))
 	}
+	if len(annotations) > 0 {
 	if err := ch.postAnnotations(ctx, checkID, annotations); err != nil {
 		return nil, fmt.Errorf("failed to post annotations: %v", err)
+	}
 	}
 
 	conclusion := "success"
