@@ -29,17 +29,18 @@ func RunAndParse(ctx context.Context, conf *Config, runners map[string]bool, def
 		semaphoreNum = 1
 	}
 	semaphore := make(chan int, semaphoreNum)
-	for _, runner := range conf.Runner {
+	for key, runner := range conf.Runner {
 		runner := runner
-		if len(runners) != 0 && !runners[runner.Name] {
+		runnerName := getRunnerName(key, runner)
+		if len(runners) != 0 && !runners[runnerName] {
 			continue // Skip this runner.
 		}
-		usedRunners = append(usedRunners, runner.Name)
+		usedRunners = append(usedRunners, runnerName)
 		semaphore <- 1
-		log.Printf("reviewdog: [start]\trunner=%s", runner.Name)
+		log.Printf("reviewdog: [start]\trunner=%s", runnerName)
 		fname := runner.Format
 		if fname == "" && len(runner.Errorformat) == 0 {
-			fname = runner.Name
+			fname = runnerName
 		}
 		opt := &reviewdog.ParserOpt{FormatName: fname, Errorformat: runner.Errorformat}
 		p, err := reviewdog.NewParser(opt)
@@ -59,12 +60,21 @@ func RunAndParse(ctx context.Context, conf *Config, runners map[string]bool, def
 			if err != nil {
 				return err
 			}
-			log.Printf("reviewdog: [finish]\trunner=%s", runner.Name)
 			level := runner.Level
 			if level == "" {
 				level = defaultLevel
 			}
-			results.Store(runner.Name, &reviewdog.Result{Level: level, CheckResults: rs})
+			cmdErr := cmd.Wait()
+			results.Store(runnerName, &reviewdog.Result{
+				Level:        level,
+				CheckResults: rs,
+				CmdErr:       cmdErr,
+			})
+			msg := fmt.Sprintf("reviewdog: [finish]\trunner=%s", runnerName)
+			if cmdErr != nil {
+				msg += fmt.Sprintf("\terror=%v", cmdErr)
+			}
+			log.Println(msg)
 			return nil
 		})
 	}
@@ -78,7 +88,7 @@ func RunAndParse(ctx context.Context, conf *Config, runners map[string]bool, def
 }
 
 // Run runs reviewdog tasks based on Config.
-func Run(ctx context.Context, conf *Config, runners map[string]bool, c reviewdog.CommentService, d reviewdog.DiffService, teeMode bool, filterMode reviewdog.FilterMode) error {
+func Run(ctx context.Context, conf *Config, runners map[string]bool, c reviewdog.CommentService, d reviewdog.DiffService, teeMode bool, filterMode reviewdog.FilterMode, failOnError bool) error {
 	results, err := RunAndParse(ctx, conf, runners, "", teeMode) // Level is not used.
 	if err != nil {
 		return err
@@ -86,6 +96,10 @@ func Run(ctx context.Context, conf *Config, runners map[string]bool, c reviewdog
 	if results.Len() == 0 {
 		return nil
 	}
+	if err := checkUnexpectedFailures(results); err != nil {
+		return err
+	}
+
 	b, err := d.Diff(ctx)
 	if err != nil {
 		return err
@@ -98,7 +112,7 @@ func Run(ctx context.Context, conf *Config, runners map[string]bool, c reviewdog
 	results.Range(func(toolname string, result *reviewdog.Result) {
 		rs := result.CheckResults
 		g.Go(func() error {
-			return reviewdog.RunFromResult(ctx, c, rs, filediffs, d.Strip(), toolname, filterMode)
+			return reviewdog.RunFromResult(ctx, c, rs, filediffs, d.Strip(), toolname, filterMode, failOnError)
 		})
 	})
 	return g.Wait()
@@ -137,4 +151,26 @@ func checkUnknownRunner(specifiedRunners map[string]bool, usedRunners []string) 
 		return fmt.Errorf("runner not found: [%s]", strings.Join(rs, ","))
 	}
 	return nil
+}
+
+func checkUnexpectedFailures(results *reviewdog.ResultMap) error {
+	var err error
+	results.Range(func(toolname string, result *reviewdog.Result) {
+		// Skip if err is already found.
+		if err != nil {
+			return
+		}
+		if result.CmdErr != nil && len(result.CheckResults) == 0 {
+			err = fmt.Errorf("%s failed with zero findings: The command itself "+
+				"failed (%v) or reviewdog cannot parse the results", toolname, result.CmdErr)
+		}
+	})
+	return err
+}
+
+func getRunnerName(key string, runner *Runner) string {
+	if runner.Name != "" {
+		return runner.Name
+	}
+	return key
 }

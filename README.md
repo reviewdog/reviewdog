@@ -71,6 +71,7 @@ by diff.
   * [GitLab CI](#gitlab-ci)
   * [Common (Jenkins, local, etc...)](#common-jenkins-local-etc)
     + [Jenkins with Github pull request builder plugin](#jenkins-with-github-pull-request-builder-plugin)
+- [Exit codes](#exit-codes)
 - [Articles](#articles)
 
 [![github-pr-check sample](https://user-images.githubusercontent.com/3797062/40884858-6efd82a0-6756-11e8-9f1a-c6af4f920fb0.png)](https://github.com/reviewdog/reviewdog/pull/131/checks)
@@ -487,6 +488,7 @@ You can use public GitHub Actions to start using reviewdog with ease! :tada: :ar
 - Ruby
   - [reviewdog/action-brakeman](https://github.com/reviewdog/action-brakeman) - Run [brakeman](https://github.com/presidentbeef/brakeman).
   - [reviewdog/action-rubocop](https://github.com/reviewdog/action-rubocop) - Run [rubocop](https://github.com/rubocop-hq/rubocop).
+  - [vk26/action-fasterer](https://github.com/vk26/action-fasterer) - Run [fasterer](https://github.com/DamirSvrtan/fasterer).
 - Python
   - [wemake-python-styleguide](https://github.com/wemake-services/wemake-python-styleguide) - Run wemake-python-styleguide
 - Kotlin
@@ -526,7 +528,7 @@ to check the result against master commit for example. :tada:
 
 Example:
 ```
-<!-- Replace <OWNWER> and <REPOSITORY>. It assumes workflow name is "reviewdog" -->
+<!-- Replace <OWNER> and <REPOSITORY>. It assumes workflow name is "reviewdog" -->
 [![reviewdog](https://github.com/<OWNER>/<REPOSITORY>/workflows/reviewdog/badge.svg?branch=master&event=push)](https://github.com/<OWNER>/<REPOSITORY>/actions?query=workflow%3Areviewdog+event%3Apush+branch%3Amaster)
 ```
 
@@ -576,7 +578,7 @@ Examples
 
 ### Circle CI
 
-Store `REVIEWDOG_TOKEN` or `REVIEWDOG_GITHUB_API_TOKEN` in
+Store `REVIEWDOG_GITHUB_API_TOKEN` (or `REVIEWDOG_TOKEN` for github-pr-check) in
 [Environment variables - CircleCI](https://circleci.com/docs/environment-variables/#setting-environment-variables-for-all-commands-without-adding-them-to-git)
 
 #### .circleci/config.yml sample
@@ -590,9 +592,10 @@ jobs:
     steps:
       - checkout
       - run: curl -sfL https://raw.githubusercontent.com/reviewdog/reviewdog/master/install.sh| sh -s -- -b ./bin
-      - run: go vet ./... 2>&1 | ./bin/reviewdog -f=govet -reporter=github-pr-check
-      # or
       - run: go vet ./... 2>&1 | ./bin/reviewdog -f=govet -reporter=github-pr-review
+
+      # Deprecated: prefer GitHub Actions to use github-pr-check reporter.
+      - run: go vet ./... 2>&1 | ./bin/reviewdog -f=govet -reporter=github-pr-check
 ```
 
 ### GitLab CI
@@ -656,6 +659,12 @@ $ REVIEWDOG_TOKEN="<token>" reviewdog -reporter=github-pr-check
 # Or
 $ REVIEWDOG_GITHUB_API_TOKEN="<token>" reviewdog -reporter=github-pr-review
 ```
+
+## Exit codes
+By default Reviewdog will return `0` as exit code once all actions done (linter report analyzed, comments posted and so on).
+
+Once `fail-on-error` flag passed - Reviewdog will return `1` as exit code if at least one violation was found/reported.
+This can be helpful when you are using it as a step in your CI pipeline and want to mark the step failed if any error found by linter.
 
 ## Articles
 - [reviewdog — A code review dog who keeps your codebase healthy ](https://medium.com/@haya14busa/reviewdog-a-code-review-dog-who-keeps-your-codebase-healthy-d957c471938b)

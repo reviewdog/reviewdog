@@ -19,7 +19,7 @@ import (
 	"golang.org/x/net/context" // "context"
 	"golang.org/x/oauth2"
 
-	"github.com/google/go-github/v29/github"
+	"github.com/google/go-github/v31/github"
 	"github.com/mattn/go-shellwords"
 	"github.com/reviewdog/errorformat/fmts"
 	"github.com/xanzy/go-gitlab"
@@ -56,6 +56,7 @@ type option struct {
 	guessPullRequest bool
 	tee              bool
 	filterMode       reviewdog.FilterMode
+	failOnError      bool
 }
 
 // flags doc
@@ -90,7 +91,7 @@ const (
 		There are two options to use this reporter.
 
 		Option 1) Run reviewdog from GitHub Actions w/ secrets.GITHUB_TOKEN
-			Note that it reports result to GitHub Actions log consle for Pull
+			Note that it reports result to GitHub Actions log console for Pull
 			Requests from fork repository due to GitHub Actions restriction.
 			https://help.github.com/en/articles/virtual-environments-for-github-actions#github_token-secret
 
@@ -158,6 +159,7 @@ const (
 		$ export CI_REPO_OWNER="haya14busa" # repository owner
 		$ export CI_REPO_NAME="reviewdog" # repository name
 `
+	failOnErrorDoc = `Returns 1 as exit code if any errors/warnings found in input`
 )
 
 var opt = &option{}
@@ -178,6 +180,7 @@ func init() {
 	flag.BoolVar(&opt.guessPullRequest, "guess", false, guessPullRequestDoc)
 	flag.BoolVar(&opt.tee, "tee", false, teeDoc)
 	flag.Var(&opt.filterMode, "filter-mode", filterModeDoc)
+	flag.BoolVar(&opt.failOnError, "fail-on-error", false, failOnErrorDoc)
 }
 
 func usage() {
@@ -255,7 +258,7 @@ See -reporter flag for migration and set -reporter="github-pr-review" or -report
 		// If it's running in GitHub Actions and it's PR from forked repository,
 		// replace comment writer to GitHubActionLogWriter to create annotations
 		// instead of review comment because if it's PR from forked repository,
-		// GitHub token doen't have write permission due to security concern and
+		// GitHub token doesn't have write permission due to security concern and
 		// cannot post results via Review API.
 		if cienv.IsInGitHubAction() && isPRFromForkedRepo() {
 			fmt.Fprintln(w, `reviewdog: This is Pull-Request from forked repository.
@@ -338,7 +341,7 @@ github-pr-check reporter as a fallback.
 		if err != nil {
 			return err
 		}
-		return project.Run(ctx, conf, buildRunnersMap(opt.runners), cs, ds, opt.tee, opt.filterMode)
+		return project.Run(ctx, conf, buildRunnersMap(opt.runners), cs, ds, opt.tee, opt.filterMode, opt.failOnError)
 	}
 
 	p, err := newParserFromOpt(opt)
@@ -346,7 +349,7 @@ github-pr-check reporter as a fallback.
 		return err
 	}
 
-	app := reviewdog.NewReviewdog(toolName(opt), p, cs, ds, opt.filterMode)
+	app := reviewdog.NewReviewdog(toolName(opt), p, cs, ds, opt.filterMode, opt.failOnError)
 	return app.Run(ctx, r)
 }
 
@@ -570,12 +573,12 @@ func fetchMergeRequestIDFromCommit(cli *gitlab.Client, projectID, sha string) (i
 }
 
 func gitlabClient(token string) (*gitlab.Client, error) {
-	client := gitlab.NewClient(newHTTPClient(), token)
 	baseURL, err := gitlabBaseURL()
 	if err != nil {
 		return nil, err
 	}
-	if err := client.SetBaseURL(baseURL.String()); err != nil {
+	client, err := gitlab.NewClient(token, gitlab.WithHTTPClient(newHTTPClient()), gitlab.WithBaseURL(baseURL.String()))
+	if err != nil {
 		return nil, err
 	}
 	return client, nil

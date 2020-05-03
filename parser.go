@@ -32,7 +32,7 @@ func NewParser(opt *ParserOpt) (Parser, error) {
 	if name != "" {
 		efm, ok := fmts.DefinedFmts()[name]
 		if !ok {
-			return nil, fmt.Errorf("%q is not supported. consider to add new errrorformat to https://github.com/reviewdog/errorformat", name)
+			return nil, fmt.Errorf("%q is not supported. consider to add new errorformat to https://github.com/reviewdog/errorformat", name)
 		}
 		opt.Errorformat = efm.Errorformat
 	}
