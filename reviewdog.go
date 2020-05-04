@@ -90,7 +90,7 @@ func (w *Reviewdog) runFromResult(ctx context.Context, results []*CheckResult,
 	hasViolations := false
 
 	for _, check := range checks {
-		if !check.InDiff {
+		if !check.ShouldReport {
 			continue
 		}
 		comment := &Comment{

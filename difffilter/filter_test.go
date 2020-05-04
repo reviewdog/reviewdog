@@ -198,12 +198,12 @@ func TestDiffFilter_root(t *testing.T) {
 	}
 	for _, tt := range tests {
 		df := New(files, 1, getCwd(), tt.mode)
-		if got, gotLine := df.InDiff(tt.path, tt.lnum); got != tt.want {
+		if got, gotLine := df.ShouldReport(tt.path, tt.lnum); got != tt.want {
 			gotLnumDiff := 0
 			if gotLine != nil {
 				gotLnumDiff = gotLine.LnumDiff
 			}
-			t.Errorf("InDiff(%q, %d) = (%v, %d), want (%v, %d)",
+			t.Errorf("ShouldReport(%q, %d) = (%v, %d), want (%v, %d)",
 				tt.path, tt.lnum, got, gotLnumDiff, tt.want, tt.wantLnumDiff)
 		}
 	}
@@ -252,12 +252,12 @@ func TestDiffFilter_subdir(t *testing.T) {
 	}
 	for _, tt := range tests {
 		df := New(files, 1, getCwd(), tt.mode)
-		if got, gotLine := df.InDiff(tt.path, tt.lnum); got != tt.want {
+		if got, gotLine := df.ShouldReport(tt.path, tt.lnum); got != tt.want {
 			gotLnumDiff := 0
 			if gotLine != nil {
 				gotLnumDiff = gotLine.LnumDiff
 			}
-			t.Errorf("InDiff(%q, %d) = (%v, %d), want (%v, %d)",
+			t.Errorf("ShouldReport(%q, %d) = (%v, %d), want (%v, %d)",
 				tt.path, tt.lnum, got, gotLnumDiff, tt.want, tt.wantLnumDiff)
 		}
 	}

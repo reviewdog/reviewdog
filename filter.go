@@ -10,22 +10,22 @@ import (
 // FilteredCheck represents CheckResult with filtering info.
 type FilteredCheck struct {
 	*CheckResult
-	InDiff   bool
-	LnumDiff int
-	OldPath  string
-	OldLine  int
+	ShouldReport bool
+	LnumDiff     int
+	OldPath      string
+	OldLine      int
 }
 
 // FilterCheck filters check results by diff. It doesn't drop check which
-// is not in diff but set FilteredCheck.InDiff field false.
+// is not in diff but set FilteredCheck.ShouldReport field false.
 func FilterCheck(results []*CheckResult, diff []*diff.FileDiff, strip int,
 	cwd string, mode difffilter.Mode) []*FilteredCheck {
 	checks := make([]*FilteredCheck, 0, len(results))
 	df := difffilter.New(diff, strip, cwd, mode)
 	for _, result := range results {
 		check := &FilteredCheck{CheckResult: result}
-		if yes, diffline := df.InDiff(result.Path, result.Lnum); yes {
-			check.InDiff = true
+		if yes, diffline := df.ShouldReport(result.Path, result.Lnum); yes {
+			check.ShouldReport = true
 			if diffline != nil {
 				check.LnumDiff = diffline.LnumDiff
 			}

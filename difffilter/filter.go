@@ -116,9 +116,9 @@ func (df *DiffFilter) addDiff(filediffs []*diff.FileDiff) {
 	}
 }
 
-// InDiff returns true, if the given path is in diff depending on the filter
+// ShouldReport returns true, if the given path is in diff depending on the filter
 // Mode. It also optionally return diff line.
-func (df *DiffFilter) InDiff(path string, lnum int) (bool, *diff.Line) {
+func (df *DiffFilter) ShouldReport(path string, lnum int) (bool, *diff.Line) {
 	lines, ok := df.difflines[df.normalizePath(path)]
 	if !ok {
 		return (df.mode == ModeNoFilter), nil
