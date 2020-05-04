@@ -9,6 +9,33 @@ import (
 	"github.com/reviewdog/reviewdog/diff"
 )
 
+func TestMode_Set(t *testing.T) {
+	tests := []struct {
+		value   string
+		want    Mode
+		wantErr bool
+	}{
+		{value: "", want: ModeDefault},
+		{value: "default", want: ModeDefault},
+		{value: "added", want: ModeAdded},
+		{value: "diff_context", want: ModeDiffContext},
+		{value: "file", want: ModeFile},
+		{value: "unknown", wantErr: true},
+	}
+	for _, tt := range tests {
+		var mode Mode
+		err := (&mode).Set(tt.value)
+		if err != nil && !tt.wantErr {
+			t.Errorf("got error for %q: %v", tt.value, err)
+		} else if err == nil && tt.wantErr {
+			t.Errorf("want error, but got nil for %q", tt.value)
+		}
+		if mode != tt.want {
+			t.Errorf("[value=%s] got %q, want %q", tt.value, mode.String(), tt.want.String())
+		}
+	}
+}
+
 const sampleDiffRoot = `--- a/sample.old.txt	2016-10-13 05:09:35.820791185 +0900
 +++ b/sample.new.txt	2016-10-13 05:15:26.839245048 +0900
 @@ -1,3 +1,4 @@
@@ -156,6 +183,13 @@ func TestDiffFilter_subdir(t *testing.T) {
 			path:         "sample.new.txt",
 			lnum:         2,
 			mode:         ModeAdded,
+			want:         true,
+			wantLnumDiff: 3,
+		},
+		{
+			path:         "sample.new.txt",
+			lnum:         2,
+			mode:         ModeDefault,
 			want:         true,
 			wantLnumDiff: 3,
 		},
