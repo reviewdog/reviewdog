@@ -6,6 +6,7 @@ import (
 	"net/http"
 	"net/http/httptest"
 	"os"
+	"sync/atomic"
 	"testing"
 
 	"github.com/google/go-cmp/cmp"
@@ -76,8 +77,8 @@ func TestGitLabMergeRequestDiscussionCommenter_Post_Flush_review_api(t *testing.
 		newComment3,
 		commentOutsideDiff,
 	}
-	postCalled := 0
-	wantPostCalled := 3
+	var postCalled int32
+	const wantPostCalled = 3
 
 	mux := http.NewServeMux()
 	mux.HandleFunc("/api/v4/projects/o/r/merge_requests/14/discussions", func(w http.ResponseWriter, r *http.Request) {
@@ -129,7 +130,7 @@ func TestGitLabMergeRequestDiscussionCommenter_Post_Flush_review_api(t *testing.
 			}
 
 		case http.MethodPost:
-			postCalled++
+			atomic.AddInt32(&postCalled, 1)
 			got := new(gitlab.CreateMergeRequestDiscussionOptions)
 			if err := json.NewDecoder(r.Body).Decode(got); err != nil {
 				t.Error(err)
