@@ -68,6 +68,9 @@ func (g *ChangeReviewCommenter) postAllComments(ctx context.Context) error {
 		Comments: map[string][]gerrit.CommentInput{},
 	}
 	for _, c := range g.postComments {
+		if !c.Result.InDiffFile {
+			continue
+		}
 		review.Comments[c.Result.Path] = append(review.Comments[c.Result.Path], gerrit.CommentInput{
 			Line:    c.Result.Lnum,
 			Message: c.Body,

@@ -31,7 +31,7 @@ func TestChangeReviewCommenter_Post_Flush(t *testing.T) {
 		Result: &reviewdog.FilteredCheck{CheckResult: &reviewdog.CheckResult{
 			Path: "file.go",
 			Lnum: newLnum1,
-		}},
+		}, InDiffFile: true},
 		Body: "new comment",
 	}
 	newLnum2 := 15
@@ -39,13 +39,21 @@ func TestChangeReviewCommenter_Post_Flush(t *testing.T) {
 		Result: &reviewdog.FilteredCheck{CheckResult: &reviewdog.CheckResult{
 			Path: "file2.go",
 			Lnum: newLnum2,
-		}},
+		}, InDiffFile: true},
 		Body: "new comment 2",
+	}
+	commentOutsideDiff := &reviewdog.Comment{
+		Result: &reviewdog.FilteredCheck{CheckResult: &reviewdog.CheckResult{
+			Path: "file3.go",
+			Lnum: 14,
+		}, InDiffFile: false},
+		Body: "comment outside diff",
 	}
 
 	comments := []*reviewdog.Comment{
 		newComment1,
 		newComment2,
+		commentOutsideDiff,
 	}
 
 	mux := http.NewServeMux()
@@ -57,8 +65,8 @@ func TestChangeReviewCommenter_Post_Flush(t *testing.T) {
 				t.Error(err)
 			}
 
-			if len(got.Comments) != len(comments) {
-				t.Error("expected two comments")
+			if want := len(comments) - 1; len(got.Comments) != want {
+				t.Errorf("got %d comments, want %d", len(got.Comments), want)
 			}
 
 			want := []gerrit.CommentInput{{Line: newComment1.Result.Lnum, Message: newComment1.Body}}
