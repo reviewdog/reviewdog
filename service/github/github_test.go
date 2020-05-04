@@ -32,6 +32,22 @@ func setupGitHubClient() *github.Client {
 	return github.NewClient(tc)
 }
 
+func setupEnvs() (cleanup func()) {
+	var cleanEnvs = []string{
+		"GITHUB_ACTION",
+	}
+	saveEnvs := make(map[string]string)
+	for _, key := range cleanEnvs {
+		saveEnvs[key] = os.Getenv(key)
+		os.Unsetenv(key)
+	}
+	return func() {
+		for key, value := range saveEnvs {
+			os.Setenv(key, value)
+		}
+	}
+}
+
 func moveToRootDir() {
 	os.Chdir("../..")
 }
@@ -177,6 +193,7 @@ func TestGitHubPullRequest_Post_Flush_review_api(t *testing.T) {
 	cwd, _ := os.Getwd()
 	defer os.Chdir(cwd)
 	moveToRootDir()
+	defer setupEnvs()()
 
 	listCommentsAPICalled := 0
 	postCommentsAPICalled := 0
@@ -307,8 +324,8 @@ func TestGitHubPullRequest_Post_Flush_review_api(t *testing.T) {
 func TestGitHubPullRequest_Post_toomany(t *testing.T) {
 	cwd, _ := os.Getwd()
 	defer os.Chdir(cwd)
-
 	moveToRootDir()
+	defer setupEnvs()()
 
 	listCommentsAPICalled := 0
 	postCommentsAPICalled := 0
@@ -373,6 +390,7 @@ func TestGitHubPullRequest_workdir(t *testing.T) {
 	cwd, _ := os.Getwd()
 	defer os.Chdir(cwd)
 	moveToRootDir()
+	defer setupEnvs()()
 
 	g, err := NewGitHubPullRequest(nil, "", "", 0, "")
 	if err != nil {
