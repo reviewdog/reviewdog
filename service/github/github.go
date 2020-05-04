@@ -10,6 +10,7 @@ import (
 	"github.com/google/go-github/v31/github"
 
 	"github.com/reviewdog/reviewdog"
+	"github.com/reviewdog/reviewdog/cienv"
 	"github.com/reviewdog/reviewdog/service/commentutil"
 	"github.com/reviewdog/reviewdog/service/github/githubutils"
 	"github.com/reviewdog/reviewdog/service/serviceutil"
@@ -83,6 +84,14 @@ func (g *GitHubPullRequest) postAsReviewComment(ctx context.Context) error {
 	comments := make([]*github.DraftReviewComment, 0, len(g.postComments))
 	remaining := make([]*reviewdog.Comment, 0)
 	for _, c := range g.postComments {
+		if c.Result.LnumDiff == 0 {
+			// GitHub Review API cannot report results outside diff. If it's running
+			// in GitHub Actions, fallback to GitHub Actions log as report .
+			if cienv.IsInGitHubAction() {
+				githubutils.ReportAsGitHubActionsLog(c.ToolName, "warning", c.Result.CheckResult)
+			}
+			continue
+		}
 		if g.postedcs.IsPosted(c, c.Result.LnumDiff) {
 			continue
 		}
@@ -110,8 +119,6 @@ func (g *GitHubPullRequest) postAsReviewComment(ctx context.Context) error {
 		return nil
 	}
 
-	// TODO(haya14busa): it might be useful to report overview results by "body"
-	// field.
 	review := &github.PullRequestReviewRequest{
 		CommitID: &g.sha,
 		Event:    github.String("COMMENT"),

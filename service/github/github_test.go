@@ -278,6 +278,15 @@ func TestGitHubPullRequest_Post_Flush_review_api(t *testing.T) {
 			},
 			Body: "new comment",
 		},
+		{
+			Result: &reviewdog.FilteredCheck{
+				CheckResult: &reviewdog.CheckResult{
+					Path: "reviewdog.go",
+				},
+				// No LnumDiff.
+			},
+			Body: "should not be reported via GitHub Review API",
+		},
 	}
 	for _, c := range comments {
 		if err := g.Post(context.Background(), c); err != nil {
