@@ -101,7 +101,9 @@ func (w *Reviewdog) runFromResult(ctx context.Context, results []*CheckResult,
 	}
 
 	if bulk, ok := w.c.(BulkCommentService); ok {
-		return bulk.Flush(ctx)
+		if err := bulk.Flush(ctx); err != nil {
+			return err
+		}
 	}
 
 	if failOnError && hasViolations {
