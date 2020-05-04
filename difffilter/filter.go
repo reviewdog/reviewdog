@@ -14,7 +14,7 @@ type Mode int
 const (
 	// ModeDiffContext represents filtering by diff context
 	ModeDiffContext Mode = iota
-	// ModeAdded represents filtering by added diff lines
+	// ModeAdded represents filtering by added/changed diff lines
 	ModeAdded
 )
 

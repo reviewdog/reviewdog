@@ -78,7 +78,7 @@ const (
     "diff_context" (default)
         Filter by diff context, which can include unchanged lines.
     "added"
-        Filter by added diff lines.
+        Filter by added/changed diff lines.
 `
 	reporterDoc = `reporter of reviewdog results. (local, github-check, github-pr-check, github-pr-review, gitlab-mr-discussion, gitlab-mr-commit)
 	"local" (default)
