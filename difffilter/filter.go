@@ -104,22 +104,20 @@ func (df *DiffFilter) addDiff(filediffs []*diff.FileDiff) {
 }
 
 // InDiff returns true, if the given path is in diff depending on the filter
-// Mode. It also optionally return LnumDiff[1].
-//
-// [1]: https://github.com/reviewdog/reviewdog/blob/73c40e69d937033b2cf20f2d6085fb7ef202e770/diff/diff.go#L81-L88
-func (df *DiffFilter) InDiff(path string, lnum int) (yes bool, lnumdiff int) {
+// Mode. It also optionally return diff line.
+func (df *DiffFilter) InDiff(path string, lnum int) (bool, *diff.Line) {
 	lines, ok := df.difflines[df.normalizePath(path)]
 	if !ok {
-		return false, 0
+		return false, nil
 	}
 	line, ok := lines[lnum]
 	if !ok {
 		if df.mode == ModeFile {
-			return true, 0
+			return true, nil
 		}
-		return false, 0
+		return false, nil
 	}
-	return true, line.LnumDiff
+	return true, line
 }
 
 func (df *DiffFilter) isSignificantLine(line *diff.Line) bool {
@@ -172,14 +170,23 @@ func contains(path, base string) bool {
 // `git diff --relative` can returns relative path to current workdir, so we
 // ask users not to use it for reviewdog command.
 func (df *DiffFilter) normalizeDiffPath(filediff *diff.FileDiff) normalizedPath {
-	path := filediff.PathNew
-	if df.strip > 0 {
-		ps := splitPathList(filediff.PathNew)
-		if len(ps) > df.strip {
-			path = filepath.Join(ps[df.strip:]...)
+	return normalizedPath{p: NormalizeDiffPath(filediff.PathNew, df.strip)}
+}
+
+// NormalizeDiffPath return path normalized path from given path in diff with
+// strip.
+func NormalizeDiffPath(diffpath string, strip int) string {
+	if diffpath == "/dev/null" {
+		return ""
+	}
+	path := diffpath
+	if strip > 0 {
+		ps := splitPathList(path)
+		if len(ps) > strip {
+			path = filepath.Join(ps[strip:]...)
 		}
 	}
-	return normalizedPath{p: filepath.ToSlash(filepath.Clean(path))}
+	return filepath.ToSlash(filepath.Clean(path))
 }
 
 func splitPathList(path string) []string {
