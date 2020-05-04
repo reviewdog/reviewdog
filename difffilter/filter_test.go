@@ -20,6 +20,7 @@ func TestMode_Set(t *testing.T) {
 		{value: "added", want: ModeAdded},
 		{value: "diff_context", want: ModeDiffContext},
 		{value: "file", want: ModeFile},
+		{value: "nofilter", want: ModeNoFilter},
 		{value: "unknown", wantErr: true},
 	}
 	for _, tt := range tests {
@@ -150,6 +151,47 @@ func TestDiffFilter_root(t *testing.T) {
 			path:         "sample.new.txt",
 			lnum:         14,
 			mode:         ModeFile,
+			want:         true,
+			wantLnumDiff: 0,
+		},
+		{
+			path:         "sample.new.txt",
+			lnum:         0, // Only file path.
+			mode:         ModeFile,
+			want:         true,
+			wantLnumDiff: 0,
+		},
+		{
+			path:         "sample.new.txt",
+			lnum:         0, // Only file path.
+			mode:         ModeAdded,
+			want:         false,
+			wantLnumDiff: 0,
+		},
+		{
+			path:         "sample.new.txt",
+			lnum:         2,
+			mode:         ModeNoFilter,
+			want:         true,
+			wantLnumDiff: 3,
+		},
+		{
+			path:         "sample.new.txt",
+			lnum:         2,
+			mode:         ModeNoFilter,
+			want:         true,
+			wantLnumDiff: 3, // ModeNoFilter returns LnumDiff if possible.
+		},
+		{
+			path:         "any_path_with_any_line.txt",
+			lnum:         141414,
+			mode:         ModeNoFilter,
+			want:         true,
+			wantLnumDiff: 0,
+		},
+		{
+			path:         "any_path_only.txt",
+			mode:         ModeNoFilter,
 			want:         true,
 			wantLnumDiff: 0,
 		},

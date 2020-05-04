@@ -25,6 +25,8 @@ const (
 	ModeDiffContext
 	// ModeFile represents filtering by changed files.
 	ModeFile
+	// ModeNoFilter doesn't filter out any results.
+	ModeNoFilter
 )
 
 // String implements the flag.Value interface
@@ -34,8 +36,9 @@ func (mode *Mode) String() string {
 		"added",
 		"diff_context",
 		"file",
+		"nofilter",
 	}
-	if *mode < ModeDefault || *mode > ModeFile {
+	if *mode < ModeDefault || *mode > ModeNoFilter {
 		return "Unknown mode"
 	}
 
@@ -53,6 +56,8 @@ func (mode *Mode) Set(value string) error {
 		*mode = ModeDiffContext
 	case "file":
 		*mode = ModeFile
+	case "nofilter":
+		*mode = ModeNoFilter
 	default:
 		return fmt.Errorf("invalid mode name: %s", value)
 	}
@@ -116,21 +121,18 @@ func (df *DiffFilter) addDiff(filediffs []*diff.FileDiff) {
 func (df *DiffFilter) InDiff(path string, lnum int) (bool, *diff.Line) {
 	lines, ok := df.difflines[df.normalizePath(path)]
 	if !ok {
-		return false, nil
+		return (df.mode == ModeNoFilter), nil
 	}
 	line, ok := lines[lnum]
 	if !ok {
-		if df.mode == ModeFile {
-			return true, nil
-		}
-		return false, nil
+		return (df.mode == ModeNoFilter || df.mode == ModeFile), nil
 	}
 	return true, line
 }
 
 func (df *DiffFilter) isSignificantLine(line *diff.Line) bool {
 	switch df.mode {
-	case ModeDiffContext, ModeFile:
+	case ModeDiffContext, ModeFile, ModeNoFilter:
 		return true // any lines in diff are significant.
 	case ModeAdded, ModeDefault:
 		return line.Type == diff.LineAdded
