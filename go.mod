@@ -14,7 +14,7 @@ require (
 	github.com/kylelemons/godebug v1.1.0
 	github.com/mattn/go-shellwords v1.0.10
 	github.com/rakyll/statik v0.1.7
-	github.com/reviewdog/errorformat v0.0.0-20200502163639-f5b5a3cb8aed
+	github.com/reviewdog/errorformat v0.0.0-20200504131036-9dd578dbe019
 	github.com/xanzy/go-gitlab v0.31.0
 	golang.org/x/build v0.0.0-20200428202702-916311cec4e1
 	golang.org/x/net v0.0.0-20200501053045-e0ff5e5a1de5
