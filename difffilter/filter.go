@@ -12,10 +12,14 @@ import (
 type Mode int
 
 const (
-	// ModeDiffContext represents filtering by diff context
+	// ModeDiffContext represents filtering by diff context.
 	ModeDiffContext Mode = iota
-	// ModeAdded represents filtering by added diff lines
+	// ModeAdded represents filtering by added/changed diff lines.
 	ModeAdded
+	// ModeFile represents filtering by changed files.
+	// Note that this mode doesn't work with github-pr-review reporter due to GitHUb API
+	// limiation.
+	ModeFile
 )
 
 // String implements the flag.Value interface
@@ -23,8 +27,9 @@ func (mode *Mode) String() string {
 	names := [...]string{
 		"diff_context",
 		"added",
+		"file",
 	}
-	if *mode < ModeDiffContext || *mode > ModeAdded {
+	if *mode < ModeDiffContext || *mode > ModeFile {
 		return "Unknown"
 	}
 
@@ -38,6 +43,8 @@ func (mode *Mode) Set(value string) error {
 		*mode = ModeDiffContext
 	case "added":
 		*mode = ModeAdded
+	case "file":
+		*mode = ModeFile
 	default:
 		*mode = ModeDiffContext
 	}
@@ -96,8 +103,8 @@ func (df *DiffFilter) addDiff(filediffs []*diff.FileDiff) {
 	}
 }
 
-// InDiff returns true, if the given path is in diff. It also optionally return
-// LnumDiff[1].
+// InDiff returns true, if the given path is in diff depending on the filter
+// Mode. It also optionally return LnumDiff[1].
 //
 // [1]: https://github.com/reviewdog/reviewdog/blob/73c40e69d937033b2cf20f2d6085fb7ef202e770/diff/diff.go#L81-L88
 func (df *DiffFilter) InDiff(path string, lnum int) (yes bool, lnumdiff int) {
@@ -107,6 +114,9 @@ func (df *DiffFilter) InDiff(path string, lnum int) (yes bool, lnumdiff int) {
 	}
 	line, ok := lines[lnum]
 	if !ok {
+		if df.mode == ModeFile {
+			return true, 0
+		}
 		return false, 0
 	}
 	return true, line.LnumDiff
@@ -114,7 +124,7 @@ func (df *DiffFilter) InDiff(path string, lnum int) (yes bool, lnumdiff int) {
 
 func (df *DiffFilter) isSignificantLine(line *diff.Line) bool {
 	switch df.mode {
-	case ModeDiffContext:
+	case ModeDiffContext, ModeFile:
 		return true // any lines in diff are significant.
 	case ModeAdded:
 		return line.Type == diff.LineAdded

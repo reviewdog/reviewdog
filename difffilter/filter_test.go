@@ -119,6 +119,13 @@ func TestDiffFilter_root(t *testing.T) {
 			want:         true,
 			wantLnumDiff: 3,
 		},
+		{
+			path:         "sample.new.txt",
+			lnum:         14,
+			mode:         ModeFile,
+			want:         true,
+			wantLnumDiff: 0,
+		},
 	}
 	for _, tt := range tests {
 		df := New(files, 1, getCwd(), tt.mode)
