@@ -112,11 +112,11 @@ func (df *DiffFilter) InDiff(path string, lnum int) (yes bool, lnumdiff int) {
 	if !ok {
 		return false, 0
 	}
-	if df.mode == ModeFile {
-		return true, 0
-	}
 	line, ok := lines[lnum]
 	if !ok {
+		if df.mode == ModeFile {
+			return true, 0
+		}
 		return false, 0
 	}
 	return true, line.LnumDiff
