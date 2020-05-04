@@ -83,7 +83,7 @@ func (g *GitHubPullRequest) postAsReviewComment(ctx context.Context) error {
 	comments := make([]*github.DraftReviewComment, 0, len(g.postComments))
 	remaining := make([]*reviewdog.Comment, 0)
 	for _, c := range g.postComments {
-		if g.postedcs.IsPosted(c, c.LnumDiff) {
+		if c.LnumDiff == 0 || g.postedcs.IsPosted(c, c.LnumDiff) {
 			continue
 		}
 		// Only posts maxCommentsPerRequest comments per 1 request to avoid spammy
