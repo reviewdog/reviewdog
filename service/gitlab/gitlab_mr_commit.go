@@ -80,7 +80,7 @@ func (g *GitLabMergeRequestCommitCommenter) postCommentsForEach(ctx context.Cont
 	var eg errgroup.Group
 	for _, c := range g.postComments {
 		c := c
-		if !c.Result.InDiffFile || g.postedcs.IsPosted(c, c.Result.Lnum) {
+		if !c.Result.InDiffFile || c.Result.Lnum == 0 || g.postedcs.IsPosted(c, c.Result.Lnum) {
 			continue
 		}
 		eg.Go(func() error {

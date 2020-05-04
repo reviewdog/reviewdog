@@ -68,6 +68,13 @@ func TestGitLabMergeRequestDiscussionCommenter_Post_Flush_review_api(t *testing.
 		}, InDiffFile: false},
 		Body: "comment outside diff",
 	}
+	commentWithoutLnum := &reviewdog.Comment{
+		Result: &reviewdog.FilteredCheck{CheckResult: &reviewdog.CheckResult{
+			Path: "path.go",
+			Lnum: 0,
+		}, InDiffFile: true},
+		Body: "comment without lnum",
+	}
 
 	comments := []*reviewdog.Comment{
 		alreadyCommented1,
@@ -76,6 +83,7 @@ func TestGitLabMergeRequestDiscussionCommenter_Post_Flush_review_api(t *testing.
 		newComment2,
 		newComment3,
 		commentOutsideDiff,
+		commentWithoutLnum,
 	}
 	var postCalled int32
 	const wantPostCalled = 3
