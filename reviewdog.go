@@ -53,9 +53,12 @@ type Parser interface {
 // Comment represents a reported result as a comment.
 type Comment struct {
 	*CheckResult
+	ToolName string
 	Body     string
 	LnumDiff int
-	ToolName string
+	DiffLine *diff.Line
+	OldPath  string
+	OldLine  int
 }
 
 // CommentService is an interface which posts Comment.
@@ -92,8 +95,10 @@ func (w *Reviewdog) runFromResult(ctx context.Context, results []*CheckResult,
 		}
 		comment := &Comment{
 			CheckResult: check.CheckResult,
-			Body:        check.Message, // TODO: format message
+			Body:        check.Message,
 			LnumDiff:    check.LnumDiff,
+			OldPath:     check.OldPath,
+			OldLine:     check.OldLine,
 			ToolName:    w.toolname,
 		}
 		if err := w.c.Post(ctx, comment); err != nil {

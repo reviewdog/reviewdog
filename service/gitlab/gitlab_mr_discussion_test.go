@@ -48,12 +48,22 @@ func TestGitLabMergeRequestDiscussionCommenter_Post_Flush_review_api(t *testing.
 		},
 		Body: "new comment 2",
 	}
+	newComment3 := &reviewdog.Comment{
+		CheckResult: &reviewdog.CheckResult{
+			Path: "new_file.go",
+			Lnum: 14,
+		},
+		Body:    "new comment 3",
+		OldPath: "old_file.go",
+		OldLine: 7,
+	}
 
 	comments := []*reviewdog.Comment{
 		alreadyCommented1,
 		alreadyCommented2,
 		newComment1,
 		newComment2,
+		newComment3,
 	}
 
 	mux := http.NewServeMux()
@@ -125,6 +135,18 @@ func TestGitLabMergeRequestDiscussionCommenter_Post_Flush_review_api(t *testing.
 					Body: gitlab.String(commentutil.CommentBody(newComment2)),
 					Position: &gitlab.NotePosition{
 						BaseSHA: "xxx", StartSHA: "xxx", HeadSHA: "sha", PositionType: "text", NewPath: "file2.go", NewLine: 15},
+				}
+				if diff := cmp.Diff(got, want); diff != "" {
+					t.Error(diff)
+				}
+			case "new_file.go":
+				want := &gitlab.CreateMergeRequestDiscussionOptions{
+					Body: gitlab.String(commentutil.CommentBody(newComment3)),
+					Position: &gitlab.NotePosition{
+						BaseSHA: "xxx", StartSHA: "xxx", HeadSHA: "sha", PositionType: "text",
+						NewPath: "new_file.go", NewLine: 14,
+						OldPath: "old_file.go", OldLine: 7,
+					},
 				}
 				if diff := cmp.Diff(got, want); diff != "" {
 					t.Error(diff)

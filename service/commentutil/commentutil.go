@@ -2,6 +2,7 @@ package commentutil
 
 import (
 	"fmt"
+	"log"
 
 	"github.com/reviewdog/reviewdog"
 )
@@ -37,6 +38,15 @@ func (p PostedComments) AddPostedComment(path string, lineNum int, body string) 
 		p[path][lineNum] = make([]string, 0)
 	}
 	p[path][lineNum] = append(p[path][lineNum], body)
+}
+
+// DebugLog outputs posted comments as log for debugging.
+func (p PostedComments) DebugLog() {
+	for filename, f := range p {
+		for line := range f {
+			log.Printf("[debug] posted: %s:%d", filename, line)
+		}
+	}
 }
 
 // BodyPrefix is prefix text of comment body.

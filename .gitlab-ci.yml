@@ -1,3 +1,6 @@
+# Go to https://gitlab.com/reviewdog/reviewdog/-/settings/repository#js-push-remote-settings
+# to sync the repository manually.
+
 # Open merge request automatically and run reviewdog against created MR.
 stages:
   - openMr
@@ -37,6 +40,6 @@ Reviewdog:
     - go install ./cmd/reviewdog
     - ( cd linters && go get golang.org/x/lint/golint )
   script:
-    - golint ./... | reviewdog -f=golint -name=golint-discussion -reporter=gitlab-mr-discussion
+    - golint ./... | reviewdog -f=golint -name=golint-discussion -reporter=gitlab-mr-discussion -filter-mode=file
     - golint ./... | reviewdog -f=golint -name=golint-commit -reporter=gitlab-mr-commit
-    - cd ./_testdata/ && golint ./... | reviewdog -f=golint -name=golint-discussion -reporter=gitlab-mr-discussion
+    - cd ./_testdata/ && golint ./... | reviewdog -f=golint -name=golint-discussion-subdir -reporter=gitlab-mr-discussion

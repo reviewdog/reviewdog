@@ -12,6 +12,8 @@ type FilteredCheck struct {
 	*CheckResult
 	InDiff   bool
 	LnumDiff int
+	OldPath  string
+	OldLine  int
 }
 
 // FilterCheck filters check results by diff. It doesn't drop check which
@@ -22,11 +24,14 @@ func FilterCheck(results []*CheckResult, diff []*diff.FileDiff, strip int,
 	df := difffilter.New(diff, strip, cwd, mode)
 	for _, result := range results {
 		check := &FilteredCheck{CheckResult: result}
-		if yes, lnumdiff := df.InDiff(result.Path, result.Lnum); yes {
+		if yes, diffline := df.InDiff(result.Path, result.Lnum); yes {
 			check.InDiff = true
-			check.LnumDiff = lnumdiff
+			if diffline != nil {
+				check.LnumDiff = diffline.LnumDiff
+			}
 		}
 		result.Path = CleanPath(result.Path, cwd)
+		check.OldPath, check.OldLine = getOldPosition(diff, strip, result.Path, result.Lnum)
 		checks = append(checks, check)
 	}
 	return checks
@@ -47,4 +52,27 @@ func CleanPath(path, workdir string) string {
 		return ""
 	}
 	return filepath.ToSlash(p)
+}
+
+func getOldPosition(filediffs []*diff.FileDiff, strip int, newPath string, newLine int) (oldPath string, oldLine int) {
+	for _, filediff := range filediffs {
+		if difffilter.NormalizeDiffPath(filediff.PathNew, strip) != newPath {
+			continue
+		}
+		oldPath = difffilter.NormalizeDiffPath(filediff.PathOld, strip)
+		delta := 0
+		for _, hunk := range filediff.Hunks {
+			if newLine < hunk.StartLineNew {
+				break
+			}
+			delta += hunk.LineLengthOld - hunk.LineLengthNew
+			for _, line := range hunk.Lines {
+				if line.LnumNew == newLine {
+					return oldPath, line.LnumOld
+				}
+			}
+		}
+		return oldPath, newLine + delta
+	}
+	return "", 0
 }
