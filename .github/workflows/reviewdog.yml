@@ -122,6 +122,13 @@ jobs:
         run: |
           golint | reviewdog -f=golint -name=golint-pr-check-filter-mode-file -reporter=github-pr-check -filter-mode=file -level=warning
 
+      - name: Run reviewdog (github-pr-review -filter-mode=nofilter)
+        env:
+          REVIEWDOG_GITHUB_API_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          cd ./_testdata/ && golint ./... | reviewdog -f=golint -name=golint-pr-review-nofilter -reporter=github-pr-review -filter-mode=nofilter -fail-on-error || EXIT_CODE=$?
+          test ${EXIT_CODE} = 1
+
   golangci-lint:
     if: github.event_name == 'pull_request'
     name: runner / golangci-lint
