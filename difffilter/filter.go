@@ -1,6 +1,7 @@
 package difffilter
 
 import (
+	"fmt"
 	"path/filepath"
 	"strings"
 
@@ -12,25 +13,30 @@ import (
 type Mode int
 
 const (
-	// ModeDiffContext represents filtering by diff context.
-	ModeDiffContext Mode = iota
+	// ModeDefault represents default mode, which means users doesn't specify
+	// filter-mode. The behavior can be changed depending on reporters/context
+	// later if we want. Basically, it's same as ModeAdded because it's most safe
+	// and basic mode for reporters implementation.
+	ModeDefault Mode = iota
 	// ModeAdded represents filtering by added/changed diff lines.
 	ModeAdded
+	// ModeDiffContext represents filtering by diff context.
+	// i.e. changed lines +-N lines (e.g. N=3 for default git diff).
+	ModeDiffContext
 	// ModeFile represents filtering by changed files.
-	// Note that this mode doesn't work with github-pr-review reporter due to GitHUb API
-	// limiation.
 	ModeFile
 )
 
 // String implements the flag.Value interface
 func (mode *Mode) String() string {
 	names := [...]string{
-		"diff_context",
+		"default",
 		"added",
+		"diff_context",
 		"file",
 	}
-	if *mode < ModeDiffContext || *mode > ModeFile {
-		return "Unknown"
+	if *mode < ModeDefault || *mode > ModeFile {
+		return "Unknown mode"
 	}
 
 	return names[*mode]
@@ -39,14 +45,16 @@ func (mode *Mode) String() string {
 // Set implements the flag.Value interface
 func (mode *Mode) Set(value string) error {
 	switch value {
-	case "diff_context":
-		*mode = ModeDiffContext
+	case "default", "":
+		*mode = ModeDefault
 	case "added":
 		*mode = ModeAdded
+	case "diff_context":
+		*mode = ModeDiffContext
 	case "file":
 		*mode = ModeFile
 	default:
-		*mode = ModeDiffContext
+		return fmt.Errorf("invalid mode name: %s", value)
 	}
 	return nil
 }
@@ -124,7 +132,7 @@ func (df *DiffFilter) isSignificantLine(line *diff.Line) bool {
 	switch df.mode {
 	case ModeDiffContext, ModeFile:
 		return true // any lines in diff are significant.
-	case ModeAdded:
+	case ModeAdded, ModeDefault:
 		return line.Type == diff.LineAdded
 	}
 	return false
