@@ -14,9 +14,9 @@ func TestUnifiedCommentWriter_Post(t *testing.T) {
 	}{
 		{
 			in: &Comment{
-				CheckResult: &CheckResult{
+				Result: &FilteredCheck{CheckResult: &CheckResult{
 					Path: "/path/to/file",
-				},
+				}},
 				ToolName: "tool name",
 				Body:     "message",
 			},
@@ -24,10 +24,10 @@ func TestUnifiedCommentWriter_Post(t *testing.T) {
 		},
 		{
 			in: &Comment{
-				CheckResult: &CheckResult{
+				Result: &FilteredCheck{CheckResult: &CheckResult{
 					Path: "/path/to/file",
 					Col:  14,
-				},
+				}},
 				ToolName: "tool name",
 				Body:     "message",
 			},
@@ -35,10 +35,10 @@ func TestUnifiedCommentWriter_Post(t *testing.T) {
 		},
 		{
 			in: &Comment{
-				CheckResult: &CheckResult{
+				Result: &FilteredCheck{CheckResult: &CheckResult{
 					Path: "/path/to/file",
 					Lnum: 14,
-				},
+				}},
 				ToolName: "tool name",
 				Body:     "message",
 			},
@@ -46,11 +46,11 @@ func TestUnifiedCommentWriter_Post(t *testing.T) {
 		},
 		{
 			in: &Comment{
-				CheckResult: &CheckResult{
+				Result: &FilteredCheck{CheckResult: &CheckResult{
 					Path: "/path/to/file",
 					Lnum: 14,
 					Col:  7,
-				},
+				}},
 				ToolName: "tool name",
 				Body:     "line1\nline2",
 			},

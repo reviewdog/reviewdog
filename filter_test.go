@@ -68,6 +68,7 @@ func TestFilterCheckByAddedLines(t *testing.T) {
 				Lnum: 1,
 			},
 			ShouldReport: false,
+			InDiffFile:   true,
 			OldPath:      "sample.old.txt",
 			OldLine:      1,
 		},
@@ -77,6 +78,7 @@ func TestFilterCheckByAddedLines(t *testing.T) {
 				Lnum: 2,
 			},
 			ShouldReport: true,
+			InDiffFile:   true,
 			LnumDiff:     3,
 			OldPath:      "sample.old.txt",
 			OldLine:      0,
@@ -87,6 +89,7 @@ func TestFilterCheckByAddedLines(t *testing.T) {
 				Lnum: 1,
 			},
 			ShouldReport: false,
+			InDiffFile:   true,
 			OldPath:      "nonewline.old.txt",
 			OldLine:      1,
 		},
@@ -96,6 +99,7 @@ func TestFilterCheckByAddedLines(t *testing.T) {
 				Lnum: 3,
 			},
 			ShouldReport: true,
+			InDiffFile:   true,
 			LnumDiff:     5,
 			OldPath:      "nonewline.old.txt",
 			OldLine:      0,
@@ -131,6 +135,7 @@ func TestFilterCheckByDiffContext(t *testing.T) {
 				Lnum: 1,
 			},
 			ShouldReport: true,
+			InDiffFile:   true,
 			LnumDiff:     1,
 			OldPath:      "sample.old.txt",
 			OldLine:      1,
@@ -141,6 +146,7 @@ func TestFilterCheckByDiffContext(t *testing.T) {
 				Lnum: 2,
 			},
 			ShouldReport: true,
+			InDiffFile:   true,
 			LnumDiff:     3,
 			OldPath:      "sample.old.txt",
 			OldLine:      0,
@@ -151,6 +157,7 @@ func TestFilterCheckByDiffContext(t *testing.T) {
 				Lnum: 3,
 			},
 			ShouldReport: true,
+			InDiffFile:   true,
 			LnumDiff:     4,
 			OldPath:      "sample.old.txt",
 			OldLine:      0,
@@ -161,6 +168,15 @@ func TestFilterCheckByDiffContext(t *testing.T) {
 	if diff := cmp.Diff(got, want); diff != "" {
 		t.Error(diff)
 	}
+}
+
+func findFileDiff(filediffs []*diff.FileDiff, path string, strip int) *diff.FileDiff {
+	for _, file := range filediffs {
+		if difffilter.NormalizeDiffPath(file.PathNew, strip) == path {
+			return file
+		}
+	}
+	return nil
 }
 
 func TestGetOldPosition(t *testing.T) {
@@ -204,7 +220,8 @@ func TestGetOldPosition(t *testing.T) {
 		},
 	}
 	for _, tt := range tests {
-		gotPath, gotLine := getOldPosition(filediffs, strip, tt.newPath, tt.newLine)
+		fdiff := findFileDiff(filediffs, tt.newPath, strip)
+		gotPath, gotLine := getOldPosition(fdiff, strip, tt.newPath, tt.newLine)
 		if !(gotPath == tt.wantOldPath && gotLine == tt.wantOldLine) {
 			t.Errorf("getOldPosition(..., %s, %d) = (%s, %d), want (%s, %d)",
 				tt.newPath, tt.newLine, gotPath, gotLine, tt.wantOldPath, tt.wantOldLine)
@@ -215,7 +232,9 @@ func TestGetOldPosition(t *testing.T) {
 func TestGetOldPosition_added(t *testing.T) {
 	const strip = 1
 	filediffs, _ := diff.ParseMultiFile(strings.NewReader(diffContentAddedStrip))
-	gotPath, _ := getOldPosition(filediffs, strip, "test_added.go", 1)
+	path := "test_added.go"
+	fdiff := findFileDiff(filediffs, path, strip)
+	gotPath, _ := getOldPosition(fdiff, strip, path, 1)
 	if gotPath != "" {
 		t.Errorf("got %q as old path for addedd diff file, want empty", gotPath)
 	}

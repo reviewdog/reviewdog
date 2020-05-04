@@ -20,7 +20,7 @@ func NewRawCommentWriter(w io.Writer) *RawCommentWriter {
 }
 
 func (s *RawCommentWriter) Post(_ context.Context, c *Comment) error {
-	_, err := fmt.Fprintln(s.w, strings.Join(c.CheckResult.Lines, "\n"))
+	_, err := fmt.Fprintln(s.w, strings.Join(c.Result.Lines, "\n"))
 	return err
 }
 
@@ -43,11 +43,11 @@ func NewUnifiedCommentWriter(w io.Writer) *UnifiedCommentWriter {
 }
 
 func (mc *UnifiedCommentWriter) Post(_ context.Context, c *Comment) error {
-	s := c.Path
-	if c.Lnum > 0 {
-		s += fmt.Sprintf(":%d", c.Lnum)
-		if c.Col > 0 {
-			s += fmt.Sprintf(":%d", c.Col)
+	s := c.Result.Path
+	if c.Result.Lnum > 0 {
+		s += fmt.Sprintf(":%d", c.Result.Lnum)
+		if c.Result.Col > 0 {
+			s += fmt.Sprintf(":%d", c.Result.Col)
 		}
 	}
 	s += fmt.Sprintf(": [%s] %s", c.ToolName, c.Body)

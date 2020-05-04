@@ -77,10 +77,14 @@ type DiffFilter struct {
 	mode  Mode
 
 	difflines difflines
+	difffiles difffiles
 }
 
-// difflines is a hash table of normalizedPath to line number to diff.Line.
+// difflines is a hash table of normalizedPath to line number to *diff.Line.
 type difflines map[normalizedPath]map[int]*diff.Line
+
+// difffiles is a hash table of normalizedPath to *diff.FileDiff.
+type difffiles map[normalizedPath]*diff.FileDiff
 
 // New creates a new DiffFilter.
 func New(diff []*diff.FileDiff, strip int, cwd string, mode Mode) *DiffFilter {
@@ -89,6 +93,7 @@ func New(diff []*diff.FileDiff, strip int, cwd string, mode Mode) *DiffFilter {
 		cwd:       cwd,
 		mode:      mode,
 		difflines: make(difflines),
+		difffiles: make(difffiles),
 	}
 	// If cwd is empty, projectRelPath should not have any meaningful data too.
 	if cwd != "" {
@@ -101,13 +106,14 @@ func New(diff []*diff.FileDiff, strip int, cwd string, mode Mode) *DiffFilter {
 func (df *DiffFilter) addDiff(filediffs []*diff.FileDiff) {
 	for _, filediff := range filediffs {
 		path := df.normalizeDiffPath(filediff)
+		df.difffiles[path] = filediff
 		lines, ok := df.difflines[path]
 		if !ok {
 			lines = make(map[int]*diff.Line)
 		}
 		for _, hunk := range filediff.Hunks {
 			for _, line := range hunk.Lines {
-				if df.isSignificantLine(line) {
+				if line.LnumNew > 0 && df.isSignificantLine(line) {
 					lines[line.LnumNew] = line
 				}
 			}
@@ -117,17 +123,19 @@ func (df *DiffFilter) addDiff(filediffs []*diff.FileDiff) {
 }
 
 // ShouldReport returns true, if the given path should be reported depending on
-// the filter Mode. It also optionally return diff line.
-func (df *DiffFilter) ShouldReport(path string, lnum int) (bool, *diff.Line) {
-	lines, ok := df.difflines[df.normalizePath(path)]
+// the filter Mode. It also optionally return diff file/line.
+func (df *DiffFilter) ShouldReport(path string, lnum int) (bool, *diff.FileDiff, *diff.Line) {
+	npath := df.normalizePath(path)
+	file := df.difffiles[npath]
+	lines, ok := df.difflines[npath]
 	if !ok {
-		return (df.mode == ModeNoFilter), nil
+		return (df.mode == ModeNoFilter), file, nil
 	}
 	line, ok := lines[lnum]
 	if !ok {
-		return (df.mode == ModeNoFilter || df.mode == ModeFile), nil
+		return (df.mode == ModeNoFilter || df.mode == ModeFile), file, nil
 	}
-	return true, line
+	return true, file, line
 }
 
 func (df *DiffFilter) isSignificantLine(line *diff.Line) bool {

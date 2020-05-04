@@ -32,7 +32,7 @@ func (lw *GitHubActionLogWriter) Post(_ context.Context, c *reviewdog.Comment) e
 	if lw.reportNum == MaxLoggingAnnotationsPerStep {
 		WarnTooManyAnnotationOnce()
 	}
-	ReportAsGitHubActionsLog(c.ToolName, lw.level, c.CheckResult)
+	ReportAsGitHubActionsLog(c.ToolName, lw.level, c.Result.CheckResult)
 	return nil
 }
 

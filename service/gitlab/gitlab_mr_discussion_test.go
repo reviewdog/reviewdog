@@ -21,41 +21,43 @@ func TestGitLabMergeRequestDiscussionCommenter_Post_Flush_review_api(t *testing.
 	os.Chdir("../..")
 
 	alreadyCommented1 := &reviewdog.Comment{
-		CheckResult: &reviewdog.CheckResult{
+		Result: &reviewdog.FilteredCheck{CheckResult: &reviewdog.CheckResult{
 			Path: "file.go",
 			Lnum: 1,
-		},
+		}},
 		Body: "already commented",
 	}
 	alreadyCommented2 := &reviewdog.Comment{
-		CheckResult: &reviewdog.CheckResult{
+		Result: &reviewdog.FilteredCheck{CheckResult: &reviewdog.CheckResult{
 			Path: "another/file.go",
 			Lnum: 14,
-		},
+		}},
 		Body: "already commented 2",
 	}
 	newComment1 := &reviewdog.Comment{
-		CheckResult: &reviewdog.CheckResult{
+		Result: &reviewdog.FilteredCheck{CheckResult: &reviewdog.CheckResult{
 			Path: "file.go",
 			Lnum: 14,
-		},
+		}},
 		Body: "new comment",
 	}
 	newComment2 := &reviewdog.Comment{
-		CheckResult: &reviewdog.CheckResult{
+		Result: &reviewdog.FilteredCheck{CheckResult: &reviewdog.CheckResult{
 			Path: "file2.go",
 			Lnum: 15,
-		},
+		}},
 		Body: "new comment 2",
 	}
 	newComment3 := &reviewdog.Comment{
-		CheckResult: &reviewdog.CheckResult{
-			Path: "new_file.go",
-			Lnum: 14,
+		Result: &reviewdog.FilteredCheck{
+			CheckResult: &reviewdog.CheckResult{
+				Path: "new_file.go",
+				Lnum: 14,
+			},
+			OldPath: "old_file.go",
+			OldLine: 7,
 		},
-		Body:    "new comment 3",
-		OldPath: "old_file.go",
-		OldLine: 7,
+		Body: "new comment 3",
 	}
 
 	comments := []*reviewdog.Comment{
@@ -78,8 +80,8 @@ func TestGitLabMergeRequestDiscussionCommenter_Post_Flush_review_api(t *testing.
 							{
 								Body: commentutil.CommentBody(alreadyCommented1),
 								Position: &gitlab.NotePosition{
-									NewPath: alreadyCommented1.Path,
-									NewLine: alreadyCommented1.Lnum,
+									NewPath: alreadyCommented1.Result.Path,
+									NewLine: alreadyCommented1.Result.Lnum,
 								},
 							},
 							{
@@ -103,8 +105,8 @@ func TestGitLabMergeRequestDiscussionCommenter_Post_Flush_review_api(t *testing.
 							{
 								Body: commentutil.CommentBody(alreadyCommented2),
 								Position: &gitlab.NotePosition{
-									NewPath: alreadyCommented2.Path,
-									NewLine: alreadyCommented2.Lnum,
+									NewPath: alreadyCommented2.Result.Path,
+									NewLine: alreadyCommented2.Result.Lnum,
 								},
 							},
 						},
