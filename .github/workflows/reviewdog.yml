@@ -107,7 +107,7 @@ jobs:
           echo 'var LocalTest = 14' >> ./_testdata/golint.go
           cd ./_testdata/ && golint ./... | reviewdog -f=golint -diff="git diff" -fail-on-error || EXIT_CODE=$?
           git reset --hard @
-          test ${EXIT_CODE} = 1
+          test "${EXIT_CODE}" = 1
 
       - name: Run reviewdog (github-pr-check with fail-on-error)
         continue-on-error: true
@@ -127,7 +127,7 @@ jobs:
           REVIEWDOG_GITHUB_API_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         run: |
           cd ./_testdata/ && golint ./... | reviewdog -f=golint -name=golint-pr-review-nofilter -reporter=github-pr-review -filter-mode=nofilter -fail-on-error || EXIT_CODE=$?
-          test ${EXIT_CODE} = 1
+          test "${EXIT_CODE}" = 1
 
   golangci-lint:
     if: github.event_name == 'pull_request'
