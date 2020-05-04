@@ -94,14 +94,14 @@ func TestGitLabMergeRequestCommitCommenter_Post_Flush_review_api(t *testing.T) {
 			Result: &reviewdog.FilteredCheck{CheckResult: &reviewdog.CheckResult{
 				Path: "notExistFile.go",
 				Lnum: 1,
-			}},
+			}, InDiffFile: true},
 			Body: "already commented",
 		},
 		{
 			Result: &reviewdog.FilteredCheck{CheckResult: &reviewdog.CheckResult{
 				Path: "notExistFile.go",
 				Lnum: 14,
-			}},
+			}, InDiffFile: true},
 			Body: "new comment",
 		},
 	}

@@ -24,28 +24,28 @@ func TestGitLabMergeRequestDiscussionCommenter_Post_Flush_review_api(t *testing.
 		Result: &reviewdog.FilteredCheck{CheckResult: &reviewdog.CheckResult{
 			Path: "file.go",
 			Lnum: 1,
-		}},
+		}, InDiffFile: true},
 		Body: "already commented",
 	}
 	alreadyCommented2 := &reviewdog.Comment{
 		Result: &reviewdog.FilteredCheck{CheckResult: &reviewdog.CheckResult{
 			Path: "another/file.go",
 			Lnum: 14,
-		}},
+		}, InDiffFile: true},
 		Body: "already commented 2",
 	}
 	newComment1 := &reviewdog.Comment{
 		Result: &reviewdog.FilteredCheck{CheckResult: &reviewdog.CheckResult{
 			Path: "file.go",
 			Lnum: 14,
-		}},
+		}, InDiffFile: true},
 		Body: "new comment",
 	}
 	newComment2 := &reviewdog.Comment{
 		Result: &reviewdog.FilteredCheck{CheckResult: &reviewdog.CheckResult{
 			Path: "file2.go",
 			Lnum: 15,
-		}},
+		}, InDiffFile: true},
 		Body: "new comment 2",
 	}
 	newComment3 := &reviewdog.Comment{
@@ -54,10 +54,18 @@ func TestGitLabMergeRequestDiscussionCommenter_Post_Flush_review_api(t *testing.
 				Path: "new_file.go",
 				Lnum: 14,
 			},
-			OldPath: "old_file.go",
-			OldLine: 7,
+			OldPath:    "old_file.go",
+			OldLine:    7,
+			InDiffFile: true,
 		},
 		Body: "new comment 3",
+	}
+	commentOutsideDiff := &reviewdog.Comment{
+		Result: &reviewdog.FilteredCheck{CheckResult: &reviewdog.CheckResult{
+			Path: "path.go",
+			Lnum: 14,
+		}, InDiffFile: false},
+		Body: "comment outside diff",
 	}
 
 	comments := []*reviewdog.Comment{
@@ -66,7 +74,10 @@ func TestGitLabMergeRequestDiscussionCommenter_Post_Flush_review_api(t *testing.
 		newComment1,
 		newComment2,
 		newComment3,
+		commentOutsideDiff,
 	}
+	postCalled := 0
+	wantPostCalled := 3
 
 	mux := http.NewServeMux()
 	mux.HandleFunc("/api/v4/projects/o/r/merge_requests/14/discussions", func(w http.ResponseWriter, r *http.Request) {
@@ -118,6 +129,7 @@ func TestGitLabMergeRequestDiscussionCommenter_Post_Flush_review_api(t *testing.
 			}
 
 		case http.MethodPost:
+			postCalled++
 			got := new(gitlab.CreateMergeRequestDiscussionOptions)
 			if err := json.NewDecoder(r.Body).Decode(got); err != nil {
 				t.Error(err)
@@ -196,5 +208,8 @@ func TestGitLabMergeRequestDiscussionCommenter_Post_Flush_review_api(t *testing.
 	}
 	if err := g.Flush(context.Background()); err != nil {
 		t.Errorf("%v", err)
+	}
+	if postCalled != wantPostCalled {
+		t.Errorf("%d discussions posted, but want %d", postCalled, wantPostCalled)
 	}
 }
