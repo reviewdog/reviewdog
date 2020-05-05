@@ -72,6 +72,7 @@ by diff.
   * [Common (Jenkins, local, etc...)](#common-jenkins-local-etc)
     + [Jenkins with Github pull request builder plugin](#jenkins-with-github-pull-request-builder-plugin)
 - [Exit codes](#exit-codes)
+- [Filter mode](#filter-mode)
 - [Articles](#articles)
 
 [![github-pr-check sample](https://user-images.githubusercontent.com/3797062/40884858-6efd82a0-6756-11e8-9f1a-c6af4f920fb0.png)](https://github.com/reviewdog/reviewdog/pull/131/checks)
@@ -669,6 +670,46 @@ This can be helpful when you are using it as a step in your CI pipeline and want
 
 See also `-level` flag for [github-pr-check/github-check](#reporter-github-checks--reportergithub-pr-check) reporters.
 reviewdog will exit with `1` if reported check status is `failure` as well if `-fail-on-error=true`.
+
+## Filter mode
+reviewdog filter results by diff and you can control how reviewdog filter results by `-filter-mode` flag.
+Available filter modes are as below.
+
+### `added` (default)
+Filter results by added/modified lines.
+### `diff_context`
+Filter results by diff context. i.e. changed lines +-N lines (N=3 for example).
+### `file`
+Filter results by added/modified file. i.e. reviewdog will report results as long as they are in added/modified file even if the results are not in actual diff.
+### `nofilter`
+Do not filter any results. Useful for posting results as comments as much as possible and check other results in console at the same time.
+
+`-fail-on-error` also works with any filter-mode and can catch all results from any linters with `nofilter` mode.
+
+Example:
+```shell
+$ reviewdog -reporter=github-pr-review -filter-mode=nofilter -fail-on-error
+```
+
+### Filter Mode Support Table
+Note that not all reporters provide full suppport of filter mode due to API limitation.
+e.g. `github-pr-review` reporter uses [GitHub Review
+API](https://developer.github.com/v3/pulls/reviews/) but it doesn't support posting comment outside diff (`diff_context`),
+so reviewdog will use [Check annotation](https://developer.github.com/v3/checks/runs/) as fallback to post those comments [1]. 
+
+| `-reporter` \ `-filter-mode` | `added` | `diff_context` | `file`                  | `nofilter` |
+| ---------------------------- | ------- | -------------- | ----------------------- | ---------- |
+| **`local`**                  | OK      | OK             | OK                      | OK |
+| **`github-check`**           | OK      | OK             | OK                      | OK |
+| **`github-pr-check`**        | OK      | OK             | OK                      | OK |
+| **`github-pr-review`**       | OK      | OK             | Partially Supported [1] | Partially Supported [1] |
+| **`gitlab-mr-discussion`**   | OK      | OK             | OK                      | Partially Supported [2] |
+| **`gitlab-mr-commit`**       | OK      | OK? [3]        | OK? [3]                 | Partially Supported? [2][3] |
+| **`gerrit-change-review`**   | OK      | OK? [3]        | OK? [3]                 | Partially Supported? [2][3] |
+
+- [1] Report results which is outside diff context with Check annotation as fallback if it's running in GitHub actions instead of Review API (comments). All results will be reported to console as well.
+- [2] Report results which is outside diff file to console.
+- [3] It should work, but not verified yet.
 
 ## Articles
 - [reviewdog — A code review dog who keeps your codebase healthy ](https://medium.com/@haya14busa/reviewdog-a-code-review-dog-who-keeps-your-codebase-healthy-d957c471938b)
