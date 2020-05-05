@@ -45,7 +45,7 @@ func runDoghouse(ctx context.Context, r io.Reader, w io.Writer, opt *option, isP
 	if err != nil {
 		return err
 	}
-	if foundResultInDiff := reportResults(w, filteredResultSet); foundResultInDiff {
+	if foundResultShouldReport := reportResults(w, filteredResultSet); foundResultShouldReport {
 		return errors.New("found at least one result in diff")
 	}
 	return nil
@@ -220,7 +220,7 @@ report results via logging command [1].
 		foundResultPerName := false
 		filteredNum := 0
 		for _, result := range results.FilteredCheck {
-			if !result.InDiff {
+			if !result.ShouldReport {
 				filteredNum++
 				continue
 			}

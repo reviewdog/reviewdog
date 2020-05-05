@@ -79,7 +79,7 @@ func (ch *Checker) postCheck(ctx context.Context, checkID int64, checks []*revie
 	filterByDiff := ch.req.PullRequest != 0 && !ch.req.OutsideDiff
 	var annotations []*github.CheckRunAnnotation
 	for _, c := range checks {
-		if !c.InDiff && filterByDiff {
+		if !c.ShouldReport && filterByDiff {
 			continue
 		}
 		annotations = append(annotations, ch.toCheckRunAnnotation(c))
@@ -181,7 +181,7 @@ func (ch *Checker) summary(checks []*reviewdog.FilteredCheck) string {
 	var findings []*reviewdog.FilteredCheck
 	var filteredFindings []*reviewdog.FilteredCheck
 	for _, c := range checks {
-		if c.InDiff {
+		if c.ShouldReport {
 			findings = append(findings, c)
 		} else {
 			filteredFindings = append(filteredFindings, c)

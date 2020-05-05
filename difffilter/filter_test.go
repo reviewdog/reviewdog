@@ -20,6 +20,7 @@ func TestMode_Set(t *testing.T) {
 		{value: "added", want: ModeAdded},
 		{value: "diff_context", want: ModeDiffContext},
 		{value: "file", want: ModeFile},
+		{value: "nofilter", want: ModeNoFilter},
 		{value: "unknown", wantErr: true},
 	}
 	for _, tt := range tests {
@@ -109,60 +110,112 @@ func TestDiffFilter_root(t *testing.T) {
 		lnum         int
 		mode         Mode
 		want         bool
-		wantLnumDiff int
+		wantFileDiff bool
+		wantLineDiff bool
 	}{
 		{
 			path:         "sample.new.txt",
 			lnum:         2,
 			mode:         ModeAdded,
 			want:         true,
-			wantLnumDiff: 3,
+			wantFileDiff: true,
+			wantLineDiff: true,
 		},
 		{
 			path:         filepath.Join(getCwd(), "sample.new.txt"),
 			lnum:         2,
 			mode:         ModeAdded,
 			want:         true,
-			wantLnumDiff: 3,
+			wantFileDiff: true,
+			wantLineDiff: true,
 		},
 		{
 			path:         "sample.new.txt",
 			lnum:         1,
 			mode:         ModeAdded,
 			want:         false,
-			wantLnumDiff: 0,
+			wantFileDiff: true,
+			wantLineDiff: false,
 		},
 		{
 			path:         "sample.new.txt",
 			lnum:         1,
 			mode:         ModeDiffContext,
 			want:         true,
-			wantLnumDiff: 1,
+			wantFileDiff: true,
+			wantLineDiff: true,
 		},
 		{
 			path:         "subdir/nonewline.new.txt",
 			lnum:         3,
 			mode:         ModeAdded,
 			want:         true,
-			wantLnumDiff: 3,
+			wantFileDiff: true,
+			wantLineDiff: true,
 		},
 		{
 			path:         "sample.new.txt",
 			lnum:         14,
 			mode:         ModeFile,
 			want:         true,
-			wantLnumDiff: 0,
+			wantFileDiff: true,
+			wantLineDiff: false,
+		},
+		{
+			path:         "sample.new.txt",
+			lnum:         0, // Only file path.
+			mode:         ModeFile,
+			want:         true,
+			wantFileDiff: true,
+			wantLineDiff: false,
+		},
+		{
+			path:         "sample.new.txt",
+			lnum:         0, // Only file path.
+			mode:         ModeAdded,
+			want:         false,
+			wantFileDiff: true,
+			wantLineDiff: false,
+		},
+		{
+			path:         "sample.new.txt",
+			lnum:         2,
+			mode:         ModeNoFilter,
+			want:         true,
+			wantFileDiff: true,
+			wantLineDiff: true,
+		},
+		{
+			path:         "sample.new.txt",
+			lnum:         2,
+			mode:         ModeNoFilter,
+			want:         true,
+			wantFileDiff: true,
+			wantLineDiff: true, // ModeNoFilter returns linediff if possible.
+		},
+		{
+			path:         "any_path_with_any_line.txt",
+			lnum:         141414,
+			mode:         ModeNoFilter,
+			want:         true,
+			wantFileDiff: false,
+			wantLineDiff: false,
+		},
+		{
+			path:         "any_path_only.txt",
+			mode:         ModeNoFilter,
+			want:         true,
+			wantFileDiff: false,
+			wantLineDiff: false,
 		},
 	}
 	for _, tt := range tests {
 		df := New(files, 1, getCwd(), tt.mode)
-		if got, gotLine := df.InDiff(tt.path, tt.lnum); got != tt.want {
-			gotLnumDiff := 0
-			if gotLine != nil {
-				gotLnumDiff = gotLine.LnumDiff
-			}
-			t.Errorf("InDiff(%q, %d) = (%v, %d), want (%v, %d)",
-				tt.path, tt.lnum, got, gotLnumDiff, tt.want, tt.wantLnumDiff)
+		if got, gotFile, gotLine := df.ShouldReport(tt.path, tt.lnum); got != tt.want ||
+			(gotFile != nil) != tt.wantFileDiff ||
+			(gotLine != nil) != tt.wantLineDiff {
+			t.Errorf("[%s] ShouldReport(%q, %d) = (%v, %t, %t), want (%v, %t, %t)",
+				tt.mode.String(), tt.path, tt.lnum, got, gotFile != nil, gotLine != nil, tt.want, tt.wantFileDiff, tt.wantLineDiff)
 		}
 	}
 }
@@ -177,46 +230,49 @@ func TestDiffFilter_subdir(t *testing.T) {
 		lnum         int
 		mode         Mode
 		want         bool
-		wantLnumDiff int
+		wantLineDiff bool
+		wantFileDiff bool
 	}{
 		{
 			path:         "sample.new.txt",
 			lnum:         2,
 			mode:         ModeAdded,
 			want:         true,
-			wantLnumDiff: 3,
+			wantFileDiff: true,
+			wantLineDiff: true,
 		},
 		{
 			path:         "sample.new.txt",
 			lnum:         2,
 			mode:         ModeDefault,
 			want:         true,
-			wantLnumDiff: 3,
+			wantFileDiff: true,
+			wantLineDiff: true,
 		},
 		{
 			path:         filepath.Join(getCwd(), "sample.new.txt"),
 			lnum:         2,
 			mode:         ModeAdded,
 			want:         true,
-			wantLnumDiff: 3,
+			wantFileDiff: true,
+			wantLineDiff: true,
 		},
 		{
 			path:         "sample.new.txt",
 			lnum:         5,
 			mode:         ModeAdded,
 			want:         false,
-			wantLnumDiff: 0,
+			wantFileDiff: true,
+			wantLineDiff: false,
 		},
 	}
 	for _, tt := range tests {
 		df := New(files, 1, getCwd(), tt.mode)
-		if got, gotLine := df.InDiff(tt.path, tt.lnum); got != tt.want {
-			gotLnumDiff := 0
-			if gotLine != nil {
-				gotLnumDiff = gotLine.LnumDiff
-			}
-			t.Errorf("InDiff(%q, %d) = (%v, %d), want (%v, %d)",
-				tt.path, tt.lnum, got, gotLnumDiff, tt.want, tt.wantLnumDiff)
+		if got, gotFile, gotLine := df.ShouldReport(tt.path, tt.lnum); got != tt.want ||
+			(gotFile != nil) != tt.wantFileDiff ||
+			(gotLine != nil) != tt.wantLineDiff {
+			t.Errorf("ShouldReport(%q, %d) = (%v, %t, %t), want (%v, %t, %t)",
+				tt.path, tt.lnum, got, gotFile != nil, gotLine != nil, tt.want, tt.wantFileDiff, tt.wantLineDiff)
 		}
 	}
 }

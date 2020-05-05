@@ -14,7 +14,7 @@ func TestMultiCommentService_Post(t *testing.T) {
 
 	const want = "line1\nline2"
 
-	c := &Comment{CheckResult: &CheckResult{Lines: strings.Split(want, "\n")}}
+	c := &Comment{Result: &FilteredCheck{CheckResult: &CheckResult{Lines: strings.Split(want, "\n")}}}
 	if err := w.Post(context.Background(), c); err != nil {
 		t.Fatal(err)
 	}

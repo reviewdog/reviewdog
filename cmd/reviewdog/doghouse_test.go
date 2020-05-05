@@ -397,13 +397,13 @@ func TestReportResults(t *testing.T) {
 				CheckResult: &reviewdog.CheckResult{
 					Lines: []string{"name1-L1", "name1-L2"},
 				},
-				InDiff: true,
+				ShouldReport: true,
 			},
 			{
 				CheckResult: &reviewdog.CheckResult{
 					Lines: []string{"name1.2-L1", "name1.2-L2"},
 				},
-				InDiff: false,
+				ShouldReport: false,
 			},
 		},
 	})
@@ -413,14 +413,14 @@ func TestReportResults(t *testing.T) {
 				CheckResult: &reviewdog.CheckResult{
 					Lines: []string{"name1-L1", "name1-L2"},
 				},
-				InDiff: false,
+				ShouldReport: false,
 			},
 		},
 	})
 	stdout := new(bytes.Buffer)
-	foundResultInDiff := reportResults(stdout, filteredResultSet)
-	if !foundResultInDiff {
-		t.Errorf("foundResultInDiff = %v, want true", foundResultInDiff)
+	foundResultShouldReport := reportResults(stdout, filteredResultSet)
+	if !foundResultShouldReport {
+		t.Errorf("foundResultShouldReport = %v, want true", foundResultShouldReport)
 	}
 	want := `reviewdog: Reporting results for "name1"
 name1-L1
@@ -446,7 +446,7 @@ func TestReportResults_inGitHubAction(t *testing.T) {
 				CheckResult: &reviewdog.CheckResult{
 					Lines: []string{"name1-L1", "name1-L2"},
 				},
-				InDiff: true,
+				ShouldReport: true,
 			},
 		},
 	})
@@ -459,7 +459,7 @@ func TestReportResults_inGitHubAction(t *testing.T) {
 	}
 }
 
-func TestReportResults_noResultsInDiff(t *testing.T) {
+func TestReportResults_noResultsShouldReport(t *testing.T) {
 	cleanup := setupEnvs(map[string]string{
 		"GITHUB_ACTION":     "",
 		"GITHUB_EVENT_PATH": "",
@@ -472,13 +472,13 @@ func TestReportResults_noResultsInDiff(t *testing.T) {
 				CheckResult: &reviewdog.CheckResult{
 					Lines: []string{"name1-L1", "name1-L2"},
 				},
-				InDiff: false,
+				ShouldReport: false,
 			},
 			{
 				CheckResult: &reviewdog.CheckResult{
 					Lines: []string{"name1.2-L1", "name1.2-L2"},
 				},
-				InDiff: false,
+				ShouldReport: false,
 			},
 		},
 	})
@@ -488,14 +488,14 @@ func TestReportResults_noResultsInDiff(t *testing.T) {
 				CheckResult: &reviewdog.CheckResult{
 					Lines: []string{"name1-L1", "name1-L2"},
 				},
-				InDiff: false,
+				ShouldReport: false,
 			},
 		},
 	})
 	stdout := new(bytes.Buffer)
-	foundResultInDiff := reportResults(stdout, filteredResultSet)
-	if foundResultInDiff {
-		t.Errorf("foundResultInDiff = %v, want false", foundResultInDiff)
+	foundResultShouldReport := reportResults(stdout, filteredResultSet)
+	if foundResultShouldReport {
+		t.Errorf("foundResultShouldReport = %v, want false", foundResultShouldReport)
 	}
 	want := `reviewdog: Reporting results for "name1"
 reviewdog: No results found for "name1". 2 results found outside diff.

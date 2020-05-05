@@ -10,6 +10,7 @@ import (
 	"github.com/google/go-github/v31/github"
 
 	"github.com/reviewdog/reviewdog"
+	"github.com/reviewdog/reviewdog/cienv"
 	"github.com/reviewdog/reviewdog/service/commentutil"
 	"github.com/reviewdog/reviewdog/service/github/githubutils"
 	"github.com/reviewdog/reviewdog/service/serviceutil"
@@ -61,7 +62,7 @@ func NewGitHubPullRequest(cli *github.Client, owner, repo string, pr int, sha st
 // Post accepts a comment and holds it. Flush method actually posts comments to
 // GitHub in parallel.
 func (g *GitHubPullRequest) Post(_ context.Context, c *reviewdog.Comment) error {
-	c.Path = filepath.ToSlash(filepath.Join(g.wd, c.Path))
+	c.Result.Path = filepath.ToSlash(filepath.Join(g.wd, c.Result.Path))
 	g.muComments.Lock()
 	defer g.muComments.Unlock()
 	g.postComments = append(g.postComments, c)
@@ -83,7 +84,15 @@ func (g *GitHubPullRequest) postAsReviewComment(ctx context.Context) error {
 	comments := make([]*github.DraftReviewComment, 0, len(g.postComments))
 	remaining := make([]*reviewdog.Comment, 0)
 	for _, c := range g.postComments {
-		if g.postedcs.IsPosted(c, c.LnumDiff) {
+		if c.Result.LnumDiff == 0 {
+			// GitHub Review API cannot report results outside diff. If it's running
+			// in GitHub Actions, fallback to GitHub Actions log as report .
+			if cienv.IsInGitHubAction() {
+				githubutils.ReportAsGitHubActionsLog(c.ToolName, "warning", c.Result.CheckResult)
+			}
+			continue
+		}
+		if g.postedcs.IsPosted(c, c.Result.LnumDiff) {
 			continue
 		}
 		// Only posts maxCommentsPerRequest comments per 1 request to avoid spammy
@@ -100,8 +109,8 @@ func (g *GitHubPullRequest) postAsReviewComment(ctx context.Context) error {
 		}
 		cbody := commentutil.CommentBody(c)
 		comments = append(comments, &github.DraftReviewComment{
-			Path:     &c.Path,
-			Position: &c.LnumDiff,
+			Path:     &c.Result.Path,
+			Position: &c.Result.LnumDiff,
 			Body:     &cbody,
 		})
 	}
@@ -110,8 +119,6 @@ func (g *GitHubPullRequest) postAsReviewComment(ctx context.Context) error {
 		return nil
 	}
 
-	// TODO(haya14busa): it might be useful to report overview results by "body"
-	// field.
 	review := &github.PullRequestReviewRequest{
 		CommitID: &g.sha,
 		Event:    github.String("COMMENT"),
@@ -138,7 +145,7 @@ func (g *GitHubPullRequest) remainingCommentsSummary(remaining []*reviewdog.Comm
 		sb.WriteString(fmt.Sprintf("<summary>%s</summary>\n", tool))
 		sb.WriteString("\n")
 		for _, c := range comments {
-			sb.WriteString(githubutils.LinkedMarkdownCheckResult(g.owner, g.repo, g.sha, c.CheckResult))
+			sb.WriteString(githubutils.LinkedMarkdownCheckResult(g.owner, g.repo, g.sha, c.Result.CheckResult))
 			sb.WriteString("\n")
 		}
 		sb.WriteString("</details>\n")

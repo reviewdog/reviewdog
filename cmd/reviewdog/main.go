@@ -74,14 +74,16 @@ const (
 	levelDoc            = `report level currently used for github-pr-check reporter ("info","warning","error").`
 	guessPullRequestDoc = `guess Pull Request ID by branch name and commit SHA`
 	teeDoc              = `enable "tee"-like mode which outputs tools's output as is while reporting results to -reporter. Useful for debugging as well.`
-	filterModeDoc       = `how to filter checks results. [added, diff_context, file].
-    "added" (default)
-        Filter by added/modified diff lines.
-    "diff_context"
-        Filter by diff context, which can include unchanged lines.
-				i.e. changed lines +-N lines (e.g. N=3 for default git diff).
-    "file"
-        Filter by added/modified file.
+	filterModeDoc       = `how to filter checks results. [added, diff_context, file, nofilter].
+		"added" (default)
+			Filter by added/modified diff lines.
+		"diff_context"
+			Filter by diff context, which can include unchanged lines.
+			i.e. changed lines +-N lines (e.g. N=3 for default git diff).
+		"file"
+			Filter by added/modified file.
+		"nofilter"
+			Do not filter any results.
 `
 	reporterDoc = `reporter of reviewdog results. (local, github-check, github-pr-check, github-pr-review, gitlab-mr-discussion, gitlab-mr-commit)
 	"local" (default)

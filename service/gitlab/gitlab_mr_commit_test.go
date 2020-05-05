@@ -91,17 +91,17 @@ func TestGitLabMergeRequestCommitCommenter_Post_Flush_review_api(t *testing.T) {
 	// If setting exists file path, sha is changed by last commit id.
 	comments := []*reviewdog.Comment{
 		{
-			CheckResult: &reviewdog.CheckResult{
+			Result: &reviewdog.FilteredCheck{CheckResult: &reviewdog.CheckResult{
 				Path: "notExistFile.go",
 				Lnum: 1,
-			},
+			}, InDiffFile: true},
 			Body: "already commented",
 		},
 		{
-			CheckResult: &reviewdog.CheckResult{
+			Result: &reviewdog.FilteredCheck{CheckResult: &reviewdog.CheckResult{
 				Path: "notExistFile.go",
 				Lnum: 14,
-			},
+			}, InDiffFile: true},
 			Body: "new comment",
 		},
 	}
@@ -132,8 +132,8 @@ func TestGitLabPullRequest_workdir(t *testing.T) {
 	}
 	ctx := context.Background()
 	want := "a/b/c"
-	g.Post(ctx, &reviewdog.Comment{CheckResult: &reviewdog.CheckResult{Path: want}})
-	if got := g.postComments[0].Path; got != want {
+	g.Post(ctx, &reviewdog.Comment{Result: &reviewdog.FilteredCheck{CheckResult: &reviewdog.CheckResult{Path: want}}})
+	if got := g.postComments[0].Result.Path; got != want {
 		t.Errorf("wd=%q path=%q, want %q", g.wd, got, want)
 	}
 
@@ -147,8 +147,8 @@ func TestGitLabPullRequest_workdir(t *testing.T) {
 	}
 	path := "a/b/c"
 	wantPath := "cmd/" + path
-	g.Post(ctx, &reviewdog.Comment{CheckResult: &reviewdog.CheckResult{Path: path}})
-	if got := g.postComments[0].Path; got != wantPath {
+	g.Post(ctx, &reviewdog.Comment{Result: &reviewdog.FilteredCheck{CheckResult: &reviewdog.CheckResult{Path: path}}})
+	if got := g.postComments[0].Result.Path; got != wantPath {
 		t.Errorf("wd=%q path=%q, want %q", g.wd, got, wantPath)
 	}
 }

@@ -32,6 +32,22 @@ func setupGitHubClient() *github.Client {
 	return github.NewClient(tc)
 }
 
+func setupEnvs() (cleanup func()) {
+	var cleanEnvs = []string{
+		"GITHUB_ACTION",
+	}
+	saveEnvs := make(map[string]string)
+	for _, key := range cleanEnvs {
+		saveEnvs[key] = os.Getenv(key)
+		os.Unsetenv(key)
+	}
+	return func() {
+		for key, value := range saveEnvs {
+			os.Setenv(key, value)
+		}
+	}
+}
+
 func moveToRootDir() {
 	os.Chdir("../..")
 }
@@ -54,11 +70,13 @@ func TestGitHubPullRequest_Post(t *testing.T) {
 		t.Fatal(err)
 	}
 	comment := &reviewdog.Comment{
-		CheckResult: &reviewdog.CheckResult{
-			Path: "watchdogs.go",
+		Result: &reviewdog.FilteredCheck{
+			CheckResult: &reviewdog.CheckResult{
+				Path: "watchdogs.go",
+			},
+			LnumDiff: 17,
 		},
-		LnumDiff: 17,
-		Body:     "[reviewdog] test",
+		Body: "[reviewdog] test",
 	}
 	// https://github.com/reviewdog/reviewdog/pull/2/files#diff-ed1d019a10f54464cfaeaf6a736b7d27L20
 	if err := g.Post(context.Background(), comment); err != nil {
@@ -175,6 +193,7 @@ func TestGitHubPullRequest_Post_Flush_review_api(t *testing.T) {
 	cwd, _ := os.Getwd()
 	defer os.Chdir(cwd)
 	moveToRootDir()
+	defer setupEnvs()()
 
 	listCommentsAPICalled := 0
 	postCommentsAPICalled := 0
@@ -250,25 +269,40 @@ func TestGitHubPullRequest_Post_Flush_review_api(t *testing.T) {
 	}
 	comments := []*reviewdog.Comment{
 		{
-			CheckResult: &reviewdog.CheckResult{
-				Path: "reviewdog.go",
+			Result: &reviewdog.FilteredCheck{
+				CheckResult: &reviewdog.CheckResult{
+					Path: "reviewdog.go",
+				},
+				LnumDiff: 1,
 			},
-			LnumDiff: 1,
-			Body:     "already commented",
+			Body: "already commented",
 		},
 		{
-			CheckResult: &reviewdog.CheckResult{
-				Path: "reviewdog.go",
+			Result: &reviewdog.FilteredCheck{
+				CheckResult: &reviewdog.CheckResult{
+					Path: "reviewdog.go",
+				},
+				LnumDiff: 14,
 			},
-			LnumDiff: 14,
-			Body:     "already commented 2",
+			Body: "already commented 2",
 		},
 		{
-			CheckResult: &reviewdog.CheckResult{
-				Path: "reviewdog.go",
+			Result: &reviewdog.FilteredCheck{
+				CheckResult: &reviewdog.CheckResult{
+					Path: "reviewdog.go",
+				},
+				LnumDiff: 14,
 			},
-			LnumDiff: 14,
-			Body:     "new comment",
+			Body: "new comment",
+		},
+		{
+			Result: &reviewdog.FilteredCheck{
+				CheckResult: &reviewdog.CheckResult{
+					Path: "reviewdog.go",
+				},
+				// No LnumDiff.
+			},
+			Body: "should not be reported via GitHub Review API",
 		},
 	}
 	for _, c := range comments {
@@ -290,8 +324,8 @@ func TestGitHubPullRequest_Post_Flush_review_api(t *testing.T) {
 func TestGitHubPullRequest_Post_toomany(t *testing.T) {
 	cwd, _ := os.Getwd()
 	defer os.Chdir(cwd)
-
 	moveToRootDir()
+	defer setupEnvs()()
 
 	listCommentsAPICalled := 0
 	postCommentsAPICalled := 0
@@ -325,11 +359,13 @@ func TestGitHubPullRequest_Post_toomany(t *testing.T) {
 	var comments []*reviewdog.Comment
 	for i := 0; i < 100; i++ {
 		comments = append(comments, &reviewdog.Comment{
-			CheckResult: &reviewdog.CheckResult{
-				Path: "reviewdog.go",
-				Lnum: i,
+			Result: &reviewdog.FilteredCheck{
+				CheckResult: &reviewdog.CheckResult{
+					Path: "reviewdog.go",
+					Lnum: i,
+				},
+				LnumDiff: i,
 			},
-			LnumDiff: i,
 			Body:     "comment",
 			ToolName: "tool",
 		})
@@ -354,6 +390,7 @@ func TestGitHubPullRequest_workdir(t *testing.T) {
 	cwd, _ := os.Getwd()
 	defer os.Chdir(cwd)
 	moveToRootDir()
+	defer setupEnvs()()
 
 	g, err := NewGitHubPullRequest(nil, "", "", 0, "")
 	if err != nil {
@@ -364,8 +401,8 @@ func TestGitHubPullRequest_workdir(t *testing.T) {
 	}
 	ctx := context.Background()
 	want := "a/b/c"
-	g.Post(ctx, &reviewdog.Comment{CheckResult: &reviewdog.CheckResult{Path: want}})
-	if got := g.postComments[0].Path; got != want {
+	g.Post(ctx, &reviewdog.Comment{Result: &reviewdog.FilteredCheck{CheckResult: &reviewdog.CheckResult{Path: want}}})
+	if got := g.postComments[0].Result.Path; got != want {
 		t.Errorf("wd=%q path=%q, want %q", g.wd, got, want)
 	}
 
@@ -379,8 +416,8 @@ func TestGitHubPullRequest_workdir(t *testing.T) {
 	}
 	path := "a/b/c"
 	wantPath := "cmd/" + path
-	g.Post(ctx, &reviewdog.Comment{CheckResult: &reviewdog.CheckResult{Path: path}})
-	if got := g.postComments[0].Path; got != wantPath {
+	g.Post(ctx, &reviewdog.Comment{Result: &reviewdog.FilteredCheck{CheckResult: &reviewdog.CheckResult{Path: path}}})
+	if got := g.postComments[0].Result.Path; got != wantPath {
 		t.Errorf("wd=%q path=%q, want %q", g.wd, got, wantPath)
 	}
 }

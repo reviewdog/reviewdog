@@ -14,10 +14,10 @@ type PostedComments map[string]map[int][]string
 // otherwise returns false. It sees comments with same path, same position,
 // and same body as same comments.
 func (p PostedComments) IsPosted(c *reviewdog.Comment, lineNum int) bool {
-	if _, ok := p[c.Path]; !ok {
+	if _, ok := p[c.Result.Path]; !ok {
 		return false
 	}
-	bodies, ok := p[c.Path][lineNum]
+	bodies, ok := p[c.Result.Path][lineNum]
 	if !ok {
 		return false
 	}
