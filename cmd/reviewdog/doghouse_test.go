@@ -278,7 +278,7 @@ func TestPostResultSet_withReportURL(t *testing.T) {
 	}
 
 	opt := &option{filterMode: difffilter.ModeAdded}
-	if _, err := postResultSet(context.Background(), &resultSet, ghInfo, fakeCli, true, opt); err != nil {
+	if _, err := postResultSet(context.Background(), &resultSet, ghInfo, fakeCli, opt); err != nil {
 		t.Fatal(err)
 	}
 }
@@ -303,7 +303,7 @@ func TestPostResultSet_withoutReportURL(t *testing.T) {
 	ghInfo := &cienv.BuildInfo{Owner: owner, Repo: repo, PullRequest: prNum, SHA: sha}
 
 	opt := &option{filterMode: difffilter.ModeAdded}
-	resp, err := postResultSet(context.Background(), &resultSet, ghInfo, fakeCli, true, opt)
+	resp, err := postResultSet(context.Background(), &resultSet, ghInfo, fakeCli, opt)
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -351,7 +351,7 @@ func TestPostResultSet_conclusion(t *testing.T) {
 		}
 		opt := &option{filterMode: difffilter.ModeAdded, failOnError: tt.failOnError}
 		id := fmt.Sprintf("[conclusion=%s, failOnError=%v]", tt.conclusion, tt.failOnError)
-		_, err := postResultSet(context.Background(), &resultSet, ghInfo, fakeCli, true, opt)
+		_, err := postResultSet(context.Background(), &resultSet, ghInfo, fakeCli, opt)
 		if tt.wantErr && err == nil {
 			t.Errorf("[%s] want err, but got nil.", id)
 		} else if !tt.wantErr && err != nil {
@@ -379,7 +379,7 @@ func TestPostResultSet_withEmptyResponse(t *testing.T) {
 	ghInfo := &cienv.BuildInfo{Owner: owner, Repo: repo, PullRequest: prNum, SHA: sha}
 
 	opt := &option{filterMode: difffilter.ModeAdded}
-	if _, err := postResultSet(context.Background(), &resultSet, ghInfo, fakeCli, true, opt); err == nil {
+	if _, err := postResultSet(context.Background(), &resultSet, ghInfo, fakeCli, opt); err == nil {
 		t.Error("got no error but want report missing error")
 	}
 }

@@ -90,9 +90,9 @@ const (
 		Report results to stdout.
 
 	"github-check" (experimental)
-		Report results to GitHub Check. It works both for Pull Requests and commits
-		and this reporter reports all results regardless of it's new result or not.
-		You can see report results in GitHub PullRequest Check tab for Pull Request.
+		Report results to GitHub Check. It works both for Pull Requests and commits.
+		For Pull Request, you can see report results in GitHub PullRequest Check
+		tab and can control filtering mode by -filter-mode flag.
 
 		There are two options to use this reporter.
 
@@ -113,8 +113,7 @@ const (
 			Note: Token is not required if you run reviewdog in Travis CI.
 
 	"github-pr-check" (experimental)
-		Same as github-check reporter but it only supports Pull Requests and
-		reports only new results which is in diff.
+		Same as github-check reporter but it only supports Pull Requests.
 
 	"github-pr-review"
 		Report results to GitHub review comments.
