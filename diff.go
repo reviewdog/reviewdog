@@ -60,3 +60,12 @@ func (d *DiffCmd) Diff(_ context.Context) ([]byte, error) {
 func (d *DiffCmd) Strip() int {
 	return d.strip
 }
+
+// EmptyDiff service return empty diff.
+type EmptyDiff struct{}
+
+func (*EmptyDiff) Diff(context.Context) ([]byte, error) {
+	return []byte{}, nil
+}
+
+func (*EmptyDiff) Strip() int { return 0 }

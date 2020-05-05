@@ -335,11 +335,15 @@ github-pr-check reporter as a fallback.
 		}
 		ds = d
 	case "local":
-		d, err := diffService(opt.diffCmd, opt.diffStrip)
-		if err != nil {
-			return err
+		if opt.diffCmd == "" && opt.filterMode == difffilter.ModeNoFilter {
+			ds = &reviewdog.EmptyDiff{}
+		} else {
+			d, err := diffService(opt.diffCmd, opt.diffStrip)
+			if err != nil {
+				return err
+			}
+			ds = d
 		}
-		ds = d
 	}
 
 	if isProject {
