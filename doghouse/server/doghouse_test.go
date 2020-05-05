@@ -9,6 +9,7 @@ import (
 	"github.com/google/go-cmp/cmp"
 	"github.com/google/go-github/v31/github"
 
+	"github.com/reviewdog/reviewdog/difffilter"
 	"github.com/reviewdog/reviewdog/doghouse"
 )
 
@@ -141,7 +142,7 @@ func TestCheck_OK(t *testing.T) {
 	}
 }
 
-func TestCheck_OK_outsidediff(t *testing.T) {
+func testOutsideDiff(t *testing.T, outsideDiff bool, filterMode difffilter.Mode) {
 	const (
 		name        = "haya14busa-linter"
 		owner       = "haya14busa"
@@ -174,7 +175,8 @@ func TestCheck_OK_outsidediff(t *testing.T) {
 			},
 		},
 		Level:       "warning",
-		OutsideDiff: true,
+		OutsideDiff: outsideDiff,
+		FilterMode:  filterMode,
 	}
 
 	cli := &fakeCheckerGitHubCli{}
@@ -221,6 +223,15 @@ func TestCheck_OK_outsidediff(t *testing.T) {
 	if _, err := checker.Check(context.Background()); err != nil {
 		t.Fatal(err)
 	}
+}
+
+func TestCheck_OK_deprecated_outsidediff(t *testing.T) {
+	t.Run("deprecated: outside_diff", func(t *testing.T) {
+		testOutsideDiff(t, true, difffilter.ModeDefault)
+	})
+	t.Run("filter-mode=NoFilter", func(t *testing.T) {
+		testOutsideDiff(t, false, difffilter.ModeNoFilter)
+	})
 }
 
 func TestCheck_OK_multiple_update_runs(t *testing.T) {

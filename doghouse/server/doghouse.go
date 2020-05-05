@@ -12,6 +12,7 @@ import (
 
 	"github.com/reviewdog/reviewdog"
 	"github.com/reviewdog/reviewdog/diff"
+	"github.com/reviewdog/reviewdog/difffilter"
 	"github.com/reviewdog/reviewdog/doghouse"
 	"github.com/reviewdog/reviewdog/service/github/githubutils"
 )
@@ -49,7 +50,13 @@ func (ch *Checker) Check(ctx context.Context) (*doghouse.CheckResponse, error) {
 	}
 
 	results := annotationsToCheckResults(ch.req.Annotations)
-	filtered := reviewdog.FilterCheck(results, filediffs, 1, "", ch.req.FilterMode)
+	filterMode := ch.req.FilterMode
+	if ch.req.PullRequest == 0 || ch.req.OutsideDiff {
+		// If it's not Pull Request run, do not filter results by diff regardless
+		// of the filter mode.
+		filterMode = difffilter.ModeNoFilter
+	}
+	filtered := reviewdog.FilterCheck(results, filediffs, 1, "", filterMode)
 	check, err := ch.createCheck(ctx)
 	if err != nil {
 		// If this error is StatusForbidden (403) here, it means reviewdog is
@@ -76,10 +83,9 @@ func (ch *Checker) Check(ctx context.Context) (*doghouse.CheckResponse, error) {
 }
 
 func (ch *Checker) postCheck(ctx context.Context, checkID int64, checks []*reviewdog.FilteredCheck) (*github.CheckRun, string, error) {
-	filterByDiff := ch.req.PullRequest != 0 && !ch.req.OutsideDiff
 	var annotations []*github.CheckRunAnnotation
 	for _, c := range checks {
-		if !c.ShouldReport && filterByDiff {
+		if !c.ShouldReport {
 			continue
 		}
 		annotations = append(annotations, ch.toCheckRunAnnotation(c))
