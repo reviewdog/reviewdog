@@ -89,7 +89,7 @@ const (
 	"local" (default)
 		Report results to stdout.
 
-	"github-check" (experimental)
+	"github-check"
 		Report results to GitHub Check. It works both for Pull Requests and commits.
 		For Pull Request, you can see report results in GitHub PullRequest Check
 		tab and can control filtering mode by -filter-mode flag.
@@ -112,7 +112,7 @@ const (
 
 			Note: Token is not required if you run reviewdog in Travis CI.
 
-	"github-pr-check" (experimental)
+	"github-pr-check"
 		Same as github-check reporter but it only supports Pull Requests.
 
 	"github-pr-review"
