@@ -18,6 +18,9 @@
   <a href="https://github.com/reviewdog/reviewdog/releases">
     <img alt="releases" src="https://img.shields.io/github/release/reviewdog/reviewdog.svg?logo=github">
   </a>
+  <a href="https://github.com/reviewdog/nightly">
+    <img alt="nightly releases" src="https://img.shields.io/github/v/release/reviewdog/nightly.svg?logo=github">
+  </a>
   <a href="https://somsubhra.com/github-release-stats/?username=reviewdog&repository=reviewdog">
     <img alt="Github Releases Stats" src="https://img.shields.io/github/downloads/reviewdog/reviewdog/total.svg?logo=github">
   </a>
@@ -94,7 +97,16 @@ $ curl -sfL https://raw.githubusercontent.com/reviewdog/reviewdog/master/install
 $ wget -O - -q https://raw.githubusercontent.com/reviewdog/reviewdog/master/install.sh| sh -s [vX.Y.Z]
 ```
 
-or
+### Nightly releases
+
+You can also use [nightly reviewdog release](https://github.com/reviewdog/nightly)
+to try the latest reviwedog improvements every day!
+
+```
+$ curl -sfL https://raw.githubusercontent.com/reviewdog/reviewdog/master/install.sh| sh -s -- -b $(go env GOPATH)/bin
+```
+
+### Build from HEAD with go get
 
 ```shell
 $ go get -u github.com/reviewdog/reviewdog/cmd/reviewdog
