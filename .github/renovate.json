@@ -9,5 +9,6 @@
     }
   ],
   "postUpdateOptions": ["gomodTidy"],
-  "rangeStrategy": "replace"
+  "rangeStrategy": "replace",
+  "labels": ["renovate"]
 }
