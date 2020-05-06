@@ -42,7 +42,7 @@
   <a href="https://starcharts.herokuapp.com/reviewdog/reviewdog"><img alt="Stars" src="https://img.shields.io/github/stars/reviewdog/reviewdog.svg?style=social"></a>
 </p>
 
-"reviewdog" provides a way to post review comments to code hosting service,
+reviewdog provides a way to post review comments to code hosting service,
 such as GitHub, automatically by integrating with any linter tools with ease.
 It uses an output of lint tools and posts them as a comment if findings are in
 diff of patches to review.
