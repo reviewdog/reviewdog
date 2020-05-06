@@ -1,8 +1,16 @@
-# Document: http://goreleaser.com
-# This config is for normal release. See .goreleaser-nightly.yml for nightly release.
+# For nightly release. See .goreleaser.yml for normal release.
+project_name: reviewdog
+
 before:
   hooks:
     - go mod download
+
+release:
+  github:
+    owner: reviewdog
+    name: nightly
+  # Do not set prelease so that https://github.com/reviewdog/nightly/releases/latest always points to the latest version.
+  prerelease: false
 
 builds:
   - env:
@@ -31,25 +39,8 @@ archives:
       - LICENSE
       - README.md
 
-brews:
-  - github:
-      owner: reviewdog
-      name: homebrew-tap
-    folder: Formula
-    homepage:  https://github.com/reviewdog/reviewdog
-    description: Automated code review tool integrated with any code analysis tools regardless of programming language.
-    test: |
-      system "#{bin}/reviewdog -version"
-
 checksum:
   name_template: 'checksums.txt'
 
 snapshot:
   name_template: "{{ .Tag }}-next"
-
-changelog:
-  sort: asc
-  filters:
-    exclude:
-    - '^docs:'
-    - '^test:'
