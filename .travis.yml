@@ -41,10 +41,6 @@ before_script:
 script:
   - reviewdog -reporter=github-pr-check
   - $(npm bin)/textlint -f checkstyle README.md | reviewdog -f=checkstyle -name="textlint" -reporter=github-pr-check -level=info
-  - go test -coverpkg=./... -coverprofile=coverage.txt ./...
-
-after_success:
-  - bash <(curl -s https://codecov.io/bash)
 
 notifications:
   webhooks:
