@@ -21,12 +21,6 @@
   <a href="https://github.com/reviewdog/nightly">
     <img alt="nightly releases" src="https://img.shields.io/github/v/release/reviewdog/nightly.svg?logo=github">
   </a>
-  <a href="https://somsubhra.com/github-release-stats/?username=reviewdog&repository=reviewdog">
-    <img alt="Github Releases Stats" src="https://img.shields.io/github/downloads/reviewdog/reviewdog/total.svg?logo=github">
-  </a>
-  <a href="https://gitlab.com/reviewdog/reviewdog/pipelines">
-    <img alt="GitLab Supported" src="https://img.shields.io/badge/GitLab%20-Supported-fc6d26?logo=gitlab">
-  </a>
 </p>
 
 <p align="center">
@@ -39,6 +33,18 @@
   <a href="https://travis-ci.org/reviewdog/reviewdog"><img alt="Travis Status" src="https://img.shields.io/travis/reviewdog/reviewdog/master.svg?label=Travis&logo=travis"></a>
   <a href="https://circleci.com/gh/reviewdog/reviewdog"><img alt="CircleCI Status" src="http://img.shields.io/circleci/build/github/reviewdog/reviewdog/master.svg?label=CircleCI&logo=circleci"></a>
   <a href="https://codecov.io/github/reviewdog/reviewdog"><img alt="Coverage Status" src="https://img.shields.io/codecov/c/github/reviewdog/reviewdog/master.svg?logo=codecov"></a>
+</p>
+
+<p align="center">
+  <a href="https://gitlab.com/reviewdog/reviewdog/pipelines">
+    <img alt="GitLab Supported" src="https://img.shields.io/badge/GitLab%20-Supported-fc6d26?logo=gitlab">
+  </a>
+  <a href="https://github.com/haya14busa/action-bumpr">
+    <img alt="action-bumpr supported" src="https://img.shields.io/badge/bumpr-supported-ff69b4?logo=github&link=https://github.com/haya14busa/action-bumpr">
+  </a>
+  <a href="https://somsubhra.com/github-release-stats/?username=reviewdog&repository=reviewdog">
+    <img alt="Github Releases Stats" src="https://img.shields.io/github/downloads/reviewdog/reviewdog/total.svg?logo=github">
+  </a>
   <a href="https://starcharts.herokuapp.com/reviewdog/reviewdog"><img alt="Stars" src="https://img.shields.io/github/stars/reviewdog/reviewdog.svg?style=social"></a>
 </p>
 
