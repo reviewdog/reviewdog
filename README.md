@@ -500,6 +500,7 @@ You can use public GitHub Actions to start using reviewdog with ease! :tada: :ar
   - [reviewdog/action-yamllint](https://github.com/reviewdog/action-yamllint) - Run [yamllint](https://github.com/adrienverge/yamllint).
 - Ruby
   - [reviewdog/action-brakeman](https://github.com/reviewdog/action-brakeman) - Run [brakeman](https://github.com/presidentbeef/brakeman).
+  - [reviewdog/action-reek](https://github.com/reviewdog/action-reek) - Run [reek](https://github.com/troessner/reek).
   - [reviewdog/action-rubocop](https://github.com/reviewdog/action-rubocop) - Run [rubocop](https://github.com/rubocop-hq/rubocop).
   - [vk26/action-fasterer](https://github.com/vk26/action-fasterer) - Run [fasterer](https://github.com/DamirSvrtan/fasterer).
   - [SennaLabs/action-standardrb](https://github.com/SennaLabs/action-standardrb) - Run [standardrb](https://github.com/testdouble/standard).
