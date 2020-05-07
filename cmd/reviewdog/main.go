@@ -597,16 +597,15 @@ func gitlabClient(token string) (*gitlab.Client, error) {
 const defaultGitLabAPI = "https://gitlab.com/api/v4"
 
 func gitlabBaseURL() (*url.URL, error) {
-	gitlabApi := os.Getenv("GITLAB_API")
-	gitlabV4Url := os.Getenv("CI_API_V4_URL")
+	gitlabAPI := os.Getenv("GITLAB_API")
+	gitlabV4URL := os.Getenv("CI_API_V4_URL")
 
 	var baseURL string
-	switch true {
-	case gitlabApi != "":
-		baseURL = gitlabApi
-	case gitlabV4Url != "":
-		baseURL = gitlabV4Url
-	default:
+	if gitlabAPI != "" {
+		baseURL = gitlabAPI
+	} else if gitlabV4URL != "" {
+		baseURL = gitlabV4URL
+	} else {
 		baseURL = defaultGitLabAPI
 	}
 
