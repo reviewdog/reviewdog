@@ -25,7 +25,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
   ([document](https://github.com/reviewdog/reviewdog/tree/e359505275143ec85e9b114fc1ab4a4e91d04fb5#exit-codes))
   and improved exit code handling. ([@DmitryLanda](https://github.com/DmitryLanda), [@haya14busa])
 - [#187](https://github.com/reviewdog/reviewdog/issues/187) Added
-  `-filter-mode` flag
+  `-filter-mode` flag [`added`, `diff_context`, `file`, `nofilter`]
   ([document](https://github.com/reviewdog/reviewdog/tree/e359505275143ec85e9b114fc1ab4a4e91d04fb5#filter-mode))
   which controls how reviewdog filter results. ([@Le6ow5k1](https://github.com/Le6ow5k1), [@haya14busa])
 - [#548](https://github.com/reviewdog/reviewdog/issues/548) Introduced nightly release ([reviewdog/nightly](https://github.com/reviewdog/nightly)). ([@haya14busa])
