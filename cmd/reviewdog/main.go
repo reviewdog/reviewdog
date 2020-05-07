@@ -130,7 +130,8 @@ const (
 		1. Set REVIEWDOG_GITLAB_API_TOKEN environment variable.
 		Go to https://gitlab.com/profile/personal_access_tokens
 
-		For self hosted GitLab:
+		CI_API_V4_URL (defined by Gitlab CI) as the base URL for the Gitlab API automatically.
+		Alternatively, GITLAB_API can also be defined, and it will take precedence over the former:
 			$ export GITLAB_API="https://example.gitlab.com/api/v4"
 
 	"gitlab-mr-commit"
@@ -596,10 +597,19 @@ func gitlabClient(token string) (*gitlab.Client, error) {
 const defaultGitLabAPI = "https://gitlab.com/api/v4"
 
 func gitlabBaseURL() (*url.URL, error) {
-	baseURL := os.Getenv("GITLAB_API")
-	if baseURL == "" {
+	gitlabApi := os.Getenv("GITLAB_API")
+	gitlabV4Url := os.Getenv("CI_API_V4_URL")
+
+	var baseURL string
+	switch true {
+	case gitlabApi != "":
+		baseURL = gitlabApi
+	case gitlabV4Url != "":
+		baseURL = gitlabV4Url
+	default:
 		baseURL = defaultGitLabAPI
 	}
+
 	u, err := url.Parse(baseURL)
 	if err != nil {
 		return nil, fmt.Errorf("GitLab base URL is invalid: %v, %v", baseURL, err)
