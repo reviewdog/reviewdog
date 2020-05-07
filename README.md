@@ -1,14 +1,14 @@
-<p align="center">
+<div align="center">
   <a href="https://github.com/reviewdog/reviewdog">
     <img alt="reviewdog" src="https://raw.githubusercontent.com/haya14busa/i/d598ed7dc49fefb0018e422e4c43e5ab8f207a6b/reviewdog/reviewdog.logo.png">
   </a>
-</p>
+</div>
 
 <h2 align="center">
   reviewdog - A code review dog who keeps your codebase healthy.
 </h2>
 
-<p align="center">
+<div align="center">
   <a href="https://github.com/reviewdog/reviewdog/blob/master/LICENSE">
     <img alt="LICENSE" src="https://img.shields.io/badge/license-MIT-blue.svg?maxAge=43200">
   </a>
@@ -21,9 +21,9 @@
   <a href="https://github.com/reviewdog/nightly">
     <img alt="nightly releases" src="https://img.shields.io/github/v/release/reviewdog/nightly.svg?logo=github">
   </a>
-</p>
+</div>
 
-<p align="center">
+<div align="center">
   <a href="https://github.com/reviewdog/reviewdog/actions?query=workflow%3AGo+event%3Apush+branch%3Amaster">
     <img alt="GitHub Actions" src="https://github.com/reviewdog/reviewdog/workflows/Go/badge.svg">
   </a>
@@ -33,9 +33,9 @@
   <a href="https://travis-ci.org/reviewdog/reviewdog"><img alt="Travis Status" src="https://img.shields.io/travis/reviewdog/reviewdog/master.svg?label=Travis&logo=travis"></a>
   <a href="https://circleci.com/gh/reviewdog/reviewdog"><img alt="CircleCI Status" src="http://img.shields.io/circleci/build/github/reviewdog/reviewdog/master.svg?label=CircleCI&logo=circleci"></a>
   <a href="https://codecov.io/github/reviewdog/reviewdog"><img alt="Coverage Status" src="https://img.shields.io/codecov/c/github/reviewdog/reviewdog/master.svg?logo=codecov"></a>
-</p>
+</div>
 
-<p align="center">
+<div align="center">
   <a href="https://gitlab.com/reviewdog/reviewdog/pipelines">
     <img alt="GitLab Supported" src="https://img.shields.io/badge/GitLab%20-Supported-fc6d26?logo=gitlab">
   </a>
@@ -46,7 +46,8 @@
     <img alt="Github Releases Stats" src="https://img.shields.io/github/downloads/reviewdog/reviewdog/total.svg?logo=github">
   </a>
   <a href="https://starcharts.herokuapp.com/reviewdog/reviewdog"><img alt="Stars" src="https://img.shields.io/github/stars/reviewdog/reviewdog.svg?style=social"></a>
-</p>
+</div>
+<br />
 
 reviewdog provides a way to post review comments to code hosting service,
 such as GitHub, automatically by integrating with any linter tools with ease.
