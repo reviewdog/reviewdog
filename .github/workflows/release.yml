@@ -26,6 +26,12 @@ jobs:
           if_true: ${{ github.ref }}
           if_false: ${{ steps.bumpr.outputs.next_version }}
 
+      # Setup Go for building reviewdog binary.
+      - uses: actions/setup-go@v2
+        if: "steps.tag.outputs.value != ''"
+        with:
+          go-version: 1.14
+
       # Create release.
       - uses: goreleaser/goreleaser-action@v1
         if: "steps.tag.outputs.value != ''"
