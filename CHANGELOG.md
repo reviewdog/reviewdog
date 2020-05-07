@@ -24,7 +24,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ### :sparkles: Release Note
 
 With v0.10.0 release, now reviewdog can find issues outside diff by controlling
-fitlering behavior with `-filter-mode`. Also, you can ensure to check reported
+filtering behavior with `-filter-mode`. Also, you can ensure to check reported
 results by exit 1 with `-fail-on-error`.
 
 Example
