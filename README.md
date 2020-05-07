@@ -9,13 +9,13 @@
 </h2>
 
 <div align="center">
-  <a href="https://github.com/reviewdog/reviewdog/blob/master/LICENSE">
+  <a href="./LICENSE">
     <img alt="LICENSE" src="https://img.shields.io/badge/license-MIT-blue.svg?maxAge=43200">
   </a>
   <a href="https://godoc.org/github.com/reviewdog/reviewdog">
     <img alt="GoDoc" src="https://img.shields.io/badge/godoc-reference-4F73B3.svg?label=godoc.org&maxAge=43200&logo=go">
   </a>
-  <a href="https://github.com/reviewdog/reviewdog/releases">
+  <a href="./CHANGELOG.md">
     <img alt="releases" src="https://img.shields.io/github/release/reviewdog/reviewdog.svg?logo=github">
   </a>
   <a href="https://github.com/reviewdog/nightly">
