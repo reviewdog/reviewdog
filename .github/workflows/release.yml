@@ -1,0 +1,44 @@
+name: release
+on:
+  push:
+    branches:
+      - master
+    tags:
+      - 'v*.*.*'
+
+jobs:
+  release:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v2
+
+      # Bump version on merging Pull Requests with specific labels.
+      # (bump:major,bump:minor,bump:patch)
+      - id: bumpr
+        if: "!startsWith(github.ref, 'refs/tags/')"
+        uses: haya14busa/action-bumpr@v1
+
+      # Get tag name.
+      - id: tag
+        uses: haya14busa/action-cond@v1
+        with:
+          cond: "${{ startsWith(github.ref, 'refs/tags/') }}"
+          if_true: ${{ github.ref }}
+          if_false: ${{ steps.bumpr.outputs.next_version }}
+
+      # Setup Go for building reviewdog binary.
+      - uses: actions/setup-go@v2
+        if: "steps.tag.outputs.value != ''"
+        with:
+          go-version: 1.14
+
+      # Create release.
+      - uses: goreleaser/goreleaser-action@v1
+        if: "steps.tag.outputs.value != ''"
+        with:
+          version: latest
+          args: release --rm-dist
+        env:
+          # Need to use personal access token instead of default token to
+          # update https://github.com/reviewdog/homebrew-tap.
+          GITHUB_TOKEN: ${{ secrets.RELEASE_GITHUB_TOKEN }}

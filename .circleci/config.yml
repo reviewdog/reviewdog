@@ -23,12 +23,6 @@ jobs:
     steps:
       - checkout
       - run: 'go test -v ./...'
-  release:
-    docker:
-      - image: circleci/golang:1.14
-    steps:
-      - checkout
-      - run: curl -sL https://git.io/goreleaser | bash
   deploy:
     working_directory: ~/reviewdog/doghouse/appengine/
     docker:
@@ -83,14 +77,14 @@ workflows:
   lint_test_deploy:
     jobs:
       - lint:
-          filters: # required since `release` has tag filters AND requires `lint`
+          filters: # required since `deploy` has tag filters AND requires `lint`
             tags:
               only: /.*/
       - test:
-          filters: # required since `release` has tag filters AND requires `test`
+          filters: # required since `deploy` has tag filters AND requires `test`
             tags:
               only: /.*/
-      - release:
+      - deploy:
           requires:
             - lint
             - test
@@ -99,13 +93,6 @@ workflows:
               ignore: /.*/
             tags:
               only: /v[0-9]+(\.[0-9]+)*(-.*)*/
-      - deploy:
-          requires:
-            - lint
-            - test
-          filters:
-            branches:
-              only: master
 
 notify:
   webhooks:
