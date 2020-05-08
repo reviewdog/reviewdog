@@ -384,7 +384,9 @@ $ export REVIEWDOG_GITLAB_API_TOKEN="<token>"
 $ reviewdog -reporter=gitlab-mr-discussion
 ```
 
-For self-hosted GitLab, set API endpoint by environment variable.
+The `CI_API_V4_URL` environment variable, defined automatically by Gitlab CI (v11.7 onwards), will be used to find out the Gitlab API URL.
+
+Alternatively, `GITLAB_API` can also be defined, in which case it will take precedence over `CI_API_V4_URL`.
 
 ```shell
 $ export GITLAB_API="https://example.gitlab.com/api/v4"

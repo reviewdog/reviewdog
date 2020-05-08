@@ -9,6 +9,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ### :book: Release Note <!-- optional -->
 
 ### :rocket: Enhancements
+- [#563](https://github.com/reviewdog/reviewdog/issues/563) Use `CI_API_V4_URL` environment variable when present. 
 - ...
 
 ### :bug: Fixes
