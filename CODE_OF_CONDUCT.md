@@ -1,4 +1,4 @@
-# Contributor Covenant Code of Conduct
+# Reviewdog Code of Conduct
 
 ## Our Pledge
 
