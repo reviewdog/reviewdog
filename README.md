@@ -495,6 +495,7 @@ You can use public GitHub Actions to start using reviewdog with ease! :tada: :ar
 - Shell script
   - [reviewdog/action-shellcheck](https://github.com/reviewdog/action-shellcheck) - Run [shellcheck](https://github.com/koalaman/shellcheck).
 - Go
+  - [reviewdog/action-staticcheck](https://github.com/reviewdog/action-staticcheck) - Run [staticcheck](https://staticcheck.io/).
   - [reviewdog/action-golangci-lint](https://github.com/reviewdog/action-golangci-lint) - Run [golangci-lint](https://github.com/golangci/golangci-lint) and supported linters individually by golangci-lint.
 - JavaScript
   - [reviewdog/action-eslint](https://github.com/reviewdog/action-eslint) - Run [eslint](https://github.com/eslint/eslint).
