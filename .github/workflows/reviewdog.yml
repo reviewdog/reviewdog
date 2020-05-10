@@ -142,6 +142,20 @@ jobs:
           level: "warning"
           reporter: github-pr-check
 
+  staticcheck:
+    if: github.event_name == 'pull_request'
+    name: runner / staticcheck
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v2
+      - uses: reviewdog/action-staticcheck@v1
+        with:
+          github_token: ${{ secrets.github_token }}
+          reporter: github-pr-review
+          filter_mode: nofilter
+          fail_on_error: true
+          workdir: ./_testdata/
+
   misspell:
     name: runner / misspell
     runs-on: ubuntu-latest
