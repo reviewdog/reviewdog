@@ -154,7 +154,7 @@ jobs:
           reporter: github-pr-review
           filter_mode: nofilter
           fail_on_error: true
-          workdir: ./_testdata/
+          # workdir: ./_testdata/
 
   misspell:
     name: runner / misspell
