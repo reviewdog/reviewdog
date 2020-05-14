@@ -45,7 +45,7 @@
   <a href="https://github.com/haya14busa/action-bumpr">
     <img alt="action-bumpr supported" src="https://img.shields.io/badge/bumpr-supported-ff69b4?logo=github&link=https://github.com/haya14busa/action-bumpr">
   </a>
-  <a href="./CODE_OF_CONDUCT.md">
+  <a href="https://github.com/reviewdog/reviewdog/blob/master/CODE_OF_CONDUCT.md">
     <img alt="Contributor Covenant" src="https://img.shields.io/badge/Contributor%20Covenant-v2.0%20adopted-ff69b4.svg">
   </a>
   <a href="https://somsubhra.com/github-release-stats/?username=reviewdog&repository=reviewdog">
