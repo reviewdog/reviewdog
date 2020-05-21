@@ -1,7 +1,4 @@
 
-
-
-
 package reviewdog
 
 import (
