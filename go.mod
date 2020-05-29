@@ -17,7 +17,7 @@ require (
 	github.com/reviewdog/errorformat v0.0.0-20200525170631-83a795bbcf02
 	github.com/xanzy/go-gitlab v0.32.0
 	golang.org/x/build v0.0.0-20200527161851-9e7a7627a619
-	golang.org/x/net v0.0.0-20200520182314-0ba52f642ac2
+	golang.org/x/net v0.0.0-20200528225125-3c3fba18258b
 	golang.org/x/oauth2 v0.0.0-20200107190931-bf48bf16ab8d
 	golang.org/x/sync v0.0.0-20200317015054-43a5402ce75a
 	gopkg.in/yaml.v2 v2.3.0
