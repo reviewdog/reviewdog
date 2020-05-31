@@ -98,9 +98,6 @@ func Run(ctx context.Context, conf *Config, runners map[string]bool, c reviewdog
 	if results.Len() == 0 {
 		return nil
 	}
-	if err := checkUnexpectedFailures(results); err != nil {
-		return err
-	}
 
 	b, err := d.Diff(ctx)
 	if err != nil {
@@ -114,6 +111,9 @@ func Run(ctx context.Context, conf *Config, runners map[string]bool, c reviewdog
 	results.Range(func(toolname string, result *reviewdog.Result) {
 		rs := result.CheckResults
 		g.Go(func() error {
+			if err := result.CheckUnexpectedFailure(); err != nil {
+				return err
+			}
 			return reviewdog.RunFromResult(ctx, c, rs, filediffs, d.Strip(), toolname, filterMode, failOnError)
 		})
 	})
@@ -153,18 +153,6 @@ func checkUnknownRunner(specifiedRunners map[string]bool, usedRunners []string) 
 		return fmt.Errorf("runner not found: [%s]", strings.Join(rs, ","))
 	}
 	return nil
-}
-
-func checkUnexpectedFailures(results *reviewdog.ResultMap) error {
-	var err error
-	results.Range(func(toolname string, result *reviewdog.Result) {
-		// Skip if err is already found.
-		if err != nil {
-			return
-		}
-		err = result.CheckUnexpectedFailure()
-	})
-	return err
 }
 
 func getRunnerName(key string, runner *Runner) string {
