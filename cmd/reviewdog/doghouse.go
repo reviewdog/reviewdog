@@ -138,6 +138,9 @@ func postResultSet(ctx context.Context, resultSet *reviewdog.ResultMap,
 			FilterMode:  opt.filterMode,
 		}
 		g.Go(func() error {
+			if err := result.CheckUnexpectedFailure(); err != nil {
+				return err
+			}
 			res, err := cli.Check(ctx, req)
 			if err != nil {
 				return fmt.Errorf("post failed for %s: %v", name, err)

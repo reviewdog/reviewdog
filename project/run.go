@@ -67,6 +67,7 @@ func RunAndParse(ctx context.Context, conf *Config, runners map[string]bool, def
 			}
 			cmdErr := cmd.Wait()
 			results.Store(runnerName, &reviewdog.Result{
+				Name:         runnerName,
 				Level:        level,
 				CheckResults: rs,
 				CmdErr:       cmdErr,
@@ -161,10 +162,7 @@ func checkUnexpectedFailures(results *reviewdog.ResultMap) error {
 		if err != nil {
 			return
 		}
-		if result.CmdErr != nil && len(result.CheckResults) == 0 {
-			err = fmt.Errorf("%s failed with zero findings: The command itself "+
-				"failed (%v) or reviewdog cannot parse the results", toolname, result.CmdErr)
-		}
+		err = result.CheckUnexpectedFailure()
 	})
 	return err
 }
