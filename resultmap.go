@@ -12,11 +12,25 @@ type ResultMap struct {
 }
 
 type Result struct {
+	Name         string
 	Level        string
 	CheckResults []*CheckResult
 
 	// Optional. Report an error of the command execution.
+	// Non-nil CmdErr doesn't mean failure and CheckResults still may have
+	// results.
+	// It is common that a linter fails with non-zero exit code when it finds
+	// lint errors.
 	CmdErr error
+}
+
+// CheckUnexpectedFailure returns error on unexpected failure, if any.
+func (r *Result) CheckUnexpectedFailure() error {
+	if r.CmdErr != nil && len(r.CheckResults) == 0 {
+		return fmt.Errorf("%s failed with zero findings: The command itself "+
+			"failed (%v) or reviewdog cannot parse the results", r.Name, r.CmdErr)
+	}
+	return nil
 }
 
 // Store saves a new *Result into ResultMap.

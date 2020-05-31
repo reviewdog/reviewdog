@@ -67,6 +67,7 @@ func RunAndParse(ctx context.Context, conf *Config, runners map[string]bool, def
 			}
 			cmdErr := cmd.Wait()
 			results.Store(runnerName, &reviewdog.Result{
+				Name:         runnerName,
 				Level:        level,
 				CheckResults: rs,
 				CmdErr:       cmdErr,
@@ -97,9 +98,6 @@ func Run(ctx context.Context, conf *Config, runners map[string]bool, c reviewdog
 	if results.Len() == 0 {
 		return nil
 	}
-	if err := checkUnexpectedFailures(results); err != nil {
-		return err
-	}
 
 	b, err := d.Diff(ctx)
 	if err != nil {
@@ -113,6 +111,9 @@ func Run(ctx context.Context, conf *Config, runners map[string]bool, c reviewdog
 	results.Range(func(toolname string, result *reviewdog.Result) {
 		rs := result.CheckResults
 		g.Go(func() error {
+			if err := result.CheckUnexpectedFailure(); err != nil {
+				return err
+			}
 			return reviewdog.RunFromResult(ctx, c, rs, filediffs, d.Strip(), toolname, filterMode, failOnError)
 		})
 	})
@@ -152,21 +153,6 @@ func checkUnknownRunner(specifiedRunners map[string]bool, usedRunners []string) 
 		return fmt.Errorf("runner not found: [%s]", strings.Join(rs, ","))
 	}
 	return nil
-}
-
-func checkUnexpectedFailures(results *reviewdog.ResultMap) error {
-	var err error
-	results.Range(func(toolname string, result *reviewdog.Result) {
-		// Skip if err is already found.
-		if err != nil {
-			return
-		}
-		if result.CmdErr != nil && len(result.CheckResults) == 0 {
-			err = fmt.Errorf("%s failed with zero findings: The command itself "+
-				"failed (%v) or reviewdog cannot parse the results", toolname, result.CmdErr)
-		}
-	})
-	return err
 }
 
 func getRunnerName(key string, runner *Runner) string {
