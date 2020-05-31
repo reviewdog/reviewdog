@@ -1,0 +1,10 @@
+runner:
+  # OK
+  golint-ok:
+    cmd: golint ./...
+    format: golint
+    level: warning
+  test-fail:
+    cmd: 'echo "test failure"; exit 1'
+    errorformat:
+      - "%f:%l:%c:%m"

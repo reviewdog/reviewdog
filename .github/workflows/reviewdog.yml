@@ -129,6 +129,26 @@ jobs:
           cd ./_testdata/ && golint ./... | reviewdog -f=golint -name=golint-pr-review-nofilter -reporter=github-pr-review -filter-mode=nofilter -fail-on-error || EXIT_CODE=$?
           test "${EXIT_CODE}" = 1
 
+      - name: Unexpected failure (github-pr-review)
+        env:
+          REVIEWDOG_GITHUB_API_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          cd ./_testdata/ && reviewdog -conf=reviewdog_error.yml \
+            -reporter=github-pr-review || EXIT_CODE=$?
+          test "${EXIT_CODE}" = 1
+      - name: Unexpected failure (github-check)
+        env:
+          REVIEWDOG_GITHUB_API_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          cd ./_testdata/ && reviewdog -conf=reviewdog_error.yml \
+            -reporter=github-check || EXIT_CODE=$?
+          test "${EXIT_CODE}" = 1
+      - name: Unexpected failure (local)
+        run: |
+          cd ./_testdata/ && reviewdog -conf=reviewdog_error.yml \
+            -reporter=local -diff='git diff master' || EXIT_CODE=$?
+          test "${EXIT_CODE}" = 1
+
   golangci-lint:
     if: github.event_name == 'pull_request'
     name: runner / golangci-lint
