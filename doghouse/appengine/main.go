@@ -73,13 +73,6 @@ func main() {
 	ghInstStore := storage.GitHubInstallationDatastore{}
 	ghRepoTokenStore := storage.GitHubRepoTokenDatastore{}
 
-	httpCli := &http.Client{
-		Transport: &ochttp.Transport{
-			// Use Google Cloud propagation format.
-			Propagation: &propagation.HTTPFormat{},
-		},
-	}
-
 	ghHandler := NewGitHubHandler(
 		mustGetenv("GITHUB_CLIENT_ID"),
 		mustGetenv("GITHUB_CLIENT_SECRET"),
@@ -93,7 +86,6 @@ func main() {
 		integrationID:    integrationID,
 		ghInstStore:      &ghInstStore,
 		ghRepoTokenStore: &ghRepoTokenStore,
-		httpCli:          httpCli,
 	}
 
 	ghWebhookHandler := githubWebhookHandler{
