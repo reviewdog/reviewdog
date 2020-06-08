@@ -7,11 +7,14 @@ import (
 	"os"
 	"strconv"
 
+	"contrib.go.opencensus.io/exporter/stackdriver"
+	"contrib.go.opencensus.io/exporter/stackdriver/propagation"
 	"github.com/haya14busa/secretbox"
 	"github.com/justinas/nosurf"
-
 	"github.com/reviewdog/reviewdog/doghouse/server/cookieman"
 	"github.com/reviewdog/reviewdog/doghouse/server/storage"
+	"go.opencensus.io/plugin/ochttp"
+	"go.opencensus.io/trace"
 )
 
 func mustCookieMan() *cookieman.CookieMan {
@@ -61,6 +64,7 @@ func mustIntEnv(name string) int {
 }
 
 func main() {
+	configureTrace()
 	initTemplates()
 
 	integrationID := mustIntEnv("GITHUB_INTEGRATION_ID")
@@ -94,15 +98,23 @@ func main() {
 	// Register Admin handlers.
 	mu.HandleFunc("/_ah/warmup", warmupHandler)
 
-	mu.HandleFunc("/", handleTop)
-	mu.HandleFunc("/check", ghChecker.handleCheck)
-	mu.HandleFunc("/gh_/webhook", ghWebhookHandler.handleWebhook)
-	mu.HandleFunc("/gh_/auth/callback", ghHandler.HandleAuthCallback)
-	mu.HandleFunc("/gh_/logout", ghHandler.HandleLogout)
-	mu.Handle("/gh/", nosurf.New(ghHandler.LogInHandler(http.HandlerFunc(ghHandler.HandleGitHubTop))))
+	handleFunc(mu, "/", handleTop)
+	handleFunc(mu, "/check", ghChecker.handleCheck)
+	handleFunc(mu, "/gh_/webhook", ghWebhookHandler.handleWebhook)
+	handleFunc(mu, "/gh_/auth/callback", ghHandler.HandleAuthCallback)
+	handleFunc(mu, "/gh_/logout", ghHandler.HandleLogout)
+	mu.Handle("/gh/", nosurf.New(ochttp.WithRouteTag(ghHandler.LogInHandler(http.HandlerFunc(ghHandler.HandleGitHubTop)), "/gh/")))
 
 	http.Handle("/", mu)
-	log.Fatal(http.ListenAndServe(":"+os.Getenv("PORT"), nil))
+	log.Fatal(http.ListenAndServe(":"+os.Getenv("PORT"), &ochttp.Handler{
+		Handler:     mu,
+		Propagation: &propagation.HTTPFormat{},
+	}))
+}
+
+func handleFunc(mu *http.ServeMux, pattern string, handler func(http.ResponseWriter, *http.Request)) {
+	mu.Handle(pattern,
+		ochttp.WithRouteTag(http.HandlerFunc(handler), pattern))
 }
 
 func handleTop(w http.ResponseWriter, _ *http.Request) {
@@ -111,4 +123,17 @@ func handleTop(w http.ResponseWriter, _ *http.Request) {
 	}
 	data.Title = "reviewdog"
 	topTmpl.ExecuteTemplate(w, "base", &data)
+}
+
+// Document: https://cloud.google.com/trace/docs/setup/go
+func configureTrace() {
+	// Create and register a OpenCensus Stackdriver Trace exporter.
+	exporter, err := stackdriver.NewExporter(stackdriver.Options{
+		ProjectID: os.Getenv("GOOGLE_CLOUD_PROJECT"),
+	})
+	if err != nil {
+		log.Fatal(err)
+	}
+	trace.RegisterExporter(exporter)
+	trace.ApplyConfig(trace.Config{DefaultSampler: trace.AlwaysSample()})
 }

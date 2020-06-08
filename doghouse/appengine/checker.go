@@ -9,10 +9,12 @@ import (
 	"net/url"
 	"strings"
 
+	"contrib.go.opencensus.io/exporter/stackdriver/propagation"
 	"github.com/reviewdog/reviewdog/doghouse"
 	"github.com/reviewdog/reviewdog/doghouse/server"
 	"github.com/reviewdog/reviewdog/doghouse/server/ciutil"
 	"github.com/reviewdog/reviewdog/doghouse/server/storage"
+	"go.opencensus.io/plugin/ochttp"
 )
 
 type githubChecker struct {
@@ -45,7 +47,12 @@ func (gc *githubChecker) handleCheck(w http.ResponseWriter, r *http.Request) {
 		PrivateKey:    gc.privateKey,
 		IntegrationID: gc.integrationID,
 		RepoOwner:     req.Owner,
-		Client:        &http.Client{},
+		Client: &http.Client{
+			Transport: &ochttp.Transport{
+				// Use Google Cloud propagation format.
+				Propagation: &propagation.HTTPFormat{},
+			},
+		},
 	}
 
 	gh, err := server.NewGitHubClient(ctx, opt)

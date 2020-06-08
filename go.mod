@@ -5,6 +5,7 @@ go 1.14
 require (
 	cloud.google.com/go v0.57.0
 	cloud.google.com/go/datastore v1.1.0
+	contrib.go.opencensus.io/exporter/stackdriver v0.13.1
 	github.com/bradleyfalzon/ghinstallation v1.1.1
 	github.com/google/go-cmp v0.4.1
 	github.com/google/go-github/v31 v31.0.0
@@ -16,6 +17,7 @@ require (
 	github.com/rakyll/statik v0.1.7
 	github.com/reviewdog/errorformat v0.0.0-20200602145434-9f3caa8ff10b
 	github.com/xanzy/go-gitlab v0.32.1
+	go.opencensus.io v0.22.3
 	golang.org/x/build v0.0.0-20200605162911-826f76b0b12a
 	golang.org/x/net v0.0.0-20200602114024-627f9648deb9
 	golang.org/x/oauth2 v0.0.0-20200107190931-bf48bf16ab8d
