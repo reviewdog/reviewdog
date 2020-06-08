@@ -10,3 +10,31 @@ inbound_services:
 includes:
 - handlers.yaml
 - secret/secret.yaml # set GITHUB_WEBHOOK_SECRET env var
+
+# Configure automatic scaling setting to reduce the running cost of the
+# reviewdog server (doghouse server).
+# The server should be mostly network I/O bound as it basically just calling
+# GitHub APIs, so it should be safe to increase the scaling condition while
+# preserving the performance.
+#
+# reviewdog CLI tipically call multiple requests at the same time, so the
+# default max_concurrent_requests (=10) seems to be too small and it can be a
+# reason why AppEngine starts multiple instances for the reviewdog server.
+#
+# We can also limit the # of instances explicitly by max_instances and
+# max_idle_instances, but this config doesn't use them just in case.
+#
+# https://cloud.google.com/appengine/docs/standard/go/config/appref#scaling_elements
+automatic_scaling:
+  max_concurrent_requests: 80
+  target_cpu_utilization: 0.95
+  target_throughput_utilization: 0.95
+
+  # Most requests is not (directly) user facing requests but reviewdog CLI
+  # sends requests in CI. It should not be so bad that waiting order of seconds
+  # considering CI start up and running analyzers should take more time.
+  min_pending_latency: 1000ms # default is 30ms
+  max_pending_latency: automatic
+
+  min_instances: 0
+  min_idle_instances: 0
