@@ -20,6 +20,7 @@ type githubChecker struct {
 	integrationID    int
 	ghInstStore      storage.GitHubInstallationStore
 	ghRepoTokenStore storage.GitHubRepositoryTokenStore
+	httpCli          *http.Client
 }
 
 func (gc *githubChecker) handleCheck(w http.ResponseWriter, r *http.Request) {
@@ -45,7 +46,7 @@ func (gc *githubChecker) handleCheck(w http.ResponseWriter, r *http.Request) {
 		PrivateKey:    gc.privateKey,
 		IntegrationID: gc.integrationID,
 		RepoOwner:     req.Owner,
-		Client:        &http.Client{},
+		Client:        gc.httpCli,
 	}
 
 	gh, err := server.NewGitHubClient(ctx, opt)
