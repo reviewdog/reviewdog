@@ -1,0 +1,192 @@
+// Reviewdog Diagnostic Protocol (RDP)
+//
+// Reviewdog Diagnostic Protocol (RDP. Or *R*eview*D*og *P*rotocol in short.)
+// defines generic machine readable message structures which represents a
+// result of diagnostic tool such as a compiler or a linter.
+//
+// The idea behind the Reviewdog Diagnostic Protocol (RDP) is to standardize
+// the protocol for how diagnostic tools (e.g. compilers, linters, etc..) and
+// development tools (e.g. editors, reviewdog, etc..) communicate.
+//
+// Wire formats of Reviewdog Diagnostic Protocol.
+// - rdpjsonl: JSON Lines (http://jsonlines.org/) of the `Diagnostic` message.
+// - rdpjson: JSON format of the `DiagnosticResult` message.
+
+syntax = "proto3";
+package reviewdog.rdp;
+
+option go_package = "github.com/reviewdog/reviewdog/proto/rdp";
+
+// Result of diagnostic tool such as a compiler or a linter.
+// It's intended to be used as top-level structured format which represents a
+// whole result of a diagnostic tool.
+message DiagnosticResult {
+  repeated Diagnostic diagnostics = 1;
+
+  // The source of diagnostics, e.g. 'typescript' or 'super lint'.
+  // Optional.
+  Source source = 2;
+
+  // This diagnostics' overall severity.
+  // Optional.
+  Severity severity = 3;
+}
+
+// Represents a diagnostic, such as a compiler error or warning.
+// It's intended to be used as structured format which represents a
+// diagnostic and can be used as stream of input/output such as jsonl.
+// This message should be self-contained to report a diagnostic.
+message Diagnostic {
+  // The diagnostic's message.
+  string message = 1;
+
+  // Location at which this diagnostic message applies.
+  Location location = 2;
+
+  // This diagnostic's severity.
+  // Optional.
+  Severity severity = 3;
+
+  // The source of this diagnostic, e.g. 'typescript' or 'super lint'.
+  // Optional.
+  Source source = 4;
+
+  // This diagnostic's rule code.
+  // Optional.
+  Code code = 5;
+
+  // Suggested fixes to resolve this diagnostic.
+  // Optional.
+  repeated Suggestion suggestions = 6;
+}
+
+enum Severity {
+  UNKNOWN_SEVERITY = 0;
+  ERROR = 1;
+  WARNING = 2;
+  INFO = 3;
+}
+
+message Location {
+  // File path. It could be either absolute path or relative path.
+  string path = 2;
+
+  // Range in the file path.
+  // Optional.
+  Range range = 3;
+}
+
+// A range in a text document expressed as start and end positions.
+
+// The end position is *exclusive*. It might be a bit unnatural for you or for
+// some diagnostic tools to use exlusive range, but it's necessary to represent
+// zero-width range especially when using it in Suggestion context to support
+// code insertion.
+// Example: "14" in "haya14busa"
+//   start: { line: 1, column: 5 }
+//   end:   { line: 1, column: 7 } # <= Exclusive
+//
+// |h|a|y|a|1|4|b|u|s|a|
+// 1 2 3 4 5 6 7 8 9 0 1
+//         ^---^
+// haya14busa
+//     ^^
+//
+// If you want to specify a range that
+// contains a line including the line ending character(s), then use an end
+// position denoting the start of the next line.
+// Example:
+//   start: { line: 5, column: 23 }
+//   end:   { line: 6, column: 1 } # column: 0 also works as well.
+//
+// If both start and end position omit column value to specify line range, it's
+// handles as linewise and the range includes end position (line) as well.
+// Example:
+//   start: { line: 5 }
+//   end:   { line: 6 }
+// The above example represents range start from line 5 to the end of line 6
+// including EOL.
+message Range {
+  // Required.
+  Position start = 1;
+
+  // end can be omitted. Then the range is handled as zero-length (start == end).
+  // Optional.
+  Position end = 2;
+}
+
+message Position {
+  // Line number, starting at 1.
+  // Optional.
+  int32 line = 1;
+
+  // Column number, starting at 1 (byte count in UTF-8).
+  // Example: 'a𐐀b'
+  //  The column of a: 1
+  //  The column of 𐐀: 2
+  //  The column of b: 6 since 𐐀 is represented with 4 bytes in UTF-8.
+  // Optional.
+  int32 column = 2;
+}
+
+// Suggestion represents a suggested text manipulation to resolve a diagnostic
+// problem.
+//
+// Insert example ('hayabusa' -> 'haya15busa'):
+//   range {
+//     start {
+//       line: 1
+//       column: 5
+//     }
+//     end {
+//       line: 1
+//       column: 5
+//     }
+//   }
+//   text: 15
+// |h|a|y|a|b|u|s|a|
+// 1 2 3 4 5 6 7 8 9
+//         ^--- insert '15'
+//
+// Update example ('haya15busa' -> 'haya14busa'):
+//   range {
+//     start {
+//       line: 1
+//       column: 5
+//     }
+//     end {
+//       line: 1
+//       column: 7
+//     }
+//   }
+//   text: 14
+// |h|a|y|a|1|5|b|u|s|a|
+// 1 2 3 4 5 6 7 8 9 0 1
+//         ^---^ replace with '14'
+message Suggestion {
+  // Range at which this suggestion applies.
+  // To insert text into a document create a range where start == end.
+  Range range = 1;
+
+  // A suggested text which replace the range.
+  // For delete operations use an empty string.
+  string text = 2;
+}
+
+message Source {
+  // A human-readable string describing the source of diagnostics, e.g.
+  // 'typescript' or 'super lint'.
+  string name = 1;
+  // URL to this source.
+  // Optional.
+  string url = 2;
+}
+
+message Code {
+  // This rule's code/identifier.
+  string value = 1;
+
+  // A URL to open with more information about this rule code.
+  // Optional.
+  string url = 2;
+}
