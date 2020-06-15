@@ -10,7 +10,7 @@ status: Proposed / Experimental
 This document proposes Reviewdog Diagnostic Protocol (RDP) and it's still
 in experimental stage.
 
-Any review, suggestion, feedback, criticism, and comments from anyone are very
+Any review, suggestion, feedback, criticism, and comments from anyone is very
 much welcome. Please leave comments in
 [#628](https://github.com/reviewdog/reviewdog/issues/628) or
 file [an issue](https://github.com/reviewdog/reviewdog/issues).
@@ -22,7 +22,7 @@ repository once it's reviewed and stabilized.
 # Reviewdog Diagnostic Protocol (RDP)
 
 Reviewdog Diagnostic Protocol (RDP. Or **R**eview**D**og **P**rotocol in short.)
-defines standard machine readable message structures which represents a
+defines standard machine-readable message structures which represents a
 result of diagnostic tool such as a compiler or a linter.
 
 The idea behind the Reviewdog Diagnostic Protocol (RDP) is to standardize
@@ -116,11 +116,11 @@ Example:
 ## Background: Still No Good Standard Diagnostic Format Out There in 2020
 
 As of writing (2020), most diagnostic tools such as linters or compilers output
-results with their own format. Some tools supports machine readable structured
+results with their own format. Some tools support machine-readable structured
 format like their own JSON format, and other tools just support unstructured
 format (e.g. `/path/to/file:<line>:<column>: <message>`).
 
-The fact that there are no standard format for diagnostic tools' output makes
+The fact that there are no standard formats for diagnostic tools' output makes
 it hard to integrate diagnostic tools with development tools such as editors or
 automated code review tools/services.
 
@@ -128,14 +128,14 @@ automated code review tools/services.
 by introducing [errorformat](https://github.com/reviewdog/errorformat) to
 support unstructured output and checkstyle XML format as structured output.
 It works great so far and reviewdog can support arbitrary diagnostic tools
-regardless of programming languages. However, these solution doesn't solve
+regardless of programming languages. However, these solutions doesn't solve
 everything.
 
 ### *errorformat*
 [errorformat](https://github.com/reviewdog/errorformat)
 
 Problems:
-- No support for diagnostics for code range. It only support start position.
+- No support for diagnostics for code range. It only supports start position.
 - No support for code suggestions (also known as auto-correct or fix).
 - It's hard to write errorformat for complicated output.
 
@@ -143,10 +143,10 @@ Problems:
 [checkstyle](https://checkstyle.sourceforge.io/)
 
 Problems:
-- No support for diagnostics for code range. It only support start position.
+- No support for diagnostics for code range. It only supports start position.
 - No support for code suggestions (also known as auto-correct or fix).
 - It's ..... XML. It's true that some diagnostic tools support checkstyle
-format, but not everyone want to support it.
+format, but not everyone wants to support it.
 - The checkstyle itself is actually a diagnostic tool for Java and its
   output format is actually not well-documented and not meant to be
   used as generic format. Some linters just happens to use the same format(?).
@@ -205,7 +205,7 @@ tools and development tools regardless of their programming languages.
 Ideally, diagnostic tools themselves should support outputing their results as
 RDP compriant format, but not all tools does support RDP especially in early
 stage. But we can still introduce RDP by supporting RDP with errorformat for
-most diagnostic tools. Also we can write a converter and add RPD support in
+most diagnostic tools. Also, we can write a converter and add RPD support in
 diagnostic tools incrementally.
 
 ### Consumer: reviewdog
@@ -233,7 +233,7 @@ message as input.
 efm-langserver currently uses
 [errorformat](https://github.com/reviewdog/errorformat) to support diagnostic
 tools generally, but not all tools' output can be easily parsed with
-errorformat and errorformat lacks some feature like diagnostics for code range.
+errorformat and errorformat lacks some features like diagnostics for code range.
 It should be able to support code action to apply suggested fix as well.
 
 ### Consumer: RDP Report Formatter
@@ -244,8 +244,8 @@ tool implement them on their own. e.g. [eslint](https://eslint.org/docs/user-gui
 support more than 10 formats like stylish, compact, codeframe, html, etc...
 Users may want to use a certain format for every diagnostic tools they use, but 
 not all tools support their desired format. It takes time to implement many
-formats for each tool and it's actually not worth doing it for most of cases,
-IMO.
+formats for each tool and it's actually not worth doing it for most of the
+cases, IMO.
 
 RDP Report Formatter should support formating of diagnostic results based on RDP.
 Then, diagnostic tools can focus on improving diagnostic feature
@@ -256,7 +256,7 @@ The CLI can take RDP messages as input and output formatted results. The CLI
 should be especially useful to build special format like custom html to
 generate report pages independing on diagnostic tools nor their implementation
 languages. However, many diagnostic tools and users should not always want to
-depends on the CLI, so providing libraries for their implementation languages
+depend on the CLI, so providing libraries for their implementation languages
 should be useful to format results natively by each diagnostic tool.
 
 ## Open Questions
