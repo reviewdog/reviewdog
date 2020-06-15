@@ -11,8 +11,8 @@ This document proposes Reviewdog Diagnostic Protocol (RDP) and it's still
 in experimental stage.
 
 Any review, suggestion, feedback, criticism, and comments from anyone is very
-much welcome. Please leave comments in
-[#628](https://github.com/reviewdog/reviewdog/issues/628) or
+much welcome. Please leave comments in Pull Request ([#629](https://github.com/reviewdog/reviewdog/pull/629))
+, in issue [#628](https://github.com/reviewdog/reviewdog/issues/628) or
 file [an issue](https://github.com/reviewdog/reviewdog/issues).
 
 The document and the actual definition are currently in under
@@ -39,7 +39,7 @@ it's widely used and easy to support both from diagnostic tools and development
 tools.
 
 ### **rdpjsonl**
-JSON Lines (http://jsonlines.org/) of the `Diagnostic` message.
+JSON Lines (http://jsonlines.org/) of the [`Diagnostic`](reviewdog.proto) message.
 
 Example:
 ```json
@@ -49,7 +49,7 @@ Example:
 ```
 
 ### **rdpjson**
-JSON format of the `DiagnosticResult` message.
+JSON format of the [`DiagnosticResult`](reviewdog.proto) message.
 
 Example:
 ```json
@@ -262,7 +262,7 @@ should be useful to format results natively by each diagnostic tool.
 ## Open Questions
 - Naming:
   - Is "Reviewdog Diagnostic Protocol" good naming?
-  - Should we really include *reviewdog* in the naming? It's true that the
+  - Should we really include *reviewdog* in the name? It's true that the
     primary motivation is for the reviewdog CLI, but it can be just a standard
     diagnostic format and it can be used outside reviwedog.
   - Is "Protocol" good word? Should we use scheme/format/specification/etc...
