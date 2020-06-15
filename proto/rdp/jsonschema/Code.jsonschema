@@ -1,0 +1,15 @@
+{
+    "$schema": "http://json-schema.org/draft-04/schema#",
+    "properties": {
+        "value": {
+            "type": "string",
+            "description": "This rule's code/identifier."
+        },
+        "url": {
+            "type": "string",
+            "description": "A URL to open with more information about this rule code.\n Optional."
+        }
+    },
+    "additionalProperties": true,
+    "type": "object"
+}

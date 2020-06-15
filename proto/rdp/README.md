@@ -30,6 +30,7 @@ the protocol for how diagnostic tools (e.g. compilers, linters, etc..) and
 development tools (e.g. editors, reviewdog, code review API etc..) communicate.
 
 See [reviewdog.proto](reviewdog.proto) for the actual definition.
+[JSON Schema](./jsonschema) is available as well.
 
 ## Wire formats of Reviewdog Diagnostic Protocol.
 
@@ -39,7 +40,7 @@ it's widely used and easy to support both from diagnostic tools and development
 tools.
 
 ### **rdpjsonl**
-JSON Lines (http://jsonlines.org/) of the [`Diagnostic`](reviewdog.proto) message.
+JSON Lines (http://jsonlines.org/) of the [`Diagnostic`](reviewdog.proto) message ([JSON Schema](./jsonschema/Diagnostic.jsonschema)).
 
 Example:
 ```json
@@ -49,7 +50,7 @@ Example:
 ```
 
 ### **rdpjson**
-JSON format of the [`DiagnosticResult`](reviewdog.proto) message.
+JSON format of the [`DiagnosticResult`](reviewdog.proto) message ([JSON Schema](./jsonschema/DiagnosticResult.jsonschema)).
 
 Example:
 ```json
@@ -274,13 +275,3 @@ should be useful to format results natively by each diagnostic tool.
   - RPD should be stable, but there are still a possibility to extend it with
     backward incompatible way. e.g. We **may** want to add byte offset field in
     Position message as an alternative of line and column.
-
-## Development
-```shell
-# Install Protoc (use brew for example)
-$ brew install protobuf
-# Install protoc-gen-go (https://github.com/protocolbuffers/protobuf-go)
-$ go get google.golang.org/protobuf/cmd/protoc-gen-go
-# Run protoc and include output file in commits as well when updating reviewdog.proto.
-$ protoc --proto_path=proto/rdp --go_out=proto/rdp --go_opt=paths=source_relative proto/rdp/reviewdog.proto 
-```
