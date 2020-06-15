@@ -267,6 +267,8 @@ should be useful to format results natively by each diagnostic tool.
     diagnostic format and it can be used outside reviwedog.
   - Is "Protocol" good word? Should we use scheme/format/specification/etc...
     instead?
+  - RDP is not unique acronym and [Remote Desktop Protocol](https://en.wikipedia.org/wiki/Remote_Desktop_Protocol)
+    is already using it.
 - Protocol Version Representation and Backward/Future Compatibility
   - Should we add version or some capability data in RDP?
   - RPD should be stable, but there are still a possibility to extend it with
