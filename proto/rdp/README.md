@@ -165,7 +165,7 @@ to support arbitrary diagnostic tools. It's similar to errorformat, but it uses 
 
 Problems:
 - No support for code suggestions (also known as auto-correct or fix).
-- Output format of matched results are undocumented and it seems to be used internally in VSCode nor GitHub Actions.
+- Output format of matched results are undocumented and it seems to be used internally in VSCode and GitHub Actions.
 - It's hard to write problem matchers for complicated output.
 
 ### *Language Server Protocol (LSP)*
