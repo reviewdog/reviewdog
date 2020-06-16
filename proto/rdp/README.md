@@ -11,18 +11,18 @@ This document proposes Reviewdog Diagnostic Protocol (RDP) and it's still
 in experimental stage.
 
 Any review, suggestion, feedback, criticism, and comments from anyone is very
-much welcome. Please leave comments in Pull Request ([#629](https://github.com/reviewdog/reviewdog/pull/629))
-, in issue [#628](https://github.com/reviewdog/reviewdog/issues/628) or
+much welcome. Please leave comments in Pull Request ([#629](https://github.com/reviewdog/reviewdog/pull/629)),
+in issue [#628](https://github.com/reviewdog/reviewdog/issues/628) or
 file [an issue](https://github.com/reviewdog/reviewdog/issues).
 
-The document and the actual definition are currently in under
+The document and the actual definition are currently under the
 https://github.com/reviewdog/reviewdog repository, but we may create a separate
 repository once it's reviewed and stabilized.
 
 # Reviewdog Diagnostic Protocol (RDP)
 
 Reviewdog Diagnostic Protocol (RDP. Or **R**eview**D**og **P**rotocol in short.)
-defines standard machine-readable message structures which represents a
+defines standard machine-readable message structures which represent a
 result of diagnostic tool such as a compiler or a linter.
 
 The idea behind the Reviewdog Diagnostic Protocol (RDP) is to standardize
@@ -35,7 +35,7 @@ See [reviewdog.proto](reviewdog.proto) for the actual definition.
 ## Wire formats of Reviewdog Diagnostic Protocol.
 
 RDP uses [Protocol Buffer](https://developers.google.com/protocol-buffers) to
-define the message structure, but recommended wire format is JSON considering
+define the message structure, but the recommended wire format is JSON considering
 it's widely used and easy to support both from diagnostic tools and development
 tools.
 
@@ -166,7 +166,7 @@ to support arbitrary diagnostic tools. It's similar to errorformat, but it uses 
 Problems:
 - No support for code suggestions (also known as auto-correct or fix).
 - Output format of matched results are undocumented and it seems to be used internally in VSCode nor GitHub Actions.
-- It's hard to write problem matcher for complicated output.
+- It's hard to write problem matchers for complicated output.
 
 ### *Language Server Protocol (LSP)*
 [Language Server Protocol Specification](https://microsoft.github.io/language-server-protocol/specifications/specification-current/)
@@ -178,7 +178,7 @@ RDP message is actually inspired by LSP Diagnostic message too.
 
 Problems:
 - LSP and the Diagnostic message is basically per one file. It's not always
-  suited to be used as diagnostic tools output because they often needs to
+  suited to be used as diagnostic tools output because they often need to
   report diagnostic results for multiple files and outputing json per file does
   not make very much sense.
 - LSP's Diagnostic message doesn't have code suggestions (code action) data.
@@ -204,7 +204,7 @@ tools and development tools regardless of their programming languages.
 
 ### Diagnostic tools' RDP Support
 Ideally, diagnostic tools themselves should support outputing their results as
-RDP compriant format, but not all tools does support RDP especially in early
+RDP compliant format, but not all tools does support RDP especially in early
 stage. But we can still introduce RDP by supporting RDP with errorformat for
 most diagnostic tools. Also, we can write a converter and add RPD support in
 diagnostic tools incrementally.
@@ -240,8 +240,8 @@ It should be able to support code action to apply suggested fix as well.
 ### Consumer: RDP Report Formatter
 *Not implemented yet*
 
-There are many diagnostic output format (report format) and each diagnostic
-tool implement them on their own. e.g. [eslint](https://eslint.org/docs/user-guide/formatters)
+There are many diagnostic output formats (report formats) and each diagnostic
+tool implements them on their own. e.g. [eslint](https://eslint.org/docs/user-guide/formatters)
 support more than 10 formats like stylish, compact, codeframe, html, etc...
 Users may want to use a certain format for every diagnostic tools they use, but 
 not all tools support their desired format. It takes time to implement many
