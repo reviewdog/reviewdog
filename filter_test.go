@@ -236,6 +236,6 @@ func TestGetOldPosition_added(t *testing.T) {
 	fdiff := findFileDiff(filediffs, path, strip)
 	gotPath, _ := getOldPosition(fdiff, strip, path, 1)
 	if gotPath != "" {
-		t.Errorf("got %q as old path for addedd diff file, want empty", gotPath)
+		t.Errorf("got %q as old path for added diff file, want empty", gotPath)
 	}
 }
