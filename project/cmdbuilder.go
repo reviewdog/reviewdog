@@ -33,7 +33,7 @@ func (cb *cmdBuilder) build(ctx context.Context, command string) (*exec.Cmd, io.
 	shell := "sh"
 	args := []string{"-c", command}
 	if runtime.GOOS == "windows" {
-		// Under Windows the executalbe sh is not always available
+		// Under Windows the executable sh is not always available
 		// If running under MinGW the environment variable SHELL would be set
 		SHELL := os.Getenv("SHELL")
 		// Otherwise use the environment variable COMSPEC (path to cmd.exe)
