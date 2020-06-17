@@ -37,7 +37,7 @@ type CheckRequest struct {
 	// Optional.
 	Level string `json:"level"`
 
-	// Deprecatd: Use FilterMode == diffilter.NoFilter instead.
+	// Deprecated: Use FilterMode == diffilter.NoFilter instead.
 	//
 	// OutsideDiff represents whether it report results in outside diff or not as
 	// annotations. It's useful only when PullRequest != 0. If PullRequest is
