@@ -723,7 +723,7 @@ $ reviewdog -reporter=github-pr-review -filter-mode=nofilter -fail-on-error
 ```
 
 ### Filter Mode Support Table
-Note that not all reporters provide full suppport of filter mode due to API limitation.
+Note that not all reporters provide full support of filter mode due to API limitation.
 e.g. `github-pr-review` reporter uses [GitHub Review
 API](https://developer.github.com/v3/pulls/reviews/) but it doesn't support posting comment outside diff (`diff_context`),
 so reviewdog will use [Check annotation](https://developer.github.com/v3/checks/runs/) as fallback to post those comments [1]. 

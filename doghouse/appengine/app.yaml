@@ -17,7 +17,7 @@ includes:
 # GitHub APIs, so it should be safe to increase the scaling condition while
 # preserving the performance.
 #
-# reviewdog CLI tipically call multiple requests at the same time, so the
+# reviewdog CLI typically call multiple requests at the same time, so the
 # default max_concurrent_requests (=10) seems to be too small and it can be a
 # reason why AppEngine starts multiple instances for the reviewdog server.
 #
