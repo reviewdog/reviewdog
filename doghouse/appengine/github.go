@@ -253,7 +253,7 @@ func notfound(w http.ResponseWriter) {
 func (g *GitHubHandler) getUserOrBadRequest(ctx context.Context, ghcli *github.Client, w http.ResponseWriter) (bool, *github.User) {
 	u, _, err := ghcli.Users.Get(ctx, "")
 	if err != nil {
-		// Token seeims invalid. Clear it before returning BadRequest status.
+		// Token seems invalid. Clear it before returning BadRequest status.
 		g.tokenStore.Clear(w)
 		w.WriteHeader(http.StatusBadRequest)
 		fmt.Fprintf(w, "Cannot get GitHub authenticated user. Please reload the page again.")
