@@ -1,4 +1,7 @@
+.idea
+.DS_Store
 .drone.sec.yaml
 vendor/
 node_modules/
 dist/
+package-lock.json
