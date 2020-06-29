@@ -49,6 +49,10 @@ $ cd subdir/ && reviewdog -filter-mode=file -fail-on-error -reporter=github-pr-r
 ### :bug: Fixes
 - [#461](https://github.com/reviewdog/reviewdog/issues/461) All reporters now supports sub-directory run. ([@haya14busa])
 
+### :rotating_light: Breaking changes
+- `github-check` reporter won't report results outside diff by default now. You
+  need to use `-filter-mode=nofilter` to keep the same bahavior.
+
 ---
 
 See https://github.com/reviewdog/reviewdog/releases for older release note.
