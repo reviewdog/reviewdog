@@ -51,6 +51,7 @@ func (ch *Checker) Check(ctx context.Context) (*doghouse.CheckResponse, error) {
 
 	results := annotationsToCheckResults(ch.req.Annotations)
 	filterMode := ch.req.FilterMode
+	//lint:ignore SA1019 Need to support OutsideDiff for backward compatibility.
 	if ch.req.PullRequest == 0 || ch.req.OutsideDiff {
 		// If it's not Pull Request run, do not filter results by diff regardless
 		// of the filter mode.
