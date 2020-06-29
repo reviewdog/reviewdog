@@ -342,8 +342,7 @@ server.
 ### Reporter: GitHub Checks (-reporter=github-check)
 
 It's basically same as `-reporter=github-pr-check` except it works not only for
-Pull Request but also for commit and it reports results outside Pull Request
-diff too.
+Pull Request but also for commit.
 
 [![sample comment outside diff](https://user-images.githubusercontent.com/3797062/69917921-e0680580-14ae-11ea-9a56-de9e3cbac005.png)](https://github.com/reviewdog/reviewdog/pull/364/files)
 
