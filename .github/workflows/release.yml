@@ -41,7 +41,7 @@ jobs:
         if: "steps.tag.outputs.value != ''"
         with:
           version: latest
-          args: release --rm-dist --release-header <(echo -n 'See [CHANGELOG](https://github.com/reviewdog/reviewdog/blob/master/CHANGELOG.md)')
+          args: release --rm-dist --release-header .github/goreleaser-header.md
         env:
           # Need to use personal access token instead of default token to
           # update https://github.com/reviewdog/homebrew-tap.
