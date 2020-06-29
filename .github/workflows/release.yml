@@ -5,9 +5,13 @@ on:
       - master
     tags:
       - 'v*.*.*'
+  pull_request:
+    types:
+      - labeled
 
 jobs:
   release:
+    if: github.event.action != 'labeled'
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v2
@@ -37,8 +41,16 @@ jobs:
         if: "steps.tag.outputs.value != ''"
         with:
           version: latest
-          args: release --rm-dist
+          args: release --rm-dist --release-header <(echo -n 'See [CHANGELOG](https://github.com/reviewdog/reviewdog/blob/master/CHANGELOG.md)')
         env:
           # Need to use personal access token instead of default token to
           # update https://github.com/reviewdog/homebrew-tap.
           GITHUB_TOKEN: ${{ secrets.RELEASE_GITHUB_TOKEN }}
+
+  release-check:
+    if: github.event.action == 'labeled'
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v2
+      - name: Post bumpr status comment
+        uses: haya14busa/action-bumpr@v1
