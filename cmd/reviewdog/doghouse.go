@@ -193,11 +193,10 @@ func checkResultToAnnotation(c *reviewdog.CheckResult, wd, gitRelWd string) *dog
 // It returns true if reviewdog should exit with 1.
 // e.g. At least one annotation result is in diff.
 func reportResults(w io.Writer, filteredResultSet *reviewdog.FilteredResultMap) bool {
-	if filteredResultSet.Len() != 0 && isPRFromForkedRepo() {
+	if filteredResultSet.Len() != 0 && cienv.IsGitHubPRFromForkedRepo() {
 		fmt.Fprintln(w, `reviewdog: This is Pull-Request from forked repository.
 GitHub token doesn't have write permission of Check API, so reviewdog will
 report results via logging command [1].
-
 [1]: https://help.github.com/en/actions/automating-your-workflow-with-github-actions/development-tools-for-github-actions#logging-commands`)
 	}
 
@@ -251,12 +250,4 @@ report results via logging command [1].
 		}
 	}
 	return shouldFail
-}
-
-func isPRFromForkedRepo() bool {
-	event, err := cienv.LoadGitHubEvent()
-	if err != nil {
-		return false
-	}
-	return event.PullRequest.Head.Repo.Fork
 }
