@@ -4,7 +4,7 @@ go 1.13
 
 require (
 	github.com/client9/misspell v0.3.4
-	github.com/kisielk/errcheck v1.2.0
+	github.com/kisielk/errcheck v1.3.0
 	github.com/mgechev/revive v1.0.2
 	golang.org/x/lint v0.0.0-20200302205851-738671d3881b
 	golang.org/x/mod v0.3.0 // indirect
