@@ -105,6 +105,40 @@ func TestRun_local_nofilter(t *testing.T) {
 	}
 }
 
+func TestRun_unified_nofilter(t *testing.T) {
+	var (
+		stdin = strings.Join([]string{
+			"/path/to/file(2,1): message1",
+			"/path/to/file(2): message2",
+			"/path/to/file(14,1): message3",
+		}, "\n")
+		want = `/path/to/file:2:1: [test] message1
+/path/to/file:14:1: [test] message3`
+	)
+
+	opt := &option{
+		diffCmd:   "", // empty
+		efms:      strslice([]string{`%f(%l,%c): %m`}),
+		diffStrip: 0,
+		reporter:  "unified",
+		name:      "test",
+	}
+
+	stdout := new(bytes.Buffer)
+	if err := run(strings.NewReader(stdin), stdout, opt); err == nil {
+		t.Errorf("got no error, but want error")
+	}
+
+	opt.filterMode = difffilter.ModeNoFilter
+	if err := run(strings.NewReader(stdin), stdout, opt); err != nil {
+		t.Error(err)
+	}
+
+	if got := strings.Trim(stdout.String(), "\n"); got != want {
+		t.Errorf("got:\n%v\n want\n%v", got, want)
+	}
+}
+
 func TestRun_local_tee(t *testing.T) {
 	stdin := "tee test"
 	opt := &option{

@@ -89,6 +89,13 @@ const (
 	"local" (default)
 		Report results to stdout.
 
+	"unified"
+		Similar to local, but outputs in the "project" output format:
+			- <file>: [<tool name>] <message>
+			- <file>:<lnum>: [<tool name>] <message>
+			- <file>:<lnum>:<col>: [<tool name>] <message>
+		where <message> can be multiple lines.
+
 	"github-check"
 		Report results to GitHub Check. It works both for Pull Requests and commits.
 		For Pull Request, you can see report results in GitHub PullRequest Check
@@ -235,7 +242,7 @@ See -reporter flag for migration and set -reporter="github-pr-review" or -report
 	var cs reviewdog.CommentService
 	var ds reviewdog.DiffService
 
-	if isProject {
+	if isProject || opt.reporter == "unified" {
 		cs = reviewdog.NewUnifiedCommentWriter(w)
 	} else {
 		cs = reviewdog.NewRawCommentWriter(w)
@@ -333,7 +340,7 @@ github-pr-check reporter as a fallback.
 			return err
 		}
 		ds = d
-	case "local":
+	case "local", "unified":
 		if opt.diffCmd == "" && opt.filterMode == difffilter.ModeNoFilter {
 			ds = &reviewdog.EmptyDiff{}
 		} else {
