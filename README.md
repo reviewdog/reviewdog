@@ -101,13 +101,13 @@ by diff.
 
 ```shell
 # Install the latest version. (Install it into ./bin/ by default).
-$ curl -sfL https://raw.githubusercontent.com/reviewdog/reviewdog/master/install.sh| sh -s
+$ curl -sfL https://raw.githubusercontent.com/reviewdog/reviewdog/master/install.sh | sh -s
 
 # Specify installation directory ($(go env GOPATH)/bin/) and version.
-$ curl -sfL https://raw.githubusercontent.com/reviewdog/reviewdog/master/install.sh| sh -s -- -b $(go env GOPATH)/bin [vX.Y.Z]
+$ curl -sfL https://raw.githubusercontent.com/reviewdog/reviewdog/master/install.sh | sh -s -- -b $(go env GOPATH)/bin [vX.Y.Z]
 
 # In alpine linux (as it does not come with curl by default)
-$ wget -O - -q https://raw.githubusercontent.com/reviewdog/reviewdog/master/install.sh| sh -s [vX.Y.Z]
+$ wget -O - -q https://raw.githubusercontent.com/reviewdog/reviewdog/master/install.sh | sh -s [vX.Y.Z]
 ```
 
 ### Nightly releases
@@ -115,8 +115,8 @@ $ wget -O - -q https://raw.githubusercontent.com/reviewdog/reviewdog/master/inst
 You can also use [nightly reviewdog release](https://github.com/reviewdog/nightly)
 to try the latest reviewdog improvements every day!
 
-```
-$ curl -sfL https://raw.githubusercontent.com/reviewdog/reviewdog/master/install.sh| sh -s -- -b $(go env GOPATH)/bin
+```shell
+$ curl -sfL https://raw.githubusercontent.com/reviewdog/nightly/master/install.sh | sh -s -- -b $(go env GOPATH)/bin
 ```
 
 ### Build from HEAD with go get
