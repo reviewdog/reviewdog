@@ -16,7 +16,7 @@ require (
 	github.com/mattn/go-shellwords v1.0.10
 	github.com/rakyll/statik v0.1.7
 	github.com/reviewdog/errorformat v0.0.0-20200701132939-79fe8306e8d9
-	github.com/xanzy/go-gitlab v0.32.1
+	github.com/xanzy/go-gitlab v0.33.0
 	go.opencensus.io v0.22.4
 	golang.org/x/build v0.0.0-20200616162219-07bebbe343e9
 	golang.org/x/net v0.0.0-20200625001655-4c5254603344
