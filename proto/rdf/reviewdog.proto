@@ -97,7 +97,7 @@ message Location {
 // position denoting the start of the next line.
 // Example:
 //   start: { line: 5, column: 23 }
-//   end:   { line: 6, column: 1 } # column: 0 also works as well.
+//   end:   { line: 6, column: 1 }
 //
 // If both start and end position omit column value, it's
 // handled as linewise and the range includes end position (line) as well.
@@ -106,6 +106,31 @@ message Location {
 //   end:   { line: 6 }
 // The above example represents range start from line 5 to the end of line 6
 // including EOL.
+//
+// Examples for line range:
+//  Text example. <line>|<line content>(line breaking)
+//  1|abc\r\n
+//  2|def\r\n
+//  3|ghi\r\n
+//
+// start: { line: 2 }
+//   => "abc"
+//
+// start: { line: 2 }
+// end:   { line: 2 }
+//   => "abc"
+//
+// start: { line: 2 }
+// end:   { line: 3 }
+//   => "abc\r\ndef"
+//
+// start: { line: 2 }
+// end:   { line: 3, column: 1 }
+//   => "abc\r\n"
+
+// start: { line: 2, column: 1 }
+// end:   { line: 2, column: 4 }
+//   => "abc" (without line-break)
 message Range {
   // Required.
   Position start = 1;

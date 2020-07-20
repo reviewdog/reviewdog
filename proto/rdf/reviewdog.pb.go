@@ -320,34 +320,9 @@ func (x *Location) GetRange() *Range {
 	return nil
 }
 
-// The end position is *exclusive*. It might be a bit unnatural for you or for
-// some diagnostic tools to use exlusive range, but it's necessary to represent
-// zero-width range especially when using it in Suggestion context to support
-// code insertion.
-// Example: "14" in "haya14busa"
-//   start: { line: 1, column: 5 }
-//   end:   { line: 1, column: 7 } # <= Exclusive
-//
-// |h|a|y|a|1|4|b|u|s|a|
-// 1 2 3 4 5 6 7 8 9 0 1
-//         ^---^
-// haya14busa
-//     ^^
-//
-// If you want to specify a range that
-// contains a line including the line ending character(s), then use an end
-// position denoting the start of the next line.
-// Example:
-//   start: { line: 5, column: 23 }
-//   end:   { line: 6, column: 1 } # column: 0 also works as well.
-//
-// If both start and end position omit column value, it's
-// handled as linewise and the range includes end position (line) as well.
-// Example:
-//   start: { line: 5 }
-//   end:   { line: 6 }
-// The above example represents range start from line 5 to the end of line 6
-// including EOL.
+// start: { line: 2, column: 1 }
+// end:   { line: 2, column: 4 }
+//   => "abc" (without line-break)
 type Range struct {
 	state         protoimpl.MessageState
 	sizeCache     protoimpl.SizeCache
