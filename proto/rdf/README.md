@@ -201,7 +201,7 @@ RDFormat should support major use cases from representing diagnostic results to
 apply suggested fix in general way and should be easily supported by diagnostic
 tools and development tools regardless of their programming languages.
 
-[![Reviewdog Diagnostic Format Concept](https://user-images.githubusercontent.com/3797062/84576021-8dbbbe80-adec-11ea-9a9f-760d41e1ab5b.png)](https://docs.google.com/drawings/d/15GZu5Iq6wukFtrpy91srQO_ry1iFQUisVAJd_yEprLc/edit?usp=sharing)
+[![Reviewdog Diagnostic Format Concept](https://user-images.githubusercontent.com/3797062/87955046-2b8b6300-cae8-11ea-983f-6554e2aeb8f2.png)](https://docs.google.com/drawings/d/15GZu5Iq6wukFtrpy91srQO_ry1iFQUisVAJd_yEprLc/edit?usp=sharing)
 
 ### Diagnostic tools' RDFormat Support
 Ideally, diagnostic tools themselves should support outputing their results as
