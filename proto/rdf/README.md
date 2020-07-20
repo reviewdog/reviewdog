@@ -1,5 +1,5 @@
 ---
-title: Reviewdog Diagnostic Protocol (RDP)
+title: Reviewdog Diagnostic Format
 date: 2020-06-15
 author: haya14busa
 status: Proposed / Experimental
@@ -7,7 +7,7 @@ status: Proposed / Experimental
 
 # Status
 
-This document proposes Reviewdog Diagnostic Protocol (RDP) and it's still
+This document proposes Reviewdog Diagnostic Format and it's still
 in experimental stage.
 
 Any review, suggestion, feedback, criticism, and comments from anyone is very
@@ -19,27 +19,27 @@ The document and the actual definition are currently under the
 https://github.com/reviewdog/reviewdog repository, but we may create a separate
 repository once it's reviewed and stabilized.
 
-# Reviewdog Diagnostic Protocol (RDP)
+# Reviewdog Diagnostic Format (RDFormat)
 
-Reviewdog Diagnostic Protocol (RDP. Or **R**eview**D**og **P**rotocol in short.)
-defines standard machine-readable message structures which represent a
-result of diagnostic tool such as a compiler or a linter.
+Reviewdog Diagnostic Format defines standard machine-readable message
+structures which represent a result of diagnostic tool such as a compiler or a
+linter.
 
-The idea behind the Reviewdog Diagnostic Protocol (RDP) is to standardize
+The idea behind the Reviewdog Diagnostic Format is to standardize
 the protocol for how diagnostic tools (e.g. compilers, linters, etc..) and
 development tools (e.g. editors, reviewdog, code review API etc..) communicate.
 
 See [reviewdog.proto](reviewdog.proto) for the actual definition.
 [JSON Schema](./jsonschema) is available as well.
 
-## Wire formats of Reviewdog Diagnostic Protocol.
+## Wire formats of Reviewdog Diagnostic Format.
 
-RDP uses [Protocol Buffer](https://developers.google.com/protocol-buffers) to
+RDFormat uses [Protocol Buffer](https://developers.google.com/protocol-buffers) to
 define the message structure, but the recommended wire format is JSON considering
 it's widely used and easy to support both from diagnostic tools and development
 tools.
 
-### **rdpjsonl**
+### **rdjsonl**
 JSON Lines (http://jsonlines.org/) of the [`Diagnostic`](reviewdog.proto) message ([JSON Schema](./jsonschema/Diagnostic.jsonschema)).
 
 Example:
@@ -49,7 +49,7 @@ Example:
 ...
 ```
 
-### **rdpjson**
+### **rdjson**
 JSON format of the [`DiagnosticResult`](reviewdog.proto) message ([JSON Schema](./jsonschema/DiagnosticResult.jsonschema)).
 
 Example:
@@ -174,7 +174,7 @@ Problems:
 LSP supports [Diagnostic](https://microsoft.github.io/language-server-protocol/specifications/specification-current/#diagnostic)
 to represents a diagnostic, such as a compiler error or warning.
 It's great for editor integration and is widely used these days as well.
-RDP message is actually inspired by LSP Diagnostic message too.
+RDFormat message is actually inspired by LSP Diagnostic message too.
 
 Problems:
 - LSP and the Diagnostic message is basically per one file. It's not always
@@ -191,28 +191,29 @@ Problems:
   review API such as GitHub, GitLab and Gerrit....
   In addition, UTF-8 is defact-standard of text file encoding as well these days.
 
-## Reviewdog Diagnostic Protocol Concept
-Again, the idea behind the Reviewdog Diagnostic Protocol (RDP) is to standardize
-the protocol for how diagnostic tools (e.g. compilers, linters, etc..) and
-development tools (e.g. editors, reviewdog, code review API etc..) communicate.
+## Reviewdog Diagnostic Format Concept
+Again, the idea behind the Reviewdog Diagnostic Format (RDFormat) is to
+standardize the protocol for how diagnostic tools (e.g. compilers, linters,
+etc..) and development tools (e.g. editors, reviewdog, code review API etc..)
+communicate.
 
-RDP should support major use cases from representing diagnostic results to
+RDFormat should support major use cases from representing diagnostic results to
 apply suggested fix in general way and should be easily supported by diagnostic
 tools and development tools regardless of their programming languages.
 
-[![Reviewdog Diagnostic Protocol Concept](https://user-images.githubusercontent.com/3797062/84576021-8dbbbe80-adec-11ea-9a9f-760d41e1ab5b.png)](https://docs.google.com/drawings/d/15GZu5Iq6wukFtrpy91srQO_ry1iFQUisVAJd_yEprLc/edit?usp=sharing)
+[![Reviewdog Diagnostic Format Concept](https://user-images.githubusercontent.com/3797062/84576021-8dbbbe80-adec-11ea-9a9f-760d41e1ab5b.png)](https://docs.google.com/drawings/d/15GZu5Iq6wukFtrpy91srQO_ry1iFQUisVAJd_yEprLc/edit?usp=sharing)
 
-### Diagnostic tools' RDP Support
+### Diagnostic tools' RDFormat Support
 Ideally, diagnostic tools themselves should support outputing their results as
-RDP compliant format, but not all tools does support RDP especially in early
-stage. But we can still introduce RDP by supporting RDP with errorformat for
-most diagnostic tools. Also, we can write a converter and add RPD support in
-diagnostic tools incrementally.
+RDFormat compliant format, but not all tools does support RDFormat especially
+in early stage. But we can still introduce RDFormat by supporting RDFormat with
+errorformat for most diagnostic tools. Also, we can write a converter and add
+RPD support in diagnostic tools incrementally.
 
 ### Consumer: reviewdog
 *Not implemented yet*
 
-reviewdog can support RDP and consume `rdpjsonl`/`rdpjson` as structured input
+reviewdog can support RDFormat and consume `rdjsonl`/`rdjson` as structured input
 of diagnostic tools.
 It also makes it possible to support (1) a diagnostic to code range and (2)
 code suggestions (auto-correction) if a reporter supports them (e.g.
@@ -225,11 +226,11 @@ apply suggestions only in diff for example.
 *Not implemented yet*
 
 It's going to be easier for editors to support arbitrary diagnostic tools by
-using RDP. Language Server can also use RDP and it's easy to convert RDP
+using RDFormat. Language Server can also use RDFormat and it's easy to convert RDFormat
 message to LSP Diagnostic and/or Code Action message.
 
 One possible more concrete idea is to extend
-[efm-langserver](https://github.com/mattn/efm-langserver) to support RDP
+[efm-langserver](https://github.com/mattn/efm-langserver) to support RDFormat
 message as input.
 efm-langserver currently uses
 [errorformat](https://github.com/reviewdog/errorformat) to support diagnostic
@@ -237,7 +238,7 @@ tools generally, but not all tools' output can be easily parsed with
 errorformat and errorformat lacks some features like diagnostics for code range.
 It should be able to support code action to apply suggested fix as well.
 
-### Consumer: RDP Report Formatter
+### Consumer: Reviewdog Diagnostic Formatter (RDFormatter)
 *Not implemented yet*
 
 There are many diagnostic output formats (report formats) and each diagnostic
@@ -248,12 +249,12 @@ not all tools support their desired format. It takes time to implement many
 formats for each tool and it's actually not worth doing it for most of the
 cases, IMO.
 
-RDP Report Formatter should support formating of diagnostic results based on RDP.
-Then, diagnostic tools can focus on improving diagnostic feature
-and let RDP Report Formatter to format the results.
+Reviewdog Diagnostic Formatter should support formating of diagnostic
+results based on RDfFormat. Then, diagnostic tools can focus on improving
+diagnostic feature and let the formatter to format the results.
 
-RDP Report Formatter should be provided both as CLI and as libraries.
-The CLI can take RDP messages as input and output formatted results. The CLI
+RDFormatter should be provided both as CLI and as libraries.
+The CLI can take RDFormat messages as input and output formatted results. The CLI
 should be especially useful to build special format like custom html to
 generate report pages independing on diagnostic tools nor their implementation
 languages. However, many diagnostic tools and users should not always want to

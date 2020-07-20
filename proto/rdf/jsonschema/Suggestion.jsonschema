@@ -4,13 +4,13 @@
         "range": {
             "properties": {
                 "start": {
-                    "$ref": "reviewdog.rdp.Position",
+                    "$ref": "reviewdog.rdf.Position",
                     "additionalProperties": true,
                     "type": "object",
                     "description": "Required."
                 },
                 "end": {
-                    "$ref": "reviewdog.rdp.Position",
+                    "$ref": "reviewdog.rdf.Position",
                     "additionalProperties": true,
                     "type": "object",
                     "description": "end can be omitted. Then the range is handled as zero-length (start == end).\n Optional."
@@ -29,7 +29,7 @@
     "type": "object",
     "description": "Suggestion represents a suggested text manipulation to resolve a diagnostic\n problem.\n\n Insert example ('hayabusa' -\u003e 'haya15busa'):\n   range {\n     start {\n       line: 1\n       column: 5\n     }\n     end {\n       line: 1\n       column: 5\n     }\n   }\n   text: 15\n |h|a|y|a|b|u|s|a|\n 1 2 3 4 5 6 7 8 9\n         ^--- insert '15'\n\n Update example ('haya15busa' -\u003e 'haya14busa'):\n   range {\n     start {\n       line: 1\n       column: 5\n     }\n     end {\n       line: 1\n       column: 7\n     }\n   }\n   text: 14\n |h|a|y|a|1|5|b|u|s|a|\n 1 2 3 4 5 6 7 8 9 0 1\n         ^---^ replace with '14'",
     "definitions": {
-        "reviewdog.rdp.Position": {
+        "reviewdog.rdf.Position": {
             "$schema": "http://json-schema.org/draft-04/schema#",
             "properties": {
                 "line": {
@@ -43,7 +43,7 @@
             },
             "additionalProperties": true,
             "type": "object",
-            "id": "reviewdog.rdp.Position"
+            "id": "reviewdog.rdf.Position"
         }
     }
 }

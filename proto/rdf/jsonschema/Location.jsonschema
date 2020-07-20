@@ -8,13 +8,13 @@
         "range": {
             "properties": {
                 "start": {
-                    "$ref": "reviewdog.rdp.Position",
+                    "$ref": "reviewdog.rdf.Position",
                     "additionalProperties": true,
                     "type": "object",
                     "description": "Required."
                 },
                 "end": {
-                    "$ref": "reviewdog.rdp.Position",
+                    "$ref": "reviewdog.rdf.Position",
                     "additionalProperties": true,
                     "type": "object",
                     "description": "end can be omitted. Then the range is handled as zero-length (start == end).\n Optional."
@@ -28,7 +28,7 @@
     "additionalProperties": true,
     "type": "object",
     "definitions": {
-        "reviewdog.rdp.Position": {
+        "reviewdog.rdf.Position": {
             "$schema": "http://json-schema.org/draft-04/schema#",
             "properties": {
                 "line": {
@@ -42,7 +42,7 @@
             },
             "additionalProperties": true,
             "type": "object",
-            "id": "reviewdog.rdp.Position"
+            "id": "reviewdog.rdf.Position"
         }
     }
 }

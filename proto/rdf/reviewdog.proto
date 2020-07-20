@@ -1,21 +1,21 @@
-// Reviewdog Diagnostic Protocol (RDP)
+// Reviewdog Diagnostic Format
 //
-// Reviewdog Diagnostic Protocol (RDP. Or *R*eview*D*og *P*rotocol in short.)
-// defines generic machine readable message structures which represents a
-// result of diagnostic tool such as a compiler or a linter.
+// Reviewdog Diagnostic Format defines generic machine readable message
+// structures which represents a result of diagnostic tool such as a compiler
+// or a linter.
 //
-// The idea behind the Reviewdog Diagnostic Protocol (RDP) is to standardize
+// The idea behind the Reviewdog Diagnostic Format is to standardize
 // the protocol for how diagnostic tools (e.g. compilers, linters, etc..) and
 // development tools (e.g. editors, reviewdog, etc..) communicate.
 //
-// Wire formats of Reviewdog Diagnostic Protocol.
-// - rdpjsonl: JSON Lines (http://jsonlines.org/) of the `Diagnostic` message.
-// - rdpjson: JSON format of the `DiagnosticResult` message.
+// Wire formats of Reviewdog Diagnostic Format.
+// - rdjsonl: JSON Lines (http://jsonlines.org/) of the `Diagnostic` message.
+// - rdjson: JSON format of the `DiagnosticResult` message.
 
 syntax = "proto3";
-package reviewdog.rdp;
+package reviewdog.rdf;
 
-option go_package = "github.com/reviewdog/reviewdog/proto/rdp";
+option go_package = "github.com/reviewdog/reviewdog/proto/rdf";
 
 // Result of diagnostic tool such as a compiler or a linter.
 // It's intended to be used as top-level structured format which represents a
