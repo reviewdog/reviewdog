@@ -101,13 +101,13 @@ by diff.
 
 ```shell
 # Install the latest version. (Install it into ./bin/ by default).
-$ curl -sfL https://raw.githubusercontent.com/reviewdog/reviewdog/master/install.sh| sh -s
+$ curl -sfL https://raw.githubusercontent.com/reviewdog/reviewdog/master/install.sh | sh -s
 
 # Specify installation directory ($(go env GOPATH)/bin/) and version.
-$ curl -sfL https://raw.githubusercontent.com/reviewdog/reviewdog/master/install.sh| sh -s -- -b $(go env GOPATH)/bin [vX.Y.Z]
+$ curl -sfL https://raw.githubusercontent.com/reviewdog/reviewdog/master/install.sh | sh -s -- -b $(go env GOPATH)/bin [vX.Y.Z]
 
 # In alpine linux (as it does not come with curl by default)
-$ wget -O - -q https://raw.githubusercontent.com/reviewdog/reviewdog/master/install.sh| sh -s [vX.Y.Z]
+$ wget -O - -q https://raw.githubusercontent.com/reviewdog/reviewdog/master/install.sh | sh -s [vX.Y.Z]
 ```
 
 ### Nightly releases
@@ -115,8 +115,8 @@ $ wget -O - -q https://raw.githubusercontent.com/reviewdog/reviewdog/master/inst
 You can also use [nightly reviewdog release](https://github.com/reviewdog/nightly)
 to try the latest reviewdog improvements every day!
 
-```
-$ curl -sfL https://raw.githubusercontent.com/reviewdog/reviewdog/master/install.sh| sh -s -- -b $(go env GOPATH)/bin
+```shell
+$ curl -sfL https://raw.githubusercontent.com/reviewdog/nightly/master/install.sh | sh -s -- -b $(go env GOPATH)/bin
 ```
 
 ### Build from HEAD with go get
@@ -342,8 +342,7 @@ server.
 ### Reporter: GitHub Checks (-reporter=github-check)
 
 It's basically same as `-reporter=github-pr-check` except it works not only for
-Pull Request but also for commit and it reports results outside Pull Request
-diff too.
+Pull Request but also for commit.
 
 [![sample comment outside diff](https://user-images.githubusercontent.com/3797062/69917921-e0680580-14ae-11ea-9a56-de9e3cbac005.png)](https://github.com/reviewdog/reviewdog/pull/364/files)
 
@@ -491,9 +490,11 @@ You can use public GitHub Actions to start using reviewdog with ease! :tada: :ar
 
 - Common
   - [reviewdog/action-misspell](https://github.com/reviewdog/action-misspell) - Run [misspell](https://github.com/client9/misspell).
+- Text (e.g. Markdown)
+  - [reviewdog/action-alex](https://github.com/reviewdog/action-alex) - Run [alex](languagetool) which catches insensitive, inconsiderate writing. (e.g. master/slave)
+  - [reviewdog/action-languagetool](https://github.com/reviewdog/action-languagetool) - Run [languagetool](https://github.com/languagetool-org/languagetool).
   - [tsuyoshicho/action-textlint](https://github.com/tsuyoshicho/action-textlint) - Run [textlint](https://github.com/textlint/textlint)
   - [tsuyoshicho/action-redpen](https://github.com/tsuyoshicho/action-redpen) - Run [redpen](https://github.com/redpen-cc/redpen)
-  - [reviewdog/action-languagetool](https://github.com/reviewdog/action-languagetool) - Run [languagetool](https://github.com/languagetool-org/languagetool).
 - Docker
   - [reviewdog/action-hadolint](https://github.com/reviewdog/action-hadolint) - Run [hadolint](https://github.com/hadolint/hadolint) to lint `Dockerfile`.
 - Env
@@ -723,7 +724,7 @@ $ reviewdog -reporter=github-pr-review -filter-mode=nofilter -fail-on-error
 ```
 
 ### Filter Mode Support Table
-Note that not all reporters provide full suppport of filter mode due to API limitation.
+Note that not all reporters provide full support of filter mode due to API limitation.
 e.g. `github-pr-review` reporter uses [GitHub Review
 API](https://developer.github.com/v3/pulls/reviews/) but it doesn't support posting comment outside diff (`diff_context`),
 so reviewdog will use [Check annotation](https://developer.github.com/v3/checks/runs/) as fallback to post those comments [1]. 

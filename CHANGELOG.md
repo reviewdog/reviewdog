@@ -9,15 +9,24 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ### :book: Release Note <!-- optional -->
 
 ### :rocket: Enhancements
-- [#563](https://github.com/reviewdog/reviewdog/issues/563) Use `CI_API_V4_URL` environment variable when present. 
 - ...
 
 ### :bug: Fixes
-- [#609](https://github.com/reviewdog/reviewdog/issues/609) reviewdog command will fail with unexpected tool's error for github-check/github-pr-check reporters as well. ([@haya14busa])
 - ...
 
 ### :rotating_light: Breaking changes
 - ...
+
+---
+
+## [v0.10.1] - 2020-06-30
+
+### :rocket: Enhancements
+- [#563](https://github.com/reviewdog/reviewdog/issues/563) Use `CI_API_V4_URL` environment variable when present.
+
+### :bug: Fixes
+- [#609](https://github.com/reviewdog/reviewdog/issues/609) reviewdog command will fail with unexpected tool's error for github-check/github-pr-check reporters as well. ([@haya14busa])
+- [#603](https://github.com/reviewdog/reviewdog/issues/603) Fixed detection of Pull Requests from forked repo. ([@haya14busa])
 
 ---
 
@@ -49,10 +58,15 @@ $ cd subdir/ && reviewdog -filter-mode=file -fail-on-error -reporter=github-pr-r
 ### :bug: Fixes
 - [#461](https://github.com/reviewdog/reviewdog/issues/461) All reporters now supports sub-directory run. ([@haya14busa])
 
+### :rotating_light: Breaking changes
+- `github-check` reporter won't report results outside diff by default now. You
+  need to use `-filter-mode=nofilter` to keep the same bahavior.
+
 ---
 
 See https://github.com/reviewdog/reviewdog/releases for older release note.
 
 [Unreleased]: https://github.com/reviewdog/reviewdog/compare/v0.10.0...HEAD
 [v0.10.0]: https://github.com/reviewdog/reviewdog/compare/v0.9.17...v0.10.0
+[v0.10.1]: https://github.com/reviewdog/reviewdog/compare/v0.10.0...v0.10.1
 [@haya14busa]: https://github.com/haya14busa

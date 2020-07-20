@@ -24,15 +24,22 @@ type GitHubEvent struct {
 	} `json:"head_commit"`
 }
 
+type GitHubRepo struct {
+	Owner struct {
+		ID int64 `json:"id"`
+	}
+}
+
 type GitHubPullRequest struct {
 	Number int `json:"number"`
 	Head   struct {
-		Sha  string `json:"sha"`
-		Ref  string `json:"ref"`
-		Repo struct {
-			Fork bool `json:"fork"`
-		} `json:"repo"`
+		Sha  string     `json:"sha"`
+		Ref  string     `json:"ref"`
+		Repo GitHubRepo `json:"repo"`
 	} `json:"head"`
+	Base struct {
+		Repo GitHubRepo `json:"repo"`
+	} `json:"base"`
 }
 
 // LoadGitHubEvent loads GitHubEvent if it's running in GitHub Actions.
@@ -93,4 +100,14 @@ func getBuildInfoFromGitHubActionEventPath(eventPath string) (*BuildInfo, bool, 
 func IsInGitHubAction() bool {
 	// https://help.github.com/en/articles/virtual-environments-for-github-actions#default-environment-variables
 	return os.Getenv("GITHUB_ACTION") != ""
+}
+
+// IsGitHubPRFromForkedRepo returns true if reviewdog is running in GitHub
+// Actions and running for PullRequests from forked repository.
+func IsGitHubPRFromForkedRepo() bool {
+	event, err := LoadGitHubEvent()
+	if err != nil {
+		return false
+	}
+	return event.PullRequest.Head.Repo.Owner.ID != event.PullRequest.Base.Repo.Owner.ID
 }
