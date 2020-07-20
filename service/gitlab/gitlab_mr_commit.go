@@ -57,7 +57,8 @@ func NewGitLabMergeRequestCommitCommenter(cli *gitlab.Client, owner, repo string
 // Post accepts a comment and holds it. Flush method actually posts comments to
 // GitLab in parallel.
 func (g *GitLabMergeRequestCommitCommenter) Post(_ context.Context, c *reviewdog.Comment) error {
-	c.Result.Path = filepath.ToSlash(filepath.Join(g.wd, c.Result.Path))
+	c.Result.Diagnostic.GetLocation().Path = filepath.ToSlash(
+		filepath.Join(g.wd, c.Result.Diagnostic.GetLocation().GetPath()))
 	g.muComments.Lock()
 	defer g.muComments.Unlock()
 	g.postComments = append(g.postComments, c)
@@ -80,21 +81,22 @@ func (g *GitLabMergeRequestCommitCommenter) postCommentsForEach(ctx context.Cont
 	var eg errgroup.Group
 	for _, c := range g.postComments {
 		c := c
-		if !c.Result.InDiffFile || c.Result.Lnum == 0 || g.postedcs.IsPosted(c, c.Result.Lnum) {
+		loc := c.Result.Diagnostic.GetLocation()
+		lnum := int(loc.GetRange().GetStart().GetLine())
+		if !c.Result.InDiffFile || lnum == 0 || g.postedcs.IsPosted(c, lnum) {
 			continue
 		}
 		eg.Go(func() error {
-			commitID, err := g.getLastCommitsID(c.Result.Path, c.Result.Lnum)
+			commitID, err := g.getLastCommitsID(loc.GetPath(), lnum)
 			if err != nil {
 				commitID = g.sha
 			}
 			body := commentutil.CommentBody(c)
-			ltype := "new"
 			prcomment := &gitlab.PostCommitCommentOptions{
-				Note:     &body,
-				Path:     &c.Result.Path,
-				Line:     &c.Result.Lnum,
-				LineType: &ltype,
+				Note:     gitlab.String(body),
+				Path:     gitlab.String(loc.GetPath()),
+				Line:     gitlab.Int(lnum),
+				LineType: gitlab.String("new"),
 			}
 			_, _, err = g.cli.Commits.PostCommitComment(g.projects, commitID, prcomment, gitlab.WithContext(ctx))
 			return err

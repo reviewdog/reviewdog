@@ -43,11 +43,13 @@ func NewUnifiedCommentWriter(w io.Writer) *UnifiedCommentWriter {
 }
 
 func (mc *UnifiedCommentWriter) Post(_ context.Context, c *Comment) error {
-	s := c.Result.Path
-	if c.Result.Lnum > 0 {
-		s += fmt.Sprintf(":%d", c.Result.Lnum)
-		if c.Result.Col > 0 {
-			s += fmt.Sprintf(":%d", c.Result.Col)
+	loc := c.Result.Diagnostic.GetLocation()
+	s := loc.GetPath()
+	start := loc.GetRange().GetStart()
+	if start.GetLine() > 0 {
+		s += fmt.Sprintf(":%d", start.GetLine())
+		if start.GetColumn() > 0 {
+			s += fmt.Sprintf(":%d", start.GetColumn())
 		}
 	}
 	s += fmt.Sprintf(": [%s] %s", c.ToolName, c.Body)

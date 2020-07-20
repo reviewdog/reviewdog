@@ -48,7 +48,7 @@ func NewChangeReviewCommenter(cli *gerrit.Client, changeID, revisionID string) (
 
 // Post accepts a comment and holds it. Flush method actually posts comments to Gerrit
 func (g *ChangeReviewCommenter) Post(_ context.Context, c *reviewdog.Comment) error {
-	c.Result.Path = filepath.Join(g.wd, c.Result.Path)
+	c.Result.Diagnostic.GetLocation().Path = filepath.Join(g.wd, c.Result.Diagnostic.GetLocation().GetPath())
 	g.muComments.Lock()
 	defer g.muComments.Unlock()
 	g.postComments = append(g.postComments, c)
@@ -71,8 +71,10 @@ func (g *ChangeReviewCommenter) postAllComments(ctx context.Context) error {
 		if !c.Result.InDiffFile {
 			continue
 		}
-		review.Comments[c.Result.Path] = append(review.Comments[c.Result.Path], gerrit.CommentInput{
-			Line:    c.Result.Lnum,
+		loc := c.Result.Diagnostic.GetLocation()
+		path := loc.GetPath()
+		review.Comments[path] = append(review.Comments[path], gerrit.CommentInput{
+			Line:    int(loc.GetRange().GetStart().GetLine()),
 			Message: c.Body,
 		})
 	}

@@ -9,6 +9,7 @@ import (
 
 	"github.com/reviewdog/reviewdog/diff"
 	"github.com/reviewdog/reviewdog/difffilter"
+	"github.com/reviewdog/reviewdog/proto/rdf"
 )
 
 // Reviewdog represents review dog application which parses result of compiler
@@ -37,11 +38,8 @@ func RunFromResult(ctx context.Context, c CommentService, results []*CheckResult
 // CheckResult represents a checked result of static analysis tools.
 // :h error-file-format
 type CheckResult struct {
-	Path    string   // relative file path
-	Lnum    int      // line number
-	Col     int      // column number (1 <tab> == 1 character column)
-	Message string   // error message
-	Lines   []string // Original error lines (often one line)
+	Diagnostic *rdf.Diagnostic
+	Lines      []string // Original error lines (often one line). (Optional)
 }
 
 // Parser is an interface which parses compilers, linters, or any tools
@@ -91,7 +89,7 @@ func (w *Reviewdog) runFromResult(ctx context.Context, results []*CheckResult,
 		}
 		comment := &Comment{
 			Result:   check,
-			Body:     check.Message,
+			Body:     check.Diagnostic.GetMessage(),
 			ToolName: w.toolname,
 		}
 		if err := w.c.Post(ctx, comment); err != nil {

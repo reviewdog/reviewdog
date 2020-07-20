@@ -179,10 +179,12 @@ func postResultSet(ctx context.Context, resultSet *reviewdog.ResultMap,
 }
 
 func checkResultToAnnotation(c *reviewdog.CheckResult, wd, gitRelWd string) *doghouse.Annotation {
+	loc := c.Diagnostic.GetLocation()
+	// TODO(haya14busa): Pass diagnostic to annotation instead.
 	return &doghouse.Annotation{
-		Path:       filepath.ToSlash(filepath.Join(gitRelWd, reviewdog.CleanPath(c.Path, wd))),
-		Line:       c.Lnum,
-		Message:    c.Message,
+		Path:       filepath.ToSlash(filepath.Join(gitRelWd, reviewdog.CleanPath(loc.GetPath(), wd))),
+		Line:       int(loc.GetRange().GetStart().GetLine()),
+		Message:    c.Diagnostic.GetMessage(),
 		RawMessage: strings.Join(c.Lines, "\n"),
 	}
 }

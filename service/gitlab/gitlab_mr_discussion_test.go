@@ -13,6 +13,7 @@ import (
 	"github.com/xanzy/go-gitlab"
 
 	"github.com/reviewdog/reviewdog"
+	"github.com/reviewdog/reviewdog/proto/rdf"
 	"github.com/reviewdog/reviewdog/service/commentutil"
 )
 
@@ -23,37 +24,67 @@ func TestGitLabMergeRequestDiscussionCommenter_Post_Flush_review_api(t *testing.
 
 	alreadyCommented1 := &reviewdog.Comment{
 		Result: &reviewdog.FilteredCheck{CheckResult: &reviewdog.CheckResult{
-			Path: "file.go",
-			Lnum: 1,
+			Diagnostic: &rdf.Diagnostic{
+				Location: &rdf.Location{
+					Path: "file.go",
+					Range: &rdf.Range{Start: &rdf.Position{
+						Line: 1,
+					}},
+				},
+			},
 		}, InDiffFile: true},
 		Body: "already commented",
 	}
 	alreadyCommented2 := &reviewdog.Comment{
 		Result: &reviewdog.FilteredCheck{CheckResult: &reviewdog.CheckResult{
-			Path: "another/file.go",
-			Lnum: 14,
+			Diagnostic: &rdf.Diagnostic{
+				Location: &rdf.Location{
+					Path: "another/file.go",
+					Range: &rdf.Range{Start: &rdf.Position{
+						Line: 14,
+					}},
+				},
+			},
 		}, InDiffFile: true},
 		Body: "already commented 2",
 	}
 	newComment1 := &reviewdog.Comment{
 		Result: &reviewdog.FilteredCheck{CheckResult: &reviewdog.CheckResult{
-			Path: "file.go",
-			Lnum: 14,
+			Diagnostic: &rdf.Diagnostic{
+				Location: &rdf.Location{
+					Path: "file.go",
+					Range: &rdf.Range{Start: &rdf.Position{
+						Line: 14,
+					}},
+				},
+			},
 		}, InDiffFile: true},
 		Body: "new comment",
 	}
 	newComment2 := &reviewdog.Comment{
 		Result: &reviewdog.FilteredCheck{CheckResult: &reviewdog.CheckResult{
-			Path: "file2.go",
-			Lnum: 15,
+			Diagnostic: &rdf.Diagnostic{
+				Location: &rdf.Location{
+					Path: "file2.go",
+					Range: &rdf.Range{Start: &rdf.Position{
+						Line: 15,
+					}},
+				},
+			},
 		}, InDiffFile: true},
 		Body: "new comment 2",
 	}
 	newComment3 := &reviewdog.Comment{
 		Result: &reviewdog.FilteredCheck{
 			CheckResult: &reviewdog.CheckResult{
-				Path: "new_file.go",
-				Lnum: 14,
+				Diagnostic: &rdf.Diagnostic{
+					Location: &rdf.Location{
+						Path: "new_file.go",
+						Range: &rdf.Range{Start: &rdf.Position{
+							Line: 14,
+						}},
+					},
+				},
 			},
 			OldPath:    "old_file.go",
 			OldLine:    7,
@@ -63,15 +94,24 @@ func TestGitLabMergeRequestDiscussionCommenter_Post_Flush_review_api(t *testing.
 	}
 	commentOutsideDiff := &reviewdog.Comment{
 		Result: &reviewdog.FilteredCheck{CheckResult: &reviewdog.CheckResult{
-			Path: "path.go",
-			Lnum: 14,
+			Diagnostic: &rdf.Diagnostic{
+				Location: &rdf.Location{
+					Path: "path.go",
+					Range: &rdf.Range{Start: &rdf.Position{
+						Line: 14,
+					}},
+				},
+			},
 		}, InDiffFile: false},
 		Body: "comment outside diff",
 	}
 	commentWithoutLnum := &reviewdog.Comment{
 		Result: &reviewdog.FilteredCheck{CheckResult: &reviewdog.CheckResult{
-			Path: "path.go",
-			Lnum: 0,
+			Diagnostic: &rdf.Diagnostic{
+				Location: &rdf.Location{
+					Path: "path.go",
+				},
+			},
 		}, InDiffFile: true},
 		Body: "comment without lnum",
 	}
@@ -100,8 +140,8 @@ func TestGitLabMergeRequestDiscussionCommenter_Post_Flush_review_api(t *testing.
 							{
 								Body: commentutil.CommentBody(alreadyCommented1),
 								Position: &gitlab.NotePosition{
-									NewPath: alreadyCommented1.Result.Path,
-									NewLine: alreadyCommented1.Result.Lnum,
+									NewPath: alreadyCommented1.Result.Diagnostic.GetLocation().GetPath(),
+									NewLine: int(alreadyCommented1.Result.Diagnostic.GetLocation().GetRange().GetStart().GetLine()),
 								},
 							},
 							{
@@ -125,8 +165,8 @@ func TestGitLabMergeRequestDiscussionCommenter_Post_Flush_review_api(t *testing.
 							{
 								Body: commentutil.CommentBody(alreadyCommented2),
 								Position: &gitlab.NotePosition{
-									NewPath: alreadyCommented2.Result.Path,
-									NewLine: alreadyCommented2.Result.Lnum,
+									NewPath: alreadyCommented2.Result.Diagnostic.GetLocation().GetPath(),
+									NewLine: int(alreadyCommented2.Result.Diagnostic.GetLocation().GetRange().GetStart().GetLine()),
 								},
 							},
 						},
