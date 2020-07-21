@@ -1,0 +1,38 @@
+{
+    "$schema": "http://json-schema.org/draft-04/schema#",
+    "properties": {
+        "start": {
+            "$ref": "reviewdog.rdf.Position",
+            "additionalProperties": true,
+            "type": "object",
+            "description": "Required."
+        },
+        "end": {
+            "$ref": "reviewdog.rdf.Position",
+            "additionalProperties": true,
+            "type": "object",
+            "description": "end can be omitted. Then the range is handled as zero-length (start == end).\n Optional."
+        }
+    },
+    "additionalProperties": true,
+    "type": "object",
+    "description": "A range in a text document expressed as start and end positions.\n\nThe end position is *exclusive*. It might be a bit unnatural for you or for\n some diagnostic tools to use exlusive range, but it's necessary to represent\n zero-width range especially when using it in Suggestion context to support\n code insertion.\n Example: \"14\" in \"haya14busa\"\n   start: { line: 1, column: 5 }\n   end:   { line: 1, column: 7 } # \u003c= Exclusive\n\n |h|a|y|a|1|4|b|u|s|a|\n 1 2 3 4 5 6 7 8 9 0 1\n         ^---^\n haya14busa\n     ^^\n\n If you want to specify a range that\n contains a line including the line ending character(s), then use an end\n position denoting the start of the next line.\n Example:\n   start: { line: 5, column: 23 }\n   end:   { line: 6, column: 1 }\n\n If both start and end position omit column value, it's\n handled as linewise and the range includes end position (line) as well.\n Example:\n   start: { line: 5 }\n   end:   { line: 6 }\n The above example represents range start from line 5 to the end of line 6\n including EOL.\n\n Examples for line range:\n  Text example. \u003cline\u003e|\u003cline content\u003e(line breaking)\n  1|abc\\r\\n\n  2|def\\r\\n\n  3|ghi\\r\\n\n\n start: { line: 2 }\n   =\u003e \"abc\"\n\n start: { line: 2 }\n end:   { line: 2 }\n   =\u003e \"abc\"\n\n start: { line: 2 }\n end:   { line: 3 }\n   =\u003e \"abc\\r\\ndef\"\n\n start: { line: 2 }\n end:   { line: 3, column: 1 }\n   =\u003e \"abc\\r\\n\"\n\nstart: { line: 2, column: 1 }\n end:   { line: 2, column: 4 }\n   =\u003e \"abc\" (without line-break)",
+    "definitions": {
+        "reviewdog.rdf.Position": {
+            "$schema": "http://json-schema.org/draft-04/schema#",
+            "properties": {
+                "line": {
+                    "type": "integer",
+                    "description": "Line number, starting at 1.\n Optional."
+                },
+                "column": {
+                    "type": "integer",
+                    "description": "Column number, starting at 1 (byte count in UTF-8).\n Example: 'a𐐀b'\n  The column of a: 1\n  The column of 𐐀: 2\n  The column of b: 6 since 𐐀 is represented with 4 bytes in UTF-8.\n Optional."
+                }
+            },
+            "additionalProperties": true,
+            "type": "object",
+            "id": "reviewdog.rdf.Position"
+        }
+    }
+}

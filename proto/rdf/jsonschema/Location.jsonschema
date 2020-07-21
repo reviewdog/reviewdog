@@ -1,0 +1,48 @@
+{
+    "$schema": "http://json-schema.org/draft-04/schema#",
+    "properties": {
+        "path": {
+            "type": "string",
+            "description": "File path. It could be either absolute path or relative path."
+        },
+        "range": {
+            "properties": {
+                "start": {
+                    "$ref": "reviewdog.rdf.Position",
+                    "additionalProperties": true,
+                    "type": "object",
+                    "description": "Required."
+                },
+                "end": {
+                    "$ref": "reviewdog.rdf.Position",
+                    "additionalProperties": true,
+                    "type": "object",
+                    "description": "end can be omitted. Then the range is handled as zero-length (start == end).\n Optional."
+                }
+            },
+            "additionalProperties": true,
+            "type": "object",
+            "description": "Range in the file path.\n Optional."
+        }
+    },
+    "additionalProperties": true,
+    "type": "object",
+    "definitions": {
+        "reviewdog.rdf.Position": {
+            "$schema": "http://json-schema.org/draft-04/schema#",
+            "properties": {
+                "line": {
+                    "type": "integer",
+                    "description": "Line number, starting at 1.\n Optional."
+                },
+                "column": {
+                    "type": "integer",
+                    "description": "Column number, starting at 1 (byte count in UTF-8).\n Example: 'a𐐀b'\n  The column of a: 1\n  The column of 𐐀: 2\n  The column of b: 6 since 𐐀 is represented with 4 bytes in UTF-8.\n Optional."
+                }
+            },
+            "additionalProperties": true,
+            "type": "object",
+            "id": "reviewdog.rdf.Position"
+        }
+    }
+}

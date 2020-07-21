@@ -1,0 +1,49 @@
+{
+    "$schema": "http://json-schema.org/draft-04/schema#",
+    "properties": {
+        "range": {
+            "properties": {
+                "start": {
+                    "$ref": "reviewdog.rdf.Position",
+                    "additionalProperties": true,
+                    "type": "object",
+                    "description": "Required."
+                },
+                "end": {
+                    "$ref": "reviewdog.rdf.Position",
+                    "additionalProperties": true,
+                    "type": "object",
+                    "description": "end can be omitted. Then the range is handled as zero-length (start == end).\n Optional."
+                }
+            },
+            "additionalProperties": true,
+            "type": "object",
+            "description": "Range at which this suggestion applies.\n To insert text into a document create a range where start == end."
+        },
+        "text": {
+            "type": "string",
+            "description": "A suggested text which replace the range.\n For delete operations use an empty string."
+        }
+    },
+    "additionalProperties": true,
+    "type": "object",
+    "description": "Suggestion represents a suggested text manipulation to resolve a diagnostic\n problem.\n\n Insert example ('hayabusa' -\u003e 'haya15busa'):\n   range {\n     start {\n       line: 1\n       column: 5\n     }\n     end {\n       line: 1\n       column: 5\n     }\n   }\n   text: 15\n |h|a|y|a|b|u|s|a|\n 1 2 3 4 5 6 7 8 9\n         ^--- insert '15'\n\n Update example ('haya15busa' -\u003e 'haya14busa'):\n   range {\n     start {\n       line: 1\n       column: 5\n     }\n     end {\n       line: 1\n       column: 7\n     }\n   }\n   text: 14\n |h|a|y|a|1|5|b|u|s|a|\n 1 2 3 4 5 6 7 8 9 0 1\n         ^---^ replace with '14'",
+    "definitions": {
+        "reviewdog.rdf.Position": {
+            "$schema": "http://json-schema.org/draft-04/schema#",
+            "properties": {
+                "line": {
+                    "type": "integer",
+                    "description": "Line number, starting at 1.\n Optional."
+                },
+                "column": {
+                    "type": "integer",
+                    "description": "Column number, starting at 1 (byte count in UTF-8).\n Example: 'a𐐀b'\n  The column of a: 1\n  The column of 𐐀: 2\n  The column of b: 6 since 𐐀 is represented with 4 bytes in UTF-8.\n Optional."
+                }
+            },
+            "additionalProperties": true,
+            "type": "object",
+            "id": "reviewdog.rdf.Position"
+        }
+    }
+}

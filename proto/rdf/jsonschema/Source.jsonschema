@@ -1,0 +1,15 @@
+{
+    "$schema": "http://json-schema.org/draft-04/schema#",
+    "properties": {
+        "name": {
+            "type": "string",
+            "description": "A human-readable string describing the source of diagnostics, e.g.\n 'typescript' or 'super lint'."
+        },
+        "url": {
+            "type": "string",
+            "description": "URL to this source.\n Optional."
+        }
+    },
+    "additionalProperties": true,
+    "type": "object"
+}
