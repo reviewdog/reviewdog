@@ -83,7 +83,8 @@ func (g *GitLabMergeRequestCommitCommenter) postCommentsForEach(ctx context.Cont
 		c := c
 		loc := c.Result.Diagnostic.GetLocation()
 		lnum := int(loc.GetRange().GetStart().GetLine())
-		if !c.Result.InDiffFile || lnum == 0 || g.postedcs.IsPosted(c, lnum) {
+		body := commentutil.CommentBody(c)
+		if !c.Result.InDiffFile || lnum == 0 || g.postedcs.IsPosted(c, lnum, body) {
 			continue
 		}
 		eg.Go(func() error {
@@ -91,7 +92,6 @@ func (g *GitLabMergeRequestCommitCommenter) postCommentsForEach(ctx context.Cont
 			if err != nil {
 				commitID = g.sha
 			}
-			body := commentutil.CommentBody(c)
 			prcomment := &gitlab.PostCommitCommentOptions{
 				Note:     gitlab.String(body),
 				Path:     gitlab.String(loc.GetPath()),

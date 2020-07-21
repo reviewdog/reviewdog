@@ -95,7 +95,8 @@ func (g *GitHubPullRequest) postAsReviewComment(ctx context.Context) error {
 			}
 			continue
 		}
-		if g.postedcs.IsPosted(c, c.Result.LnumDiff) {
+		body := buildBody(c)
+		if g.postedcs.IsPosted(c, c.Result.LnumDiff, body) {
 			continue
 		}
 		// Only posts maxCommentsPerRequest comments per 1 request to avoid spammy
@@ -110,14 +111,10 @@ func (g *GitHubPullRequest) postAsReviewComment(ctx context.Context) error {
 			remaining = append(remaining, c)
 			continue
 		}
-		cbody := commentutil.CommentBody(c)
-		if suggestion := buildSuggestions(c); suggestion != "" {
-			cbody += "\n" + suggestion
-		}
 		comments = append(comments, &github.DraftReviewComment{
 			Path:     github.String(c.Result.Diagnostic.GetLocation().GetPath()),
 			Position: github.Int(c.Result.LnumDiff),
-			Body:     github.String(cbody),
+			Body:     github.String(body),
 		})
 	}
 
@@ -225,6 +222,14 @@ func listAllPullRequestsComments(ctx context.Context, cli *github.Client,
 		return nil, err
 	}
 	return append(comments, restComments...), nil
+}
+
+func buildBody(c *reviewdog.Comment) string {
+	cbody := commentutil.CommentBody(c)
+	if suggestion := buildSuggestions(c); suggestion != "" {
+		cbody += "\n" + suggestion
+	}
+	return cbody
 }
 
 func buildSuggestions(c *reviewdog.Comment) string {

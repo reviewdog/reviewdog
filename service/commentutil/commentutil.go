@@ -13,7 +13,7 @@ type PostedComments map[string]map[int][]string
 // IsPosted returns true if a given comment has been posted in code review service already,
 // otherwise returns false. It sees comments with same path, same position,
 // and same body as same comments.
-func (p PostedComments) IsPosted(c *reviewdog.Comment, lineNum int) bool {
+func (p PostedComments) IsPosted(c *reviewdog.Comment, lineNum int, body string) bool {
 	path := c.Result.Diagnostic.GetLocation().GetPath()
 	if _, ok := p[path]; !ok {
 		return false
@@ -22,8 +22,8 @@ func (p PostedComments) IsPosted(c *reviewdog.Comment, lineNum int) bool {
 	if !ok {
 		return false
 	}
-	for _, body := range bodies {
-		if body == CommentBody(c) {
+	for _, b := range bodies {
+		if b == body {
 			return true
 		}
 	}

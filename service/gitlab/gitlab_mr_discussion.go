@@ -103,7 +103,8 @@ func (g *GitLabMergeRequestDiscussionCommenter) postCommentsForEach(ctx context.
 		c := c
 		loc := c.Result.Diagnostic.GetLocation()
 		lnum := int(loc.GetRange().GetStart().GetLine())
-		if !c.Result.InDiffFile || lnum == 0 || postedcs.IsPosted(c, lnum) {
+		body := commentutil.CommentBody(c)
+		if !c.Result.InDiffFile || lnum == 0 || postedcs.IsPosted(c, lnum, body) {
 			continue
 		}
 		eg.Go(func() error {
@@ -120,7 +121,7 @@ func (g *GitLabMergeRequestDiscussionCommenter) postCommentsForEach(ctx context.
 				pos.OldLine = c.Result.OldLine
 			}
 			discussion := &gitlab.CreateMergeRequestDiscussionOptions{
-				Body:     gitlab.String(commentutil.CommentBody(c)),
+				Body:     gitlab.String(body),
 				Position: pos,
 			}
 			_, _, err := g.cli.Discussions.CreateMergeRequestDiscussion(g.projects, g.pr, discussion)
