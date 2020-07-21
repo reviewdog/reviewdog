@@ -12,6 +12,7 @@ import (
 	"github.com/xanzy/go-gitlab"
 
 	"github.com/reviewdog/reviewdog"
+	"github.com/reviewdog/reviewdog/proto/rdf"
 	"github.com/reviewdog/reviewdog/service/commentutil"
 )
 
@@ -92,15 +93,27 @@ func TestGitLabMergeRequestCommitCommenter_Post_Flush_review_api(t *testing.T) {
 	comments := []*reviewdog.Comment{
 		{
 			Result: &reviewdog.FilteredCheck{CheckResult: &reviewdog.CheckResult{
-				Path: "notExistFile.go",
-				Lnum: 1,
+				Diagnostic: &rdf.Diagnostic{
+					Location: &rdf.Location{
+						Path: "notExistFile.go",
+						Range: &rdf.Range{Start: &rdf.Position{
+							Line: 1,
+						}},
+					},
+				},
 			}, InDiffFile: true},
 			Body: "already commented",
 		},
 		{
 			Result: &reviewdog.FilteredCheck{CheckResult: &reviewdog.CheckResult{
-				Path: "notExistFile.go",
-				Lnum: 14,
+				Diagnostic: &rdf.Diagnostic{
+					Location: &rdf.Location{
+						Path: "notExistFile.go",
+						Range: &rdf.Range{Start: &rdf.Position{
+							Line: 14,
+						}},
+					},
+				},
 			}, InDiffFile: true},
 			Body: "new comment",
 		},
@@ -132,8 +145,9 @@ func TestGitLabPullRequest_workdir(t *testing.T) {
 	}
 	ctx := context.Background()
 	want := "a/b/c"
-	g.Post(ctx, &reviewdog.Comment{Result: &reviewdog.FilteredCheck{CheckResult: &reviewdog.CheckResult{Path: want}}})
-	if got := g.postComments[0].Result.Path; got != want {
+	g.Post(ctx, &reviewdog.Comment{Result: &reviewdog.FilteredCheck{CheckResult: &reviewdog.CheckResult{
+		Diagnostic: &rdf.Diagnostic{Location: &rdf.Location{Path: want}}}}})
+	if got := g.postComments[0].Result.Diagnostic.GetLocation().GetPath(); got != want {
 		t.Errorf("wd=%q path=%q, want %q", g.wd, got, want)
 	}
 
@@ -147,8 +161,9 @@ func TestGitLabPullRequest_workdir(t *testing.T) {
 	}
 	path := "a/b/c"
 	wantPath := "cmd/" + path
-	g.Post(ctx, &reviewdog.Comment{Result: &reviewdog.FilteredCheck{CheckResult: &reviewdog.CheckResult{Path: path}}})
-	if got := g.postComments[0].Result.Path; got != wantPath {
+	g.Post(ctx, &reviewdog.Comment{Result: &reviewdog.FilteredCheck{CheckResult: &reviewdog.CheckResult{
+		Diagnostic: &rdf.Diagnostic{Location: &rdf.Location{Path: want}}}}})
+	if got := g.postComments[0].Result.Diagnostic.GetLocation().GetPath(); got != wantPath {
 		t.Errorf("wd=%q path=%q, want %q", g.wd, got, wantPath)
 	}
 }

@@ -51,7 +51,8 @@ func NewGitLabMergeRequestDiscussionCommenter(cli *gitlab.Client, owner, repo st
 // Post accepts a comment and holds it. Flush method actually posts comments to
 // GitLab in parallel.
 func (g *GitLabMergeRequestDiscussionCommenter) Post(_ context.Context, c *reviewdog.Comment) error {
-	c.Result.Path = filepath.Join(g.wd, c.Result.Path)
+	c.Result.Diagnostic.GetLocation().Path = filepath.ToSlash(
+		filepath.Join(g.wd, c.Result.Diagnostic.GetLocation().GetPath()))
 	g.muComments.Lock()
 	defer g.muComments.Unlock()
 	g.postComments = append(g.postComments, c)
@@ -100,7 +101,9 @@ func (g *GitLabMergeRequestDiscussionCommenter) postCommentsForEach(ctx context.
 	var eg errgroup.Group
 	for _, c := range g.postComments {
 		c := c
-		if !c.Result.InDiffFile || c.Result.Lnum == 0 || postedcs.IsPosted(c, c.Result.Lnum) {
+		loc := c.Result.Diagnostic.GetLocation()
+		lnum := int(loc.GetRange().GetStart().GetLine())
+		if !c.Result.InDiffFile || lnum == 0 || postedcs.IsPosted(c, lnum) {
 			continue
 		}
 		eg.Go(func() error {
@@ -109,8 +112,8 @@ func (g *GitLabMergeRequestDiscussionCommenter) postCommentsForEach(ctx context.
 				HeadSHA:      g.sha,
 				BaseSHA:      targetBranch.Commit.ID,
 				PositionType: "text",
-				NewPath:      c.Result.Path,
-				NewLine:      c.Result.Lnum,
+				NewPath:      loc.GetPath(),
+				NewLine:      lnum,
 			}
 			if c.Result.OldPath != "" && c.Result.OldLine != 0 {
 				pos.OldPath = c.Result.OldPath

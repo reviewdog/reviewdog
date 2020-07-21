@@ -8,6 +8,7 @@ import (
 
 	"github.com/reviewdog/errorformat"
 	"github.com/reviewdog/errorformat/fmts"
+	"github.com/reviewdog/reviewdog/proto/rdf"
 )
 
 // ParserOpt represents option to create Parser. Either FormatName or
@@ -71,11 +72,19 @@ func (p *ErrorformatParser) Parse(r io.Reader) ([]*CheckResult, error) {
 		e := s.Entry()
 		if e.Valid {
 			rs = append(rs, &CheckResult{
-				Path:    e.Filename,
-				Lnum:    e.Lnum,
-				Col:     e.Col,
-				Message: e.Text,
-				Lines:   e.Lines,
+				Diagnostic: &rdf.Diagnostic{
+					Location: &rdf.Location{
+						Path: e.Filename,
+						Range: &rdf.Range{
+							Start: &rdf.Position{
+								Line:   int32(e.Lnum),
+								Column: int32(e.Col),
+							},
+						},
+					},
+					Message: e.Text,
+				},
+				Lines: e.Lines,
 			})
 		}
 	}
@@ -101,10 +110,18 @@ func (p *CheckStyleParser) Parse(r io.Reader) ([]*CheckResult, error) {
 	for _, file := range cs.Files {
 		for _, cerr := range file.Errors {
 			rs = append(rs, &CheckResult{
-				Path:    file.Name,
-				Lnum:    cerr.Line,
-				Col:     cerr.Column,
-				Message: cerr.Message,
+				Diagnostic: &rdf.Diagnostic{
+					Location: &rdf.Location{
+						Path: file.Name,
+						Range: &rdf.Range{
+							Start: &rdf.Position{
+								Line:   int32(cerr.Line),
+								Column: int32(cerr.Column),
+							},
+						},
+					},
+					Message: cerr.Message,
+				},
 				Lines: []string{
 					fmt.Sprintf("%v:%d:%d: %v: %v (%v)",
 						file.Name, cerr.Line, cerr.Column, cerr.Severity, cerr.Message, cerr.Source),

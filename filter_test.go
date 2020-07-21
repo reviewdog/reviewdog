@@ -5,9 +5,11 @@ import (
 	"testing"
 
 	"github.com/google/go-cmp/cmp"
+	"google.golang.org/protobuf/testing/protocmp"
 
 	"github.com/reviewdog/reviewdog/diff"
 	"github.com/reviewdog/reviewdog/difffilter"
+	"github.com/reviewdog/reviewdog/proto/rdf"
 )
 
 const diffContent = `--- sample.old.txt	2016-10-13 05:09:35.820791185 +0900
@@ -45,27 +47,47 @@ index 0000000..264c67e
 func TestFilterCheckByAddedLines(t *testing.T) {
 	results := []*CheckResult{
 		{
-			Path: "sample.new.txt",
-			Lnum: 1,
+			Diagnostic: &rdf.Diagnostic{
+				Location: &rdf.Location{
+					Path:  "sample.new.txt",
+					Range: &rdf.Range{Start: &rdf.Position{Line: 1}},
+				},
+			},
 		},
 		{
-			Path: "sample.new.txt",
-			Lnum: 2,
+			Diagnostic: &rdf.Diagnostic{
+				Location: &rdf.Location{
+					Path:  "sample.new.txt",
+					Range: &rdf.Range{Start: &rdf.Position{Line: 2}},
+				},
+			},
 		},
 		{
-			Path: "nonewline.new.txt",
-			Lnum: 1,
+			Diagnostic: &rdf.Diagnostic{
+				Location: &rdf.Location{
+					Path:  "nonewline.new.txt",
+					Range: &rdf.Range{Start: &rdf.Position{Line: 1}},
+				},
+			},
 		},
 		{
-			Path: "nonewline.new.txt",
-			Lnum: 3,
+			Diagnostic: &rdf.Diagnostic{
+				Location: &rdf.Location{
+					Path:  "nonewline.new.txt",
+					Range: &rdf.Range{Start: &rdf.Position{Line: 3}},
+				},
+			},
 		},
 	}
 	want := []*FilteredCheck{
 		{
 			CheckResult: &CheckResult{
-				Path: "sample.new.txt",
-				Lnum: 1,
+				Diagnostic: &rdf.Diagnostic{
+					Location: &rdf.Location{
+						Path:  "sample.new.txt",
+						Range: &rdf.Range{Start: &rdf.Position{Line: 1}},
+					},
+				},
 			},
 			ShouldReport: false,
 			InDiffFile:   true,
@@ -74,8 +96,12 @@ func TestFilterCheckByAddedLines(t *testing.T) {
 		},
 		{
 			CheckResult: &CheckResult{
-				Path: "sample.new.txt",
-				Lnum: 2,
+				Diagnostic: &rdf.Diagnostic{
+					Location: &rdf.Location{
+						Path:  "sample.new.txt",
+						Range: &rdf.Range{Start: &rdf.Position{Line: 2}},
+					},
+				},
 			},
 			ShouldReport: true,
 			InDiffFile:   true,
@@ -85,8 +111,12 @@ func TestFilterCheckByAddedLines(t *testing.T) {
 		},
 		{
 			CheckResult: &CheckResult{
-				Path: "nonewline.new.txt",
-				Lnum: 1,
+				Diagnostic: &rdf.Diagnostic{
+					Location: &rdf.Location{
+						Path:  "nonewline.new.txt",
+						Range: &rdf.Range{Start: &rdf.Position{Line: 1}},
+					},
+				},
 			},
 			ShouldReport: false,
 			InDiffFile:   true,
@@ -95,8 +125,12 @@ func TestFilterCheckByAddedLines(t *testing.T) {
 		},
 		{
 			CheckResult: &CheckResult{
-				Path: "nonewline.new.txt",
-				Lnum: 3,
+				Diagnostic: &rdf.Diagnostic{
+					Location: &rdf.Location{
+						Path:  "nonewline.new.txt",
+						Range: &rdf.Range{Start: &rdf.Position{Line: 3}},
+					},
+				},
 			},
 			ShouldReport: true,
 			InDiffFile:   true,
@@ -107,7 +141,7 @@ func TestFilterCheckByAddedLines(t *testing.T) {
 	}
 	filediffs, _ := diff.ParseMultiFile(strings.NewReader(diffContent))
 	got := FilterCheck(results, filediffs, 0, "", difffilter.ModeAdded)
-	if diff := cmp.Diff(got, want); diff != "" {
+	if diff := cmp.Diff(got, want, protocmp.Transform()); diff != "" {
 		t.Error(diff)
 	}
 }
@@ -116,23 +150,39 @@ func TestFilterCheckByAddedLines(t *testing.T) {
 func TestFilterCheckByDiffContext(t *testing.T) {
 	results := []*CheckResult{
 		{
-			Path: "sample.new.txt",
-			Lnum: 1,
+			Diagnostic: &rdf.Diagnostic{
+				Location: &rdf.Location{
+					Path:  "sample.new.txt",
+					Range: &rdf.Range{Start: &rdf.Position{Line: 1}},
+				},
+			},
 		},
 		{
-			Path: "sample.new.txt",
-			Lnum: 2,
+			Diagnostic: &rdf.Diagnostic{
+				Location: &rdf.Location{
+					Path:  "sample.new.txt",
+					Range: &rdf.Range{Start: &rdf.Position{Line: 2}},
+				},
+			},
 		},
 		{
-			Path: "sample.new.txt",
-			Lnum: 3,
+			Diagnostic: &rdf.Diagnostic{
+				Location: &rdf.Location{
+					Path:  "sample.new.txt",
+					Range: &rdf.Range{Start: &rdf.Position{Line: 3}},
+				},
+			},
 		},
 	}
 	want := []*FilteredCheck{
 		{
 			CheckResult: &CheckResult{
-				Path: "sample.new.txt",
-				Lnum: 1,
+				Diagnostic: &rdf.Diagnostic{
+					Location: &rdf.Location{
+						Path:  "sample.new.txt",
+						Range: &rdf.Range{Start: &rdf.Position{Line: 1}},
+					},
+				},
 			},
 			ShouldReport: true,
 			InDiffFile:   true,
@@ -142,8 +192,12 @@ func TestFilterCheckByDiffContext(t *testing.T) {
 		},
 		{
 			CheckResult: &CheckResult{
-				Path: "sample.new.txt",
-				Lnum: 2,
+				Diagnostic: &rdf.Diagnostic{
+					Location: &rdf.Location{
+						Path:  "sample.new.txt",
+						Range: &rdf.Range{Start: &rdf.Position{Line: 2}},
+					},
+				},
 			},
 			ShouldReport: true,
 			InDiffFile:   true,
@@ -153,8 +207,12 @@ func TestFilterCheckByDiffContext(t *testing.T) {
 		},
 		{
 			CheckResult: &CheckResult{
-				Path: "sample.new.txt",
-				Lnum: 3,
+				Diagnostic: &rdf.Diagnostic{
+					Location: &rdf.Location{
+						Path:  "sample.new.txt",
+						Range: &rdf.Range{Start: &rdf.Position{Line: 3}},
+					},
+				},
 			},
 			ShouldReport: true,
 			InDiffFile:   true,
@@ -165,7 +223,7 @@ func TestFilterCheckByDiffContext(t *testing.T) {
 	}
 	filediffs, _ := diff.ParseMultiFile(strings.NewReader(diffContent))
 	got := FilterCheck(results, filediffs, 0, "", difffilter.ModeDiffContext)
-	if diff := cmp.Diff(got, want); diff != "" {
+	if diff := cmp.Diff(got, want, protocmp.Transform()); diff != "" {
 		t.Error(diff)
 	}
 }

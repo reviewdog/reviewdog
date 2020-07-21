@@ -25,15 +25,17 @@ func FilterCheck(results []*CheckResult, diff []*diff.FileDiff, strip int,
 	df := difffilter.New(diff, strip, cwd, mode)
 	for _, result := range results {
 		check := &FilteredCheck{CheckResult: result}
-		shouldReport, difffile, diffline := df.ShouldReport(result.Path, result.Lnum)
+		loc := result.Diagnostic.GetLocation()
+		lnum := int(loc.GetRange().GetStart().GetLine())
+		shouldReport, difffile, diffline := df.ShouldReport(loc.GetPath(), lnum)
 		check.ShouldReport = shouldReport
 		if diffline != nil {
 			check.LnumDiff = diffline.LnumDiff
 		}
-		result.Path = CleanPath(result.Path, cwd)
+		loc.Path = CleanPath(loc.GetPath(), cwd)
 		if difffile != nil {
 			check.InDiffFile = true
-			check.OldPath, check.OldLine = getOldPosition(difffile, strip, result.Path, result.Lnum)
+			check.OldPath, check.OldLine = getOldPosition(difffile, strip, loc.GetPath(), lnum)
 		}
 		checks = append(checks, check)
 	}

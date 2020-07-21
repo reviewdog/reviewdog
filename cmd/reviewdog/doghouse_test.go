@@ -12,6 +12,7 @@ import (
 
 	"github.com/google/go-cmp/cmp"
 	"golang.org/x/oauth2"
+	"google.golang.org/protobuf/testing/protocmp"
 
 	"github.com/reviewdog/reviewdog"
 	"github.com/reviewdog/reviewdog/cienv"
@@ -19,6 +20,7 @@ import (
 	"github.com/reviewdog/reviewdog/doghouse"
 	"github.com/reviewdog/reviewdog/doghouse/client"
 	"github.com/reviewdog/reviewdog/project"
+	"github.com/reviewdog/reviewdog/proto/rdf"
 )
 
 func setupEnvs(testEnvs map[string]string) (cleanup func()) {
@@ -121,10 +123,16 @@ func TestCheckResultSet_Project(t *testing.T) {
 	var wantCheckResult reviewdog.ResultMap
 	wantCheckResult.Store("name1", &reviewdog.Result{CheckResults: []*reviewdog.CheckResult{
 		{
-			Lnum:    1,
-			Col:     14,
-			Message: "msg",
-			Path:    "reviewdog.go",
+			Diagnostic: &rdf.Diagnostic{
+				Location: &rdf.Location{
+					Range: &rdf.Range{Start: &rdf.Position{
+						Line:   1,
+						Column: 14,
+					}},
+					Path: "reviewdog.go",
+				},
+				Message: "msg",
+			},
 		},
 	}})
 
@@ -148,7 +156,7 @@ func TestCheckResultSet_Project(t *testing.T) {
 	}
 	got.Range(func(k string, r *reviewdog.Result) {
 		w, _ := wantCheckResult.Load(k)
-		if diff := cmp.Diff(r, w); diff != "" {
+		if diff := cmp.Diff(r, w, protocmp.Transform()); diff != "" {
 			t.Errorf("result has diff:\n%s", diff)
 		}
 	})
@@ -166,11 +174,17 @@ func TestCheckResultSet_NonProject(t *testing.T) {
 	var want reviewdog.ResultMap
 	want.Store("golint", &reviewdog.Result{CheckResults: []*reviewdog.CheckResult{
 		{
-			Lnum:    14,
-			Col:     14,
-			Message: "test message",
-			Path:    "reviewdog.go",
-			Lines:   []string{input},
+			Diagnostic: &rdf.Diagnostic{
+				Location: &rdf.Location{
+					Range: &rdf.Range{Start: &rdf.Position{
+						Line:   14,
+						Column: 14,
+					}},
+					Path: "reviewdog.go",
+				},
+				Message: "test message",
+			},
+			Lines: []string{input},
 		},
 	}})
 
@@ -179,7 +193,7 @@ func TestCheckResultSet_NonProject(t *testing.T) {
 	}
 	got.Range(func(k string, r *reviewdog.Result) {
 		w, _ := want.Load(k)
-		if diff := cmp.Diff(r, w); diff != "" {
+		if diff := cmp.Diff(r, w, protocmp.Transform()); diff != "" {
 			t.Errorf("result has diff:\n%s", diff)
 		}
 	})
@@ -252,21 +266,37 @@ func TestPostResultSet_withReportURL(t *testing.T) {
 	var resultSet reviewdog.ResultMap
 	resultSet.Store("name1", &reviewdog.Result{CheckResults: []*reviewdog.CheckResult{
 		{
-			Lnum:    14,
-			Message: "name1: test 1",
-			Path:    "reviewdog.go", // test relative path
-			Lines:   []string{"L1", "L2"},
+			Diagnostic: &rdf.Diagnostic{
+				Location: &rdf.Location{
+					Range: &rdf.Range{Start: &rdf.Position{
+						Line: 14,
+					}},
+					Path: "reviewdog.go", // test relative path
+				},
+				Message: "name1: test 1",
+			},
+			Lines: []string{"L1", "L2"},
 		},
 		{
-			Message: "name1: test 2",
-			Path:    absPath(t, "reviewdog.go"), // test abs path
+			Diagnostic: &rdf.Diagnostic{
+				Location: &rdf.Location{
+					Path: absPath(t, "reviewdog.go"), // test abs path
+				},
+				Message: "name1: test 2",
+			},
 		},
 	}})
 	resultSet.Store("name2", &reviewdog.Result{CheckResults: []*reviewdog.CheckResult{
 		{
-			Lnum:    14,
-			Message: "name2: test 1",
-			Path:    "doghouse.go",
+			Diagnostic: &rdf.Diagnostic{
+				Location: &rdf.Location{
+					Range: &rdf.Range{Start: &rdf.Position{
+						Line: 14,
+					}},
+					Path: "doghouse.go",
+				},
+				Message: "name2: test 1",
+			},
 		},
 	}})
 
@@ -314,7 +344,7 @@ func TestPostResultSet_withoutReportURL(t *testing.T) {
 	if err != nil {
 		t.Fatalf("should have result for name1: %v", err)
 	}
-	if diff := cmp.Diff(results.FilteredCheck, wantResults); diff != "" {
+	if diff := cmp.Diff(results.FilteredCheck, wantResults, protocmp.Transform()); diff != "" {
 		t.Errorf("results has diff:\n%s", diff)
 	}
 }

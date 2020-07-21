@@ -11,6 +11,7 @@ import (
 
 	"github.com/google/go-cmp/cmp"
 	"github.com/reviewdog/reviewdog"
+	"github.com/reviewdog/reviewdog/proto/rdf"
 	"golang.org/x/build/gerrit"
 )
 
@@ -29,23 +30,41 @@ func TestChangeReviewCommenter_Post_Flush(t *testing.T) {
 	newLnum1 := 14
 	newComment1 := &reviewdog.Comment{
 		Result: &reviewdog.FilteredCheck{CheckResult: &reviewdog.CheckResult{
-			Path: "file.go",
-			Lnum: newLnum1,
+			Diagnostic: &rdf.Diagnostic{
+				Location: &rdf.Location{
+					Path: "file.go",
+					Range: &rdf.Range{Start: &rdf.Position{
+						Line: int32(newLnum1),
+					}},
+				},
+			},
 		}, InDiffFile: true},
 		Body: "new comment",
 	}
 	newLnum2 := 15
 	newComment2 := &reviewdog.Comment{
 		Result: &reviewdog.FilteredCheck{CheckResult: &reviewdog.CheckResult{
-			Path: "file2.go",
-			Lnum: newLnum2,
+			Diagnostic: &rdf.Diagnostic{
+				Location: &rdf.Location{
+					Path: "file2.go",
+					Range: &rdf.Range{Start: &rdf.Position{
+						Line: int32(newLnum2),
+					}},
+				},
+			},
 		}, InDiffFile: true},
 		Body: "new comment 2",
 	}
 	commentOutsideDiff := &reviewdog.Comment{
 		Result: &reviewdog.FilteredCheck{CheckResult: &reviewdog.CheckResult{
-			Path: "file3.go",
-			Lnum: 14,
+			Diagnostic: &rdf.Diagnostic{
+				Location: &rdf.Location{
+					Path: "file3.go",
+					Range: &rdf.Range{Start: &rdf.Position{
+						Line: 14,
+					}},
+				},
+			},
 		}, InDiffFile: false},
 		Body: "comment outside diff",
 	}
@@ -69,12 +88,14 @@ func TestChangeReviewCommenter_Post_Flush(t *testing.T) {
 				t.Errorf("got %d comments, want %d", len(got.Comments), want)
 			}
 
-			want := []gerrit.CommentInput{{Line: newComment1.Result.Lnum, Message: newComment1.Body}}
+			line1 := int(newComment1.Result.Diagnostic.GetLocation().GetRange().GetStart().GetLine())
+			want := []gerrit.CommentInput{{Line: line1, Message: newComment1.Body}}
 			if diff := cmp.Diff(got.Comments["file.go"], want); diff != "" {
 				t.Error(diff)
 			}
 
-			want = []gerrit.CommentInput{{Line: newComment2.Result.Lnum, Message: newComment2.Body}}
+			line2 := int(newComment2.Result.Diagnostic.GetLocation().GetRange().GetStart().GetLine())
+			want = []gerrit.CommentInput{{Line: line2, Message: newComment2.Body}}
 			if diff := cmp.Diff(got.Comments["file2.go"], want); diff != "" {
 				t.Error(diff)
 			}

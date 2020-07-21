@@ -86,4 +86,6 @@ type Annotation struct {
 	// Original error message of this annotation.
 	// Optional.
 	RawMessage string `json:"raw_message,omitempty"`
+
+	// TODO(haya14busa): Support RDFormat.
 }

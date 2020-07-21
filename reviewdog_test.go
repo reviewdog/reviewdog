@@ -84,7 +84,7 @@ index 34cacb9..a727dd3 100644
 
 	c := &testWriter{
 		FakePost: func(c *Comment) error {
-			if got := c.Result.Path; got != want {
+			if got := c.Result.Diagnostic.GetLocation().GetPath(); got != want {
 				t.Errorf("path: got %v, want %v", got, want)
 			}
 			return nil

@@ -15,6 +15,7 @@ import (
 	"golang.org/x/oauth2"
 
 	"github.com/reviewdog/reviewdog"
+	"github.com/reviewdog/reviewdog/proto/rdf"
 	"github.com/reviewdog/reviewdog/service/commentutil"
 )
 
@@ -72,7 +73,11 @@ func TestGitHubPullRequest_Post(t *testing.T) {
 	comment := &reviewdog.Comment{
 		Result: &reviewdog.FilteredCheck{
 			CheckResult: &reviewdog.CheckResult{
-				Path: "watchdogs.go",
+				Diagnostic: &rdf.Diagnostic{
+					Location: &rdf.Location{
+						Path: "watchdogs.go",
+					},
+				},
 			},
 			LnumDiff: 17,
 		},
@@ -271,7 +276,11 @@ func TestGitHubPullRequest_Post_Flush_review_api(t *testing.T) {
 		{
 			Result: &reviewdog.FilteredCheck{
 				CheckResult: &reviewdog.CheckResult{
-					Path: "reviewdog.go",
+					Diagnostic: &rdf.Diagnostic{
+						Location: &rdf.Location{
+							Path: "reviewdog.go",
+						},
+					},
 				},
 				LnumDiff: 1,
 			},
@@ -280,7 +289,11 @@ func TestGitHubPullRequest_Post_Flush_review_api(t *testing.T) {
 		{
 			Result: &reviewdog.FilteredCheck{
 				CheckResult: &reviewdog.CheckResult{
-					Path: "reviewdog.go",
+					Diagnostic: &rdf.Diagnostic{
+						Location: &rdf.Location{
+							Path: "reviewdog.go",
+						},
+					},
 				},
 				LnumDiff: 14,
 			},
@@ -289,7 +302,11 @@ func TestGitHubPullRequest_Post_Flush_review_api(t *testing.T) {
 		{
 			Result: &reviewdog.FilteredCheck{
 				CheckResult: &reviewdog.CheckResult{
-					Path: "reviewdog.go",
+					Diagnostic: &rdf.Diagnostic{
+						Location: &rdf.Location{
+							Path: "reviewdog.go",
+						},
+					},
 				},
 				LnumDiff: 14,
 			},
@@ -298,7 +315,11 @@ func TestGitHubPullRequest_Post_Flush_review_api(t *testing.T) {
 		{
 			Result: &reviewdog.FilteredCheck{
 				CheckResult: &reviewdog.CheckResult{
-					Path: "reviewdog.go",
+					Diagnostic: &rdf.Diagnostic{
+						Location: &rdf.Location{
+							Path: "reviewdog.go",
+						},
+					},
 				},
 				// No LnumDiff.
 			},
@@ -361,8 +382,14 @@ func TestGitHubPullRequest_Post_toomany(t *testing.T) {
 		comments = append(comments, &reviewdog.Comment{
 			Result: &reviewdog.FilteredCheck{
 				CheckResult: &reviewdog.CheckResult{
-					Path: "reviewdog.go",
-					Lnum: i,
+					Diagnostic: &rdf.Diagnostic{
+						Location: &rdf.Location{
+							Path: "reviewdog.go",
+							Range: &rdf.Range{Start: &rdf.Position{
+								Line: int32(i),
+							}},
+						},
+					},
 				},
 				LnumDiff: i,
 			},
@@ -401,8 +428,9 @@ func TestGitHubPullRequest_workdir(t *testing.T) {
 	}
 	ctx := context.Background()
 	want := "a/b/c"
-	g.Post(ctx, &reviewdog.Comment{Result: &reviewdog.FilteredCheck{CheckResult: &reviewdog.CheckResult{Path: want}}})
-	if got := g.postComments[0].Result.Path; got != want {
+	g.Post(ctx, &reviewdog.Comment{Result: &reviewdog.FilteredCheck{CheckResult: &reviewdog.CheckResult{
+		Diagnostic: &rdf.Diagnostic{Location: &rdf.Location{Path: want}}}}})
+	if got := g.postComments[0].Result.Diagnostic.GetLocation().GetPath(); got != want {
 		t.Errorf("wd=%q path=%q, want %q", g.wd, got, want)
 	}
 
@@ -416,8 +444,9 @@ func TestGitHubPullRequest_workdir(t *testing.T) {
 	}
 	path := "a/b/c"
 	wantPath := "cmd/" + path
-	g.Post(ctx, &reviewdog.Comment{Result: &reviewdog.FilteredCheck{CheckResult: &reviewdog.CheckResult{Path: path}}})
-	if got := g.postComments[0].Result.Path; got != wantPath {
+	g.Post(ctx, &reviewdog.Comment{Result: &reviewdog.FilteredCheck{CheckResult: &reviewdog.CheckResult{
+		Diagnostic: &rdf.Diagnostic{Location: &rdf.Location{Path: want}}}}})
+	if got := g.postComments[0].Result.Diagnostic.GetLocation().GetPath(); got != wantPath {
 		t.Errorf("wd=%q path=%q, want %q", g.wd, got, wantPath)
 	}
 }

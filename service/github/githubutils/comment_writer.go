@@ -49,11 +49,13 @@ func (lw *GitHubActionLogWriter) Flush(_ context.Context) error {
 // https://help.github.com/en/actions/automating-your-workflow-with-github-actions/development-tools-for-github-actions#example-5
 func ReportAsGitHubActionsLog(toolName, level string, c *reviewdog.CheckResult) {
 	mes := fmt.Sprintf("[%s] reported by reviewdog 🐶\n%s\n\nRaw Output:\n%s",
-		toolName, c.Message, strings.Join(c.Lines, "\n"))
+		toolName, c.Diagnostic.GetMessage(), strings.Join(c.Lines, "\n"))
+	loc := c.Diagnostic.GetLocation()
+	start := loc.GetRange().GetStart()
 	opt := &core.LogOption{
-		File: c.Path,
-		Line: c.Lnum,
-		Col:  c.Col,
+		File: c.Diagnostic.GetLocation().GetPath(),
+		Line: int(start.GetLine()),
+		Col:  int(start.GetColumn()),
 	}
 
 	switch level {

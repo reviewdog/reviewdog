@@ -14,6 +14,7 @@ import (
 	"github.com/reviewdog/reviewdog/diff"
 	"github.com/reviewdog/reviewdog/difffilter"
 	"github.com/reviewdog/reviewdog/doghouse"
+	"github.com/reviewdog/reviewdog/proto/rdf"
 	"github.com/reviewdog/reviewdog/service/github/githubutils"
 )
 
@@ -218,15 +219,20 @@ func (ch *Checker) summaryFindings(name string, checks []*reviewdog.FilteredChec
 }
 
 func (ch *Checker) toCheckRunAnnotation(c *reviewdog.FilteredCheck) *github.CheckRunAnnotation {
+	loc := c.Diagnostic.GetLocation()
+	endLine := loc.GetRange().GetEnd().GetLine()
+	if endLine == 0 {
+		endLine = loc.GetRange().GetStart().GetLine()
+	}
 	a := &github.CheckRunAnnotation{
-		Path:            github.String(c.Path),
-		StartLine:       github.Int(c.Lnum),
-		EndLine:         github.Int(c.Lnum),
+		Path:            github.String(loc.GetPath()),
+		StartLine:       github.Int(int(loc.GetRange().GetStart().GetLine())),
+		EndLine:         github.Int(int(endLine)),
 		AnnotationLevel: github.String(ch.annotationLevel()),
-		Message:         github.String(c.Message),
+		Message:         github.String(c.Diagnostic.GetMessage()),
 	}
 	if ch.req.Name != "" {
-		a.Title = github.String(fmt.Sprintf("[%s] %s#L%d", ch.req.Name, c.Path, c.Lnum))
+		a.Title = github.String(fmt.Sprintf("[%s] %s#L%d", ch.req.Name, loc.GetPath(), loc.GetRange().GetStart().GetLine()))
 	}
 	if s := strings.Join(c.Lines, "\n"); s != "" {
 		a.RawDetails = github.String(s)
@@ -258,10 +264,18 @@ func annotationsToCheckResults(as []*doghouse.Annotation) []*reviewdog.CheckResu
 	cs := make([]*reviewdog.CheckResult, 0, len(as))
 	for _, a := range as {
 		cs = append(cs, &reviewdog.CheckResult{
-			Path:    a.Path,
-			Lnum:    a.Line,
-			Message: a.Message,
-			Lines:   strings.Split(a.RawMessage, "\n"),
+			Diagnostic: &rdf.Diagnostic{
+				Location: &rdf.Location{
+					Path: a.Path,
+					Range: &rdf.Range{
+						Start: &rdf.Position{
+							Line: int32(a.Line),
+						},
+					},
+				},
+				Message: a.Message,
+			},
+			Lines: strings.Split(a.RawMessage, "\n"),
 		})
 	}
 	return cs
