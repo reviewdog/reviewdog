@@ -11,6 +11,7 @@ import (
 
 	"github.com/reviewdog/reviewdog"
 	"github.com/reviewdog/reviewdog/cienv"
+	"github.com/reviewdog/reviewdog/proto/rdf"
 	"github.com/reviewdog/reviewdog/service/commentutil"
 	"github.com/reviewdog/reviewdog/service/github/githubutils"
 	"github.com/reviewdog/reviewdog/service/serviceutil"
@@ -109,6 +110,10 @@ func (g *GitHubPullRequest) postAsReviewComment(ctx context.Context) error {
 			continue
 		}
 		cbody := commentutil.CommentBody(c)
+		suggestion := buildSuggestions(c)
+		if suggestion != "" {
+			cbody += "\n" + suggestion
+		}
 		comments = append(comments, &github.DraftReviewComment{
 			Path:     github.String(c.Result.Diagnostic.GetLocation().GetPath()),
 			Position: github.Int(c.Result.LnumDiff),
@@ -220,4 +225,42 @@ func listAllPullRequestsComments(ctx context.Context, cli *github.Client,
 		return nil, err
 	}
 	return append(comments, restComments...), nil
+}
+
+func buildSuggestions(c *reviewdog.Comment) string {
+	var sb strings.Builder
+	for _, s := range c.Result.Diagnostic.GetSuggestions() {
+		if txt := buildSingleSuggestion(c, s); txt != "" {
+			sb.WriteString(txt)
+			sb.WriteString("\n")
+		}
+	}
+	return sb.String()
+}
+
+func buildSingleSuggestion(c *reviewdog.Comment, s *rdf.Suggestion) string {
+	start := s.GetRange().GetStart()
+	if start.GetLine() != c.Result.Diagnostic.GetLocation().GetRange().GetStart().GetLine() {
+		// Diagnostic and Suggestion lines must be the same.
+		return ""
+	}
+	end := s.GetRange().GetEnd()
+	if start.GetColumn() <= 1 && !(end.GetLine() == 0 ||
+		(start.GetLine() == end.GetLine() && end.GetColumn() == 0) ||
+		(start.GetLine() == end.GetLine()+1 && end.GetColumn() == 1)) {
+		// It must be a suggestion for a single line change due to GitHub API
+		// restriction. Create a review for a pull request API [1] doesn't support
+		// comments to multi lines as of writing (2020-07-21).
+		// [1]: https://docs.github.com/en/rest/reference/pulls#create-a-review-for-a-pull-request
+		return ""
+	}
+	// TODO(haya14busa): Support non-line based suggestion.
+	var sb strings.Builder
+	sb.WriteString("```suggestion\n")
+	if txt := s.GetText(); txt != "" {
+		sb.WriteString(txt)
+		sb.WriteString("\n")
+	}
+	sb.WriteString("```")
+	return sb.String()
 }
