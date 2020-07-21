@@ -148,6 +148,12 @@ jobs:
           cd ./_testdata/ && reviewdog -conf=reviewdog_error.yml \
             -reporter=local -diff='git diff master' || EXIT_CODE=$?
           test "${EXIT_CODE}" = 1
+      - name: Suggestion
+        env:
+          REVIEWDOG_GITHUB_API_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          cat ./_testdata/suggestions.json | \
+            reviewdog -name="suggestion-test" -f=rdjsonl -reporter=github-pr-review
 
   golangci-lint:
     if: github.event_name == 'pull_request'

@@ -1,0 +1,4 @@
+package testdata
+
+func suggestions() {
+}
