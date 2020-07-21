@@ -1,6 +1,8 @@
 package reviewdog
 
 import (
+	"bufio"
+	"encoding/json"
 	"encoding/xml"
 	"errors"
 	"fmt"
@@ -26,9 +28,13 @@ func NewParser(opt *ParserOpt) (Parser, error) {
 		return nil, errors.New("you cannot specify both format name and errorformat at the same time")
 	}
 
-	if name == "checkstyle" {
+	switch name {
+	case "checkstyle":
 		return NewCheckStyleParser(), nil
+	case "rdjsonl":
+		return NewRDJSONLParser(), nil
 	}
+
 	// use defined errorformat
 	if name != "" {
 		efm, ok := fmts.DefinedFmts()[name]
@@ -157,4 +163,24 @@ type CheckStyleError struct {
 	Message  string `xml:"message,attr"`
 	Severity string `xml:"severity,attr,omitempty"`
 	Source   string `xml:"source,attr,omitempty"`
+}
+
+// RDJSONLParser is parser for rdjsonl format.
+type RDJSONLParser struct{}
+
+func NewRDJSONLParser() *RDJSONLParser {
+	return &RDJSONLParser{}
+}
+
+func (p *RDJSONLParser) Parse(r io.Reader) ([]*CheckResult, error) {
+	var results []*CheckResult
+	s := bufio.NewScanner(r)
+	for s.Scan() {
+		d := new(rdf.Diagnostic)
+		if err := json.Unmarshal(s.Bytes(), d); err != nil {
+			return nil, err
+		}
+		results = append(results, &CheckResult{Diagnostic: d, Lines: []string{s.Text()}})
+	}
+	return results, nil
 }
