@@ -245,7 +245,7 @@ func buildSingleSuggestion(c *reviewdog.Comment, s *rdf.Suggestion) string {
 		return ""
 	}
 	end := s.GetRange().GetEnd()
-	if start.GetColumn() <= 1 && !(end.GetLine() == 0 ||
+	if !(end.GetLine() == 0 ||
 		(start.GetLine() == end.GetLine() && end.GetColumn() == 0) ||
 		(start.GetLine() == end.GetLine()+1 && end.GetColumn() == 1)) {
 		// It must be a suggestion for a single line change due to GitHub API
@@ -254,7 +254,10 @@ func buildSingleSuggestion(c *reviewdog.Comment, s *rdf.Suggestion) string {
 		// [1]: https://docs.github.com/en/rest/reference/pulls#create-a-review-for-a-pull-request
 		return ""
 	}
-	// TODO(haya14busa): Support non-line based suggestion.
+	if start.GetColumn() > 1 {
+		// TODO(haya14busa): Support non-line based suggestion.
+		return ""
+	}
 	var sb strings.Builder
 	sb.WriteString("```suggestion\n")
 	if txt := s.GetText(); txt != "" {
