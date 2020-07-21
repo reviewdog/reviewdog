@@ -111,8 +111,7 @@ func (g *GitHubPullRequest) postAsReviewComment(ctx context.Context) error {
 			continue
 		}
 		cbody := commentutil.CommentBody(c)
-		suggestion := buildSuggestions(c)
-		if suggestion != "" {
+		if suggestion := buildSuggestions(c); suggestion != "" {
 			cbody += "\n" + suggestion
 		}
 		comments = append(comments, &github.DraftReviewComment{
