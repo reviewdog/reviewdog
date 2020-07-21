@@ -116,6 +116,9 @@ Example:
 
 ## Background: Still No Good Standard Diagnostic Format Out There in 2020
 
+Update: Found *The Static Analysis Results Interchange Format (SARIF)* as a
+potential good standard format.
+
 As of writing (2020), most diagnostic tools such as linters or compilers output
 results with their own format. Some tools support machine-readable structured
 format like their own JSON format, and other tools just support unstructured
@@ -156,6 +159,45 @@ format, but not everyone wants to support it.
 
 There are altenative solutions out there (which are not used by reviewdog) as
 well.
+
+### The Static Analysis Results Interchange Format (SARIF)
+[The Static Analysis Results Interchange Format (SARIF)](https://sarifweb.azurewebsites.net/)
+has been approved as an OASIS standard.
+
+Although, there are not many usages of SARIF as of writing (2020 July, 21),
+it can be good standard format.
+A promising usage example is [GitHub Code Scanning](https://docs.github.com/en/github/finding-security-vulnerabilities-and-errors-in-your-code/about-code-scanning#about-third-party-code-scanning-tools)
+(beta), which uses SARIF to support third party code scanning tools.
+Other examples: [spotbugs](https://github.com/spotbugs/discuss/issues/95).
+
+Problems:
+- No stream output support and static analysis tools cannot output each diagnostic result one by one.
+- `columnKind` doesn't support byte count. https://github.com/oasis-tcs/sarif-spec/issues/466
+- The spec is too big and complex ([SARIF v2.1.0 PDF](https://docs.oasis-open.org/sarif/sarif/v2.1.0/sarif-v2.1.0.pdf) is 227 pages!)
+  for developer tools as consumer of SARIF (e.g.  reviewdog). Probably most
+  tools end up with supporting SARIF partially.  GitHub Code Scanning feature
+  actually doesn't support a whole spec
+  ([doc](https://docs.github.com/en/github/finding-security-vulnerabilities-and-errors-in-your-code/sarif-support-for-code-scanning))
+  for example.
+- The spec is too big and complex for static analysis tools as provider of
+  SARIF. They can just support partial and minimum SARIF support as result
+  output format but it's still not simple and the output still needs to pass
+  SARIF validatiotor.
+- Not all languages have good tools to generate code from JSON Schema.
+  To create Go SARIF package [haya14busa/go-sarif](https://github.com/haya14busa/go-sarif),
+  I needed to try 3+ [Go](https://github.com/atombender/go-jsonschema) [JSON Schema](https://github.com/idubinskiy/schematyper)
+  [Code Generator](https://github.com/aaharu/schemarshal)
+  tools but all of them didn't work for the complex SARIF JSON Schema.
+  I ended up using [quicktype](https://github.com/quicktype/quicktype) and it
+  worked but I still needed to send [a Pull Request](https://github.com/quicktype/quicktype/pull/1513)...
+- SARIF SDK and related tools are written in C# (and TypeScript), which means we need dotnet runtime.
+  SARIF is general and standard format while the related tools requires dotnet runtime.
+
+There are some problems as above but SARIF should be still good to support
+considering it has been already approved as an OASIS standard and GitHub Code
+Scanning uses it.
+Reviewdog Diagnostic Format can be used as simpler format and we can create
+converters between RD Format and SARIF.
 
 ### *Problem Matcher*
 [VSCode](https://vscode-docs.readthedocs.io/en/stable/editor/tasks/#defining-a-problem-matcher)
@@ -262,17 +304,8 @@ depend on the CLI, so providing libraries for their implementation languages
 should be useful to format results natively by each diagnostic tool.
 
 ## Open Questions
-- Naming:
-  - Is "Reviewdog Diagnostic Protocol" good naming?
-  - Should we really include *reviewdog* in the name? It's true that the
-    primary motivation is for the reviewdog CLI, but it can be just a standard
-    diagnostic format and it can be used outside reviwedog.
-  - Is "Protocol" good word? Should we use scheme/format/specification/etc...
-    instead?
-  - RDP is not unique acronym and [Remote Desktop Protocol](https://en.wikipedia.org/wiki/Remote_Desktop_Protocol)
-    is already using it.
 - Protocol Version Representation and Backward/Future Compatibility
-  - Should we add version or some capability data in RDP?
-  - RPD should be stable, but there are still a possibility to extend it with
+  - Should we add version or some capability data in RD Format?
+  - RD Format should be stable, but there are still a possibility to extend it with
     backward incompatible way. e.g. We **may** want to add byte offset field in
     Position message as an alternative of line and column.
