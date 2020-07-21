@@ -1,1 +1,1 @@
-{"message":"suggestion test","location":{"path":"_testdata/suggestions.go","range":{"start":{"line":3}}}, "suggestion": {"range":{"start":{"line":3}}, "text": "func Suggestions() {"}}
+{"message":"suggestion test","location":{"path":"_testdata/suggestions.go","range":{"start":{"line":3}}}, "suggestions": [{"range":{"start":{"line":3}}, "text": "func Suggestions() {"}]}
