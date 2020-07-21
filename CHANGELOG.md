@@ -7,8 +7,10 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ## [Unreleased]
 
 ### :book: Release Note <!-- optional -->
+<!-- TODO(haya14busa): Write about Reviewdog Diagnostic Format -->
 
 ### :rocket: Enhancements
+- [#629](https://github.com/reviewdog/reviewdog/pull/629) Introduced Reviewdog Diagnostic Format. ([@haya14busa])
 - ...
 
 ### :bug: Fixes
