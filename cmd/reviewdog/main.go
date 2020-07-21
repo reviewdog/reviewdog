@@ -19,7 +19,7 @@ import (
 	"golang.org/x/net/context" // "context"
 	"golang.org/x/oauth2"
 
-	"github.com/google/go-github/v31/github"
+	"github.com/google/go-github/v32/github"
 	"github.com/mattn/go-shellwords"
 	"github.com/reviewdog/errorformat/fmts"
 	"github.com/xanzy/go-gitlab"
