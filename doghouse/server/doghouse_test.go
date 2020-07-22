@@ -146,6 +146,20 @@ func TestCheck_OK(t *testing.T) {
 				},
 			},
 			{
+				Diagnostic: &rdf.Diagnostic{
+					Message: "source test",
+					Source: &rdf.Source{
+						Name: "awesome-linter",
+					},
+					Location: &rdf.Location{
+						Path: "sample.new.txt",
+						Range: &rdf.Range{
+							Start: &rdf.Position{Line: 2},
+						},
+					},
+				},
+			},
+			{
 				Path:    "sample.new.txt",
 				Line:    2,
 				Message: "request from old clients",
@@ -223,6 +237,14 @@ func TestCheck_OK(t *testing.T) {
 					AnnotationLevel: github.String("failure"),
 					Message:         github.String("test severity override"),
 					Title:           github.String("[haya14busa-linter] sample.new.txt#L2"),
+				},
+				{
+					Path:            github.String("sample.new.txt"),
+					StartLine:       github.Int(2),
+					EndLine:         github.Int(2),
+					AnnotationLevel: github.String("warning"),
+					Message:         github.String("source test"),
+					Title:           github.String("[awesome-linter] sample.new.txt#L2"),
 				},
 				{
 					Path:            github.String("sample.new.txt"),

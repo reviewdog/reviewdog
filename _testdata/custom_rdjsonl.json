@@ -5,3 +5,4 @@
 {"message":"range test 5 (within line)","location":{"path":"_testdata/custom.txt","range":{"start":{"line":12, "column": 5},"end":{"line":12, "column": 7}}}}
 {"message":"severity test 1","location":{"path":"_testdata/custom.txt","range":{"start":{"line":3, "column": 5}}}, "severity": "INFO"}
 {"message":"severity test 2","location":{"path":"_testdata/custom.txt","range":{"start":{"line":3, "column": 4}}}, "severity": 2}
+{"source":{"name": "rdjsonl-source"}, "message":"source test","location":{"path":"_testdata/custom.txt","range":{"start":{"line":3}}}}
