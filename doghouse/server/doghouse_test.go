@@ -79,7 +79,7 @@ func TestCheck_OK(t *testing.T) {
 					Location: &rdf.Location{
 						Path: "sample.new.txt",
 						Range: &rdf.Range{
-							Start: &rdf.Position{Line: 2},
+							Start: &rdf.Position{Line: 2, Column: 1},
 						},
 					},
 				},

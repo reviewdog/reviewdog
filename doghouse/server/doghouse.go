@@ -247,11 +247,9 @@ func (ch *Checker) toCheckRunAnnotation(c *reviewdog.FilteredCheck) *github.Chec
 	}
 	// Annotations only support start_column and end_column on the same line.
 	if startLine == endLine {
-		if col := loc.GetRange().GetStart().GetColumn(); col != 0 {
-			a.StartColumn = github.Int(int(col))
-		}
-		if col := loc.GetRange().GetEnd().GetColumn(); col != 0 {
-			a.EndColumn = github.Int(int(col))
+		if s, e := loc.GetRange().GetStart().GetColumn(), loc.GetRange().GetEnd().GetColumn(); s != 0 && e != 0 {
+			a.StartColumn = github.Int(int(s))
+			a.EndColumn = github.Int(int(e))
 		}
 	}
 	if ch.req.Name != "" {
