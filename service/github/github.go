@@ -108,21 +108,7 @@ func (g *GitHubPullRequest) postAsReviewComment(ctx context.Context) error {
 			remaining = append(remaining, c)
 			continue
 		}
-		cbody := commentutil.CommentBody(c)
-		// Document: https://docs.github.com/en/rest/reference/pulls#create-a-review-comment-for-a-pull-request
-		loc := c.Result.Diagnostic.GetLocation()
-		comment := &github.DraftReviewComment{
-			Path: github.String(loc.GetPath()),
-			Side: github.String("RIGHT"),
-			Body: github.String(cbody),
-			Line: github.Int(int(loc.GetRange().GetStart().GetLine())),
-		}
-		if loc.GetRange().GetEnd().GetLine() > 0 {
-			comment.StartSide = github.String("RIGHT")
-			comment.StartLine = github.Int(int(loc.GetRange().GetStart().GetLine()))
-			comment.Line = github.Int(int(loc.GetRange().GetEnd().GetLine()))
-		}
-		comments = append(comments, comment)
+		comments = append(comments, buildDraftReviewComment(c))
 	}
 
 	if len(comments) == 0 {
@@ -137,6 +123,32 @@ func (g *GitHubPullRequest) postAsReviewComment(ctx context.Context) error {
 	}
 	_, _, err := g.cli.PullRequests.CreateReview(ctx, g.owner, g.repo, g.pr, review)
 	return err
+}
+
+// Document: https://docs.github.com/en/rest/reference/pulls#create-a-review-comment-for-a-pull-request
+func buildDraftReviewComment(c *reviewdog.Comment) *github.DraftReviewComment {
+	cbody := commentutil.CommentBody(c)
+	loc := c.Result.Diagnostic.GetLocation()
+	startLine := int(loc.GetRange().GetStart().GetLine())
+	endLine := int(loc.GetRange().GetEnd().GetLine())
+	// End position with column == 1 means range to the end of the previous lines
+	// including line-break.
+	if loc.GetRange().GetEnd().GetColumn() == 1 {
+		endLine--
+	}
+	r := &github.DraftReviewComment{
+		Path: github.String(loc.GetPath()),
+		Side: github.String("RIGHT"),
+		Body: github.String(cbody),
+		Line: github.Int(startLine),
+	}
+	// GitHub API: Start line must precede the end line.
+	if startLine < endLine {
+		r.StartSide = github.String("RIGHT")
+		r.StartLine = github.Int(startLine)
+		r.Line = github.Int(endLine)
+	}
+	return r
 }
 
 func (g *GitHubPullRequest) remainingCommentsSummary(remaining []*reviewdog.Comment) string {
