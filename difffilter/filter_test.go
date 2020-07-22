@@ -135,7 +135,7 @@ func TestDiffFilter_root(t *testing.T) {
 			mode:         ModeAdded,
 			want:         false,
 			wantFileDiff: true,
-			wantLineDiff: false,
+			wantLineDiff: true,
 		},
 		{
 			path:         "sample.new.txt",

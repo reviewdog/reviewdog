@@ -85,7 +85,7 @@ func (g *GitHubPullRequest) postAsReviewComment(ctx context.Context) error {
 	comments := make([]*github.DraftReviewComment, 0, len(g.postComments))
 	remaining := make([]*reviewdog.Comment, 0)
 	for _, c := range g.postComments {
-		if c.Result.LnumDiff == 0 {
+		if !c.Result.InDiffContext {
 			// GitHub Review API cannot report results outside diff. If it's running
 			// in GitHub Actions, fallback to GitHub Actions log as report .
 			if cienv.IsInGitHubAction() {
@@ -93,7 +93,7 @@ func (g *GitHubPullRequest) postAsReviewComment(ctx context.Context) error {
 			}
 			continue
 		}
-		if g.postedcs.IsPosted(c, c.Result.LnumDiff) {
+		if g.postedcs.IsPosted(c, githubCommentLine(c)) {
 			continue
 		}
 		// Only posts maxCommentsPerRequest comments per 1 request to avoid spammy
@@ -108,12 +108,7 @@ func (g *GitHubPullRequest) postAsReviewComment(ctx context.Context) error {
 			remaining = append(remaining, c)
 			continue
 		}
-		cbody := commentutil.CommentBody(c)
-		comments = append(comments, &github.DraftReviewComment{
-			Path:     github.String(c.Result.Diagnostic.GetLocation().GetPath()),
-			Position: github.Int(c.Result.LnumDiff),
-			Body:     github.String(cbody),
-		})
+		comments = append(comments, buildDraftReviewComment(c))
 	}
 
 	if len(comments) == 0 {
@@ -128,6 +123,42 @@ func (g *GitHubPullRequest) postAsReviewComment(ctx context.Context) error {
 	}
 	_, _, err := g.cli.PullRequests.CreateReview(ctx, g.owner, g.repo, g.pr, review)
 	return err
+}
+
+// Document: https://docs.github.com/en/rest/reference/pulls#create-a-review-comment-for-a-pull-request
+func buildDraftReviewComment(c *reviewdog.Comment) *github.DraftReviewComment {
+	cbody := commentutil.CommentBody(c)
+	loc := c.Result.Diagnostic.GetLocation()
+	line := githubCommentLine(c)
+	r := &github.DraftReviewComment{
+		Path: github.String(loc.GetPath()),
+		Side: github.String("RIGHT"),
+		Body: github.String(cbody),
+		Line: github.Int(line),
+	}
+	// GitHub API: Start line must precede the end line.
+	if startLine := int(loc.GetRange().GetStart().GetLine()); startLine < line {
+		r.StartSide = github.String("RIGHT")
+		r.StartLine = github.Int(startLine)
+	}
+	return r
+}
+
+// line represents end line if it's a multiline comment in GitHub, otherwise
+// it's start line.
+// Document: https://docs.github.com/en/rest/reference/pulls#create-a-review-comment-for-a-pull-request
+func githubCommentLine(c *reviewdog.Comment) int {
+	loc := c.Result.Diagnostic.GetLocation()
+	line := loc.GetRange().GetEnd().GetLine()
+	// End position with column == 1 means range to the end of the previous lines
+	// including line-break.
+	if loc.GetRange().GetEnd().GetColumn() == 1 {
+		line--
+	}
+	if line == 0 {
+		line = loc.GetRange().GetStart().GetLine()
+	}
+	return int(line)
 }
 
 func (g *GitHubPullRequest) remainingCommentsSummary(remaining []*reviewdog.Comment) string {
@@ -161,12 +192,10 @@ func (g *GitHubPullRequest) setPostedComment(ctx context.Context) error {
 		return err
 	}
 	for _, c := range cs {
-		if c.Position == nil || c.Path == nil || c.Body == nil {
-			// skip resolved comments. Or comments which do not have "path" nor
-			// "body".
+		if c.Line == nil || c.Path == nil || c.Body == nil {
 			continue
 		}
-		g.postedcs.AddPostedComment(c.GetPath(), c.GetPosition(), c.GetBody())
+		g.postedcs.AddPostedComment(c.GetPath(), c.GetLine(), c.GetBody())
 	}
 	return nil
 }
