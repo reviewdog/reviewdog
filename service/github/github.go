@@ -109,11 +109,20 @@ func (g *GitHubPullRequest) postAsReviewComment(ctx context.Context) error {
 			continue
 		}
 		cbody := commentutil.CommentBody(c)
-		comments = append(comments, &github.DraftReviewComment{
-			Path:     github.String(c.Result.Diagnostic.GetLocation().GetPath()),
-			Position: github.Int(c.Result.LnumDiff),
-			Body:     github.String(cbody),
-		})
+		// Document: https://docs.github.com/en/rest/reference/pulls#create-a-review-comment-for-a-pull-request
+		loc := c.Result.Diagnostic.GetLocation()
+		comment := &github.DraftReviewComment{
+			Path: github.String(loc.GetPath()),
+			Side: github.String("RIGHT"),
+			Body: github.String(cbody),
+			Line: github.Int(int(loc.GetRange().GetStart().GetLine())),
+		}
+		if loc.GetRange().GetEnd().GetLine() > 0 {
+			comment.StartSide = github.String("RIGHT")
+			comment.StartLine = github.Int(int(loc.GetRange().GetStart().GetLine()))
+			comment.Line = github.Int(int(loc.GetRange().GetEnd().GetLine()))
+		}
+		comments = append(comments, comment)
 	}
 
 	if len(comments) == 0 {

@@ -254,9 +254,10 @@ func TestGitHubPullRequest_Post_Flush_review_api(t *testing.T) {
 		}
 		want := []*github.DraftReviewComment{
 			{
-				Path:     github.String("reviewdog.go"),
-				Position: github.Int(14),
-				Body:     github.String(commentutil.BodyPrefix + "\nnew comment"),
+				Path: github.String("reviewdog.go"),
+				Side: github.String("RIGHT"),
+				Line: github.Int(15),
+				Body: github.String(commentutil.BodyPrefix + "\nnew comment"),
 			},
 		}
 		if diff := pretty.Compare(want, req.Comments); diff != "" {
@@ -279,6 +280,11 @@ func TestGitHubPullRequest_Post_Flush_review_api(t *testing.T) {
 					Diagnostic: &rdf.Diagnostic{
 						Location: &rdf.Location{
 							Path: "reviewdog.go",
+							Range: &rdf.Range{
+								Start: &rdf.Position{
+									Line: 2,
+								},
+							},
 						},
 					},
 				},
@@ -292,6 +298,11 @@ func TestGitHubPullRequest_Post_Flush_review_api(t *testing.T) {
 					Diagnostic: &rdf.Diagnostic{
 						Location: &rdf.Location{
 							Path: "reviewdog.go",
+							Range: &rdf.Range{
+								Start: &rdf.Position{
+									Line: 15,
+								},
+							},
 						},
 					},
 				},
@@ -305,6 +316,11 @@ func TestGitHubPullRequest_Post_Flush_review_api(t *testing.T) {
 					Diagnostic: &rdf.Diagnostic{
 						Location: &rdf.Location{
 							Path: "reviewdog.go",
+							Range: &rdf.Range{
+								Start: &rdf.Position{
+									Line: 15,
+								},
+							},
 						},
 					},
 				},
@@ -318,6 +334,7 @@ func TestGitHubPullRequest_Post_Flush_review_api(t *testing.T) {
 					Diagnostic: &rdf.Diagnostic{
 						Location: &rdf.Location{
 							Path: "reviewdog.go",
+							// No Line
 						},
 					},
 				},
