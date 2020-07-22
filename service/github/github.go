@@ -85,7 +85,7 @@ func (g *GitHubPullRequest) postAsReviewComment(ctx context.Context) error {
 	comments := make([]*github.DraftReviewComment, 0, len(g.postComments))
 	remaining := make([]*reviewdog.Comment, 0)
 	for _, c := range g.postComments {
-		if c.Result.LnumDiff == 0 {
+		if !c.Result.InDiffContext {
 			// GitHub Review API cannot report results outside diff. If it's running
 			// in GitHub Actions, fallback to GitHub Actions log as report .
 			if cienv.IsInGitHubAction() {

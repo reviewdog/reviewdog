@@ -321,7 +321,7 @@ func TestPostResultSet_withoutReportURL(t *testing.T) {
 		sha   = "1414"
 	)
 
-	wantResults := []*reviewdog.FilteredCheck{{LnumDiff: 1}}
+	wantResults := []*reviewdog.FilteredCheck{{ShouldReport: true}}
 	fakeCli := &fakeDoghouseServerCli{}
 	fakeCli.FakeCheck = func(ctx context.Context, req *doghouse.CheckRequest) (*doghouse.CheckResponse, error) {
 		return &doghouse.CheckResponse{CheckedResults: wantResults}, nil

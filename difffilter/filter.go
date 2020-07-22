@@ -113,7 +113,7 @@ func (df *DiffFilter) addDiff(filediffs []*diff.FileDiff) {
 		}
 		for _, hunk := range filediff.Hunks {
 			for _, line := range hunk.Lines {
-				if line.LnumNew > 0 && df.isSignificantLine(line) {
+				if line.LnumNew > 0 {
 					lines[line.LnumNew] = line
 				}
 			}
@@ -135,7 +135,7 @@ func (df *DiffFilter) ShouldReport(path string, lnum int) (bool, *diff.FileDiff,
 	if !ok {
 		return (df.mode == ModeNoFilter || df.mode == ModeFile), file, nil
 	}
-	return true, file, line
+	return df.isSignificantLine(line), file, line
 }
 
 func (df *DiffFilter) isSignificantLine(line *diff.Line) bool {

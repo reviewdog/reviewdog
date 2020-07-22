@@ -78,6 +78,18 @@ func TestFilterCheckByAddedLines(t *testing.T) {
 				},
 			},
 		},
+		{
+			Diagnostic: &rdf.Diagnostic{
+				Message: "outside range (start)",
+				Location: &rdf.Location{
+					Path: "sample.new.txt",
+					Range: &rdf.Range{
+						Start: &rdf.Position{Line: 1},
+						End:   &rdf.Position{Line: 2},
+					},
+				},
+			},
+		},
 	}
 	want := []*FilteredCheck{
 		{
@@ -89,10 +101,11 @@ func TestFilterCheckByAddedLines(t *testing.T) {
 					},
 				},
 			},
-			ShouldReport: false,
-			InDiffFile:   true,
-			OldPath:      "sample.old.txt",
-			OldLine:      1,
+			ShouldReport:  false,
+			InDiffFile:    true,
+			InDiffContext: true,
+			OldPath:       "sample.old.txt",
+			OldLine:       1,
 		},
 		{
 			CheckResult: &CheckResult{
@@ -103,11 +116,11 @@ func TestFilterCheckByAddedLines(t *testing.T) {
 					},
 				},
 			},
-			ShouldReport: true,
-			InDiffFile:   true,
-			LnumDiff:     3,
-			OldPath:      "sample.old.txt",
-			OldLine:      0,
+			ShouldReport:  true,
+			InDiffFile:    true,
+			InDiffContext: true,
+			OldPath:       "sample.old.txt",
+			OldLine:       0,
 		},
 		{
 			CheckResult: &CheckResult{
@@ -118,10 +131,11 @@ func TestFilterCheckByAddedLines(t *testing.T) {
 					},
 				},
 			},
-			ShouldReport: false,
-			InDiffFile:   true,
-			OldPath:      "nonewline.old.txt",
-			OldLine:      1,
+			ShouldReport:  false,
+			InDiffFile:    true,
+			InDiffContext: true,
+			OldPath:       "nonewline.old.txt",
+			OldLine:       1,
 		},
 		{
 			CheckResult: &CheckResult{
@@ -132,11 +146,30 @@ func TestFilterCheckByAddedLines(t *testing.T) {
 					},
 				},
 			},
-			ShouldReport: true,
-			InDiffFile:   true,
-			LnumDiff:     5,
-			OldPath:      "nonewline.old.txt",
-			OldLine:      0,
+			ShouldReport:  true,
+			InDiffFile:    true,
+			InDiffContext: true,
+			OldPath:       "nonewline.old.txt",
+			OldLine:       0,
+		},
+		{
+			CheckResult: &CheckResult{
+				Diagnostic: &rdf.Diagnostic{
+					Message: "outside range (start)",
+					Location: &rdf.Location{
+						Path: "sample.new.txt",
+						Range: &rdf.Range{
+							Start: &rdf.Position{Line: 1},
+							End:   &rdf.Position{Line: 2},
+						},
+					},
+				},
+			},
+			ShouldReport:  true,
+			InDiffFile:    true,
+			InDiffContext: true,
+			OldPath:       "sample.old.txt",
+			OldLine:       1,
 		},
 	}
 	filediffs, _ := diff.ParseMultiFile(strings.NewReader(diffContent))
@@ -184,11 +217,11 @@ func TestFilterCheckByDiffContext(t *testing.T) {
 					},
 				},
 			},
-			ShouldReport: true,
-			InDiffFile:   true,
-			LnumDiff:     1,
-			OldPath:      "sample.old.txt",
-			OldLine:      1,
+			ShouldReport:  true,
+			InDiffFile:    true,
+			InDiffContext: true,
+			OldPath:       "sample.old.txt",
+			OldLine:       1,
 		},
 		{
 			CheckResult: &CheckResult{
@@ -199,11 +232,11 @@ func TestFilterCheckByDiffContext(t *testing.T) {
 					},
 				},
 			},
-			ShouldReport: true,
-			InDiffFile:   true,
-			LnumDiff:     3,
-			OldPath:      "sample.old.txt",
-			OldLine:      0,
+			ShouldReport:  true,
+			InDiffFile:    true,
+			InDiffContext: true,
+			OldPath:       "sample.old.txt",
+			OldLine:       0,
 		},
 		{
 			CheckResult: &CheckResult{
@@ -214,11 +247,11 @@ func TestFilterCheckByDiffContext(t *testing.T) {
 					},
 				},
 			},
-			ShouldReport: true,
-			InDiffFile:   true,
-			LnumDiff:     4,
-			OldPath:      "sample.old.txt",
-			OldLine:      0,
+			ShouldReport:  true,
+			InDiffFile:    true,
+			InDiffContext: true,
+			OldPath:       "sample.old.txt",
+			OldLine:       0,
 		},
 	}
 	filediffs, _ := diff.ParseMultiFile(strings.NewReader(diffContent))

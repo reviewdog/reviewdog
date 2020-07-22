@@ -11,10 +11,14 @@ import (
 type FilteredCheck struct {
 	*CheckResult
 	ShouldReport bool
-	LnumDiff     int  // 0 if the result is outside diff.
-	InDiffFile   bool // false if the result is outside diff files.
-	OldPath      string
-	OldLine      int
+	// false if the result is outside diff files.
+	InDiffFile bool
+	// true if the result is inside a diff hunk.
+	// If it's a multiline result, both start and end must be in the same diff
+	// hunk.
+	InDiffContext bool
+	OldPath       string
+	OldLine       int
 }
 
 // FilterCheck filters check results by diff. It doesn't drop check which
@@ -26,17 +30,26 @@ func FilterCheck(results []*CheckResult, diff []*diff.FileDiff, strip int,
 	for _, result := range results {
 		check := &FilteredCheck{CheckResult: result}
 		loc := result.Diagnostic.GetLocation()
-		lnum := int(loc.GetRange().GetStart().GetLine())
-		shouldReport, difffile, diffline := df.ShouldReport(loc.GetPath(), lnum)
-		check.ShouldReport = shouldReport
-		if diffline != nil {
-			check.LnumDiff = diffline.LnumDiff
+		startLine := int(loc.GetRange().GetStart().GetLine())
+		endLine := int(loc.GetRange().GetEnd().GetLine())
+		if endLine == 0 {
+			endLine = startLine
+		}
+		check.InDiffContext = true
+		for l := startLine; l <= endLine; l++ {
+			shouldReport, difffile, diffline := df.ShouldReport(loc.GetPath(), l)
+			check.ShouldReport = check.ShouldReport || shouldReport
+			// all lines must be in diff.
+			check.InDiffContext = check.InDiffContext && diffline != nil
+			if difffile != nil {
+				check.InDiffFile = true
+				if l == startLine {
+					// TODO(haya14busa): Support endline as well especially for GitLab.
+					check.OldPath, check.OldLine = getOldPosition(difffile, strip, loc.GetPath(), l)
+				}
+			}
 		}
 		loc.Path = CleanPath(loc.GetPath(), cwd)
-		if difffile != nil {
-			check.InDiffFile = true
-			check.OldPath, check.OldLine = getOldPosition(difffile, strip, loc.GetPath(), lnum)
-		}
 		checks = append(checks, check)
 	}
 	return checks
@@ -44,6 +57,9 @@ func FilterCheck(results []*CheckResult, diff []*diff.FileDiff, strip int,
 
 // CleanPath clean up given path. If workdir is not empty, it returns relative
 // path to the given workdir.
+//
+// TODO(haya14busa): DRY. Create shared logic between this and
+// difffilter.normalizePath.
 func CleanPath(path, workdir string) string {
 	p := path
 	if filepath.IsAbs(path) && workdir != "" {
