@@ -1,6 +1,6 @@
 Custom text for testing
 
-line 5
+Line 5
 
 --- Range
 	a = 1
