@@ -170,7 +170,20 @@ func (ch *Checker) conclusion() string {
 }
 
 // https://developer.github.com/v3/checks/runs/#annotations-object
-func (ch *Checker) annotationLevel() string {
+func (ch *Checker) annotationLevel(s rdf.Severity) string {
+	switch s {
+	case rdf.Severity_ERROR:
+		return "failure"
+	case rdf.Severity_WARNING:
+		return "warning"
+	case rdf.Severity_INFO:
+		return "notice"
+	default:
+		return ch.reqAnnotationLevel()
+	}
+}
+
+func (ch *Checker) reqAnnotationLevel() string {
 	switch strings.ToLower(ch.req.Level) {
 	case "info":
 		return "notice"
@@ -228,7 +241,7 @@ func (ch *Checker) toCheckRunAnnotation(c *reviewdog.FilteredCheck) *github.Chec
 		Path:            github.String(loc.GetPath()),
 		StartLine:       github.Int(int(loc.GetRange().GetStart().GetLine())),
 		EndLine:         github.Int(int(endLine)),
-		AnnotationLevel: github.String(ch.annotationLevel()),
+		AnnotationLevel: github.String(ch.annotationLevel(c.Diagnostic.Severity)),
 		Message:         github.String(c.Diagnostic.GetMessage()),
 	}
 	if ch.req.Name != "" {
@@ -263,22 +276,33 @@ func (ch *Checker) rawPullRequestDiff(ctx context.Context, pr int) ([]byte, erro
 func annotationsToCheckResults(as []*doghouse.Annotation) []*reviewdog.CheckResult {
 	cs := make([]*reviewdog.CheckResult, 0, len(as))
 	for _, a := range as {
-		cs = append(cs, &reviewdog.CheckResult{
-			Diagnostic: &rdf.Diagnostic{
-				Location: &rdf.Location{
-					Path: a.Path,
-					Range: &rdf.Range{
-						Start: &rdf.Position{
-							Line: int32(a.Line),
-						},
-					},
-				},
-				Message: a.Message,
-			},
-			Lines: strings.Split(a.RawMessage, "\n"),
-		})
+		cs = append(cs, annotationToCheckResult(a))
 	}
 	return cs
+}
+
+func annotationToCheckResult(a *doghouse.Annotation) *reviewdog.CheckResult {
+	if a.Diagnostic != nil {
+		return &reviewdog.CheckResult{
+			Diagnostic: a.Diagnostic,
+			Lines:      strings.Split(a.RawMessage, "\n"),
+		}
+	}
+	// Old reviwedog CLI doesn't have the Diagnostic field.
+	return &reviewdog.CheckResult{
+		Diagnostic: &rdf.Diagnostic{
+			Location: &rdf.Location{
+				Path: a.Path,
+				Range: &rdf.Range{
+					Start: &rdf.Position{
+						Line: int32(a.Line),
+					},
+				},
+			},
+			Message: a.Message,
+		},
+		Lines: strings.Split(a.RawMessage, "\n"),
+	}
 }
 
 func min(x, y int) int {
