@@ -234,6 +234,12 @@ func TestGitHubPullRequest_Post_Flush_review_api(t *testing.T) {
 					Line:      github.Int(16),
 					Body:      github.String(commentutil.BodyPrefix + "\nmultiline existing comment"),
 				},
+				{
+					Path:      github.String("reviewdog.go"),
+					StartLine: github.Int(15),
+					Line:      github.Int(16),
+					Body:      github.String(commentutil.BodyPrefix + "\nmultiline existing comment (line-break)"),
+				},
 			}
 			if err := json.NewEncoder(w).Encode(cs); err != nil {
 				t.Fatal(err)
@@ -362,6 +368,29 @@ func TestGitHubPullRequest_Post_Flush_review_api(t *testing.T) {
 				LnumDiff: 14,
 			},
 			Body: "multiline existing comment",
+		},
+		{
+			Result: &reviewdog.FilteredCheck{
+				CheckResult: &reviewdog.CheckResult{
+					Diagnostic: &rdf.Diagnostic{
+						Location: &rdf.Location{
+							Path: "reviewdog.go",
+							Range: &rdf.Range{
+								Start: &rdf.Position{
+									Line:   15,
+									Column: 1,
+								},
+								End: &rdf.Position{
+									Line:   17,
+									Column: 1,
+								},
+							},
+						},
+					},
+				},
+				LnumDiff: 14,
+			},
+			Body: "multiline existing comment (line-break)",
 		},
 		{
 			Result: &reviewdog.FilteredCheck{

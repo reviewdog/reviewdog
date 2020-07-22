@@ -93,7 +93,7 @@ func (g *GitHubPullRequest) postAsReviewComment(ctx context.Context) error {
 			}
 			continue
 		}
-		if g.postedcs.IsPosted(c, githubPostedLine(c)) {
+		if g.postedcs.IsPosted(c, githubCommentLine(c)) {
 			continue
 		}
 		// Only posts maxCommentsPerRequest comments per 1 request to avoid spammy
@@ -129,34 +129,34 @@ func (g *GitHubPullRequest) postAsReviewComment(ctx context.Context) error {
 func buildDraftReviewComment(c *reviewdog.Comment) *github.DraftReviewComment {
 	cbody := commentutil.CommentBody(c)
 	loc := c.Result.Diagnostic.GetLocation()
-	startLine := int(loc.GetRange().GetStart().GetLine())
-	endLine := int(loc.GetRange().GetEnd().GetLine())
-	// End position with column == 1 means range to the end of the previous lines
-	// including line-break.
-	if loc.GetRange().GetEnd().GetColumn() == 1 {
-		endLine--
-	}
+	line := githubCommentLine(c)
 	r := &github.DraftReviewComment{
 		Path: github.String(loc.GetPath()),
 		Side: github.String("RIGHT"),
 		Body: github.String(cbody),
-		Line: github.Int(startLine),
+		Line: github.Int(line),
 	}
 	// GitHub API: Start line must precede the end line.
-	if startLine < endLine {
+	if startLine := int(loc.GetRange().GetStart().GetLine()); startLine < line {
 		r.StartSide = github.String("RIGHT")
 		r.StartLine = github.Int(startLine)
-		r.Line = github.Int(endLine)
 	}
 	return r
 }
 
-// line represents end line if it's a multiline comment in GitHub.
+// line represents end line if it's a multiline comment in GitHub, otherwise
+// it's start line.
 // Document: https://docs.github.com/en/rest/reference/pulls#create-a-review-comment-for-a-pull-request
-func githubPostedLine(c *reviewdog.Comment) int {
-	line := c.Result.Diagnostic.GetLocation().GetRange().GetEnd().GetLine()
+func githubCommentLine(c *reviewdog.Comment) int {
+	loc := c.Result.Diagnostic.GetLocation()
+	line := loc.GetRange().GetEnd().GetLine()
+	// End position with column == 1 means range to the end of the previous lines
+	// including line-break.
+	if loc.GetRange().GetEnd().GetColumn() == 1 {
+		line--
+	}
 	if line == 0 {
-		line = c.Result.Diagnostic.GetLocation().GetRange().GetStart().GetLine()
+		line = loc.GetRange().GetStart().GetLine()
 	}
 	return int(line)
 }
