@@ -1,6 +1,7 @@
-{"message":"multiline test 1","location":{"path":"_testdata/custom.txt","range":{"start":{"line":5}, "end":{"line":9}}}}
-{"message":"multiline test 2 (same line)","location":{"path":"_testdata/custom.txt","range":{"start":{"line":5}, "end":{"line":5}}}}
-{"message":"multiline test 3 (with line-break)","location":{"path":"_testdata/custom.txt","range":{"start":{"line":6,"column":2}, "end":{"line":7,"column":1}}}}
-{"message":"multiline test 4 (with line-break)","location":{"path":"_testdata/custom.txt","range":{"start":{"line":6,"column":2}, "end":{"line":9,"column":1}}}}
-{"message":"severity test 1","location":{"path":"_testdata/custom.txt","range":{"start":{"line":5, "column": 5}}}, "severity": "INFO"}
-{"message":"severity test 2","location":{"path":"_testdata/custom.txt","range":{"start":{"line":5, "column": 4}}}, "severity": 2}
+{"message":"range test 1 (line only)","location":{"path":"_testdata/custom.txt","range":{"start":{"line":5}, "end":{"line":9}}}}
+{"message":"range test 2 (same line)","location":{"path":"_testdata/custom.txt","range":{"start":{"line":5}, "end":{"line":5}}}}
+{"message":"range test 3 (with line-break)","location":{"path":"_testdata/custom.txt","range":{"start":{"line":6,"column":2}, "end":{"line":7,"column":1}}}}
+{"message":"range test 4 (with line-break)","location":{"path":"_testdata/custom.txt","range":{"start":{"line":6,"column":2}, "end":{"line":9,"column":1}}}}
+{"message":"range test 5 (within line)","location":{"path":"_testdata/custom.txt","range":{"start":{"line":12, "column": 5},"end":{"line":12, "column": 7}}}}
+{"message":"severity test 1","location":{"path":"_testdata/custom.txt","range":{"start":{"line":3, "column": 5}}}, "severity": "INFO"}
+{"message":"severity test 2","location":{"path":"_testdata/custom.txt","range":{"start":{"line":3, "column": 4}}}, "severity": 2}
