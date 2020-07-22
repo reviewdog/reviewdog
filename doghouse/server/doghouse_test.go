@@ -145,6 +145,11 @@ func TestCheck_OK(t *testing.T) {
 					},
 				},
 			},
+			{
+				Path:    "sample.new.txt",
+				Line:    2,
+				Message: "request from old clients",
+			},
 		},
 		Level: "warning",
 	}
@@ -217,6 +222,14 @@ func TestCheck_OK(t *testing.T) {
 					EndLine:         github.Int(2),
 					AnnotationLevel: github.String("failure"),
 					Message:         github.String("test severity override"),
+					Title:           github.String("[haya14busa-linter] sample.new.txt#L2"),
+				},
+				{
+					Path:            github.String("sample.new.txt"),
+					StartLine:       github.Int(2),
+					EndLine:         github.Int(2),
+					AnnotationLevel: github.String("warning"),
+					Message:         github.String("request from old clients"),
 					Title:           github.String("[haya14busa-linter] sample.new.txt#L2"),
 				},
 			}
