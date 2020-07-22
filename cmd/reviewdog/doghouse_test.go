@@ -234,26 +234,42 @@ func TestPostResultSet_withReportURL(t *testing.T) {
 		case "name1":
 			if diff := cmp.Diff(req.Annotations, []*doghouse.Annotation{
 				{
-					Line:       14,
-					Message:    "name1: test 1",
-					Path:       "cmd/reviewdog/reviewdog.go",
+					Diagnostic: &rdf.Diagnostic{
+						Message: "name1: test 1",
+						Location: &rdf.Location{
+							Path: "cmd/reviewdog/reviewdog.go",
+							Range: &rdf.Range{
+								Start: &rdf.Position{Line: 14},
+							},
+						},
+					},
 					RawMessage: "L1\nL2",
 				},
 				{
-					Message: "name1: test 2",
-					Path:    "cmd/reviewdog/reviewdog.go",
+					Diagnostic: &rdf.Diagnostic{
+						Message: "name1: test 2",
+						Location: &rdf.Location{
+							Path: "cmd/reviewdog/reviewdog.go",
+						},
+					},
 				},
-			}); diff != "" {
+			}, protocmp.Transform()); diff != "" {
 				t.Errorf("%s: req.Annotation have diff:\n%s", req.Name, diff)
 			}
 		case "name2":
 			if diff := cmp.Diff(req.Annotations, []*doghouse.Annotation{
 				{
-					Line:    14,
-					Message: "name2: test 1",
-					Path:    "cmd/reviewdog/doghouse.go",
+					Diagnostic: &rdf.Diagnostic{
+						Message: "name2: test 1",
+						Location: &rdf.Location{
+							Path: "cmd/reviewdog/doghouse.go",
+							Range: &rdf.Range{
+								Start: &rdf.Position{Line: 14},
+							},
+						},
+					},
 				},
-			}); diff != "" {
+			}, protocmp.Transform()); diff != "" {
 				t.Errorf("%s: req.Annotation have diff:\n%s", req.Name, diff)
 			}
 		default:
