@@ -86,6 +86,10 @@ func main() {
 		integrationID:    integrationID,
 		ghInstStore:      &ghInstStore,
 		ghRepoTokenStore: &ghRepoTokenStore,
+		tr: &ochttp.Transport{
+			// Use Google Cloud propagation format.
+			Propagation: &propagation.HTTPFormat{},
+		},
 	}
 
 	ghWebhookHandler := githubWebhookHandler{
