@@ -1,4 +1,4 @@
-{"message":"multiline test 1","location":{"path":"_testdata/custom.go","range":{"start":{"line":5}, "end":{"line":9}}}}
-{"message":"multiline test 2 (same line)","location":{"path":"_testdata/custom.go","range":{"start":{"line":5}, "end":{"line":5}}}}
-{"message":"multiline test 3 (with line-break)","location":{"path":"_testdata/custom.go","range":{"start":{"line":6,"column":2}, "end":{"line":7,"column":1}}}}
-{"message":"multiline test 4 (with line-break)","location":{"path":"_testdata/custom.go","range":{"start":{"line":6,"column":2}, "end":{"line":9,"column":1}}}}
+{"message":"multiline test 1","location":{"path":"_testdata/custom.txt","range":{"start":{"line":5}, "end":{"line":9}}}}
+{"message":"multiline test 2 (same line)","location":{"path":"_testdata/custom.txt","range":{"start":{"line":5}, "end":{"line":5}}}}
+{"message":"multiline test 3 (with line-break)","location":{"path":"_testdata/custom.txt","range":{"start":{"line":6,"column":2}, "end":{"line":7,"column":1}}}}
+{"message":"multiline test 4 (with line-break)","location":{"path":"_testdata/custom.txt","range":{"start":{"line":6,"column":2}, "end":{"line":9,"column":1}}}}
