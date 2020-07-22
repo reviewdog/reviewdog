@@ -46,7 +46,7 @@ jobs:
           REVIEWDOG_GITHUB_API_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         run: |
           cat ./_testdata/custom_rdjsonl.json | \
-            reviewdog -name="custom-rdjsonl" -f=rdjsonl -reporter=github-check
+            reviewdog -name="custom-rdjsonl" -f=rdjsonl -reporter=github-check -level=info
 
   reviewdog-pr:
     if: github.event_name == 'pull_request'
