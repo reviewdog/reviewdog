@@ -3,9 +3,9 @@ Custom text for testing
 Line 3
 
 --- Range
-	a = 1
-	b = 2
-	c = 3
+	a = 10
+	b = 20
+	c = 30
 ---
 
 1234567890
