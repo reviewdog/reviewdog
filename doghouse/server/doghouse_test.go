@@ -191,7 +191,7 @@ func TestCheck_OK(t *testing.T) {
 					EndLine:         github.Int(3),
 					AnnotationLevel: github.String("warning"),
 					Message:         github.String("test multiline"),
-					Title:           github.String("[haya14busa-linter] sample.new.txt#L2"),
+					Title:           github.String("[haya14busa-linter] sample.new.txt#L2-L3"),
 				},
 				{
 					Path:            github.String("sample.new.txt"),
@@ -199,7 +199,7 @@ func TestCheck_OK(t *testing.T) {
 					EndLine:         github.Int(3),
 					AnnotationLevel: github.String("warning"),
 					Message:         github.String("test multiline with column"),
-					Title:           github.String("[haya14busa-linter] sample.new.txt#L2"),
+					Title:           github.String("[haya14busa-linter] sample.new.txt#L2-L3"),
 				},
 				{
 					Path:            github.String("sample.new.txt"),

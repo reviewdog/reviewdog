@@ -252,8 +252,16 @@ func (ch *Checker) toCheckRunAnnotation(c *reviewdog.FilteredCheck) *github.Chec
 			a.EndColumn = github.Int(int(e))
 		}
 	}
-	if ch.req.Name != "" {
-		a.Title = github.String(fmt.Sprintf("[%s] %s#L%d", ch.req.Name, loc.GetPath(), loc.GetRange().GetStart().GetLine()))
+	toolName := c.Diagnostic.GetSource().GetName()
+	if toolName == "" {
+		toolName = ch.req.Name
+	}
+	if toolName != "" {
+		line := fmt.Sprintf("L%d", startLine)
+		if startLine < endLine {
+			line += fmt.Sprintf("-L%d", endLine)
+		}
+		a.Title = github.String(fmt.Sprintf("[%s] %s#%s", toolName, loc.GetPath(), line))
 	}
 	if s := strings.Join(c.Lines, "\n"); s != "" {
 		a.RawDetails = github.String(s)
