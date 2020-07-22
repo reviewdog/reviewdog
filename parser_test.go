@@ -115,7 +115,9 @@ func TestRDJSONLParser(t *testing.T) {
 {"source":{"name":"deadcode"},"message":"'unused2' is unused","location":{"path":"testdata/main.go","range":{"start":{"line":24,"column":6}}}}
 {"source":{"name":"errcheck"},"message":"Error return value of 'os.Open' is not checked","location":{"path":"testdata/main.go","range":{"start":{"line":15,"column":9}}}}
 {"source":{"name":"ineffassign"},"message":"ineffectual assignment to 'x'","location":{"path":"testdata/main.go","range":{"start":{"line":12,"column":2}}}}
-{"source":{"name":"govet"},"message":"printf: Sprintf format %d reads arg #1, but call has 0 args","location":{"path":"testdata/main.go","range":{"start":{"line":13,"column":2}}}}`
+{"source":{"name":"govet"},"message":"printf: Sprintf format %d reads arg #1, but call has 0 args","location":{"path":"testdata/main.go","range":{"start":{"line":13,"column":2}}}}
+{"source":{"name":"severity-test"},"message":"severity test (string)","location":{"path":"testdata/main.go","range":{"start":{"line":24,"column":6}}}, "severity": "WARNING"}
+{"source":{"name":"severity-test"},"message":"severity test (number)","location":{"path":"testdata/main.go","range":{"start":{"line":24,"column":6}}}, "severity": "WARNING"}`
 	sampleLines := strings.Split(sample, "\n")
 	p := NewRDJSONLParser()
 	crs, err := p.Parse(strings.NewReader(sample))
