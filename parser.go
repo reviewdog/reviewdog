@@ -2,7 +2,6 @@ package reviewdog
 
 import (
 	"bufio"
-	"encoding/json"
 	"encoding/xml"
 	"errors"
 	"fmt"
@@ -11,6 +10,7 @@ import (
 	"github.com/reviewdog/errorformat"
 	"github.com/reviewdog/errorformat/fmts"
 	"github.com/reviewdog/reviewdog/proto/rdf"
+	"google.golang.org/protobuf/encoding/protojson"
 )
 
 // ParserOpt represents option to create Parser. Either FormatName or
@@ -177,7 +177,7 @@ func (p *RDJSONLParser) Parse(r io.Reader) ([]*CheckResult, error) {
 	s := bufio.NewScanner(r)
 	for s.Scan() {
 		d := new(rdf.Diagnostic)
-		if err := json.Unmarshal(s.Bytes(), d); err != nil {
+		if err := protojson.Unmarshal(s.Bytes(), d); err != nil {
 			return nil, err
 		}
 		results = append(results, &CheckResult{Diagnostic: d, Lines: []string{s.Text()}})
