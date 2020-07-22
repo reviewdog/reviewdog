@@ -93,7 +93,7 @@ func (g *GitHubPullRequest) postAsReviewComment(ctx context.Context) error {
 			}
 			continue
 		}
-		if g.postedcs.IsPosted(c, c.Result.LnumDiff) {
+		if g.postedcs.IsPosted(c, githubPostedLine(c)) {
 			continue
 		}
 		// Only posts maxCommentsPerRequest comments per 1 request to avoid spammy
@@ -151,6 +151,16 @@ func buildDraftReviewComment(c *reviewdog.Comment) *github.DraftReviewComment {
 	return r
 }
 
+// line represents end line if it's a multiline comment in GitHub.
+// Document: https://docs.github.com/en/rest/reference/pulls#create-a-review-comment-for-a-pull-request
+func githubPostedLine(c *reviewdog.Comment) int {
+	line := c.Result.Diagnostic.GetLocation().GetRange().GetEnd().GetLine()
+	if line == 0 {
+		line = c.Result.Diagnostic.GetLocation().GetRange().GetStart().GetLine()
+	}
+	return int(line)
+}
+
 func (g *GitHubPullRequest) remainingCommentsSummary(remaining []*reviewdog.Comment) string {
 	if len(remaining) == 0 {
 		return ""
@@ -182,12 +192,10 @@ func (g *GitHubPullRequest) setPostedComment(ctx context.Context) error {
 		return err
 	}
 	for _, c := range cs {
-		if c.Position == nil || c.Path == nil || c.Body == nil {
-			// skip resolved comments. Or comments which do not have "path" nor
-			// "body".
+		if c.Line == nil || c.Path == nil || c.Body == nil {
 			continue
 		}
-		g.postedcs.AddPostedComment(c.GetPath(), c.GetPosition(), c.GetBody())
+		g.postedcs.AddPostedComment(c.GetPath(), c.GetLine(), c.GetBody())
 	}
 	return nil
 }
