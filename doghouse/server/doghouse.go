@@ -233,16 +233,26 @@ func (ch *Checker) summaryFindings(name string, checks []*reviewdog.FilteredChec
 
 func (ch *Checker) toCheckRunAnnotation(c *reviewdog.FilteredCheck) *github.CheckRunAnnotation {
 	loc := c.Diagnostic.GetLocation()
-	endLine := loc.GetRange().GetEnd().GetLine()
+	startLine := int(loc.GetRange().GetStart().GetLine())
+	endLine := int(loc.GetRange().GetEnd().GetLine())
 	if endLine == 0 {
-		endLine = loc.GetRange().GetStart().GetLine()
+		endLine = startLine
 	}
 	a := &github.CheckRunAnnotation{
 		Path:            github.String(loc.GetPath()),
-		StartLine:       github.Int(int(loc.GetRange().GetStart().GetLine())),
-		EndLine:         github.Int(int(endLine)),
+		StartLine:       github.Int(startLine),
+		EndLine:         github.Int(endLine),
 		AnnotationLevel: github.String(ch.annotationLevel(c.Diagnostic.Severity)),
 		Message:         github.String(c.Diagnostic.GetMessage()),
+	}
+	// Annotations only support start_column and end_column on the same line.
+	if startLine == endLine {
+		if col := loc.GetRange().GetStart().GetColumn(); col != 0 {
+			a.StartColumn = github.Int(int(col))
+		}
+		if col := loc.GetRange().GetEnd().GetColumn(); col != 0 {
+			a.EndColumn = github.Int(int(col))
+		}
 	}
 	if ch.req.Name != "" {
 		a.Title = github.String(fmt.Sprintf("[%s] %s#L%d", ch.req.Name, loc.GetPath(), loc.GetRange().GetStart().GetLine()))
