@@ -53,7 +53,7 @@ func (gc *githubChecker) handleCheck(w http.ResponseWriter, r *http.Request) {
 
 	gh, err := server.NewGitHubClient(ctx, opt)
 	if err != nil {
-		aelog.Errorf(ctx, "failed to create GitHub client: %v\n", err)
+		aelog.Errorf(ctx, "failed to create GitHub client: %v", err)
 		w.WriteHeader(http.StatusBadRequest)
 		fmt.Fprintln(w, err)
 		return
@@ -61,7 +61,7 @@ func (gc *githubChecker) handleCheck(w http.ResponseWriter, r *http.Request) {
 
 	res, err := server.NewChecker(&req, gh).Check(ctx)
 	if err != nil {
-		aelog.Errorf(ctx, "failed to run checker: %v\n", err)
+		aelog.Errorf(ctx, "failed to run checker: %v", err)
 		w.WriteHeader(http.StatusBadRequest)
 		fmt.Fprintln(w, err)
 		return
@@ -78,7 +78,7 @@ func (gc *githubChecker) validateCheckRequest(ctx context.Context, w http.Respon
 		// Update Travis IP Address before checking IP to reduce the # of
 		// flaky errors when token is not present.
 		if err := ciutil.UpdateTravisCIIPAddrs(&http.Client{}); err != nil {
-			aelog.Errorf(ctx, "failed to update travis CI IP addresses: %v\n", err)
+			aelog.Errorf(ctx, "failed to update travis CI IP addresses: %v", err)
 		}
 	}
 	aelog.Infof(ctx, "Remote Addr: %s", ciutil.IPFromReq(r))
@@ -99,7 +99,7 @@ func (gc *githubChecker) validateCheckToken(ctx context.Context, w http.Response
 	}
 	_, wantToken, err := gc.ghRepoTokenStore.Get(ctx, owner, repo)
 	if err != nil {
-		aelog.Errorf(ctx, "failed to get repository (%s/%s) token: %v\n", owner, repo, err)
+		aelog.Errorf(ctx, "failed to get repository (%s/%s) token: %v", owner, repo, err)
 	}
 	if wantToken == nil {
 		w.WriteHeader(http.StatusNotFound)
@@ -130,7 +130,7 @@ func doghouseBaseURL(ctx context.Context, r *http.Request) *url.URL {
 	}
 	u, err := url.Parse(scheme + "://" + r.Host)
 	if err != nil {
-		aelog.Errorf(ctx, "%v\n", err)
+		aelog.Errorf(ctx, "%v", err)
 	}
 	return u
 }

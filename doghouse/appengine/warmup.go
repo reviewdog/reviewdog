@@ -9,10 +9,10 @@ import (
 
 func warmupHandler(_ http.ResponseWriter, r *http.Request) {
 	ctx := r.Context()
-	aelog.Infof(ctx, "warming up server...\n")
+	aelog.Infof(ctx, "warming up server...")
 
 	if err := ciutil.UpdateTravisCIIPAddrs(&http.Client{}); err != nil {
-		aelog.Errorf(ctx, "failed to update travis CI IP addresses: %v\n", err)
+		aelog.Errorf(ctx, "failed to update travis CI IP addresses: %v", err)
 	}
 
 	aelog.Infof(ctx, "warmup done")

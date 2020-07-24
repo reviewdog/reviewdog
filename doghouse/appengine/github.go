@@ -121,7 +121,7 @@ func (g *GitHubHandler) HandleAuthCallback(w http.ResponseWriter, r *http.Reques
 	// Request and save access token.
 	token, err := g.requestAccessToken(ctx, code, state)
 	if err != nil {
-		aelog.Errorf(ctx, "failed to get access token: %v\n", err)
+		aelog.Errorf(ctx, "failed to get access token: %v", err)
 		w.WriteHeader(http.StatusBadRequest)
 		fmt.Fprintln(w, "failed to get GitHub access token")
 		return
@@ -204,7 +204,7 @@ func (g *GitHubHandler) requestAccessToken(ctx context.Context, code, state stri
 	}
 
 	if token.AccessToken == "" {
-		aelog.Errorf(ctx, "[ERROR] response doesn't contain token (response: %s)\n", b)
+		aelog.Errorf(ctx, "[ERROR] response doesn't contain token (response: %s)", b)
 		return "", errors.New("response doesn't contain GitHub access token")
 	}
 
