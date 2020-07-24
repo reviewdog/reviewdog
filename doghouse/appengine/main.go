@@ -1,7 +1,6 @@
 package main
 
 import (
-	"context"
 	"io/ioutil"
 	"log"
 	"net/http"
@@ -12,7 +11,6 @@ import (
 	"contrib.go.opencensus.io/exporter/stackdriver/propagation"
 	"github.com/haya14busa/secretbox"
 	"github.com/justinas/nosurf"
-	"github.com/reviewdog/reviewdog/doghouse/appengine/logger"
 	"github.com/reviewdog/reviewdog/doghouse/server/cookieman"
 	"github.com/reviewdog/reviewdog/doghouse/server/storage"
 	"go.opencensus.io/plugin/ochttp"
@@ -66,11 +64,8 @@ func mustIntEnv(name string) int {
 }
 
 func main() {
-	ctx := context.Background()
 	configureTrace()
 	initTemplates()
-
-	defer logger.Init(ctx)()
 
 	integrationID := mustIntEnv("GITHUB_INTEGRATION_ID")
 	ghPrivateKey := mustGitHubAppsPrivateKey()
