@@ -79,7 +79,7 @@ func IsFromCI(r *http.Request) bool {
 func IsFromTravisCI(r *http.Request) bool {
 	muTravisIPAddrs.RLock()
 	defer muTravisIPAddrs.RUnlock()
-	return travisIPAddrs[ipFromReq(r)]
+	return travisIPAddrs[IPFromReq(r)]
 }
 
 // https://docs.travis-ci.com/user/ip-addresses/
@@ -100,10 +100,10 @@ func UpdateTravisCIIPAddrs(cli *http.Client) error {
 // IsFromAppveyor returns true if given request is from Appveyor.
 // https://www.appveyor.com/docs/build-environment/#ip-addresses
 func IsFromAppveyor(r *http.Request) bool {
-	return appveyorIPAddrs[ipFromReq(r)]
+	return appveyorIPAddrs[IPFromReq(r)]
 }
 
-func ipFromReq(r *http.Request) string {
+func IPFromReq(r *http.Request) string {
 	if f := r.Header.Get("Forwarded"); f != "" {
 		for _, kv := range strings.Split(f, ";") {
 			if kvPair := strings.SplitN(kv, "=", 2); len(kvPair) == 2 &&

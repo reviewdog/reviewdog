@@ -82,7 +82,7 @@ func (gc *githubChecker) validateCheckRequest(ctx context.Context, w http.Respon
 			log.Printf("[ERROR] failed to update travis CI IP addresses: %v\n", err)
 		}
 	}
-	logger.LogWithReq(r, fmt.Sprintf("[INFO] Remote Addr: %s\n", r.RemoteAddr))
+	logger.LogWithReq(r, fmt.Sprintf("[INFO] Remote Addr: %s", ciutil.IPFromReq(r)))
 	if ciutil.IsFromCI(r) {
 		// Skip token validation if it's from trusted CI providers.
 		return true
