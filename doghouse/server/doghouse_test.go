@@ -11,6 +11,7 @@ import (
 
 	"github.com/reviewdog/reviewdog/difffilter"
 	"github.com/reviewdog/reviewdog/doghouse"
+	"github.com/reviewdog/reviewdog/proto/rdf"
 )
 
 type fakeCheckerGitHubCli struct {
@@ -73,16 +74,95 @@ func TestCheck_OK(t *testing.T) {
 		SHA:         sha,
 		Annotations: []*doghouse.Annotation{
 			{
-				Path:       "sample.new.txt",
-				Line:       2,
-				Message:    "test message",
+				Diagnostic: &rdf.Diagnostic{
+					Message: "test message",
+					Location: &rdf.Location{
+						Path: "sample.new.txt",
+						Range: &rdf.Range{
+							Start: &rdf.Position{Line: 2, Column: 1},
+						},
+					},
+				},
 				RawMessage: "raw test message",
 			},
 			{
-				Path:       "sample.new.txt",
-				Line:       14,
-				Message:    "test message outside diff",
+				Diagnostic: &rdf.Diagnostic{
+					Message: "test message outside diff",
+					Location: &rdf.Location{
+						Path: "sample.new.txt",
+						Range: &rdf.Range{
+							Start: &rdf.Position{Line: 14},
+						},
+					},
+				},
 				RawMessage: "raw test message outside diff",
+			},
+			{
+				Diagnostic: &rdf.Diagnostic{
+					Message: "test multiline",
+					Location: &rdf.Location{
+						Path: "sample.new.txt",
+						Range: &rdf.Range{
+							Start: &rdf.Position{Line: 2},
+							End:   &rdf.Position{Line: 3},
+						},
+					},
+				},
+			},
+			{
+				Diagnostic: &rdf.Diagnostic{
+					Message: "test multiline with column",
+					Location: &rdf.Location{
+						Path: "sample.new.txt",
+						Range: &rdf.Range{
+							Start: &rdf.Position{Line: 2, Column: 1},
+							End:   &rdf.Position{Line: 3, Column: 5},
+						},
+					},
+				},
+			},
+			{
+				Diagnostic: &rdf.Diagnostic{
+					Message: "test range comment",
+					Location: &rdf.Location{
+						Path: "sample.new.txt",
+						Range: &rdf.Range{
+							Start: &rdf.Position{Line: 2, Column: 1},
+							End:   &rdf.Position{Line: 2, Column: 5},
+						},
+					},
+				},
+			},
+			{
+				Diagnostic: &rdf.Diagnostic{
+					Message:  "test severity override",
+					Severity: rdf.Severity_ERROR,
+					Location: &rdf.Location{
+						Path: "sample.new.txt",
+						Range: &rdf.Range{
+							Start: &rdf.Position{Line: 2},
+						},
+					},
+				},
+			},
+			{
+				Diagnostic: &rdf.Diagnostic{
+					Message: "source test",
+					Source: &rdf.Source{
+						Name: "awesome-linter",
+					},
+					Location: &rdf.Location{
+						Path: "sample.new.txt",
+						Range: &rdf.Range{
+							Start: &rdf.Position{Line: 2},
+						},
+					},
+				},
+			},
+			{
+				Path:    "sample.new.txt",
+				Line:    2,
+				Message: "request from old clients",
 			},
 		},
 		Level: "warning",
@@ -124,6 +204,56 @@ func TestCheck_OK(t *testing.T) {
 					Title:           github.String("[haya14busa-linter] sample.new.txt#L2"),
 					RawDetails:      github.String("raw test message"),
 				},
+				{
+					Path:            github.String("sample.new.txt"),
+					StartLine:       github.Int(2),
+					EndLine:         github.Int(3),
+					AnnotationLevel: github.String("warning"),
+					Message:         github.String("test multiline"),
+					Title:           github.String("[haya14busa-linter] sample.new.txt#L2-L3"),
+				},
+				{
+					Path:            github.String("sample.new.txt"),
+					StartLine:       github.Int(2),
+					EndLine:         github.Int(3),
+					AnnotationLevel: github.String("warning"),
+					Message:         github.String("test multiline with column"),
+					Title:           github.String("[haya14busa-linter] sample.new.txt#L2-L3"),
+				},
+				{
+					Path:            github.String("sample.new.txt"),
+					StartLine:       github.Int(2),
+					EndLine:         github.Int(2),
+					StartColumn:     github.Int(1),
+					EndColumn:       github.Int(5),
+					AnnotationLevel: github.String("warning"),
+					Message:         github.String("test range comment"),
+					Title:           github.String("[haya14busa-linter] sample.new.txt#L2"),
+				},
+				{
+					Path:            github.String("sample.new.txt"),
+					StartLine:       github.Int(2),
+					EndLine:         github.Int(2),
+					AnnotationLevel: github.String("failure"),
+					Message:         github.String("test severity override"),
+					Title:           github.String("[haya14busa-linter] sample.new.txt#L2"),
+				},
+				{
+					Path:            github.String("sample.new.txt"),
+					StartLine:       github.Int(2),
+					EndLine:         github.Int(2),
+					AnnotationLevel: github.String("warning"),
+					Message:         github.String("source test"),
+					Title:           github.String("[awesome-linter] sample.new.txt#L2"),
+				},
+				{
+					Path:            github.String("sample.new.txt"),
+					StartLine:       github.Int(2),
+					EndLine:         github.Int(2),
+					AnnotationLevel: github.String("warning"),
+					Message:         github.String("request from old clients"),
+					Title:           github.String("[haya14busa-linter] sample.new.txt#L2"),
+				},
 			}
 			if d := cmp.Diff(annotations, wantAnnotations); d != "" {
 				t.Errorf("Annotation diff found:\n%s", d)
@@ -162,15 +292,27 @@ func testOutsideDiff(t *testing.T, outsideDiff bool, filterMode difffilter.Mode)
 		SHA:         sha,
 		Annotations: []*doghouse.Annotation{
 			{
-				Path:       "sample.new.txt",
-				Line:       2,
-				Message:    "test message",
+				Diagnostic: &rdf.Diagnostic{
+					Message: "test message",
+					Location: &rdf.Location{
+						Path: "sample.new.txt",
+						Range: &rdf.Range{
+							Start: &rdf.Position{Line: 2},
+						},
+					},
+				},
 				RawMessage: "raw test message",
 			},
 			{
-				Path:       "sample.new.txt",
-				Line:       14,
-				Message:    "test message outside diff",
+				Diagnostic: &rdf.Diagnostic{
+					Message: "test message outside diff",
+					Location: &rdf.Location{
+						Path: "sample.new.txt",
+						Range: &rdf.Range{
+							Start: &rdf.Position{Line: 14},
+						},
+					},
+				},
 				RawMessage: "raw test message outside diff",
 			},
 		},
@@ -256,9 +398,15 @@ func TestCheck_OK_multiple_update_runs(t *testing.T) {
 	}
 	for i := 0; i < 101; i++ {
 		req.Annotations = append(req.Annotations, &doghouse.Annotation{
-			Path:       "sample.new.txt",
-			Line:       2,
-			Message:    "test message",
+			Diagnostic: &rdf.Diagnostic{
+				Message: "test message",
+				Location: &rdf.Location{
+					Path: "sample.new.txt",
+					Range: &rdf.Range{
+						Start: &rdf.Position{Line: 2},
+					},
+				},
+			},
 			RawMessage: "raw test message",
 		})
 	}
@@ -317,15 +465,27 @@ func TestCheck_OK_nonPullRequests(t *testing.T) {
 		SHA:   sha,
 		Annotations: []*doghouse.Annotation{
 			{
-				Path:       "sample.new.txt",
-				Line:       2,
-				Message:    "test message",
+				Diagnostic: &rdf.Diagnostic{
+					Message: "test message",
+					Location: &rdf.Location{
+						Path: "sample.new.txt",
+						Range: &rdf.Range{
+							Start: &rdf.Position{Line: 2},
+						},
+					},
+				},
 				RawMessage: "raw test message",
 			},
 			{
-				Path:       "sample.new.txt",
-				Line:       14,
-				Message:    "test message2",
+				Diagnostic: &rdf.Diagnostic{
+					Message: "test message2",
+					Location: &rdf.Location{
+						Path: "sample.new.txt",
+						Range: &rdf.Range{
+							Start: &rdf.Position{Line: 14},
+						},
+					},
+				},
 				RawMessage: "raw test message2",
 			},
 		},

@@ -41,6 +41,13 @@ jobs:
         run: |
           cd ./_testdata/ && golint ./... | reviewdog -f=golint -name=golint-check-subdir -reporter=github-check -level=info -filter-mode=nofilter
 
+      - name: Custom rdjsonl test (github-check)
+        env:
+          REVIEWDOG_GITHUB_API_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          cat ./_testdata/custom_rdjsonl.json | \
+            reviewdog -name="custom-rdjsonl" -f=rdjsonl -reporter=github-check -level=info
+
   reviewdog-pr:
     if: github.event_name == 'pull_request'
     name: reviewdog on Pull Request
@@ -149,12 +156,12 @@ jobs:
             -reporter=local -diff='git diff master' || EXIT_CODE=$?
           test "${EXIT_CODE}" = 1
 
-      - name: Multiline
+      - name: Custom rdjsonl test (github-pr-review)
         env:
           REVIEWDOG_GITHUB_API_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         run: |
           cat ./_testdata/custom_rdjsonl.json | \
-            reviewdog -name="multiline-test" -f=rdjsonl -reporter=github-pr-review
+            reviewdog -name="custom-rdjsonl" -f=rdjsonl -reporter=github-pr-review
 
   golangci-lint:
     if: github.event_name == 'pull_request'

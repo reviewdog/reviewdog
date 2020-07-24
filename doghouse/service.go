@@ -3,6 +3,7 @@ package doghouse
 import (
 	"github.com/reviewdog/reviewdog"
 	"github.com/reviewdog/reviewdog/difffilter"
+	"github.com/reviewdog/reviewdog/proto/rdf"
 )
 
 // CheckRequest represents doghouse GitHub check request.
@@ -74,18 +75,21 @@ type CheckResponse struct {
 
 // Annotation represents an annotation to file or specific line.
 type Annotation struct {
-	// Relative file path
-	// Required.
-	Path string `json:"path,omitempty"`
-	// Line number.
+	// Diagnostic.Location.Path must be relative path to the project root.
 	// Optional.
-	Line int `json:"line,omitempty"`
-	// Annotation message.
-	// Required.
-	Message string `json:"message,omitempty"`
+	Diagnostic *rdf.Diagnostic `json:"diagnostic,omitempty"`
+
 	// Original error message of this annotation.
 	// Optional.
 	RawMessage string `json:"raw_message,omitempty"`
 
-	// TODO(haya14busa): Support RDFormat.
+	// DEPRECATED fields below. Need to support them for the old reviewdog CLI
+	// version.
+
+	// DEPRECATED: Use Diagnostic.
+	Path string `json:"path,omitempty"`
+	// DEPRECATED: Use Diagnostic.
+	Line int `json:"line,omitempty"`
+	// DEPRECATED: Use Diagnostic.
+	Message string `json:"message,omitempty"`
 }

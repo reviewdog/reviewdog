@@ -170,7 +170,20 @@ func (ch *Checker) conclusion() string {
 }
 
 // https://developer.github.com/v3/checks/runs/#annotations-object
-func (ch *Checker) annotationLevel() string {
+func (ch *Checker) annotationLevel(s rdf.Severity) string {
+	switch s {
+	case rdf.Severity_ERROR:
+		return "failure"
+	case rdf.Severity_WARNING:
+		return "warning"
+	case rdf.Severity_INFO:
+		return "notice"
+	default:
+		return ch.reqAnnotationLevel()
+	}
+}
+
+func (ch *Checker) reqAnnotationLevel() string {
 	switch strings.ToLower(ch.req.Level) {
 	case "info":
 		return "notice"
@@ -220,19 +233,35 @@ func (ch *Checker) summaryFindings(name string, checks []*reviewdog.FilteredChec
 
 func (ch *Checker) toCheckRunAnnotation(c *reviewdog.FilteredCheck) *github.CheckRunAnnotation {
 	loc := c.Diagnostic.GetLocation()
-	endLine := loc.GetRange().GetEnd().GetLine()
+	startLine := int(loc.GetRange().GetStart().GetLine())
+	endLine := int(loc.GetRange().GetEnd().GetLine())
 	if endLine == 0 {
-		endLine = loc.GetRange().GetStart().GetLine()
+		endLine = startLine
 	}
 	a := &github.CheckRunAnnotation{
 		Path:            github.String(loc.GetPath()),
-		StartLine:       github.Int(int(loc.GetRange().GetStart().GetLine())),
-		EndLine:         github.Int(int(endLine)),
-		AnnotationLevel: github.String(ch.annotationLevel()),
+		StartLine:       github.Int(startLine),
+		EndLine:         github.Int(endLine),
+		AnnotationLevel: github.String(ch.annotationLevel(c.Diagnostic.Severity)),
 		Message:         github.String(c.Diagnostic.GetMessage()),
 	}
-	if ch.req.Name != "" {
-		a.Title = github.String(fmt.Sprintf("[%s] %s#L%d", ch.req.Name, loc.GetPath(), loc.GetRange().GetStart().GetLine()))
+	// Annotations only support start_column and end_column on the same line.
+	if startLine == endLine {
+		if s, e := loc.GetRange().GetStart().GetColumn(), loc.GetRange().GetEnd().GetColumn(); s != 0 && e != 0 {
+			a.StartColumn = github.Int(int(s))
+			a.EndColumn = github.Int(int(e))
+		}
+	}
+	toolName := c.Diagnostic.GetSource().GetName()
+	if toolName == "" {
+		toolName = ch.req.Name
+	}
+	if toolName != "" {
+		line := fmt.Sprintf("L%d", startLine)
+		if startLine < endLine {
+			line += fmt.Sprintf("-L%d", endLine)
+		}
+		a.Title = github.String(fmt.Sprintf("[%s] %s#%s", toolName, loc.GetPath(), line))
 	}
 	if s := strings.Join(c.Lines, "\n"); s != "" {
 		a.RawDetails = github.String(s)
@@ -263,22 +292,33 @@ func (ch *Checker) rawPullRequestDiff(ctx context.Context, pr int) ([]byte, erro
 func annotationsToCheckResults(as []*doghouse.Annotation) []*reviewdog.CheckResult {
 	cs := make([]*reviewdog.CheckResult, 0, len(as))
 	for _, a := range as {
-		cs = append(cs, &reviewdog.CheckResult{
-			Diagnostic: &rdf.Diagnostic{
-				Location: &rdf.Location{
-					Path: a.Path,
-					Range: &rdf.Range{
-						Start: &rdf.Position{
-							Line: int32(a.Line),
-						},
-					},
-				},
-				Message: a.Message,
-			},
-			Lines: strings.Split(a.RawMessage, "\n"),
-		})
+		cs = append(cs, annotationToCheckResult(a))
 	}
 	return cs
+}
+
+func annotationToCheckResult(a *doghouse.Annotation) *reviewdog.CheckResult {
+	if a.Diagnostic != nil {
+		return &reviewdog.CheckResult{
+			Diagnostic: a.Diagnostic,
+			Lines:      strings.Split(a.RawMessage, "\n"),
+		}
+	}
+	// Old reviwedog CLI doesn't have the Diagnostic field.
+	return &reviewdog.CheckResult{
+		Diagnostic: &rdf.Diagnostic{
+			Location: &rdf.Location{
+				Path: a.Path,
+				Range: &rdf.Range{
+					Start: &rdf.Position{
+						Line: int32(a.Line),
+					},
+				},
+			},
+			Message: a.Message,
+		},
+		Lines: strings.Split(a.RawMessage, "\n"),
+	}
 }
 
 func min(x, y int) int {
