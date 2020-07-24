@@ -10,6 +10,7 @@ import (
 	"strings"
 
 	"github.com/reviewdog/reviewdog/doghouse"
+	"github.com/reviewdog/reviewdog/doghouse/appengine/logger"
 	"github.com/reviewdog/reviewdog/doghouse/server"
 	"github.com/reviewdog/reviewdog/doghouse/server/ciutil"
 	"github.com/reviewdog/reviewdog/doghouse/server/storage"
@@ -81,7 +82,7 @@ func (gc *githubChecker) validateCheckRequest(ctx context.Context, w http.Respon
 			log.Printf("[ERROR] failed to update travis CI IP addresses: %v\n", err)
 		}
 	}
-	log.Printf("[INFO] Remote Addr: %s\n", r.RemoteAddr)
+	logger.LogWithReq(r, fmt.Sprintf("[INFO] Remote Addr: %s\n", r.RemoteAddr))
 	if ciutil.IsFromCI(r) {
 		// Skip token validation if it's from trusted CI providers.
 		return true
