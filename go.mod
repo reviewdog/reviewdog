@@ -27,3 +27,5 @@ require (
 	google.golang.org/protobuf v1.25.0
 	gopkg.in/yaml.v2 v2.3.0
 )
+
+replace github.com/bradleyfalzon/ghinstallation => github.com/haya14busa/ghinstallation v1.1.1-0.20200724114330-d3e6a9d3b19b
