@@ -204,7 +204,7 @@ func (g *GitHubHandler) requestAccessToken(ctx context.Context, code, state stri
 	}
 
 	if token.AccessToken == "" {
-		aelog.Errorf(ctx, "[ERROR] response doesn't contain token (response: %s)", b)
+		aelog.Errorf(ctx, "response doesn't contain token (response: %s)", b)
 		return "", errors.New("response doesn't contain GitHub access token")
 	}
 
