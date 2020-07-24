@@ -28,4 +28,4 @@ require (
 	gopkg.in/yaml.v2 v2.3.0
 )
 
-replace github.com/bradleyfalzon/ghinstallation => github.com/haya14busa/ghinstallation v1.1.1-0.20200724121439-5564b27de11c
+replace github.com/bradleyfalzon/ghinstallation => github.com/haya14busa/ghinstallation v1.1.1-0.20200724154554-d03e3d0c4f74

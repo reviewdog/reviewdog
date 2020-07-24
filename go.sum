@@ -166,6 +166,8 @@ github.com/haya14busa/ghinstallation v1.1.1-0.20200724114330-d3e6a9d3b19b h1:0ZI
 github.com/haya14busa/ghinstallation v1.1.1-0.20200724114330-d3e6a9d3b19b/go.mod h1:zxSiG4rUH1J+MrLWjmWy4fLGqzhuWfanAclxFFtV6mA=
 github.com/haya14busa/ghinstallation v1.1.1-0.20200724121439-5564b27de11c h1:1UKYrg6pfIUJ0X0A7EjSpnI1P0Jgwn0Rau80wfCkjs4=
 github.com/haya14busa/ghinstallation v1.1.1-0.20200724121439-5564b27de11c/go.mod h1:R1Q7kg6uaizRJjIQvrWRgBeMIGFJzkpplQQee6msEWU=
+github.com/haya14busa/ghinstallation v1.1.1-0.20200724154554-d03e3d0c4f74 h1:8HrcZM11KULBMkbmYE6PFhMQQp+PCvREqGQwOlFp1hY=
+github.com/haya14busa/ghinstallation v1.1.1-0.20200724154554-d03e3d0c4f74/go.mod h1:R1Q7kg6uaizRJjIQvrWRgBeMIGFJzkpplQQee6msEWU=
 github.com/haya14busa/go-actions-toolkit v0.0.0-20200105081403-ca0307860f01 h1:HiJF8Mek+I7PY0Bm+SuhkwaAZSZP83sw6rrTMrgZ0io=
 github.com/haya14busa/go-actions-toolkit v0.0.0-20200105081403-ca0307860f01/go.mod h1:1DWDZmeYf0LX30zscWb7K9rUMeirNeBMd5Dum+seUhc=
 github.com/haya14busa/go-checkstyle v0.0.0-20170303121022-5e9d09f51fa1/go.mod h1:RsN5RGgVYeXpcXNtWyztD5VIe7VNSEqpJvF2iEH7QvI=
