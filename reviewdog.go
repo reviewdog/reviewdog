@@ -40,7 +40,6 @@ func RunFromResult(ctx context.Context, c CommentService, results []*rdf.Diagnos
 type Comment struct {
 	Result   *filter.FilteredDiagnostic
 	ToolName string
-	Body     string
 }
 
 // CommentService is an interface which posts Comment.
@@ -77,7 +76,6 @@ func (w *Reviewdog) runFromResult(ctx context.Context, results []*rdf.Diagnostic
 		}
 		comment := &Comment{
 			Result:   check,
-			Body:     check.Diagnostic.GetMessage(),
 			ToolName: w.toolname,
 		}
 		if err := w.c.Post(ctx, comment); err != nil {

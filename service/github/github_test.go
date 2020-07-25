@@ -77,10 +77,10 @@ func TestGitHubPullRequest_Post(t *testing.T) {
 				Location: &rdf.Location{
 					Path: "watchdogs.go",
 				},
+				Message: "[reviewdog] test",
 			},
 			InDiffContext: true,
 		},
-		Body: "[reviewdog] test",
 	}
 	// https://github.com/reviewdog/reviewdog/pull/2/files#diff-ed1d019a10f54464cfaeaf6a736b7d27L20
 	if err := g.Post(context.Background(), comment); err != nil {
@@ -353,10 +353,10 @@ func TestGitHubPullRequest_Post_Flush_review_api(t *testing.T) {
 							},
 						},
 					},
+					Message: "already commented",
 				},
 				InDiffContext: true,
 			},
-			Body: "already commented",
 		},
 		{
 			Result: &filter.FilteredDiagnostic{
@@ -369,10 +369,10 @@ func TestGitHubPullRequest_Post_Flush_review_api(t *testing.T) {
 							},
 						},
 					},
+					Message: "already commented 2",
 				},
 				InDiffContext: true,
 			},
-			Body: "already commented 2",
 		},
 		{
 			Result: &filter.FilteredDiagnostic{
@@ -385,10 +385,10 @@ func TestGitHubPullRequest_Post_Flush_review_api(t *testing.T) {
 							},
 						},
 					},
+					Message: "new comment",
 				},
 				InDiffContext: true,
 			},
-			Body: "new comment",
 		},
 		{
 			Result: &filter.FilteredDiagnostic{
@@ -404,10 +404,10 @@ func TestGitHubPullRequest_Post_Flush_review_api(t *testing.T) {
 							},
 						},
 					},
+					Message: "multiline existing comment",
 				},
 				InDiffContext: true,
 			},
-			Body: "multiline existing comment",
 		},
 		{
 			Result: &filter.FilteredDiagnostic{
@@ -425,10 +425,10 @@ func TestGitHubPullRequest_Post_Flush_review_api(t *testing.T) {
 							},
 						},
 					},
+					Message: "multiline existing comment (line-break)",
 				},
 				InDiffContext: true,
 			},
-			Body: "multiline existing comment (line-break)",
 		},
 		{
 			Result: &filter.FilteredDiagnostic{
@@ -444,10 +444,10 @@ func TestGitHubPullRequest_Post_Flush_review_api(t *testing.T) {
 							},
 						},
 					},
+					Message: "multiline new comment",
 				},
 				InDiffContext: true,
 			},
-			Body: "multiline new comment",
 		},
 		{
 			Result: &filter.FilteredDiagnostic{
@@ -456,9 +456,9 @@ func TestGitHubPullRequest_Post_Flush_review_api(t *testing.T) {
 						Path: "reviewdog.go",
 						// No Line
 					},
+					Message: "should not be reported via GitHub Review API",
 				},
 			},
-			Body: "should not be reported via GitHub Review API",
 		},
 		{
 			Result: &filter.FilteredDiagnostic{
@@ -487,10 +487,10 @@ func TestGitHubPullRequest_Post_Flush_review_api(t *testing.T) {
 							Text: "line1\nline2\nline3",
 						},
 					},
+					Message: "multiline suggestion comment",
 				},
 				InDiffContext: true,
 			},
-			Body: "multiline suggestion comment",
 		},
 		{
 			Result: &filter.FilteredDiagnostic{
@@ -513,10 +513,10 @@ func TestGitHubPullRequest_Post_Flush_review_api(t *testing.T) {
 							Text: "line1\nline2",
 						},
 					},
+					Message: "singleline suggestion comment",
 				},
 				InDiffContext: true,
 			},
-			Body: "singleline suggestion comment",
 		},
 		{
 			Result: &filter.FilteredDiagnostic{
@@ -545,10 +545,10 @@ func TestGitHubPullRequest_Post_Flush_review_api(t *testing.T) {
 							Text: "line1\nline2\nline3",
 						},
 					},
+					Message: "invalid lines suggestion comment",
 				},
 				InDiffContext: true,
 			},
-			Body: "invalid lines suggestion comment",
 		},
 		{
 			Result: &filter.FilteredDiagnostic{
@@ -579,10 +579,10 @@ func TestGitHubPullRequest_Post_Flush_review_api(t *testing.T) {
 							Text: "replacement",
 						},
 					},
+					Message: "non-line based suggestion comment",
 				},
 				InDiffContext: true,
 			},
-			Body: "non-line based suggestion comment",
 		},
 	}
 	for _, c := range comments {
@@ -647,10 +647,10 @@ func TestGitHubPullRequest_Post_toomany(t *testing.T) {
 							Line: int32(i),
 						}},
 					},
+					Message: "comment",
 				},
 				InDiffContext: true,
 			},
-			Body:     "comment",
 			ToolName: "tool",
 		})
 	}
