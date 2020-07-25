@@ -83,7 +83,7 @@ func (ch *Checker) Check(ctx context.Context) (*doghouse.CheckResponse, error) {
 	return res, nil
 }
 
-func (ch *Checker) postCheck(ctx context.Context, checkID int64, checks []*filter.FilteredCheck) (*github.CheckRun, string, error) {
+func (ch *Checker) postCheck(ctx context.Context, checkID int64, checks []*filter.FilteredDiagnostic) (*github.CheckRun, string, error) {
 	var annotations []*github.CheckRunAnnotation
 	for _, c := range checks {
 		if !c.ShouldReport {
@@ -194,12 +194,12 @@ func (ch *Checker) reqAnnotationLevel() string {
 	return "failure"
 }
 
-func (ch *Checker) summary(checks []*filter.FilteredCheck) string {
+func (ch *Checker) summary(checks []*filter.FilteredDiagnostic) string {
 	var lines []string
 	lines = append(lines, "reported by [reviewdog](https://github.com/reviewdog/reviewdog) :dog:")
 
-	var findings []*filter.FilteredCheck
-	var filteredFindings []*filter.FilteredCheck
+	var findings []*filter.FilteredDiagnostic
+	var filteredFindings []*filter.FilteredDiagnostic
 	for _, c := range checks {
 		if c.ShouldReport {
 			findings = append(findings, c)
@@ -213,7 +213,7 @@ func (ch *Checker) summary(checks []*filter.FilteredCheck) string {
 	return strings.Join(lines, "\n")
 }
 
-func (ch *Checker) summaryFindings(name string, checks []*filter.FilteredCheck) []string {
+func (ch *Checker) summaryFindings(name string, checks []*filter.FilteredDiagnostic) []string {
 	var lines []string
 	lines = append(lines, "<details>")
 	lines = append(lines, fmt.Sprintf("<summary>%s (%d)</summary>", name, len(checks)))
@@ -230,7 +230,7 @@ func (ch *Checker) summaryFindings(name string, checks []*filter.FilteredCheck) 
 	return lines
 }
 
-func (ch *Checker) toCheckRunAnnotation(c *filter.FilteredCheck) *github.CheckRunAnnotation {
+func (ch *Checker) toCheckRunAnnotation(c *filter.FilteredDiagnostic) *github.CheckRunAnnotation {
 	loc := c.Diagnostic.GetLocation()
 	startLine := int(loc.GetRange().GetStart().GetLine())
 	endLine := int(loc.GetRange().GetEnd().GetLine())

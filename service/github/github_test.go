@@ -72,7 +72,7 @@ func TestGitHubPullRequest_Post(t *testing.T) {
 		t.Fatal(err)
 	}
 	comment := &reviewdog.Comment{
-		Result: &filter.FilteredCheck{
+		Result: &filter.FilteredDiagnostic{
 			Diagnostic: &rdf.Diagnostic{
 				Location: &rdf.Location{
 					Path: "watchdogs.go",
@@ -294,7 +294,7 @@ func TestGitHubPullRequest_Post_Flush_review_api(t *testing.T) {
 	}
 	comments := []*reviewdog.Comment{
 		{
-			Result: &filter.FilteredCheck{
+			Result: &filter.FilteredDiagnostic{
 				Diagnostic: &rdf.Diagnostic{
 					Location: &rdf.Location{
 						Path: "reviewdog.go",
@@ -310,7 +310,7 @@ func TestGitHubPullRequest_Post_Flush_review_api(t *testing.T) {
 			Body: "already commented",
 		},
 		{
-			Result: &filter.FilteredCheck{
+			Result: &filter.FilteredDiagnostic{
 				Diagnostic: &rdf.Diagnostic{
 					Location: &rdf.Location{
 						Path: "reviewdog.go",
@@ -326,7 +326,7 @@ func TestGitHubPullRequest_Post_Flush_review_api(t *testing.T) {
 			Body: "already commented 2",
 		},
 		{
-			Result: &filter.FilteredCheck{
+			Result: &filter.FilteredDiagnostic{
 				Diagnostic: &rdf.Diagnostic{
 					Location: &rdf.Location{
 						Path: "reviewdog.go",
@@ -342,7 +342,7 @@ func TestGitHubPullRequest_Post_Flush_review_api(t *testing.T) {
 			Body: "new comment",
 		},
 		{
-			Result: &filter.FilteredCheck{
+			Result: &filter.FilteredDiagnostic{
 				Diagnostic: &rdf.Diagnostic{
 					Location: &rdf.Location{
 						Path: "reviewdog.go",
@@ -361,7 +361,7 @@ func TestGitHubPullRequest_Post_Flush_review_api(t *testing.T) {
 			Body: "multiline existing comment",
 		},
 		{
-			Result: &filter.FilteredCheck{
+			Result: &filter.FilteredDiagnostic{
 				Diagnostic: &rdf.Diagnostic{
 					Location: &rdf.Location{
 						Path: "reviewdog.go",
@@ -382,7 +382,7 @@ func TestGitHubPullRequest_Post_Flush_review_api(t *testing.T) {
 			Body: "multiline existing comment (line-break)",
 		},
 		{
-			Result: &filter.FilteredCheck{
+			Result: &filter.FilteredDiagnostic{
 				Diagnostic: &rdf.Diagnostic{
 					Location: &rdf.Location{
 						Path: "reviewdog.go",
@@ -401,7 +401,7 @@ func TestGitHubPullRequest_Post_Flush_review_api(t *testing.T) {
 			Body: "multiline new comment",
 		},
 		{
-			Result: &filter.FilteredCheck{
+			Result: &filter.FilteredDiagnostic{
 				Diagnostic: &rdf.Diagnostic{
 					Location: &rdf.Location{
 						Path: "reviewdog.go",
@@ -466,7 +466,7 @@ func TestGitHubPullRequest_Post_toomany(t *testing.T) {
 	var comments []*reviewdog.Comment
 	for i := 0; i < 100; i++ {
 		comments = append(comments, &reviewdog.Comment{
-			Result: &filter.FilteredCheck{
+			Result: &filter.FilteredDiagnostic{
 				Diagnostic: &rdf.Diagnostic{
 					Location: &rdf.Location{
 						Path: "reviewdog.go",
@@ -512,7 +512,7 @@ func TestGitHubPullRequest_workdir(t *testing.T) {
 	}
 	ctx := context.Background()
 	want := "a/b/c"
-	g.Post(ctx, &reviewdog.Comment{Result: &filter.FilteredCheck{
+	g.Post(ctx, &reviewdog.Comment{Result: &filter.FilteredDiagnostic{
 		Diagnostic: &rdf.Diagnostic{Location: &rdf.Location{Path: want}}}})
 	if got := g.postComments[0].Result.Diagnostic.GetLocation().GetPath(); got != want {
 		t.Errorf("wd=%q path=%q, want %q", g.wd, got, want)
@@ -528,7 +528,7 @@ func TestGitHubPullRequest_workdir(t *testing.T) {
 	}
 	path := "a/b/c"
 	wantPath := "cmd/" + path
-	g.Post(ctx, &reviewdog.Comment{Result: &filter.FilteredCheck{
+	g.Post(ctx, &reviewdog.Comment{Result: &filter.FilteredDiagnostic{
 		Diagnostic: &rdf.Diagnostic{Location: &rdf.Location{Path: want}}}})
 	if got := g.postComments[0].Result.Diagnostic.GetLocation().GetPath(); got != wantPath {
 		t.Errorf("wd=%q path=%q, want %q", g.wd, got, wantPath)

@@ -17,7 +17,7 @@ func TestMultiCommentService_Post(t *testing.T) {
 
 	const want = "line1\nline2"
 
-	c := &Comment{Result: &filter.FilteredCheck{Diagnostic: &rdf.Diagnostic{OriginalOutput: want}}}
+	c := &Comment{Result: &filter.FilteredDiagnostic{Diagnostic: &rdf.Diagnostic{OriginalOutput: want}}}
 	if err := w.Post(context.Background(), c); err != nil {
 		t.Fatal(err)
 	}

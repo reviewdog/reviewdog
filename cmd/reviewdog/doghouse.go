@@ -156,7 +156,7 @@ func postResultSet(ctx context.Context, resultSet *reviewdog.ResultMap,
 				// it failed to report results with Check API.
 				filteredResultSet.Store(name, &reviewdog.FilteredResult{
 					Level:         result.Level,
-					FilteredCheck: res.CheckedResults,
+					FilteredDiagnostic: res.CheckedResults,
 				})
 			}
 			if res.ReportURL == "" && res.CheckedResults == nil {
@@ -217,7 +217,7 @@ report results via logging command [1].
 		fmt.Fprintf(w, "reviewdog: Reporting results for %q\n", name)
 		foundResultPerName := false
 		filteredNum := 0
-		for _, result := range results.FilteredCheck {
+		for _, result := range results.FilteredDiagnostic {
 			if !result.ShouldReport {
 				filteredNum++
 				continue

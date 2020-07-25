@@ -80,7 +80,7 @@ func TestFilterCheckByAddedLines(t *testing.T) {
 			},
 		},
 	}
-	want := []*FilteredCheck{
+	want := []*FilteredDiagnostic{
 		{
 			Diagnostic: &rdf.Diagnostic{
 				Location: &rdf.Location{
@@ -180,7 +180,7 @@ func TestFilterCheckByDiffContext(t *testing.T) {
 			},
 		},
 	}
-	want := []*FilteredCheck{
+	want := []*FilteredDiagnostic{
 		{
 			Diagnostic: &rdf.Diagnostic{
 				Location: &rdf.Location{

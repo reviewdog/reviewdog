@@ -7,8 +7,8 @@ import (
 	"github.com/reviewdog/reviewdog/proto/rdf"
 )
 
-// FilteredCheck represents Diagnostic with filtering info.
-type FilteredCheck struct {
+// FilteredDiagnostic represents Diagnostic with filtering info.
+type FilteredDiagnostic struct {
 	Diagnostic   *rdf.Diagnostic
 	ShouldReport bool
 	// false if the result is outside diff files.
@@ -22,13 +22,13 @@ type FilteredCheck struct {
 }
 
 // FilterCheck filters check results by diff. It doesn't drop check which
-// is not in diff but set FilteredCheck.ShouldReport field false.
+// is not in diff but set FilteredDiagnostic.ShouldReport field false.
 func FilterCheck(results []*rdf.Diagnostic, diff []*diff.FileDiff, strip int,
-	cwd string, mode Mode) []*FilteredCheck {
-	checks := make([]*FilteredCheck, 0, len(results))
+	cwd string, mode Mode) []*FilteredDiagnostic {
+	checks := make([]*FilteredDiagnostic, 0, len(results))
 	df := NewDiffFilter(diff, strip, cwd, mode)
 	for _, result := range results {
-		check := &FilteredCheck{Diagnostic: result}
+		check := &FilteredDiagnostic{Diagnostic: result}
 		loc := result.GetLocation()
 		loc.Path = NormalizePath(loc.GetPath(), cwd, "")
 		startLine := int(loc.GetRange().GetStart().GetLine())

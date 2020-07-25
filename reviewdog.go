@@ -38,7 +38,7 @@ func RunFromResult(ctx context.Context, c CommentService, results []*rdf.Diagnos
 
 // Comment represents a reported result as a comment.
 type Comment struct {
-	Result   *filter.FilteredCheck
+	Result   *filter.FilteredDiagnostic
 	ToolName string
 	Body     string
 }

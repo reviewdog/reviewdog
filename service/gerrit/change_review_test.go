@@ -30,7 +30,7 @@ func TestChangeReviewCommenter_Post_Flush(t *testing.T) {
 	ctx := context.Background()
 	newLnum1 := 14
 	newComment1 := &reviewdog.Comment{
-		Result: &filter.FilteredCheck{
+		Result: &filter.FilteredDiagnostic{
 			Diagnostic: &rdf.Diagnostic{
 				Location: &rdf.Location{
 					Path: "file.go",
@@ -45,7 +45,7 @@ func TestChangeReviewCommenter_Post_Flush(t *testing.T) {
 	}
 	newLnum2 := 15
 	newComment2 := &reviewdog.Comment{
-		Result: &filter.FilteredCheck{
+		Result: &filter.FilteredDiagnostic{
 			Diagnostic: &rdf.Diagnostic{
 				Location: &rdf.Location{
 					Path: "file2.go",
@@ -59,7 +59,7 @@ func TestChangeReviewCommenter_Post_Flush(t *testing.T) {
 		Body: "new comment 2",
 	}
 	commentOutsideDiff := &reviewdog.Comment{
-		Result: &filter.FilteredCheck{
+		Result: &filter.FilteredDiagnostic{
 			Diagnostic: &rdf.Diagnostic{
 				Location: &rdf.Location{
 					Path: "file3.go",
