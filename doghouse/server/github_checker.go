@@ -37,6 +37,16 @@ func (c *checkerGitHubClient) UpdateCheckRun(ctx context.Context, owner, repo st
 			aelog.Errorf(ctx, "failed to read error response body: %v", err)
 		}
 		aelog.Errorf(ctx, "UpdateCheckRun failed: %s", string(b))
+		// Retry upto 5 times.
+		// GitHub API somehow returns 401 Bad credentials from time to time...
+		for i := 0; i < 5; i++ {
+			aelog.Errorf(ctx, "Retry UpdateCheckRun: %d", i+1)
+			checkRun, _, err = c.Checks.UpdateCheckRun(ctx, owner, repo, checkID, opt)
+			if err != nil {
+				continue
+			}
+			return checkRun, nil
+		}
 	}
 	return checkRun, err
 }
