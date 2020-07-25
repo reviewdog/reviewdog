@@ -375,6 +375,23 @@ func TestGitHubPullRequest_Post_Flush_review_api(t *testing.T) {
 					"```",
 				}, "\n") + "\n"),
 			},
+			{
+				Path: github.String("reviewdog.go"),
+				Side: github.String("RIGHT"),
+				Line: github.Int(15),
+				Body: github.String(commentutil.BodyPrefix + "\n" + strings.Join([]string{
+					"multiple suggestions",
+					"```suggestion",
+					"haya1busa",
+					"```",
+					"```suggestion",
+					"haya4busa",
+					"```",
+					"```suggestion",
+					"haya14busa",
+					"```",
+				}, "\n") + "\n"),
+			},
 		}
 		if diff := pretty.Compare(want, req.Comments); diff != "" {
 			t.Errorf("req.Comments diff: (-got +want)\n%s", diff)
@@ -737,6 +754,45 @@ func TestGitHubPullRequest_Post_Flush_review_api(t *testing.T) {
 						},
 					},
 					Message: "range suggestion (insert)",
+				},
+				InDiffContext: true,
+			},
+		},
+		{
+			Result: &filter.FilteredDiagnostic{
+				SourceLines: []string{"haya??busa"},
+				Diagnostic: &rdf.Diagnostic{
+					Location: &rdf.Location{
+						Path: "reviewdog.go",
+						Range: &rdf.Range{
+							Start: &rdf.Position{Line: 15, Column: 5},
+							End:   &rdf.Position{Line: 15, Column: 7},
+						},
+					},
+					Suggestions: []*rdf.Suggestion{
+						{
+							Range: &rdf.Range{
+								Start: &rdf.Position{Line: 15, Column: 5},
+								End:   &rdf.Position{Line: 15, Column: 7},
+							},
+							Text: "1",
+						},
+						{
+							Range: &rdf.Range{
+								Start: &rdf.Position{Line: 15, Column: 5},
+								End:   &rdf.Position{Line: 15, Column: 7},
+							},
+							Text: "4",
+						},
+						{
+							Range: &rdf.Range{
+								Start: &rdf.Position{Line: 15, Column: 5},
+								End:   &rdf.Position{Line: 15, Column: 7},
+							},
+							Text: "14",
+						},
+					},
+					Message: "multiple suggestions",
 				},
 				InDiffContext: true,
 			},
