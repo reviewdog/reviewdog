@@ -323,9 +323,57 @@ func TestGitHubPullRequest_Post_Flush_review_api(t *testing.T) {
 				StartLine: github.Int(15),
 				Line:      github.Int(16),
 				Body: github.String(commentutil.BodyPrefix + "\n" + strings.Join([]string{
-					"non-line based suggestion comment",
-					"Invalid suggestion: non line based suggestions (contains column) are not supported yet",
+					"non-line based suggestion comment (no source lines)",
+					"Invalid suggestion: source lines are not available",
 				}, "\n")),
+			},
+			{
+				Path: github.String("reviewdog.go"),
+				Side: github.String("RIGHT"),
+				Line: github.Int(15),
+				Body: github.String(commentutil.BodyPrefix + "\n" + strings.Join([]string{
+					"range suggestion (single line)",
+					"```suggestion",
+					"haya14busa",
+					"```",
+				}, "\n") + "\n"),
+			},
+			{
+				Path:      github.String("reviewdog.go"),
+				Side:      github.String("RIGHT"),
+				StartSide: github.String("RIGHT"),
+				StartLine: github.Int(15),
+				Line:      github.Int(16),
+				Body: github.String(commentutil.BodyPrefix + "\n" + strings.Join([]string{
+					"range suggestion (multi-line)",
+					"```suggestion",
+					"haya14busa (multi-line)",
+					"```",
+				}, "\n") + "\n"),
+			},
+			{
+				Path:      github.String("reviewdog.go"),
+				Side:      github.String("RIGHT"),
+				StartSide: github.String("RIGHT"),
+				StartLine: github.Int(15),
+				Line:      github.Int(17),
+				Body: github.String(commentutil.BodyPrefix + "\n" + strings.Join([]string{
+					"range suggestion (line-break, remove)",
+					"```suggestion",
+					"line 15 (content at line 15)",
+					"```",
+				}, "\n") + "\n"),
+			},
+			{
+				Path: github.String("reviewdog.go"),
+				Side: github.String("RIGHT"),
+				Line: github.Int(15),
+				Body: github.String(commentutil.BodyPrefix + "\n" + strings.Join([]string{
+					"range suggestion (insert)",
+					"```suggestion",
+					"haya14busa",
+					"```",
+				}, "\n") + "\n"),
 			},
 		}
 		if diff := pretty.Compare(want, req.Comments); diff != "" {
@@ -579,7 +627,116 @@ func TestGitHubPullRequest_Post_Flush_review_api(t *testing.T) {
 							Text: "replacement",
 						},
 					},
-					Message: "non-line based suggestion comment",
+					Message: "non-line based suggestion comment (no source lines)",
+				},
+				InDiffContext: true,
+			},
+		},
+		{
+			Result: &filter.FilteredDiagnostic{
+				SourceLines: []string{"haya15busa"},
+				Diagnostic: &rdf.Diagnostic{
+					Location: &rdf.Location{
+						Path: "reviewdog.go",
+						Range: &rdf.Range{
+							Start: &rdf.Position{Line: 15, Column: 5},
+							End:   &rdf.Position{Line: 15, Column: 7},
+						},
+					},
+					Suggestions: []*rdf.Suggestion{
+						{
+							Range: &rdf.Range{
+								Start: &rdf.Position{Line: 15, Column: 5},
+								End:   &rdf.Position{Line: 15, Column: 7},
+							},
+							Text: "14",
+						},
+					},
+					Message: "range suggestion (single line)",
+				},
+				InDiffContext: true,
+			},
+		},
+		{
+			Result: &filter.FilteredDiagnostic{
+				SourceLines: []string{
+					"haya???",
+					"???busa (multi-line)",
+				},
+				Diagnostic: &rdf.Diagnostic{
+					Location: &rdf.Location{
+						Path: "reviewdog.go",
+						Range: &rdf.Range{
+							Start: &rdf.Position{Line: 15, Column: 5},
+							End:   &rdf.Position{Line: 16, Column: 4},
+						},
+					},
+					Suggestions: []*rdf.Suggestion{
+						{
+							Range: &rdf.Range{
+								Start: &rdf.Position{Line: 15, Column: 5},
+								End:   &rdf.Position{Line: 16, Column: 4},
+							},
+							Text: "14",
+						},
+					},
+					Message: "range suggestion (multi-line)",
+				},
+				InDiffContext: true,
+			},
+		},
+		{
+			Result: &filter.FilteredDiagnostic{
+				SourceLines: []string{
+					"line 15 xxx",
+					"line 16",
+					"(content at line 15)",
+				},
+				Diagnostic: &rdf.Diagnostic{
+					Location: &rdf.Location{
+						Path: "reviewdog.go",
+						Range: &rdf.Range{
+							Start: &rdf.Position{Line: 15, Column: 9},
+							End:   &rdf.Position{Line: 17, Column: 1},
+						},
+					},
+					Suggestions: []*rdf.Suggestion{
+						{
+							Range: &rdf.Range{
+								Start: &rdf.Position{Line: 15, Column: 9},
+								End:   &rdf.Position{Line: 17, Column: 1},
+							},
+							Text: "",
+						},
+					},
+					Message: "range suggestion (line-break, remove)",
+				},
+				InDiffContext: true,
+			},
+		},
+		{
+			Result: &filter.FilteredDiagnostic{
+				SourceLines: []string{
+					"hayabusa",
+				},
+				Diagnostic: &rdf.Diagnostic{
+					Location: &rdf.Location{
+						Path: "reviewdog.go",
+						Range: &rdf.Range{
+							Start: &rdf.Position{Line: 15, Column: 5},
+							End:   &rdf.Position{Line: 15, Column: 5},
+						},
+					},
+					Suggestions: []*rdf.Suggestion{
+						{
+							Range: &rdf.Range{
+								Start: &rdf.Position{Line: 15, Column: 5},
+								End:   &rdf.Position{Line: 15, Column: 5},
+							},
+							Text: "14",
+						},
+					},
+					Message: "range suggestion (insert)",
 				},
 				InDiffContext: true,
 			},
