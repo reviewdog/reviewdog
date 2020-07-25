@@ -1,6 +1,8 @@
 package parser
 
 import (
+	"bytes"
+	"encoding/json"
 	"fmt"
 	"strings"
 	"testing"
@@ -33,10 +35,44 @@ func ExampleErrorformatParser() {
 		panic(err)
 	}
 	for _, d := range diagnostics {
-		json, _ := protojson.Marshal(d)
-		fmt.Println(string(json))
+		rdjson, _ := protojson.MarshalOptions{Indent: "  "}.Marshal(d)
+		var out bytes.Buffer
+		json.Indent(&out, rdjson, "", "  ")
+		fmt.Println(out.String())
 	}
 	// Output:
-	// {"message":"message 1","location":{"path":"/path/to/file1.txt","range":{"start":{"line":1,"column":14}}},"severity":"ERROR","code":{"value":"14"},"originalOutput":"/path/to/file1.txt:1:14: [E][RULE:14] message 1"}
-	// {"message":"message 2","location":{"path":"/path/to/file2.txt","range":{"start":{"line":2,"column":14}}},"severity":"WARNING","code":{"value":"7"},"originalOutput":"/path/to/file2.txt:2:14: [W][RULE:7] message 2"}
+	// {
+	//   "message": "message 1",
+	//   "location": {
+	//     "path": "/path/to/file1.txt",
+	//     "range": {
+	//       "start": {
+	//         "line": 1,
+	//         "column": 14
+	//       }
+	//     }
+	//   },
+	//   "severity": "ERROR",
+	//   "code": {
+	//     "value": "14"
+	//   },
+	//   "originalOutput": "/path/to/file1.txt:1:14: [E][RULE:14] message 1"
+	// }
+	// {
+	//   "message": "message 2",
+	//   "location": {
+	//     "path": "/path/to/file2.txt",
+	//     "range": {
+	//       "start": {
+	//         "line": 2,
+	//         "column": 14
+	//       }
+	//     }
+	//   },
+	//   "severity": "WARNING",
+	//   "code": {
+	//     "value": "7"
+	//   },
+	//   "originalOutput": "/path/to/file2.txt:2:14: [W][RULE:7] message 2"
+	// }
 }
