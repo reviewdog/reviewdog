@@ -23,6 +23,11 @@ var _ reviewdog.DiffService = &GitHubPullRequest{}
 
 const maxCommentsPerRequest = 30
 
+const (
+	invalidSuggestionPre  = "<details><summary>reviewdog suggestion error</summary>"
+	invalidSuggestionPost = "</details>"
+)
+
 // GitHubPullRequest is a comment and diff service for GitHub PullRequest.
 //
 // API:
@@ -261,7 +266,7 @@ func buildSuggestions(c *reviewdog.Comment) string {
 	for _, s := range c.Result.Diagnostic.GetSuggestions() {
 		txt, err := buildSingleSuggestion(c, s)
 		if err != nil {
-			sb.WriteString(fmt.Sprintf("Invalid suggestion: %v", err))
+			sb.WriteString(invalidSuggestionPre + err.Error() + invalidSuggestionPost + "\n")
 			continue
 		}
 		sb.WriteString(txt)

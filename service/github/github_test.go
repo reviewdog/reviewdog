@@ -313,8 +313,8 @@ func TestGitHubPullRequest_Post_Flush_review_api(t *testing.T) {
 				Line:      github.Int(16),
 				Body: github.String(commentutil.BodyPrefix + "\n" + strings.Join([]string{
 					"invalid lines suggestion comment",
-					"Invalid suggestion: the Diagnostic's lines and Suggestion lines must be the same. 15-16 v.s. 16-17",
-				}, "\n")),
+					invalidSuggestionPre + "the Diagnostic's lines and Suggestion lines must be the same. 15-16 v.s. 16-17" + invalidSuggestionPost,
+				}, "\n") + "\n"),
 			},
 			{
 				Path:      github.String("reviewdog.go"),
@@ -324,8 +324,8 @@ func TestGitHubPullRequest_Post_Flush_review_api(t *testing.T) {
 				Line:      github.Int(16),
 				Body: github.String(commentutil.BodyPrefix + "\n" + strings.Join([]string{
 					"non-line based suggestion comment (no source lines)",
-					"Invalid suggestion: source lines are not available",
-				}, "\n")),
+					invalidSuggestionPre + "source lines are not available" + invalidSuggestionPost,
+				}, "\n") + "\n"),
 			},
 			{
 				Path: github.String("reviewdog.go"),
