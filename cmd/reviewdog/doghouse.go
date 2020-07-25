@@ -18,6 +18,7 @@ import (
 	"github.com/reviewdog/reviewdog/cienv"
 	"github.com/reviewdog/reviewdog/doghouse"
 	"github.com/reviewdog/reviewdog/doghouse/client"
+	"github.com/reviewdog/reviewdog/filter"
 	"github.com/reviewdog/reviewdog/project"
 	"github.com/reviewdog/reviewdog/proto/rdf"
 	"github.com/reviewdog/reviewdog/service/github/githubutils"
@@ -180,7 +181,7 @@ func postResultSet(ctx context.Context, resultSet *reviewdog.ResultMap,
 
 func checkResultToAnnotation(d *rdf.Diagnostic, wd, gitRelWd string) *doghouse.Annotation {
 	d.GetLocation().Path = filepath.ToSlash(filepath.Join(
-		gitRelWd, reviewdog.CleanPath(d.GetLocation().GetPath(), wd)))
+		gitRelWd, filter.CleanPath(d.GetLocation().GetPath(), wd)))
 	return &doghouse.Annotation{
 		Diagnostic: d,
 	}

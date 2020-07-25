@@ -38,7 +38,7 @@ func RunFromResult(ctx context.Context, c CommentService, results []*rdf.Diagnos
 
 // Comment represents a reported result as a comment.
 type Comment struct {
-	Result   *FilteredCheck
+	Result   *filter.FilteredCheck
 	ToolName string
 	Body     string
 }
@@ -68,7 +68,7 @@ func (w *Reviewdog) runFromResult(ctx context.Context, results []*rdf.Diagnostic
 		return err
 	}
 
-	checks := FilterCheck(results, filediffs, strip, wd, w.filterMode)
+	checks := filter.FilterCheck(results, filediffs, strip, wd, w.filterMode)
 	hasViolations := false
 
 	for _, check := range checks {

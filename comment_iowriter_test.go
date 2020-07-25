@@ -6,6 +6,7 @@ import (
 	"strings"
 	"testing"
 
+	"github.com/reviewdog/reviewdog/filter"
 	"github.com/reviewdog/reviewdog/proto/rdf"
 )
 
@@ -16,7 +17,7 @@ func TestUnifiedCommentWriter_Post(t *testing.T) {
 	}{
 		{
 			in: &Comment{
-				Result: &FilteredCheck{
+				Result: &filter.FilteredCheck{
 					Diagnostic: &rdf.Diagnostic{Location: &rdf.Location{Path: "/path/to/file"}},
 				},
 				ToolName: "tool name",
@@ -26,7 +27,7 @@ func TestUnifiedCommentWriter_Post(t *testing.T) {
 		},
 		{
 			in: &Comment{
-				Result: &FilteredCheck{
+				Result: &filter.FilteredCheck{
 					Diagnostic: &rdf.Diagnostic{Location: &rdf.Location{
 						Path: "/path/to/file",
 						Range: &rdf.Range{Start: &rdf.Position{
@@ -41,7 +42,7 @@ func TestUnifiedCommentWriter_Post(t *testing.T) {
 		},
 		{
 			in: &Comment{
-				Result: &FilteredCheck{
+				Result: &filter.FilteredCheck{
 					Diagnostic: &rdf.Diagnostic{Location: &rdf.Location{
 						Path: "/path/to/file",
 						Range: &rdf.Range{Start: &rdf.Position{
@@ -56,7 +57,7 @@ func TestUnifiedCommentWriter_Post(t *testing.T) {
 		},
 		{
 			in: &Comment{
-				Result: &FilteredCheck{
+				Result: &filter.FilteredCheck{
 					Diagnostic: &rdf.Diagnostic{Location: &rdf.Location{
 						Path: "/path/to/file",
 						Range: &rdf.Range{Start: &rdf.Position{

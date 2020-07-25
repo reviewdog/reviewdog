@@ -11,6 +11,7 @@ import (
 
 	"github.com/google/go-cmp/cmp"
 	"github.com/reviewdog/reviewdog"
+	"github.com/reviewdog/reviewdog/filter"
 	"github.com/reviewdog/reviewdog/proto/rdf"
 	"golang.org/x/build/gerrit"
 )
@@ -29,7 +30,7 @@ func TestChangeReviewCommenter_Post_Flush(t *testing.T) {
 	ctx := context.Background()
 	newLnum1 := 14
 	newComment1 := &reviewdog.Comment{
-		Result: &reviewdog.FilteredCheck{
+		Result: &filter.FilteredCheck{
 			Diagnostic: &rdf.Diagnostic{
 				Location: &rdf.Location{
 					Path: "file.go",
@@ -44,7 +45,7 @@ func TestChangeReviewCommenter_Post_Flush(t *testing.T) {
 	}
 	newLnum2 := 15
 	newComment2 := &reviewdog.Comment{
-		Result: &reviewdog.FilteredCheck{
+		Result: &filter.FilteredCheck{
 			Diagnostic: &rdf.Diagnostic{
 				Location: &rdf.Location{
 					Path: "file2.go",
@@ -58,7 +59,7 @@ func TestChangeReviewCommenter_Post_Flush(t *testing.T) {
 		Body: "new comment 2",
 	}
 	commentOutsideDiff := &reviewdog.Comment{
-		Result: &reviewdog.FilteredCheck{
+		Result: &filter.FilteredCheck{
 			Diagnostic: &rdf.Diagnostic{
 				Location: &rdf.Location{
 					Path: "file3.go",

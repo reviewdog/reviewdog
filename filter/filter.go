@@ -1,10 +1,9 @@
-package reviewdog
+package filter
 
 import (
 	"path/filepath"
 
 	"github.com/reviewdog/reviewdog/diff"
-	"github.com/reviewdog/reviewdog/filter"
 	"github.com/reviewdog/reviewdog/proto/rdf"
 )
 
@@ -25,9 +24,9 @@ type FilteredCheck struct {
 // FilterCheck filters check results by diff. It doesn't drop check which
 // is not in diff but set FilteredCheck.ShouldReport field false.
 func FilterCheck(results []*rdf.Diagnostic, diff []*diff.FileDiff, strip int,
-	cwd string, mode filter.Mode) []*FilteredCheck {
+	cwd string, mode Mode) []*FilteredCheck {
 	checks := make([]*FilteredCheck, 0, len(results))
-	df := filter.New(diff, strip, cwd, mode)
+	df := New(diff, strip, cwd, mode)
 	for _, result := range results {
 		check := &FilteredCheck{Diagnostic: result}
 		loc := result.GetLocation()
@@ -80,10 +79,10 @@ func getOldPosition(filediff *diff.FileDiff, strip int, newPath string, newLine 
 	if filediff == nil {
 		return "", 0
 	}
-	if filter.NormalizeDiffPath(filediff.PathNew, strip) != newPath {
+	if NormalizeDiffPath(filediff.PathNew, strip) != newPath {
 		return "", 0
 	}
-	oldPath = filter.NormalizeDiffPath(filediff.PathOld, strip)
+	oldPath = NormalizeDiffPath(filediff.PathOld, strip)
 	delta := 0
 	for _, hunk := range filediff.Hunks {
 		if newLine < hunk.StartLineNew {

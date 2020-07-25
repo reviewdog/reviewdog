@@ -327,7 +327,7 @@ func TestPostResultSet_withoutReportURL(t *testing.T) {
 		sha   = "1414"
 	)
 
-	wantResults := []*reviewdog.FilteredCheck{{ShouldReport: true}}
+	wantResults := []*filter.FilteredCheck{{ShouldReport: true}}
 	fakeCli := &fakeDoghouseServerCli{}
 	fakeCli.FakeCheck = func(ctx context.Context, req *doghouse.CheckRequest) (*doghouse.CheckResponse, error) {
 		return &doghouse.CheckResponse{CheckedResults: wantResults}, nil
@@ -428,7 +428,7 @@ func TestReportResults(t *testing.T) {
 	defer cleanup()
 	filteredResultSet := new(reviewdog.FilteredResultMap)
 	filteredResultSet.Store("name1", &reviewdog.FilteredResult{
-		FilteredCheck: []*reviewdog.FilteredCheck{
+		FilteredCheck: []*filter.FilteredCheck{
 			{
 				Diagnostic: &rdf.Diagnostic{
 					OriginalOutput: "name1-L1\nname1-L2",
@@ -444,7 +444,7 @@ func TestReportResults(t *testing.T) {
 		},
 	})
 	filteredResultSet.Store("name2", &reviewdog.FilteredResult{
-		FilteredCheck: []*reviewdog.FilteredCheck{
+		FilteredCheck: []*filter.FilteredCheck{
 			{
 				Diagnostic: &rdf.Diagnostic{
 					OriginalOutput: "name1-L1\nname1-L2",
@@ -477,7 +477,7 @@ func TestReportResults_inGitHubAction(t *testing.T) {
 	defer cleanup()
 	filteredResultSet := new(reviewdog.FilteredResultMap)
 	filteredResultSet.Store("name1", &reviewdog.FilteredResult{
-		FilteredCheck: []*reviewdog.FilteredCheck{
+		FilteredCheck: []*filter.FilteredCheck{
 			{
 				Diagnostic: &rdf.Diagnostic{
 					OriginalOutput: "name1-L1\nname1-L2",
@@ -503,7 +503,7 @@ func TestReportResults_noResultsShouldReport(t *testing.T) {
 	defer cleanup()
 	filteredResultSet := new(reviewdog.FilteredResultMap)
 	filteredResultSet.Store("name1", &reviewdog.FilteredResult{
-		FilteredCheck: []*reviewdog.FilteredCheck{
+		FilteredCheck: []*filter.FilteredCheck{
 			{
 				Diagnostic: &rdf.Diagnostic{
 					OriginalOutput: "name1-L1\nname1-L2",
@@ -519,7 +519,7 @@ func TestReportResults_noResultsShouldReport(t *testing.T) {
 		},
 	})
 	filteredResultSet.Store("name2", &reviewdog.FilteredResult{
-		FilteredCheck: []*reviewdog.FilteredCheck{
+		FilteredCheck: []*filter.FilteredCheck{
 			{
 				Diagnostic: &rdf.Diagnostic{
 					OriginalOutput: "name1-L1\nname1-L2",

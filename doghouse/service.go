@@ -1,7 +1,6 @@
 package doghouse
 
 import (
-	"github.com/reviewdog/reviewdog"
 	"github.com/reviewdog/reviewdog/filter"
 	"github.com/reviewdog/reviewdog/proto/rdf"
 )
@@ -66,7 +65,7 @@ type CheckResponse struct {
 	// TODO(haya14busa): Consider to move this type to this package to avoid
 	// (cyclic) import.
 	// Optional.
-	CheckedResults []*reviewdog.FilteredCheck `json:"checked_results"`
+	CheckedResults []*filter.FilteredCheck `json:"checked_results"`
 
 	// Conclusion of check result, which is same as GitHub's conclusion of Check
 	// API. https://developer.github.com/v3/checks/runs/#parameters-1

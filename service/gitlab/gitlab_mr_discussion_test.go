@@ -13,6 +13,7 @@ import (
 	"github.com/xanzy/go-gitlab"
 
 	"github.com/reviewdog/reviewdog"
+	"github.com/reviewdog/reviewdog/filter"
 	"github.com/reviewdog/reviewdog/proto/rdf"
 	"github.com/reviewdog/reviewdog/service/commentutil"
 )
@@ -23,7 +24,7 @@ func TestGitLabMergeRequestDiscussionCommenter_Post_Flush_review_api(t *testing.
 	os.Chdir("../..")
 
 	alreadyCommented1 := &reviewdog.Comment{
-		Result: &reviewdog.FilteredCheck{
+		Result: &filter.FilteredCheck{
 			Diagnostic: &rdf.Diagnostic{
 				Location: &rdf.Location{
 					Path: "file.go",
@@ -37,7 +38,7 @@ func TestGitLabMergeRequestDiscussionCommenter_Post_Flush_review_api(t *testing.
 		Body: "already commented",
 	}
 	alreadyCommented2 := &reviewdog.Comment{
-		Result: &reviewdog.FilteredCheck{
+		Result: &filter.FilteredCheck{
 			Diagnostic: &rdf.Diagnostic{
 				Location: &rdf.Location{
 					Path: "another/file.go",
@@ -51,7 +52,7 @@ func TestGitLabMergeRequestDiscussionCommenter_Post_Flush_review_api(t *testing.
 		Body: "already commented 2",
 	}
 	newComment1 := &reviewdog.Comment{
-		Result: &reviewdog.FilteredCheck{
+		Result: &filter.FilteredCheck{
 			Diagnostic: &rdf.Diagnostic{
 				Location: &rdf.Location{
 					Path: "file.go",
@@ -65,7 +66,7 @@ func TestGitLabMergeRequestDiscussionCommenter_Post_Flush_review_api(t *testing.
 		Body: "new comment",
 	}
 	newComment2 := &reviewdog.Comment{
-		Result: &reviewdog.FilteredCheck{
+		Result: &filter.FilteredCheck{
 			Diagnostic: &rdf.Diagnostic{
 				Location: &rdf.Location{
 					Path: "file2.go",
@@ -79,7 +80,7 @@ func TestGitLabMergeRequestDiscussionCommenter_Post_Flush_review_api(t *testing.
 		Body: "new comment 2",
 	}
 	newComment3 := &reviewdog.Comment{
-		Result: &reviewdog.FilteredCheck{
+		Result: &filter.FilteredCheck{
 			Diagnostic: &rdf.Diagnostic{
 				Location: &rdf.Location{
 					Path: "new_file.go",
@@ -95,7 +96,7 @@ func TestGitLabMergeRequestDiscussionCommenter_Post_Flush_review_api(t *testing.
 		Body: "new comment 3",
 	}
 	commentOutsideDiff := &reviewdog.Comment{
-		Result: &reviewdog.FilteredCheck{
+		Result: &filter.FilteredCheck{
 			Diagnostic: &rdf.Diagnostic{
 				Location: &rdf.Location{
 					Path: "path.go",
@@ -109,7 +110,7 @@ func TestGitLabMergeRequestDiscussionCommenter_Post_Flush_review_api(t *testing.
 		Body: "comment outside diff",
 	}
 	commentWithoutLnum := &reviewdog.Comment{
-		Result: &reviewdog.FilteredCheck{
+		Result: &filter.FilteredCheck{
 			Diagnostic: &rdf.Diagnostic{
 				Location: &rdf.Location{
 					Path: "path.go",

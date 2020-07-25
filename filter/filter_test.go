@@ -1,4 +1,4 @@
-package reviewdog
+package filter
 
 import (
 	"strings"
@@ -8,7 +8,6 @@ import (
 	"google.golang.org/protobuf/testing/protocmp"
 
 	"github.com/reviewdog/reviewdog/diff"
-	"github.com/reviewdog/reviewdog/filter"
 	"github.com/reviewdog/reviewdog/proto/rdf"
 )
 
@@ -153,7 +152,7 @@ func TestFilterCheckByAddedLines(t *testing.T) {
 		},
 	}
 	filediffs, _ := diff.ParseMultiFile(strings.NewReader(diffContent))
-	got := FilterCheck(results, filediffs, 0, "", filter.ModeAdded)
+	got := FilterCheck(results, filediffs, 0, "", ModeAdded)
 	if diff := cmp.Diff(got, want, protocmp.Transform()); diff != "" {
 		t.Error(diff)
 	}
@@ -223,7 +222,7 @@ func TestFilterCheckByDiffContext(t *testing.T) {
 		},
 	}
 	filediffs, _ := diff.ParseMultiFile(strings.NewReader(diffContent))
-	got := FilterCheck(results, filediffs, 0, "", filter.ModeDiffContext)
+	got := FilterCheck(results, filediffs, 0, "", ModeDiffContext)
 	if diff := cmp.Diff(got, want, protocmp.Transform()); diff != "" {
 		t.Error(diff)
 	}
@@ -231,7 +230,7 @@ func TestFilterCheckByDiffContext(t *testing.T) {
 
 func findFileDiff(filediffs []*diff.FileDiff, path string, strip int) *diff.FileDiff {
 	for _, file := range filediffs {
-		if filter.NormalizeDiffPath(file.PathNew, strip) == path {
+		if NormalizeDiffPath(file.PathNew, strip) == path {
 			return file
 		}
 	}
