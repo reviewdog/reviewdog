@@ -503,7 +503,7 @@ func githubBaseURL() (*url.URL, error) {
 	}
 	u, err := url.Parse(baseURL)
 	if err != nil {
-		return nil, fmt.Errorf("GitHub base URL is invalid: %v, %v", baseURL, err)
+		return nil, fmt.Errorf("GitHub base URL is invalid: %v, %w", baseURL, err)
 	}
 	return u, nil
 }
@@ -611,7 +611,7 @@ func gitlabBaseURL() (*url.URL, error) {
 
 	u, err := url.Parse(baseURL)
 	if err != nil {
-		return nil, fmt.Errorf("GitLab base URL is invalid: %v, %v", baseURL, err)
+		return nil, fmt.Errorf("GitLab base URL is invalid: %v, %w", baseURL, err)
 	}
 	return u, nil
 }
@@ -638,11 +638,11 @@ func (ss *strslice) Set(value string) error {
 func projectConfig(path string) (*project.Config, error) {
 	b, err := readConf(path)
 	if err != nil {
-		return nil, fmt.Errorf("fail to open config: %v", err)
+		return nil, fmt.Errorf("fail to open config: %w", err)
 	}
 	conf, err := project.Parse(b)
 	if err != nil {
-		return nil, fmt.Errorf("config is invalid: %v", err)
+		return nil, fmt.Errorf("config is invalid: %w", err)
 	}
 	return conf, nil
 }
@@ -671,7 +671,7 @@ func readConf(conf string) ([]byte, error) {
 func newParserFromOpt(opt *option) (reviewdog.Parser, error) {
 	p, err := reviewdog.NewParser(&reviewdog.ParserOpt{FormatName: opt.f, Errorformat: opt.efms})
 	if err != nil {
-		return nil, fmt.Errorf("fail to create parser. use either -f or -efm: %v", err)
+		return nil, fmt.Errorf("fail to create parser. use either -f or -efm: %w", err)
 	}
 	return p, err
 }

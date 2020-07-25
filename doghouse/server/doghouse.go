@@ -46,7 +46,7 @@ func (ch *Checker) Check(ctx context.Context) (*doghouse.CheckResponse, error) {
 		var err error
 		filediffs, err = ch.pullRequestDiff(ctx, ch.req.PullRequest)
 		if err != nil {
-			return nil, fmt.Errorf("fail to parse diff: %v", err)
+			return nil, fmt.Errorf("fail to parse diff: %w", err)
 		}
 	}
 
@@ -70,12 +70,12 @@ func (ch *Checker) Check(ctx context.Context) (*doghouse.CheckResponse, error) {
 		if err, ok := err.(*github.ErrorResponse); ok && err.Response.StatusCode == http.StatusForbidden {
 			return &doghouse.CheckResponse{CheckedResults: filtered}, nil
 		}
-		return nil, fmt.Errorf("failed to create check: %v", err)
+		return nil, fmt.Errorf("failed to create check: %w", err)
 	}
 
 	checkRun, conclusion, err := ch.postCheck(ctx, check.GetID(), filtered)
 	if err != nil {
-		return nil, fmt.Errorf("failed to post result: %v", err)
+		return nil, fmt.Errorf("failed to post result: %w", err)
 	}
 	res := &doghouse.CheckResponse{
 		ReportURL:  checkRun.GetHTMLURL(),
@@ -94,7 +94,7 @@ func (ch *Checker) postCheck(ctx context.Context, checkID int64, checks []*revie
 	}
 	if len(annotations) > 0 {
 		if err := ch.postAnnotations(ctx, checkID, annotations); err != nil {
-			return nil, "", fmt.Errorf("failed to post annotations: %v", err)
+			return nil, "", fmt.Errorf("failed to post annotations: %w", err)
 		}
 	}
 
@@ -276,7 +276,7 @@ func (ch *Checker) pullRequestDiff(ctx context.Context, pr int) ([]*diff.FileDif
 	}
 	filediffs, err := diff.ParseMultiFile(bytes.NewReader(d))
 	if err != nil {
-		return nil, fmt.Errorf("fail to parse diff: %v", err)
+		return nil, fmt.Errorf("fail to parse diff: %w", err)
 	}
 	return filediffs, nil
 }
