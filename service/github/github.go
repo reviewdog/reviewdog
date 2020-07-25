@@ -2,6 +2,7 @@ package github
 
 import (
 	"context"
+	"errors"
 	"fmt"
 	"path/filepath"
 	"strings"
@@ -11,6 +12,7 @@ import (
 
 	"github.com/reviewdog/reviewdog"
 	"github.com/reviewdog/reviewdog/cienv"
+	"github.com/reviewdog/reviewdog/proto/rdf"
 	"github.com/reviewdog/reviewdog/service/commentutil"
 	"github.com/reviewdog/reviewdog/service/github/githubutils"
 	"github.com/reviewdog/reviewdog/service/serviceutil"
@@ -93,7 +95,8 @@ func (g *GitHubPullRequest) postAsReviewComment(ctx context.Context) error {
 			}
 			continue
 		}
-		if g.postedcs.IsPosted(c, githubCommentLine(c)) {
+		body := buildBody(c)
+		if g.postedcs.IsPosted(c, githubCommentLine(c), body) {
 			continue
 		}
 		// Only posts maxCommentsPerRequest comments per 1 request to avoid spammy
@@ -108,7 +111,7 @@ func (g *GitHubPullRequest) postAsReviewComment(ctx context.Context) error {
 			remaining = append(remaining, c)
 			continue
 		}
-		comments = append(comments, buildDraftReviewComment(c))
+		comments = append(comments, buildDraftReviewComment(c, body))
 	}
 
 	if len(comments) == 0 {
@@ -126,14 +129,13 @@ func (g *GitHubPullRequest) postAsReviewComment(ctx context.Context) error {
 }
 
 // Document: https://docs.github.com/en/rest/reference/pulls#create-a-review-comment-for-a-pull-request
-func buildDraftReviewComment(c *reviewdog.Comment) *github.DraftReviewComment {
-	cbody := commentutil.CommentBody(c)
+func buildDraftReviewComment(c *reviewdog.Comment, body string) *github.DraftReviewComment {
 	loc := c.Result.Diagnostic.GetLocation()
 	line := githubCommentLine(c)
 	r := &github.DraftReviewComment{
 		Path: github.String(loc.GetPath()),
 		Side: github.String("RIGHT"),
-		Body: github.String(cbody),
+		Body: github.String(body),
 		Line: github.Int(line),
 	}
 	// GitHub API: Start line must precede the end line.
@@ -249,4 +251,49 @@ func listAllPullRequestsComments(ctx context.Context, cli *github.Client,
 		return nil, err
 	}
 	return append(comments, restComments...), nil
+}
+
+func buildBody(c *reviewdog.Comment) string {
+	cbody := commentutil.CommentBody(c)
+	if suggestion := buildSuggestions(c); suggestion != "" {
+		cbody += "\n" + suggestion
+	}
+	return cbody
+}
+
+func buildSuggestions(c *reviewdog.Comment) string {
+	var sb strings.Builder
+	for _, s := range c.Result.Diagnostic.GetSuggestions() {
+		txt, err := buildSingleSuggestion(c, s)
+		if err != nil {
+			sb.WriteString(fmt.Sprintf("Invalid suggestion: %v", err))
+			continue
+		}
+		sb.WriteString(txt)
+		sb.WriteString("\n")
+	}
+	return sb.String()
+}
+
+func buildSingleSuggestion(c *reviewdog.Comment, s *rdf.Suggestion) (string, error) {
+	start := s.GetRange().GetStart()
+	end := s.GetRange().GetEnd()
+	drange := c.Result.Diagnostic.GetLocation().GetRange()
+	if start.GetLine() != drange.GetStart().GetLine() ||
+		end.GetLine() != drange.GetEnd().GetLine() {
+		return "", fmt.Errorf("the Diagnostic's lines and Suggestion lines must be the same. %d-%d v.s. %d-%d",
+			drange.GetStart().GetLine(), drange.GetEnd().GetLine(), start.GetLine(), end.GetLine())
+	}
+	if start.GetColumn() > 1 || end.GetColumn() > 1 {
+		// TODO(haya14busa): Support non-line based suggestion.
+		return "", errors.New("non line based suggestions (contains column) are not supported yet")
+	}
+	var sb strings.Builder
+	sb.WriteString("```suggestion\n")
+	if txt := s.GetText(); txt != "" {
+		sb.WriteString(txt)
+		sb.WriteString("\n")
+	}
+	sb.WriteString("```")
+	return sb.String(), nil
 }

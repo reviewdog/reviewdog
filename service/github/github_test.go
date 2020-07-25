@@ -278,6 +278,55 @@ func TestGitHubPullRequest_Post_Flush_review_api(t *testing.T) {
 				Line:      github.Int(16),
 				Body:      github.String(commentutil.BodyPrefix + "\nmultiline new comment"),
 			},
+			{
+				Path:      github.String("reviewdog.go"),
+				Side:      github.String("RIGHT"),
+				StartSide: github.String("RIGHT"),
+				StartLine: github.Int(15),
+				Line:      github.Int(16),
+				Body: github.String(commentutil.BodyPrefix + "\n" + strings.Join([]string{
+					"multiline suggestion comment",
+					"```suggestion",
+					"line1",
+					"line2",
+					"line3",
+					"```",
+				}, "\n") + "\n"),
+			},
+			{
+				Path: github.String("reviewdog.go"),
+				Side: github.String("RIGHT"),
+				Line: github.Int(15),
+				Body: github.String(commentutil.BodyPrefix + "\n" + strings.Join([]string{
+					"singleline suggestion comment",
+					"```suggestion",
+					"line1",
+					"line2",
+					"```",
+				}, "\n") + "\n"),
+			},
+			{
+				Path:      github.String("reviewdog.go"),
+				Side:      github.String("RIGHT"),
+				StartSide: github.String("RIGHT"),
+				StartLine: github.Int(15),
+				Line:      github.Int(16),
+				Body: github.String(commentutil.BodyPrefix + "\n" + strings.Join([]string{
+					"invalid lines suggestion comment",
+					"Invalid suggestion: the Diagnostic's lines and Suggestion lines must be the same. 15-16 v.s. 16-17",
+				}, "\n")),
+			},
+			{
+				Path:      github.String("reviewdog.go"),
+				Side:      github.String("RIGHT"),
+				StartSide: github.String("RIGHT"),
+				StartLine: github.Int(15),
+				Line:      github.Int(16),
+				Body: github.String(commentutil.BodyPrefix + "\n" + strings.Join([]string{
+					"non-line based suggestion comment",
+					"Invalid suggestion: non line based suggestions (contains column) are not supported yet",
+				}, "\n")),
+			},
 		}
 		if diff := pretty.Compare(want, req.Comments); diff != "" {
 			t.Errorf("req.Comments diff: (-got +want)\n%s", diff)
@@ -410,6 +459,130 @@ func TestGitHubPullRequest_Post_Flush_review_api(t *testing.T) {
 				},
 			},
 			Body: "should not be reported via GitHub Review API",
+		},
+		{
+			Result: &filter.FilteredDiagnostic{
+				Diagnostic: &rdf.Diagnostic{
+					Location: &rdf.Location{
+						Path: "reviewdog.go",
+						Range: &rdf.Range{
+							Start: &rdf.Position{
+								Line: 15,
+							},
+							End: &rdf.Position{
+								Line: 16,
+							},
+						},
+					},
+					Suggestions: []*rdf.Suggestion{
+						{
+							Range: &rdf.Range{
+								Start: &rdf.Position{
+									Line: 15,
+								},
+								End: &rdf.Position{
+									Line: 16,
+								},
+							},
+							Text: "line1\nline2\nline3",
+						},
+					},
+				},
+				InDiffContext: true,
+			},
+			Body: "multiline suggestion comment",
+		},
+		{
+			Result: &filter.FilteredDiagnostic{
+				Diagnostic: &rdf.Diagnostic{
+					Location: &rdf.Location{
+						Path: "reviewdog.go",
+						Range: &rdf.Range{
+							Start: &rdf.Position{
+								Line: 15,
+							},
+						},
+					},
+					Suggestions: []*rdf.Suggestion{
+						{
+							Range: &rdf.Range{
+								Start: &rdf.Position{
+									Line: 15,
+								},
+							},
+							Text: "line1\nline2",
+						},
+					},
+				},
+				InDiffContext: true,
+			},
+			Body: "singleline suggestion comment",
+		},
+		{
+			Result: &filter.FilteredDiagnostic{
+				Diagnostic: &rdf.Diagnostic{
+					Location: &rdf.Location{
+						Path: "reviewdog.go",
+						Range: &rdf.Range{
+							Start: &rdf.Position{
+								Line: 15,
+							},
+							End: &rdf.Position{
+								Line: 16,
+							},
+						},
+					},
+					Suggestions: []*rdf.Suggestion{
+						{
+							Range: &rdf.Range{
+								Start: &rdf.Position{
+									Line: 16,
+								},
+								End: &rdf.Position{
+									Line: 17,
+								},
+							},
+							Text: "line1\nline2\nline3",
+						},
+					},
+				},
+				InDiffContext: true,
+			},
+			Body: "invalid lines suggestion comment",
+		},
+		{
+			Result: &filter.FilteredDiagnostic{
+				Diagnostic: &rdf.Diagnostic{
+					Location: &rdf.Location{
+						Path: "reviewdog.go",
+						Range: &rdf.Range{
+							Start: &rdf.Position{
+								Line: 15,
+							},
+							End: &rdf.Position{
+								Line: 16,
+							},
+						},
+					},
+					Suggestions: []*rdf.Suggestion{
+						{
+							Range: &rdf.Range{
+								Start: &rdf.Position{
+									Line:   15,
+									Column: 5,
+								},
+								End: &rdf.Position{
+									Line:   16,
+									Column: 7,
+								},
+							},
+							Text: "replacement",
+						},
+					},
+				},
+				InDiffContext: true,
+			},
+			Body: "non-line based suggestion comment",
 		},
 	}
 	for _, c := range comments {
