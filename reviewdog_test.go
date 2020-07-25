@@ -8,6 +8,7 @@ import (
 
 	"github.com/reviewdog/errorformat"
 	"github.com/reviewdog/reviewdog/difffilter"
+	"github.com/reviewdog/reviewdog/parser"
 )
 
 var _ CommentService = &testWriter{}
@@ -45,7 +46,7 @@ golint.new.go:7:1: comment on exported function F should be of the form "F ..."
 golint.new.go:11:1: comment on exported function F2 should be of the form "F2 ..."
 `
 	efm, _ := errorformat.NewErrorformat([]string{`%f:%l:%c: %m`})
-	p := NewErrorformatParser(efm)
+	p := parser.NewErrorformatParser(efm)
 	c := NewRawCommentWriter(os.Stdout)
 	d := NewDiffString(difftext, 1)
 	app := NewReviewdog("tool name", p, c, d, difffilter.ModeAdded, false)
@@ -92,7 +93,7 @@ index 34cacb9..a727dd3 100644
 	}
 
 	efm, _ := errorformat.NewErrorformat([]string{`%f:%l:%c: %m`})
-	p := NewErrorformatParser(efm)
+	p := parser.NewErrorformatParser(efm)
 	d := NewDiffString(difftext, 1)
 	app := NewReviewdog("tool name", p, c, d, difffilter.ModeAdded, false)
 	app.Run(context.Background(), strings.NewReader(lintresult))
@@ -125,7 +126,7 @@ golint.new.go:11:1: comment on exported function F2 should be of the form "F2 ..
 
 	c := NewRawCommentWriter(os.Stdout)
 	efm, _ := errorformat.NewErrorformat([]string{`%f:%l:%c: %m`})
-	p := NewErrorformatParser(efm)
+	p := parser.NewErrorformatParser(efm)
 	d := NewDiffString(difftext, 1)
 	app := NewReviewdog("tool name", p, c, d, difffilter.ModeAdded, false)
 	err := app.Run(context.Background(), strings.NewReader(lintresult))
@@ -161,7 +162,7 @@ golint.new.go:11:1: comment on exported function F2 should be of the form "F2 ..
 `
 	c := NewRawCommentWriter(os.Stdout)
 	efm, _ := errorformat.NewErrorformat([]string{`%f:%l:%c: %m`})
-	p := NewErrorformatParser(efm)
+	p := parser.NewErrorformatParser(efm)
 	d := NewDiffString(difftext, 1)
 	app := NewReviewdog("tool name", p, c, d, difffilter.ModeAdded, true)
 	err := app.Run(context.Background(), strings.NewReader(lintresult))

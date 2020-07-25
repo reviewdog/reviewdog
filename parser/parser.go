@@ -1,4 +1,4 @@
-package reviewdog
+package parser
 
 import (
 	"bufio"
@@ -13,6 +13,12 @@ import (
 	"github.com/reviewdog/reviewdog/proto/rdf"
 	"google.golang.org/protobuf/encoding/protojson"
 )
+
+// Parser is an interface which parses compilers, linters, or any tools
+// results.
+type Parser interface {
+	Parse(r io.Reader) ([]*rdf.Diagnostic, error)
+}
 
 // ParserOpt represents option to create Parser. Either FormatName or
 // Errorformat should be specified.

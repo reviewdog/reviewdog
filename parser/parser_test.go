@@ -1,4 +1,4 @@
-package reviewdog
+package parser
 
 import (
 	"reflect"

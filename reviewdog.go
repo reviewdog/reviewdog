@@ -9,6 +9,7 @@ import (
 
 	"github.com/reviewdog/reviewdog/diff"
 	"github.com/reviewdog/reviewdog/difffilter"
+	"github.com/reviewdog/reviewdog/parser"
 	"github.com/reviewdog/reviewdog/proto/rdf"
 )
 
@@ -17,7 +18,7 @@ import (
 // results.
 type Reviewdog struct {
 	toolname    string
-	p           Parser
+	p           parser.Parser
 	c           CommentService
 	d           DiffService
 	filterMode  difffilter.Mode
@@ -25,7 +26,7 @@ type Reviewdog struct {
 }
 
 // NewReviewdog returns a new Reviewdog.
-func NewReviewdog(toolname string, p Parser, c CommentService, d DiffService, filterMode difffilter.Mode, failOnError bool) *Reviewdog {
+func NewReviewdog(toolname string, p parser.Parser, c CommentService, d DiffService, filterMode difffilter.Mode, failOnError bool) *Reviewdog {
 	return &Reviewdog{p: p, c: c, d: d, toolname: toolname, filterMode: filterMode, failOnError: failOnError}
 }
 
@@ -33,12 +34,6 @@ func NewReviewdog(toolname string, p Parser, c CommentService, d DiffService, fi
 func RunFromResult(ctx context.Context, c CommentService, results []*rdf.Diagnostic,
 	filediffs []*diff.FileDiff, strip int, toolname string, filterMode difffilter.Mode, failOnError bool) error {
 	return (&Reviewdog{c: c, toolname: toolname, filterMode: filterMode, failOnError: failOnError}).runFromResult(ctx, results, filediffs, strip, failOnError)
-}
-
-// Parser is an interface which parses compilers, linters, or any tools
-// results.
-type Parser interface {
-	Parse(r io.Reader) ([]*rdf.Diagnostic, error)
 }
 
 // Comment represents a reported result as a comment.
@@ -123,3 +118,4 @@ func (w *Reviewdog) Run(ctx context.Context, r io.Reader) error {
 
 	return w.runFromResult(ctx, results, filediffs, w.d.Strip(), w.failOnError)
 }
+

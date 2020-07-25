@@ -15,6 +15,7 @@ import (
 	"github.com/reviewdog/reviewdog"
 	"github.com/reviewdog/reviewdog/diff"
 	"github.com/reviewdog/reviewdog/difffilter"
+	"github.com/reviewdog/reviewdog/parser"
 )
 
 // RunAndParse runs commands and parse results. Returns map of tool name to check results.
@@ -43,8 +44,8 @@ func RunAndParse(ctx context.Context, conf *Config, runners map[string]bool, def
 		if fname == "" && len(runner.Errorformat) == 0 {
 			fname = runnerName
 		}
-		opt := &reviewdog.ParserOpt{FormatName: fname, Errorformat: runner.Errorformat}
-		p, err := reviewdog.NewParser(opt)
+		opt := &parser.ParserOpt{FormatName: fname, Errorformat: runner.Errorformat}
+		p, err := parser.NewParser(opt)
 		if err != nil {
 			return nil, err
 		}

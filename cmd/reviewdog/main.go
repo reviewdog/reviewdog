@@ -28,6 +28,7 @@ import (
 	"github.com/reviewdog/reviewdog/cienv"
 	"github.com/reviewdog/reviewdog/commands"
 	"github.com/reviewdog/reviewdog/difffilter"
+	"github.com/reviewdog/reviewdog/parser"
 	"github.com/reviewdog/reviewdog/project"
 	gerritservice "github.com/reviewdog/reviewdog/service/gerrit"
 	githubservice "github.com/reviewdog/reviewdog/service/github"
@@ -668,8 +669,8 @@ func readConf(conf string) ([]byte, error) {
 	return nil, errors.New(".reviewdog.yml not found")
 }
 
-func newParserFromOpt(opt *option) (reviewdog.Parser, error) {
-	p, err := reviewdog.NewParser(&reviewdog.ParserOpt{FormatName: opt.f, Errorformat: opt.efms})
+func newParserFromOpt(opt *option) (parser.Parser, error) {
+	p, err := parser.NewParser(&parser.ParserOpt{FormatName: opt.f, Errorformat: opt.efms})
 	if err != nil {
 		return nil, fmt.Errorf("fail to create parser. use either -f or -efm: %w", err)
 	}
