@@ -101,10 +101,10 @@ func TestGitLabMergeRequestCommitCommenter_Post_Flush_review_api(t *testing.T) {
 							Line: 1,
 						}},
 					},
+					Message: "already commented",
 				},
 				InDiffFile: true,
 			},
-			Body: "already commented",
 		},
 		{
 			Result: &filter.FilteredDiagnostic{
@@ -115,10 +115,10 @@ func TestGitLabMergeRequestCommitCommenter_Post_Flush_review_api(t *testing.T) {
 							Line: 14,
 						}},
 					},
+					Message: "new comment",
 				},
 				InDiffFile: true,
 			},
-			Body: "new comment",
 		},
 	}
 	for _, c := range comments {

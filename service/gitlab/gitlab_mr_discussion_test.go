@@ -32,10 +32,10 @@ func TestGitLabMergeRequestDiscussionCommenter_Post_Flush_review_api(t *testing.
 						Line: 1,
 					}},
 				},
+				Message: "already commented",
 			},
 			InDiffFile: true,
 		},
-		Body: "already commented",
 	}
 	alreadyCommented2 := &reviewdog.Comment{
 		Result: &filter.FilteredDiagnostic{
@@ -46,10 +46,10 @@ func TestGitLabMergeRequestDiscussionCommenter_Post_Flush_review_api(t *testing.
 						Line: 14,
 					}},
 				},
+				Message: "already commented 2",
 			},
 			InDiffFile: true,
 		},
-		Body: "already commented 2",
 	}
 	newComment1 := &reviewdog.Comment{
 		Result: &filter.FilteredDiagnostic{
@@ -60,10 +60,10 @@ func TestGitLabMergeRequestDiscussionCommenter_Post_Flush_review_api(t *testing.
 						Line: 14,
 					}},
 				},
+				Message: "new comment",
 			},
 			InDiffFile: true,
 		},
-		Body: "new comment",
 	}
 	newComment2 := &reviewdog.Comment{
 		Result: &filter.FilteredDiagnostic{
@@ -74,10 +74,10 @@ func TestGitLabMergeRequestDiscussionCommenter_Post_Flush_review_api(t *testing.
 						Line: 15,
 					}},
 				},
+				Message: "new comment 2",
 			},
 			InDiffFile: true,
 		},
-		Body: "new comment 2",
 	}
 	newComment3 := &reviewdog.Comment{
 		Result: &filter.FilteredDiagnostic{
@@ -88,12 +88,12 @@ func TestGitLabMergeRequestDiscussionCommenter_Post_Flush_review_api(t *testing.
 						Line: 14,
 					}},
 				},
+				Message: "new comment 3",
 			},
 			OldPath:    "old_file.go",
 			OldLine:    7,
 			InDiffFile: true,
 		},
-		Body: "new comment 3",
 	}
 	commentOutsideDiff := &reviewdog.Comment{
 		Result: &filter.FilteredDiagnostic{
@@ -104,10 +104,10 @@ func TestGitLabMergeRequestDiscussionCommenter_Post_Flush_review_api(t *testing.
 						Line: 14,
 					}},
 				},
+				Message: "comment outside diff",
 			},
 			InDiffFile: false,
 		},
-		Body: "comment outside diff",
 	}
 	commentWithoutLnum := &reviewdog.Comment{
 		Result: &filter.FilteredDiagnostic{
@@ -115,10 +115,10 @@ func TestGitLabMergeRequestDiscussionCommenter_Post_Flush_review_api(t *testing.
 				Location: &rdf.Location{
 					Path: "path.go",
 				},
+				Message: "comment without lnum",
 			},
 			InDiffFile: true,
 		},
-		Body: "comment without lnum",
 	}
 
 	comments := []*reviewdog.Comment{

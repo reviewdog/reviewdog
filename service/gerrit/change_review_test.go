@@ -38,10 +38,10 @@ func TestChangeReviewCommenter_Post_Flush(t *testing.T) {
 						Line: int32(newLnum1),
 					}},
 				},
+				Message: "new comment",
 			},
 			InDiffFile: true,
 		},
-		Body: "new comment",
 	}
 	newLnum2 := 15
 	newComment2 := &reviewdog.Comment{
@@ -53,10 +53,10 @@ func TestChangeReviewCommenter_Post_Flush(t *testing.T) {
 						Line: int32(newLnum2),
 					}},
 				},
+				Message: "new comment 2",
 			},
 			InDiffFile: true,
 		},
-		Body: "new comment 2",
 	}
 	commentOutsideDiff := &reviewdog.Comment{
 		Result: &filter.FilteredDiagnostic{
@@ -67,10 +67,10 @@ func TestChangeReviewCommenter_Post_Flush(t *testing.T) {
 						Line: 14,
 					}},
 				},
+				Message: "comment outside diff",
 			},
 			InDiffFile: false,
 		},
-		Body: "comment outside diff",
 	}
 
 	comments := []*reviewdog.Comment{
@@ -93,13 +93,15 @@ func TestChangeReviewCommenter_Post_Flush(t *testing.T) {
 			}
 
 			line1 := int(newComment1.Result.Diagnostic.GetLocation().GetRange().GetStart().GetLine())
-			want := []gerrit.CommentInput{{Line: line1, Message: newComment1.Body}}
+			want := []gerrit.CommentInput{{
+				Line: line1, Message: newComment1.Result.Diagnostic.GetMessage()}}
 			if diff := cmp.Diff(got.Comments["file.go"], want); diff != "" {
 				t.Error(diff)
 			}
 
 			line2 := int(newComment2.Result.Diagnostic.GetLocation().GetRange().GetStart().GetLine())
-			want = []gerrit.CommentInput{{Line: line2, Message: newComment2.Body}}
+			want = []gerrit.CommentInput{{
+				Line: line2, Message: newComment2.Result.Diagnostic.GetMessage()}}
 			if diff := cmp.Diff(got.Comments["file2.go"], want); diff != "" {
 				t.Error(diff)
 			}

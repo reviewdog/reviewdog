@@ -51,7 +51,7 @@ func (mc *UnifiedCommentWriter) Post(_ context.Context, c *Comment) error {
 			s += fmt.Sprintf(":%d", start.GetColumn())
 		}
 	}
-	s += fmt.Sprintf(": [%s] %s", c.ToolName, c.Body)
+	s += fmt.Sprintf(": [%s] %s", c.ToolName, c.Result.Diagnostic.GetMessage())
 	_, err := fmt.Fprintln(mc.w, s)
 	return err
 }

@@ -59,5 +59,5 @@ func CommentBody(c *reviewdog.Comment) string {
 	if c.ToolName != "" {
 		tool = fmt.Sprintf("**[%s]** ", c.ToolName)
 	}
-	return tool + BodyPrefix + "\n" + c.Body
+	return tool + BodyPrefix + "\n" + c.Result.Diagnostic.GetMessage()
 }

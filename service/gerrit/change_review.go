@@ -75,7 +75,7 @@ func (g *ChangeReviewCommenter) postAllComments(ctx context.Context) error {
 		path := loc.GetPath()
 		review.Comments[path] = append(review.Comments[path], gerrit.CommentInput{
 			Line:    int(loc.GetRange().GetStart().GetLine()),
-			Message: c.Body,
+			Message: c.Result.Diagnostic.GetMessage(),
 		})
 	}
 
