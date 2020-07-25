@@ -93,7 +93,3 @@ workflows:
               ignore: /.*/
             tags:
               only: /v[0-9]+(\.[0-9]+)*(-.*)*/
-
-notify:
-  webhooks:
-    - url: https://webhooks.gitter.im/e/1285d150756c4cbf4795
