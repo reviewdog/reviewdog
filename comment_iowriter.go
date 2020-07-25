@@ -4,7 +4,6 @@ import (
 	"context"
 	"fmt"
 	"io"
-	"strings"
 )
 
 var _ CommentService = &RawCommentWriter{}
@@ -20,7 +19,7 @@ func NewRawCommentWriter(w io.Writer) *RawCommentWriter {
 }
 
 func (s *RawCommentWriter) Post(_ context.Context, c *Comment) error {
-	_, err := fmt.Fprintln(s.w, strings.Join(c.Result.Lines, "\n"))
+	_, err := fmt.Fprintln(s.w, c.Result.Diagnostic.OriginalOutput)
 	return err
 }
 

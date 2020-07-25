@@ -8,9 +8,7 @@ import (
 	"log"
 	"net/http"
 	"os"
-	"path/filepath"
 	"sort"
-	"strings"
 
 	"golang.org/x/oauth2"
 	"golang.org/x/sync/errgroup"
@@ -19,7 +17,9 @@ import (
 	"github.com/reviewdog/reviewdog/cienv"
 	"github.com/reviewdog/reviewdog/doghouse"
 	"github.com/reviewdog/reviewdog/doghouse/client"
+	"github.com/reviewdog/reviewdog/filter"
 	"github.com/reviewdog/reviewdog/project"
+	"github.com/reviewdog/reviewdog/proto/rdf"
 	"github.com/reviewdog/reviewdog/service/github/githubutils"
 	"github.com/reviewdog/reviewdog/service/serviceutil"
 )
@@ -99,13 +99,13 @@ func checkResultSet(ctx context.Context, r io.Reader, opt *option, isProject boo
 		if err != nil {
 			return nil, err
 		}
-		rs, err := p.Parse(r)
+		diagnostics, err := p.Parse(r)
 		if err != nil {
 			return nil, err
 		}
 		resultSet.Store(toolName(opt), &reviewdog.Result{
-			Level:        opt.level,
-			CheckResults: rs,
+			Level:       opt.level,
+			Diagnostics: diagnostics,
 		})
 	}
 	return resultSet, nil
@@ -121,10 +121,10 @@ func postResultSet(ctx context.Context, resultSet *reviewdog.ResultMap,
 	}
 	filteredResultSet := new(reviewdog.FilteredResultMap)
 	resultSet.Range(func(name string, result *reviewdog.Result) {
-		checkResults := result.CheckResults
-		as := make([]*doghouse.Annotation, 0, len(checkResults))
-		for _, r := range checkResults {
-			as = append(as, checkResultToAnnotation(r, wd, gitRelWd))
+		diagnostics := result.Diagnostics
+		as := make([]*doghouse.Annotation, 0, len(diagnostics))
+		for _, d := range diagnostics {
+			as = append(as, checkResultToAnnotation(d, wd, gitRelWd))
 		}
 		req := &doghouse.CheckRequest{
 			Name:        name,
@@ -143,7 +143,7 @@ func postResultSet(ctx context.Context, resultSet *reviewdog.ResultMap,
 			}
 			res, err := cli.Check(ctx, req)
 			if err != nil {
-				return fmt.Errorf("post failed for %s: %v", name, err)
+				return fmt.Errorf("post failed for %s: %w", name, err)
 			}
 			if res.ReportURL != "" {
 				conclusion := ""
@@ -156,7 +156,7 @@ func postResultSet(ctx context.Context, resultSet *reviewdog.ResultMap,
 				// it failed to report results with Check API.
 				filteredResultSet.Store(name, &reviewdog.FilteredResult{
 					Level:         result.Level,
-					FilteredCheck: res.CheckedResults,
+					FilteredDiagnostic: res.CheckedResults,
 				})
 			}
 			if res.ReportURL == "" && res.CheckedResults == nil {
@@ -178,14 +178,10 @@ func postResultSet(ctx context.Context, resultSet *reviewdog.ResultMap,
 	return filteredResultSet, g.Wait()
 }
 
-func checkResultToAnnotation(c *reviewdog.CheckResult, wd, gitRelWd string) *doghouse.Annotation {
-	loc := c.Diagnostic.GetLocation()
-	// TODO(haya14busa): Pass diagnostic to annotation instead.
+func checkResultToAnnotation(d *rdf.Diagnostic, wd, gitRelWd string) *doghouse.Annotation {
+	d.GetLocation().Path = filter.NormalizePath(d.GetLocation().GetPath(), wd, gitRelWd)
 	return &doghouse.Annotation{
-		Path:       filepath.ToSlash(filepath.Join(gitRelWd, reviewdog.CleanPath(loc.GetPath(), wd))),
-		Line:       int(loc.GetRange().GetStart().GetLine()),
-		Message:    c.Diagnostic.GetMessage(),
-		RawMessage: strings.Join(c.Lines, "\n"),
+		Diagnostic: d,
 	}
 }
 
@@ -221,7 +217,7 @@ report results via logging command [1].
 		fmt.Fprintf(w, "reviewdog: Reporting results for %q\n", name)
 		foundResultPerName := false
 		filteredNum := 0
-		for _, result := range results.FilteredCheck {
+		for _, result := range results.FilteredDiagnostic {
 			if !result.ShouldReport {
 				filteredNum++
 				continue
@@ -239,12 +235,10 @@ report results via logging command [1].
 
 			foundResultPerName = true
 			if cienv.IsInGitHubAction() {
-				githubutils.ReportAsGitHubActionsLog(name, results.Level, result.CheckResult)
+				githubutils.ReportAsGitHubActionsLog(name, results.Level, result.Diagnostic)
 			} else {
 				// Output original lines.
-				for _, line := range result.Lines {
-					fmt.Fprintln(w, line)
-				}
+				fmt.Fprintln(w, result.Diagnostic.GetOriginalOutput())
 			}
 		}
 		if !foundResultPerName {

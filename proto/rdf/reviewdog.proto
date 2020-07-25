@@ -58,6 +58,12 @@ message Diagnostic {
   // Suggested fixes to resolve this diagnostic.
   // Optional.
   repeated Suggestion suggestions = 6;
+
+  // Experimental: If this diagnostic is converted from other formats,
+  // original_output represents the original output which corresponds to this
+  // diagnostic.
+  // Optional.
+  string original_output = 7;
 }
 
 enum Severity {

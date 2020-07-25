@@ -15,6 +15,7 @@ import (
 	"golang.org/x/oauth2"
 
 	"github.com/reviewdog/reviewdog"
+	"github.com/reviewdog/reviewdog/filter"
 	"github.com/reviewdog/reviewdog/proto/rdf"
 	"github.com/reviewdog/reviewdog/service/commentutil"
 )
@@ -71,15 +72,13 @@ func TestGitHubPullRequest_Post(t *testing.T) {
 		t.Fatal(err)
 	}
 	comment := &reviewdog.Comment{
-		Result: &reviewdog.FilteredCheck{
-			CheckResult: &reviewdog.CheckResult{
-				Diagnostic: &rdf.Diagnostic{
-					Location: &rdf.Location{
-						Path: "watchdogs.go",
-					},
+		Result: &filter.FilteredDiagnostic{
+			Diagnostic: &rdf.Diagnostic{
+				Location: &rdf.Location{
+					Path: "watchdogs.go",
 				},
 			},
-			LnumDiff: 17,
+			InDiffContext: true,
 		},
 		Body: "[reviewdog] test",
 	}
@@ -212,9 +211,9 @@ func TestGitHubPullRequest_Post_Flush_review_api(t *testing.T) {
 		default:
 			cs := []*github.PullRequestComment{
 				{
-					Path:     github.String("reviewdog.go"),
-					Position: github.Int(1),
-					Body:     github.String(commentutil.BodyPrefix + "\nalready commented"),
+					Path: github.String("reviewdog.go"),
+					Line: github.Int(2),
+					Body: github.String(commentutil.BodyPrefix + "\nalready commented"),
 				},
 			}
 			w.Header().Add("Link", `<https://api.github.com/repos/o/r/pulls/14/comments?page=2>; rel="next"`)
@@ -224,9 +223,21 @@ func TestGitHubPullRequest_Post_Flush_review_api(t *testing.T) {
 		case "2":
 			cs := []*github.PullRequestComment{
 				{
-					Path:     github.String("reviewdog.go"),
-					Position: github.Int(14),
-					Body:     github.String(commentutil.BodyPrefix + "\nalready commented 2"),
+					Path: github.String("reviewdog.go"),
+					Line: github.Int(15),
+					Body: github.String(commentutil.BodyPrefix + "\nalready commented 2"),
+				},
+				{
+					Path:      github.String("reviewdog.go"),
+					StartLine: github.Int(15),
+					Line:      github.Int(16),
+					Body:      github.String(commentutil.BodyPrefix + "\nmultiline existing comment"),
+				},
+				{
+					Path:      github.String("reviewdog.go"),
+					StartLine: github.Int(15),
+					Line:      github.Int(16),
+					Body:      github.String(commentutil.BodyPrefix + "\nmultiline existing comment (line-break)"),
 				},
 			}
 			if err := json.NewEncoder(w).Encode(cs); err != nil {
@@ -254,9 +265,18 @@ func TestGitHubPullRequest_Post_Flush_review_api(t *testing.T) {
 		}
 		want := []*github.DraftReviewComment{
 			{
-				Path:     github.String("reviewdog.go"),
-				Position: github.Int(14),
-				Body:     github.String(commentutil.BodyPrefix + "\nnew comment"),
+				Path: github.String("reviewdog.go"),
+				Side: github.String("RIGHT"),
+				Line: github.Int(15),
+				Body: github.String(commentutil.BodyPrefix + "\nnew comment"),
+			},
+			{
+				Path:      github.String("reviewdog.go"),
+				Side:      github.String("RIGHT"),
+				StartSide: github.String("RIGHT"),
+				StartLine: github.Int(15),
+				Line:      github.Int(16),
+				Body:      github.String(commentutil.BodyPrefix + "\nmultiline new comment"),
 			},
 		}
 		if diff := pretty.Compare(want, req.Comments); diff != "" {
@@ -274,54 +294,120 @@ func TestGitHubPullRequest_Post_Flush_review_api(t *testing.T) {
 	}
 	comments := []*reviewdog.Comment{
 		{
-			Result: &reviewdog.FilteredCheck{
-				CheckResult: &reviewdog.CheckResult{
-					Diagnostic: &rdf.Diagnostic{
-						Location: &rdf.Location{
-							Path: "reviewdog.go",
+			Result: &filter.FilteredDiagnostic{
+				Diagnostic: &rdf.Diagnostic{
+					Location: &rdf.Location{
+						Path: "reviewdog.go",
+						Range: &rdf.Range{
+							Start: &rdf.Position{
+								Line: 2,
+							},
 						},
 					},
 				},
-				LnumDiff: 1,
+				InDiffContext: true,
 			},
 			Body: "already commented",
 		},
 		{
-			Result: &reviewdog.FilteredCheck{
-				CheckResult: &reviewdog.CheckResult{
-					Diagnostic: &rdf.Diagnostic{
-						Location: &rdf.Location{
-							Path: "reviewdog.go",
+			Result: &filter.FilteredDiagnostic{
+				Diagnostic: &rdf.Diagnostic{
+					Location: &rdf.Location{
+						Path: "reviewdog.go",
+						Range: &rdf.Range{
+							Start: &rdf.Position{
+								Line: 15,
+							},
 						},
 					},
 				},
-				LnumDiff: 14,
+				InDiffContext: true,
 			},
 			Body: "already commented 2",
 		},
 		{
-			Result: &reviewdog.FilteredCheck{
-				CheckResult: &reviewdog.CheckResult{
-					Diagnostic: &rdf.Diagnostic{
-						Location: &rdf.Location{
-							Path: "reviewdog.go",
+			Result: &filter.FilteredDiagnostic{
+				Diagnostic: &rdf.Diagnostic{
+					Location: &rdf.Location{
+						Path: "reviewdog.go",
+						Range: &rdf.Range{
+							Start: &rdf.Position{
+								Line: 15,
+							},
 						},
 					},
 				},
-				LnumDiff: 14,
+				InDiffContext: true,
 			},
 			Body: "new comment",
 		},
 		{
-			Result: &reviewdog.FilteredCheck{
-				CheckResult: &reviewdog.CheckResult{
-					Diagnostic: &rdf.Diagnostic{
-						Location: &rdf.Location{
-							Path: "reviewdog.go",
+			Result: &filter.FilteredDiagnostic{
+				Diagnostic: &rdf.Diagnostic{
+					Location: &rdf.Location{
+						Path: "reviewdog.go",
+						Range: &rdf.Range{
+							Start: &rdf.Position{
+								Line: 15,
+							},
+							End: &rdf.Position{
+								Line: 16,
+							},
 						},
 					},
 				},
-				// No LnumDiff.
+				InDiffContext: true,
+			},
+			Body: "multiline existing comment",
+		},
+		{
+			Result: &filter.FilteredDiagnostic{
+				Diagnostic: &rdf.Diagnostic{
+					Location: &rdf.Location{
+						Path: "reviewdog.go",
+						Range: &rdf.Range{
+							Start: &rdf.Position{
+								Line:   15,
+								Column: 1,
+							},
+							End: &rdf.Position{
+								Line:   17,
+								Column: 1,
+							},
+						},
+					},
+				},
+				InDiffContext: true,
+			},
+			Body: "multiline existing comment (line-break)",
+		},
+		{
+			Result: &filter.FilteredDiagnostic{
+				Diagnostic: &rdf.Diagnostic{
+					Location: &rdf.Location{
+						Path: "reviewdog.go",
+						Range: &rdf.Range{
+							Start: &rdf.Position{
+								Line: 15,
+							},
+							End: &rdf.Position{
+								Line: 16,
+							},
+						},
+					},
+				},
+				InDiffContext: true,
+			},
+			Body: "multiline new comment",
+		},
+		{
+			Result: &filter.FilteredDiagnostic{
+				Diagnostic: &rdf.Diagnostic{
+					Location: &rdf.Location{
+						Path: "reviewdog.go",
+						// No Line
+					},
+				},
 			},
 			Body: "should not be reported via GitHub Review API",
 		},
@@ -380,18 +466,16 @@ func TestGitHubPullRequest_Post_toomany(t *testing.T) {
 	var comments []*reviewdog.Comment
 	for i := 0; i < 100; i++ {
 		comments = append(comments, &reviewdog.Comment{
-			Result: &reviewdog.FilteredCheck{
-				CheckResult: &reviewdog.CheckResult{
-					Diagnostic: &rdf.Diagnostic{
-						Location: &rdf.Location{
-							Path: "reviewdog.go",
-							Range: &rdf.Range{Start: &rdf.Position{
-								Line: int32(i),
-							}},
-						},
+			Result: &filter.FilteredDiagnostic{
+				Diagnostic: &rdf.Diagnostic{
+					Location: &rdf.Location{
+						Path: "reviewdog.go",
+						Range: &rdf.Range{Start: &rdf.Position{
+							Line: int32(i),
+						}},
 					},
 				},
-				LnumDiff: i,
+				InDiffContext: true,
 			},
 			Body:     "comment",
 			ToolName: "tool",
@@ -428,8 +512,8 @@ func TestGitHubPullRequest_workdir(t *testing.T) {
 	}
 	ctx := context.Background()
 	want := "a/b/c"
-	g.Post(ctx, &reviewdog.Comment{Result: &reviewdog.FilteredCheck{CheckResult: &reviewdog.CheckResult{
-		Diagnostic: &rdf.Diagnostic{Location: &rdf.Location{Path: want}}}}})
+	g.Post(ctx, &reviewdog.Comment{Result: &filter.FilteredDiagnostic{
+		Diagnostic: &rdf.Diagnostic{Location: &rdf.Location{Path: want}}}})
 	if got := g.postComments[0].Result.Diagnostic.GetLocation().GetPath(); got != want {
 		t.Errorf("wd=%q path=%q, want %q", g.wd, got, want)
 	}
@@ -444,8 +528,8 @@ func TestGitHubPullRequest_workdir(t *testing.T) {
 	}
 	path := "a/b/c"
 	wantPath := "cmd/" + path
-	g.Post(ctx, &reviewdog.Comment{Result: &reviewdog.FilteredCheck{CheckResult: &reviewdog.CheckResult{
-		Diagnostic: &rdf.Diagnostic{Location: &rdf.Location{Path: want}}}}})
+	g.Post(ctx, &reviewdog.Comment{Result: &filter.FilteredDiagnostic{
+		Diagnostic: &rdf.Diagnostic{Location: &rdf.Location{Path: want}}}})
 	if got := g.postComments[0].Result.Diagnostic.GetLocation().GetPath(); got != wantPath {
 		t.Errorf("wd=%q path=%q, want %q", g.wd, got, wantPath)
 	}

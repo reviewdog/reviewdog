@@ -2,12 +2,6 @@ language: go
 
 go:
   - "1.14.x"
-  - master
-
-matrix:
-  allow_failures:
-    - go: master
-  fast_finish: true
 
 env:
   global:
@@ -41,11 +35,3 @@ before_script:
 script:
   - reviewdog -reporter=github-pr-check
   - $(npm bin)/textlint -f checkstyle README.md | reviewdog -f=checkstyle -name="textlint" -reporter=github-pr-check -level=info
-
-notifications:
-  webhooks:
-    urls:
-      - https://webhooks.gitter.im/e/60344004ff53f5ef37c5
-    on_success: change
-    on_failure: always
-    on_start: never

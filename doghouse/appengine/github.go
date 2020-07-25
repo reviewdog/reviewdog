@@ -9,13 +9,13 @@ import (
 	"fmt"
 	"io"
 	"io/ioutil"
-	"log"
 	"net/http"
 	"net/url"
 	"strings"
 
 	"github.com/google/go-github/v32/github"
 	"github.com/justinas/nosurf"
+	"github.com/vvakame/sdlog/aelog"
 	"golang.org/x/oauth2"
 
 	"github.com/reviewdog/reviewdog/doghouse/server"
@@ -121,7 +121,7 @@ func (g *GitHubHandler) HandleAuthCallback(w http.ResponseWriter, r *http.Reques
 	// Request and save access token.
 	token, err := g.requestAccessToken(ctx, code, state)
 	if err != nil {
-		log.Printf("[ERROR] failed to get access token: %v\n", err)
+		aelog.Errorf(ctx, "failed to get access token: %v", err)
 		w.WriteHeader(http.StatusBadRequest)
 		fmt.Fprintln(w, "failed to get GitHub access token")
 		return
@@ -149,7 +149,7 @@ func (g *GitHubHandler) LogInHandler(h http.Handler) http.Handler {
 			return
 		}
 		// Not logged in yet.
-		log.Println("[DEBUG] Not logged in yet.")
+		aelog.Debugf(r.Context(), "Not logged in yet.")
 		state := securerandom(16)
 		g.redirURLStore.Set(w, []byte(r.URL.RequestURI()))
 		g.authStateStore.Set(w, []byte(state))
@@ -181,7 +181,7 @@ func (g *GitHubHandler) requestAccessToken(ctx context.Context, code, state stri
 
 	req, err := http.NewRequest(http.MethodPost, u, strings.NewReader(data.Encode()))
 	if err != nil {
-		return "", fmt.Errorf("failed to create request: %v", err)
+		return "", fmt.Errorf("failed to create request: %w", err)
 	}
 	req = req.WithContext(ctx)
 	req.Header.Add("Accept", "application/json")
@@ -190,7 +190,7 @@ func (g *GitHubHandler) requestAccessToken(ctx context.Context, code, state stri
 
 	res, err := cli.Do(req)
 	if err != nil {
-		return "", fmt.Errorf("failed to request access token: %v", err)
+		return "", fmt.Errorf("failed to request access token: %w", err)
 	}
 	defer res.Body.Close()
 
@@ -200,11 +200,11 @@ func (g *GitHubHandler) requestAccessToken(ctx context.Context, code, state stri
 		AccessToken string `json:"access_token"`
 	}
 	if err := json.NewDecoder(bytes.NewReader(b)).Decode(&token); err != nil {
-		return "", fmt.Errorf("failed to decode response: %v", err)
+		return "", fmt.Errorf("failed to decode response: %w", err)
 	}
 
 	if token.AccessToken == "" {
-		log.Printf("[ERROR] response doesn't contain token (response: %s)\n", b)
+		aelog.Errorf(ctx, "response doesn't contain token (response: %s)", b)
 		return "", errors.New("response doesn't contain GitHub access token")
 	}
 

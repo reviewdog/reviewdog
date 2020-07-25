@@ -1,0 +1,13 @@
+Custom text for testing
+
+Line 3
+
+--- Range
+	a = 10
+	b = 20
+	c = 30
+---
+
+1234567890
+haya14busa
+    ~~

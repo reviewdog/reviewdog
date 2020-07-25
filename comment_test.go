@@ -5,6 +5,9 @@ import (
 	"context"
 	"strings"
 	"testing"
+
+	"github.com/reviewdog/reviewdog/filter"
+	"github.com/reviewdog/reviewdog/proto/rdf"
 )
 
 func TestMultiCommentService_Post(t *testing.T) {
@@ -14,7 +17,7 @@ func TestMultiCommentService_Post(t *testing.T) {
 
 	const want = "line1\nline2"
 
-	c := &Comment{Result: &FilteredCheck{CheckResult: &CheckResult{Lines: strings.Split(want, "\n")}}}
+	c := &Comment{Result: &filter.FilteredDiagnostic{Diagnostic: &rdf.Diagnostic{OriginalOutput: want}}}
 	if err := w.Post(context.Background(), c); err != nil {
 		t.Fatal(err)
 	}

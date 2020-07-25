@@ -33,7 +33,7 @@ type ChangeDiff struct {
 func NewChangeDiff(cli *gerrit.Client, branch, changeID string) (*ChangeDiff, error) {
 	workDir, err := serviceutil.GitRelWorkdir()
 	if err != nil {
-		return nil, fmt.Errorf("ChangeDiff needs 'git' command: %v", err)
+		return nil, fmt.Errorf("ChangeDiff needs 'git' command: %w", err)
 	}
 	return &ChangeDiff{
 		cli:      cli,
@@ -61,12 +61,12 @@ func (g *ChangeDiff) Diff(ctx context.Context) ([]byte, error) {
 func (g *ChangeDiff) gitDiff(_ context.Context, baseSha, targetSha string) ([]byte, error) {
 	b, err := exec.Command("git", "merge-base", targetSha, baseSha).Output() // #nosec
 	if err != nil {
-		return nil, fmt.Errorf("failed to get merge-base commit: %v", err)
+		return nil, fmt.Errorf("failed to get merge-base commit: %w", err)
 	}
 	mergeBase := strings.Trim(string(b), "\n")
 	bytes, err := exec.Command("git", "diff", "--find-renames", mergeBase, baseSha).Output()
 	if err != nil {
-		return nil, fmt.Errorf("failed to run git diff: %v", err)
+		return nil, fmt.Errorf("failed to run git diff: %w", err)
 	}
 	return bytes, nil
 }

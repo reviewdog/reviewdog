@@ -8,7 +8,8 @@ import (
 	"os"
 
 	"github.com/reviewdog/reviewdog/diff"
-	"github.com/reviewdog/reviewdog/difffilter"
+	"github.com/reviewdog/reviewdog/filter"
+	"github.com/reviewdog/reviewdog/parser"
 	"github.com/reviewdog/reviewdog/proto/rdf"
 )
 
@@ -17,40 +18,27 @@ import (
 // results.
 type Reviewdog struct {
 	toolname    string
-	p           Parser
+	p           parser.Parser
 	c           CommentService
 	d           DiffService
-	filterMode  difffilter.Mode
+	filterMode  filter.Mode
 	failOnError bool
 }
 
 // NewReviewdog returns a new Reviewdog.
-func NewReviewdog(toolname string, p Parser, c CommentService, d DiffService, filterMode difffilter.Mode, failOnError bool) *Reviewdog {
+func NewReviewdog(toolname string, p parser.Parser, c CommentService, d DiffService, filterMode filter.Mode, failOnError bool) *Reviewdog {
 	return &Reviewdog{p: p, c: c, d: d, toolname: toolname, filterMode: filterMode, failOnError: failOnError}
 }
 
 // RunFromResult creates a new Reviewdog and runs it with check results.
-func RunFromResult(ctx context.Context, c CommentService, results []*CheckResult,
-	filediffs []*diff.FileDiff, strip int, toolname string, filterMode difffilter.Mode, failOnError bool) error {
+func RunFromResult(ctx context.Context, c CommentService, results []*rdf.Diagnostic,
+	filediffs []*diff.FileDiff, strip int, toolname string, filterMode filter.Mode, failOnError bool) error {
 	return (&Reviewdog{c: c, toolname: toolname, filterMode: filterMode, failOnError: failOnError}).runFromResult(ctx, results, filediffs, strip, failOnError)
-}
-
-// CheckResult represents a checked result of static analysis tools.
-// :h error-file-format
-type CheckResult struct {
-	Diagnostic *rdf.Diagnostic
-	Lines      []string // Original error lines (often one line). (Optional)
-}
-
-// Parser is an interface which parses compilers, linters, or any tools
-// results.
-type Parser interface {
-	Parse(r io.Reader) ([]*CheckResult, error)
 }
 
 // Comment represents a reported result as a comment.
 type Comment struct {
-	Result   *FilteredCheck
+	Result   *filter.FilteredDiagnostic
 	ToolName string
 	Body     string
 }
@@ -73,14 +61,14 @@ type DiffService interface {
 	Strip() int
 }
 
-func (w *Reviewdog) runFromResult(ctx context.Context, results []*CheckResult,
+func (w *Reviewdog) runFromResult(ctx context.Context, results []*rdf.Diagnostic,
 	filediffs []*diff.FileDiff, strip int, failOnError bool) error {
 	wd, err := os.Getwd()
 	if err != nil {
 		return err
 	}
 
-	checks := FilterCheck(results, filediffs, strip, wd, w.filterMode)
+	checks := filter.FilterCheck(results, filediffs, strip, wd, w.filterMode)
 	hasViolations := false
 
 	for _, check := range checks {
@@ -115,17 +103,17 @@ func (w *Reviewdog) runFromResult(ctx context.Context, results []*CheckResult,
 func (w *Reviewdog) Run(ctx context.Context, r io.Reader) error {
 	results, err := w.p.Parse(r)
 	if err != nil {
-		return fmt.Errorf("parse error: %v", err)
+		return fmt.Errorf("parse error: %w", err)
 	}
 
 	d, err := w.d.Diff(ctx)
 	if err != nil {
-		return fmt.Errorf("fail to get diff: %v", err)
+		return fmt.Errorf("fail to get diff: %w", err)
 	}
 
 	filediffs, err := diff.ParseMultiFile(bytes.NewReader(d))
 	if err != nil {
-		return fmt.Errorf("fail to parse diff: %v", err)
+		return fmt.Errorf("fail to parse diff: %w", err)
 	}
 
 	return w.runFromResult(ctx, results, filediffs, w.d.Strip(), w.failOnError)

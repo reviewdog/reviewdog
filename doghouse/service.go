@@ -1,8 +1,8 @@
 package doghouse
 
 import (
-	"github.com/reviewdog/reviewdog"
-	"github.com/reviewdog/reviewdog/difffilter"
+	"github.com/reviewdog/reviewdog/filter"
+	"github.com/reviewdog/reviewdog/proto/rdf"
 )
 
 // CheckRequest represents doghouse GitHub check request.
@@ -37,7 +37,7 @@ type CheckRequest struct {
 	// Optional.
 	Level string `json:"level"`
 
-	// Deprecated: Use FilterMode == difffilter.NoFilter instead.
+	// Deprecated: Use FilterMode == filter.NoFilter instead.
 	//
 	// OutsideDiff represents whether it report results in outside diff or not as
 	// annotations. It's useful only when PullRequest != 0. If PullRequest is
@@ -48,7 +48,7 @@ type CheckRequest struct {
 
 	// FilterMode represents a way to filter checks results
 	// Optional.
-	FilterMode difffilter.Mode `json:"filter_mode"`
+	FilterMode filter.Mode `json:"filter_mode"`
 }
 
 // CheckResponse represents doghouse GitHub check response.
@@ -65,7 +65,7 @@ type CheckResponse struct {
 	// TODO(haya14busa): Consider to move this type to this package to avoid
 	// (cyclic) import.
 	// Optional.
-	CheckedResults []*reviewdog.FilteredCheck `json:"checked_results"`
+	CheckedResults []*filter.FilteredDiagnostic `json:"checked_results"`
 
 	// Conclusion of check result, which is same as GitHub's conclusion of Check
 	// API. https://developer.github.com/v3/checks/runs/#parameters-1
@@ -74,18 +74,19 @@ type CheckResponse struct {
 
 // Annotation represents an annotation to file or specific line.
 type Annotation struct {
-	// Relative file path
-	// Required.
-	Path string `json:"path,omitempty"`
-	// Line number.
+	// Diagnostic.Location.Path must be relative path to the project root.
 	// Optional.
-	Line int `json:"line,omitempty"`
-	// Annotation message.
-	// Required.
-	Message string `json:"message,omitempty"`
-	// Original error message of this annotation.
-	// Optional.
-	RawMessage string `json:"raw_message,omitempty"`
+	Diagnostic *rdf.Diagnostic `json:"diagnostic,omitempty"`
 
-	// TODO(haya14busa): Support RDFormat.
+	// DEPRECATED fields below. Need to support them for the old reviewdog CLI
+	// version.
+
+	// DEPRECATED: Use Diagnostic.
+	Path string `json:"path,omitempty"`
+	// DEPRECATED: Use Diagnostic.
+	Line int `json:"line,omitempty"`
+	// DEPRECATED: Use Diagnostic.
+	Message string `json:"message,omitempty"`
+	// DEPRECATED: Use Diagnostic.
+	RawMessage string `json:"raw_message,omitempty"`
 }

@@ -10,13 +10,9 @@ jobs:
     name: reviewdog (github-check)
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/setup-go@v1
+      - uses: actions/setup-go@v2
         with:
           go-version: 1.14
-
-      - name: Add $GOPATH/bin
-        run: |
-          echo ::add-path::$(go env GOPATH)/bin
 
       - uses: actions/checkout@v2
 
@@ -41,18 +37,21 @@ jobs:
         run: |
           cd ./_testdata/ && golint ./... | reviewdog -f=golint -name=golint-check-subdir -reporter=github-check -level=info -filter-mode=nofilter
 
+      - name: Custom rdjsonl test (github-check)
+        env:
+          REVIEWDOG_GITHUB_API_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          cat ./_testdata/custom_rdjsonl.json | \
+            reviewdog -name="custom-rdjsonl" -f=rdjsonl -reporter=github-check -level=info
+
   reviewdog-pr:
     if: github.event_name == 'pull_request'
     name: reviewdog on Pull Request
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/setup-go@v1
+      - uses: actions/setup-go@v2
         with:
           go-version: 1.14
-
-      - name: Add $GOPATH/bin
-        run: |
-          echo ::add-path::$(go env GOPATH)/bin
 
       - uses: actions/checkout@v2
 
@@ -154,6 +153,13 @@ jobs:
         run: |
           cat ./_testdata/suggestions.json | \
             reviewdog -name="suggestion-test" -f=rdjsonl -reporter=github-pr-review
+
+      - name: Custom rdjsonl test (github-pr-review)
+        env:
+          REVIEWDOG_GITHUB_API_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          cat ./_testdata/custom_rdjsonl.json | \
+            reviewdog -name="custom-rdjsonl" -f=rdjsonl -reporter=github-pr-review
 
   golangci-lint:
     if: github.event_name == 'pull_request'

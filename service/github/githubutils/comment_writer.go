@@ -3,11 +3,11 @@ package githubutils
 import (
 	"context"
 	"fmt"
-	"strings"
 	"sync"
 
 	"github.com/haya14busa/go-actions-toolkit/core"
 	"github.com/reviewdog/reviewdog"
+	"github.com/reviewdog/reviewdog/proto/rdf"
 )
 
 const MaxLoggingAnnotationsPerStep = 10
@@ -32,7 +32,7 @@ func (lw *GitHubActionLogWriter) Post(_ context.Context, c *reviewdog.Comment) e
 	if lw.reportNum == MaxLoggingAnnotationsPerStep {
 		WarnTooManyAnnotationOnce()
 	}
-	ReportAsGitHubActionsLog(c.ToolName, lw.level, c.Result.CheckResult)
+	ReportAsGitHubActionsLog(c.ToolName, lw.level, c.Result.Diagnostic)
 	return nil
 }
 
@@ -47,13 +47,13 @@ func (lw *GitHubActionLogWriter) Flush(_ context.Context) error {
 // ReportAsGitHubActionsLog reports results via logging command to create
 // annotations.
 // https://help.github.com/en/actions/automating-your-workflow-with-github-actions/development-tools-for-github-actions#example-5
-func ReportAsGitHubActionsLog(toolName, level string, c *reviewdog.CheckResult) {
+func ReportAsGitHubActionsLog(toolName, level string, d *rdf.Diagnostic) {
 	mes := fmt.Sprintf("[%s] reported by reviewdog 🐶\n%s\n\nRaw Output:\n%s",
-		toolName, c.Diagnostic.GetMessage(), strings.Join(c.Lines, "\n"))
-	loc := c.Diagnostic.GetLocation()
+		toolName, d.GetMessage(), d.GetOriginalOutput())
+	loc := d.GetLocation()
 	start := loc.GetRange().GetStart()
 	opt := &core.LogOption{
-		File: c.Diagnostic.GetLocation().GetPath(),
+		File: d.GetLocation().GetPath(),
 		Line: int(start.GetLine()),
 		Col:  int(start.GetColumn()),
 	}

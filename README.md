@@ -445,7 +445,6 @@ jobs:
         run: |
           mkdir -p $HOME/bin && curl -sfL https://raw.githubusercontent.com/reviewdog/reviewdog/master/install.sh| sh -s -- -b $HOME/bin
           echo ::add-path::$HOME/bin
-          echo ::add-path::$(go env GOPATH)/bin # for Go projects
       - name: Run reviewdog
         env:
           REVIEWDOG_GITHUB_API_TOKEN: ${{ secrets.GITHUB_TOKEN }}
