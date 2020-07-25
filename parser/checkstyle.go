@@ -23,10 +23,10 @@ func (p *CheckStyleParser) Parse(r io.Reader) ([]*rdf.Diagnostic, error) {
 	if err := xml.NewDecoder(r).Decode(cs); err != nil {
 		return nil, err
 	}
-	var rs []*rdf.Diagnostic
+	var ds []*rdf.Diagnostic
 	for _, file := range cs.Files {
 		for _, cerr := range file.Errors {
-			rs = append(rs, &rdf.Diagnostic{
+			d := &rdf.Diagnostic{
 				Location: &rdf.Location{
 					Path: file.Name,
 					Range: &rdf.Range{
@@ -36,13 +36,18 @@ func (p *CheckStyleParser) Parse(r io.Reader) ([]*rdf.Diagnostic, error) {
 						},
 					},
 				},
-				Message: cerr.Message,
+				Message:  cerr.Message,
+				Severity: severity(cerr.Severity),
 				OriginalOutput: fmt.Sprintf("%v:%d:%d: %v: %v (%v)",
 					file.Name, cerr.Line, cerr.Column, cerr.Severity, cerr.Message, cerr.Source),
-			})
+			}
+			if s := cerr.Source; s != "" {
+				d.Code = &rdf.Code{Value: s}
+			}
+			ds = append(ds, d)
 		}
 	}
-	return rs, nil
+	return ds, nil
 }
 
 // CheckStyleResult represents checkstyle XML result.
