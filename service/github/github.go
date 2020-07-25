@@ -152,11 +152,6 @@ func buildDraftReviewComment(c *reviewdog.Comment, body string) *github.DraftRev
 func githubCommentLine(c *reviewdog.Comment) int {
 	loc := c.Result.Diagnostic.GetLocation()
 	line := loc.GetRange().GetEnd().GetLine()
-	// End position with column == 1 means range to the end of the previous lines
-	// including line-break.
-	if loc.GetRange().GetEnd().GetColumn() == 1 {
-		line--
-	}
 	if line == 0 {
 		line = loc.GetRange().GetStart().GetLine()
 	}
