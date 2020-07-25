@@ -84,6 +84,10 @@
             },
             "type": "array",
             "description": "Suggested fixes to resolve this diagnostic.\n Optional."
+        },
+        "original_output": {
+            "type": "string",
+            "description": "Experimental: If this diagnostic is converted from other formats,\n original_output represents the original output which corresponds to this\n diagnostic.\n Optional."
         }
     },
     "additionalProperties": true,
