@@ -4,7 +4,7 @@ import (
 	"path/filepath"
 
 	"github.com/reviewdog/reviewdog/diff"
-	"github.com/reviewdog/reviewdog/difffilter"
+	"github.com/reviewdog/reviewdog/filter"
 	"github.com/reviewdog/reviewdog/proto/rdf"
 )
 
@@ -25,9 +25,9 @@ type FilteredCheck struct {
 // FilterCheck filters check results by diff. It doesn't drop check which
 // is not in diff but set FilteredCheck.ShouldReport field false.
 func FilterCheck(results []*rdf.Diagnostic, diff []*diff.FileDiff, strip int,
-	cwd string, mode difffilter.Mode) []*FilteredCheck {
+	cwd string, mode filter.Mode) []*FilteredCheck {
 	checks := make([]*FilteredCheck, 0, len(results))
-	df := difffilter.New(diff, strip, cwd, mode)
+	df := filter.New(diff, strip, cwd, mode)
 	for _, result := range results {
 		check := &FilteredCheck{Diagnostic: result}
 		loc := result.GetLocation()
@@ -60,7 +60,7 @@ func FilterCheck(results []*rdf.Diagnostic, diff []*diff.FileDiff, strip int,
 // path to the given workdir.
 //
 // TODO(haya14busa): DRY. Create shared logic between this and
-// difffilter.normalizePath.
+// filter.normalizePath.
 func CleanPath(path, workdir string) string {
 	p := path
 	if filepath.IsAbs(path) && workdir != "" {
@@ -80,10 +80,10 @@ func getOldPosition(filediff *diff.FileDiff, strip int, newPath string, newLine 
 	if filediff == nil {
 		return "", 0
 	}
-	if difffilter.NormalizeDiffPath(filediff.PathNew, strip) != newPath {
+	if filter.NormalizeDiffPath(filediff.PathNew, strip) != newPath {
 		return "", 0
 	}
-	oldPath = difffilter.NormalizeDiffPath(filediff.PathOld, strip)
+	oldPath = filter.NormalizeDiffPath(filediff.PathOld, strip)
 	delta := 0
 	for _, hunk := range filediff.Hunks {
 		if newLine < hunk.StartLineNew {

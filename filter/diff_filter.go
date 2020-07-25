@@ -1,4 +1,4 @@
-package difffilter
+package filter
 
 import (
 	"fmt"

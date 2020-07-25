@@ -16,9 +16,9 @@ import (
 
 	"github.com/reviewdog/reviewdog"
 	"github.com/reviewdog/reviewdog/cienv"
-	"github.com/reviewdog/reviewdog/difffilter"
 	"github.com/reviewdog/reviewdog/doghouse"
 	"github.com/reviewdog/reviewdog/doghouse/client"
+	"github.com/reviewdog/reviewdog/filter"
 	"github.com/reviewdog/reviewdog/project"
 	"github.com/reviewdog/reviewdog/proto/rdf"
 )
@@ -313,7 +313,7 @@ func TestPostResultSet_withReportURL(t *testing.T) {
 		SHA:         sha,
 	}
 
-	opt := &option{filterMode: difffilter.ModeAdded}
+	opt := &option{filterMode: filter.ModeAdded}
 	if _, err := postResultSet(context.Background(), &resultSet, ghInfo, fakeCli, opt); err != nil {
 		t.Fatal(err)
 	}
@@ -338,7 +338,7 @@ func TestPostResultSet_withoutReportURL(t *testing.T) {
 
 	ghInfo := &cienv.BuildInfo{Owner: owner, Repo: repo, PullRequest: prNum, SHA: sha}
 
-	opt := &option{filterMode: difffilter.ModeAdded}
+	opt := &option{filterMode: filter.ModeAdded}
 	resp, err := postResultSet(context.Background(), &resultSet, ghInfo, fakeCli, opt)
 	if err != nil {
 		t.Fatal(err)
@@ -385,7 +385,7 @@ func TestPostResultSet_conclusion(t *testing.T) {
 		fakeCli.FakeCheck = func(ctx context.Context, req *doghouse.CheckRequest) (*doghouse.CheckResponse, error) {
 			return &doghouse.CheckResponse{ReportURL: "xxx", Conclusion: tt.conclusion}, nil
 		}
-		opt := &option{filterMode: difffilter.ModeAdded, failOnError: tt.failOnError}
+		opt := &option{filterMode: filter.ModeAdded, failOnError: tt.failOnError}
 		id := fmt.Sprintf("[conclusion=%s, failOnError=%v]", tt.conclusion, tt.failOnError)
 		_, err := postResultSet(context.Background(), &resultSet, ghInfo, fakeCli, opt)
 		if tt.wantErr && err == nil {
@@ -414,7 +414,7 @@ func TestPostResultSet_withEmptyResponse(t *testing.T) {
 
 	ghInfo := &cienv.BuildInfo{Owner: owner, Repo: repo, PullRequest: prNum, SHA: sha}
 
-	opt := &option{filterMode: difffilter.ModeAdded}
+	opt := &option{filterMode: filter.ModeAdded}
 	if _, err := postResultSet(context.Background(), &resultSet, ghInfo, fakeCli, opt); err == nil {
 		t.Error("got no error but want report missing error")
 	}

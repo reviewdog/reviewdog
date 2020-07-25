@@ -12,8 +12,8 @@ import (
 
 	"github.com/reviewdog/reviewdog"
 	"github.com/reviewdog/reviewdog/diff"
-	"github.com/reviewdog/reviewdog/difffilter"
 	"github.com/reviewdog/reviewdog/doghouse"
+	"github.com/reviewdog/reviewdog/filter"
 	"github.com/reviewdog/reviewdog/proto/rdf"
 	"github.com/reviewdog/reviewdog/service/github/githubutils"
 )
@@ -56,7 +56,7 @@ func (ch *Checker) Check(ctx context.Context) (*doghouse.CheckResponse, error) {
 	if ch.req.PullRequest == 0 || ch.req.OutsideDiff {
 		// If it's not Pull Request run, do not filter results by diff regardless
 		// of the filter mode.
-		filterMode = difffilter.ModeNoFilter
+		filterMode = filter.ModeNoFilter
 	}
 	filtered := reviewdog.FilterCheck(results, filediffs, 1, "", filterMode)
 	check, err := ch.createCheck(ctx)

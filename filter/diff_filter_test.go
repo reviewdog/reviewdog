@@ -1,4 +1,4 @@
-package difffilter
+package filter
 
 import (
 	"os"
@@ -58,8 +58,8 @@ const sampleDiffRoot = `--- a/sample.old.txt	2016-10-13 05:09:35.820791185 +0900
 \ No newline at end of file
 `
 
-const sampleDiffSubDir = `--- a/difffilter/sample.old.txt	2016-10-13 05:09:35.820791185 +0900
-+++ b/difffilter/sample.new.txt	2016-10-13 05:15:26.839245048 +0900
+const sampleDiffSubDir = `--- a/filter/sample.old.txt	2016-10-13 05:09:35.820791185 +0900
++++ b/filter/sample.new.txt	2016-10-13 05:15:26.839245048 +0900
 @@ -1,3 +1,4 @@
  unchanged, contextual line
 -deleted line

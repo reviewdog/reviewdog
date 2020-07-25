@@ -9,8 +9,8 @@ import (
 	"github.com/google/go-cmp/cmp"
 	"github.com/google/go-github/v32/github"
 
-	"github.com/reviewdog/reviewdog/difffilter"
 	"github.com/reviewdog/reviewdog/doghouse"
+	"github.com/reviewdog/reviewdog/filter"
 	"github.com/reviewdog/reviewdog/proto/rdf"
 )
 
@@ -274,7 +274,7 @@ func TestCheck_OK(t *testing.T) {
 	}
 }
 
-func testOutsideDiff(t *testing.T, outsideDiff bool, filterMode difffilter.Mode) {
+func testOutsideDiff(t *testing.T, outsideDiff bool, filterMode filter.Mode) {
 	const (
 		name        = "haya14busa-linter"
 		owner       = "haya14busa"
@@ -371,10 +371,10 @@ func testOutsideDiff(t *testing.T, outsideDiff bool, filterMode difffilter.Mode)
 
 func TestCheck_OK_deprecated_outsidediff(t *testing.T) {
 	t.Run("deprecated: outside_diff", func(t *testing.T) {
-		testOutsideDiff(t, true, difffilter.ModeDefault)
+		testOutsideDiff(t, true, filter.ModeDefault)
 	})
 	t.Run("filter-mode=NoFilter", func(t *testing.T) {
-		testOutsideDiff(t, false, difffilter.ModeNoFilter)
+		testOutsideDiff(t, false, filter.ModeNoFilter)
 	})
 }
 
