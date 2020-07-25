@@ -50,3 +50,17 @@ func New(opt *Option) (Parser, error) {
 	}
 	return NewErrorformatParserString(opt.Errorformat)
 }
+
+func severity(s string) rdf.Severity {
+	switch s {
+	case "error", "ERROR", "Error", "e", "E":
+		return rdf.Severity_ERROR
+	case "warning", "WARNING", "Warning", "w", "W":
+		return rdf.Severity_WARNING
+	case "info", "INFO", "Info", "i", "I",
+		"note", "NOTE", "Note", "n", "N": // Treat note as info.
+		return rdf.Severity_INFO
+	default:
+		return rdf.Severity_UNKNOWN_SEVERITY
+	}
+}
