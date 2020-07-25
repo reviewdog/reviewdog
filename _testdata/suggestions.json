@@ -1,2 +1,2 @@
-{"message":"suggestion test","location":{"path":"_testdata/suggestions.go","range":{"start":{"line":3}}}, "suggestions": [{"range":{"start":{"line":3}},"text": "func Suggestions() {"}]}
-{"message":"multiline suggestion test","location":{"path":"_testdata/suggestions.go","range":{"start":{"line":3},"end":{"line":4}}}, "suggestions": [{"range":{"start":{"line":3},"end":{"line":4}}, "text": "func Suggestions() {\n// Multiline suggestion!\n} // end of suggestion func"}]}
+{"message":"suggestion test","location":{"path":"_testdata/suggestions.txt","range":{"start":{"line":3}}}, "suggestions": [{"range":{"start":{"line":3}},"text": "func Suggestions() {"}]}
+{"message":"multiline suggestion test","location":{"path":"_testdata/suggestions.txt","range":{"start":{"line":3},"end":{"line":4}}}, "suggestions": [{"range":{"start":{"line":3},"end":{"line":4}}, "text": "func Suggestions() {\n// Multiline suggestion!\n} // end of suggestion func"}]}
