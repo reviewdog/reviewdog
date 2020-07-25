@@ -2,6 +2,7 @@ package github
 
 import (
 	"context"
+	"errors"
 	"fmt"
 	"log"
 	"path/filepath"
@@ -264,20 +265,21 @@ func buildBody(c *reviewdog.Comment) string {
 func buildSuggestions(c *reviewdog.Comment) string {
 	var sb strings.Builder
 	for _, s := range c.Result.Diagnostic.GetSuggestions() {
-		if txt := buildSingleSuggestion(c, s); txt != "" {
-			sb.WriteString(txt)
-			sb.WriteString("\n")
+		txt, err := buildSingleSuggestion(c, s)
+		if err != nil {
+			log.Printf("reviewdog: %v", err)
+			continue
 		}
+		sb.WriteString(txt)
+		sb.WriteString("\n")
 	}
 	return sb.String()
 }
 
-func buildSingleSuggestion(c *reviewdog.Comment, s *rdf.Suggestion) string {
+func buildSingleSuggestion(c *reviewdog.Comment, s *rdf.Suggestion) (string, error) {
 	start := s.GetRange().GetStart()
 	if start.GetLine() != c.Result.Diagnostic.GetLocation().GetRange().GetStart().GetLine() {
-		// Diagnostic and Suggestion lines must be the same.
-		log.Println("Diagnostic and Suggestion lines must be the same.")
-		return ""
+		return "", errors.New("Diagnostic and Suggestion lines must be the same.")
 	}
 	end := s.GetRange().GetEnd()
 	if !(end.GetLine() == 0 ||
@@ -287,13 +289,11 @@ func buildSingleSuggestion(c *reviewdog.Comment, s *rdf.Suggestion) string {
 		// restriction. Create a review for a pull request API [1] doesn't support
 		// comments to multi lines as of writing (2020-07-21).
 		// [1]: https://docs.github.com/en/rest/reference/pulls#create-a-review-for-a-pull-request
-		log.Println("non single line")
-		return ""
+		return "", errors.New("non single line")
 	}
 	if start.GetColumn() > 1 {
 		// TODO(haya14busa): Support non-line based suggestion.
-		log.Println("non line based")
-		return ""
+		return "", errors.New("non line based")
 	}
 	var sb strings.Builder
 	sb.WriteString("```suggestion\n")
@@ -302,5 +302,5 @@ func buildSingleSuggestion(c *reviewdog.Comment, s *rdf.Suggestion) string {
 		sb.WriteString("\n")
 	}
 	sb.WriteString("```")
-	return sb.String()
+	return sb.String(), nil
 }
