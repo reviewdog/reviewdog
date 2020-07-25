@@ -63,7 +63,6 @@ func FilterCheck(results []*rdf.Diagnostic, diff []*diff.FileDiff, strip int,
 		if check.InDiffContext {
 			check.SourceLines = sourceLines
 		}
-		// loc.Path = NormalizePath(loc.GetPath(), cwd, "")
 		checks = append(checks, check)
 	}
 	return checks
