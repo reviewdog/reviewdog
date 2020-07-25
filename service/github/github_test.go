@@ -236,7 +236,7 @@ func TestGitHubPullRequest_Post_Flush_review_api(t *testing.T) {
 				{
 					Path:      github.String("reviewdog.go"),
 					StartLine: github.Int(15),
-					Line:      github.Int(16),
+					Line:      github.Int(17),
 					Body:      github.String(commentutil.BodyPrefix + "\nmultiline existing comment (line-break)"),
 				},
 			}

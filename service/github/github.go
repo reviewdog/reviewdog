@@ -152,11 +152,6 @@ func buildDraftReviewComment(c *reviewdog.Comment, body string) *github.DraftRev
 func githubCommentLine(c *reviewdog.Comment) int {
 	loc := c.Result.Diagnostic.GetLocation()
 	line := loc.GetRange().GetEnd().GetLine()
-	// End position with column == 1 means range to the end of the previous lines
-	// including line-break.
-	if loc.GetRange().GetEnd().GetColumn() == 1 {
-		line--
-	}
 	if line == 0 {
 		line = loc.GetRange().GetStart().GetLine()
 	}
@@ -284,7 +279,7 @@ func buildSingleSuggestion(c *reviewdog.Comment, s *rdf.Suggestion) (string, err
 		return "", fmt.Errorf("the Diagnostic's lines and Suggestion lines must be the same. %d-%d v.s. %d-%d",
 			drange.GetStart().GetLine(), drange.GetEnd().GetLine(), start.GetLine(), end.GetLine())
 	}
-	if start.GetColumn() > 1 || end.GetColumn() > 1 {
+	if start.GetColumn() > 0 || end.GetColumn() > 0 {
 		// TODO(haya14busa): Support non-line based suggestion.
 		return "", errors.New("non line based suggestions (contains column) are not supported yet")
 	}
