@@ -4,7 +4,6 @@ import (
 	"context"
 	"errors"
 	"fmt"
-	"log"
 	"path/filepath"
 	"strings"
 	"sync"
@@ -267,7 +266,7 @@ func buildSuggestions(c *reviewdog.Comment) string {
 	for _, s := range c.Result.Diagnostic.GetSuggestions() {
 		txt, err := buildSingleSuggestion(c, s)
 		if err != nil {
-			log.Printf("reviewdog: %v", err)
+			sb.WriteString(fmt.Sprintf("Invalid suggestion: %v", err))
 			continue
 		}
 		sb.WriteString(txt)
@@ -283,11 +282,11 @@ func buildSingleSuggestion(c *reviewdog.Comment, s *rdf.Suggestion) (string, err
 	if start.GetLine() != drange.GetStart().GetLine() ||
 		end.GetLine() != drange.GetEnd().GetLine() {
 		return "", fmt.Errorf("the Diagnostic's lines and Suggestion lines must be the same. %d-%d v.s. %d-%d",
-			start.GetLine(), end.GetLine(), drange.GetStart().GetLine(), drange.GetEnd().GetLine())
+			drange.GetStart().GetLine(), drange.GetEnd().GetLine(), start.GetLine(), end.GetLine())
 	}
 	if start.GetColumn() > 1 || end.GetColumn() > 1 {
 		// TODO(haya14busa): Support non-line based suggestion.
-		return "", errors.New("non line based suggestion (contains column)")
+		return "", errors.New("non line based suggestions (contains column) are not supported yet")
 	}
 	var sb strings.Builder
 	sb.WriteString("```suggestion\n")
