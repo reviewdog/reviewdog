@@ -45,7 +45,43 @@ index 0000000..264c67e
 `
 
 func TestFilterCheckByAddedLines(t *testing.T) {
-	results := []*CheckResult{
+	results := []*rdf.Diagnostic{
+		{
+			Location: &rdf.Location{
+				Path:  "sample.new.txt",
+				Range: &rdf.Range{Start: &rdf.Position{Line: 1}},
+			},
+		},
+		{
+			Location: &rdf.Location{
+				Path:  "sample.new.txt",
+				Range: &rdf.Range{Start: &rdf.Position{Line: 2}},
+			},
+		},
+		{
+			Location: &rdf.Location{
+				Path:  "nonewline.new.txt",
+				Range: &rdf.Range{Start: &rdf.Position{Line: 1}},
+			},
+		},
+		{
+			Location: &rdf.Location{
+				Path:  "nonewline.new.txt",
+				Range: &rdf.Range{Start: &rdf.Position{Line: 3}},
+			},
+		},
+		{
+			Message: "outside range (start)",
+			Location: &rdf.Location{
+				Path: "sample.new.txt",
+				Range: &rdf.Range{
+					Start: &rdf.Position{Line: 1},
+					End:   &rdf.Position{Line: 2},
+				},
+			},
+		},
+	}
+	want := []*FilteredCheck{
 		{
 			Diagnostic: &rdf.Diagnostic{
 				Location: &rdf.Location{
@@ -53,6 +89,11 @@ func TestFilterCheckByAddedLines(t *testing.T) {
 					Range: &rdf.Range{Start: &rdf.Position{Line: 1}},
 				},
 			},
+			ShouldReport:  false,
+			InDiffFile:    true,
+			InDiffContext: true,
+			OldPath:       "sample.old.txt",
+			OldLine:       1,
 		},
 		{
 			Diagnostic: &rdf.Diagnostic{
@@ -61,6 +102,11 @@ func TestFilterCheckByAddedLines(t *testing.T) {
 					Range: &rdf.Range{Start: &rdf.Position{Line: 2}},
 				},
 			},
+			ShouldReport:  true,
+			InDiffFile:    true,
+			InDiffContext: true,
+			OldPath:       "sample.old.txt",
+			OldLine:       0,
 		},
 		{
 			Diagnostic: &rdf.Diagnostic{
@@ -69,6 +115,11 @@ func TestFilterCheckByAddedLines(t *testing.T) {
 					Range: &rdf.Range{Start: &rdf.Position{Line: 1}},
 				},
 			},
+			ShouldReport:  false,
+			InDiffFile:    true,
+			InDiffContext: true,
+			OldPath:       "nonewline.old.txt",
+			OldLine:       1,
 		},
 		{
 			Diagnostic: &rdf.Diagnostic{
@@ -77,6 +128,11 @@ func TestFilterCheckByAddedLines(t *testing.T) {
 					Range: &rdf.Range{Start: &rdf.Position{Line: 3}},
 				},
 			},
+			ShouldReport:  true,
+			InDiffFile:    true,
+			InDiffContext: true,
+			OldPath:       "nonewline.old.txt",
+			OldLine:       0,
 		},
 		{
 			Diagnostic: &rdf.Diagnostic{
@@ -86,82 +142,6 @@ func TestFilterCheckByAddedLines(t *testing.T) {
 					Range: &rdf.Range{
 						Start: &rdf.Position{Line: 1},
 						End:   &rdf.Position{Line: 2},
-					},
-				},
-			},
-		},
-	}
-	want := []*FilteredCheck{
-		{
-			CheckResult: &CheckResult{
-				Diagnostic: &rdf.Diagnostic{
-					Location: &rdf.Location{
-						Path:  "sample.new.txt",
-						Range: &rdf.Range{Start: &rdf.Position{Line: 1}},
-					},
-				},
-			},
-			ShouldReport:  false,
-			InDiffFile:    true,
-			InDiffContext: true,
-			OldPath:       "sample.old.txt",
-			OldLine:       1,
-		},
-		{
-			CheckResult: &CheckResult{
-				Diagnostic: &rdf.Diagnostic{
-					Location: &rdf.Location{
-						Path:  "sample.new.txt",
-						Range: &rdf.Range{Start: &rdf.Position{Line: 2}},
-					},
-				},
-			},
-			ShouldReport:  true,
-			InDiffFile:    true,
-			InDiffContext: true,
-			OldPath:       "sample.old.txt",
-			OldLine:       0,
-		},
-		{
-			CheckResult: &CheckResult{
-				Diagnostic: &rdf.Diagnostic{
-					Location: &rdf.Location{
-						Path:  "nonewline.new.txt",
-						Range: &rdf.Range{Start: &rdf.Position{Line: 1}},
-					},
-				},
-			},
-			ShouldReport:  false,
-			InDiffFile:    true,
-			InDiffContext: true,
-			OldPath:       "nonewline.old.txt",
-			OldLine:       1,
-		},
-		{
-			CheckResult: &CheckResult{
-				Diagnostic: &rdf.Diagnostic{
-					Location: &rdf.Location{
-						Path:  "nonewline.new.txt",
-						Range: &rdf.Range{Start: &rdf.Position{Line: 3}},
-					},
-				},
-			},
-			ShouldReport:  true,
-			InDiffFile:    true,
-			InDiffContext: true,
-			OldPath:       "nonewline.old.txt",
-			OldLine:       0,
-		},
-		{
-			CheckResult: &CheckResult{
-				Diagnostic: &rdf.Diagnostic{
-					Message: "outside range (start)",
-					Location: &rdf.Location{
-						Path: "sample.new.txt",
-						Range: &rdf.Range{
-							Start: &rdf.Position{Line: 1},
-							End:   &rdf.Position{Line: 2},
-						},
 					},
 				},
 			},
@@ -181,40 +161,32 @@ func TestFilterCheckByAddedLines(t *testing.T) {
 
 // All lines that are in diff are taken into account
 func TestFilterCheckByDiffContext(t *testing.T) {
-	results := []*CheckResult{
+	results := []*rdf.Diagnostic{
 		{
-			Diagnostic: &rdf.Diagnostic{
-				Location: &rdf.Location{
-					Path:  "sample.new.txt",
-					Range: &rdf.Range{Start: &rdf.Position{Line: 1}},
-				},
+			Location: &rdf.Location{
+				Path:  "sample.new.txt",
+				Range: &rdf.Range{Start: &rdf.Position{Line: 1}},
 			},
 		},
 		{
-			Diagnostic: &rdf.Diagnostic{
-				Location: &rdf.Location{
-					Path:  "sample.new.txt",
-					Range: &rdf.Range{Start: &rdf.Position{Line: 2}},
-				},
+			Location: &rdf.Location{
+				Path:  "sample.new.txt",
+				Range: &rdf.Range{Start: &rdf.Position{Line: 2}},
 			},
 		},
 		{
-			Diagnostic: &rdf.Diagnostic{
-				Location: &rdf.Location{
-					Path:  "sample.new.txt",
-					Range: &rdf.Range{Start: &rdf.Position{Line: 3}},
-				},
+			Location: &rdf.Location{
+				Path:  "sample.new.txt",
+				Range: &rdf.Range{Start: &rdf.Position{Line: 3}},
 			},
 		},
 	}
 	want := []*FilteredCheck{
 		{
-			CheckResult: &CheckResult{
-				Diagnostic: &rdf.Diagnostic{
-					Location: &rdf.Location{
-						Path:  "sample.new.txt",
-						Range: &rdf.Range{Start: &rdf.Position{Line: 1}},
-					},
+			Diagnostic: &rdf.Diagnostic{
+				Location: &rdf.Location{
+					Path:  "sample.new.txt",
+					Range: &rdf.Range{Start: &rdf.Position{Line: 1}},
 				},
 			},
 			ShouldReport:  true,
@@ -224,12 +196,10 @@ func TestFilterCheckByDiffContext(t *testing.T) {
 			OldLine:       1,
 		},
 		{
-			CheckResult: &CheckResult{
-				Diagnostic: &rdf.Diagnostic{
-					Location: &rdf.Location{
-						Path:  "sample.new.txt",
-						Range: &rdf.Range{Start: &rdf.Position{Line: 2}},
-					},
+			Diagnostic: &rdf.Diagnostic{
+				Location: &rdf.Location{
+					Path:  "sample.new.txt",
+					Range: &rdf.Range{Start: &rdf.Position{Line: 2}},
 				},
 			},
 			ShouldReport:  true,
@@ -239,12 +209,10 @@ func TestFilterCheckByDiffContext(t *testing.T) {
 			OldLine:       0,
 		},
 		{
-			CheckResult: &CheckResult{
-				Diagnostic: &rdf.Diagnostic{
-					Location: &rdf.Location{
-						Path:  "sample.new.txt",
-						Range: &rdf.Range{Start: &rdf.Position{Line: 3}},
-					},
+			Diagnostic: &rdf.Diagnostic{
+				Location: &rdf.Location{
+					Path:  "sample.new.txt",
+					Range: &rdf.Range{Start: &rdf.Position{Line: 3}},
 				},
 			},
 			ShouldReport:  true,

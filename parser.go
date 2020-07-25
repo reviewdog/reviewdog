@@ -6,6 +6,7 @@ import (
 	"errors"
 	"fmt"
 	"io"
+	"strings"
 
 	"github.com/reviewdog/errorformat"
 	"github.com/reviewdog/errorformat/fmts"
@@ -71,26 +72,24 @@ func NewErrorformatParserString(efms []string) (*ErrorformatParser, error) {
 	return NewErrorformatParser(efm), nil
 }
 
-func (p *ErrorformatParser) Parse(r io.Reader) ([]*CheckResult, error) {
+func (p *ErrorformatParser) Parse(r io.Reader) ([]*rdf.Diagnostic, error) {
 	s := p.efm.NewScanner(r)
-	var rs []*CheckResult
+	var rs []*rdf.Diagnostic
 	for s.Scan() {
 		e := s.Entry()
 		if e.Valid {
-			rs = append(rs, &CheckResult{
-				Diagnostic: &rdf.Diagnostic{
-					Location: &rdf.Location{
-						Path: e.Filename,
-						Range: &rdf.Range{
-							Start: &rdf.Position{
-								Line:   int32(e.Lnum),
-								Column: int32(e.Col),
-							},
+			rs = append(rs, &rdf.Diagnostic{
+				Location: &rdf.Location{
+					Path: e.Filename,
+					Range: &rdf.Range{
+						Start: &rdf.Position{
+							Line:   int32(e.Lnum),
+							Column: int32(e.Col),
 						},
 					},
-					Message: e.Text,
 				},
-				Lines: e.Lines,
+				Message:        e.Text,
+				OriginalOutput: strings.Join(e.Lines, "\n"),
 			})
 		}
 	}
@@ -107,31 +106,27 @@ func NewCheckStyleParser() Parser {
 	return &CheckStyleParser{}
 }
 
-func (p *CheckStyleParser) Parse(r io.Reader) ([]*CheckResult, error) {
+func (p *CheckStyleParser) Parse(r io.Reader) ([]*rdf.Diagnostic, error) {
 	var cs = new(CheckStyleResult)
 	if err := xml.NewDecoder(r).Decode(cs); err != nil {
 		return nil, err
 	}
-	var rs []*CheckResult
+	var rs []*rdf.Diagnostic
 	for _, file := range cs.Files {
 		for _, cerr := range file.Errors {
-			rs = append(rs, &CheckResult{
-				Diagnostic: &rdf.Diagnostic{
-					Location: &rdf.Location{
-						Path: file.Name,
-						Range: &rdf.Range{
-							Start: &rdf.Position{
-								Line:   int32(cerr.Line),
-								Column: int32(cerr.Column),
-							},
+			rs = append(rs, &rdf.Diagnostic{
+				Location: &rdf.Location{
+					Path: file.Name,
+					Range: &rdf.Range{
+						Start: &rdf.Position{
+							Line:   int32(cerr.Line),
+							Column: int32(cerr.Column),
 						},
 					},
-					Message: cerr.Message,
 				},
-				Lines: []string{
-					fmt.Sprintf("%v:%d:%d: %v: %v (%v)",
-						file.Name, cerr.Line, cerr.Column, cerr.Severity, cerr.Message, cerr.Source),
-				},
+				Message: cerr.Message,
+				OriginalOutput: fmt.Sprintf("%v:%d:%d: %v: %v (%v)",
+					file.Name, cerr.Line, cerr.Column, cerr.Severity, cerr.Message, cerr.Source),
 			})
 		}
 	}
@@ -172,15 +167,19 @@ func NewRDJSONLParser() *RDJSONLParser {
 	return &RDJSONLParser{}
 }
 
-func (p *RDJSONLParser) Parse(r io.Reader) ([]*CheckResult, error) {
-	var results []*CheckResult
+func (p *RDJSONLParser) Parse(r io.Reader) ([]*rdf.Diagnostic, error) {
+	var results []*rdf.Diagnostic
 	s := bufio.NewScanner(r)
 	for s.Scan() {
 		d := new(rdf.Diagnostic)
 		if err := protojson.Unmarshal(s.Bytes(), d); err != nil {
 			return nil, err
 		}
-		results = append(results, &CheckResult{Diagnostic: d, Lines: []string{s.Text()}})
+		if d.GetOriginalOutput() == "" {
+			// TODO(haya14busa): Refactor not to fill in original output.
+			d.OriginalOutput = s.Text()
+		}
+		results = append(results, d)
 	}
 	return results, nil
 }

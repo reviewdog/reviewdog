@@ -89,7 +89,7 @@ func (g *GitHubPullRequest) postAsReviewComment(ctx context.Context) error {
 			// GitHub Review API cannot report results outside diff. If it's running
 			// in GitHub Actions, fallback to GitHub Actions log as report .
 			if cienv.IsInGitHubAction() {
-				githubutils.ReportAsGitHubActionsLog(c.ToolName, "warning", c.Result.CheckResult)
+				githubutils.ReportAsGitHubActionsLog(c.ToolName, "warning", c.Result.Diagnostic)
 			}
 			continue
 		}
@@ -177,7 +177,7 @@ func (g *GitHubPullRequest) remainingCommentsSummary(remaining []*reviewdog.Comm
 		sb.WriteString(fmt.Sprintf("<summary>%s</summary>\n", tool))
 		sb.WriteString("\n")
 		for _, c := range comments {
-			sb.WriteString(githubutils.LinkedMarkdownCheckResult(g.owner, g.repo, g.sha, c.Result.CheckResult))
+			sb.WriteString(githubutils.LinkedMarkdownDiagnostic(g.owner, g.repo, g.sha, c.Result.Diagnostic))
 			sb.WriteString("\n")
 		}
 		sb.WriteString("</details>\n")

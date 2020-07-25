@@ -224,8 +224,8 @@ func (ch *Checker) summaryFindings(name string, checks []*reviewdog.FilteredChec
 			lines = append(lines, "... (Too many findings. Dropped some findings)")
 			break
 		}
-		lines = append(lines, githubutils.LinkedMarkdownCheckResult(
-			ch.req.Owner, ch.req.Repo, ch.req.SHA, c.CheckResult))
+		lines = append(lines, githubutils.LinkedMarkdownDiagnostic(
+			ch.req.Owner, ch.req.Repo, ch.req.SHA, c.Diagnostic))
 	}
 	lines = append(lines, "</details>")
 	return lines
@@ -263,7 +263,7 @@ func (ch *Checker) toCheckRunAnnotation(c *reviewdog.FilteredCheck) *github.Chec
 		}
 		a.Title = github.String(fmt.Sprintf("[%s] %s#%s", toolName, loc.GetPath(), line))
 	}
-	if s := strings.Join(c.Lines, "\n"); s != "" {
+	if s := c.Diagnostic.GetOriginalOutput(); s != "" {
 		a.RawDetails = github.String(s)
 	}
 	return a
@@ -289,35 +289,30 @@ func (ch *Checker) rawPullRequestDiff(ctx context.Context, pr int) ([]byte, erro
 	return d, nil
 }
 
-func annotationsToCheckResults(as []*doghouse.Annotation) []*reviewdog.CheckResult {
-	cs := make([]*reviewdog.CheckResult, 0, len(as))
+func annotationsToCheckResults(as []*doghouse.Annotation) []*rdf.Diagnostic {
+	ds := make([]*rdf.Diagnostic, 0, len(as))
 	for _, a := range as {
-		cs = append(cs, annotationToCheckResult(a))
+		ds = append(ds, annotationToDiagnostic(a))
 	}
-	return cs
+	return ds
 }
 
-func annotationToCheckResult(a *doghouse.Annotation) *reviewdog.CheckResult {
+func annotationToDiagnostic(a *doghouse.Annotation) *rdf.Diagnostic {
 	if a.Diagnostic != nil {
-		return &reviewdog.CheckResult{
-			Diagnostic: a.Diagnostic,
-			Lines:      strings.Split(a.RawMessage, "\n"),
-		}
+		return a.Diagnostic
 	}
 	// Old reviwedog CLI doesn't have the Diagnostic field.
-	return &reviewdog.CheckResult{
-		Diagnostic: &rdf.Diagnostic{
-			Location: &rdf.Location{
-				Path: a.Path,
-				Range: &rdf.Range{
-					Start: &rdf.Position{
-						Line: int32(a.Line),
-					},
+	return &rdf.Diagnostic{
+		Location: &rdf.Location{
+			Path: a.Path,
+			Range: &rdf.Range{
+				Start: &rdf.Position{
+					Line: int32(a.Line),
 				},
 			},
-			Message: a.Message,
 		},
-		Lines: strings.Split(a.RawMessage, "\n"),
+		Message:        a.Message,
+		OriginalOutput: a.RawMessage,
 	}
 }
 

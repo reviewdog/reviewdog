@@ -57,7 +57,7 @@ func RunAndParse(ctx context.Context, conf *Config, runners map[string]bool, def
 		}
 		g.Go(func() error {
 			defer func() { <-semaphore }()
-			rs, err := p.Parse(io.MultiReader(stdout, stderr))
+			diagnostics, err := p.Parse(io.MultiReader(stdout, stderr))
 			if err != nil {
 				return err
 			}
@@ -67,10 +67,10 @@ func RunAndParse(ctx context.Context, conf *Config, runners map[string]bool, def
 			}
 			cmdErr := cmd.Wait()
 			results.Store(runnerName, &reviewdog.Result{
-				Name:         runnerName,
-				Level:        level,
-				CheckResults: rs,
-				CmdErr:       cmdErr,
+				Name:        runnerName,
+				Level:       level,
+				Diagnostics: diagnostics,
+				CmdErr:      cmdErr,
 			})
 			msg := fmt.Sprintf("reviewdog: [finish]\trunner=%s", runnerName)
 			if cmdErr != nil {
@@ -109,12 +109,12 @@ func Run(ctx context.Context, conf *Config, runners map[string]bool, c reviewdog
 	}
 	var g errgroup.Group
 	results.Range(func(toolname string, result *reviewdog.Result) {
-		rs := result.CheckResults
+		ds := result.Diagnostics
 		g.Go(func() error {
 			if err := result.CheckUnexpectedFailure(); err != nil {
 				return err
 			}
-			return reviewdog.RunFromResult(ctx, c, rs, filediffs, d.Strip(), toolname, filterMode, failOnError)
+			return reviewdog.RunFromResult(ctx, c, ds, filediffs, d.Strip(), toolname, filterMode, failOnError)
 		})
 	})
 	return g.Wait()

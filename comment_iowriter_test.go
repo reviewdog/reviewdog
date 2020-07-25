@@ -16,9 +16,9 @@ func TestUnifiedCommentWriter_Post(t *testing.T) {
 	}{
 		{
 			in: &Comment{
-				Result: &FilteredCheck{CheckResult: &CheckResult{
+				Result: &FilteredCheck{
 					Diagnostic: &rdf.Diagnostic{Location: &rdf.Location{Path: "/path/to/file"}},
-				}},
+				},
 				ToolName: "tool name",
 				Body:     "message",
 			},
@@ -26,14 +26,14 @@ func TestUnifiedCommentWriter_Post(t *testing.T) {
 		},
 		{
 			in: &Comment{
-				Result: &FilteredCheck{CheckResult: &CheckResult{
+				Result: &FilteredCheck{
 					Diagnostic: &rdf.Diagnostic{Location: &rdf.Location{
 						Path: "/path/to/file",
 						Range: &rdf.Range{Start: &rdf.Position{
 							Column: 14,
 						}},
 					}},
-				}},
+				},
 				ToolName: "tool name",
 				Body:     "message",
 			},
@@ -41,14 +41,14 @@ func TestUnifiedCommentWriter_Post(t *testing.T) {
 		},
 		{
 			in: &Comment{
-				Result: &FilteredCheck{CheckResult: &CheckResult{
+				Result: &FilteredCheck{
 					Diagnostic: &rdf.Diagnostic{Location: &rdf.Location{
 						Path: "/path/to/file",
 						Range: &rdf.Range{Start: &rdf.Position{
 							Line: 14,
 						}},
 					}},
-				}},
+				},
 				ToolName: "tool name",
 				Body:     "message",
 			},
@@ -56,7 +56,7 @@ func TestUnifiedCommentWriter_Post(t *testing.T) {
 		},
 		{
 			in: &Comment{
-				Result: &FilteredCheck{CheckResult: &CheckResult{
+				Result: &FilteredCheck{
 					Diagnostic: &rdf.Diagnostic{Location: &rdf.Location{
 						Path: "/path/to/file",
 						Range: &rdf.Range{Start: &rdf.Position{
@@ -64,7 +64,7 @@ func TestUnifiedCommentWriter_Post(t *testing.T) {
 							Column: 7,
 						}},
 					}},
-				}},
+				},
 				ToolName: "tool name",
 				Body:     "line1\nline2",
 			},

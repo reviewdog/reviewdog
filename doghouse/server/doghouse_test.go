@@ -82,8 +82,8 @@ func TestCheck_OK(t *testing.T) {
 							Start: &rdf.Position{Line: 2, Column: 1},
 						},
 					},
+					OriginalOutput: "raw test message",
 				},
-				RawMessage: "raw test message",
 			},
 			{
 				Diagnostic: &rdf.Diagnostic{
@@ -94,8 +94,8 @@ func TestCheck_OK(t *testing.T) {
 							Start: &rdf.Position{Line: 14},
 						},
 					},
+					OriginalOutput: "raw test message outside diff",
 				},
-				RawMessage: "raw test message outside diff",
 			},
 			{
 				Diagnostic: &rdf.Diagnostic{
@@ -160,9 +160,10 @@ func TestCheck_OK(t *testing.T) {
 				},
 			},
 			{
-				Path:    "sample.new.txt",
-				Line:    2,
-				Message: "request from old clients",
+				Path:       "sample.new.txt",
+				Line:       2,
+				Message:    "request from old clients",
+				RawMessage: "raw message from old clients",
 			},
 		},
 		Level: "warning",
@@ -253,6 +254,7 @@ func TestCheck_OK(t *testing.T) {
 					AnnotationLevel: github.String("warning"),
 					Message:         github.String("request from old clients"),
 					Title:           github.String("[haya14busa-linter] sample.new.txt#L2"),
+					RawDetails:      github.String("raw message from old clients"),
 				},
 			}
 			if d := cmp.Diff(annotations, wantAnnotations); d != "" {
@@ -300,8 +302,8 @@ func testOutsideDiff(t *testing.T, outsideDiff bool, filterMode difffilter.Mode)
 							Start: &rdf.Position{Line: 2},
 						},
 					},
+					OriginalOutput: "raw test message",
 				},
-				RawMessage: "raw test message",
 			},
 			{
 				Diagnostic: &rdf.Diagnostic{
@@ -312,8 +314,8 @@ func testOutsideDiff(t *testing.T, outsideDiff bool, filterMode difffilter.Mode)
 							Start: &rdf.Position{Line: 14},
 						},
 					},
+					OriginalOutput: "raw test message outside diff",
 				},
-				RawMessage: "raw test message outside diff",
 			},
 		},
 		Level:       "warning",
@@ -406,8 +408,8 @@ func TestCheck_OK_multiple_update_runs(t *testing.T) {
 						Start: &rdf.Position{Line: 2},
 					},
 				},
+				OriginalOutput: "raw test message",
 			},
-			RawMessage: "raw test message",
 		})
 	}
 
@@ -473,8 +475,8 @@ func TestCheck_OK_nonPullRequests(t *testing.T) {
 							Start: &rdf.Position{Line: 2},
 						},
 					},
+					OriginalOutput: "raw test message",
 				},
-				RawMessage: "raw test message",
 			},
 			{
 				Diagnostic: &rdf.Diagnostic{
@@ -485,8 +487,8 @@ func TestCheck_OK_nonPullRequests(t *testing.T) {
 							Start: &rdf.Position{Line: 14},
 						},
 					},
+					OriginalOutput: "raw test message2",
 				},
-				RawMessage: "raw test message2",
 			},
 		},
 		Level: "warning",
