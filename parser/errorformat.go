@@ -1,6 +1,7 @@
 package parser
 
 import (
+	"fmt"
 	"io"
 	"strings"
 
@@ -32,11 +33,11 @@ func NewErrorformatParserString(efms []string) (*ErrorformatParser, error) {
 
 func (p *ErrorformatParser) Parse(r io.Reader) ([]*rdf.Diagnostic, error) {
 	s := p.efm.NewScanner(r)
-	var rs []*rdf.Diagnostic
+	var ds []*rdf.Diagnostic
 	for s.Scan() {
 		e := s.Entry()
 		if e.Valid {
-			rs = append(rs, &rdf.Diagnostic{
+			d := &rdf.Diagnostic{
 				Location: &rdf.Location{
 					Path: e.Filename,
 					Range: &rdf.Range{
@@ -47,9 +48,14 @@ func (p *ErrorformatParser) Parse(r io.Reader) ([]*rdf.Diagnostic, error) {
 					},
 				},
 				Message:        e.Text,
+				Severity:       severity(string(e.Type)),
 				OriginalOutput: strings.Join(e.Lines, "\n"),
-			})
+			}
+			if e.Nr != 0 {
+				d.Code = &rdf.Code{Value: fmt.Sprintf("%d", e.Nr)}
+			}
+			ds = append(ds, d)
 		}
 	}
-	return rs, nil
+	return ds, nil
 }
