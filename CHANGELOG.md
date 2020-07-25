@@ -13,7 +13,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - [#629](https://github.com/reviewdog/reviewdog/pull/629) Introduced Reviewdog Diagnostic Format. ([@haya14busa])
  - [#674](https://github.com/reviewdog/reviewdog/pull/674) Support rdjsonl as input format
  - [#680](https://github.com/reviewdog/reviewdog/pull/680) github-pr-review: Support multiline comments
- - [#675](https://github.com/reviewdog/reviewdog/pull/675) github-pr-review: Support line based suggestions
+ - [#675](https://github.com/reviewdog/reviewdog/pull/675) [#698](https://github.com/reviewdog/reviewdog/pull/698) github-pr-review: Support suggested changes
 - ...
 
 ### :bug: Fixes
