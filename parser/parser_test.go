@@ -7,54 +7,54 @@ import (
 
 func TestNewParser(t *testing.T) {
 	tests := []struct {
-		in      *ParserOpt
+		in      *Option
 		typ     Parser
 		wantErr bool
 	}{
 		{
-			in: &ParserOpt{
+			in: &Option{
 				FormatName: "checkstyle",
 			},
 			typ: &CheckStyleParser{},
 		},
 		{
-			in: &ParserOpt{
+			in: &Option{
 				FormatName: "rdjsonl",
 			},
 			typ: &RDJSONLParser{},
 		},
 		{
-			in: &ParserOpt{
+			in: &Option{
 				FormatName: "golint",
 			},
 			typ: &ErrorformatParser{},
 		},
 		{
-			in: &ParserOpt{
+			in: &Option{
 				Errorformat: []string{`%f:%l:%c:%m`},
 			},
 			typ: &ErrorformatParser{},
 		},
 		{ // empty
-			in:      &ParserOpt{},
+			in:      &Option{},
 			wantErr: true,
 		},
 		{ // both
-			in: &ParserOpt{
+			in: &Option{
 				FormatName:  "checkstyle",
 				Errorformat: []string{`%f:%l:%c:%m`},
 			},
 			wantErr: true,
 		},
 		{ // unsupported
-			in: &ParserOpt{
+			in: &Option{
 				FormatName: "unsupported format",
 			},
 			wantErr: true,
 		},
 	}
 	for _, tt := range tests {
-		p, err := NewParser(tt.in)
+		p, err := New(tt.in)
 		if tt.wantErr && err != nil {
 			continue
 		}

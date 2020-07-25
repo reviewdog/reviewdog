@@ -670,7 +670,7 @@ func readConf(conf string) ([]byte, error) {
 }
 
 func newParserFromOpt(opt *option) (parser.Parser, error) {
-	p, err := parser.NewParser(&parser.ParserOpt{FormatName: opt.f, Errorformat: opt.efms})
+	p, err := parser.New(&parser.Option{FormatName: opt.f, Errorformat: opt.efms})
 	if err != nil {
 		return nil, fmt.Errorf("fail to create parser. use either -f or -efm: %w", err)
 	}

@@ -44,8 +44,8 @@ func RunAndParse(ctx context.Context, conf *Config, runners map[string]bool, def
 		if fname == "" && len(runner.Errorformat) == 0 {
 			fname = runnerName
 		}
-		opt := &parser.ParserOpt{FormatName: fname, Errorformat: runner.Errorformat}
-		p, err := parser.NewParser(opt)
+		opt := &parser.Option{FormatName: fname, Errorformat: runner.Errorformat}
+		p, err := parser.New(opt)
 		if err != nil {
 			return nil, err
 		}

@@ -15,15 +15,15 @@ type Parser interface {
 	Parse(r io.Reader) ([]*rdf.Diagnostic, error)
 }
 
-// ParserOpt represents option to create Parser. Either FormatName or
+// Option represents option to create Parser. Either FormatName or
 // Errorformat should be specified.
-type ParserOpt struct {
+type Option struct {
 	FormatName  string
 	Errorformat []string
 }
 
-// NewParser returns Parser based on ParserOpt.
-func NewParser(opt *ParserOpt) (Parser, error) {
+// New returns Parser based on Option.
+func New(opt *Option) (Parser, error) {
 	name := opt.FormatName
 
 	if name != "" && len(opt.Errorformat) > 0 {
