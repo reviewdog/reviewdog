@@ -8,7 +8,7 @@ import (
 	"github.com/reviewdog/reviewdog/proto/rdf"
 )
 
-// FilteredCheck represents CheckResult with filtering info.
+// FilteredCheck represents Diagnostic with filtering info.
 type FilteredCheck struct {
 	Diagnostic   *rdf.Diagnostic
 	ShouldReport bool

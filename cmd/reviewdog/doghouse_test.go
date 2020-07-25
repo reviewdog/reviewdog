@@ -115,13 +115,13 @@ func TestNewDoghouseServerCli(t *testing.T) {
 	}
 }
 
-func TestCheckResultSet_Project(t *testing.T) {
+func TestDiagnosticResultSet_Project(t *testing.T) {
 	defer func(f func(ctx context.Context, conf *project.Config, runners map[string]bool, level string, tee bool) (*reviewdog.ResultMap, error)) {
 		projectRunAndParse = f
 	}(projectRunAndParse)
 
-	var wantCheckResult reviewdog.ResultMap
-	wantCheckResult.Store("name1", &reviewdog.Result{Diagnostics: []*rdf.Diagnostic{
+	var wantDiagnosticResult reviewdog.ResultMap
+	wantDiagnosticResult.Store("name1", &reviewdog.Result{Diagnostics: []*rdf.Diagnostic{
 		{
 			Location: &rdf.Location{
 				Range: &rdf.Range{Start: &rdf.Position{
@@ -135,7 +135,7 @@ func TestCheckResultSet_Project(t *testing.T) {
 	}})
 
 	projectRunAndParse = func(ctx context.Context, conf *project.Config, runners map[string]bool, level string, tee bool) (*reviewdog.ResultMap, error) {
-		return &wantCheckResult, nil
+		return &wantDiagnosticResult, nil
 	}
 
 	tmp, err := ioutil.TempFile("", "")
@@ -149,18 +149,18 @@ func TestCheckResultSet_Project(t *testing.T) {
 		t.Fatal(err)
 	}
 
-	if got.Len() != wantCheckResult.Len() {
-		t.Errorf("length of results is different. got = %d, want = %d\n", got.Len(), wantCheckResult.Len())
+	if got.Len() != wantDiagnosticResult.Len() {
+		t.Errorf("length of results is different. got = %d, want = %d\n", got.Len(), wantDiagnosticResult.Len())
 	}
 	got.Range(func(k string, r *reviewdog.Result) {
-		w, _ := wantCheckResult.Load(k)
+		w, _ := wantDiagnosticResult.Load(k)
 		if diff := cmp.Diff(r, w, protocmp.Transform()); diff != "" {
 			t.Errorf("result has diff:\n%s", diff)
 		}
 	})
 }
 
-func TestCheckResultSet_NonProject(t *testing.T) {
+func TestDiagnosticResultSet_NonProject(t *testing.T) {
 	opt := &option{
 		f: "golint",
 	}

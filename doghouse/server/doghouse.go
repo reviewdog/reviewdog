@@ -50,7 +50,7 @@ func (ch *Checker) Check(ctx context.Context) (*doghouse.CheckResponse, error) {
 		}
 	}
 
-	results := annotationsToCheckResults(ch.req.Annotations)
+	results := annotationsToDiagnostics(ch.req.Annotations)
 	filterMode := ch.req.FilterMode
 	//lint:ignore SA1019 Need to support OutsideDiff for backward compatibility.
 	if ch.req.PullRequest == 0 || ch.req.OutsideDiff {
@@ -289,7 +289,7 @@ func (ch *Checker) rawPullRequestDiff(ctx context.Context, pr int) ([]byte, erro
 	return d, nil
 }
 
-func annotationsToCheckResults(as []*doghouse.Annotation) []*rdf.Diagnostic {
+func annotationsToDiagnostics(as []*doghouse.Annotation) []*rdf.Diagnostic {
 	ds := make([]*rdf.Diagnostic, 0, len(as))
 	for _, a := range as {
 		ds = append(ds, annotationToDiagnostic(a))
