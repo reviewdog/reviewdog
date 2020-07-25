@@ -10,10 +10,9 @@ import (
 
 	"github.com/google/go-github/v32/github"
 
-	"github.com/reviewdog/reviewdog"
 	"github.com/reviewdog/reviewdog/diff"
-	"github.com/reviewdog/reviewdog/difffilter"
 	"github.com/reviewdog/reviewdog/doghouse"
+	"github.com/reviewdog/reviewdog/filter"
 	"github.com/reviewdog/reviewdog/proto/rdf"
 	"github.com/reviewdog/reviewdog/service/github/githubutils"
 )
@@ -56,9 +55,9 @@ func (ch *Checker) Check(ctx context.Context) (*doghouse.CheckResponse, error) {
 	if ch.req.PullRequest == 0 || ch.req.OutsideDiff {
 		// If it's not Pull Request run, do not filter results by diff regardless
 		// of the filter mode.
-		filterMode = difffilter.ModeNoFilter
+		filterMode = filter.ModeNoFilter
 	}
-	filtered := reviewdog.FilterCheck(results, filediffs, 1, "", filterMode)
+	filtered := filter.FilterCheck(results, filediffs, 1, "", filterMode)
 	check, err := ch.createCheck(ctx)
 	if err != nil {
 		// If this error is StatusForbidden (403) here, it means reviewdog is
@@ -84,7 +83,7 @@ func (ch *Checker) Check(ctx context.Context) (*doghouse.CheckResponse, error) {
 	return res, nil
 }
 
-func (ch *Checker) postCheck(ctx context.Context, checkID int64, checks []*reviewdog.FilteredCheck) (*github.CheckRun, string, error) {
+func (ch *Checker) postCheck(ctx context.Context, checkID int64, checks []*filter.FilteredDiagnostic) (*github.CheckRun, string, error) {
 	var annotations []*github.CheckRunAnnotation
 	for _, c := range checks {
 		if !c.ShouldReport {
@@ -195,12 +194,12 @@ func (ch *Checker) reqAnnotationLevel() string {
 	return "failure"
 }
 
-func (ch *Checker) summary(checks []*reviewdog.FilteredCheck) string {
+func (ch *Checker) summary(checks []*filter.FilteredDiagnostic) string {
 	var lines []string
 	lines = append(lines, "reported by [reviewdog](https://github.com/reviewdog/reviewdog) :dog:")
 
-	var findings []*reviewdog.FilteredCheck
-	var filteredFindings []*reviewdog.FilteredCheck
+	var findings []*filter.FilteredDiagnostic
+	var filteredFindings []*filter.FilteredDiagnostic
 	for _, c := range checks {
 		if c.ShouldReport {
 			findings = append(findings, c)
@@ -214,7 +213,7 @@ func (ch *Checker) summary(checks []*reviewdog.FilteredCheck) string {
 	return strings.Join(lines, "\n")
 }
 
-func (ch *Checker) summaryFindings(name string, checks []*reviewdog.FilteredCheck) []string {
+func (ch *Checker) summaryFindings(name string, checks []*filter.FilteredDiagnostic) []string {
 	var lines []string
 	lines = append(lines, "<details>")
 	lines = append(lines, fmt.Sprintf("<summary>%s (%d)</summary>", name, len(checks)))
@@ -231,7 +230,7 @@ func (ch *Checker) summaryFindings(name string, checks []*reviewdog.FilteredChec
 	return lines
 }
 
-func (ch *Checker) toCheckRunAnnotation(c *reviewdog.FilteredCheck) *github.CheckRunAnnotation {
+func (ch *Checker) toCheckRunAnnotation(c *filter.FilteredDiagnostic) *github.CheckRunAnnotation {
 	loc := c.Diagnostic.GetLocation()
 	startLine := int(loc.GetRange().GetStart().GetLine())
 	endLine := int(loc.GetRange().GetEnd().GetLine())

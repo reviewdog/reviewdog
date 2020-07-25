@@ -16,9 +16,9 @@ import (
 
 	"github.com/reviewdog/reviewdog"
 	"github.com/reviewdog/reviewdog/cienv"
-	"github.com/reviewdog/reviewdog/difffilter"
 	"github.com/reviewdog/reviewdog/doghouse"
 	"github.com/reviewdog/reviewdog/doghouse/client"
+	"github.com/reviewdog/reviewdog/filter"
 	"github.com/reviewdog/reviewdog/project"
 	"github.com/reviewdog/reviewdog/proto/rdf"
 )
@@ -313,7 +313,7 @@ func TestPostResultSet_withReportURL(t *testing.T) {
 		SHA:         sha,
 	}
 
-	opt := &option{filterMode: difffilter.ModeAdded}
+	opt := &option{filterMode: filter.ModeAdded}
 	if _, err := postResultSet(context.Background(), &resultSet, ghInfo, fakeCli, opt); err != nil {
 		t.Fatal(err)
 	}
@@ -327,7 +327,7 @@ func TestPostResultSet_withoutReportURL(t *testing.T) {
 		sha   = "1414"
 	)
 
-	wantResults := []*reviewdog.FilteredCheck{{ShouldReport: true}}
+	wantResults := []*filter.FilteredDiagnostic{{ShouldReport: true}}
 	fakeCli := &fakeDoghouseServerCli{}
 	fakeCli.FakeCheck = func(ctx context.Context, req *doghouse.CheckRequest) (*doghouse.CheckResponse, error) {
 		return &doghouse.CheckResponse{CheckedResults: wantResults}, nil
@@ -338,7 +338,7 @@ func TestPostResultSet_withoutReportURL(t *testing.T) {
 
 	ghInfo := &cienv.BuildInfo{Owner: owner, Repo: repo, PullRequest: prNum, SHA: sha}
 
-	opt := &option{filterMode: difffilter.ModeAdded}
+	opt := &option{filterMode: filter.ModeAdded}
 	resp, err := postResultSet(context.Background(), &resultSet, ghInfo, fakeCli, opt)
 	if err != nil {
 		t.Fatal(err)
@@ -350,7 +350,7 @@ func TestPostResultSet_withoutReportURL(t *testing.T) {
 	if err != nil {
 		t.Fatalf("should have result for name1: %v", err)
 	}
-	if diff := cmp.Diff(results.FilteredCheck, wantResults, protocmp.Transform()); diff != "" {
+	if diff := cmp.Diff(results.FilteredDiagnostic, wantResults, protocmp.Transform()); diff != "" {
 		t.Errorf("results has diff:\n%s", diff)
 	}
 }
@@ -385,7 +385,7 @@ func TestPostResultSet_conclusion(t *testing.T) {
 		fakeCli.FakeCheck = func(ctx context.Context, req *doghouse.CheckRequest) (*doghouse.CheckResponse, error) {
 			return &doghouse.CheckResponse{ReportURL: "xxx", Conclusion: tt.conclusion}, nil
 		}
-		opt := &option{filterMode: difffilter.ModeAdded, failOnError: tt.failOnError}
+		opt := &option{filterMode: filter.ModeAdded, failOnError: tt.failOnError}
 		id := fmt.Sprintf("[conclusion=%s, failOnError=%v]", tt.conclusion, tt.failOnError)
 		_, err := postResultSet(context.Background(), &resultSet, ghInfo, fakeCli, opt)
 		if tt.wantErr && err == nil {
@@ -414,7 +414,7 @@ func TestPostResultSet_withEmptyResponse(t *testing.T) {
 
 	ghInfo := &cienv.BuildInfo{Owner: owner, Repo: repo, PullRequest: prNum, SHA: sha}
 
-	opt := &option{filterMode: difffilter.ModeAdded}
+	opt := &option{filterMode: filter.ModeAdded}
 	if _, err := postResultSet(context.Background(), &resultSet, ghInfo, fakeCli, opt); err == nil {
 		t.Error("got no error but want report missing error")
 	}
@@ -428,7 +428,7 @@ func TestReportResults(t *testing.T) {
 	defer cleanup()
 	filteredResultSet := new(reviewdog.FilteredResultMap)
 	filteredResultSet.Store("name1", &reviewdog.FilteredResult{
-		FilteredCheck: []*reviewdog.FilteredCheck{
+		FilteredDiagnostic: []*filter.FilteredDiagnostic{
 			{
 				Diagnostic: &rdf.Diagnostic{
 					OriginalOutput: "name1-L1\nname1-L2",
@@ -444,7 +444,7 @@ func TestReportResults(t *testing.T) {
 		},
 	})
 	filteredResultSet.Store("name2", &reviewdog.FilteredResult{
-		FilteredCheck: []*reviewdog.FilteredCheck{
+		FilteredDiagnostic: []*filter.FilteredDiagnostic{
 			{
 				Diagnostic: &rdf.Diagnostic{
 					OriginalOutput: "name1-L1\nname1-L2",
@@ -477,7 +477,7 @@ func TestReportResults_inGitHubAction(t *testing.T) {
 	defer cleanup()
 	filteredResultSet := new(reviewdog.FilteredResultMap)
 	filteredResultSet.Store("name1", &reviewdog.FilteredResult{
-		FilteredCheck: []*reviewdog.FilteredCheck{
+		FilteredDiagnostic: []*filter.FilteredDiagnostic{
 			{
 				Diagnostic: &rdf.Diagnostic{
 					OriginalOutput: "name1-L1\nname1-L2",
@@ -503,7 +503,7 @@ func TestReportResults_noResultsShouldReport(t *testing.T) {
 	defer cleanup()
 	filteredResultSet := new(reviewdog.FilteredResultMap)
 	filteredResultSet.Store("name1", &reviewdog.FilteredResult{
-		FilteredCheck: []*reviewdog.FilteredCheck{
+		FilteredDiagnostic: []*filter.FilteredDiagnostic{
 			{
 				Diagnostic: &rdf.Diagnostic{
 					OriginalOutput: "name1-L1\nname1-L2",
@@ -519,7 +519,7 @@ func TestReportResults_noResultsShouldReport(t *testing.T) {
 		},
 	})
 	filteredResultSet.Store("name2", &reviewdog.FilteredResult{
-		FilteredCheck: []*reviewdog.FilteredCheck{
+		FilteredDiagnostic: []*filter.FilteredDiagnostic{
 			{
 				Diagnostic: &rdf.Diagnostic{
 					OriginalOutput: "name1-L1\nname1-L2",

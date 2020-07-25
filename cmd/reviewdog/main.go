@@ -27,7 +27,7 @@ import (
 	"github.com/reviewdog/reviewdog"
 	"github.com/reviewdog/reviewdog/cienv"
 	"github.com/reviewdog/reviewdog/commands"
-	"github.com/reviewdog/reviewdog/difffilter"
+	"github.com/reviewdog/reviewdog/filter"
 	"github.com/reviewdog/reviewdog/parser"
 	"github.com/reviewdog/reviewdog/project"
 	gerritservice "github.com/reviewdog/reviewdog/service/gerrit"
@@ -57,7 +57,7 @@ type option struct {
 	level            string
 	guessPullRequest bool
 	tee              bool
-	filterMode       difffilter.Mode
+	filterMode       filter.Mode
 	failOnError      bool
 }
 
@@ -335,7 +335,7 @@ github-pr-check reporter as a fallback.
 		}
 		ds = d
 	case "local":
-		if opt.diffCmd == "" && opt.filterMode == difffilter.ModeNoFilter {
+		if opt.diffCmd == "" && opt.filterMode == filter.ModeNoFilter {
 			ds = &reviewdog.EmptyDiff{}
 		} else {
 			d, err := diffService(opt.diffCmd, opt.diffStrip)

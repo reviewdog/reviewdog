@@ -1,4 +1,4 @@
-package difffilter
+package filter
 
 import (
 	"os"
@@ -58,8 +58,8 @@ const sampleDiffRoot = `--- a/sample.old.txt	2016-10-13 05:09:35.820791185 +0900
 \ No newline at end of file
 `
 
-const sampleDiffSubDir = `--- a/difffilter/sample.old.txt	2016-10-13 05:09:35.820791185 +0900
-+++ b/difffilter/sample.new.txt	2016-10-13 05:15:26.839245048 +0900
+const sampleDiffSubDir = `--- a/filter/sample.old.txt	2016-10-13 05:09:35.820791185 +0900
++++ b/filter/sample.new.txt	2016-10-13 05:15:26.839245048 +0900
 @@ -1,3 +1,4 @@
  unchanged, contextual line
 -deleted line
@@ -210,7 +210,7 @@ func TestDiffFilter_root(t *testing.T) {
 		},
 	}
 	for _, tt := range tests {
-		df := New(files, 1, getCwd(), tt.mode)
+		df := NewDiffFilter(files, 1, getCwd(), tt.mode)
 		if got, gotFile, gotLine := df.ShouldReport(tt.path, tt.lnum); got != tt.want ||
 			(gotFile != nil) != tt.wantFileDiff ||
 			(gotLine != nil) != tt.wantLineDiff {
@@ -267,7 +267,7 @@ func TestDiffFilter_subdir(t *testing.T) {
 		},
 	}
 	for _, tt := range tests {
-		df := New(files, 1, getCwd(), tt.mode)
+		df := NewDiffFilter(files, 1, getCwd(), tt.mode)
 		if got, gotFile, gotLine := df.ShouldReport(tt.path, tt.lnum); got != tt.want ||
 			(gotFile != nil) != tt.wantFileDiff ||
 			(gotLine != nil) != tt.wantLineDiff {

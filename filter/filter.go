@@ -1,15 +1,14 @@
-package reviewdog
+package filter
 
 import (
 	"path/filepath"
 
 	"github.com/reviewdog/reviewdog/diff"
-	"github.com/reviewdog/reviewdog/difffilter"
 	"github.com/reviewdog/reviewdog/proto/rdf"
 )
 
-// FilteredCheck represents Diagnostic with filtering info.
-type FilteredCheck struct {
+// FilteredDiagnostic represents Diagnostic with filtering info.
+type FilteredDiagnostic struct {
 	Diagnostic   *rdf.Diagnostic
 	ShouldReport bool
 	// false if the result is outside diff files.
@@ -23,14 +22,15 @@ type FilteredCheck struct {
 }
 
 // FilterCheck filters check results by diff. It doesn't drop check which
-// is not in diff but set FilteredCheck.ShouldReport field false.
+// is not in diff but set FilteredDiagnostic.ShouldReport field false.
 func FilterCheck(results []*rdf.Diagnostic, diff []*diff.FileDiff, strip int,
-	cwd string, mode difffilter.Mode) []*FilteredCheck {
-	checks := make([]*FilteredCheck, 0, len(results))
-	df := difffilter.New(diff, strip, cwd, mode)
+	cwd string, mode Mode) []*FilteredDiagnostic {
+	checks := make([]*FilteredDiagnostic, 0, len(results))
+	df := NewDiffFilter(diff, strip, cwd, mode)
 	for _, result := range results {
-		check := &FilteredCheck{Diagnostic: result}
+		check := &FilteredDiagnostic{Diagnostic: result}
 		loc := result.GetLocation()
+		loc.Path = NormalizePath(loc.GetPath(), cwd, "")
 		startLine := int(loc.GetRange().GetStart().GetLine())
 		endLine := int(loc.GetRange().GetEnd().GetLine())
 		if endLine == 0 {
@@ -50,40 +50,41 @@ func FilterCheck(results []*rdf.Diagnostic, diff []*diff.FileDiff, strip int,
 				}
 			}
 		}
-		loc.Path = CleanPath(loc.GetPath(), cwd)
+		// loc.Path = NormalizePath(loc.GetPath(), cwd, "")
 		checks = append(checks, check)
 	}
 	return checks
 }
 
-// CleanPath clean up given path. If workdir is not empty, it returns relative
-// path to the given workdir.
-//
-// TODO(haya14busa): DRY. Create shared logic between this and
-// difffilter.normalizePath.
-func CleanPath(path, workdir string) string {
-	p := path
-	if filepath.IsAbs(path) && workdir != "" {
-		relPath, err := filepath.Rel(workdir, path)
-		if err == nil {
-			p = relPath
-		}
-	}
-	p = filepath.Clean(p)
-	if p == "." {
+// NormalizePath return normalized path with workdir and relative path to
+// project.
+func NormalizePath(path, workdir, projectRelPath string) string {
+	path = filepath.Clean(path)
+	if path == "." {
 		return ""
 	}
-	return filepath.ToSlash(p)
+	// Convert absolute path to relative path only if the path is in current
+	// directory.
+	if filepath.IsAbs(path) && workdir != "" && contains(path, workdir) {
+		relPath, err := filepath.Rel(workdir, path)
+		if err == nil {
+			path = relPath
+		}
+	}
+	if !filepath.IsAbs(path) && projectRelPath != "" {
+		path = filepath.Join(projectRelPath, path)
+	}
+	return filepath.ToSlash(path)
 }
 
 func getOldPosition(filediff *diff.FileDiff, strip int, newPath string, newLine int) (oldPath string, oldLine int) {
 	if filediff == nil {
 		return "", 0
 	}
-	if difffilter.NormalizeDiffPath(filediff.PathNew, strip) != newPath {
+	if NormalizeDiffPath(filediff.PathNew, strip) != newPath {
 		return "", 0
 	}
-	oldPath = difffilter.NormalizeDiffPath(filediff.PathOld, strip)
+	oldPath = NormalizeDiffPath(filediff.PathOld, strip)
 	delta := 0
 	for _, hunk := range filediff.Hunks {
 		if newLine < hunk.StartLineNew {

@@ -1,4 +1,4 @@
-package difffilter
+package filter
 
 import (
 	"fmt"
@@ -86,8 +86,8 @@ type difflines map[normalizedPath]map[int]*diff.Line
 // difffiles is a hash table of normalizedPath to *diff.FileDiff.
 type difffiles map[normalizedPath]*diff.FileDiff
 
-// New creates a new DiffFilter.
-func New(diff []*diff.FileDiff, strip int, cwd string, mode Mode) *DiffFilter {
+// NewDiffFilter creates a new DiffFilter.
+func NewDiffFilter(diff []*diff.FileDiff, strip int, cwd string, mode Mode) *DiffFilter {
 	df := &DiffFilter{
 		strip:     strip,
 		cwd:       cwd,
@@ -153,19 +153,7 @@ func (df *DiffFilter) isSignificantLine(line *diff.Line) bool {
 type normalizedPath struct{ p string }
 
 func (df *DiffFilter) normalizePath(path string) normalizedPath {
-	path = filepath.Clean(path)
-	// Convert absolute path to relative path only if the path is in current
-	// directory.
-	if filepath.IsAbs(path) && df.cwd != "" && contains(path, df.cwd) {
-		relPath, err := filepath.Rel(df.cwd, path)
-		if err == nil {
-			path = relPath
-		}
-	}
-	if !filepath.IsAbs(path) && df.projectRelPath != "" {
-		path = filepath.Join(df.projectRelPath, path)
-	}
-	return normalizedPath{p: filepath.ToSlash(path)}
+	return normalizedPath{p: NormalizePath(path, df.cwd, df.projectRelPath)}
 }
 
 func contains(path, base string) bool {

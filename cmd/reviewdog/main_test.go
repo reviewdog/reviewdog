@@ -10,7 +10,7 @@ import (
 	"testing"
 
 	"github.com/reviewdog/reviewdog/commands"
-	"github.com/reviewdog/reviewdog/difffilter"
+	"github.com/reviewdog/reviewdog/filter"
 )
 
 func TestRun_local(t *testing.T) {
@@ -95,7 +95,7 @@ func TestRun_local_nofilter(t *testing.T) {
 		t.Errorf("got no error, but want error")
 	}
 
-	opt.filterMode = difffilter.ModeNoFilter
+	opt.filterMode = filter.ModeNoFilter
 	if err := run(strings.NewReader(stdin), stdout, opt); err != nil {
 		t.Error(err)
 	}
