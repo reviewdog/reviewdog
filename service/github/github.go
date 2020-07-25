@@ -281,7 +281,7 @@ func buildSingleSuggestion(c *reviewdog.Comment, s *rdf.Suggestion) (string, err
 	drange := c.Result.Diagnostic.GetLocation().GetRange()
 	if start.GetLine() != drange.GetStart().GetLine() ||
 		end.GetLine() != drange.GetEnd().GetLine() {
-		return "", fmt.Errorf("the Diagnostic's lines and Suggestion lines must be the same. %d-%d v.s. %d-%d",
+		return "", fmt.Errorf("the Diagnostic's lines and Suggestion lines must be the same. L%d-L%d v.s. L%d-L%d",
 			drange.GetStart().GetLine(), drange.GetEnd().GetLine(), start.GetLine(), end.GetLine())
 	}
 	if start.GetColumn() > 0 || end.GetColumn() > 0 {

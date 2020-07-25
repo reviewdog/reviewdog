@@ -313,7 +313,7 @@ func TestGitHubPullRequest_Post_Flush_review_api(t *testing.T) {
 				Line:      github.Int(16),
 				Body: github.String(commentutil.BodyPrefix + "\n" + strings.Join([]string{
 					"invalid lines suggestion comment",
-					invalidSuggestionPre + "the Diagnostic's lines and Suggestion lines must be the same. 15-16 v.s. 16-17" + invalidSuggestionPost,
+					invalidSuggestionPre + "the Diagnostic's lines and Suggestion lines must be the same. L15-L16 v.s. L16-L17" + invalidSuggestionPost,
 				}, "\n") + "\n"),
 			},
 			{
