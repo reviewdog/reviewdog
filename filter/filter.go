@@ -26,10 +26,11 @@ type FilteredCheck struct {
 func FilterCheck(results []*rdf.Diagnostic, diff []*diff.FileDiff, strip int,
 	cwd string, mode Mode) []*FilteredCheck {
 	checks := make([]*FilteredCheck, 0, len(results))
-	df := New(diff, strip, cwd, mode)
+	df := NewDiffFilter(diff, strip, cwd, mode)
 	for _, result := range results {
 		check := &FilteredCheck{Diagnostic: result}
 		loc := result.GetLocation()
+		loc.Path = NormalizePath(loc.GetPath(), cwd, "")
 		startLine := int(loc.GetRange().GetStart().GetLine())
 		endLine := int(loc.GetRange().GetEnd().GetLine())
 		if endLine == 0 {
@@ -49,30 +50,31 @@ func FilterCheck(results []*rdf.Diagnostic, diff []*diff.FileDiff, strip int,
 				}
 			}
 		}
-		loc.Path = CleanPath(loc.GetPath(), cwd)
+		// loc.Path = NormalizePath(loc.GetPath(), cwd, "")
 		checks = append(checks, check)
 	}
 	return checks
 }
 
-// CleanPath clean up given path. If workdir is not empty, it returns relative
-// path to the given workdir.
-//
-// TODO(haya14busa): DRY. Create shared logic between this and
-// filter.normalizePath.
-func CleanPath(path, workdir string) string {
-	p := path
-	if filepath.IsAbs(path) && workdir != "" {
-		relPath, err := filepath.Rel(workdir, path)
-		if err == nil {
-			p = relPath
-		}
-	}
-	p = filepath.Clean(p)
-	if p == "." {
+// NormalizePath return normalized path with workdir and relative path to
+// project.
+func NormalizePath(path, workdir, projectRelPath string) string {
+	path = filepath.Clean(path)
+	if path == "." {
 		return ""
 	}
-	return filepath.ToSlash(p)
+	// Convert absolute path to relative path only if the path is in current
+	// directory.
+	if filepath.IsAbs(path) && workdir != "" && contains(path, workdir) {
+		relPath, err := filepath.Rel(workdir, path)
+		if err == nil {
+			path = relPath
+		}
+	}
+	if !filepath.IsAbs(path) && projectRelPath != "" {
+		path = filepath.Join(projectRelPath, path)
+	}
+	return filepath.ToSlash(path)
 }
 
 func getOldPosition(filediff *diff.FileDiff, strip int, newPath string, newLine int) (oldPath string, oldLine int) {

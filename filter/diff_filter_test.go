@@ -210,7 +210,7 @@ func TestDiffFilter_root(t *testing.T) {
 		},
 	}
 	for _, tt := range tests {
-		df := New(files, 1, getCwd(), tt.mode)
+		df := NewDiffFilter(files, 1, getCwd(), tt.mode)
 		if got, gotFile, gotLine := df.ShouldReport(tt.path, tt.lnum); got != tt.want ||
 			(gotFile != nil) != tt.wantFileDiff ||
 			(gotLine != nil) != tt.wantLineDiff {
@@ -267,7 +267,7 @@ func TestDiffFilter_subdir(t *testing.T) {
 		},
 	}
 	for _, tt := range tests {
-		df := New(files, 1, getCwd(), tt.mode)
+		df := NewDiffFilter(files, 1, getCwd(), tt.mode)
 		if got, gotFile, gotLine := df.ShouldReport(tt.path, tt.lnum); got != tt.want ||
 			(gotFile != nil) != tt.wantFileDiff ||
 			(gotLine != nil) != tt.wantLineDiff {

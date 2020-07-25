@@ -8,7 +8,6 @@ import (
 	"log"
 	"net/http"
 	"os"
-	"path/filepath"
 	"sort"
 
 	"golang.org/x/oauth2"
@@ -180,8 +179,7 @@ func postResultSet(ctx context.Context, resultSet *reviewdog.ResultMap,
 }
 
 func checkResultToAnnotation(d *rdf.Diagnostic, wd, gitRelWd string) *doghouse.Annotation {
-	d.GetLocation().Path = filepath.ToSlash(filepath.Join(
-		gitRelWd, filter.CleanPath(d.GetLocation().GetPath(), wd)))
+	d.GetLocation().Path = filter.NormalizePath(d.GetLocation().GetPath(), wd, gitRelWd)
 	return &doghouse.Annotation{
 		Diagnostic: d,
 	}
