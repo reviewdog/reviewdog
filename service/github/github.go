@@ -281,17 +281,7 @@ func buildSingleSuggestion(c *reviewdog.Comment, s *rdf.Suggestion) (string, err
 	if start.GetLine() != c.Result.Diagnostic.GetLocation().GetRange().GetStart().GetLine() {
 		return "", errors.New("Diagnostic and Suggestion lines must be the same.")
 	}
-	end := s.GetRange().GetEnd()
-	if !(end.GetLine() == 0 ||
-		(start.GetLine() == end.GetLine() && end.GetColumn() == 0) ||
-		(start.GetLine() == end.GetLine()+1 && end.GetColumn() == 1)) {
-		// It must be a suggestion for a single line change due to GitHub API
-		// restriction. Create a review for a pull request API [1] doesn't support
-		// comments to multi lines as of writing (2020-07-21).
-		// [1]: https://docs.github.com/en/rest/reference/pulls#create-a-review-for-a-pull-request
-		return "", errors.New("non single line")
-	}
-	if start.GetColumn() > 1 {
+	if start.GetColumn() > 1 || s.GetRange().GetEnd().GetColumn() > 1 {
 		// TODO(haya14busa): Support non-line based suggestion.
 		return "", errors.New("non line based")
 	}
