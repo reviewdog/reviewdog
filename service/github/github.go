@@ -278,12 +278,16 @@ func buildSuggestions(c *reviewdog.Comment) string {
 
 func buildSingleSuggestion(c *reviewdog.Comment, s *rdf.Suggestion) (string, error) {
 	start := s.GetRange().GetStart()
-	if start.GetLine() != c.Result.Diagnostic.GetLocation().GetRange().GetStart().GetLine() {
-		return "", errors.New("Diagnostic and Suggestion lines must be the same.")
+	end := s.GetRange().GetEnd()
+	drange := c.Result.Diagnostic.GetLocation().GetRange()
+	if start.GetLine() != drange.GetStart().GetLine() ||
+		end.GetLine() != drange.GetEnd().GetLine() {
+		return "", fmt.Errorf("the Diagnostic's lines and Suggestion lines must be the same. %d-%d v.s. %d-%d",
+			start.GetLine(), end.GetLine(), drange.GetStart().GetLine(), drange.GetEnd().GetLine())
 	}
-	if start.GetColumn() > 1 || s.GetRange().GetEnd().GetColumn() > 1 {
+	if start.GetColumn() > 1 || end.GetColumn() > 1 {
 		// TODO(haya14busa): Support non-line based suggestion.
-		return "", errors.New("non line based")
+		return "", errors.New("non line based suggestion (contains column)")
 	}
 	var sb strings.Builder
 	sb.WriteString("```suggestion\n")
