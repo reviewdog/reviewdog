@@ -37,7 +37,7 @@ type GitLabMergeRequestDiscussionCommenter struct {
 func NewGitLabMergeRequestDiscussionCommenter(cli *gitlab.Client, owner, repo string, pr int, sha string) (*GitLabMergeRequestDiscussionCommenter, error) {
 	workDir, err := serviceutil.GitRelWorkdir()
 	if err != nil {
-		return nil, fmt.Errorf("GitLabMergeRequestDiscussionCommenter needs 'git' command: %v", err)
+		return nil, fmt.Errorf("GitLabMergeRequestDiscussionCommenter needs 'git' command: %w", err)
 	}
 	return &GitLabMergeRequestDiscussionCommenter{
 		cli:      cli,
@@ -65,7 +65,7 @@ func (g *GitLabMergeRequestDiscussionCommenter) Flush(ctx context.Context) error
 	defer g.muComments.Unlock()
 	postedcs, err := g.createPostedComments()
 	if err != nil {
-		return fmt.Errorf("failed to create posted comments: %v", err)
+		return fmt.Errorf("failed to create posted comments: %w", err)
 	}
 	return g.postCommentsForEach(ctx, postedcs)
 }
@@ -74,7 +74,7 @@ func (g *GitLabMergeRequestDiscussionCommenter) createPostedComments() (commentu
 	postedcs := make(commentutil.PostedComments)
 	discussions, err := listAllMergeRequestDiscussion(g.cli, g.projects, g.pr, &gitlab.ListMergeRequestDiscussionsOptions{PerPage: 100})
 	if err != nil {
-		return nil, fmt.Errorf("failed to list all merge request discussions: %v", err)
+		return nil, fmt.Errorf("failed to list all merge request discussions: %w", err)
 	}
 	for _, d := range discussions {
 		for _, note := range d.Notes {
@@ -91,7 +91,7 @@ func (g *GitLabMergeRequestDiscussionCommenter) createPostedComments() (commentu
 func (g *GitLabMergeRequestDiscussionCommenter) postCommentsForEach(ctx context.Context, postedcs commentutil.PostedComments) error {
 	mr, _, err := g.cli.MergeRequests.GetMergeRequest(g.projects, g.pr, nil, gitlab.WithContext(ctx))
 	if err != nil {
-		return fmt.Errorf("failed to get merge request: %v", err)
+		return fmt.Errorf("failed to get merge request: %w", err)
 	}
 	targetBranch, _, err := g.cli.Branches.GetBranch(mr.TargetProjectID, mr.TargetBranch, nil)
 	if err != nil {
@@ -125,7 +125,7 @@ func (g *GitLabMergeRequestDiscussionCommenter) postCommentsForEach(ctx context.
 			}
 			_, _, err := g.cli.Discussions.CreateMergeRequestDiscussion(g.projects, g.pr, discussion)
 			if err != nil {
-				return fmt.Errorf("failed to create merge request discussion: %v", err)
+				return fmt.Errorf("failed to create merge request discussion: %w", err)
 			}
 			return nil
 		})

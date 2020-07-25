@@ -53,7 +53,7 @@ func RunAndParse(ctx context.Context, conf *Config, runners map[string]bool, def
 			return nil, err
 		}
 		if err := cmd.Start(); err != nil {
-			return nil, fmt.Errorf("fail to start command: %v", err)
+			return nil, fmt.Errorf("fail to start command: %w", err)
 		}
 		g.Go(func() error {
 			defer func() { <-semaphore }()
@@ -81,7 +81,7 @@ func RunAndParse(ctx context.Context, conf *Config, runners map[string]bool, def
 		})
 	}
 	if err := g.Wait(); err != nil {
-		return nil, fmt.Errorf("fail to run reviewdog: %v", err)
+		return nil, fmt.Errorf("fail to run reviewdog: %w", err)
 	}
 	if err := checkUnknownRunner(runners, usedRunners); err != nil {
 		return nil, err

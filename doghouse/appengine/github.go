@@ -181,7 +181,7 @@ func (g *GitHubHandler) requestAccessToken(ctx context.Context, code, state stri
 
 	req, err := http.NewRequest(http.MethodPost, u, strings.NewReader(data.Encode()))
 	if err != nil {
-		return "", fmt.Errorf("failed to create request: %v", err)
+		return "", fmt.Errorf("failed to create request: %w", err)
 	}
 	req = req.WithContext(ctx)
 	req.Header.Add("Accept", "application/json")
@@ -190,7 +190,7 @@ func (g *GitHubHandler) requestAccessToken(ctx context.Context, code, state stri
 
 	res, err := cli.Do(req)
 	if err != nil {
-		return "", fmt.Errorf("failed to request access token: %v", err)
+		return "", fmt.Errorf("failed to request access token: %w", err)
 	}
 	defer res.Body.Close()
 
@@ -200,7 +200,7 @@ func (g *GitHubHandler) requestAccessToken(ctx context.Context, code, state stri
 		AccessToken string `json:"access_token"`
 	}
 	if err := json.NewDecoder(bytes.NewReader(b)).Decode(&token); err != nil {
-		return "", fmt.Errorf("failed to decode response: %v", err)
+		return "", fmt.Errorf("failed to decode response: %w", err)
 	}
 
 	if token.AccessToken == "" {

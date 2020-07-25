@@ -115,17 +115,17 @@ func (w *Reviewdog) runFromResult(ctx context.Context, results []*CheckResult,
 func (w *Reviewdog) Run(ctx context.Context, r io.Reader) error {
 	results, err := w.p.Parse(r)
 	if err != nil {
-		return fmt.Errorf("parse error: %v", err)
+		return fmt.Errorf("parse error: %w", err)
 	}
 
 	d, err := w.d.Diff(ctx)
 	if err != nil {
-		return fmt.Errorf("fail to get diff: %v", err)
+		return fmt.Errorf("fail to get diff: %w", err)
 	}
 
 	filediffs, err := diff.ParseMultiFile(bytes.NewReader(d))
 	if err != nil {
-		return fmt.Errorf("fail to parse diff: %v", err)
+		return fmt.Errorf("fail to parse diff: %w", err)
 	}
 
 	return w.runFromResult(ctx, results, filediffs, w.d.Strip(), w.failOnError)

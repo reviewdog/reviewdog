@@ -43,7 +43,7 @@ type GitLabMergeRequestCommitCommenter struct {
 func NewGitLabMergeRequestCommitCommenter(cli *gitlab.Client, owner, repo string, pr int, sha string) (*GitLabMergeRequestCommitCommenter, error) {
 	workDir, err := serviceutil.GitRelWorkdir()
 	if err != nil {
-		return nil, fmt.Errorf("GitLabMergeRequestCommitCommenter needs 'git' command: %v", err)
+		return nil, fmt.Errorf("GitLabMergeRequestCommitCommenter needs 'git' command: %w", err)
 	}
 	return &GitLabMergeRequestCommitCommenter{
 		cli:      cli,
@@ -109,7 +109,7 @@ func (g *GitLabMergeRequestCommitCommenter) getLastCommitsID(path string, line i
 	lineFormat := fmt.Sprintf("%d,%d", line, line)
 	s, err := exec.Command("git", "blame", "-l", "-L", lineFormat, path).Output()
 	if err != nil {
-		return "", fmt.Errorf("failed to get commitID: %v", err)
+		return "", fmt.Errorf("failed to get commitID: %w", err)
 	}
 	commitID := strings.Split(string(s), " ")[0]
 	return commitID, nil

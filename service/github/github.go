@@ -47,7 +47,7 @@ type GitHubPullRequest struct {
 func NewGitHubPullRequest(cli *github.Client, owner, repo string, pr int, sha string) (*GitHubPullRequest, error) {
 	workDir, err := serviceutil.GitRelWorkdir()
 	if err != nil {
-		return nil, fmt.Errorf("GitHubPullRequest needs 'git' command: %v", err)
+		return nil, fmt.Errorf("GitHubPullRequest needs 'git' command: %w", err)
 	}
 	return &GitHubPullRequest{
 		cli:   cli,

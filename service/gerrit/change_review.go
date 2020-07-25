@@ -34,7 +34,7 @@ type ChangeReviewCommenter struct {
 func NewChangeReviewCommenter(cli *gerrit.Client, changeID, revisionID string) (*ChangeReviewCommenter, error) {
 	workDir, err := serviceutil.GitRelWorkdir()
 	if err != nil {
-		return nil, fmt.Errorf("ChangeReviewCommenter needs 'git' command: %v", err)
+		return nil, fmt.Errorf("ChangeReviewCommenter needs 'git' command: %w", err)
 	}
 
 	return &ChangeReviewCommenter{

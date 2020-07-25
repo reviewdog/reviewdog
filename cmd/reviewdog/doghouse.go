@@ -143,7 +143,7 @@ func postResultSet(ctx context.Context, resultSet *reviewdog.ResultMap,
 			}
 			res, err := cli.Check(ctx, req)
 			if err != nil {
-				return fmt.Errorf("post failed for %s: %v", name, err)
+				return fmt.Errorf("post failed for %s: %w", name, err)
 			}
 			if res.ReportURL != "" {
 				conclusion := ""
