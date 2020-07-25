@@ -30,22 +30,15 @@ func NewReviewdog(toolname string, p Parser, c CommentService, d DiffService, fi
 }
 
 // RunFromResult creates a new Reviewdog and runs it with check results.
-func RunFromResult(ctx context.Context, c CommentService, results []*CheckResult,
+func RunFromResult(ctx context.Context, c CommentService, results []*rdf.Diagnostic,
 	filediffs []*diff.FileDiff, strip int, toolname string, filterMode difffilter.Mode, failOnError bool) error {
 	return (&Reviewdog{c: c, toolname: toolname, filterMode: filterMode, failOnError: failOnError}).runFromResult(ctx, results, filediffs, strip, failOnError)
-}
-
-// CheckResult represents a checked result of static analysis tools.
-// :h error-file-format
-type CheckResult struct {
-	Diagnostic *rdf.Diagnostic
-	Lines      []string // Original error lines (often one line). (Optional)
 }
 
 // Parser is an interface which parses compilers, linters, or any tools
 // results.
 type Parser interface {
-	Parse(r io.Reader) ([]*CheckResult, error)
+	Parse(r io.Reader) ([]*rdf.Diagnostic, error)
 }
 
 // Comment represents a reported result as a comment.
@@ -73,7 +66,7 @@ type DiffService interface {
 	Strip() int
 }
 
-func (w *Reviewdog) runFromResult(ctx context.Context, results []*CheckResult,
+func (w *Reviewdog) runFromResult(ctx context.Context, results []*rdf.Diagnostic,
 	filediffs []*diff.FileDiff, strip int, failOnError bool) error {
 	wd, err := os.Getwd()
 	if err != nil {

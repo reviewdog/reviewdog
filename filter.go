@@ -5,11 +5,12 @@ import (
 
 	"github.com/reviewdog/reviewdog/diff"
 	"github.com/reviewdog/reviewdog/difffilter"
+	"github.com/reviewdog/reviewdog/proto/rdf"
 )
 
-// FilteredCheck represents CheckResult with filtering info.
+// FilteredCheck represents Diagnostic with filtering info.
 type FilteredCheck struct {
-	*CheckResult
+	Diagnostic   *rdf.Diagnostic
 	ShouldReport bool
 	// false if the result is outside diff files.
 	InDiffFile bool
@@ -23,13 +24,13 @@ type FilteredCheck struct {
 
 // FilterCheck filters check results by diff. It doesn't drop check which
 // is not in diff but set FilteredCheck.ShouldReport field false.
-func FilterCheck(results []*CheckResult, diff []*diff.FileDiff, strip int,
+func FilterCheck(results []*rdf.Diagnostic, diff []*diff.FileDiff, strip int,
 	cwd string, mode difffilter.Mode) []*FilteredCheck {
 	checks := make([]*FilteredCheck, 0, len(results))
 	df := difffilter.New(diff, strip, cwd, mode)
 	for _, result := range results {
-		check := &FilteredCheck{CheckResult: result}
-		loc := result.Diagnostic.GetLocation()
+		check := &FilteredCheck{Diagnostic: result}
+		loc := result.GetLocation()
 		startLine := int(loc.GetRange().GetStart().GetLine())
 		endLine := int(loc.GetRange().GetEnd().GetLine())
 		if endLine == 0 {

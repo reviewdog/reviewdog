@@ -3,19 +3,19 @@ package githubutils
 import (
 	"fmt"
 
-	"github.com/reviewdog/reviewdog"
+	"github.com/reviewdog/reviewdog/proto/rdf"
 )
 
-// LinkedMarkdownCheckResult returns Markdown string which contains a link to the
-// location in the CheckResult and CheckResult content itself.
-func LinkedMarkdownCheckResult(owner, repo, sha string, c *reviewdog.CheckResult) string {
-	path := c.Diagnostic.GetLocation().GetPath()
-	msg := c.Diagnostic.GetMessage()
+// LinkedMarkdownDiagnostic returns Markdown string which contains a link to the
+// location in the diagnostic and the diagnostic content itself.
+func LinkedMarkdownDiagnostic(owner, repo, sha string, d *rdf.Diagnostic) string {
+	path := d.GetLocation().GetPath()
+	msg := d.GetMessage()
 	if path == "" {
 		return msg
 	}
-	loc := BasicLocationFormat(c)
-	line := int(c.Diagnostic.GetLocation().GetRange().GetStart().GetLine())
+	loc := BasicLocationFormat(d)
+	line := int(d.GetLocation().GetRange().GetStart().GetLine())
 	link := PathLink(owner, repo, sha, path, line)
 	return fmt.Sprintf("[%s](%s) %s", loc, link, msg)
 }
@@ -33,9 +33,9 @@ func PathLink(owner, repo, sha, path string, line int) string {
 		owner, repo, sha, path, fragment)
 }
 
-// BasicLocationFormat format check CheckResult to %f|%l col %c| errorformat.
-func BasicLocationFormat(c *reviewdog.CheckResult) string {
-	loc := c.Diagnostic.GetLocation()
+// BasicLocationFormat format a diagnostic to %f|%l col %c| errorformat.
+func BasicLocationFormat(d *rdf.Diagnostic) string {
+	loc := d.GetLocation()
 	out := loc.GetPath() + "|"
 	lnum := int(loc.GetRange().GetStart().GetLine())
 	col := int(loc.GetRange().GetStart().GetColumn())

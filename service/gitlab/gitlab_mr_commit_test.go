@@ -92,7 +92,7 @@ func TestGitLabMergeRequestCommitCommenter_Post_Flush_review_api(t *testing.T) {
 	// If setting exists file path, sha is changed by last commit id.
 	comments := []*reviewdog.Comment{
 		{
-			Result: &reviewdog.FilteredCheck{CheckResult: &reviewdog.CheckResult{
+			Result: &reviewdog.FilteredCheck{
 				Diagnostic: &rdf.Diagnostic{
 					Location: &rdf.Location{
 						Path: "notExistFile.go",
@@ -101,11 +101,12 @@ func TestGitLabMergeRequestCommitCommenter_Post_Flush_review_api(t *testing.T) {
 						}},
 					},
 				},
-			}, InDiffFile: true},
+				InDiffFile: true,
+			},
 			Body: "already commented",
 		},
 		{
-			Result: &reviewdog.FilteredCheck{CheckResult: &reviewdog.CheckResult{
+			Result: &reviewdog.FilteredCheck{
 				Diagnostic: &rdf.Diagnostic{
 					Location: &rdf.Location{
 						Path: "notExistFile.go",
@@ -114,7 +115,8 @@ func TestGitLabMergeRequestCommitCommenter_Post_Flush_review_api(t *testing.T) {
 						}},
 					},
 				},
-			}, InDiffFile: true},
+				InDiffFile: true,
+			},
 			Body: "new comment",
 		},
 	}
@@ -145,8 +147,8 @@ func TestGitLabPullRequest_workdir(t *testing.T) {
 	}
 	ctx := context.Background()
 	want := "a/b/c"
-	g.Post(ctx, &reviewdog.Comment{Result: &reviewdog.FilteredCheck{CheckResult: &reviewdog.CheckResult{
-		Diagnostic: &rdf.Diagnostic{Location: &rdf.Location{Path: want}}}}})
+	g.Post(ctx, &reviewdog.Comment{Result: &reviewdog.FilteredCheck{
+		Diagnostic: &rdf.Diagnostic{Location: &rdf.Location{Path: want}}}})
 	if got := g.postComments[0].Result.Diagnostic.GetLocation().GetPath(); got != want {
 		t.Errorf("wd=%q path=%q, want %q", g.wd, got, want)
 	}
@@ -161,8 +163,8 @@ func TestGitLabPullRequest_workdir(t *testing.T) {
 	}
 	path := "a/b/c"
 	wantPath := "cmd/" + path
-	g.Post(ctx, &reviewdog.Comment{Result: &reviewdog.FilteredCheck{CheckResult: &reviewdog.CheckResult{
-		Diagnostic: &rdf.Diagnostic{Location: &rdf.Location{Path: want}}}}})
+	g.Post(ctx, &reviewdog.Comment{Result: &reviewdog.FilteredCheck{
+		Diagnostic: &rdf.Diagnostic{Location: &rdf.Location{Path: want}}}})
 	if got := g.postComments[0].Result.Diagnostic.GetLocation().GetPath(); got != wantPath {
 		t.Errorf("wd=%q path=%q, want %q", g.wd, got, wantPath)
 	}

@@ -10,7 +10,6 @@ import (
 	"os"
 	"path/filepath"
 	"sort"
-	"strings"
 
 	"golang.org/x/oauth2"
 	"golang.org/x/sync/errgroup"
@@ -20,6 +19,7 @@ import (
 	"github.com/reviewdog/reviewdog/doghouse"
 	"github.com/reviewdog/reviewdog/doghouse/client"
 	"github.com/reviewdog/reviewdog/project"
+	"github.com/reviewdog/reviewdog/proto/rdf"
 	"github.com/reviewdog/reviewdog/service/github/githubutils"
 	"github.com/reviewdog/reviewdog/service/serviceutil"
 )
@@ -99,13 +99,13 @@ func checkResultSet(ctx context.Context, r io.Reader, opt *option, isProject boo
 		if err != nil {
 			return nil, err
 		}
-		rs, err := p.Parse(r)
+		diagnostics, err := p.Parse(r)
 		if err != nil {
 			return nil, err
 		}
 		resultSet.Store(toolName(opt), &reviewdog.Result{
-			Level:        opt.level,
-			CheckResults: rs,
+			Level:       opt.level,
+			Diagnostics: diagnostics,
 		})
 	}
 	return resultSet, nil
@@ -121,10 +121,10 @@ func postResultSet(ctx context.Context, resultSet *reviewdog.ResultMap,
 	}
 	filteredResultSet := new(reviewdog.FilteredResultMap)
 	resultSet.Range(func(name string, result *reviewdog.Result) {
-		checkResults := result.CheckResults
-		as := make([]*doghouse.Annotation, 0, len(checkResults))
-		for _, r := range checkResults {
-			as = append(as, checkResultToAnnotation(r, wd, gitRelWd))
+		diagnostics := result.Diagnostics
+		as := make([]*doghouse.Annotation, 0, len(diagnostics))
+		for _, d := range diagnostics {
+			as = append(as, checkResultToAnnotation(d, wd, gitRelWd))
 		}
 		req := &doghouse.CheckRequest{
 			Name:        name,
@@ -178,12 +178,11 @@ func postResultSet(ctx context.Context, resultSet *reviewdog.ResultMap,
 	return filteredResultSet, g.Wait()
 }
 
-func checkResultToAnnotation(c *reviewdog.CheckResult, wd, gitRelWd string) *doghouse.Annotation {
-	c.Diagnostic.GetLocation().Path = filepath.ToSlash(filepath.Join(
-		gitRelWd, reviewdog.CleanPath(c.Diagnostic.GetLocation().GetPath(), wd)))
+func checkResultToAnnotation(d *rdf.Diagnostic, wd, gitRelWd string) *doghouse.Annotation {
+	d.GetLocation().Path = filepath.ToSlash(filepath.Join(
+		gitRelWd, reviewdog.CleanPath(d.GetLocation().GetPath(), wd)))
 	return &doghouse.Annotation{
-		Diagnostic: c.Diagnostic,
-		RawMessage: strings.Join(c.Lines, "\n"),
+		Diagnostic: d,
 	}
 }
 
@@ -237,12 +236,10 @@ report results via logging command [1].
 
 			foundResultPerName = true
 			if cienv.IsInGitHubAction() {
-				githubutils.ReportAsGitHubActionsLog(name, results.Level, result.CheckResult)
+				githubutils.ReportAsGitHubActionsLog(name, results.Level, result.Diagnostic)
 			} else {
 				// Output original lines.
-				for _, line := range result.Lines {
-					fmt.Fprintln(w, line)
-				}
+				fmt.Fprintln(w, result.Diagnostic.GetOriginalOutput())
 			}
 		}
 		if !foundResultPerName {

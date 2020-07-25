@@ -79,10 +79,6 @@ type Annotation struct {
 	// Optional.
 	Diagnostic *rdf.Diagnostic `json:"diagnostic,omitempty"`
 
-	// Original error message of this annotation.
-	// Optional.
-	RawMessage string `json:"raw_message,omitempty"`
-
 	// DEPRECATED fields below. Need to support them for the old reviewdog CLI
 	// version.
 
@@ -92,4 +88,6 @@ type Annotation struct {
 	Line int `json:"line,omitempty"`
 	// DEPRECATED: Use Diagnostic.
 	Message string `json:"message,omitempty"`
+	// DEPRECATED: Use Diagnostic.
+	RawMessage string `json:"raw_message,omitempty"`
 }

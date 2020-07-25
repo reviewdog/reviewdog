@@ -115,29 +115,27 @@ func TestNewDoghouseServerCli(t *testing.T) {
 	}
 }
 
-func TestCheckResultSet_Project(t *testing.T) {
+func TestDiagnosticResultSet_Project(t *testing.T) {
 	defer func(f func(ctx context.Context, conf *project.Config, runners map[string]bool, level string, tee bool) (*reviewdog.ResultMap, error)) {
 		projectRunAndParse = f
 	}(projectRunAndParse)
 
-	var wantCheckResult reviewdog.ResultMap
-	wantCheckResult.Store("name1", &reviewdog.Result{CheckResults: []*reviewdog.CheckResult{
+	var wantDiagnosticResult reviewdog.ResultMap
+	wantDiagnosticResult.Store("name1", &reviewdog.Result{Diagnostics: []*rdf.Diagnostic{
 		{
-			Diagnostic: &rdf.Diagnostic{
-				Location: &rdf.Location{
-					Range: &rdf.Range{Start: &rdf.Position{
-						Line:   1,
-						Column: 14,
-					}},
-					Path: "reviewdog.go",
-				},
-				Message: "msg",
+			Location: &rdf.Location{
+				Range: &rdf.Range{Start: &rdf.Position{
+					Line:   1,
+					Column: 14,
+				}},
+				Path: "reviewdog.go",
 			},
+			Message: "msg",
 		},
 	}})
 
 	projectRunAndParse = func(ctx context.Context, conf *project.Config, runners map[string]bool, level string, tee bool) (*reviewdog.ResultMap, error) {
-		return &wantCheckResult, nil
+		return &wantDiagnosticResult, nil
 	}
 
 	tmp, err := ioutil.TempFile("", "")
@@ -151,18 +149,18 @@ func TestCheckResultSet_Project(t *testing.T) {
 		t.Fatal(err)
 	}
 
-	if got.Len() != wantCheckResult.Len() {
-		t.Errorf("length of results is different. got = %d, want = %d\n", got.Len(), wantCheckResult.Len())
+	if got.Len() != wantDiagnosticResult.Len() {
+		t.Errorf("length of results is different. got = %d, want = %d\n", got.Len(), wantDiagnosticResult.Len())
 	}
 	got.Range(func(k string, r *reviewdog.Result) {
-		w, _ := wantCheckResult.Load(k)
+		w, _ := wantDiagnosticResult.Load(k)
 		if diff := cmp.Diff(r, w, protocmp.Transform()); diff != "" {
 			t.Errorf("result has diff:\n%s", diff)
 		}
 	})
 }
 
-func TestCheckResultSet_NonProject(t *testing.T) {
+func TestDiagnosticResultSet_NonProject(t *testing.T) {
 	opt := &option{
 		f: "golint",
 	}
@@ -172,19 +170,17 @@ func TestCheckResultSet_NonProject(t *testing.T) {
 		t.Fatal(err)
 	}
 	var want reviewdog.ResultMap
-	want.Store("golint", &reviewdog.Result{CheckResults: []*reviewdog.CheckResult{
+	want.Store("golint", &reviewdog.Result{Diagnostics: []*rdf.Diagnostic{
 		{
-			Diagnostic: &rdf.Diagnostic{
-				Location: &rdf.Location{
-					Range: &rdf.Range{Start: &rdf.Position{
-						Line:   14,
-						Column: 14,
-					}},
-					Path: "reviewdog.go",
-				},
-				Message: "test message",
+			Location: &rdf.Location{
+				Range: &rdf.Range{Start: &rdf.Position{
+					Line:   14,
+					Column: 14,
+				}},
+				Path: "reviewdog.go",
 			},
-			Lines: []string{input},
+			Message:        "test message",
+			OriginalOutput: input,
 		},
 	}})
 
@@ -242,8 +238,8 @@ func TestPostResultSet_withReportURL(t *testing.T) {
 								Start: &rdf.Position{Line: 14},
 							},
 						},
+						OriginalOutput: "L1\nL2",
 					},
-					RawMessage: "L1\nL2",
 				},
 				{
 					Diagnostic: &rdf.Diagnostic{
@@ -280,39 +276,33 @@ func TestPostResultSet_withReportURL(t *testing.T) {
 
 	// It assumes the current dir is ./cmd/reviewdog/
 	var resultSet reviewdog.ResultMap
-	resultSet.Store("name1", &reviewdog.Result{CheckResults: []*reviewdog.CheckResult{
+	resultSet.Store("name1", &reviewdog.Result{Diagnostics: []*rdf.Diagnostic{
 		{
-			Diagnostic: &rdf.Diagnostic{
-				Location: &rdf.Location{
-					Range: &rdf.Range{Start: &rdf.Position{
-						Line: 14,
-					}},
-					Path: "reviewdog.go", // test relative path
-				},
-				Message: "name1: test 1",
+			Location: &rdf.Location{
+				Range: &rdf.Range{Start: &rdf.Position{
+					Line: 14,
+				}},
+				Path: "reviewdog.go", // test relative path
 			},
-			Lines: []string{"L1", "L2"},
+			Message:        "name1: test 1",
+			OriginalOutput: "L1\nL2",
 		},
 		{
-			Diagnostic: &rdf.Diagnostic{
-				Location: &rdf.Location{
-					Path: absPath(t, "reviewdog.go"), // test abs path
-				},
-				Message: "name1: test 2",
+			Location: &rdf.Location{
+				Path: absPath(t, "reviewdog.go"), // test abs path
 			},
+			Message: "name1: test 2",
 		},
 	}})
-	resultSet.Store("name2", &reviewdog.Result{CheckResults: []*reviewdog.CheckResult{
+	resultSet.Store("name2", &reviewdog.Result{Diagnostics: []*rdf.Diagnostic{
 		{
-			Diagnostic: &rdf.Diagnostic{
-				Location: &rdf.Location{
-					Range: &rdf.Range{Start: &rdf.Position{
-						Line: 14,
-					}},
-					Path: "doghouse.go",
-				},
-				Message: "name2: test 1",
+			Location: &rdf.Location{
+				Range: &rdf.Range{Start: &rdf.Position{
+					Line: 14,
+				}},
+				Path: "doghouse.go",
 			},
+			Message: "name2: test 1",
 		},
 	}})
 
@@ -344,7 +334,7 @@ func TestPostResultSet_withoutReportURL(t *testing.T) {
 	}
 
 	var resultSet reviewdog.ResultMap
-	resultSet.Store("name1", &reviewdog.Result{CheckResults: []*reviewdog.CheckResult{}})
+	resultSet.Store("name1", &reviewdog.Result{Diagnostics: []*rdf.Diagnostic{}})
 
 	ghInfo := &cienv.BuildInfo{Owner: owner, Repo: repo, PullRequest: prNum, SHA: sha}
 
@@ -375,7 +365,7 @@ func TestPostResultSet_conclusion(t *testing.T) {
 
 	fakeCli := &fakeDoghouseServerCli{}
 	var resultSet reviewdog.ResultMap
-	resultSet.Store("name1", &reviewdog.Result{CheckResults: []*reviewdog.CheckResult{}})
+	resultSet.Store("name1", &reviewdog.Result{Diagnostics: []*rdf.Diagnostic{}})
 	ghInfo := &cienv.BuildInfo{Owner: owner, Repo: repo, PullRequest: prNum, SHA: sha}
 
 	tests := []struct {
@@ -420,7 +410,7 @@ func TestPostResultSet_withEmptyResponse(t *testing.T) {
 	}
 
 	var resultSet reviewdog.ResultMap
-	resultSet.Store("name1", &reviewdog.Result{CheckResults: []*reviewdog.CheckResult{}})
+	resultSet.Store("name1", &reviewdog.Result{Diagnostics: []*rdf.Diagnostic{}})
 
 	ghInfo := &cienv.BuildInfo{Owner: owner, Repo: repo, PullRequest: prNum, SHA: sha}
 
@@ -440,14 +430,14 @@ func TestReportResults(t *testing.T) {
 	filteredResultSet.Store("name1", &reviewdog.FilteredResult{
 		FilteredCheck: []*reviewdog.FilteredCheck{
 			{
-				CheckResult: &reviewdog.CheckResult{
-					Lines: []string{"name1-L1", "name1-L2"},
+				Diagnostic: &rdf.Diagnostic{
+					OriginalOutput: "name1-L1\nname1-L2",
 				},
 				ShouldReport: true,
 			},
 			{
-				CheckResult: &reviewdog.CheckResult{
-					Lines: []string{"name1.2-L1", "name1.2-L2"},
+				Diagnostic: &rdf.Diagnostic{
+					OriginalOutput: "name1.2-L1\nname1.2-L2",
 				},
 				ShouldReport: false,
 			},
@@ -456,8 +446,8 @@ func TestReportResults(t *testing.T) {
 	filteredResultSet.Store("name2", &reviewdog.FilteredResult{
 		FilteredCheck: []*reviewdog.FilteredCheck{
 			{
-				CheckResult: &reviewdog.CheckResult{
-					Lines: []string{"name1-L1", "name1-L2"},
+				Diagnostic: &rdf.Diagnostic{
+					OriginalOutput: "name1-L1\nname1-L2",
 				},
 				ShouldReport: false,
 			},
@@ -489,8 +479,8 @@ func TestReportResults_inGitHubAction(t *testing.T) {
 	filteredResultSet.Store("name1", &reviewdog.FilteredResult{
 		FilteredCheck: []*reviewdog.FilteredCheck{
 			{
-				CheckResult: &reviewdog.CheckResult{
-					Lines: []string{"name1-L1", "name1-L2"},
+				Diagnostic: &rdf.Diagnostic{
+					OriginalOutput: "name1-L1\nname1-L2",
 				},
 				ShouldReport: true,
 			},
@@ -515,14 +505,14 @@ func TestReportResults_noResultsShouldReport(t *testing.T) {
 	filteredResultSet.Store("name1", &reviewdog.FilteredResult{
 		FilteredCheck: []*reviewdog.FilteredCheck{
 			{
-				CheckResult: &reviewdog.CheckResult{
-					Lines: []string{"name1-L1", "name1-L2"},
+				Diagnostic: &rdf.Diagnostic{
+					OriginalOutput: "name1-L1\nname1-L2",
 				},
 				ShouldReport: false,
 			},
 			{
-				CheckResult: &reviewdog.CheckResult{
-					Lines: []string{"name1.2-L1", "name1.2-L2"},
+				Diagnostic: &rdf.Diagnostic{
+					OriginalOutput: "name1.2-L1\nname1.2-L2",
 				},
 				ShouldReport: false,
 			},
@@ -531,8 +521,8 @@ func TestReportResults_noResultsShouldReport(t *testing.T) {
 	filteredResultSet.Store("name2", &reviewdog.FilteredResult{
 		FilteredCheck: []*reviewdog.FilteredCheck{
 			{
-				CheckResult: &reviewdog.CheckResult{
-					Lines: []string{"name1-L1", "name1-L2"},
+				Diagnostic: &rdf.Diagnostic{
+					OriginalOutput: "name1-L1\nname1-L2",
 				},
 				ShouldReport: false,
 			},

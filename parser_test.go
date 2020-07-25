@@ -99,12 +99,12 @@ func TestCheckStyleParser(t *testing.T) {
 	}
 
 	p := NewCheckStyleParser()
-	crs, err := p.Parse(strings.NewReader(sample))
+	diagnostics, err := p.Parse(strings.NewReader(sample))
 	if err != nil {
 		t.Error(err)
 	}
-	for i, cr := range crs {
-		if got, want := cr.Lines[0], wants[i]; got != want {
+	for i, d := range diagnostics {
+		if got, want := d.GetOriginalOutput(), wants[i]; got != want {
 			t.Errorf("%d: got %v, want %v", i, got, want)
 		}
 	}
@@ -120,12 +120,12 @@ func TestRDJSONLParser(t *testing.T) {
 {"source":{"name":"severity-test"},"message":"severity test (number)","location":{"path":"testdata/main.go","range":{"start":{"line":24,"column":6}}}, "severity": "WARNING"}`
 	sampleLines := strings.Split(sample, "\n")
 	p := NewRDJSONLParser()
-	crs, err := p.Parse(strings.NewReader(sample))
+	diagnostics, err := p.Parse(strings.NewReader(sample))
 	if err != nil {
 		t.Error(err)
 	}
-	for i, cr := range crs {
-		if got, want := cr.Lines[0], sampleLines[i]; got != want {
+	for i, d := range diagnostics {
+		if got, want := d.GetOriginalOutput(), sampleLines[i]; got != want {
 			t.Errorf("%d: got %v, want %v", i, got, want)
 		}
 	}

@@ -23,7 +23,7 @@ func TestGitLabMergeRequestDiscussionCommenter_Post_Flush_review_api(t *testing.
 	os.Chdir("../..")
 
 	alreadyCommented1 := &reviewdog.Comment{
-		Result: &reviewdog.FilteredCheck{CheckResult: &reviewdog.CheckResult{
+		Result: &reviewdog.FilteredCheck{
 			Diagnostic: &rdf.Diagnostic{
 				Location: &rdf.Location{
 					Path: "file.go",
@@ -32,11 +32,12 @@ func TestGitLabMergeRequestDiscussionCommenter_Post_Flush_review_api(t *testing.
 					}},
 				},
 			},
-		}, InDiffFile: true},
+			InDiffFile: true,
+		},
 		Body: "already commented",
 	}
 	alreadyCommented2 := &reviewdog.Comment{
-		Result: &reviewdog.FilteredCheck{CheckResult: &reviewdog.CheckResult{
+		Result: &reviewdog.FilteredCheck{
 			Diagnostic: &rdf.Diagnostic{
 				Location: &rdf.Location{
 					Path: "another/file.go",
@@ -45,11 +46,12 @@ func TestGitLabMergeRequestDiscussionCommenter_Post_Flush_review_api(t *testing.
 					}},
 				},
 			},
-		}, InDiffFile: true},
+			InDiffFile: true,
+		},
 		Body: "already commented 2",
 	}
 	newComment1 := &reviewdog.Comment{
-		Result: &reviewdog.FilteredCheck{CheckResult: &reviewdog.CheckResult{
+		Result: &reviewdog.FilteredCheck{
 			Diagnostic: &rdf.Diagnostic{
 				Location: &rdf.Location{
 					Path: "file.go",
@@ -58,11 +60,12 @@ func TestGitLabMergeRequestDiscussionCommenter_Post_Flush_review_api(t *testing.
 					}},
 				},
 			},
-		}, InDiffFile: true},
+			InDiffFile: true,
+		},
 		Body: "new comment",
 	}
 	newComment2 := &reviewdog.Comment{
-		Result: &reviewdog.FilteredCheck{CheckResult: &reviewdog.CheckResult{
+		Result: &reviewdog.FilteredCheck{
 			Diagnostic: &rdf.Diagnostic{
 				Location: &rdf.Location{
 					Path: "file2.go",
@@ -71,19 +74,18 @@ func TestGitLabMergeRequestDiscussionCommenter_Post_Flush_review_api(t *testing.
 					}},
 				},
 			},
-		}, InDiffFile: true},
+			InDiffFile: true,
+		},
 		Body: "new comment 2",
 	}
 	newComment3 := &reviewdog.Comment{
 		Result: &reviewdog.FilteredCheck{
-			CheckResult: &reviewdog.CheckResult{
-				Diagnostic: &rdf.Diagnostic{
-					Location: &rdf.Location{
-						Path: "new_file.go",
-						Range: &rdf.Range{Start: &rdf.Position{
-							Line: 14,
-						}},
-					},
+			Diagnostic: &rdf.Diagnostic{
+				Location: &rdf.Location{
+					Path: "new_file.go",
+					Range: &rdf.Range{Start: &rdf.Position{
+						Line: 14,
+					}},
 				},
 			},
 			OldPath:    "old_file.go",
@@ -93,7 +95,7 @@ func TestGitLabMergeRequestDiscussionCommenter_Post_Flush_review_api(t *testing.
 		Body: "new comment 3",
 	}
 	commentOutsideDiff := &reviewdog.Comment{
-		Result: &reviewdog.FilteredCheck{CheckResult: &reviewdog.CheckResult{
+		Result: &reviewdog.FilteredCheck{
 			Diagnostic: &rdf.Diagnostic{
 				Location: &rdf.Location{
 					Path: "path.go",
@@ -102,17 +104,19 @@ func TestGitLabMergeRequestDiscussionCommenter_Post_Flush_review_api(t *testing.
 					}},
 				},
 			},
-		}, InDiffFile: false},
+			InDiffFile: false,
+		},
 		Body: "comment outside diff",
 	}
 	commentWithoutLnum := &reviewdog.Comment{
-		Result: &reviewdog.FilteredCheck{CheckResult: &reviewdog.CheckResult{
+		Result: &reviewdog.FilteredCheck{
 			Diagnostic: &rdf.Diagnostic{
 				Location: &rdf.Location{
 					Path: "path.go",
 				},
 			},
-		}, InDiffFile: true},
+			InDiffFile: true,
+		},
 		Body: "comment without lnum",
 	}
 
