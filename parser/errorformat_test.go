@@ -24,7 +24,7 @@ func TestNewErrorformatParserString(t *testing.T) {
 }
 func ExampleErrorformatParser() {
 	const sample = `/path/to/file1.txt:1:14: [E][RULE:14] message 1
-/path/to/file2.txt:2:14: [W][RULE:7] message 2`
+/path/to/file2.txt:2:14: [N][RULE:7] message 2`
 
 	p, err := NewErrorformatParserString([]string{`%f:%l:%c: [%t][RULE:%n] %m`})
 	if err != nil {
@@ -69,10 +69,10 @@ func ExampleErrorformatParser() {
 	//       }
 	//     }
 	//   },
-	//   "severity": "WARNING",
+	//   "severity": "INFO",
 	//   "code": {
 	//     "value": "7"
 	//   },
-	//   "originalOutput": "/path/to/file2.txt:2:14: [W][RULE:7] message 2"
+	//   "originalOutput": "/path/to/file2.txt:2:14: [N][RULE:7] message 2"
 	// }
 }
