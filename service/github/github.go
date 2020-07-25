@@ -23,6 +23,11 @@ var _ reviewdog.DiffService = &GitHubPullRequest{}
 
 const maxCommentsPerRequest = 30
 
+const (
+	invalidSuggestionPre  = "<details><summary>reviewdog suggestion error</summary>"
+	invalidSuggestionPost = "</details>"
+)
+
 // GitHubPullRequest is a comment and diff service for GitHub PullRequest.
 //
 // API:
@@ -261,7 +266,7 @@ func buildSuggestions(c *reviewdog.Comment) string {
 	for _, s := range c.Result.Diagnostic.GetSuggestions() {
 		txt, err := buildSingleSuggestion(c, s)
 		if err != nil {
-			sb.WriteString(fmt.Sprintf("Invalid suggestion: %v", err))
+			sb.WriteString(invalidSuggestionPre + err.Error() + invalidSuggestionPost + "\n")
 			continue
 		}
 		sb.WriteString(txt)
@@ -276,12 +281,11 @@ func buildSingleSuggestion(c *reviewdog.Comment, s *rdf.Suggestion) (string, err
 	drange := c.Result.Diagnostic.GetLocation().GetRange()
 	if start.GetLine() != drange.GetStart().GetLine() ||
 		end.GetLine() != drange.GetEnd().GetLine() {
-		return "", fmt.Errorf("the Diagnostic's lines and Suggestion lines must be the same. %d-%d v.s. %d-%d",
+		return "", fmt.Errorf("the Diagnostic's lines and Suggestion lines must be the same. L%d-L%d v.s. L%d-L%d",
 			drange.GetStart().GetLine(), drange.GetEnd().GetLine(), start.GetLine(), end.GetLine())
 	}
 	if start.GetColumn() > 0 || end.GetColumn() > 0 {
-		// TODO(haya14busa): Support non-line based suggestion.
-		return "", errors.New("non line based suggestions (contains column) are not supported yet")
+		return buildNonLineBasedSuggestion(c, s)
 	}
 	var sb strings.Builder
 	sb.WriteString("```suggestion\n")
@@ -291,4 +295,31 @@ func buildSingleSuggestion(c *reviewdog.Comment, s *rdf.Suggestion) (string, err
 	}
 	sb.WriteString("```")
 	return sb.String(), nil
+}
+
+func buildNonLineBasedSuggestion(c *reviewdog.Comment, s *rdf.Suggestion) (string, error) {
+	sourceLines := c.Result.SourceLines
+	slen := len(sourceLines)
+	if slen == 0 {
+		return "", errors.New("source lines are not available")
+	}
+	start := s.GetRange().GetStart()
+	end := s.GetRange().GetEnd()
+	if slen != int(end.GetLine()-start.GetLine()+1) {
+		return "", errors.New("invalid source lines: not all source lines for this suggestion are available")
+	}
+	var sb strings.Builder
+	sb.WriteString("```suggestion\n")
+	sb.WriteString(sourceLines[0][:max(start.GetColumn()-1, 0)])
+	sb.WriteString(s.GetText())
+	sb.WriteString(sourceLines[slen-1][max(end.GetColumn()-1, 0):])
+	sb.WriteString("\n```")
+	return sb.String(), nil
+}
+
+func max(x, y int32) int32 {
+	if x < y {
+		return y
+	}
+	return x
 }

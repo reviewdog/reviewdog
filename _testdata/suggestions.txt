@@ -1,0 +1,16 @@
+package testdata
+
+func suggestions() {
+}
+
+haya13busa (replace)
+hayabusa (insert)
+haya14busa (remove)
+
+--->
+<--- (remove line-break)
+
+remove line
+
+insert line ↓
+insert line ↑

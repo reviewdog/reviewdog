@@ -1,4 +1,0 @@
-package testdata
-
-func suggestions() {
-}

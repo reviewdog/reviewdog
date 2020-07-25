@@ -17,8 +17,14 @@ type FilteredDiagnostic struct {
 	// If it's a multiline result, both start and end must be in the same diff
 	// hunk.
 	InDiffContext bool
-	OldPath       string
-	OldLine       int
+
+	// Source lines text of the diagnostic message's line-range.
+	// It contains a whole line even if the diagnostic range have column fields.
+	// Optional. Currently available only when it's in diff context.
+	SourceLines []string
+
+	OldPath string
+	OldLine int
 }
 
 // FilterCheck filters check results by diff. It doesn't drop check which
@@ -37,11 +43,15 @@ func FilterCheck(results []*rdf.Diagnostic, diff []*diff.FileDiff, strip int,
 			endLine = startLine
 		}
 		check.InDiffContext = true
+		sourceLines := []string{}
 		for l := startLine; l <= endLine; l++ {
 			shouldReport, difffile, diffline := df.ShouldReport(loc.GetPath(), l)
 			check.ShouldReport = check.ShouldReport || shouldReport
 			// all lines must be in diff.
 			check.InDiffContext = check.InDiffContext && diffline != nil
+			if diffline != nil {
+				sourceLines = append(sourceLines, diffline.Content)
+			}
 			if difffile != nil {
 				check.InDiffFile = true
 				if l == startLine {
@@ -50,7 +60,9 @@ func FilterCheck(results []*rdf.Diagnostic, diff []*diff.FileDiff, strip int,
 				}
 			}
 		}
-		// loc.Path = NormalizePath(loc.GetPath(), cwd, "")
+		if check.InDiffContext {
+			check.SourceLines = sourceLines
+		}
 		checks = append(checks, check)
 	}
 	return checks
