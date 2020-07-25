@@ -47,7 +47,7 @@ func (lw *GitHubActionLogWriter) Flush(_ context.Context) error {
 // ReportAsGitHubActionsLog reports results via logging command to create
 // annotations.
 // https://help.github.com/en/actions/automating-your-workflow-with-github-actions/development-tools-for-github-actions#example-5
-func ReportAsGitHubActionsLog(toolName, level string, d *rdf.Diagnostic) {
+func ReportAsGitHubActionsLog(toolName, defaultLevel string, d *rdf.Diagnostic) {
 	mes := fmt.Sprintf("[%s] reported by reviewdog 🐶\n%s\n\nRaw Output:\n%s",
 		toolName, d.GetMessage(), d.GetOriginalOutput())
 	loc := d.GetLocation()
@@ -56,6 +56,14 @@ func ReportAsGitHubActionsLog(toolName, level string, d *rdf.Diagnostic) {
 		File: d.GetLocation().GetPath(),
 		Line: int(start.GetLine()),
 		Col:  int(start.GetColumn()),
+	}
+
+	level := defaultLevel
+	switch d.Severity {
+	case rdf.Severity_ERROR:
+		level = "error"
+	case rdf.Severity_INFO, rdf.Severity_WARNING:
+		level = "warning"
 	}
 
 	switch level {
