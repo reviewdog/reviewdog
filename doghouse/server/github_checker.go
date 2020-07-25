@@ -3,6 +3,7 @@ package server
 import (
 	"context"
 	"io/ioutil"
+	"time"
 
 	"github.com/google/go-github/v32/github"
 	"github.com/vvakame/sdlog/aelog"
@@ -30,8 +31,8 @@ func (c *checkerGitHubClient) CreateCheckRun(ctx context.Context, owner, repo st
 }
 
 func (c *checkerGitHubClient) UpdateCheckRun(ctx context.Context, owner, repo string, checkID int64, opt github.UpdateCheckRunOptions) (*github.CheckRun, error) {
-	// Retry upto 5 times.
-	// GitHub API somehow returns 401 Bad credentials from time to time...
+	// Retry requests because GitHub API somehow returns 401 Bad credentials from
+	// time to time...
 	var err error
 	for i := 0; i < 5; i++ {
 		checkRun, resp, err1 := c.Checks.UpdateCheckRun(ctx, owner, repo, checkID, opt)
@@ -42,7 +43,8 @@ func (c *checkerGitHubClient) UpdateCheckRun(ctx context.Context, owner, repo st
 				aelog.Errorf(ctx, "failed to read error response body: %v", err1)
 			}
 			aelog.Errorf(ctx, "UpdateCheckRun failed: %s", string(b))
-			aelog.Errorf(ctx, "Retry UpdateCheckRun: %d", i+1)
+			aelog.Debugf(ctx, "Retrying UpdateCheckRun...: %d", i+1)
+			time.Sleep(time.Second)
 			continue
 		}
 		return checkRun, nil
