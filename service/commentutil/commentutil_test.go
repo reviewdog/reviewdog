@@ -39,10 +39,25 @@ func TestCommentBody(t *testing.T) {
 <sub>reported by [reviewdog](https://github.com/reviewdog/reviewdog) :dog:</sub><br>test message 2 (no tool)
 `,
 		},
+		{
+			in: &reviewdog.Comment{
+				ToolName: "global-tool-name",
+				Result: &filter.FilteredDiagnostic{
+					Diagnostic: &rdf.Diagnostic{
+						Message: "test message 3",
+						Source:  &rdf.Source{Name: "custom-tool-name"},
+					},
+				},
+			},
+			want: `
+**[custom-tool-name]** <sub>reported by [reviewdog](https://github.com/reviewdog/reviewdog) :dog:</sub><br>test message 3
+`,
+		},
 	}
 	for _, tt := range tests {
-		if got := MarkdownComment(tt.in); got != strings.Trim(tt.want, "\n") {
-			t.Errorf("got unexpected comment.\ngot:\n%s\nwant:\n%s", got, tt.want)
+		want := strings.Trim(tt.want, "\n")
+		if got := MarkdownComment(tt.in); got != want {
+			t.Errorf("got unexpected comment.\ngot:\n%s\nwant:\n%s", got, want)
 		}
 	}
 }

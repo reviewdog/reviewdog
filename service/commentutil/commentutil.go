@@ -3,6 +3,7 @@ package commentutil
 import (
 	"fmt"
 	"log"
+	"strings"
 
 	"github.com/reviewdog/reviewdog"
 )
@@ -55,9 +56,18 @@ const BodyPrefix = `<sub>reported by [reviewdog](https://github.com/reviewdog/re
 
 // MarkdownComment creates comment body markdown .
 func MarkdownComment(c *reviewdog.Comment) string {
-	tool := ""
-	if c.ToolName != "" {
-		tool = fmt.Sprintf("**[%s]** ", c.ToolName)
+	var sb strings.Builder
+	if tool := toolName(c); tool != "" {
+		sb.WriteString(fmt.Sprintf("**[%s]** ", tool))
 	}
-	return tool + BodyPrefix + c.Result.Diagnostic.GetMessage()
+	sb.WriteString(BodyPrefix)
+	sb.WriteString(c.Result.Diagnostic.GetMessage())
+	return sb.String()
+}
+
+func toolName(c *reviewdog.Comment) string {
+	if name := c.Result.Diagnostic.GetSource().GetName(); name != "" {
+		return name
+	}
+	return c.ToolName
 }
