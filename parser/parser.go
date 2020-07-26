@@ -20,6 +20,7 @@ type Parser interface {
 type Option struct {
 	FormatName  string
 	Errorformat []string
+	DiffStrip   int
 }
 
 // New returns Parser based on Option.
@@ -35,6 +36,8 @@ func New(opt *Option) (Parser, error) {
 		return NewCheckStyleParser(), nil
 	case "rdjsonl":
 		return NewRDJSONLParser(), nil
+	case "diff":
+		return NewDiffParser(opt.DiffStrip), nil
 	}
 
 	// use defined errorformat
