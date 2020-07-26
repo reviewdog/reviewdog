@@ -13,17 +13,20 @@ import (
 
 var _ Parser = &DiffParser{}
 
+// DiffParser is a unified diff parser.
 type DiffParser struct {
 	strip int
 	wd    string
 }
 
+// NewDiffParser creates a new DiffParser.
 func NewDiffParser(strip int) *DiffParser {
 	p := &DiffParser{strip: strip}
 	p.wd, _ = os.Getwd()
 	return p
 }
 
+// Parse parses input as unified diff format and return it as diagnostics.
 func (p *DiffParser) Parse(r io.Reader) ([]*rdf.Diagnostic, error) {
 	filediffs, err := diff.ParseMultiFile(r)
 	if err != nil {
