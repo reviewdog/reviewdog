@@ -160,6 +160,26 @@ func TestCheck_OK(t *testing.T) {
 				},
 			},
 			{
+				Diagnostic: &rdf.Diagnostic{
+					Message: "code test w/o URL",
+					Location: &rdf.Location{
+						Path:  "sample.new.txt",
+						Range: &rdf.Range{Start: &rdf.Position{Line: 2}},
+					},
+					Code: &rdf.Code{Value: "CODE14"},
+				},
+			},
+			{
+				Diagnostic: &rdf.Diagnostic{
+					Message: "code test w/ URL",
+					Location: &rdf.Location{
+						Path:  "sample.new.txt",
+						Range: &rdf.Range{Start: &rdf.Position{Line: 2}},
+					},
+					Code: &rdf.Code{Value: "CODE14", Url: "https://github.com/reviewdog#CODE14"},
+				},
+			},
+			{
 				Path:       "sample.new.txt",
 				Line:       2,
 				Message:    "request from old clients",
@@ -246,6 +266,22 @@ func TestCheck_OK(t *testing.T) {
 					AnnotationLevel: github.String("warning"),
 					Message:         github.String("source test"),
 					Title:           github.String("[awesome-linter] sample.new.txt#L2"),
+				},
+				{
+					Path:            github.String("sample.new.txt"),
+					StartLine:       github.Int(2),
+					EndLine:         github.Int(2),
+					AnnotationLevel: github.String("warning"),
+					Message:         github.String("code test w/o URL"),
+					Title:           github.String("[haya14busa-linter] sample.new.txt#L2 <CODE14>"),
+				},
+				{
+					Path:            github.String("sample.new.txt"),
+					StartLine:       github.Int(2),
+					EndLine:         github.Int(2),
+					AnnotationLevel: github.String("warning"),
+					Message:         github.String("code test w/ URL"),
+					Title:           github.String("[haya14busa-linter] sample.new.txt#L2 <CODE14>(https://github.com/reviewdog#CODE14)"),
 				},
 				{
 					Path:            github.String("sample.new.txt"),

@@ -275,6 +275,13 @@ func (ch *Checker) buildTitle(c *filter.FilteredDiagnostic) string {
 			sb.WriteString(fmt.Sprintf("-L%d", endLine))
 		}
 	}
+	if code := c.Diagnostic.GetCode().GetValue(); code != "" {
+		if url := c.Diagnostic.GetCode().GetUrl(); url != "" {
+			sb.WriteString(fmt.Sprintf(" <%s>(%s)", code, url))
+		} else {
+			sb.WriteString(fmt.Sprintf(" <%s>", code))
+		}
+	}
 	return sb.String()
 }
 
