@@ -177,7 +177,7 @@ jobs:
       - uses: reviewdog/action-golangci-lint@v1
         with:
           github_token: ${{ secrets.github_token }}
-          golangci_lint_flags: "--enable-all --exclude-use-default=false"
+          golangci_lint_flags: "--enable-all --exclude-use-default=false -D wsl"
           level: "warning"
           reporter: github-pr-check
 
