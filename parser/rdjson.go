@@ -14,10 +14,12 @@ var _ Parser = &RDJSONParser{}
 // RDJSONParser is parser for rdjsonl format.
 type RDJSONParser struct{}
 
+// NewRDJSONParser returns a new RDJSONParser.
 func NewRDJSONParser() *RDJSONParser {
 	return &RDJSONParser{}
 }
 
+// Parse parses rdjson (JSON of DiagnosticResult).
 func (p *RDJSONParser) Parse(r io.Reader) ([]*rdf.Diagnostic, error) {
 	b, err := ioutil.ReadAll(r)
 	if err != nil {
