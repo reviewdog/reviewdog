@@ -47,7 +47,8 @@ type option struct {
 	diffCmd          string
 	diffStrip        int
 	efms             strslice
-	f                string // errorformat name
+	f                string // format name
+	fDiffStrip       int
 	list             bool   // list supported errorformat name
 	name             string // tool name which is used in comment
 	ci               string
@@ -67,6 +68,7 @@ const (
 	diffStripDoc        = "strip NUM leading components from diff file names (equivalent to 'patch -p') (default is 1 for git diff)"
 	efmsDoc             = `list of errorformat (https://github.com/reviewdog/errorformat)`
 	fDoc                = `format name (run -list to see supported format name) for input. It's also used as tool name in review comment if -name is empty`
+	fDiffStripDoc       = `option for -f=diff: strip NUM leading components from diff file names (equivalent to 'patch -p') (default is 1 for git diff)`
 	listDoc             = `list supported pre-defined format names which can be used as -f arg`
 	nameDoc             = `tool name in review comment. -f is used as tool name if -name is empty`
 	ciDoc               = `[deprecated] reviewdog automatically get necessary data. See also -reporter for migration`
@@ -177,6 +179,7 @@ func init() {
 	flag.IntVar(&opt.diffStrip, "strip", 1, diffStripDoc)
 	flag.Var(&opt.efms, "efm", efmsDoc)
 	flag.StringVar(&opt.f, "f", "", fDoc)
+	flag.IntVar(&opt.fDiffStrip, "f.diff.strip", 1, fDiffStripDoc)
 	flag.BoolVar(&opt.list, "list", false, listDoc)
 	flag.StringVar(&opt.name, "name", "", nameDoc)
 	flag.StringVar(&opt.ci, "ci", "", ciDoc)
@@ -670,7 +673,11 @@ func readConf(conf string) ([]byte, error) {
 }
 
 func newParserFromOpt(opt *option) (parser.Parser, error) {
-	p, err := parser.New(&parser.Option{FormatName: opt.f, Errorformat: opt.efms})
+	p, err := parser.New(&parser.Option{
+		FormatName:  opt.f,
+		DiffStrip:   opt.fDiffStrip,
+		Errorformat: opt.efms,
+	})
 	if err != nil {
 		return nil, fmt.Errorf("fail to create parser. use either -f or -efm: %w", err)
 	}

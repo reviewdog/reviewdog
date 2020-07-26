@@ -186,7 +186,7 @@ func NormalizeDiffPath(diffpath string, strip int) string {
 		return ""
 	}
 	path := diffpath
-	if strip > 0 {
+	if strip > 0 && !filepath.IsAbs(path) {
 		ps := splitPathList(path)
 		if len(ps) > strip {
 			path = filepath.Join(ps[strip:]...)

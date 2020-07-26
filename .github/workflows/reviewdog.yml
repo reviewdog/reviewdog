@@ -161,6 +161,13 @@ jobs:
           cat ./_testdata/custom_rdjsonl.json | \
             reviewdog -name="custom-rdjsonl" -f=rdjsonl -reporter=github-pr-review
 
+      - name: gofmt -s with reviewdog
+        env:
+          REVIEWDOG_GITHUB_API_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          gofmt -s -d . | \
+            reviewdog -name="gofmt" -f=diff -f.diff.strip=0 -reporter=github-pr-review
+
   golangci-lint:
     if: github.event_name == 'pull_request'
     name: runner / golangci-lint
@@ -170,7 +177,7 @@ jobs:
       - uses: reviewdog/action-golangci-lint@v1
         with:
           github_token: ${{ secrets.github_token }}
-          golangci_lint_flags: "--enable-all --exclude-use-default=false"
+          golangci_lint_flags: "--enable-all --exclude-use-default=false -D wsl -D testpackage"
           level: "warning"
           reporter: github-pr-check
 

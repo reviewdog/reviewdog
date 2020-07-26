@@ -11,14 +11,14 @@ import (
 )
 
 const (
-	tokenDiffGit        = "diff --git" // diff --git a/sample.old.txt b/sample.new.txt
-	tokenOldFile        = "---"        // --- sample.old.txt	2016-10-13 05:09:35.820791185 +0900
-	tokenNewFile        = "+++"        // +++ sample.new.txt	2016-10-13 05:15:26.839245048 +0900
-	tokenStartHunk      = "@@"         // @@ -1,3 +1,4 @@
-	tokenUnchangedLine  = " "          //  unchanged, contextual line
-	tokenAddedLine      = "+"          // +added line
-	tokenDeletedLine    = "-"          // -deleted line
-	tokenNoNewlineAtEOF = `\`          // \ No newline at end of file
+	tokenDiff           = "diff" // diff --git a/sample.old.txt b/sample.new.txt
+	tokenOldFile        = "---"  // --- sample.old.txt	2016-10-13 05:09:35.820791185 +0900
+	tokenNewFile        = "+++"  // +++ sample.new.txt	2016-10-13 05:15:26.839245048 +0900
+	tokenStartHunk      = "@@"   // @@ -1,3 +1,4 @@
+	tokenUnchangedLine  = " "    //  unchanged, contextual line
+	tokenAddedLine      = "+"    // +added line
+	tokenDeletedLine    = "-"    // -deleted line
+	tokenNoNewlineAtEOF = `\`    // \ No newline at end of file
 )
 
 var (
@@ -103,11 +103,11 @@ func (p *fileParser) parseHunks() ([]*Hunk, error) {
 		return nil, ErrNoHunks
 	}
 	if !bytes.HasPrefix(b, []byte(tokenStartHunk)) {
-		b, err := p.r.Peek(len(tokenDiffGit))
+		b, err := p.r.Peek(len(tokenDiff))
 		if err != nil {
 			return nil, ErrNoHunks
 		}
-		if bytes.HasPrefix(b, []byte(tokenDiffGit)) {
+		if bytes.HasPrefix(b, []byte(tokenDiff)) {
 			// git diff may contain a file diff with empty hunks.
 			// e.g. delete an empty file.
 			return []*Hunk{}, nil
@@ -211,17 +211,17 @@ LOOP:
 
 func parseExtendedHeader(r *bufio.Reader) []string {
 	var es []string
-	b, err := r.Peek(len(tokenDiffGit))
+	b, err := r.Peek(len(tokenDiff))
 	if err != nil {
 		return nil
 	}
-	// if starts with 'diff --git', parse extended header
-	if bytes.HasPrefix(b, []byte(tokenDiffGit)) {
+	// if starts with 'diff', parse extended header
+	if bytes.HasPrefix(b, []byte(tokenDiff)) {
 		diffgitline, _ := readline(r) // ignore err because we know it can read something
 		es = append(es, diffgitline)
 		for {
-			b, err := r.Peek(len(tokenDiffGit))
-			if err != nil || bytes.HasPrefix(b, []byte(tokenOldFile)) || bytes.HasPrefix(b, []byte(tokenDiffGit)) {
+			b, err := r.Peek(len(tokenDiff))
+			if err != nil || bytes.HasPrefix(b, []byte(tokenOldFile)) || bytes.HasPrefix(b, []byte(tokenDiff)) {
 				break
 			}
 			line, _ := readline(r)
