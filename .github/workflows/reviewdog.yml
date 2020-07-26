@@ -37,12 +37,12 @@ jobs:
         run: |
           cd ./_testdata/ && golint ./... | reviewdog -f=golint -name=golint-check-subdir -reporter=github-check -level=info -filter-mode=nofilter
 
-      - name: Custom rdjsonl test (github-check)
+      - name: Custom rdjson test (github-check)
         env:
           REVIEWDOG_GITHUB_API_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         run: |
-          cat ./_testdata/custom_rdjsonl.json | \
-            reviewdog -name="custom-rdjsonl" -f=rdjsonl -reporter=github-check -level=info
+          cat ./_testdata/custom_rdjson.json | \
+            reviewdog -name="custom-rdjson" -f=rdjson -reporter=github-check -level=info
 
   reviewdog-pr:
     if: github.event_name == 'pull_request'
@@ -147,7 +147,7 @@ jobs:
           cd ./_testdata/ && reviewdog -conf=reviewdog_error.yml \
             -reporter=local -diff='git diff master' || EXIT_CODE=$?
           test "${EXIT_CODE}" = 1
-      - name: Suggestion
+      - name: Suggestion (rdjsonl)
         env:
           REVIEWDOG_GITHUB_API_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         run: |
@@ -158,8 +158,8 @@ jobs:
         env:
           REVIEWDOG_GITHUB_API_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         run: |
-          cat ./_testdata/custom_rdjsonl.json | \
-            reviewdog -name="custom-rdjsonl" -f=rdjsonl -reporter=github-pr-review
+          cat ./_testdata/custom_rdjson.json | \
+            reviewdog -name="custom-rdjson" -f=rdjson -reporter=github-pr-review
 
       - name: gofmt -s with reviewdog
         env:

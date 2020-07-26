@@ -11,7 +11,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### :rocket: Enhancements
 - [#629](https://github.com/reviewdog/reviewdog/pull/629) Introduced Reviewdog Diagnostic Format. ([@haya14busa])
- - [#674](https://github.com/reviewdog/reviewdog/pull/674) Support rdjsonl as input format
+ - [#674](https://github.com/reviewdog/reviewdog/pull/674) [#703](https://github.com/reviewdog/reviewdog/pull/703) Support rdjsonl/rdjson as input format
  - [#680](https://github.com/reviewdog/reviewdog/pull/680) github-pr-review: Support multiline comments
  - [#675](https://github.com/reviewdog/reviewdog/pull/675) [#698](https://github.com/reviewdog/reviewdog/pull/698) github-pr-review: Support suggested changes
  - [#699](https://github.com/reviewdog/reviewdog/pull/699) Support diff input format (`-f=diff`). Useful for suggested changes.
