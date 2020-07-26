@@ -75,7 +75,7 @@ func (rm *ResultMap) Len() int {
 }
 
 type FilteredResult struct {
-	Level         string
+	Level              string
 	FilteredDiagnostic []*filter.FilteredDiagnostic
 }
 
