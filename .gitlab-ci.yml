@@ -43,3 +43,4 @@ Reviewdog:
     - golint ./... | reviewdog -f=golint -name=golint-discussion -reporter=gitlab-mr-discussion -filter-mode=nofilter
     - golint ./... | reviewdog -f=golint -name=golint-commit -reporter=gitlab-mr-commit
     - cd ./_testdata/ && golint ./... | reviewdog -f=golint -name=golint-discussion-subdir -reporter=gitlab-mr-discussion
+    - cat ./_testdata/custom_rdjsonl.json | reviewdog -name="custom-rdjsonl" -f=rdjsonl -reporter=gitlab-mr-discussion
