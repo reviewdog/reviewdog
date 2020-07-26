@@ -37,24 +37,27 @@ func (p *DiffParser) Parse(r io.Reader) ([]*rdf.Diagnostic, error) {
 			prevState := diff.LineUnchanged
 			var (
 				startLine     int
-				column        int
+				isInsert      bool
 				newLines      []string
 				originalLines []string // For Diagnostic.original_output
 			)
 			reset := func() {
 				startLine = 0
-				column = 0
+				isInsert = false
 				newLines = []string{}
 				originalLines = []string{}
 			}
 			emit := func() {
 				drange := &rdf.Range{ // Diagnostic Range
-					Start: &rdf.Position{Line: int32(startLine), Column: int32(column)},
-					End:   &rdf.Position{Line: int32(lnum), Column: int32(column)},
+					Start: &rdf.Position{Line: int32(startLine)},
+					End:   &rdf.Position{Line: int32(lnum)},
 				}
 				text := strings.Join(newLines, "\n")
-				if column == 1 {
+				if isInsert {
 					text += "\n" // Need line-break at the end if it's insertion,
+					drange.GetEnd().Line = int32(startLine)
+					drange.GetEnd().Column = 1
+					drange.GetStart().Column = 1
 				}
 				d := &rdf.Diagnostic{
 					Location:       &rdf.Location{Path: path, Range: drange},
@@ -76,7 +79,7 @@ func (p *DiffParser) Parse(r io.Reader) ([]*rdf.Diagnostic, error) {
 					case diff.LineUnchanged:
 						// Insert.
 						startLine = lnum + 1
-						column = 1
+						isInsert = true
 					case diff.LineDeleted, diff.LineAdded:
 						// Do nothing in particular.
 					}
@@ -87,7 +90,7 @@ func (p *DiffParser) Parse(r io.Reader) ([]*rdf.Diagnostic, error) {
 					case diff.LineUnchanged:
 						startLine = lnum
 					case diff.LineAdded:
-						column = 0 // Now it's not insertion.
+						isInsert = false
 					case diff.LineDeleted:
 						// Do nothing in particular.
 					}
