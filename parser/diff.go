@@ -26,6 +26,33 @@ func NewDiffParser(strip int) *DiffParser {
 	return p
 }
 
+// state data for a diagnostic.
+type dstate struct {
+	startLine     int
+	isInsert      bool
+	newLines      []string
+	originalLines []string // For Diagnostic.original_output
+}
+
+func (d dstate) build(path string, currentLine int) *rdf.Diagnostic {
+	drange := &rdf.Range{ // Diagnostic Range
+		Start: &rdf.Position{Line: int32(d.startLine)},
+		End:   &rdf.Position{Line: int32(currentLine)},
+	}
+	text := strings.Join(d.newLines, "\n")
+	if d.isInsert {
+		text += "\n" // Need line-break at the end if it's insertion,
+		drange.GetEnd().Line = int32(d.startLine)
+		drange.GetEnd().Column = 1
+		drange.GetStart().Column = 1
+	}
+	return &rdf.Diagnostic{
+		Location:       &rdf.Location{Path: path, Range: drange},
+		Suggestions:    []*rdf.Suggestion{{Range: drange, Text: text}},
+		OriginalOutput: strings.Join(d.originalLines, "\n"),
+	}
+}
+
 // Parse parses input as unified diff format and return it as diagnostics.
 func (p *DiffParser) Parse(r io.Reader) ([]*rdf.Diagnostic, error) {
 	filediffs, err := diff.ParseMultiFile(r)
@@ -38,37 +65,10 @@ func (p *DiffParser) Parse(r io.Reader) ([]*rdf.Diagnostic, error) {
 		for _, hunk := range fdiff.Hunks {
 			lnum := hunk.StartLineOld - 1
 			prevState := diff.LineUnchanged
-			var (
-				startLine     int
-				isInsert      bool
-				newLines      []string
-				originalLines []string // For Diagnostic.original_output
-			)
-			reset := func() {
-				startLine = 0
-				isInsert = false
-				newLines = []string{}
-				originalLines = []string{}
-			}
+			state := dstate{}
 			emit := func() {
-				drange := &rdf.Range{ // Diagnostic Range
-					Start: &rdf.Position{Line: int32(startLine)},
-					End:   &rdf.Position{Line: int32(lnum)},
-				}
-				text := strings.Join(newLines, "\n")
-				if isInsert {
-					text += "\n" // Need line-break at the end if it's insertion,
-					drange.GetEnd().Line = int32(startLine)
-					drange.GetEnd().Column = 1
-					drange.GetStart().Column = 1
-				}
-				d := &rdf.Diagnostic{
-					Location:       &rdf.Location{Path: path, Range: drange},
-					Suggestions:    []*rdf.Suggestion{{Range: drange, Text: text}},
-					OriginalOutput: strings.Join(originalLines, "\n"),
-				}
-				diagnostics = append(diagnostics, d)
-				reset()
+				diagnostics = append(diagnostics, state.build(path, lnum))
+				state = dstate{}
 			}
 			for i, diffLine := range hunk.Lines {
 				switch diffLine.Type {
@@ -76,24 +76,24 @@ func (p *DiffParser) Parse(r io.Reader) ([]*rdf.Diagnostic, error) {
 					if i == 0 {
 						lnum++ // Increment line number only when it's at head.
 					}
-					newLines = append(newLines, diffLine.Content)
-					originalLines = append(originalLines, buildOriginalLine(path, diffLine))
+					state.newLines = append(state.newLines, diffLine.Content)
+					state.originalLines = append(state.originalLines, buildOriginalLine(path, diffLine))
 					switch prevState {
 					case diff.LineUnchanged:
 						// Insert.
-						startLine = lnum + 1
-						isInsert = true
+						state.startLine = lnum + 1
+						state.isInsert = true
 					case diff.LineDeleted, diff.LineAdded:
 						// Do nothing in particular.
 					}
 				case diff.LineDeleted:
 					lnum++
-					originalLines = append(originalLines, buildOriginalLine(path, diffLine))
+					state.originalLines = append(state.originalLines, buildOriginalLine(path, diffLine))
 					switch prevState {
 					case diff.LineUnchanged:
-						startLine = lnum
+						state.startLine = lnum
 					case diff.LineAdded:
-						isInsert = false
+						state.isInsert = false
 					case diff.LineDeleted:
 						// Do nothing in particular.
 					}
@@ -108,7 +108,7 @@ func (p *DiffParser) Parse(r io.Reader) ([]*rdf.Diagnostic, error) {
 				}
 				prevState = diffLine.Type
 			}
-			if startLine > 0 {
+			if state.startLine > 0 {
 				emit() // Output a diagnostic at the end of hunk.
 			}
 		}
