@@ -1,0 +1,185 @@
+[
+  {
+    "PathOld": "gofmt.go.orig",
+    "PathNew": "gofmt.go",
+    "TimeOld": "2020-07-26 08:01:09.260800318 +0000",
+    "TimeNew": "2020-07-26 08:01:09.260800318 +0000",
+    "Hunks": [
+      {
+        "StartLineOld": 1,
+        "LineLengthOld": 6,
+        "StartLineNew": 1,
+        "LineLengthNew": 6,
+        "Section": "",
+        "Lines": [
+          {
+            "Type": 0,
+            "Content": "package testdata",
+            "LnumDiff": 1,
+            "LnumOld": 1,
+            "LnumNew": 1
+          },
+          {
+            "Type": 0,
+            "Content": "",
+            "LnumDiff": 2,
+            "LnumOld": 2,
+            "LnumNew": 2
+          },
+          {
+            "Type": 2,
+            "Content": "func    fmt     () {",
+            "LnumDiff": 3,
+            "LnumOld": 3,
+            "LnumNew": 0
+          },
+          {
+            "Type": 1,
+            "Content": "func fmt() {",
+            "LnumDiff": 4,
+            "LnumOld": 0,
+            "LnumNew": 3
+          },
+          {
+            "Type": 0,
+            "Content": "\t// test",
+            "LnumDiff": 5,
+            "LnumOld": 4,
+            "LnumNew": 4
+          },
+          {
+            "Type": 0,
+            "Content": "\t// test line",
+            "LnumDiff": 6,
+            "LnumOld": 5,
+            "LnumNew": 5
+          },
+          {
+            "Type": 0,
+            "Content": "\t// test line",
+            "LnumDiff": 7,
+            "LnumOld": 6,
+            "LnumNew": 6
+          }
+        ]
+      },
+      {
+        "StartLineOld": 10,
+        "LineLengthOld": 11,
+        "StartLineNew": 10,
+        "LineLengthNew": 11,
+        "Section": "",
+        "Lines": [
+          {
+            "Type": 0,
+            "Content": "\t// test line",
+            "LnumDiff": 9,
+            "LnumOld": 10,
+            "LnumNew": 10
+          },
+          {
+            "Type": 0,
+            "Content": "\t// test line",
+            "LnumDiff": 10,
+            "LnumOld": 11,
+            "LnumNew": 11
+          },
+          {
+            "Type": 0,
+            "Content": "",
+            "LnumDiff": 11,
+            "LnumOld": 12,
+            "LnumNew": 12
+          },
+          {
+            "Type": 2,
+            "Content": "println(",
+            "LnumDiff": 12,
+            "LnumOld": 13,
+            "LnumNew": 0
+          },
+          {
+            "Type": 2,
+            "Content": "\t\t\"hello, gofmt test\"    )",
+            "LnumDiff": 13,
+            "LnumOld": 14,
+            "LnumNew": 0
+          },
+          {
+            "Type": 2,
+            "Content": "//comment",
+            "LnumDiff": 14,
+            "LnumOld": 15,
+            "LnumNew": 0
+          },
+          {
+            "Type": 1,
+            "Content": "\tprintln(",
+            "LnumDiff": 15,
+            "LnumOld": 0,
+            "LnumNew": 13
+          },
+          {
+            "Type": 1,
+            "Content": "\t\t\"hello, gofmt test\")",
+            "LnumDiff": 16,
+            "LnumOld": 0,
+            "LnumNew": 14
+          },
+          {
+            "Type": 1,
+            "Content": "\t//comment",
+            "LnumDiff": 17,
+            "LnumOld": 0,
+            "LnumNew": 15
+          },
+          {
+            "Type": 0,
+            "Content": "}",
+            "LnumDiff": 18,
+            "LnumOld": 16,
+            "LnumNew": 16
+          },
+          {
+            "Type": 0,
+            "Content": "",
+            "LnumDiff": 19,
+            "LnumOld": 17,
+            "LnumNew": 17
+          },
+          {
+            "Type": 1,
+            "Content": "type s struct{ A int }",
+            "LnumDiff": 20,
+            "LnumOld": 0,
+            "LnumNew": 18
+          },
+          {
+            "Type": 0,
+            "Content": "",
+            "LnumDiff": 21,
+            "LnumOld": 18,
+            "LnumNew": 19
+          },
+          {
+            "Type": 2,
+            "Content": "type s struct { A int }",
+            "LnumDiff": 22,
+            "LnumOld": 19,
+            "LnumNew": 0
+          },
+          {
+            "Type": 0,
+            "Content": "func (s s) String() { return \"s\" }",
+            "LnumDiff": 23,
+            "LnumOld": 20,
+            "LnumNew": 20
+          }
+        ]
+      }
+    ],
+    "Extended": [
+      "diff -u gofmt.go.orig gofmt.go"
+    ]
+  }
+]

@@ -1,0 +1,27 @@
+diff -u gofmt.go.orig gofmt.go
+--- gofmt.go.orig	2020-07-26 08:01:09.260800318 +0000
++++ gofmt.go	2020-07-26 08:01:09.260800318 +0000
+@@ -1,6 +1,6 @@
+ package testdata
+ 
+-func    fmt     () {
++func fmt() {
+ 	// test
+ 	// test line
+ 	// test line
+@@ -10,11 +10,11 @@
+ 	// test line
+ 	// test line
+ 
+-println(
+-		"hello, gofmt test"    )
+-//comment
++	println(
++		"hello, gofmt test")
++	//comment
+ }
+ 
++type s struct{ A int }
+ 
+-type s struct { A int }
+ func (s s) String() { return "s" }

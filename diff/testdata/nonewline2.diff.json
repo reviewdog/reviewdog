@@ -2,8 +2,8 @@
   {
     "PathOld": "nonewline2.old.txt",
     "PathNew": "nonewline2.new.txt",
-    "TimeOld": "2016-10-13 15:34:15.141779355 +0900",
-    "TimeNew": "2016-10-13 15:34:15.075112360 +0900",
+    "TimeOld": "2019-04-19 13:19:50.331526534 +0000",
+    "TimeNew": "2019-04-19 13:19:50.331526534 +0000",
     "Hunks": [
       {
         "StartLineOld": 1,

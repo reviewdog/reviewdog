@@ -1,5 +1,5 @@
---- nonewline3.old.txt	2016-10-13 15:34:15.361780443 +0900
-+++ nonewline3.new.txt	2016-10-13 15:34:15.288446747 +0900
+--- nonewline3.old.txt	2019-04-19 13:19:50.331526534 +0000
++++ nonewline3.new.txt	2019-04-19 13:19:50.331526534 +0000
 @@ -1,6 +1,7 @@
  No newline at end of the old file
  Newline at end of the new file
