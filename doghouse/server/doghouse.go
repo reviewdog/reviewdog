@@ -243,6 +243,7 @@ func (ch *Checker) toCheckRunAnnotation(c *filter.FilteredDiagnostic) *github.Ch
 		EndLine:         github.Int(endLine),
 		AnnotationLevel: github.String(ch.annotationLevel(c.Diagnostic.Severity)),
 		Message:         github.String(c.Diagnostic.GetMessage()),
+		Title:           github.String(ch.buildTitle(c)),
 	}
 	// Annotations only support start_column and end_column on the same line.
 	if startLine == endLine {
@@ -251,21 +252,30 @@ func (ch *Checker) toCheckRunAnnotation(c *filter.FilteredDiagnostic) *github.Ch
 			a.EndColumn = github.Int(int(e))
 		}
 	}
+	if s := c.Diagnostic.GetOriginalOutput(); s != "" {
+		a.RawDetails = github.String(s)
+	}
+	return a
+}
+
+func (ch *Checker) buildTitle(c *filter.FilteredDiagnostic) string {
+	var sb strings.Builder
 	toolName := c.Diagnostic.GetSource().GetName()
 	if toolName == "" {
 		toolName = ch.req.Name
 	}
 	if toolName != "" {
-		line := fmt.Sprintf("L%d", startLine)
-		if startLine < endLine {
-			line += fmt.Sprintf("-L%d", endLine)
+		sb.WriteString(fmt.Sprintf("[%s] ", toolName))
+	}
+	loc := c.Diagnostic.GetLocation()
+	sb.WriteString(loc.GetPath())
+	if startLine := int(loc.GetRange().GetStart().GetLine()); startLine > 0 {
+		sb.WriteString(fmt.Sprintf("#L%d", startLine))
+		if endLine := int(loc.GetRange().GetEnd().GetLine()); startLine < endLine {
+			sb.WriteString(fmt.Sprintf("-L%d", endLine))
 		}
-		a.Title = github.String(fmt.Sprintf("[%s] %s#%s", toolName, loc.GetPath(), line))
 	}
-	if s := c.Diagnostic.GetOriginalOutput(); s != "" {
-		a.RawDetails = github.String(s)
-	}
-	return a
+	return sb.String()
 }
 
 func (ch *Checker) pullRequestDiff(ctx context.Context, pr int) ([]*diff.FileDiff, error) {
