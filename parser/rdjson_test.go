@@ -9,7 +9,7 @@ import (
 	"google.golang.org/protobuf/encoding/protojson"
 )
 
-func ExampleDJSONParser() {
+func ExampleRDJSONParser() {
 	const sample = `
 {
   "source": {
@@ -85,6 +85,7 @@ func ExampleDJSONParser() {
 		panic(err)
 	}
 	for _, d := range diagnostics {
+		d.OriginalOutput = "" // Skip for testing as it's not deterministic.
 		rdjson, _ := protojson.MarshalOptions{Indent: "  "}.Marshal(d)
 		var out bytes.Buffer
 		json.Indent(&out, rdjson, "", "  ")

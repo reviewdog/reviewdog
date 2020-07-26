@@ -37,6 +37,10 @@ func (p *RDJSONParser) Parse(r io.Reader) ([]*rdf.Diagnostic, error) {
 		if d.Source == nil {
 			d.Source = dr.Source
 		}
+		if d.GetOriginalOutput() == "" {
+			// TODO(haya14busa): Refactor not to fill in original output.
+			d.OriginalOutput = d.String()
+		}
 	}
 	return dr.Diagnostics, nil
 }
