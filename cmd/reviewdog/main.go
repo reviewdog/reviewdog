@@ -51,7 +51,6 @@ type option struct {
 	fDiffStrip       int
 	list             bool   // list supported errorformat name
 	name             string // tool name which is used in comment
-	ci               string
 	conf             string
 	runners          string
 	reporter         string
@@ -182,7 +181,6 @@ func init() {
 	flag.IntVar(&opt.fDiffStrip, "f.diff.strip", 1, fDiffStripDoc)
 	flag.BoolVar(&opt.list, "list", false, listDoc)
 	flag.StringVar(&opt.name, "name", "", nameDoc)
-	flag.StringVar(&opt.ci, "ci", "", ciDoc)
 	flag.StringVar(&opt.conf, "conf", "", confDoc)
 	flag.StringVar(&opt.runners, "runners", "", runnersDoc)
 	flag.StringVar(&opt.reporter, "reporter", "local", reporterDoc)
@@ -221,12 +219,6 @@ func run(r io.Reader, w io.Writer, opt *option) error {
 
 	if opt.list {
 		return runList(w)
-	}
-
-	// TODO(haya14busa): clean up when removing -ci flag from next release.
-	if opt.ci != "" {
-		return errors.New(`-ci flag is deprecated.
-See -reporter flag for migration and set -reporter="github-pr-review" or -reporter="github-pr-check" or -reporter="gitlab-mr-commit"`)
 	}
 
 	if opt.tee {
