@@ -53,8 +53,8 @@ func (p PostedComments) DebugLog() {
 // BodyPrefix is prefix text of comment body.
 const BodyPrefix = `<sub>reported by [reviewdog](https://github.com/reviewdog/reviewdog) :dog:</sub><br>`
 
-// CommentBody creates comment body text.
-func CommentBody(c *reviewdog.Comment) string {
+// MarkdownComment creates comment body markdown .
+func MarkdownComment(c *reviewdog.Comment) string {
 	tool := ""
 	if c.ToolName != "" {
 		tool = fmt.Sprintf("**[%s]** ", c.ToolName)

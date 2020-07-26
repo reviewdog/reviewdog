@@ -41,7 +41,7 @@ func TestCommentBody(t *testing.T) {
 		},
 	}
 	for _, tt := range tests {
-		if got := CommentBody(tt.in); got != strings.Trim(tt.want, "\n") {
+		if got := MarkdownComment(tt.in); got != strings.Trim(tt.want, "\n") {
 			t.Errorf("got unexpected comment.\ngot:\n%s\nwant:\n%s", got, tt.want)
 		}
 	}

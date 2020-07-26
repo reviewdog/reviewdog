@@ -143,7 +143,7 @@ func TestGitLabMergeRequestDiscussionCommenter_Post_Flush_review_api(t *testing.
 					{
 						Notes: []*gitlab.Note{
 							{
-								Body: commentutil.CommentBody(alreadyCommented1),
+								Body: commentutil.MarkdownComment(alreadyCommented1),
 								Position: &gitlab.NotePosition{
 									NewPath: alreadyCommented1.Result.Diagnostic.GetLocation().GetPath(),
 									NewLine: int(alreadyCommented1.Result.Diagnostic.GetLocation().GetRange().GetStart().GetLine()),
@@ -168,7 +168,7 @@ func TestGitLabMergeRequestDiscussionCommenter_Post_Flush_review_api(t *testing.
 					{
 						Notes: []*gitlab.Note{
 							{
-								Body: commentutil.CommentBody(alreadyCommented2),
+								Body: commentutil.MarkdownComment(alreadyCommented2),
 								Position: &gitlab.NotePosition{
 									NewPath: alreadyCommented2.Result.Diagnostic.GetLocation().GetPath(),
 									NewLine: int(alreadyCommented2.Result.Diagnostic.GetLocation().GetRange().GetStart().GetLine()),
@@ -191,7 +191,7 @@ func TestGitLabMergeRequestDiscussionCommenter_Post_Flush_review_api(t *testing.
 			switch got.Position.NewPath {
 			case "file.go":
 				want := &gitlab.CreateMergeRequestDiscussionOptions{
-					Body: gitlab.String(commentutil.CommentBody(newComment1)),
+					Body: gitlab.String(commentutil.MarkdownComment(newComment1)),
 					Position: &gitlab.NotePosition{
 						BaseSHA: "xxx", StartSHA: "xxx", HeadSHA: "sha", PositionType: "text", NewPath: "file.go", NewLine: 14},
 				}
@@ -200,7 +200,7 @@ func TestGitLabMergeRequestDiscussionCommenter_Post_Flush_review_api(t *testing.
 				}
 			case "file2.go":
 				want := &gitlab.CreateMergeRequestDiscussionOptions{
-					Body: gitlab.String(commentutil.CommentBody(newComment2)),
+					Body: gitlab.String(commentutil.MarkdownComment(newComment2)),
 					Position: &gitlab.NotePosition{
 						BaseSHA: "xxx", StartSHA: "xxx", HeadSHA: "sha", PositionType: "text", NewPath: "file2.go", NewLine: 15},
 				}
@@ -209,7 +209,7 @@ func TestGitLabMergeRequestDiscussionCommenter_Post_Flush_review_api(t *testing.
 				}
 			case "new_file.go":
 				want := &gitlab.CreateMergeRequestDiscussionOptions{
-					Body: gitlab.String(commentutil.CommentBody(newComment3)),
+					Body: gitlab.String(commentutil.MarkdownComment(newComment3)),
 					Position: &gitlab.NotePosition{
 						BaseSHA: "xxx", StartSHA: "xxx", HeadSHA: "sha", PositionType: "text",
 						NewPath: "new_file.go", NewLine: 14,
