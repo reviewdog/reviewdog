@@ -213,7 +213,7 @@ func TestGitHubPullRequest_Post_Flush_review_api(t *testing.T) {
 				{
 					Path: github.String("reviewdog.go"),
 					Line: github.Int(2),
-					Body: github.String(commentutil.BodyPrefix + "\nalready commented"),
+					Body: github.String(commentutil.BodyPrefix + "already commented"),
 				},
 			}
 			w.Header().Add("Link", `<https://api.github.com/repos/o/r/pulls/14/comments?page=2>; rel="next"`)
@@ -225,19 +225,19 @@ func TestGitHubPullRequest_Post_Flush_review_api(t *testing.T) {
 				{
 					Path: github.String("reviewdog.go"),
 					Line: github.Int(15),
-					Body: github.String(commentutil.BodyPrefix + "\nalready commented 2"),
+					Body: github.String(commentutil.BodyPrefix + "already commented 2"),
 				},
 				{
 					Path:      github.String("reviewdog.go"),
 					StartLine: github.Int(15),
 					Line:      github.Int(16),
-					Body:      github.String(commentutil.BodyPrefix + "\nmultiline existing comment"),
+					Body:      github.String(commentutil.BodyPrefix + "multiline existing comment"),
 				},
 				{
 					Path:      github.String("reviewdog.go"),
 					StartLine: github.Int(15),
 					Line:      github.Int(17),
-					Body:      github.String(commentutil.BodyPrefix + "\nmultiline existing comment (line-break)"),
+					Body:      github.String(commentutil.BodyPrefix + "multiline existing comment (line-break)"),
 				},
 			}
 			if err := json.NewEncoder(w).Encode(cs); err != nil {
@@ -268,7 +268,7 @@ func TestGitHubPullRequest_Post_Flush_review_api(t *testing.T) {
 				Path: github.String("reviewdog.go"),
 				Side: github.String("RIGHT"),
 				Line: github.Int(15),
-				Body: github.String(commentutil.BodyPrefix + "\nnew comment"),
+				Body: github.String(commentutil.BodyPrefix + "new comment"),
 			},
 			{
 				Path:      github.String("reviewdog.go"),
@@ -276,7 +276,7 @@ func TestGitHubPullRequest_Post_Flush_review_api(t *testing.T) {
 				StartSide: github.String("RIGHT"),
 				StartLine: github.Int(15),
 				Line:      github.Int(16),
-				Body:      github.String(commentutil.BodyPrefix + "\nmultiline new comment"),
+				Body:      github.String(commentutil.BodyPrefix + "multiline new comment"),
 			},
 			{
 				Path:      github.String("reviewdog.go"),
@@ -284,7 +284,7 @@ func TestGitHubPullRequest_Post_Flush_review_api(t *testing.T) {
 				StartSide: github.String("RIGHT"),
 				StartLine: github.Int(15),
 				Line:      github.Int(16),
-				Body: github.String(commentutil.BodyPrefix + "\n" + strings.Join([]string{
+				Body: github.String(commentutil.BodyPrefix + strings.Join([]string{
 					"multiline suggestion comment",
 					"```suggestion",
 					"line1",
@@ -297,7 +297,7 @@ func TestGitHubPullRequest_Post_Flush_review_api(t *testing.T) {
 				Path: github.String("reviewdog.go"),
 				Side: github.String("RIGHT"),
 				Line: github.Int(15),
-				Body: github.String(commentutil.BodyPrefix + "\n" + strings.Join([]string{
+				Body: github.String(commentutil.BodyPrefix + strings.Join([]string{
 					"singleline suggestion comment",
 					"```suggestion",
 					"line1",
@@ -311,7 +311,7 @@ func TestGitHubPullRequest_Post_Flush_review_api(t *testing.T) {
 				StartSide: github.String("RIGHT"),
 				StartLine: github.Int(15),
 				Line:      github.Int(16),
-				Body: github.String(commentutil.BodyPrefix + "\n" + strings.Join([]string{
+				Body: github.String(commentutil.BodyPrefix + strings.Join([]string{
 					"invalid lines suggestion comment",
 					invalidSuggestionPre + "the Diagnostic's lines and Suggestion lines must be the same. L15-L16 v.s. L16-L17" + invalidSuggestionPost,
 				}, "\n") + "\n"),
@@ -322,7 +322,7 @@ func TestGitHubPullRequest_Post_Flush_review_api(t *testing.T) {
 				StartSide: github.String("RIGHT"),
 				StartLine: github.Int(15),
 				Line:      github.Int(16),
-				Body: github.String(commentutil.BodyPrefix + "\n" + strings.Join([]string{
+				Body: github.String(commentutil.BodyPrefix + strings.Join([]string{
 					"non-line based suggestion comment (no source lines)",
 					invalidSuggestionPre + "source lines are not available" + invalidSuggestionPost,
 				}, "\n") + "\n"),
@@ -331,7 +331,7 @@ func TestGitHubPullRequest_Post_Flush_review_api(t *testing.T) {
 				Path: github.String("reviewdog.go"),
 				Side: github.String("RIGHT"),
 				Line: github.Int(15),
-				Body: github.String(commentutil.BodyPrefix + "\n" + strings.Join([]string{
+				Body: github.String(commentutil.BodyPrefix + strings.Join([]string{
 					"range suggestion (single line)",
 					"```suggestion",
 					"haya14busa",
@@ -344,7 +344,7 @@ func TestGitHubPullRequest_Post_Flush_review_api(t *testing.T) {
 				StartSide: github.String("RIGHT"),
 				StartLine: github.Int(15),
 				Line:      github.Int(16),
-				Body: github.String(commentutil.BodyPrefix + "\n" + strings.Join([]string{
+				Body: github.String(commentutil.BodyPrefix + strings.Join([]string{
 					"range suggestion (multi-line)",
 					"```suggestion",
 					"haya14busa (multi-line)",
@@ -357,7 +357,7 @@ func TestGitHubPullRequest_Post_Flush_review_api(t *testing.T) {
 				StartSide: github.String("RIGHT"),
 				StartLine: github.Int(15),
 				Line:      github.Int(17),
-				Body: github.String(commentutil.BodyPrefix + "\n" + strings.Join([]string{
+				Body: github.String(commentutil.BodyPrefix + strings.Join([]string{
 					"range suggestion (line-break, remove)",
 					"```suggestion",
 					"line 15 (content at line 15)",
@@ -368,7 +368,7 @@ func TestGitHubPullRequest_Post_Flush_review_api(t *testing.T) {
 				Path: github.String("reviewdog.go"),
 				Side: github.String("RIGHT"),
 				Line: github.Int(15),
-				Body: github.String(commentutil.BodyPrefix + "\n" + strings.Join([]string{
+				Body: github.String(commentutil.BodyPrefix + strings.Join([]string{
 					"range suggestion (insert)",
 					"```suggestion",
 					"haya14busa",
@@ -379,7 +379,7 @@ func TestGitHubPullRequest_Post_Flush_review_api(t *testing.T) {
 				Path: github.String("reviewdog.go"),
 				Side: github.String("RIGHT"),
 				Line: github.Int(15),
-				Body: github.String(commentutil.BodyPrefix + "\n" + strings.Join([]string{
+				Body: github.String(commentutil.BodyPrefix + strings.Join([]string{
 					"multiple suggestions",
 					"```suggestion",
 					"haya1busa",

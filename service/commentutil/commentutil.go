@@ -51,7 +51,7 @@ func (p PostedComments) DebugLog() {
 }
 
 // BodyPrefix is prefix text of comment body.
-const BodyPrefix = `<sub>reported by [reviewdog](https://github.com/reviewdog/reviewdog) :dog:</sub>`
+const BodyPrefix = `<sub>reported by [reviewdog](https://github.com/reviewdog/reviewdog) :dog:</sub><br>`
 
 // CommentBody creates comment body text.
 func CommentBody(c *reviewdog.Comment) string {
@@ -59,5 +59,5 @@ func CommentBody(c *reviewdog.Comment) string {
 	if c.ToolName != "" {
 		tool = fmt.Sprintf("**[%s]** ", c.ToolName)
 	}
-	return tool + BodyPrefix + "\n" + c.Result.Diagnostic.GetMessage()
+	return tool + BodyPrefix + c.Result.Diagnostic.GetMessage()
 }
