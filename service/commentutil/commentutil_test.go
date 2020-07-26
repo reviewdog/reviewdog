@@ -53,6 +53,20 @@ func TestCommentBody(t *testing.T) {
 **[custom-tool-name]** <sub>reported by [reviewdog](https://github.com/reviewdog/reviewdog) :dog:</sub><br>test message 3
 `,
 		},
+		{
+			in: &reviewdog.Comment{
+				Result: &filter.FilteredDiagnostic{
+					Diagnostic: &rdf.Diagnostic{
+						Message:  "test message 4",
+						Source:   &rdf.Source{Name: "tool-name"},
+						Severity: rdf.Severity_WARNING,
+					},
+				},
+			},
+			want: `
+⚠️ **[tool-name]** <sub>reported by [reviewdog](https://github.com/reviewdog/reviewdog) :dog:</sub><br>test message 4
+`,
+		},
 	}
 	for _, tt := range tests {
 		want := strings.Trim(tt.want, "\n")

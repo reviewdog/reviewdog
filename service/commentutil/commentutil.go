@@ -6,6 +6,7 @@ import (
 	"strings"
 
 	"github.com/reviewdog/reviewdog"
+	"github.com/reviewdog/reviewdog/proto/rdf"
 )
 
 // `path` to `position`(Lnum for new file) to comment `body`s
@@ -57,6 +58,10 @@ const BodyPrefix = `<sub>reported by [reviewdog](https://github.com/reviewdog/re
 // MarkdownComment creates comment body markdown .
 func MarkdownComment(c *reviewdog.Comment) string {
 	var sb strings.Builder
+	if s := severity(c); s != "" {
+		sb.WriteString(s)
+		sb.WriteString(" ")
+	}
 	if tool := toolName(c); tool != "" {
 		sb.WriteString(fmt.Sprintf("**[%s]** ", tool))
 	}
@@ -70,4 +75,17 @@ func toolName(c *reviewdog.Comment) string {
 		return name
 	}
 	return c.ToolName
+}
+
+func severity(c *reviewdog.Comment) string {
+	switch c.Result.Diagnostic.GetSeverity() {
+	case rdf.Severity_ERROR:
+		return "🚫"
+	case rdf.Severity_WARNING:
+		return "⚠️"
+	case rdf.Severity_INFO:
+		return "📝"
+	default:
+		return ""
+	}
 }
