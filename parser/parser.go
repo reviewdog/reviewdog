@@ -36,6 +36,8 @@ func New(opt *Option) (Parser, error) {
 		return NewCheckStyleParser(), nil
 	case "rdjsonl":
 		return NewRDJSONLParser(), nil
+	case "rdjson":
+		return NewRDJSONParser(), nil
 	case "diff":
 		return NewDiffParser(opt.DiffStrip), nil
 	}
