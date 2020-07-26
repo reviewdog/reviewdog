@@ -48,7 +48,7 @@ func TestGitLabMergeRequestCommitCommenter_Post_Flush_review_api(t *testing.T) {
 			{
 				Path: "notExistFile.go",
 				Line: 1,
-				Note: commentutil.BodyPrefix + "\nalready commented",
+				Note: commentutil.BodyPrefix + "already commented",
 			},
 		}
 		if err := json.NewEncoder(w).Encode(cs); err != nil {
@@ -67,7 +67,7 @@ func TestGitLabMergeRequestCommitCommenter_Post_Flush_review_api(t *testing.T) {
 		want := gitlab.CommitComment{
 			Path:     "notExistFile.go",
 			Line:     14,
-			Note:     commentutil.BodyPrefix + "\nnew comment",
+			Note:     commentutil.BodyPrefix + "new comment",
 			LineType: "new",
 		}
 		if diff := pretty.Compare(want, req); diff != "" {

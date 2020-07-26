@@ -3,8 +3,10 @@ package commentutil
 import (
 	"fmt"
 	"log"
+	"strings"
 
 	"github.com/reviewdog/reviewdog"
+	"github.com/reviewdog/reviewdog/proto/rdf"
 )
 
 // `path` to `position`(Lnum for new file) to comment `body`s
@@ -51,13 +53,46 @@ func (p PostedComments) DebugLog() {
 }
 
 // BodyPrefix is prefix text of comment body.
-const BodyPrefix = `<sub>reported by [reviewdog](https://github.com/reviewdog/reviewdog) :dog:</sub>`
+const BodyPrefix = `<sub>reported by [reviewdog](https://github.com/reviewdog/reviewdog) :dog:</sub><br>`
 
-// CommentBody creates comment body text.
-func CommentBody(c *reviewdog.Comment) string {
-	tool := ""
-	if c.ToolName != "" {
-		tool = fmt.Sprintf("**[%s]** ", c.ToolName)
+// MarkdownComment creates comment body markdown.
+func MarkdownComment(c *reviewdog.Comment) string {
+	var sb strings.Builder
+	if s := severity(c); s != "" {
+		sb.WriteString(s)
+		sb.WriteString(" ")
 	}
-	return tool + BodyPrefix + "\n" + c.Result.Diagnostic.GetMessage()
+	if tool := toolName(c); tool != "" {
+		sb.WriteString(fmt.Sprintf("**[%s]** ", tool))
+	}
+	if code := c.Result.Diagnostic.GetCode().GetValue(); code != "" {
+		if url := c.Result.Diagnostic.GetCode().GetUrl(); url != "" {
+			sb.WriteString(fmt.Sprintf("<[%s](%s)> ", code, url))
+		} else {
+			sb.WriteString(fmt.Sprintf("<%s> ", code))
+		}
+	}
+	sb.WriteString(BodyPrefix)
+	sb.WriteString(c.Result.Diagnostic.GetMessage())
+	return sb.String()
+}
+
+func toolName(c *reviewdog.Comment) string {
+	if name := c.Result.Diagnostic.GetSource().GetName(); name != "" {
+		return name
+	}
+	return c.ToolName
+}
+
+func severity(c *reviewdog.Comment) string {
+	switch c.Result.Diagnostic.GetSeverity() {
+	case rdf.Severity_ERROR:
+		return "🚫"
+	case rdf.Severity_WARNING:
+		return "⚠️"
+	case rdf.Severity_INFO:
+		return "📝"
+	default:
+		return ""
+	}
 }

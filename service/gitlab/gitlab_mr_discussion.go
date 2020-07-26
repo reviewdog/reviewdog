@@ -103,7 +103,7 @@ func (g *GitLabMergeRequestDiscussionCommenter) postCommentsForEach(ctx context.
 		c := c
 		loc := c.Result.Diagnostic.GetLocation()
 		lnum := int(loc.GetRange().GetStart().GetLine())
-		body := commentutil.CommentBody(c)
+		body := commentutil.MarkdownComment(c)
 		if !c.Result.InDiffFile || lnum == 0 || postedcs.IsPosted(c, lnum, body) {
 			continue
 		}
