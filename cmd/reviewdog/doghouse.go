@@ -155,7 +155,7 @@ func postResultSet(ctx context.Context, resultSet *reviewdog.ResultMap,
 				// Fill results only when report URL is missing, which probably means
 				// it failed to report results with Check API.
 				filteredResultSet.Store(name, &reviewdog.FilteredResult{
-					Level:         result.Level,
+					Level:              result.Level,
 					FilteredDiagnostic: res.CheckedResults,
 				})
 			}
