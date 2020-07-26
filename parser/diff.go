@@ -3,7 +3,6 @@ package parser
 import (
 	"fmt"
 	"io"
-	"os"
 	"strings"
 
 	"github.com/reviewdog/reviewdog/diff"
@@ -16,14 +15,11 @@ var _ Parser = &DiffParser{}
 // DiffParser is a unified diff parser.
 type DiffParser struct {
 	strip int
-	wd    string
 }
 
 // NewDiffParser creates a new DiffParser.
 func NewDiffParser(strip int) *DiffParser {
-	p := &DiffParser{strip: strip}
-	p.wd, _ = os.Getwd()
-	return p
+	return &DiffParser{strip: strip}
 }
 
 // state data for a diagnostic.
