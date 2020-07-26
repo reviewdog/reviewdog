@@ -55,7 +55,7 @@ func (p PostedComments) DebugLog() {
 // BodyPrefix is prefix text of comment body.
 const BodyPrefix = `<sub>reported by [reviewdog](https://github.com/reviewdog/reviewdog) :dog:</sub><br>`
 
-// MarkdownComment creates comment body markdown .
+// MarkdownComment creates comment body markdown.
 func MarkdownComment(c *reviewdog.Comment) string {
 	var sb strings.Builder
 	if s := severity(c); s != "" {
@@ -64,6 +64,13 @@ func MarkdownComment(c *reviewdog.Comment) string {
 	}
 	if tool := toolName(c); tool != "" {
 		sb.WriteString(fmt.Sprintf("**[%s]** ", tool))
+	}
+	if code := c.Result.Diagnostic.GetCode().GetValue(); code != "" {
+		if url := c.Result.Diagnostic.GetCode().GetUrl(); url != "" {
+			sb.WriteString(fmt.Sprintf("<[%s](%s)> ", code, url))
+		} else {
+			sb.WriteString(fmt.Sprintf("<%s> ", code))
+		}
 	}
 	sb.WriteString(BodyPrefix)
 	sb.WriteString(c.Result.Diagnostic.GetMessage())

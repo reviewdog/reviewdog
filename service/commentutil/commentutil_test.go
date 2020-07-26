@@ -67,6 +67,39 @@ func TestCommentBody(t *testing.T) {
 ⚠️ **[tool-name]** <sub>reported by [reviewdog](https://github.com/reviewdog/reviewdog) :dog:</sub><br>test message 4
 `,
 		},
+		{
+			in: &reviewdog.Comment{
+				Result: &filter.FilteredDiagnostic{
+					Diagnostic: &rdf.Diagnostic{
+						Message: "test message 5 (code)",
+						Source:  &rdf.Source{Name: "tool-name"},
+						Code: &rdf.Code{
+							Value: "CODE14",
+						},
+					},
+				},
+			},
+			want: `
+**[tool-name]** <CODE14> <sub>reported by [reviewdog](https://github.com/reviewdog/reviewdog) :dog:</sub><br>test message 5 (code)
+`,
+		},
+		{
+			in: &reviewdog.Comment{
+				Result: &filter.FilteredDiagnostic{
+					Diagnostic: &rdf.Diagnostic{
+						Message: "test message 6 (code with URL)",
+						Source:  &rdf.Source{Name: "tool-name"},
+						Code: &rdf.Code{
+							Value: "CODE14",
+							Url:   "https://example.com/#CODE14",
+						},
+					},
+				},
+			},
+			want: `
+**[tool-name]** <[CODE14](https://example.com/#CODE14)> <sub>reported by [reviewdog](https://github.com/reviewdog/reviewdog) :dog:</sub><br>test message 6 (code with URL)
+`,
+		},
 	}
 	for _, tt := range tests {
 		want := strings.Trim(tt.want, "\n")
