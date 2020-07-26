@@ -15,6 +15,6 @@ println(
 //comment
 }
 
-type s struct{ A int }
 
+type s struct { A int }
 func (s s) String() { return "s" }
