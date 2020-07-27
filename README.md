@@ -30,6 +30,7 @@
   <a href="https://github.com/reviewdog/reviewdog/actions?query=workflow%3Areviewdog+event%3Apush+branch%3Amaster">
     <img alt="reviewdog" src="https://github.com/reviewdog/reviewdog/workflows/reviewdog/badge.svg?branch=master&event=push">
   </a>
+  
   <a href="https://github.com/reviewdog/reviewdog/actions?query=workflow%3Arelease">
     <img alt="release" src="https://github.com/reviewdog/reviewdog/workflows/release/badge.svg">
   </a>
@@ -542,7 +543,7 @@ Example: [action-tflint](https://github.com/reviewdog/reviewdog/issues/322).
 
 `GITHUB_TOKEN` for Pull Requests from forked repository doesn't have write
 access to Check API nor Review API due to [GitHub Actions
-restriction](https://help.github.com/en/articles/virtual-environments-for-github-actions#github_token-secret).
+restriction](https://docs.github.com/en/actions/configuring-and-managing-workflows/authenticating-with-the-github_token#permissions-for-the-github_token).
 
 Instead, reviewdog uses [Logging commands of GitHub
 Actions](https://help.github.com/en/actions/automating-your-workflow-with-github-actions/development-tools-for-github-actions#set-an-error-message-error)
