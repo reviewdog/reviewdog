@@ -36,7 +36,7 @@ func setupGitHubClient() *github.Client {
 
 func setupEnvs() (cleanup func()) {
 	var cleanEnvs = []string{
-		"GITHUB_ACTION",
+		"GITHUB_ACTIONS",
 	}
 	saveEnvs := make(map[string]string)
 	for _, key := range cleanEnvs {
