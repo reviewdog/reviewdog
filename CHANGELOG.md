@@ -83,4 +83,5 @@ See https://github.com/reviewdog/reviewdog/releases for older release note.
 [Unreleased]: https://github.com/reviewdog/reviewdog/compare/v0.10.0...HEAD
 [v0.10.0]: https://github.com/reviewdog/reviewdog/compare/v0.9.17...v0.10.0
 [v0.10.1]: https://github.com/reviewdog/reviewdog/compare/v0.10.0...v0.10.1
+[v0.10.2]: https://github.com/reviewdog/reviewdog/compare/v0.10.1...v0.10.2
 [@haya14busa]: https://github.com/haya14busa
