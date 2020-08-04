@@ -19,6 +19,13 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ---
 
+## [v0.10.2] - 2020-08-04
+
+### :bug: Fixes
+- [#709](https://github.com/reviewdog/reviewdog/pull/709) Check for GITHUB_ACTIONS instead of GITHUB_ACTION
+
+---
+
 ## [v0.10.1] - 2020-06-30
 
 ### :rocket: Enhancements
