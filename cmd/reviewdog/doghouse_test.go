@@ -41,7 +41,7 @@ func setupEnvs(testEnvs map[string]string) (cleanup func()) {
 func TestNewDoghouseCli_returnGitHubClient(t *testing.T) {
 	cleanup := setupEnvs(map[string]string{
 		"REVIEWDOG_TOKEN":            "",
-		"GITHUB_ACTION":              "xxx",
+		"GITHUB_ACTIONS":             "xxx",
 		"REVIEWDOG_GITHUB_API_TOKEN": "xxx",
 	})
 	defer cleanup()
@@ -57,7 +57,7 @@ func TestNewDoghouseCli_returnGitHubClient(t *testing.T) {
 func TestNewDoghouseCli_returnErrorForGitHubClient(t *testing.T) {
 	cleanup := setupEnvs(map[string]string{
 		"REVIEWDOG_TOKEN":            "",
-		"GITHUB_ACTION":              "xxx",
+		"GITHUB_ACTIONS":             "true",
 		"REVIEWDOG_GITHUB_API_TOKEN": "", // missing
 	})
 	defer cleanup()
@@ -69,7 +69,7 @@ func TestNewDoghouseCli_returnErrorForGitHubClient(t *testing.T) {
 func TestNewDoghouseCli_returnDogHouseClientWithReviewdogToken(t *testing.T) {
 	cleanup := setupEnvs(map[string]string{
 		"REVIEWDOG_TOKEN":            "xxx",
-		"GITHUB_ACTION":              "xxx",
+		"GITHUB_ACTIONS":             "true",
 		"REVIEWDOG_GITHUB_API_TOKEN": "xxx",
 	})
 	defer cleanup()
@@ -85,7 +85,7 @@ func TestNewDoghouseCli_returnDogHouseClientWithReviewdogToken(t *testing.T) {
 func TestNewDoghouseCli_returnDogHouseClient(t *testing.T) {
 	cleanup := setupEnvs(map[string]string{
 		"REVIEWDOG_TOKEN":            "",
-		"GITHUB_ACTION":              "",
+		"GITHUB_ACTIONS":             "",
 		"REVIEWDOG_GITHUB_API_TOKEN": "",
 	})
 	defer cleanup()
@@ -386,7 +386,7 @@ func TestPostResultSet_withEmptyResponse(t *testing.T) {
 
 func TestReportResults(t *testing.T) {
 	cleanup := setupEnvs(map[string]string{
-		"GITHUB_ACTION":     "",
+		"GITHUB_ACTIONS":    "",
 		"GITHUB_EVENT_PATH": "",
 	})
 	defer cleanup()
@@ -435,7 +435,7 @@ reviewdog: No results found for "name2". 1 results found outside diff.
 
 func TestReportResults_inGitHubAction(t *testing.T) {
 	cleanup := setupEnvs(map[string]string{
-		"GITHUB_ACTION":     "xxx",
+		"GITHUB_ACTIONS":    "true",
 		"GITHUB_EVENT_PATH": "",
 	})
 	defer cleanup()
@@ -461,7 +461,7 @@ func TestReportResults_inGitHubAction(t *testing.T) {
 
 func TestReportResults_noResultsShouldReport(t *testing.T) {
 	cleanup := setupEnvs(map[string]string{
-		"GITHUB_ACTION":     "",
+		"GITHUB_ACTIONS":    "",
 		"GITHUB_EVENT_PATH": "",
 	})
 	defer cleanup()
