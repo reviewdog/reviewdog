@@ -48,6 +48,14 @@ jobs:
           # update https://github.com/reviewdog/homebrew-tap.
           GITHUB_TOKEN: ${{ secrets.RELEASE_GITHUB_TOKEN }}
 
+      - name: Trigger depup workflows
+        if: "steps.tag.outputs.value != ''"
+        env:
+          # Need to use personal access token instead of default token to
+          # trigger workflow of other repositories.
+          DEPUP_GITHUB_API_TOKEN: ${{ secrets.RELEASE_GITHUB_TOKEN }}
+        run: go run ./scripts/trigger-depup/main.go
+
   release-check:
     if: github.event.action == 'labeled'
     runs-on: ubuntu-latest
