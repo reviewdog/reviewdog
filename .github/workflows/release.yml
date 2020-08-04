@@ -3,6 +3,7 @@ on:
   push:
     branches:
       - master
+      - release-*
     tags:
       - 'v*.*.*'
   pull_request:
