@@ -5,6 +5,7 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
 ## [Unreleased]
+- [#710](https://github.com/reviewdog/reviewdog/pull/710) Changed the way to determine if it is on GitHub Actions with checking GITHUB\_ACTIONS environment variable
 
 ### :book: Release Note <!-- optional -->
 <!-- TODO(haya14busa): Write about Reviewdog Diagnostic Format -->
