@@ -20,6 +20,7 @@ jobs:
         run: '( cd linters && go get golang.org/x/lint/golint )'
 
       - name: Setup reviewdog
+        # use: reviewdog/action-setup@v1
         run: |
           go install ./cmd/reviewdog
 
@@ -71,6 +72,7 @@ jobs:
         run: '( cd linters && go get golang.org/x/lint/golint )'
 
       - name: Setup reviewdog
+        # use: reviewdog/action-setup@v1
         run: |
           go install ./cmd/reviewdog
 
