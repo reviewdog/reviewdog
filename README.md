@@ -125,7 +125,7 @@ $ curl -sfL https://raw.githubusercontent.com/reviewdog/nightly/master/install.s
 steps:
 - uses: reviewdog/action-setup@v1
   with:
-    reviewdog_version: latest # [latest,nightly,v.X.Y.Z]
+    reviewdog_version: latest # Optional. [latest,nightly,v.X.Y.Z]
 ```
 
 ### homebrew / linuxbrew
@@ -452,7 +452,7 @@ jobs:
       # ...
       - use: reviewdog/action-setup@v1
         with:
-          reviewdog_version: latest # [latest,nightly,v.X.Y.Z]
+          reviewdog_version: latest # Optional. [latest,nightly,v.X.Y.Z]
       - name: Run reviewdog
         env:
           REVIEWDOG_GITHUB_API_TOKEN: ${{ secrets.GITHUB_TOKEN }}
