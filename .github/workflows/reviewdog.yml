@@ -20,9 +20,8 @@ jobs:
         run: '( cd linters && go get golang.org/x/lint/golint )'
 
       - name: Setup reviewdog
+        # use: reviewdog/action-setup@v1
         run: |
-          # mkdir -p $HOME/bin && curl -sfL https://raw.githubusercontent.com/reviewdog/reviewdog/master/install.sh| sh -s -- -b $HOME/bin
-          # echo ::add-path::$HOME/bin
           go install ./cmd/reviewdog
 
       - name: Run reviewdog
@@ -73,9 +72,8 @@ jobs:
         run: '( cd linters && go get golang.org/x/lint/golint )'
 
       - name: Setup reviewdog
+        # use: reviewdog/action-setup@v1
         run: |
-          # mkdir -p $HOME/bin && curl -sfL https://raw.githubusercontent.com/reviewdog/reviewdog/master/install.sh| sh -s -- -b $HOME/bin
-          # echo ::add-path::$HOME/bin
           go install ./cmd/reviewdog
 
       - name: Run reviewdog (github-pr-check)

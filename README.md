@@ -119,10 +119,13 @@ to try the latest reviewdog improvements every day!
 $ curl -sfL https://raw.githubusercontent.com/reviewdog/nightly/master/install.sh | sh -s -- -b $(go env GOPATH)/bin
 ```
 
-### Build from HEAD with go get
+### GitHub Action: [reviewdog/action-setup](https://github.com/reviewdog/action-setup)
 
-```shell
-$ go get -u github.com/reviewdog/reviewdog/cmd/reviewdog
+```yaml
+steps:
+- uses: reviewdog/action-setup@v1
+  with:
+    reviewdog_version: latest # Optional. [latest,nightly,v.X.Y.Z]
 ```
 
 ### homebrew / linuxbrew
@@ -131,6 +134,12 @@ You can also install reviewdog using brew:
 ```shell
 $ brew install reviewdog/tap/reviewdog
 $ brew upgrade reviewdog/tap/reviewdog
+```
+
+### Build from HEAD with go get
+
+```shell
+$ go get -u github.com/reviewdog/reviewdog/cmd/reviewdog
 ```
 
 ## Input Format
@@ -441,10 +450,9 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       # ...
-      - name: Setup reviewdog
-        run: |
-          mkdir -p $HOME/bin && curl -sfL https://raw.githubusercontent.com/reviewdog/reviewdog/master/install.sh| sh -s -- -b $HOME/bin
-          echo ::add-path::$HOME/bin
+      - use: reviewdog/action-setup@v1
+        with:
+          reviewdog_version: latest # Optional. [latest,nightly,v.X.Y.Z]
       - name: Run reviewdog
         env:
           REVIEWDOG_GITHUB_API_TOKEN: ${{ secrets.GITHUB_TOKEN }}
