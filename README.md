@@ -450,7 +450,7 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       # ...
-      - use: reviewdog/action-setup@v1
+      - uses: reviewdog/action-setup@v1
         with:
           reviewdog_version: latest # Optional. [latest,nightly,v.X.Y.Z]
       - name: Run reviewdog
