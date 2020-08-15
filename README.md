@@ -535,6 +535,8 @@ You can use public GitHub Actions to start using reviewdog with ease! :tada: :ar
   - [ScaCap/action-ktlint](https://github.com/ScaCap/action-ktlint) - Run [ktlint](https://ktlint.github.io/).
 - Android Lint
   - [dvdandroid/action-android-lint](https://github.com/DVDAndroid/action-android-lint) - Run [Android Lint](https://developer.android.com/studio/write/lint)
+- Ansible
+  - [reviewdog/action-ansiblelint](https://github.com/reviewdog/action-ansiblelint) - Run [ansible-lint](https://github.com/ansible/ansible-lint)
   
 ... and more on [GitHub Marketplace](https://github.com/marketplace?utf8=✓&type=actions&query=reviewdog).
 
