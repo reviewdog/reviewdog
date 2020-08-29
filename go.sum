@@ -197,8 +197,8 @@ github.com/pmezard/go-difflib v1.0.0/go.mod h1:iKH77koFhYxTK1pcRnkKkqfTogsbg7gZN
 github.com/prometheus/client_model v0.0.0-20190812154241-14fe0d1b01d4/go.mod h1:xMI15A0UPsDsEKsMN9yxemIoYk6Tm2C1GtYGdfGttqA=
 github.com/rakyll/statik v0.1.7 h1:OF3QCZUuyPxuGEP7B4ypUa7sB/iHtqOTDYZXGM8KOdQ=
 github.com/rakyll/statik v0.1.7/go.mod h1:AlZONWzMtEnMs7W4e/1LURLiI49pIMmp6V9Unghqrcc=
-github.com/reviewdog/errorformat v0.0.0-20200813150006-94458edd948a h1:59JQkp3lB3rtlKpt+0ueSoyLIL3tzGexPwfdAN+9HS0=
-github.com/reviewdog/errorformat v0.0.0-20200813150006-94458edd948a/go.mod h1:Akd5vemrJaAHgnEOFrC4yMbEKaOsddwF1LKkfovSFI8=
+github.com/reviewdog/errorformat v0.0.0-20200829091334-24b3799ae5cf h1:4ibpft07+42+0FbStt/q9iEp8/8twaPv+yuV6Xp71O4=
+github.com/reviewdog/errorformat v0.0.0-20200829091334-24b3799ae5cf/go.mod h1:Akd5vemrJaAHgnEOFrC4yMbEKaOsddwF1LKkfovSFI8=
 github.com/rogpeppe/go-internal v1.3.0/go.mod h1:M8bDsm7K2OlrFYOpmOWEs/qY81heoFRclV5y23lUDJ4=
 github.com/stretchr/objx v0.1.0/go.mod h1:HFkY916IF+rwdDfMAkV7OtwuqBVzrE8GR6GFx+wExME=
 github.com/stretchr/testify v1.2.2/go.mod h1:a8OnRcib4nhh0OaRAV+Yts87kKdq0PP7pXfy6kDkUVs=
