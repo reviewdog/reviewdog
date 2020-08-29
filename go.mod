@@ -16,7 +16,7 @@ require (
 	github.com/kylelemons/godebug v1.1.0
 	github.com/mattn/go-shellwords v1.0.10
 	github.com/rakyll/statik v0.1.7
-	github.com/reviewdog/errorformat v0.0.0-20200813150006-94458edd948a
+	github.com/reviewdog/errorformat v0.0.0-20200829091334-24b3799ae5cf
 	github.com/vvakame/sdlog v0.0.0-20200409072131-7c0d359efddc
 	github.com/xanzy/go-gitlab v0.36.0
 	go.opencensus.io v0.22.4
