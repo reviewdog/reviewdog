@@ -12,7 +12,7 @@ require (
 	github.com/google/go-github/v32 v32.1.0
 	github.com/haya14busa/go-actions-toolkit v0.0.0-20200105081403-ca0307860f01
 	github.com/haya14busa/secretbox v0.0.0-20180525171038-07c7ecf409f5
-	github.com/justinas/nosurf v1.1.0
+	github.com/justinas/nosurf v1.1.1
 	github.com/kylelemons/godebug v1.1.0
 	github.com/mattn/go-shellwords v1.0.10
 	github.com/rakyll/statik v0.1.7
