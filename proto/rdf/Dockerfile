@@ -1,4 +1,4 @@
-FROM golang:1.15.1
+FROM golang:1.15.2
 
 ENV PROTOC_VERSION=3.12.3
 
