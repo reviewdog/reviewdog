@@ -752,6 +752,14 @@ so reviewdog will use [Check annotation](https://developer.github.com/v3/checks/
 - [2] Report results which is outside diff file to console.
 - [3] It should work, but not verified yet.
 
+## Debugging
+
+Use the `-tee` flag to show debug info.
+
+```shell
+reviewdog -filter-mode=nofilter -tee
+```
+
 ## Articles
 - [reviewdog — A code review dog who keeps your codebase healthy ](https://medium.com/@haya14busa/reviewdog-a-code-review-dog-who-keeps-your-codebase-healthy-d957c471938b)
 - [reviewdog ♡ GitHub Check — improved automated review experience](https://medium.com/@haya14busa/reviewdog-github-check-improved-automated-review-experience-58f89e0c95f3)
