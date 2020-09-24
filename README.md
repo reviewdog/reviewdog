@@ -505,7 +505,7 @@ You can use public GitHub Actions to start using reviewdog with ease! :tada: :ar
 - Docker
   - [reviewdog/action-hadolint](https://github.com/reviewdog/action-hadolint) - Run [hadolint](https://github.com/hadolint/hadolint) to lint `Dockerfile`.
 - Env
-  - [mgrachev/action-dotenv-linter](https://github.com/mgrachev/action-dotenv-linter) - Run [dotenv-linter](https://github.com/mgrachev/dotenv-linter) to lint `.env` files.
+  - [dotenv-linter/action-dotenv-linter](https://github.com/dotenv-linter/action-dotenv-linter) - Run [dotenv-linter](https://github.com/dotenv-linter/dotenv-linter) to lint `.env` files.
 - Shell script
   - [reviewdog/action-shellcheck](https://github.com/reviewdog/action-shellcheck) - Run [shellcheck](https://github.com/koalaman/shellcheck).
 - Go
