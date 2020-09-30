@@ -21,7 +21,7 @@ require (
 	github.com/xanzy/go-gitlab v0.38.1
 	go.opencensus.io v0.22.4
 	golang.org/x/build v0.0.0-20200616162219-07bebbe343e9
-	golang.org/x/net v0.0.0-20200927032502-5d4f70055728
+	golang.org/x/net v0.0.0-20200930145003-4acb6c075d10
 	golang.org/x/oauth2 v0.0.0-20200902213428-5d25da1a8d43
 	golang.org/x/sync v0.0.0-20200930132711-30421366ff76
 	google.golang.org/protobuf v1.25.0
