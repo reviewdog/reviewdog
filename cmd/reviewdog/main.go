@@ -30,6 +30,8 @@ import (
 	"github.com/reviewdog/reviewdog/filter"
 	"github.com/reviewdog/reviewdog/parser"
 	"github.com/reviewdog/reviewdog/project"
+	bbservice "github.com/reviewdog/reviewdog/service/bitbucket"
+	bitbucket "github.com/reviewdog/reviewdog/service/bitbucket/openapi"
 	gerritservice "github.com/reviewdog/reviewdog/service/gerrit"
 	githubservice "github.com/reviewdog/reviewdog/service/github"
 	"github.com/reviewdog/reviewdog/service/github/githubutils"
@@ -152,13 +154,24 @@ const (
 			$ export GERRIT_REVISION_ID=ed318bf9a3c
 			$ export GERRIT_BRANCH=master
 			$ export GERRIT_ADDRESS=http://localhost:8080
+	
+	"bitbucket-code-report"
+		Create Bitbucket Code Report via Code Insights
+		(https://confluence.atlassian.com/display/BITBUCKET/Code+insights).
+		You can set custom report name with:
+
+		$ export BITBUCKET_REPORT_NAME="Linter Report",
+		otherwise report will be called "Reviewdog Report"
+
+		If running as part of Bitbucket Pipelines no additional configurations is needed.
+		Running outside of Bitbucket Pipelines or Bitbucket server not supported yet.
 
 	For GitHub Enterprise and self hosted GitLab, set
 	REVIEWDOG_INSECURE_SKIP_VERIFY to skip verifying SSL (please use this at your own risk)
 		$ export REVIEWDOG_INSECURE_SKIP_VERIFY=true
 
 	For non-local reporters, reviewdog automatically get necessary data from
-	environment variable in CI service (GitHub Actions, Travis CI, Circle CI, drone.io, GitLab CI).
+	environment variable in CI service (GitHub Actions, Travis CI, Circle CI, drone.io, GitLab CI, Bitbucket Pipelines).
 	You can set necessary data with following environment variable manually if
 	you want (e.g. run reviewdog in Jenkins).
 
@@ -329,6 +342,16 @@ github-pr-check reporter as a fallback.
 			return err
 		}
 		ds = d
+	case "bitbucket-code-report":
+		build, client, err := bitbucketBuildWithClient()
+		if err != nil {
+			return err
+		}
+
+		reportName := os.Getenv("BITBUCKET_REPORT_NAME")
+
+		cs = bbservice.NewReportAnnotator(client, reportName,
+			build.Owner, build.Repo, build.SHA)
 	case "local":
 		if opt.diffCmd == "" && opt.filterMode == filter.ModeNoFilter {
 			ds = &reviewdog.EmptyDiff{}
@@ -559,6 +582,16 @@ func gerritBuildWithClient() (*cienv.BuildInfo, *gerrit.Client, error) {
 
 	client := gerrit.NewClient(gerritAddr, gerrit.NoAuth)
 	return buildInfo, client, nil
+}
+
+func bitbucketBuildWithClient() (*cienv.BuildInfo, *bitbucket.APIClient, error) {
+	build, _, err := cienv.GetBuildInfo()
+	if err != nil {
+		return nil, nil, err
+	}
+
+	client := bbservice.NewAPIClient(cienv.IsInBitbucketPipeline())
+	return build, client, nil
 }
 
 func fetchMergeRequestIDFromCommit(cli *gitlab.Client, projectID, sha string) (id int, err error) {

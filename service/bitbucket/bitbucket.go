@@ -3,7 +3,6 @@ package bitbucket
 import (
 	"net/http"
 	"net/url"
-	"os"
 	"time"
 
 	"github.com/reviewdog/reviewdog/service/bitbucket/openapi"
@@ -30,19 +29,16 @@ using HTTP API endpoint and AuthProxy`,
 		URL:         "https://api.bitbucket.org/2.0",
 		Description: `HTTPS API endpoint`,
 	}
-
-	client                *openapi.APIClient
-	bitbucketPipelineUUID = os.Getenv("BITBUCKET_PIPELINE_UUID")
 )
 
-func init() {
+func NewAPIClient(isInPipeline bool) *openapi.APIClient {
 	proxyURL, _ := url.Parse(pipelineProxyURL)
 	config := openapi.NewConfiguration()
 	config.HTTPClient = &http.Client{
 		Timeout: httpTimeout,
 	}
 
-	if bitbucketPipelineUUID != "" {
+	if isInPipeline {
 		// if we are on the Bitbucket Pipeline, use HTTP endpoint
 		// and proxy
 		config.Servers = openapi.ServerConfigurations{httpServer}
@@ -54,5 +50,5 @@ func init() {
 		config.Servers = openapi.ServerConfigurations{httpsServer}
 	}
 
-	client = openapi.NewAPIClient(config)
+	return openapi.NewAPIClient(config)
 }
