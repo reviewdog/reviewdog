@@ -17,7 +17,8 @@ import (
 var _ reviewdog.CommentService = &ReportAnnotator{}
 
 const (
-	logoURL  = "https://raw.githubusercontent.com/haya14busa/i/d598ed7dc49fefb0018e422e4c43e5ab8f207a6b/reviewdog/reviewdog.logo.png"
+	// avatar from https://github.com/apps/reviewdog
+	logoURL  = "https://avatars1.githubusercontent.com/in/12131"
 	reporter = "reviewdog"
 )
 
@@ -30,31 +31,24 @@ type ReportAnnotator struct {
 	cli         *openapi.APIClient
 	sha         string
 	owner, repo string
-	reportTitle string
 
 	muAnnotations sync.Mutex
-	annotations   []openapi.ReportAnnotation
+	annotations   map[string][]openapi.ReportAnnotation
 	issuesCount   map[rdf.Severity]int
 	severityMap   map[rdf.Severity]string
 
 	// wd is working directory relative to root of repository.
-	wd       string
-	reportID string
+	wd string
 }
 
 // NewReportAnnotator creates new Bitbucket Report Annotator
 func NewReportAnnotator(cli *openapi.APIClient, reportTitle, owner, repo, sha string) *ReportAnnotator {
-	if reportTitle == "" {
-		reportTitle = "Reviewdog Report"
-	}
-
 	return &ReportAnnotator{
 		cli:         cli,
-		reportTitle: reportTitle,
 		sha:         sha,
 		owner:       owner,
 		repo:        repo,
-		reportID:    reporter + "-" + strings.ReplaceAll(reportTitle, " ", "_"),
+		annotations: make(map[string][]openapi.ReportAnnotation),
 		issuesCount: make(map[rdf.Severity]int),
 		severityMap: map[rdf.Severity]string{
 			rdf.Severity_INFO:    annotationSeverityLow,
@@ -73,7 +67,7 @@ func (r *ReportAnnotator) Post(_ context.Context, c *reviewdog.Comment) error {
 	defer r.muAnnotations.Unlock()
 
 	r.issuesCount[c.Result.Diagnostic.GetSeverity()]++
-	r.annotations = append(r.annotations, r.annotationFromReviewDogComment(*c))
+	r.annotations[c.ToolName] = append(r.annotations[c.ToolName], r.annotationFromReviewDogComment(*c))
 
 	return nil
 }
@@ -83,25 +77,37 @@ func (r *ReportAnnotator) Flush(ctx context.Context) error {
 	r.muAnnotations.Lock()
 	defer r.muAnnotations.Unlock()
 
-	if len(r.annotations) == 0 {
-		return r.createOrUpdateReport(ctx, reportResultPassed)
-	}
+	// create/update/annotate report per tool
+	for tool, annotations := range r.annotations {
+		reportID := reportID(reporter, tool)
+		title := fmt.Sprintf("[%s] %s report", tool, reporter)
+		if len(r.annotations) == 0 {
+			// if no annotation, create Passed report
+			if err := r.createOrUpdateReport(ctx, reportID, title, reportResultPassed); err != nil {
+				return err
+			}
+			// and move one
+			continue
+		}
 
-	reportStatus := reportResultPending
-	if r.issuesCount[rdf.Severity_ERROR] > 0 {
-		reportStatus = reportResultFailed
-	}
+		reportStatus := reportResultPending
+		if r.issuesCount[rdf.Severity_ERROR] > 0 {
+			reportStatus = reportResultFailed
+		}
 
-	if err := r.createOrUpdateReport(ctx, reportStatus); err != nil {
-		return err
-	}
+		// create report or update report first, with the proper status
+		if err := r.createOrUpdateReport(ctx, reportID, title, reportStatus); err != nil {
+			return err
+		}
 
-	_, resp, err := r.cli.ReportsApi.BulkCreateOrUpdateAnnotations(
-		ctx, r.owner, r.repo, r.sha, r.reportID,
-	).Body(r.annotations).Execute()
+		// add annotations to the report
+		_, resp, err := r.cli.ReportsApi.BulkCreateOrUpdateAnnotations(
+			ctx, r.owner, r.repo, r.sha, reportID,
+		).Body(annotations).Execute()
 
-	if err := checkAPIError(err, resp, http.StatusOK); err != nil {
-		return fmt.Errorf("bitbucket.BulkCreateOrUpdateAnnotations: %s", err)
+		if err := checkAPIError(err, resp, http.StatusOK); err != nil {
+			return fmt.Errorf("bitbucket.BulkCreateOrUpdateAnnotations: %s", err)
+		}
 	}
 
 	return nil
@@ -131,18 +137,18 @@ func (r *ReportAnnotator) annotationFromReviewDogComment(c reviewdog.Comment) op
 	return *a
 }
 
-func (r *ReportAnnotator) createOrUpdateReport(ctx context.Context, status string) error {
+func (r *ReportAnnotator) createOrUpdateReport(ctx context.Context, redportID, title, reportStatus string) error {
 	var report = openapi.NewReport()
-	report.SetTitle(r.reportTitle)
+	report.SetTitle(title)
 	// TODO: different report types?
 	report.SetReportType(reportTypeBug)
 	report.SetReporter(reporter)
 	report.SetLogoUrl(logoURL)
-	report.SetResult(status)
+	report.SetResult(reportStatus)
 	report.SetDetails("Woof-Woof! This report generated for you by reviewdog")
 
 	_, resp, err := r.cli.ReportsApi.CreateOrUpdateReport(
-		ctx, r.owner, r.repo, r.sha, r.reportID,
+		ctx, r.owner, r.repo, r.sha, redportID,
 	).Body(*report).Execute()
 
 	if err := checkAPIError(err, resp, http.StatusOK); err != nil {
@@ -156,4 +162,8 @@ func hashString(str string) string {
 	h := sha256.New()
 	_, _ = h.Write([]byte(str))
 	return fmt.Sprintf("%x", h.Sum(nil))
+}
+
+func reportID(ids ...string) string {
+	return strings.ReplaceAll(strings.ToLower(strings.Join(ids, "-")), " ", "_")
 }
