@@ -93,6 +93,7 @@ func NewReportAnnotator(cli *openapi.APIClient, reportTitle, owner, repo, sha st
 		owner:       owner,
 		repo:        repo,
 		reportID:    reporter + "-" + strings.ReplaceAll(reportTitle, " ", "_"),
+		issuesCount: make(map[rdf.Severity]int),
 	}
 }
 
