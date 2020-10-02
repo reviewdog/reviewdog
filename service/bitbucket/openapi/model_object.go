@@ -24,7 +24,7 @@ type Object struct {
 // This constructor will assign default values to properties that have it defined,
 // and makes sure properties required by API are set, but the set of arguments
 // will change when the set of required properties is changed
-func NewObject(type_ string, ) *Object {
+func NewObject(type_ string) *Object {
 	this := Object{}
 	this.Type = type_
 	return &this
@@ -40,7 +40,7 @@ func NewObjectWithDefaults() *Object {
 
 // GetType returns the Type field value
 func (o *Object) GetType() string {
-	if o == nil  {
+	if o == nil {
 		var ret string
 		return ret
 	}
@@ -51,7 +51,7 @@ func (o *Object) GetType() string {
 // GetTypeOk returns a tuple with the Type field value
 // and a boolean to check if the value has been set.
 func (o *Object) GetTypeOk() (*string, bool) {
-	if o == nil  {
+	if o == nil {
 		return nil, false
 	}
 	return &o.Type, true
@@ -105,5 +105,3 @@ func (v *NullableObject) UnmarshalJSON(src []byte) error {
 	v.isSet = true
 	return json.Unmarshal(src, &v.value)
 }
-
-
