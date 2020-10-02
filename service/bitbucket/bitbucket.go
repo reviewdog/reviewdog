@@ -21,18 +21,7 @@ const (
 	httpTimeout      = time.Second * 10
 )
 
-var (
-	httpServer = openapi.ServerConfiguration{
-		URL: "http://api.bitbucket.org/2.0",
-		Description: `If if called from Bitbucket Pipelines,
-using HTTP API endpoint and AuthProxy`,
-	}
-	httpsServer = openapi.ServerConfiguration{
-		URL:         "https://api.bitbucket.org/2.0",
-		Description: `HTTPS API endpoint`,
-	}
-)
-
+// NewAPIClient creates Bitbucket API client
 func NewAPIClient(isInPipeline bool) *openapi.APIClient {
 	proxyURL, _ := url.Parse(pipelineProxyURL)
 	config := openapi.NewConfiguration()
@@ -43,12 +32,12 @@ func NewAPIClient(isInPipeline bool) *openapi.APIClient {
 	if isInPipeline {
 		// if we are on the Bitbucket Pipeline, use HTTP endpoint
 		// and proxy
-		config.Servers = openapi.ServerConfigurations{httpServer}
+		config.Servers = openapi.ServerConfigurations{httpServer()}
 		config.HTTPClient.Transport = &http.Transport{
 			Proxy: http.ProxyURL(proxyURL),
 		}
 	} else {
-		config.Servers = openapi.ServerConfigurations{httpsServer}
+		config.Servers = openapi.ServerConfigurations{httpsServer()}
 	}
 
 	return openapi.NewAPIClient(config)
@@ -71,4 +60,18 @@ func WithAccessToken(ctx context.Context, accessToken string) context.Context {
 // WithOAuth2 adds basic auth credentials to context
 func WithOAuth2(ctx context.Context, tokenSource oauth2.TokenSource) context.Context {
 	return context.WithValue(ctx, openapi.ContextOAuth2, tokenSource)
+}
+
+func httpServer() openapi.ServerConfiguration {
+	return openapi.ServerConfiguration{
+		URL: "http://api.bitbucket.org/2.0",
+		Description: `If if called from Bitbucket Pipelines,
+using HTTP API endpoint and AuthProxy`,
+	}
+}
+func httpsServer() openapi.ServerConfiguration {
+	return openapi.ServerConfiguration{
+		URL:         "https://api.bitbucket.org/2.0",
+		Description: `HTTPS API endpoint`,
+	}
 }

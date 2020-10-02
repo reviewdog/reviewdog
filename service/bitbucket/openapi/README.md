@@ -8,9 +8,9 @@ However, unfortunately it is not valid OpenAPI definition, see this issues:
 
 1. [ktrysmt/go-bitbucket Issue #96](https://github.com/ktrysmt/go-bitbucket/issues/96)
 
-1. [JIRA Bitbucket Cloud/BCLOUD-17601 - api.bitbucket.org/swagger.json is invalid](https://jira.atlassian.com/browse/BCLOUD-17601)
+1. [JIRA Bitbucket Cloud/BCLOUD-17601 - api.bitbucket.org/swagger.json is broken](https://jira.atlassian.com/browse/BCLOUD-17601)
 
-However I was able to generate some models via [OpenAPI Generator CLI](https://github.com/OpenAPITools/openapi-generator-cli/) with `--skip-validate-spec` ignoring the errors.
+However, I was able to generate some models via [OpenAPI Generator CLI](https://github.com/OpenAPITools/openapi-generator-cli/) with `--skip-validate-spec` ignoring the errors.
 Here I copied only models related to [Code Insights](https://support.atlassian.com/bitbucket-cloud/docs/code-insights/).
 Feel free to extend if needed.
 

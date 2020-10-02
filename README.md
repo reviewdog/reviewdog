@@ -442,7 +442,7 @@ $ reviewdog -reporter=gerrit-change-review
 bitbucket-code-report generates the annotated
 [Bitbucket Code Insights](https://support.atlassian.com/bitbucket-cloud/docs/code-insights/) report.
 
-By default the whole project is scanned on every run.
+By default, the whole project is scanned on every run.
 Reports are stored per commit and can be viewed per commit from Bitbucket Pipelines UI or
 in Pull Request. In the Pull Request UI affected code lines will be annotated in the diff,
 as well as you will be able to filter the annotations by **This pull request** or *All**.
@@ -450,7 +450,7 @@ as well as you will be able to filter the annotations by **This pull request** o
 By default, report will be called `Reviewdog report` but can be customized with
 `BITBUCKET_REPORT_NAME` env variable.
 
-If running from [Bitbucket Pipelines](#bitbucket-pipelines) no additional configuration is needed (even credentials).
+If running from [Bitbucket Pipelines](#bitbucket-pipelines), no additional configuration is needed (even credentials).
 If running locally or from some other CI system you would need to provide Bitbucket API credentials:
 
 - For Basic Auth you need to set following env variables:

@@ -21,12 +21,6 @@ const (
 	reporter = "reviewdog"
 )
 
-var severityMap = map[rdf.Severity]string{
-	rdf.Severity_INFO:    annotationSeverityLow,
-	rdf.Severity_WARNING: annotationSeverityMedium,
-	rdf.Severity_ERROR:   annotationSeverityHigh,
-}
-
 // ReportAnnotator is a comment service for Bitbucket Code Insights reports.
 //
 // API:
@@ -41,6 +35,7 @@ type ReportAnnotator struct {
 	muAnnotations sync.Mutex
 	annotations   []openapi.ReportAnnotation
 	issuesCount   map[rdf.Severity]int
+	severityMap   map[rdf.Severity]string
 
 	// wd is working directory relative to root of repository.
 	wd       string
@@ -61,6 +56,11 @@ func NewReportAnnotator(cli *openapi.APIClient, reportTitle, owner, repo, sha st
 		repo:        repo,
 		reportID:    reporter + "-" + strings.ReplaceAll(reportTitle, " ", "_"),
 		issuesCount: make(map[rdf.Severity]int),
+		severityMap: map[rdf.Severity]string{
+			rdf.Severity_INFO:    annotationSeverityLow,
+			rdf.Severity_WARNING: annotationSeverityMedium,
+			rdf.Severity_ERROR:   annotationSeverityHigh,
+		},
 	}
 }
 
@@ -73,7 +73,7 @@ func (r *ReportAnnotator) Post(_ context.Context, c *reviewdog.Comment) error {
 	defer r.muAnnotations.Unlock()
 
 	r.issuesCount[c.Result.Diagnostic.GetSeverity()]++
-	r.annotations = append(r.annotations, annotationFromReviewDogComment(*c))
+	r.annotations = append(r.annotations, r.annotationFromReviewDogComment(*c))
 
 	return nil
 }
@@ -107,7 +107,7 @@ func (r *ReportAnnotator) Flush(ctx context.Context) error {
 	return nil
 }
 
-func annotationFromReviewDogComment(c reviewdog.Comment) openapi.ReportAnnotation {
+func (r *ReportAnnotator) annotationFromReviewDogComment(c reviewdog.Comment) openapi.ReportAnnotation {
 	a := openapi.NewReportAnnotation()
 	switch c.ToolName {
 	// TODO: different type of annotation based on tool?
@@ -121,7 +121,7 @@ func annotationFromReviewDogComment(c reviewdog.Comment) openapi.ReportAnnotatio
 	a.SetDetails(fmt.Sprintf(`[%s] %s`, c.ToolName, c.Result.Diagnostic.GetMessage()))
 	a.SetLine(c.Result.Diagnostic.GetLocation().GetRange().GetStart().GetLine())
 	a.SetPath(c.Result.Diagnostic.GetLocation().GetPath())
-	if v, ok := severityMap[c.Result.Diagnostic.GetSeverity()]; ok {
+	if v, ok := r.severityMap[c.Result.Diagnostic.GetSeverity()]; ok {
 		a.SetSeverity(v)
 	}
 	if link := c.Result.Diagnostic.GetCode().GetUrl(); link != "" {
@@ -154,6 +154,6 @@ func (r *ReportAnnotator) createOrUpdateReport(ctx context.Context, status strin
 
 func hashString(str string) string {
 	h := sha256.New()
-	h.Write([]byte(str))
+	_, _ = h.Write([]byte(str))
 	return fmt.Sprintf("%x", h.Sum(nil))
 }
