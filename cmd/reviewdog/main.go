@@ -361,7 +361,7 @@ github-pr-check reporter as a fallback.
 
 		// by default scan whole project with "filter.ModeNoFilter"
 		// Bitbucket pipelines doesn't give an easy way to know
-		// which commit run pipeline before so we can comapre between them
+		// which commit run pipeline before so we can compare between them
 		// however once PR is opened, Bitbucket Reports UI will do automatic
 		// filtering of annotations dividing them in two groups:
 		// - This pull request (10)
