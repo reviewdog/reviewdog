@@ -86,6 +86,8 @@ func GetBuildInfo() (prInfo *BuildInfo, isPR bool, err error) {
 		"TRAVIS_PULL_REQUEST_BRANCH",
 		"CIRCLE_BRANCH",
 		"DRONE_COMMIT_BRANCH",
+		// present only if PR pipeline
+		"BITBUCKET_PR_DESTINATION_BRANCH",
 		"BITBUCKET_BRANCH",
 	})
 

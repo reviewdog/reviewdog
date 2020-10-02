@@ -343,15 +343,27 @@ github-pr-check reporter as a fallback.
 		}
 		ds = d
 	case "bitbucket-code-report":
-		build, client, err := bitbucketBuildWithClient()
+		build, client, ct, err := bitbucketBuildWithClient(ctx)
 		if err != nil {
 			return err
 		}
+		ctx = ct
 
 		reportName := os.Getenv("BITBUCKET_REPORT_NAME")
 
 		cs = bbservice.NewReportAnnotator(client, reportName,
 			build.Owner, build.Repo, build.SHA)
+
+		// TODO: better diffs
+		if opt.diffCmd == "" && opt.filterMode == filter.ModeNoFilter {
+			ds = &reviewdog.EmptyDiff{}
+		} else {
+			d, err := diffService(opt.diffCmd, opt.diffStrip)
+			if err != nil {
+				return err
+			}
+			ds = d
+		}
 	case "local":
 		if opt.diffCmd == "" && opt.filterMode == filter.ModeNoFilter {
 			ds = &reviewdog.EmptyDiff{}
@@ -584,14 +596,26 @@ func gerritBuildWithClient() (*cienv.BuildInfo, *gerrit.Client, error) {
 	return buildInfo, client, nil
 }
 
-func bitbucketBuildWithClient() (*cienv.BuildInfo, *bitbucket.APIClient, error) {
+func bitbucketBuildWithClient(ctx context.Context) (*cienv.BuildInfo, *bitbucket.APIClient, context.Context, error) {
 	build, _, err := cienv.GetBuildInfo()
 	if err != nil {
-		return nil, nil, err
+		return nil, nil, ctx, err
+	}
+
+	bbUser := os.Getenv("BITBUCKET_USER")
+	bbPass := os.Getenv("BITBUCKET_PASSWORD")
+	bbAccessToken := os.Getenv("BITBUCKET_ACCESS_TOKEN")
+
+	if bbUser != "" && bbPass != "" {
+		ctx = bbservice.WithBasicAuth(ctx, bbUser, bbPass)
+	}
+
+	if bbAccessToken != "" {
+		ctx = bbservice.WithAccessToken(ctx, bbAccessToken)
 	}
 
 	client := bbservice.NewAPIClient(cienv.IsInBitbucketPipeline())
-	return build, client, nil
+	return build, client, ctx, nil
 }
 
 func fetchMergeRequestIDFromCommit(cli *gitlab.Client, projectID, sha string) (id int, err error) {

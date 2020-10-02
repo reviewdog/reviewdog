@@ -1,11 +1,13 @@
 package bitbucket
 
 import (
+	"context"
 	"net/http"
 	"net/url"
 	"time"
 
 	"github.com/reviewdog/reviewdog/service/bitbucket/openapi"
+	"golang.org/x/oauth2"
 )
 
 const (
@@ -51,4 +53,23 @@ func NewAPIClient(isInPipeline bool) *openapi.APIClient {
 	}
 
 	return openapi.NewAPIClient(config)
+}
+
+// WithBasicAuth adds basic auth credentials to context
+func WithBasicAuth(ctx context.Context, username, password string) context.Context {
+	return context.WithValue(ctx, openapi.ContextBasicAuth,
+		openapi.BasicAuth{
+			UserName: username,
+			Password: password,
+		})
+}
+
+// WithAccessToken adds basic auth credentials to context
+func WithAccessToken(ctx context.Context, accessToken string) context.Context {
+	return context.WithValue(ctx, openapi.ContextAccessToken, accessToken)
+}
+
+// WithOAuth2 adds basic auth credentials to context
+func WithOAuth2(ctx context.Context, tokenSource oauth2.TokenSource) context.Context {
+	return context.WithValue(ctx, openapi.ContextOAuth2, tokenSource)
 }

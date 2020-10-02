@@ -2,17 +2,16 @@ package bitbucket
 
 import (
 	"context"
-	"errors"
+	"crypto/sha256"
 	"fmt"
-	"io/ioutil"
 	"net/http"
 	"path/filepath"
+	"strings"
 	"sync"
 
 	"github.com/reviewdog/reviewdog"
 	"github.com/reviewdog/reviewdog/proto/rdf"
 	"github.com/reviewdog/reviewdog/service/bitbucket/openapi"
-	"github.com/reviewdog/reviewdog/service/commentutil"
 )
 
 var _ reviewdog.CommentService = &ReportAnnotator{}
@@ -64,8 +63,9 @@ var severityMap = map[rdf.Severity]string{
 //
 // API:
 //  https://developer.atlassian.com/bitbucket/api/2/reference/resource/repositories/%7Bworkspace%7D/%7Brepo_slug%7D/commit/%7Bcommit%7D/reports/%7BreportId%7D/annotations#post
-//  POST /2.0/repositories/{workspace}/{repo_slug}/commit/{commit}/reports/{reportId}/annotations
+//  POST /2.0/repositories/{username}/{repo_slug}/commit/{commit}/reports/{reportId}/annotations
 type ReportAnnotator struct {
+	ctx         context.Context
 	cli         *openapi.APIClient
 	sha         string
 	owner, repo string
@@ -93,7 +93,7 @@ func NewReportAnnotator(cli *openapi.APIClient, reportTitle, owner, repo, sha st
 		sha:         sha,
 		owner:       owner,
 		repo:        repo,
-		reportID:    reporter + "-" + reportTitle,
+		reportID:    reporter + "-" + strings.ReplaceAll(reportTitle, " ", "_"),
 	}
 }
 
@@ -139,11 +139,11 @@ func (r *ReportAnnotator) Flush(ctx context.Context) error {
 		ctx, r.owner, r.repo, r.sha, r.reportID,
 	).Body(annotations).Execute()
 
-	if err != nil {
-		return err
+	if err := checkAPIError(err, resp, http.StatusOK); err != nil {
+		return fmt.Errorf("bitbucket.BulkCreateOrUpdateAnnotations: %s", err)
 	}
 
-	return checkHTTPResp(resp, http.StatusOK)
+	return nil
 }
 
 func annotationFromReviewDogComment(c reviewdog.Comment) openapi.ReportAnnotation {
@@ -154,14 +154,18 @@ func annotationFromReviewDogComment(c reviewdog.Comment) openapi.ReportAnnotatio
 		a.SetAnnotationType(annotationTypeCodeSmell)
 	}
 
+	// hash the output of linter and use it as external id
+	a.SetExternalId(hashString(c.Result.Diagnostic.OriginalOutput))
 	a.SetSummary(c.Result.Diagnostic.GetMessage())
-	a.SetDetails(commentutil.MarkdownComment(&c))
+	a.SetDetails(fmt.Sprintf(`[%s] %s`, c.ToolName, c.Result.Diagnostic.GetMessage()))
 	a.SetLine(c.Result.Diagnostic.GetLocation().GetRange().GetStart().GetLine())
 	a.SetPath(c.Result.Diagnostic.GetLocation().GetPath())
 	if v, ok := severityMap[c.Result.Diagnostic.GetSeverity()]; ok {
 		a.SetSeverity(v)
 	}
-	a.SetLink(c.Result.Diagnostic.GetCode().GetUrl())
+	if link := c.Result.Diagnostic.GetCode().GetUrl(); link != "" {
+		a.SetLink(link)
+	}
 
 	return *a
 }
@@ -174,30 +178,21 @@ func (r *ReportAnnotator) createOrUpdateReport(ctx context.Context, status strin
 	report.SetReporter(reporter)
 	report.SetLogoUrl(logoURL)
 	report.SetResult(status)
+	report.SetDetails("Woof-Woof! This report generated for you by reviewdog")
 
 	_, resp, err := r.cli.ReportsApi.CreateOrUpdateReport(
 		ctx, r.owner, r.repo, r.sha, r.reportID,
 	).Body(*report).Execute()
 
-	if err != nil {
-		return err
-	}
-
-	return checkHTTPResp(resp, http.StatusOK)
-}
-
-func checkHTTPResp(resp *http.Response, expectedCode int) error {
-	if resp.StatusCode != expectedCode {
-		body, err := ioutil.ReadAll(resp.Body)
-		if err != nil {
-			return err
-		}
-		msg := fmt.Sprintf("Received unexpected %d code from Bitbucket API", resp.StatusCode)
-		if len(body) > 0 {
-			msg += " with message:\n" + string(body)
-		}
-		return errors.New(msg)
+	if err := checkAPIError(err, resp, http.StatusOK); err != nil {
+		return fmt.Errorf("bitbucket.CreateOrUpdateReport: %s", err)
 	}
 
 	return nil
+}
+
+func hashString(str string) string {
+	h := sha256.New()
+	h.Write([]byte(str))
+	return fmt.Sprintf("%x", h.Sum(nil))
 }
