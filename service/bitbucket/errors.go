@@ -13,7 +13,7 @@ func checkAPIError(err error, resp *http.Response, expectedCode int) error {
 	if err != nil {
 		e, ok := err.(openapi.GenericOpenAPIError)
 		if ok {
-			return fmt.Errorf(`Bitbucket API error:
+			return fmt.Errorf(`bitbucket API error:
 	Response error: %s
 	Response body: %s`,
 				e.Error(), string(e.Body()))
@@ -25,7 +25,7 @@ func checkAPIError(err error, resp *http.Response, expectedCode int) error {
 		if err != nil {
 			return err
 		}
-		msg := fmt.Sprintf("Received unexpected %d code from Bitbucket API", resp.StatusCode)
+		msg := fmt.Sprintf("received unexpected %d code from Bitbucket API", resp.StatusCode)
 		if len(body) > 0 {
 			msg += " with message:\n" + string(body)
 		}

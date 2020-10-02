@@ -19,38 +19,6 @@ var _ reviewdog.CommentService = &ReportAnnotator{}
 const (
 	logoURL  = "https://raw.githubusercontent.com/haya14busa/i/d598ed7dc49fefb0018e422e4c43e5ab8f207a6b/reviewdog/reviewdog.logo.png"
 	reporter = "reviewdog"
-
-	annotationTypeCodeSmell     = "CODE_SMELL"
-	annotationTypeVulnerability = "VULNERABILITY"
-	annotationTypeBug           = "BUG"
-
-	annotationResultPassed  = "PASSED"
-	annotationResultFailed  = "FAILED"
-	annotationResultSkipped = "SKIPPED"
-	annotationResultIgnored = "IGNORED"
-	annotationResultPending = "PENDING"
-
-	annotationSeverityHigh     = "HIGH"
-	annotationSeverityMedium   = "MEDIUM"
-	annotationSeverityLow      = "LOW"
-	annotationSeverityCritical = "CRITICAL"
-
-	reportTypeSecurity = "SECURITY"
-	reportTypeCoverage = "COVERAGE"
-	reportTypeTest     = "TEST"
-	reportTypeBug      = "BUG"
-
-	reportDataTypeBool       = "BOOLEAN"
-	reportDataTypeDate       = "DATE"
-	reportDataTypeDuration   = "DURATION"
-	reportDataTypeLink       = "LINK"
-	reportDataTypeNumber     = "NUMBER"
-	reportDataTypePercentage = "PERCENTAGE"
-	reportDataTypeText       = "TEXT"
-
-	reportResultPassed  = "PASSED"
-	reportResultFailed  = "FAILED"
-	reportResultPending = "PENDING"
 )
 
 var severityMap = map[rdf.Severity]string{
@@ -65,7 +33,6 @@ var severityMap = map[rdf.Severity]string{
 //  https://developer.atlassian.com/bitbucket/api/2/reference/resource/repositories/%7Bworkspace%7D/%7Brepo_slug%7D/commit/%7Bcommit%7D/reports/%7BreportId%7D/annotations#post
 //  POST /2.0/repositories/{username}/{repo_slug}/commit/{commit}/reports/{reportId}/annotations
 type ReportAnnotator struct {
-	ctx         context.Context
 	cli         *openapi.APIClient
 	sha         string
 	owner, repo string
