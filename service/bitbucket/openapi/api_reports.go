@@ -28,13 +28,13 @@ var (
 type ReportsApiService service
 
 type ApiBulkCreateOrUpdateAnnotationsRequest struct {
-	ctx _context.Context
+	ctx        _context.Context
 	ApiService *ReportsApiService
-	username string
-	repoSlug string
-	commit string
-	reportId string
-	body *[]ReportAnnotation
+	username   string
+	repoSlug   string
+	commit     string
+	reportId   string
+	body       *[]ReportAnnotation
 }
 
 func (r ApiBulkCreateOrUpdateAnnotationsRequest) Body(body []ReportAnnotation) ApiBulkCreateOrUpdateAnnotationsRequest {
@@ -93,15 +93,15 @@ Please refer to the [Code Insights documentation](https://confluence.atlassian.c
  * @param commit The commit for which to retrieve reports.
  * @param reportId Uuid or external-if of the report for which to get annotations for.
  * @return ApiBulkCreateOrUpdateAnnotationsRequest
- */
+*/
 func (a *ReportsApiService) BulkCreateOrUpdateAnnotations(ctx _context.Context, username string, repoSlug string, commit string, reportId string) ApiBulkCreateOrUpdateAnnotationsRequest {
 	return ApiBulkCreateOrUpdateAnnotationsRequest{
 		ApiService: a,
-		ctx: ctx,
-		username: username,
-		repoSlug: repoSlug,
-		commit: commit,
-		reportId: reportId,
+		ctx:        ctx,
+		username:   username,
+		repoSlug:   repoSlug,
+		commit:     commit,
+		reportId:   reportId,
 	}
 }
 
@@ -124,7 +124,7 @@ func (a *ReportsApiService) BulkCreateOrUpdateAnnotationsExecute(r ApiBulkCreate
 		return localVarReturnValue, nil, GenericOpenAPIError{error: err.Error()}
 	}
 
-	localVarPath := localBasePath + "/repositories/{workspace}/{repo_slug}/commit/{commit}/reports/{reportId}/annotations"
+	localVarPath := localBasePath + "/repositories/{username}/{repo_slug}/commit/{commit}/reports/{reportId}/annotations"
 	localVarPath = strings.Replace(localVarPath, "{"+"username"+"}", _neturl.PathEscape(parameterToString(r.username, "")), -1)
 	localVarPath = strings.Replace(localVarPath, "{"+"repo_slug"+"}", _neturl.PathEscape(parameterToString(r.repoSlug, "")), -1)
 	localVarPath = strings.Replace(localVarPath, "{"+"commit"+"}", _neturl.PathEscape(parameterToString(r.commit, "")), -1)
@@ -199,14 +199,14 @@ func (a *ReportsApiService) BulkCreateOrUpdateAnnotationsExecute(r ApiBulkCreate
 }
 
 type ApiCreateOrUpdateAnnotationRequest struct {
-	ctx _context.Context
-	ApiService *ReportsApiService
-	username string
-	repoSlug string
-	commit string
-	reportId string
+	ctx          _context.Context
+	ApiService   *ReportsApiService
+	username     string
+	repoSlug     string
+	commit       string
+	reportId     string
 	annotationId string
-	body *ReportAnnotation
+	body         *ReportAnnotation
 }
 
 func (r ApiCreateOrUpdateAnnotationRequest) Body(body ReportAnnotation) ApiCreateOrUpdateAnnotationRequest {
@@ -253,15 +253,15 @@ Please refer to the [Code Insights documentation](https://confluence.atlassian.c
  * @param reportId Either the uuid or external-id of the report.
  * @param annotationId Either the uuid or external-id of the annotation.
  * @return ApiCreateOrUpdateAnnotationRequest
- */
+*/
 func (a *ReportsApiService) CreateOrUpdateAnnotation(ctx _context.Context, username string, repoSlug string, commit string, reportId string, annotationId string) ApiCreateOrUpdateAnnotationRequest {
 	return ApiCreateOrUpdateAnnotationRequest{
-		ApiService: a,
-		ctx: ctx,
-		username: username,
-		repoSlug: repoSlug,
-		commit: commit,
-		reportId: reportId,
+		ApiService:   a,
+		ctx:          ctx,
+		username:     username,
+		repoSlug:     repoSlug,
+		commit:       commit,
+		reportId:     reportId,
 		annotationId: annotationId,
 	}
 }
@@ -285,7 +285,7 @@ func (a *ReportsApiService) CreateOrUpdateAnnotationExecute(r ApiCreateOrUpdateA
 		return localVarReturnValue, nil, GenericOpenAPIError{error: err.Error()}
 	}
 
-	localVarPath := localBasePath + "/repositories/{workspace}/{repo_slug}/commit/{commit}/reports/{reportId}/annotations/{annotationId}"
+	localVarPath := localBasePath + "/repositories/{username}/{repo_slug}/commit/{commit}/reports/{reportId}/annotations/{annotationId}"
 	localVarPath = strings.Replace(localVarPath, "{"+"username"+"}", _neturl.PathEscape(parameterToString(r.username, "")), -1)
 	localVarPath = strings.Replace(localVarPath, "{"+"repo_slug"+"}", _neturl.PathEscape(parameterToString(r.repoSlug, "")), -1)
 	localVarPath = strings.Replace(localVarPath, "{"+"commit"+"}", _neturl.PathEscape(parameterToString(r.commit, "")), -1)
@@ -364,13 +364,13 @@ func (a *ReportsApiService) CreateOrUpdateAnnotationExecute(r ApiCreateOrUpdateA
 }
 
 type ApiCreateOrUpdateReportRequest struct {
-	ctx _context.Context
+	ctx        _context.Context
 	ApiService *ReportsApiService
-	username string
-	repoSlug string
-	commit string
-	reportId string
-	body *Report
+	username   string
+	repoSlug   string
+	commit     string
+	reportId   string
+	body       *Report
 }
 
 func (r ApiCreateOrUpdateReportRequest) Body(body Report) ApiCreateOrUpdateReportRequest {
@@ -426,15 +426,15 @@ Please refer to the [Code Insights documentation](https://confluence.atlassian.c
  * @param commit The commit the report belongs to.
  * @param reportId Either the uuid or external-id of the report.
  * @return ApiCreateOrUpdateReportRequest
- */
+*/
 func (a *ReportsApiService) CreateOrUpdateReport(ctx _context.Context, username string, repoSlug string, commit string, reportId string) ApiCreateOrUpdateReportRequest {
 	return ApiCreateOrUpdateReportRequest{
 		ApiService: a,
-		ctx: ctx,
-		username: username,
-		repoSlug: repoSlug,
-		commit: commit,
-		reportId: reportId,
+		ctx:        ctx,
+		username:   username,
+		repoSlug:   repoSlug,
+		commit:     commit,
+		reportId:   reportId,
 	}
 }
 
@@ -457,7 +457,7 @@ func (a *ReportsApiService) CreateOrUpdateReportExecute(r ApiCreateOrUpdateRepor
 		return localVarReturnValue, nil, GenericOpenAPIError{error: err.Error()}
 	}
 
-	localVarPath := localBasePath + "/repositories/{workspace}/{repo_slug}/commit/{commit}/reports/{reportId}"
+	localVarPath := localBasePath + "/repositories/{username}/{repo_slug}/commit/{commit}/reports/{reportId}"
 	localVarPath = strings.Replace(localVarPath, "{"+"username"+"}", _neturl.PathEscape(parameterToString(r.username, "")), -1)
 	localVarPath = strings.Replace(localVarPath, "{"+"repo_slug"+"}", _neturl.PathEscape(parameterToString(r.repoSlug, "")), -1)
 	localVarPath = strings.Replace(localVarPath, "{"+"commit"+"}", _neturl.PathEscape(parameterToString(r.commit, "")), -1)
@@ -535,15 +535,14 @@ func (a *ReportsApiService) CreateOrUpdateReportExecute(r ApiCreateOrUpdateRepor
 }
 
 type ApiDeleteAnnotationRequest struct {
-	ctx _context.Context
-	ApiService *ReportsApiService
-	username string
-	repoSlug string
-	commit string
-	reportId string
+	ctx          _context.Context
+	ApiService   *ReportsApiService
+	username     string
+	repoSlug     string
+	commit       string
+	reportId     string
 	annotationId string
 }
-
 
 func (r ApiDeleteAnnotationRequest) Execute() (*_nethttp.Response, error) {
 	return r.ApiService.DeleteAnnotationExecute(r)
@@ -562,12 +561,12 @@ func (r ApiDeleteAnnotationRequest) Execute() (*_nethttp.Response, error) {
  */
 func (a *ReportsApiService) DeleteAnnotation(ctx _context.Context, username string, repoSlug string, commit string, reportId string, annotationId string) ApiDeleteAnnotationRequest {
 	return ApiDeleteAnnotationRequest{
-		ApiService: a,
-		ctx: ctx,
-		username: username,
-		repoSlug: repoSlug,
-		commit: commit,
-		reportId: reportId,
+		ApiService:   a,
+		ctx:          ctx,
+		username:     username,
+		repoSlug:     repoSlug,
+		commit:       commit,
+		reportId:     reportId,
 		annotationId: annotationId,
 	}
 }
@@ -589,7 +588,7 @@ func (a *ReportsApiService) DeleteAnnotationExecute(r ApiDeleteAnnotationRequest
 		return nil, GenericOpenAPIError{error: err.Error()}
 	}
 
-	localVarPath := localBasePath + "/repositories/{workspace}/{repo_slug}/commit/{commit}/reports/{reportId}/annotations/{annotationId}"
+	localVarPath := localBasePath + "/repositories/{username}/{repo_slug}/commit/{commit}/reports/{reportId}/annotations/{annotationId}"
 	localVarPath = strings.Replace(localVarPath, "{"+"username"+"}", _neturl.PathEscape(parameterToString(r.username, "")), -1)
 	localVarPath = strings.Replace(localVarPath, "{"+"repo_slug"+"}", _neturl.PathEscape(parameterToString(r.repoSlug, "")), -1)
 	localVarPath = strings.Replace(localVarPath, "{"+"commit"+"}", _neturl.PathEscape(parameterToString(r.commit, "")), -1)
@@ -645,14 +644,13 @@ func (a *ReportsApiService) DeleteAnnotationExecute(r ApiDeleteAnnotationRequest
 }
 
 type ApiDeleteReportRequest struct {
-	ctx _context.Context
+	ctx        _context.Context
 	ApiService *ReportsApiService
-	username string
-	repoSlug string
-	commit string
-	reportId string
+	username   string
+	repoSlug   string
+	commit     string
+	reportId   string
 }
-
 
 func (r ApiDeleteReportRequest) Execute() (*_nethttp.Response, error) {
 	return r.ApiService.DeleteReportExecute(r)
@@ -671,11 +669,11 @@ func (r ApiDeleteReportRequest) Execute() (*_nethttp.Response, error) {
 func (a *ReportsApiService) DeleteReport(ctx _context.Context, username string, repoSlug string, commit string, reportId string) ApiDeleteReportRequest {
 	return ApiDeleteReportRequest{
 		ApiService: a,
-		ctx: ctx,
-		username: username,
-		repoSlug: repoSlug,
-		commit: commit,
-		reportId: reportId,
+		ctx:        ctx,
+		username:   username,
+		repoSlug:   repoSlug,
+		commit:     commit,
+		reportId:   reportId,
 	}
 }
 
@@ -696,7 +694,7 @@ func (a *ReportsApiService) DeleteReportExecute(r ApiDeleteReportRequest) (*_net
 		return nil, GenericOpenAPIError{error: err.Error()}
 	}
 
-	localVarPath := localBasePath + "/repositories/{workspace}/{repo_slug}/commit/{commit}/reports/{reportId}"
+	localVarPath := localBasePath + "/repositories/{username}/{repo_slug}/commit/{commit}/reports/{reportId}"
 	localVarPath = strings.Replace(localVarPath, "{"+"username"+"}", _neturl.PathEscape(parameterToString(r.username, "")), -1)
 	localVarPath = strings.Replace(localVarPath, "{"+"repo_slug"+"}", _neturl.PathEscape(parameterToString(r.repoSlug, "")), -1)
 	localVarPath = strings.Replace(localVarPath, "{"+"commit"+"}", _neturl.PathEscape(parameterToString(r.commit, "")), -1)
@@ -751,15 +749,14 @@ func (a *ReportsApiService) DeleteReportExecute(r ApiDeleteReportRequest) (*_net
 }
 
 type ApiGetAnnotationRequest struct {
-	ctx _context.Context
-	ApiService *ReportsApiService
-	username string
-	repoSlug string
-	commit string
-	reportId string
+	ctx          _context.Context
+	ApiService   *ReportsApiService
+	username     string
+	repoSlug     string
+	commit       string
+	reportId     string
 	annotationId string
 }
-
 
 func (r ApiGetAnnotationRequest) Execute() (ReportAnnotation, *_nethttp.Response, error) {
 	return r.ApiService.GetAnnotationExecute(r)
@@ -778,12 +775,12 @@ func (r ApiGetAnnotationRequest) Execute() (ReportAnnotation, *_nethttp.Response
  */
 func (a *ReportsApiService) GetAnnotation(ctx _context.Context, username string, repoSlug string, commit string, reportId string, annotationId string) ApiGetAnnotationRequest {
 	return ApiGetAnnotationRequest{
-		ApiService: a,
-		ctx: ctx,
-		username: username,
-		repoSlug: repoSlug,
-		commit: commit,
-		reportId: reportId,
+		ApiService:   a,
+		ctx:          ctx,
+		username:     username,
+		repoSlug:     repoSlug,
+		commit:       commit,
+		reportId:     reportId,
 		annotationId: annotationId,
 	}
 }
@@ -807,7 +804,7 @@ func (a *ReportsApiService) GetAnnotationExecute(r ApiGetAnnotationRequest) (Rep
 		return localVarReturnValue, nil, GenericOpenAPIError{error: err.Error()}
 	}
 
-	localVarPath := localBasePath + "/repositories/{workspace}/{repo_slug}/commit/{commit}/reports/{reportId}/annotations/{annotationId}"
+	localVarPath := localBasePath + "/repositories/{username}/{repo_slug}/commit/{commit}/reports/{reportId}/annotations/{annotationId}"
 	localVarPath = strings.Replace(localVarPath, "{"+"username"+"}", _neturl.PathEscape(parameterToString(r.username, "")), -1)
 	localVarPath = strings.Replace(localVarPath, "{"+"repo_slug"+"}", _neturl.PathEscape(parameterToString(r.repoSlug, "")), -1)
 	localVarPath = strings.Replace(localVarPath, "{"+"commit"+"}", _neturl.PathEscape(parameterToString(r.commit, "")), -1)
@@ -881,14 +878,13 @@ func (a *ReportsApiService) GetAnnotationExecute(r ApiGetAnnotationRequest) (Rep
 }
 
 type ApiGetAnnotationsForReportRequest struct {
-	ctx _context.Context
+	ctx        _context.Context
 	ApiService *ReportsApiService
-	username string
-	repoSlug string
-	commit string
-	reportId string
+	username   string
+	repoSlug   string
+	commit     string
+	reportId   string
 }
-
 
 func (r ApiGetAnnotationsForReportRequest) Execute() (PaginatedAnnotations, *_nethttp.Response, error) {
 	return r.ApiService.GetAnnotationsForReportExecute(r)
@@ -907,11 +903,11 @@ func (r ApiGetAnnotationsForReportRequest) Execute() (PaginatedAnnotations, *_ne
 func (a *ReportsApiService) GetAnnotationsForReport(ctx _context.Context, username string, repoSlug string, commit string, reportId string) ApiGetAnnotationsForReportRequest {
 	return ApiGetAnnotationsForReportRequest{
 		ApiService: a,
-		ctx: ctx,
-		username: username,
-		repoSlug: repoSlug,
-		commit: commit,
-		reportId: reportId,
+		ctx:        ctx,
+		username:   username,
+		repoSlug:   repoSlug,
+		commit:     commit,
+		reportId:   reportId,
 	}
 }
 
@@ -934,7 +930,7 @@ func (a *ReportsApiService) GetAnnotationsForReportExecute(r ApiGetAnnotationsFo
 		return localVarReturnValue, nil, GenericOpenAPIError{error: err.Error()}
 	}
 
-	localVarPath := localBasePath + "/repositories/{workspace}/{repo_slug}/commit/{commit}/reports/{reportId}/annotations"
+	localVarPath := localBasePath + "/repositories/{username}/{repo_slug}/commit/{commit}/reports/{reportId}/annotations"
 	localVarPath = strings.Replace(localVarPath, "{"+"username"+"}", _neturl.PathEscape(parameterToString(r.username, "")), -1)
 	localVarPath = strings.Replace(localVarPath, "{"+"repo_slug"+"}", _neturl.PathEscape(parameterToString(r.repoSlug, "")), -1)
 	localVarPath = strings.Replace(localVarPath, "{"+"commit"+"}", _neturl.PathEscape(parameterToString(r.commit, "")), -1)
@@ -998,14 +994,13 @@ func (a *ReportsApiService) GetAnnotationsForReportExecute(r ApiGetAnnotationsFo
 }
 
 type ApiGetReportRequest struct {
-	ctx _context.Context
+	ctx        _context.Context
 	ApiService *ReportsApiService
-	username string
-	repoSlug string
-	commit string
-	reportId string
+	username   string
+	repoSlug   string
+	commit     string
+	reportId   string
 }
-
 
 func (r ApiGetReportRequest) Execute() (Report, *_nethttp.Response, error) {
 	return r.ApiService.GetReportExecute(r)
@@ -1024,11 +1019,11 @@ func (r ApiGetReportRequest) Execute() (Report, *_nethttp.Response, error) {
 func (a *ReportsApiService) GetReport(ctx _context.Context, username string, repoSlug string, commit string, reportId string) ApiGetReportRequest {
 	return ApiGetReportRequest{
 		ApiService: a,
-		ctx: ctx,
-		username: username,
-		repoSlug: repoSlug,
-		commit: commit,
-		reportId: reportId,
+		ctx:        ctx,
+		username:   username,
+		repoSlug:   repoSlug,
+		commit:     commit,
+		reportId:   reportId,
 	}
 }
 
@@ -1051,7 +1046,7 @@ func (a *ReportsApiService) GetReportExecute(r ApiGetReportRequest) (Report, *_n
 		return localVarReturnValue, nil, GenericOpenAPIError{error: err.Error()}
 	}
 
-	localVarPath := localBasePath + "/repositories/{workspace}/{repo_slug}/commit/{commit}/reports/{reportId}"
+	localVarPath := localBasePath + "/repositories/{username}/{repo_slug}/commit/{commit}/reports/{reportId}"
 	localVarPath = strings.Replace(localVarPath, "{"+"username"+"}", _neturl.PathEscape(parameterToString(r.username, "")), -1)
 	localVarPath = strings.Replace(localVarPath, "{"+"repo_slug"+"}", _neturl.PathEscape(parameterToString(r.repoSlug, "")), -1)
 	localVarPath = strings.Replace(localVarPath, "{"+"commit"+"}", _neturl.PathEscape(parameterToString(r.commit, "")), -1)
@@ -1124,13 +1119,12 @@ func (a *ReportsApiService) GetReportExecute(r ApiGetReportRequest) (Report, *_n
 }
 
 type ApiGetReportsForCommitRequest struct {
-	ctx _context.Context
+	ctx        _context.Context
 	ApiService *ReportsApiService
-	username string
-	repoSlug string
-	commit string
+	username   string
+	repoSlug   string
+	commit     string
 }
-
 
 func (r ApiGetReportsForCommitRequest) Execute() (PaginatedReports, *_nethttp.Response, error) {
 	return r.ApiService.GetReportsForCommitExecute(r)
@@ -1148,10 +1142,10 @@ func (r ApiGetReportsForCommitRequest) Execute() (PaginatedReports, *_nethttp.Re
 func (a *ReportsApiService) GetReportsForCommit(ctx _context.Context, username string, repoSlug string, commit string) ApiGetReportsForCommitRequest {
 	return ApiGetReportsForCommitRequest{
 		ApiService: a,
-		ctx: ctx,
-		username: username,
-		repoSlug: repoSlug,
-		commit: commit,
+		ctx:        ctx,
+		username:   username,
+		repoSlug:   repoSlug,
+		commit:     commit,
 	}
 }
 
@@ -1174,7 +1168,7 @@ func (a *ReportsApiService) GetReportsForCommitExecute(r ApiGetReportsForCommitR
 		return localVarReturnValue, nil, GenericOpenAPIError{error: err.Error()}
 	}
 
-	localVarPath := localBasePath + "/repositories/{workspace}/{repo_slug}/commit/{commit}/reports"
+	localVarPath := localBasePath + "/repositories/{username}/{repo_slug}/commit/{commit}/reports"
 	localVarPath = strings.Replace(localVarPath, "{"+"username"+"}", _neturl.PathEscape(parameterToString(r.username, "")), -1)
 	localVarPath = strings.Replace(localVarPath, "{"+"repo_slug"+"}", _neturl.PathEscape(parameterToString(r.repoSlug, "")), -1)
 	localVarPath = strings.Replace(localVarPath, "{"+"commit"+"}", _neturl.PathEscape(parameterToString(r.commit, "")), -1)
