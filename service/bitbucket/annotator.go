@@ -71,10 +71,9 @@ type ReportAnnotator struct {
 	owner, repo string
 	reportTitle string
 
-	muComments   sync.Mutex
-	postComments []*reviewdog.Comment
-
-	// postedcs commentutil.PostedComments
+	muAnnotations sync.Mutex
+	annotations   []openapi.ReportAnnotation
+	issuesCount   map[rdf.Severity]int
 
 	// wd is working directory relative to root of repository.
 	wd       string
@@ -102,32 +101,26 @@ func NewReportAnnotator(cli *openapi.APIClient, reportTitle, owner, repo, sha st
 func (r *ReportAnnotator) Post(_ context.Context, c *reviewdog.Comment) error {
 	c.Result.Diagnostic.GetLocation().Path = filepath.ToSlash(
 		filepath.Join(r.wd, c.Result.Diagnostic.GetLocation().GetPath()))
-	r.muComments.Lock()
-	defer r.muComments.Unlock()
-	r.postComments = append(r.postComments, c)
+	r.muAnnotations.Lock()
+	defer r.muAnnotations.Unlock()
+
+	r.issuesCount[c.Result.Diagnostic.GetSeverity()]++
+	r.annotations = append(r.annotations, annotationFromReviewDogComment(*c))
+
 	return nil
 }
 
 // Flush posts comments which has not been posted yet.
 func (r *ReportAnnotator) Flush(ctx context.Context) error {
-	r.muComments.Lock()
-	defer r.muComments.Unlock()
+	r.muAnnotations.Lock()
+	defer r.muAnnotations.Unlock()
 
-	var annotations []openapi.ReportAnnotation
-
-	issuesCount := map[rdf.Severity]int{}
-
-	for _, c := range r.postComments {
-		issuesCount[c.Result.Diagnostic.GetSeverity()]++
-		annotations = append(annotations, annotationFromReviewDogComment(*c))
-	}
-
-	if len(annotations) == 0 {
+	if len(r.annotations) == 0 {
 		return r.createOrUpdateReport(ctx, reportResultPassed)
 	}
 
 	reportStatus := reportResultPending
-	if issuesCount[rdf.Severity_ERROR] > 0 {
+	if r.issuesCount[rdf.Severity_ERROR] > 0 {
 		reportStatus = reportResultFailed
 	}
 
@@ -137,7 +130,7 @@ func (r *ReportAnnotator) Flush(ctx context.Context) error {
 
 	_, resp, err := r.cli.ReportsApi.BulkCreateOrUpdateAnnotations(
 		ctx, r.owner, r.repo, r.sha, r.reportID,
-	).Body(annotations).Execute()
+	).Body(r.annotations).Execute()
 
 	if err := checkAPIError(err, resp, http.StatusOK); err != nil {
 		return fmt.Errorf("bitbucket.BulkCreateOrUpdateAnnotations: %s", err)
