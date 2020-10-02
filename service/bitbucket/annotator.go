@@ -34,7 +34,6 @@ type ReportAnnotator struct {
 
 	muAnnotations sync.Mutex
 	annotations   map[string][]openapi.ReportAnnotation
-	issuesCount   map[rdf.Severity]int
 	severityMap   map[rdf.Severity]string
 
 	// wd is working directory relative to root of repository.
@@ -49,7 +48,6 @@ func NewReportAnnotator(cli *openapi.APIClient, reportTitle, owner, repo, sha st
 		owner:       owner,
 		repo:        repo,
 		annotations: make(map[string][]openapi.ReportAnnotation),
-		issuesCount: make(map[rdf.Severity]int),
 		severityMap: map[rdf.Severity]string{
 			rdf.Severity_INFO:    annotationSeverityLow,
 			rdf.Severity_WARNING: annotationSeverityMedium,
@@ -66,7 +64,6 @@ func (r *ReportAnnotator) Post(_ context.Context, c *reviewdog.Comment) error {
 	r.muAnnotations.Lock()
 	defer r.muAnnotations.Unlock()
 
-	r.issuesCount[c.Result.Diagnostic.GetSeverity()]++
 	r.annotations[c.ToolName] = append(r.annotations[c.ToolName], r.annotationFromReviewDogComment(*c))
 
 	return nil
@@ -90,13 +87,8 @@ func (r *ReportAnnotator) Flush(ctx context.Context) error {
 			continue
 		}
 
-		reportStatus := reportResultPending
-		if r.issuesCount[rdf.Severity_ERROR] > 0 {
-			reportStatus = reportResultFailed
-		}
-
-		// create report or update report first, with the proper status
-		if err := r.createOrUpdateReport(ctx, reportID, title, reportStatus); err != nil {
+		// create report or update report first, with the failed status
+		if err := r.createOrUpdateReport(ctx, reportID, title, reportResultFailed); err != nil {
 			return err
 		}
 
