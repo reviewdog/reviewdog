@@ -697,7 +697,6 @@ pipelines:
         name: Reviewdog
         image: golangci/golangci-lint:v1.31-alpine
         script:
-          - export REVIEWDOG_VERSION=v0.10.2
           - wget -O - -q https://raw.githubusercontent.com/reviewdog/reviewdog/master/install.sh | 
               sh -s -- -b $(go env GOPATH)/bin
           - golangci-lint run --out-format=line-number ./... | reviewdog -f=golangci-lint -filter-mode=nofilter
