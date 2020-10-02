@@ -80,11 +80,13 @@ by diff.
   * [Reporter: GitHub PullRequest review comment (-reporter=github-pr-review)](#reporter-github-pullrequest-review-comment--reportergithub-pr-review)
   * [Reporter: GitLab MergeRequest discussions (-reporter=gitlab-mr-discussion)](#reporter-gitlab-mergerequest-discussions--reportergitlab-mr-discussion)
   * [Reporter: GitLab MergeRequest commit (-reporter=gitlab-mr-commit)](#reporter-gitlab-mergerequest-commit--reportergitlab-mr-commit)
+  * [Reporter: Bitbucket Code Insights Reports (-reporter=bitbucket-code-report)](#reporter-bitbucket-code-insights-reports--reporter-bitbucket-code-report)
 - [Supported CI services](#supported-ci-services)
   * [GitHub Actions](#github-actions)
   * [Travis CI](#travis-ci)
   * [Circle CI](#circle-ci)
   * [GitLab CI](#gitlab-ci)
+  * [Bitbucket Pipelines](#bitbucket-pipelines)
   * [Common (Jenkins, local, etc...)](#common-jenkins-local-etc)
     + [Jenkins with Github pull request builder plugin](#jenkins-with-github-pull-request-builder-plugin)
 - [Exit codes](#exit-codes)
@@ -435,6 +437,32 @@ $ export GERRIT_ADDRESS=http://<gerrit-host>:<gerrit-port>
 $ reviewdog -reporter=gerrit-change-review
 ```
 
+### Reporter: Bitbucket Code Insights Reports (-reporter=bitbucket-code-report)
+
+bitbucket-code-report generates the annotated
+[Bitbucket Code Insights](https://support.atlassian.com/bitbucket-cloud/docs/code-insights/) report.
+
+By default the whole project is scanned on every run.
+Reports are stored per commit and can be viewed per commit from Bitbucket Pipelines UI or
+in Pull Request. In the Pull Request UI affected code lines will be annotated in the diff,
+as well as you will be able to filter the annotations by **This pull request** or *All**.
+
+By default, report will be called `Reviewdog report` but can be customized with
+`BITBUCKET_REPORT_NAME` env variable.
+
+If running from [Bitbucket Pipelines](#bitbucket-pipelines) no additional configuration is needed (even credentials).
+If running locally or from some other CI system you would need to provide Bitbucket API credentials:
+
+- For Basic Auth you need to set following env variables:
+    `BITBUCKET_USER` and `BITBUCKET_PASSWORD`
+- For AccessToken Auth you need to set `BITBUCKET_ACCESS_TOKEN`
+
+```shell
+$ export BITBUCKET_USER="my_user"
+$ export BITBUCKET_PASSWORD="my_password"
+$ reviewdog -reporter=bitbucket-code-report
+```
+
 ## Supported CI services
 
 ### [GitHub Actions](https://github.com/features/actions)
@@ -656,6 +684,25 @@ reviewdog:
     - reviewdog -reporter=gitlab-mr-commit
 ```
 
+### Bitbucket Pipelines
+
+No additional configuration is needed.
+
+#### bitbucket-pipelines.yml sample
+
+```yaml
+pipelines:
+  default:
+    - step:
+        name: Reviewdog
+        image: golangci/golangci-lint:v1.31-alpine
+        script:
+          - export REVIEWDOG_VERSION=v0.10.2
+          - wget -O - -q https://raw.githubusercontent.com/reviewdog/reviewdog/master/install.sh | 
+              sh -s -- -b $(go env GOPATH)/bin
+          - golangci-lint run --out-format=line-number ./... | reviewdog -f=golangci-lint -filter-mode=nofilter
+```
+
 ### Common (Jenkins, local, etc...)
 
 You can use reviewdog to post review comments from anywhere with following
@@ -747,6 +794,7 @@ so reviewdog will use [Check annotation](https://developer.github.com/v3/checks/
 | **`gitlab-mr-discussion`**   | OK      | OK             | OK                      | Partially Supported [2] |
 | **`gitlab-mr-commit`**       | OK      | Partially Supported [2] | Partially Supported [2] | Partially Supported [2] |
 | **`gerrit-change-review`**   | OK      | OK? [3]        | OK? [3]                 | Partially Supported? [2][3] |
+| **`bitbucket-code-report`**  | OK? [3] | OK? [3]        | OK? [3]                 | OK |
 
 - [1] Report results which is outside diff context with Check annotation as fallback if it's running in GitHub actions instead of Review API (comments). All results will be reported to console as well.
 - [2] Report results which is outside diff file to console.

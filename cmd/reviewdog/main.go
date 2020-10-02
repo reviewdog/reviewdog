@@ -164,7 +164,12 @@ const (
 		otherwise report will be called "Reviewdog Report"
 
 		If running as part of Bitbucket Pipelines no additional configurations is needed.
-		Running outside of Bitbucket Pipelines or Bitbucket server not supported yet.
+		If running outside of Bitbucket Pipelines you need to provide git repo data
+		(see documentation below for local reporters) and BitBucket credentials:
+		- For Basic Auth you need to set following env variables:
+			  BITBUCKET_USER and BITBUCKET_PASSWORD
+		- For AccessToken Auth you need to set BITBUCKET_ACCESS_TOKEN 
+		Running on Bitbucket Server is not tested/supported yet.
 
 	For GitHub Enterprise and self hosted GitLab, set
 	REVIEWDOG_INSECURE_SKIP_VERIFY to skip verifying SSL (please use this at your own risk)
@@ -354,8 +359,14 @@ github-pr-check reporter as a fallback.
 		cs = bbservice.NewReportAnnotator(client, reportName,
 			build.Owner, build.Repo, build.SHA)
 
-		// TODO: better diffs
-		if opt.diffCmd == "" && opt.filterMode == filter.ModeNoFilter {
+		// by default scan whole project.
+		// Bitbucket pipelines doesn't give an easy way to know
+		// which commit run pipeline before so we can comapre between them
+		// however once PR is opened, Bitbucket Reports UI will do automatic
+		// filtering of annotations dividing them in two groups:
+		// - This pull request (10)
+		// - All (50)
+		if opt.diffCmd == "" || opt.filterMode == filter.ModeNoFilter {
 			ds = &reviewdog.EmptyDiff{}
 		} else {
 			d, err := diffService(opt.diffCmd, opt.diffStrip)

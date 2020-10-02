@@ -48,7 +48,6 @@ func NewAPIClient(isInPipeline bool) *openapi.APIClient {
 			Proxy: http.ProxyURL(proxyURL),
 		}
 	} else {
-		// TODO: check how to configure credentials
 		config.Servers = openapi.ServerConfigurations{httpsServer}
 	}
 
