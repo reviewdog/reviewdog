@@ -447,9 +447,6 @@ Reports are stored per commit and can be viewed per commit from Bitbucket Pipeli
 in Pull Request. In the Pull Request UI affected code lines will be annotated in the diff,
 as well as you will be able to filter the annotations by **This pull request** or *All**.
 
-By default, report will be called `Reviewdog report` but can be customized with
-`BITBUCKET_REPORT_NAME` env variable.
-
 If running from [Bitbucket Pipelines](#bitbucket-pipelines), no additional configuration is needed (even credentials).
 If running locally or from some other CI system you would need to provide Bitbucket API credentials:
 

@@ -41,7 +41,7 @@ type ReportAnnotator struct {
 }
 
 // NewReportAnnotator creates new Bitbucket Report Annotator
-func NewReportAnnotator(cli *openapi.APIClient, reportTitle, owner, repo, sha string) *ReportAnnotator {
+func NewReportAnnotator(cli *openapi.APIClient, owner, repo, sha string) *ReportAnnotator {
 	return &ReportAnnotator{
 		cli:         cli,
 		sha:         sha,

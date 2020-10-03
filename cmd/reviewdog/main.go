@@ -160,9 +160,6 @@ const (
 		(https://confluence.atlassian.com/display/BITBUCKET/Code+insights).
 		You can set custom report name with:
 
-		$ export BITBUCKET_REPORT_NAME="Linter Report",
-		otherwise report will be called "Reviewdog Report"
-
 		If running as part of Bitbucket Pipelines no additional configurations is needed.
 		If running outside of Bitbucket Pipelines you need to provide git repo data
 		(see documentation below for local reporters) and BitBucket credentials:
@@ -354,9 +351,7 @@ github-pr-check reporter as a fallback.
 		}
 		ctx = ct
 
-		reportName := os.Getenv("BITBUCKET_REPORT_NAME")
-
-		cs = bbservice.NewReportAnnotator(client, reportName,
+		cs = bbservice.NewReportAnnotator(client,
 			build.Owner, build.Repo, build.SHA)
 
 		// by default scan whole project with "filter.ModeNoFilter"
