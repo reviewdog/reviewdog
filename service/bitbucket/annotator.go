@@ -39,7 +39,8 @@ type ReportAnnotator struct {
 	severityMap   map[rdf.Severity]string
 
 	// wd is working directory relative to root of repository.
-	wd string
+	wd         string
+	duplicates map[string]struct{}
 }
 
 // NewReportAnnotator creates new Bitbucket Report Annotator
@@ -55,6 +56,7 @@ func NewReportAnnotator(cli *openapi.APIClient, owner, repo, sha string) *Report
 			rdf.Severity_WARNING: annotationSeverityMedium,
 			rdf.Severity_ERROR:   annotationSeverityHigh,
 		},
+		duplicates: map[string]struct{}{},
 	}
 }
 
@@ -66,8 +68,16 @@ func (r *ReportAnnotator) Post(_ context.Context, c *reviewdog.Comment) error {
 	r.muAnnotations.Lock()
 	defer r.muAnnotations.Unlock()
 
-	r.annotations[c.ToolName] = append(r.annotations[c.ToolName], r.annotationFromReviewDogComment(*c))
+	anot := r.annotationFromReviewDogComment(*c)
 
+	// deduplicate event, because some reporters might report
+	// it twice, and bitbucket api will complain on duplicated
+	// external id of annotation
+	if _, ok := r.duplicates[*anot.ExternalId]; !ok {
+		r.annotations[c.ToolName] = append(r.annotations[c.ToolName], anot)
+	}
+
+	r.duplicates[*anot.ExternalId] = struct{}{}
 	return nil
 }
 
