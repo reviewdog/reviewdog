@@ -20,6 +20,8 @@ const (
 	// avatar from https://github.com/apps/reviewdog
 	logoURL  = "https://avatars1.githubusercontent.com/in/12131"
 	reporter = "reviewdog"
+	// max amount of annotations in one batch call
+	annotationsBatchSize = 100
 )
 
 // ReportAnnotator is a comment service for Bitbucket Code Insights reports.
@@ -92,13 +94,22 @@ func (r *ReportAnnotator) Flush(ctx context.Context) error {
 			return err
 		}
 
-		// add annotations to the report
-		_, resp, err := r.cli.ReportsApi.BulkCreateOrUpdateAnnotations(
-			ctx, r.owner, r.repo, r.sha, reportID,
-		).Body(annotations).Execute()
+		// send annotations in batches, because of the api max payload size limit
+		for start, annCount := 0, len(annotations); start < annCount; start += annotationsBatchSize {
+			end := start + annotationsBatchSize
 
-		if err := checkAPIError(err, resp, http.StatusOK); err != nil {
-			return fmt.Errorf("bitbucket.BulkCreateOrUpdateAnnotations: %s", err)
+			if end > annCount {
+				end = annCount
+			}
+
+			// add annotations to the report
+			_, resp, err := r.cli.ReportsApi.BulkCreateOrUpdateAnnotations(
+				ctx, r.owner, r.repo, r.sha, reportID,
+			).Body(annotations[start:end]).Execute()
+
+			if err := checkAPIError(err, resp, http.StatusOK); err != nil {
+				return fmt.Errorf("bitbucket.BulkCreateOrUpdateAnnotations: %s", err)
+			}
 		}
 	}
 
