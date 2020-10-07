@@ -19,7 +19,7 @@ require (
 	github.com/reviewdog/errorformat v0.0.0-20200929113217-87743a11f4be
 	github.com/vvakame/sdlog v0.0.0-20200409072131-7c0d359efddc
 	github.com/xanzy/go-gitlab v0.38.1
-	go.opencensus.io v0.22.4
+	go.opencensus.io v0.22.5
 	golang.org/x/build v0.0.0-20200616162219-07bebbe343e9
 	golang.org/x/net v0.0.0-20201006153459-a7d1128ccaa0
 	golang.org/x/oauth2 v0.0.0-20200902213428-5d25da1a8d43
