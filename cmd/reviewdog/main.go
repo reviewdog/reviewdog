@@ -242,11 +242,18 @@ func run(r io.Reader, w io.Writer, opt *option) error {
 
 	// assume it's project based run when both -efm and -f are not specified
 	isProject := len(opt.efms) == 0 && opt.f == ""
+	var projectConf *project.Config
 
 	var cs reviewdog.CommentService
 	var ds reviewdog.DiffService
 
 	if isProject {
+		var err error
+		projectConf, err = projectConfig(opt.conf)
+		if err != nil {
+			return err
+		}
+
 		cs = reviewdog.NewUnifiedCommentWriter(w)
 	} else {
 		cs = reviewdog.NewRawCommentWriter(w)
@@ -351,8 +358,17 @@ github-pr-check reporter as a fallback.
 		}
 		ctx = ct
 
+		// get list of runners, so we can create "green" for that runner
+		// if there are no issues from it
+		runnersList := strings.Split(opt.runners, ",")
+		if projectConf != nil {
+			for runner := range projectConf.Runner {
+				runnersList = append(runnersList, runner)
+			}
+		}
+
 		cs = bbservice.NewReportAnnotator(client,
-			build.Owner, build.Repo, build.SHA, strings.Split(opt.runners, ","))
+			build.Owner, build.Repo, build.SHA, runnersList)
 
 		// by default scan whole project with "filter.ModeNoFilter"
 		// Bitbucket pipelines doesn't give an easy way to know
@@ -387,11 +403,7 @@ github-pr-check reporter as a fallback.
 	}
 
 	if isProject {
-		conf, err := projectConfig(opt.conf)
-		if err != nil {
-			return err
-		}
-		return project.Run(ctx, conf, buildRunnersMap(opt.runners), cs, ds, opt.tee, opt.filterMode, opt.failOnError)
+		return project.Run(ctx, projectConf, buildRunnersMap(opt.runners), cs, ds, opt.tee, opt.filterMode, opt.failOnError)
 	}
 
 	p, err := newParserFromOpt(opt)

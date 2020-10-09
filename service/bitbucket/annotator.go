@@ -51,6 +51,9 @@ func NewReportAnnotator(cli *openapi.APIClient, owner, repo, sha string, runners
 	// if no issues found from the specific tool
 	annotations := make(map[string][]openapi.ReportAnnotation, len(runners))
 	for _, runner := range runners {
+		if len(runner) == 0 {
+			continue
+		}
 		annotations[runner] = []openapi.ReportAnnotation{}
 	}
 
