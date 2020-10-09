@@ -170,7 +170,11 @@ func (r *ReportAnnotator) createOrUpdateReport(ctx context.Context, redportID, t
 	report.SetReporter(reporter)
 	report.SetLogoUrl(logoURL)
 	report.SetResult(reportStatus)
-	report.SetDetails("Woof-Woof! This report generated for you by reviewdog")
+	if reportStatus == reportResultPassed {
+		report.SetDetails("Great news! Reviewdog couldn't spot any issues!")
+	} else {
+		report.SetDetails("Woof-Woof! This report generated for you by reviewdog")
+	}
 
 	_, resp, err := r.cli.ReportsApi.CreateOrUpdateReport(
 		ctx, r.owner, r.repo, r.sha, redportID,
