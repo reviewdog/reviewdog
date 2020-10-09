@@ -102,7 +102,7 @@ func (r *ReportAnnotator) Flush(ctx context.Context) error {
 	for tool, annotations := range r.annotations {
 		reportID := reportID(reporter, tool)
 		title := fmt.Sprintf("[%s] %s report", tool, reporter)
-		if len(r.annotations) == 0 {
+		if len(annotations) == 0 {
 			// if no annotation, create Passed report
 			if err := r.createOrUpdateReport(ctx, reportID, title, reportResultPassed); err != nil {
 				return err
