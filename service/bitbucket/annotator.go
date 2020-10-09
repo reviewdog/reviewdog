@@ -35,8 +35,10 @@ type ReportAnnotator struct {
 	owner, repo string
 
 	muAnnotations sync.Mutex
-	annotations   map[string][]openapi.ReportAnnotation
-	severityMap   map[rdf.Severity]string
+	// store annotations in map per tool name
+	// so we can create report per tool
+	annotations map[string][]openapi.ReportAnnotation
+	severityMap map[rdf.Severity]string
 
 	// wd is working directory relative to root of repository.
 	wd         string
@@ -44,13 +46,20 @@ type ReportAnnotator struct {
 }
 
 // NewReportAnnotator creates new Bitbucket Report Annotator
-func NewReportAnnotator(cli *openapi.APIClient, owner, repo, sha string) *ReportAnnotator {
+func NewReportAnnotator(cli *openapi.APIClient, owner, repo, sha string, runners []string) *ReportAnnotator {
+	// pre populate map of annotations, so we still create passed (green) report
+	// if no issues found from the specific tool
+	annotations := make(map[string][]openapi.ReportAnnotation, len(runners))
+	for _, runner := range runners {
+		annotations[runner] = []openapi.ReportAnnotation{}
+	}
+
 	return &ReportAnnotator{
 		cli:         cli,
 		sha:         sha,
 		owner:       owner,
 		repo:        repo,
-		annotations: make(map[string][]openapi.ReportAnnotation),
+		annotations: annotations,
 		severityMap: map[rdf.Severity]string{
 			rdf.Severity_INFO:    annotationSeverityLow,
 			rdf.Severity_WARNING: annotationSeverityMedium,

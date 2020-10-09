@@ -352,7 +352,7 @@ github-pr-check reporter as a fallback.
 		ctx = ct
 
 		cs = bbservice.NewReportAnnotator(client,
-			build.Owner, build.Repo, build.SHA)
+			build.Owner, build.Repo, build.SHA, strings.Split(opt.runners, ","))
 
 		// by default scan whole project with "filter.ModeNoFilter"
 		// Bitbucket pipelines doesn't give an easy way to know
