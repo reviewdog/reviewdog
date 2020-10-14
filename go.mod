@@ -3,7 +3,7 @@ module github.com/reviewdog/reviewdog
 go 1.14
 
 require (
-	cloud.google.com/go v0.68.0
+	cloud.google.com/go v0.69.0
 	cloud.google.com/go/datastore v1.1.0
 	contrib.go.opencensus.io/exporter/stackdriver v0.13.4
 	github.com/bradleyfalzon/ghinstallation v1.1.1
