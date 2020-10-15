@@ -7,7 +7,7 @@ require (
 	cloud.google.com/go/datastore v1.1.0
 	contrib.go.opencensus.io/exporter/stackdriver v0.13.4
 	github.com/bradleyfalzon/ghinstallation v1.1.1
-	github.com/golang/protobuf v1.4.2
+	github.com/golang/protobuf v1.4.3
 	github.com/google/go-cmp v0.5.2
 	github.com/google/go-github/v32 v32.1.0
 	github.com/haya14busa/go-actions-toolkit v0.0.0-20200105081403-ca0307860f01
