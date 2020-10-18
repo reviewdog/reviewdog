@@ -6,9 +6,10 @@ import (
 	"path/filepath"
 	"sync"
 
+	"golang.org/x/build/gerrit"
+
 	"github.com/reviewdog/reviewdog"
 	"github.com/reviewdog/reviewdog/service/serviceutil"
-	"golang.org/x/build/gerrit"
 )
 
 var _ reviewdog.CommentService = &ChangeReviewCommenter{}

@@ -3,8 +3,9 @@ package main
 import (
 	"net/http"
 
-	"github.com/reviewdog/reviewdog/doghouse/server/ciutil"
 	"github.com/vvakame/sdlog/aelog"
+
+	"github.com/reviewdog/reviewdog/doghouse/server/ciutil"
 )
 
 func warmupHandler(_ http.ResponseWriter, r *http.Request) {

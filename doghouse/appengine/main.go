@@ -11,10 +11,11 @@ import (
 	"contrib.go.opencensus.io/exporter/stackdriver/propagation"
 	"github.com/haya14busa/secretbox"
 	"github.com/justinas/nosurf"
-	"github.com/reviewdog/reviewdog/doghouse/server/cookieman"
-	"github.com/reviewdog/reviewdog/doghouse/server/storage"
 	"go.opencensus.io/plugin/ochttp"
 	"go.opencensus.io/trace"
+
+	"github.com/reviewdog/reviewdog/doghouse/server/cookieman"
+	"github.com/reviewdog/reviewdog/doghouse/server/storage"
 )
 
 func mustCookieMan() *cookieman.CookieMan {

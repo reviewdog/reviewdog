@@ -5,8 +5,9 @@ import (
 	"fmt"
 	"io"
 
-	"github.com/reviewdog/reviewdog/proto/rdf"
 	"google.golang.org/protobuf/encoding/protojson"
+
+	"github.com/reviewdog/reviewdog/proto/rdf"
 )
 
 var _ Parser = &RDJSONLParser{}
