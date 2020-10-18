@@ -104,7 +104,7 @@ func (g *GitLabMergeRequestDiscussionCommenter) postCommentsForEach(ctx context.
 		loc := c.Result.Diagnostic.GetLocation()
 		lnum := int(loc.GetRange().GetStart().GetLine())
 		body := commentutil.MarkdownComment(c)
-		if !c.Result.InDiffFile || lnum == 0 || postedcs.IsPosted(c, lnum, body) {
+		if !c.Result.InDiffFile || postedcs.IsPosted(c, lnum, body) {
 			continue
 		}
 		eg.Go(func() error {
@@ -114,7 +114,9 @@ func (g *GitLabMergeRequestDiscussionCommenter) postCommentsForEach(ctx context.
 				BaseSHA:      targetBranch.Commit.ID,
 				PositionType: "text",
 				NewPath:      loc.GetPath(),
-				NewLine:      lnum,
+			}
+			if lnum != 0 {
+				pos.NewLine = lnum
 			}
 			if c.Result.OldPath != "" && c.Result.OldLine != 0 {
 				pos.OldPath = c.Result.OldPath
