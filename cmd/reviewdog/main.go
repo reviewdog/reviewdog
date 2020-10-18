@@ -245,10 +245,6 @@ func run(r io.Reader, w io.Writer, opt *option) error {
 	case "github-pr-check":
 		return runDoghouse(ctx, r, w, opt, isProject, true)
 	case "github-pr-review":
-		if os.Getenv("REVIEWDOG_GITHUB_API_TOKEN") == "" {
-			fmt.Fprintln(os.Stderr, "REVIEWDOG_GITHUB_API_TOKEN is not set")
-			return nil
-		}
 		gs, isPR, err := githubService(ctx, opt)
 		if err != nil {
 			return err
