@@ -103,6 +103,11 @@ func (g *GitLabMergeRequestDiscussionCommenter) postCommentsForEach(ctx context.
 		c := c
 		loc := c.Result.Diagnostic.GetLocation()
 		lnum := int(loc.GetRange().GetStart().GetLine())
+		if lnum == 0 {
+			// See file comments as comments to Line 1 because GitLab doesn't support
+			// file comments.
+			lnum = 1
+		}
 		body := commentutil.MarkdownComment(c)
 		if !c.Result.InDiffFile || postedcs.IsPosted(c, lnum, body) {
 			continue
@@ -114,9 +119,7 @@ func (g *GitLabMergeRequestDiscussionCommenter) postCommentsForEach(ctx context.
 				BaseSHA:      targetBranch.Commit.ID,
 				PositionType: "text",
 				NewPath:      loc.GetPath(),
-			}
-			if lnum != 0 {
-				pos.NewLine = lnum
+				NewLine:      lnum,
 			}
 			if c.Result.OldPath != "" && c.Result.OldLine != 0 {
 				pos.OldPath = c.Result.OldPath
