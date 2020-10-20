@@ -158,8 +158,8 @@ func TestFilterCheckByAddedLines(t *testing.T) {
 	}
 	filediffs, _ := diff.ParseMultiFile(strings.NewReader(diffContent))
 	got := FilterCheck(results, filediffs, 0, "", ModeAdded)
-	if diff := cmp.Diff(got, want, protocmp.Transform()); diff != "" {
-		t.Error(diff)
+	if value := cmp.Diff(got, want, protocmp.Transform()); value != "" {
+		t.Error(value)
 	}
 }
 
@@ -231,8 +231,8 @@ func TestFilterCheckByDiffContext(t *testing.T) {
 	}
 	filediffs, _ := diff.ParseMultiFile(strings.NewReader(diffContent))
 	got := FilterCheck(results, filediffs, 0, "", ModeDiffContext)
-	if diff := cmp.Diff(got, want, protocmp.Transform()); diff != "" {
-		t.Error(diff)
+	if value := cmp.Diff(got, want, protocmp.Transform()); value != "" {
+		t.Error(value)
 	}
 }
 
