@@ -57,7 +57,7 @@ jobs:
       # https://github.com/actions/cache/blob/master/examples.md#go---modules
       - name: Cache Go Modules
         id: cache
-        uses: actions/cache@v1
+        uses: actions/cache@v2
         with:
           path: ~/go/pkg/mod
           key: ${{ runner.os }}-go-${{ hashFiles('**/go.sum') }}
