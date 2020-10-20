@@ -278,11 +278,21 @@ func buildSuggestions(c *reviewdog.Comment) string {
 func buildSingleSuggestion(c *reviewdog.Comment, s *rdf.Suggestion) (string, error) {
 	start := s.GetRange().GetStart()
 	end := s.GetRange().GetEnd()
+	endLine := end.GetLine()
+	if endLine == 0 {
+		endLine = start.GetLine()
+	}
 	drange := c.Result.Diagnostic.GetLocation().GetRange()
+	dendLine := drange.GetEnd().GetLine()
+	if dendLine == 0 {
+		// As long as suggestion has valid range, it's ok even if diagnostic
+		// location only contains start.
+		dendLine = drange.GetStart().GetLine()
+	}
 	if start.GetLine() != drange.GetStart().GetLine() ||
-		end.GetLine() != drange.GetEnd().GetLine() {
+		(endLine != dendLine) {
 		return "", fmt.Errorf("the Diagnostic's lines and Suggestion lines must be the same. L%d-L%d v.s. L%d-L%d",
-			drange.GetStart().GetLine(), drange.GetEnd().GetLine(), start.GetLine(), end.GetLine())
+			drange.GetStart().GetLine(), dendLine, start.GetLine(), endLine)
 	}
 	if start.GetColumn() > 0 || end.GetColumn() > 0 {
 		return buildNonLineBasedSuggestion(c, s)
