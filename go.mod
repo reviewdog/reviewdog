@@ -16,12 +16,12 @@ require (
 	github.com/kylelemons/godebug v1.1.0
 	github.com/mattn/go-shellwords v1.0.10
 	github.com/rakyll/statik v0.1.7
-	github.com/reviewdog/errorformat v0.0.0-20200929113217-87743a11f4be
+	github.com/reviewdog/errorformat v0.0.0-20201020160743-a656ed371170
 	github.com/vvakame/sdlog v0.0.0-20200409072131-7c0d359efddc
 	github.com/xanzy/go-gitlab v0.38.2
 	go.opencensus.io v0.22.5
 	golang.org/x/build v0.0.0-20200616162219-07bebbe343e9
-	golang.org/x/net v0.0.0-20201020065357-d65d470038a5
+	golang.org/x/net v0.0.0-20201020065357-d65d470038a5 // indirect
 	golang.org/x/oauth2 v0.0.0-20200902213428-5d25da1a8d43
 	golang.org/x/sync v0.0.0-20201008141435-b3e1573b7520
 	google.golang.org/protobuf v1.25.0
