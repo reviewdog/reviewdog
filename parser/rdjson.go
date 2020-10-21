@@ -5,8 +5,9 @@ import (
 	"io"
 	"io/ioutil"
 
-	"github.com/reviewdog/reviewdog/proto/rdf"
 	"google.golang.org/protobuf/encoding/protojson"
+
+	"github.com/reviewdog/reviewdog/proto/rdf"
 )
 
 var _ Parser = &RDJSONParser{}

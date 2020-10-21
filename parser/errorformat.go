@@ -6,6 +6,7 @@ import (
 	"strings"
 
 	"github.com/reviewdog/errorformat"
+
 	"github.com/reviewdog/reviewdog/proto/rdf"
 )
 

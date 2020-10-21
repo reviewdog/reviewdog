@@ -18,8 +18,8 @@ import (
 	"github.com/reviewdog/reviewdog/service/serviceutil"
 )
 
-var _ reviewdog.CommentService = &GitHubPullRequest{}
-var _ reviewdog.DiffService = &GitHubPullRequest{}
+var _ reviewdog.CommentService = &PullRequest{}
+var _ reviewdog.DiffService = &PullRequest{}
 
 const maxCommentsPerRequest = 30
 
@@ -28,12 +28,12 @@ const (
 	invalidSuggestionPost = "</details>"
 )
 
-// GitHubPullRequest is a comment and diff service for GitHub PullRequest.
+// PullRequest is a comment and diff service for GitHub PullRequest.
 //
 // API:
 //	https://developer.github.com/v3/pulls/comments/#create-a-comment
 //	POST /repos/:owner/:repo/pulls/:number/comments
-type GitHubPullRequest struct {
+type PullRequest struct {
 	cli   *github.Client
 	owner string
 	repo  string
@@ -49,14 +49,14 @@ type GitHubPullRequest struct {
 	wd string
 }
 
-// NewGitHubPullRequest returns a new GitHubPullRequest service.
-// GitHubPullRequest service needs git command in $PATH.
-func NewGitHubPullRequest(cli *github.Client, owner, repo string, pr int, sha string) (*GitHubPullRequest, error) {
+// NewGitHubPullRequest returns a new PullRequest service.
+// PullRequest service needs git command in $PATH.
+func NewGitHubPullRequest(cli *github.Client, owner, repo string, pr int, sha string) (*PullRequest, error) {
 	workDir, err := serviceutil.GitRelWorkdir()
 	if err != nil {
-		return nil, fmt.Errorf("GitHubPullRequest needs 'git' command: %w", err)
+		return nil, fmt.Errorf("PullRequest needs 'git' command: %w", err)
 	}
-	return &GitHubPullRequest{
+	return &PullRequest{
 		cli:   cli,
 		owner: owner,
 		repo:  repo,
@@ -68,7 +68,7 @@ func NewGitHubPullRequest(cli *github.Client, owner, repo string, pr int, sha st
 
 // Post accepts a comment and holds it. Flush method actually posts comments to
 // GitHub in parallel.
-func (g *GitHubPullRequest) Post(_ context.Context, c *reviewdog.Comment) error {
+func (g *PullRequest) Post(_ context.Context, c *reviewdog.Comment) error {
 	c.Result.Diagnostic.GetLocation().Path = filepath.ToSlash(filepath.Join(g.wd,
 		c.Result.Diagnostic.GetLocation().GetPath()))
 	g.muComments.Lock()
@@ -78,7 +78,7 @@ func (g *GitHubPullRequest) Post(_ context.Context, c *reviewdog.Comment) error 
 }
 
 // Flush posts comments which has not been posted yet.
-func (g *GitHubPullRequest) Flush(ctx context.Context) error {
+func (g *PullRequest) Flush(ctx context.Context) error {
 	g.muComments.Lock()
 	defer g.muComments.Unlock()
 
@@ -88,7 +88,7 @@ func (g *GitHubPullRequest) Flush(ctx context.Context) error {
 	return g.postAsReviewComment(ctx)
 }
 
-func (g *GitHubPullRequest) postAsReviewComment(ctx context.Context) error {
+func (g *PullRequest) postAsReviewComment(ctx context.Context) error {
 	comments := make([]*github.DraftReviewComment, 0, len(g.postComments))
 	remaining := make([]*reviewdog.Comment, 0)
 	for _, c := range g.postComments {
@@ -163,7 +163,7 @@ func githubCommentLine(c *reviewdog.Comment) int {
 	return int(line)
 }
 
-func (g *GitHubPullRequest) remainingCommentsSummary(remaining []*reviewdog.Comment) string {
+func (g *PullRequest) remainingCommentsSummary(remaining []*reviewdog.Comment) string {
 	if len(remaining) == 0 {
 		return ""
 	}
@@ -187,7 +187,7 @@ func (g *GitHubPullRequest) remainingCommentsSummary(remaining []*reviewdog.Comm
 	return sb.String()
 }
 
-func (g *GitHubPullRequest) setPostedComment(ctx context.Context) error {
+func (g *PullRequest) setPostedComment(ctx context.Context) error {
 	g.postedcs = make(commentutil.PostedComments)
 	cs, err := g.comment(ctx)
 	if err != nil {
@@ -203,7 +203,7 @@ func (g *GitHubPullRequest) setPostedComment(ctx context.Context) error {
 }
 
 // Diff returns a diff of PullRequest.
-func (g *GitHubPullRequest) Diff(ctx context.Context) ([]byte, error) {
+func (g *PullRequest) Diff(ctx context.Context) ([]byte, error) {
 	opt := github.RawOptions{Type: github.Diff}
 	d, _, err := g.cli.PullRequests.GetRaw(ctx, g.owner, g.repo, g.pr, opt)
 	if err != nil {
@@ -213,11 +213,11 @@ func (g *GitHubPullRequest) Diff(ctx context.Context) ([]byte, error) {
 }
 
 // Strip returns 1 as a strip of git diff.
-func (g *GitHubPullRequest) Strip() int {
+func (g *PullRequest) Strip() int {
 	return 1
 }
 
-func (g *GitHubPullRequest) comment(ctx context.Context) ([]*github.PullRequestComment, error) {
+func (g *PullRequest) comment(ctx context.Context) ([]*github.PullRequestComment, error) {
 	// https://developer.github.com/v3/guides/traversing-with-pagination/
 	opts := &github.PullRequestListCommentsOptions{
 		ListOptions: github.ListOptions{
@@ -278,11 +278,21 @@ func buildSuggestions(c *reviewdog.Comment) string {
 func buildSingleSuggestion(c *reviewdog.Comment, s *rdf.Suggestion) (string, error) {
 	start := s.GetRange().GetStart()
 	end := s.GetRange().GetEnd()
+	endLine := end.GetLine()
+	if endLine == 0 {
+		endLine = start.GetLine()
+	}
 	drange := c.Result.Diagnostic.GetLocation().GetRange()
+	dendLine := drange.GetEnd().GetLine()
+	if dendLine == 0 {
+		// As long as suggestion has valid range, it's ok even if diagnostic
+		// location only contains start.
+		dendLine = drange.GetStart().GetLine()
+	}
 	if start.GetLine() != drange.GetStart().GetLine() ||
-		end.GetLine() != drange.GetEnd().GetLine() {
+		(endLine != dendLine) {
 		return "", fmt.Errorf("the Diagnostic's lines and Suggestion lines must be the same. L%d-L%d v.s. L%d-L%d",
-			drange.GetStart().GetLine(), drange.GetEnd().GetLine(), start.GetLine(), end.GetLine())
+			drange.GetStart().GetLine(), dendLine, start.GetLine(), endLine)
 	}
 	if start.GetColumn() > 0 || end.GetColumn() > 0 {
 		return buildNonLineBasedSuggestion(c, s)

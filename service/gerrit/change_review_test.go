@@ -10,10 +10,11 @@ import (
 	"testing"
 
 	"github.com/google/go-cmp/cmp"
+	"golang.org/x/build/gerrit"
+
 	"github.com/reviewdog/reviewdog"
 	"github.com/reviewdog/reviewdog/filter"
 	"github.com/reviewdog/reviewdog/proto/rdf"
-	"golang.org/x/build/gerrit"
 )
 
 func TestChangeReviewCommenter_Post_Flush(t *testing.T) {

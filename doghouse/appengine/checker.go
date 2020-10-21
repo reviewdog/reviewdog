@@ -8,11 +8,12 @@ import (
 	"net/url"
 	"strings"
 
+	"github.com/vvakame/sdlog/aelog"
+
 	"github.com/reviewdog/reviewdog/doghouse"
 	"github.com/reviewdog/reviewdog/doghouse/server"
 	"github.com/reviewdog/reviewdog/doghouse/server/ciutil"
 	"github.com/reviewdog/reviewdog/doghouse/server/storage"
-	"github.com/vvakame/sdlog/aelog"
 )
 
 type githubChecker struct {

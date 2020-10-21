@@ -6,6 +6,7 @@ import (
 	"io"
 
 	"github.com/reviewdog/errorformat/fmts"
+
 	"github.com/reviewdog/reviewdog/proto/rdf"
 )
 

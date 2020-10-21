@@ -7,6 +7,7 @@ import (
 	"testing"
 
 	"github.com/reviewdog/errorformat"
+
 	"github.com/reviewdog/reviewdog/filter"
 	"github.com/reviewdog/reviewdog/parser"
 )

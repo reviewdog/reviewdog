@@ -130,7 +130,7 @@ func (g *GitHubHandler) HandleAuthCallback(w http.ResponseWriter, r *http.Reques
 
 	// Redirect.
 	redirURL := "/gh/"
-	if r, _ := g.redirURLStore.Get(r); err == nil {
+	if r, err := g.redirURLStore.Get(r); err == nil {
 		redirURL = string(r)
 		g.redirURLStore.Clear(w)
 	}

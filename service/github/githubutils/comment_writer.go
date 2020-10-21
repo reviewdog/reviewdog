@@ -6,6 +6,7 @@ import (
 	"sync"
 
 	"github.com/haya14busa/go-actions-toolkit/core"
+
 	"github.com/reviewdog/reviewdog"
 	"github.com/reviewdog/reviewdog/proto/rdf"
 )

@@ -14,12 +14,12 @@ import (
 	"github.com/reviewdog/reviewdog/service/serviceutil"
 )
 
-// GitLabMergeRequestDiscussionCommenter is a comment and diff service for GitLab MergeRequest.
+// MergeRequestDiscussionCommenter is a comment and diff service for GitLab MergeRequest.
 //
 // API:
 //  https://docs.gitlab.com/ee/api/discussions.html#create-new-merge-request-discussion
 //  POST /projects/:id/merge_requests/:merge_request_iid/discussions
-type GitLabMergeRequestDiscussionCommenter struct {
+type MergeRequestDiscussionCommenter struct {
 	cli      *gitlab.Client
 	pr       int
 	sha      string
@@ -32,14 +32,14 @@ type GitLabMergeRequestDiscussionCommenter struct {
 	wd string
 }
 
-// NewGitLabMergeRequestDiscussionCommenter returns a new GitLabMergeRequestDiscussionCommenter service.
-// GitLabMergeRequestDiscussionCommenter service needs git command in $PATH.
-func NewGitLabMergeRequestDiscussionCommenter(cli *gitlab.Client, owner, repo string, pr int, sha string) (*GitLabMergeRequestDiscussionCommenter, error) {
+// NewGitLabMergeRequestDiscussionCommenter returns a new MergeRequestDiscussionCommenter service.
+// MergeRequestDiscussionCommenter service needs git command in $PATH.
+func NewGitLabMergeRequestDiscussionCommenter(cli *gitlab.Client, owner, repo string, pr int, sha string) (*MergeRequestDiscussionCommenter, error) {
 	workDir, err := serviceutil.GitRelWorkdir()
 	if err != nil {
-		return nil, fmt.Errorf("GitLabMergeRequestDiscussionCommenter needs 'git' command: %w", err)
+		return nil, fmt.Errorf("MergeRequestDiscussionCommenter needs 'git' command: %w", err)
 	}
-	return &GitLabMergeRequestDiscussionCommenter{
+	return &MergeRequestDiscussionCommenter{
 		cli:      cli,
 		pr:       pr,
 		sha:      sha,
@@ -50,7 +50,7 @@ func NewGitLabMergeRequestDiscussionCommenter(cli *gitlab.Client, owner, repo st
 
 // Post accepts a comment and holds it. Flush method actually posts comments to
 // GitLab in parallel.
-func (g *GitLabMergeRequestDiscussionCommenter) Post(_ context.Context, c *reviewdog.Comment) error {
+func (g *MergeRequestDiscussionCommenter) Post(_ context.Context, c *reviewdog.Comment) error {
 	c.Result.Diagnostic.GetLocation().Path = filepath.ToSlash(
 		filepath.Join(g.wd, c.Result.Diagnostic.GetLocation().GetPath()))
 	g.muComments.Lock()
@@ -60,7 +60,7 @@ func (g *GitLabMergeRequestDiscussionCommenter) Post(_ context.Context, c *revie
 }
 
 // Flush posts comments which has not been posted yet.
-func (g *GitLabMergeRequestDiscussionCommenter) Flush(ctx context.Context) error {
+func (g *MergeRequestDiscussionCommenter) Flush(ctx context.Context) error {
 	g.muComments.Lock()
 	defer g.muComments.Unlock()
 	postedcs, err := g.createPostedComments()
@@ -70,7 +70,7 @@ func (g *GitLabMergeRequestDiscussionCommenter) Flush(ctx context.Context) error
 	return g.postCommentsForEach(ctx, postedcs)
 }
 
-func (g *GitLabMergeRequestDiscussionCommenter) createPostedComments() (commentutil.PostedComments, error) {
+func (g *MergeRequestDiscussionCommenter) createPostedComments() (commentutil.PostedComments, error) {
 	postedcs := make(commentutil.PostedComments)
 	discussions, err := listAllMergeRequestDiscussion(g.cli, g.projects, g.pr, &gitlab.ListMergeRequestDiscussionsOptions{PerPage: 100})
 	if err != nil {
@@ -88,7 +88,7 @@ func (g *GitLabMergeRequestDiscussionCommenter) createPostedComments() (commentu
 	return postedcs, nil
 }
 
-func (g *GitLabMergeRequestDiscussionCommenter) postCommentsForEach(ctx context.Context, postedcs commentutil.PostedComments) error {
+func (g *MergeRequestDiscussionCommenter) postCommentsForEach(ctx context.Context, postedcs commentutil.PostedComments) error {
 	mr, _, err := g.cli.MergeRequests.GetMergeRequest(g.projects, g.pr, nil, gitlab.WithContext(ctx))
 	if err != nil {
 		return fmt.Errorf("failed to get merge request: %w", err)

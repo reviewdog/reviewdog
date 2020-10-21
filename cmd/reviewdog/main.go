@@ -1,6 +1,7 @@
 package main
 
 import (
+	"context"
 	"crypto/tls"
 	"errors"
 	"flag"
@@ -16,7 +17,6 @@ import (
 	"text/tabwriter"
 
 	"golang.org/x/build/gerrit"
-	"golang.org/x/net/context" // "context"
 	"golang.org/x/oauth2"
 
 	"github.com/google/go-github/v32/github"
@@ -63,16 +63,15 @@ type option struct {
 	failOnError      bool
 }
 
-// flags doc
 const (
-	diffCmdDoc          = `diff command (e.g. "git diff") for local reporter. Do not use --relative flag for git command.`
-	diffStripDoc        = "strip NUM leading components from diff file names (equivalent to 'patch -p') (default is 1 for git diff)"
-	efmsDoc             = `list of errorformat (https://github.com/reviewdog/errorformat)`
-	fDoc                = `format name (run -list to see supported format name) for input. It's also used as tool name in review comment if -name is empty`
-	fDiffStripDoc       = `option for -f=diff: strip NUM leading components from diff file names (equivalent to 'patch -p') (default is 1 for git diff)`
-	listDoc             = `list supported pre-defined format names which can be used as -f arg`
-	nameDoc             = `tool name in review comment. -f is used as tool name if -name is empty`
-	ciDoc               = `[deprecated] reviewdog automatically get necessary data. See also -reporter for migration`
+	diffCmdDoc    = `diff command (e.g. "git diff") for local reporter. Do not use --relative flag for git command.`
+	diffStripDoc  = "strip NUM leading components from diff file names (equivalent to 'patch -p') (default is 1 for git diff)"
+	efmsDoc       = `list of errorformat (https://github.com/reviewdog/errorformat)`
+	fDoc          = `format name (run -list to see supported format name) for input. It's also used as tool name in review comment if -name is empty`
+	fDiffStripDoc = `option for -f=diff: strip NUM leading components from diff file names (equivalent to 'patch -p') (default is 1 for git diff)`
+	listDoc       = `list supported pre-defined format names which can be used as -f arg`
+	nameDoc       = `tool name in review comment. -f is used as tool name if -name is empty`
+
 	confDoc             = `config file path`
 	runnersDoc          = `comma separated runners name to run in config file. default: run all runners`
 	levelDoc            = `report level currently used for github-pr-check reporter ("info","warning","error").`
@@ -267,10 +266,6 @@ func run(r io.Reader, w io.Writer, opt *option) error {
 	case "github-pr-check":
 		return runDoghouse(ctx, r, w, opt, isProject, true)
 	case "github-pr-review":
-		if os.Getenv("REVIEWDOG_GITHUB_API_TOKEN") == "" {
-			fmt.Fprintln(os.Stderr, "REVIEWDOG_GITHUB_API_TOKEN is not set")
-			return nil
-		}
 		gs, isPR, err := githubService(ctx, opt)
 		if err != nil {
 			return err
@@ -466,7 +461,7 @@ func insecureSkipVerify() bool {
 	return os.Getenv("REVIEWDOG_INSECURE_SKIP_VERIFY") == "true"
 }
 
-func githubService(ctx context.Context, opt *option) (gs *githubservice.GitHubPullRequest, isPR bool, err error) {
+func githubService(ctx context.Context, opt *option) (gs *githubservice.PullRequest, isPR bool, err error) {
 	token, err := nonEmptyEnv("REVIEWDOG_GITHUB_API_TOKEN")
 	if err != nil {
 		return nil, isPR, err
