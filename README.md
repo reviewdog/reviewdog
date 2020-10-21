@@ -696,7 +696,7 @@ pipelines:
         script:
           - wget -O - -q https://raw.githubusercontent.com/reviewdog/reviewdog/master/install.sh | 
               sh -s -- -b $(go env GOPATH)/bin
-          - golangci-lint run --out-format=line-number ./... | reviewdog -f=golangci-lint -filter-mode=nofilter
+          - golangci-lint run --out-format=line-number ./... | reviewdog -f=golangci-lint -reporter=bitbucket-code-report
 ```
 
 ### Common (Jenkins, local, etc...)
