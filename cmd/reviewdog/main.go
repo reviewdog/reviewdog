@@ -8,6 +8,7 @@ import (
 	"fmt"
 	"io"
 	"io/ioutil"
+	"log"
 	"net/http"
 	"net/url"
 	"os"
@@ -363,6 +364,8 @@ github-pr-check reporter as a fallback.
 		// filtering of annotations dividing them in two groups:
 		// - This pull request (10)
 		// - All (50)
+		log.Printf("reviewdog: [bitbucket-code-report] supports only with filter.ModeNoFilter for now\n")
+		opt.filterMode = filter.ModeNoFilter
 		ds = &reviewdog.EmptyDiff{}
 	case "local":
 		if opt.diffCmd == "" && opt.filterMode == filter.ModeNoFilter {

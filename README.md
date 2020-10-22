@@ -444,7 +444,7 @@ $ reviewdog -reporter=gerrit-change-review
 bitbucket-code-report generates the annotated
 [Bitbucket Code Insights](https://support.atlassian.com/bitbucket-cloud/docs/code-insights/) report.
 
-By default, the whole project is scanned on every run.
+For now, only the `no-filter` mode supported, so the whole project is scanned on every run.
 Reports are stored per commit and can be viewed per commit from Bitbucket Pipelines UI or
 in Pull Request. In the Pull Request UI affected code lines will be annotated in the diff,
 as well as you will be able to filter the annotations by **This pull request** or **All**.
@@ -792,11 +792,12 @@ so reviewdog will use [Check annotation](https://developer.github.com/v3/checks/
 | **`gitlab-mr-discussion`**   | OK      | OK             | OK                      | Partially Supported [2] |
 | **`gitlab-mr-commit`**       | OK      | Partially Supported [2] | Partially Supported [2] | Partially Supported [2] |
 | **`gerrit-change-review`**   | OK      | OK? [3]        | OK? [3]                 | Partially Supported? [2][3] |
-| **`bitbucket-code-report`**  | OK? [3] | OK? [3]        | OK? [3]                 | OK |
+| **`bitbucket-code-report`**  | NO [4]  | NO [4]         | NO [4]                  | OK |
 
 - [1] Report results which is outside diff context with Check annotation as fallback if it's running in GitHub actions instead of Review API (comments). All results will be reported to console as well.
 - [2] Report results which is outside diff file to console.
 - [3] It should work, but not verified yet.
+- [4] Not implemented at the moment
 
 ## Debugging
 
