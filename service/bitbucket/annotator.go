@@ -143,12 +143,9 @@ func (r *ReportAnnotator) Flush(ctx context.Context) error {
 
 func (r *ReportAnnotator) annotationFromReviewDogComment(c reviewdog.Comment) openapi.ReportAnnotation {
 	a := openapi.NewReportAnnotation()
-	switch c.ToolName {
-	// TODO: different type of annotation based on tool?
-	default:
-		a.SetAnnotationType(annotationTypeCodeSmell)
-	}
 
+	// TODO: allow providing different annotation types in future
+	a.SetAnnotationType(annotationTypeCodeSmell)
 	// hash the output of linter and use it as external id
 	a.SetExternalId(hashString(c.Result.Diagnostic.OriginalOutput))
 	a.SetSummary(c.Result.Diagnostic.GetMessage())
