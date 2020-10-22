@@ -356,26 +356,14 @@ github-pr-check reporter as a fallback.
 		cs = bbservice.NewReportAnnotator(client,
 			build.Owner, build.Repo, build.SHA, getRunnersList(opt, projectConf))
 
-		// by default scan whole project with "filter.ModeNoFilter"
+		// by default scan whole project with out diff (filter.ModeNoFilter)
 		// Bitbucket pipelines doesn't give an easy way to know
 		// which commit run pipeline before so we can compare between them
 		// however once PR is opened, Bitbucket Reports UI will do automatic
 		// filtering of annotations dividing them in two groups:
 		// - This pull request (10)
 		// - All (50)
-		if opt.diffCmd == "" && opt.filterMode == filter.ModeDefault {
-			opt.filterMode = filter.ModeNoFilter
-		}
-
-		if opt.filterMode == filter.ModeNoFilter {
-			ds = &reviewdog.EmptyDiff{}
-		} else {
-			d, err := diffService(opt.diffCmd, opt.diffStrip)
-			if err != nil {
-				return err
-			}
-			ds = d
-		}
+		ds = &reviewdog.EmptyDiff{}
 	case "local":
 		if opt.diffCmd == "" && opt.filterMode == filter.ModeNoFilter {
 			ds = &reviewdog.EmptyDiff{}
