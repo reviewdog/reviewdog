@@ -163,7 +163,7 @@ func (r *ReportAnnotator) annotationFromReviewDogComment(c reviewdog.Comment) op
 	return *a
 }
 
-func (r *ReportAnnotator) createOrUpdateReport(ctx context.Context, redportID, title, reportStatus string) error {
+func (r *ReportAnnotator) createOrUpdateReport(ctx context.Context, id, title, reportStatus string) error {
 	var report = openapi.NewReport()
 	report.SetTitle(title)
 	// TODO: different report types?
@@ -180,9 +180,7 @@ func (r *ReportAnnotator) createOrUpdateReport(ctx context.Context, redportID, t
 		report.SetDetails("Woof-Woof! This report generated for you by reviewdog.")
 	}
 
-	_, resp, err := r.cli.ReportsApi.CreateOrUpdateReport(
-		ctx, r.owner, r.repo, r.sha, redportID,
-	).Body(*report).Execute()
+	_, resp, err := r.cli.ReportsApi.CreateOrUpdateReport(ctx, r.owner, r.repo, r.sha, id).Body(*report).Execute()
 
 	if err := checkAPIError(err, resp, http.StatusOK); err != nil {
 		return fmt.Errorf("bitbucket.CreateOrUpdateReport: %s", err)
