@@ -12,6 +12,7 @@ import (
 	"github.com/reviewdog/reviewdog"
 	"github.com/reviewdog/reviewdog/proto/rdf"
 	"github.com/reviewdog/reviewdog/service/bitbucket/openapi"
+	"google.golang.org/protobuf/proto"
 )
 
 var _ reviewdog.CommentService = &ReportAnnotator{}
@@ -147,7 +148,7 @@ func (r *ReportAnnotator) annotationFromReviewDogComment(c reviewdog.Comment) op
 	// TODO: allow providing different annotation types in future
 	a.SetAnnotationType(annotationTypeCodeSmell)
 	// hash the output of linter and use it as external id
-	a.SetExternalId(hashString(c.Result.Diagnostic.OriginalOutput))
+	a.SetExternalId(externalIDFromDiagnostic(c.Result.Diagnostic))
 	a.SetSummary(c.Result.Diagnostic.GetMessage())
 	a.SetDetails(fmt.Sprintf(`[%s] %s`, c.ToolName, c.Result.Diagnostic.GetMessage()))
 	a.SetLine(c.Result.Diagnostic.GetLocation().GetRange().GetStart().GetLine())
@@ -187,10 +188,21 @@ func (r *ReportAnnotator) createOrUpdateReport(ctx context.Context, redportID, t
 	return nil
 }
 
-func hashString(str string) string {
+func hash(b []byte) string {
 	h := sha256.New()
-	_, _ = h.Write([]byte(str))
+	_, _ = h.Write(b)
 	return fmt.Sprintf("%x", h.Sum(nil))
+}
+
+// Note that it might be good to create external ID from the diagnostic
+// content along with *original line* (by using git blame for example) to
+// generate unique ID, but it hashes the Diagnostic message for simplicity.
+func externalIDFromDiagnostic(d *rdf.Diagnostic) string {
+	b, err := proto.Marshal(d)
+	if err != nil {
+		b = []byte(d.OriginalOutput)
+	}
+	return hash(b)
 }
 
 func reportID(ids ...string) string {
