@@ -104,7 +104,7 @@ func (r *ReportAnnotator) Flush(ctx context.Context) error {
 
 	// create/update/annotate report per tool
 	for tool, annotations := range r.annotations {
-		reportID := reportID(reporter, tool)
+		reportID := reportID(tool, reporter)
 		title := reportTitle(tool, reporter)
 		if len(annotations) == 0 {
 			// if no annotation, create Passed report
