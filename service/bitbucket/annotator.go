@@ -47,22 +47,12 @@ type ReportAnnotator struct {
 
 // NewReportAnnotator creates new Bitbucket Report Annotator
 func NewReportAnnotator(cli *openapi.APIClient, owner, repo, sha string, runners []string) *ReportAnnotator {
-	// pre populate map of annotations, so we still create passed (green) report
-	// if no issues found from the specific tool
-	annotations := make(map[string][]openapi.ReportAnnotation, len(runners))
-	for _, runner := range runners {
-		if len(runner) == 0 {
-			continue
-		}
-		annotations[runner] = []openapi.ReportAnnotation{}
-	}
-
-	return &ReportAnnotator{
+	r := &ReportAnnotator{
 		cli:         cli,
 		sha:         sha,
 		owner:       owner,
 		repo:        repo,
-		annotations: annotations,
+		annotations: make(map[string][]openapi.ReportAnnotation, len(runners)),
 		severityMap: map[rdf.Severity]string{
 			rdf.Severity_INFO:    annotationSeverityLow,
 			rdf.Severity_WARNING: annotationSeverityMedium,
@@ -70,6 +60,19 @@ func NewReportAnnotator(cli *openapi.APIClient, owner, repo, sha string, runners
 		},
 		duplicates: map[string]struct{}{},
 	}
+
+	// pre populate map of annotations, so we still create passed (green) report
+	// if no issues found from the specific tool
+	for _, runner := range runners {
+		if len(runner) == 0 {
+			continue
+		}
+		r.annotations[runner] = []openapi.ReportAnnotation{}
+		// create Pending report for each tool
+		_ = r.createOrUpdateReport(context.Background(), reportID(runner, reporter), reportTitle(runner, reporter), reportResultPending)
+	}
+
+	return r
 }
 
 // Post accepts a comment and holds it. Flush method actually posts comments to
@@ -101,7 +104,7 @@ func (r *ReportAnnotator) Flush(ctx context.Context) error {
 	// create/update/annotate report per tool
 	for tool, annotations := range r.annotations {
 		reportID := reportID(reporter, tool)
-		title := fmt.Sprintf("[%s] %s report", tool, reporter)
+		title := reportTitle(tool, reporter)
 		if len(annotations) == 0 {
 			// if no annotation, create Passed report
 			if err := r.createOrUpdateReport(ctx, reportID, title, reportResultPassed); err != nil {
@@ -195,4 +198,8 @@ func hashString(str string) string {
 
 func reportID(ids ...string) string {
 	return strings.ReplaceAll(strings.ToLower(strings.Join(ids, "-")), " ", "_")
+}
+
+func reportTitle(tool, reporter string) string {
+	return fmt.Sprintf("[%s] %s report", tool, reporter)
 }

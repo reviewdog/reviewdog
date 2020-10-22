@@ -353,17 +353,8 @@ github-pr-check reporter as a fallback.
 		}
 		ctx = ct
 
-		// get list of runners, so we can create "green" for that runner
-		// if there are no issues from it
-		runnersList := strings.Split(opt.runners, ",")
-		if projectConf != nil {
-			for runner := range projectConf.Runner {
-				runnersList = append(runnersList, runner)
-			}
-		}
-
 		cs = bbservice.NewReportAnnotator(client,
-			build.Owner, build.Repo, build.SHA, runnersList)
+			build.Owner, build.Repo, build.SHA, getRunnersList(opt, projectConf))
 
 		// by default scan whole project with "filter.ModeNoFilter"
 		// Bitbucket pipelines doesn't give an easy way to know
@@ -767,4 +758,27 @@ func buildRunnersMap(runners string) map[string]bool {
 		}
 	}
 	return m
+}
+
+func getRunnersList(opt *option, conf *project.Config) []string {
+	if len(opt.runners) > 0 { // if runners explicitly defined, use them
+		return strings.Split(opt.runners, ",")
+	}
+
+	if conf != nil { // if this is a Project run, and no explicitly provided runners
+		// if no runners explicitly provided
+		// get all runners from config
+		list := make([]string, 0, len(conf.Runner))
+		for runner := range conf.Runner {
+			list = append(list, runner)
+		}
+		return list
+	}
+
+	// if this is simple run, get the single tool name
+	if name := toolName(opt); len(name) > 0 {
+		return []string{name}
+	}
+
+	return []string{}
 }
