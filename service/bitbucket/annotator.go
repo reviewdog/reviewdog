@@ -171,10 +171,13 @@ func (r *ReportAnnotator) createOrUpdateReport(ctx context.Context, redportID, t
 	report.SetReporter(reporter)
 	report.SetLogoUrl(logoURL)
 	report.SetResult(reportStatus)
-	if reportStatus == reportResultPassed {
+	switch reportStatus {
+	case reportResultPassed:
 		report.SetDetails("Great news! Reviewdog couldn't spot any issues!")
-	} else {
-		report.SetDetails("Woof-Woof! This report generated for you by reviewdog")
+	case reportResultPending:
+		report.SetDetails("Please wait for Reviewdog to finish checking your code for issues.")
+	default:
+		report.SetDetails("Woof-Woof! This report generated for you by reviewdog.")
 	}
 
 	_, resp, err := r.cli.ReportsApi.CreateOrUpdateReport(
