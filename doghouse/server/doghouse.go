@@ -4,6 +4,7 @@ import (
 	"bytes"
 	"context"
 	"fmt"
+	"log"
 	"net/http"
 	"strings"
 	"time"
@@ -127,6 +128,7 @@ func (ch *Checker) createCheck(ctx context.Context) (*github.CheckRun, error) {
 	if ch.req.ExternalID != "" {
 		opt.ExternalID = github.String(ch.req.ExternalID)
 	}
+	log.Printf("CheckRun.external_id: %s", ch.req.ExternalID)
 	return ch.gh.CreateCheckRun(ctx, ch.req.Owner, ch.req.Repo, opt)
 }
 
