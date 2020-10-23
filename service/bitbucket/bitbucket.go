@@ -23,24 +23,37 @@ const (
 
 // NewAPIClient creates Bitbucket API client
 func NewAPIClient(isInPipeline bool) *openapi.APIClient {
-	proxyURL, _ := url.Parse(pipelineProxyURL)
-	config := openapi.NewConfiguration()
-	config.HTTPClient = &http.Client{
+	httpClient := &http.Client{
 		Timeout: httpTimeout,
 	}
+	server := httpsServer()
 
 	if isInPipeline {
 		// if we are on the Bitbucket Pipeline, use HTTP endpoint
 		// and proxy
-		config.Servers = openapi.ServerConfigurations{httpServer()}
-		config.HTTPClient.Transport = &http.Transport{
+		proxyURL, _ := url.Parse(pipelineProxyURL)
+		server = httpServer()
+		httpClient.Transport = &http.Transport{
 			Proxy: http.ProxyURL(proxyURL),
 		}
-	} else {
-		config.Servers = openapi.ServerConfigurations{httpsServer()}
 	}
+	return NewAPIClientWithConfigurations(httpClient, server)
+}
 
+// NewAPIClientWithConfigurations allows to create new Bitbucket API client with
+// custom http client or server configurations
+func NewAPIClientWithConfigurations(client *http.Client, server openapi.ServerConfiguration) *openapi.APIClient {
+	config := openapi.NewConfiguration()
+	if client != nil {
+		config.HTTPClient = client
+	} else {
+		config.HTTPClient = &http.Client{
+			Timeout: httpTimeout,
+		}
+	}
+	config.Servers = openapi.ServerConfigurations{server}
 	return openapi.NewAPIClient(config)
+
 }
 
 // WithBasicAuth adds basic auth credentials to context
