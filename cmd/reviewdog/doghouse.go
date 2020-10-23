@@ -159,6 +159,7 @@ func postResultSet(ctx context.Context, resultSet *reviewdog.ResultMap,
 		return nil, err
 	}
 	externalID := maybeGetExternalID(ctx, ghInfo)
+	log.Printf("externalID: %s", externalID)
 	filteredResultSet := new(reviewdog.FilteredResultMap)
 	resultSet.Range(func(name string, result *reviewdog.Result) {
 		diagnostics := result.Diagnostics
