@@ -440,6 +440,7 @@ $ reviewdog -reporter=gerrit-change-review
 ### Reporter: Bitbucket Code Insights Reports (-reporter=bitbucket-code-report)
 
 [![bitbucket-code-report](https://user-images.githubusercontent.com/9948629/96770123-c138d600-13e8-11eb-8e46-250b4bb393bd.png)](https://bitbucket.org/Trane9991/reviewdog-example/pull-requests/1)
+[![bitbucket-code-annotations](https://user-images.githubusercontent.com/9948629/97054896-5e813f00-158e-11eb-9ad7-f8d75489b8ba.png)](https://bitbucket.org/Trane9991/reviewdog-example/pull-requests/1)
 
 bitbucket-code-report generates the annotated
 [Bitbucket Code Insights](https://support.atlassian.com/bitbucket-cloud/docs/code-insights/) report.
