@@ -124,6 +124,9 @@ func (ch *Checker) createCheck(ctx context.Context) (*github.CheckRun, error) {
 		HeadSHA: ch.req.SHA,
 		Status:  github.String("in_progress"),
 	}
+	if ch.req.ExternalID != "" {
+		opt.ExternalID = github.String(ch.req.ExternalID)
+	}
 	return ch.gh.CreateCheckRun(ctx, ch.req.Owner, ch.req.Repo, opt)
 }
 

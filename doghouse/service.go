@@ -49,6 +49,10 @@ type CheckRequest struct {
 	// FilterMode represents a way to filter checks results
 	// Optional.
 	FilterMode filter.Mode `json:"filter_mode"`
+
+	// Check suite external ID to associate with the check run.
+	// Optional.
+	ExternalID string `json:"external_id,omitempty"`
 }
 
 // CheckResponse represents doghouse GitHub check response.

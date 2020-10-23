@@ -9,10 +9,12 @@ import (
 	"net/http"
 	"os"
 	"sort"
+	"strconv"
 
 	"golang.org/x/oauth2"
 	"golang.org/x/sync/errgroup"
 
+	"github.com/google/go-github/v32/github"
 	"github.com/reviewdog/reviewdog"
 	"github.com/reviewdog/reviewdog/cienv"
 	"github.com/reviewdog/reviewdog/doghouse"
@@ -111,6 +113,43 @@ func checkResultSet(ctx context.Context, r io.Reader, opt *option, isProject boo
 	return resultSet, nil
 }
 
+func maybeGetExternalID(ctx context.Context, ghInfo *cienv.BuildInfo) string {
+	runIDStr, err := nonEmptyEnv("GITHUB_RUN_ID")
+	if err != nil {
+		return ""
+	}
+	runID, err := strconv.Atoi(runIDStr)
+	if err != nil {
+		return ""
+	}
+	token, err := nonEmptyEnv("REVIEWDOG_GITHUB_API_TOKEN")
+	if err != nil {
+		return ""
+	}
+	ghcli, err := githubClient(ctx, token)
+	if err != nil {
+		return ""
+	}
+	jobs, _, err := ghcli.Actions.ListWorkflowJobs(ctx, ghInfo.Owner, ghInfo.Repo, int64(runID), nil)
+	if err != nil {
+		return ""
+	}
+	if len(jobs.Jobs) == 0 {
+		return ""
+	}
+	jobName := jobs.Jobs[0].GetName()
+	checkRuns, _, err := ghcli.Checks.ListCheckRunsForRef(ctx, ghInfo.Owner, ghInfo.Repo, ghInfo.SHA, &github.ListCheckRunsOptions{
+		CheckName: github.String(jobName),
+	})
+	if err != nil {
+		return ""
+	}
+	for _, run := range checkRuns.CheckRuns {
+		return run.GetExternalID()
+	}
+	return ""
+}
+
 func postResultSet(ctx context.Context, resultSet *reviewdog.ResultMap,
 	ghInfo *cienv.BuildInfo, cli client.DogHouseClientInterface, opt *option) (*reviewdog.FilteredResultMap, error) {
 	var g errgroup.Group
@@ -119,6 +158,7 @@ func postResultSet(ctx context.Context, resultSet *reviewdog.ResultMap,
 	if err != nil {
 		return nil, err
 	}
+	externalID := maybeGetExternalID(ctx, ghInfo)
 	filteredResultSet := new(reviewdog.FilteredResultMap)
 	resultSet.Range(func(name string, result *reviewdog.Result) {
 		diagnostics := result.Diagnostics
@@ -136,6 +176,7 @@ func postResultSet(ctx context.Context, resultSet *reviewdog.ResultMap,
 			Annotations: as,
 			Level:       result.Level,
 			FilterMode:  opt.filterMode,
+			ExternalID:  externalID,
 		}
 		g.Go(func() error {
 			if err := result.CheckUnexpectedFailure(); err != nil {
