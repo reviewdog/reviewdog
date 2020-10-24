@@ -769,7 +769,7 @@ func getRunnersList(opt *option, conf *project.Config) []string {
 	}
 
 	// if this is simple run, get the single tool name
-	if name := toolName(opt); len(name) > 0 {
+	if name := toolName(opt); name != "" {
 		return []string{name}
 	}
 

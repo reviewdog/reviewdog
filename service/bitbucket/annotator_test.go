@@ -99,6 +99,7 @@ func TestAnnotator(t *testing.T) {
 	urlPrefix := fmt.Sprintf("/repositories/%s/%s/commit/%s/reports/", username, repo, commit)
 
 	for _, test := range testcases {
+		test := test
 		t.Run(test.name, func(t *testing.T) {
 			reportCallsSequence := map[string][]string{}
 			annotations := map[string]int{}
@@ -146,18 +147,15 @@ func TestAnnotator(t *testing.T) {
 			}))
 			defer ts.Close()
 
-			// create client
 			client := NewAPIClientWithConfigurations(&http.Client{Timeout: 1 * time.Second}, openapi.ServerConfiguration{URL: ts.URL})
 			bb := NewReportAnnotator(client, username, repo, commit, test.runnersList)
 			ctx := context.Background()
 
 			for _, c := range test.comments {
-				// post comments
 				if err := bb.Post(ctx, c); err != nil {
 					t.Error(err)
 				}
 			}
-			// flush comments
 			if err := bb.Flush(ctx); err != nil {
 				t.Error(err)
 			}
