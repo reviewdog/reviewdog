@@ -14,7 +14,7 @@ runner:
       - "%f:%l:%c:%m"
     level: warning
   staticcheck:
-    cmd: staticcheck $(go list ./... | grep -v /vendor/)
+    cmd: staticcheck $(go list ./... | grep -v /vendor/ | grep -v /bitbucket/openapi)
     errorformat:
       - "%f:%l:%c: %m"
   misspell:

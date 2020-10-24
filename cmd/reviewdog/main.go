@@ -8,6 +8,7 @@ import (
 	"fmt"
 	"io"
 	"io/ioutil"
+	"log"
 	"net/http"
 	"net/url"
 	"os"
@@ -30,6 +31,8 @@ import (
 	"github.com/reviewdog/reviewdog/filter"
 	"github.com/reviewdog/reviewdog/parser"
 	"github.com/reviewdog/reviewdog/project"
+	bbservice "github.com/reviewdog/reviewdog/service/bitbucket"
+	bitbucket "github.com/reviewdog/reviewdog/service/bitbucket/openapi"
 	gerritservice "github.com/reviewdog/reviewdog/service/gerrit"
 	githubservice "github.com/reviewdog/reviewdog/service/github"
 	"github.com/reviewdog/reviewdog/service/github/githubutils"
@@ -151,13 +154,26 @@ const (
 			$ export GERRIT_REVISION_ID=ed318bf9a3c
 			$ export GERRIT_BRANCH=master
 			$ export GERRIT_ADDRESS=http://localhost:8080
+	
+	"bitbucket-code-report"
+		Create Bitbucket Code Report via Code Insights
+		(https://confluence.atlassian.com/display/BITBUCKET/Code+insights).
+		You can set custom report name with:
+
+		If running as part of Bitbucket Pipelines no additional configurations is needed.
+		If running outside of Bitbucket Pipelines you need to provide git repo data
+		(see documentation below for local reporters) and BitBucket credentials:
+		- For Basic Auth you need to set following env variables:
+			  BITBUCKET_USER and BITBUCKET_PASSWORD
+		- For AccessToken Auth you need to set BITBUCKET_ACCESS_TOKEN 
+		Running on Bitbucket Server is not tested/supported yet.
 
 	For GitHub Enterprise and self hosted GitLab, set
 	REVIEWDOG_INSECURE_SKIP_VERIFY to skip verifying SSL (please use this at your own risk)
 		$ export REVIEWDOG_INSECURE_SKIP_VERIFY=true
 
 	For non-local reporters, reviewdog automatically get necessary data from
-	environment variable in CI service (GitHub Actions, Travis CI, Circle CI, drone.io, GitLab CI).
+	environment variable in CI service (GitHub Actions, Travis CI, Circle CI, drone.io, GitLab CI, Bitbucket Pipelines).
 	You can set necessary data with following environment variable manually if
 	you want (e.g. run reviewdog in Jenkins).
 
@@ -226,11 +242,18 @@ func run(r io.Reader, w io.Writer, opt *option) error {
 
 	// assume it's project based run when both -efm and -f are not specified
 	isProject := len(opt.efms) == 0 && opt.f == ""
+	var projectConf *project.Config
 
 	var cs reviewdog.CommentService
 	var ds reviewdog.DiffService
 
 	if isProject {
+		var err error
+		projectConf, err = projectConfig(opt.conf)
+		if err != nil {
+			return err
+		}
+
 		cs = reviewdog.NewUnifiedCommentWriter(w)
 	} else {
 		cs = reviewdog.NewRawCommentWriter(w)
@@ -324,6 +347,28 @@ github-pr-check reporter as a fallback.
 			return err
 		}
 		ds = d
+	case "bitbucket-code-report":
+		build, client, ct, err := bitbucketBuildWithClient(ctx)
+		if err != nil {
+			return err
+		}
+		ctx = ct
+
+		cs = bbservice.NewReportAnnotator(client,
+			build.Owner, build.Repo, build.SHA, getRunnersList(opt, projectConf))
+
+		if !(opt.filterMode == filter.ModeDefault || opt.filterMode == filter.ModeNoFilter) {
+			// by default scan whole project with out diff (filter.ModeNoFilter)
+			// Bitbucket pipelines doesn't give an easy way to know
+			// which commit run pipeline before so we can compare between them
+			// however once PR is opened, Bitbucket Reports UI will do automatic
+			// filtering of annotations dividing them in two groups:
+			// - This pull request (10)
+			// - All (50)
+			log.Printf("reviewdog: [bitbucket-code-report] supports only with filter.ModeNoFilter for now")
+		}
+		opt.filterMode = filter.ModeNoFilter
+		ds = &reviewdog.EmptyDiff{}
 	case "local":
 		if opt.diffCmd == "" && opt.filterMode == filter.ModeNoFilter {
 			ds = &reviewdog.EmptyDiff{}
@@ -337,11 +382,7 @@ github-pr-check reporter as a fallback.
 	}
 
 	if isProject {
-		conf, err := projectConfig(opt.conf)
-		if err != nil {
-			return err
-		}
-		return project.Run(ctx, conf, buildRunnersMap(opt.runners), cs, ds, opt.tee, opt.filterMode, opt.failOnError)
+		return project.Run(ctx, projectConf, buildRunnersMap(opt.runners), cs, ds, opt.tee, opt.filterMode, opt.failOnError)
 	}
 
 	p, err := newParserFromOpt(opt)
@@ -556,6 +597,28 @@ func gerritBuildWithClient() (*cienv.BuildInfo, *gerrit.Client, error) {
 	return buildInfo, client, nil
 }
 
+func bitbucketBuildWithClient(ctx context.Context) (*cienv.BuildInfo, *bitbucket.APIClient, context.Context, error) {
+	build, _, err := cienv.GetBuildInfo()
+	if err != nil {
+		return nil, nil, ctx, err
+	}
+
+	bbUser := os.Getenv("BITBUCKET_USER")
+	bbPass := os.Getenv("BITBUCKET_PASSWORD")
+	bbAccessToken := os.Getenv("BITBUCKET_ACCESS_TOKEN")
+
+	if bbUser != "" && bbPass != "" {
+		ctx = bbservice.WithBasicAuth(ctx, bbUser, bbPass)
+	}
+
+	if bbAccessToken != "" {
+		ctx = bbservice.WithAccessToken(ctx, bbAccessToken)
+	}
+
+	client := bbservice.NewAPIClient(cienv.IsInBitbucketPipeline())
+	return build, client, ctx, nil
+}
+
 func fetchMergeRequestIDFromCommit(cli *gitlab.Client, projectID, sha string) (id int, err error) {
 	// https://docs.gitlab.com/ce/api/merge_requests.html#list-project-merge-requests
 	opt := &gitlab.ListProjectMergeRequestsOptions{
@@ -688,4 +751,27 @@ func buildRunnersMap(runners string) map[string]bool {
 		}
 	}
 	return m
+}
+
+func getRunnersList(opt *option, conf *project.Config) []string {
+	if len(opt.runners) > 0 { // if runners explicitly defined, use them
+		return strings.Split(opt.runners, ",")
+	}
+
+	if conf != nil { // if this is a Project run, and no explicitly provided runners
+		// if no runners explicitly provided
+		// get all runners from config
+		list := make([]string, 0, len(conf.Runner))
+		for runner := range conf.Runner {
+			list = append(list, runner)
+		}
+		return list
+	}
+
+	// if this is simple run, get the single tool name
+	if name := toolName(opt); name != "" {
+		return []string{name}
+	}
+
+	return []string{}
 }
