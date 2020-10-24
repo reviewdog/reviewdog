@@ -71,7 +71,10 @@ by diff.
 - [Input Format](#input-format)
   * ['errorformat'](#errorformat)
   * [Available pre-defined 'errorformat'](#available-pre-defined-errorformat)
+  * [Reviewdog Diagnostic Format (RDFormat)](#reviewdog-diagnostic-format-rdformat)
+  * [Diff](#diff)
   * [checkstyle format](#checkstyle-format)
+- [Code Suggestions](#code-suggestions)
 - [reviewdog config file](#reviewdog-config-file)
 - [Reporters](#reporters)
   * [Reporter: Local (-reporter=local) [default]](#reporter-local--reporterlocal-default)
@@ -202,6 +205,62 @@ $ golint ./... | reviewdog -f=golint -diff="git diff master"
 
 You can add supported pre-defined 'errorformat' by contributing to [reviewdog/errorformat](https://github.com/reviewdog/errorformat)
 
+### Reviewdog Diagnostic Format (RDFormat)
+
+reviewdog supports [Reviewdog Diagnostic Format (RDFormat)](./proto/rdf/) as a
+generic diagnostic format and it supports both [rdjson](./proto/rdf/#rdjson) and
+[rdjsonl](./proto/rdf/#rdjsonl) JSON.
+
+This rdformat supports rich feature like multiline ranged comments, severity,
+rule code with URL, and [code suggestions](#code-suggestions).
+
+```shell
+$ <linter> | <convert-to-rdjson> | reviewdog -f=rdjson -reporter=github-pr-review
+# or
+$ <linter> | <convert-to-rdjsonl> | reviewdog -f=rdjsonl -reporter=github-pr-review
+```
+
+#### Example: ESLint with RDFormat 
+
+![eslint reviewdog rdjson demo](https://user-images.githubusercontent.com/3797062/97085944-87233a80-165b-11eb-94a8-0a47d5e24905.png)
+
+You can use [eslint-formatter-rdjson](https://www.npmjs.com/package/eslint-formatter-rdjson)
+to output `rdjson` as eslint output format.
+
+```shell
+$ npm install --save-dev eslint-formatter-rdjson
+$ eslint -f rdjson . | reviewdog -f=rdjson -reporter=github-pr-review
+```
+
+Or you can also use [reviewdog/action-eslint](https://github.com/reviewdog/action-eslint) for GitHub Actions.
+
+### Diff
+
+![reviewdog with gofmt example](https://user-images.githubusercontent.com/3797062/89168305-a3ad5a80-d5b7-11ea-8939-be7ac1976d30.png)
+
+reviewdog supports diff (unified format) as an input format especially useful
+for [code suggestions](#code-suggestions).
+reviewdog can integrate with any code suggestions tools or formatters to report suggestions.
+
+`-f.diff.strip`: option for `-f=diff`: strip NUM leading components from diff file names (equivalent to 'patch -p') (default is 1 for git diff) (default 1)
+
+```shell
+$ <any-code-fixer/formatter> # e.g. eslint --fix, gofmt
+$ TMPFILE=$(mktemp)
+$ git diff >"${TMPFILE}"
+$ git stash -u && git stash drop
+$ reviewdog -f=diff -f.diff.strip=1 -reporter=github-pr-review < "${TMPFILE}"
+```
+
+Or you can also use [reviewdog/action-suggester](https://github.com/reviewdog/action-suggester) for GitHub Actions.
+
+If diagnostic tools support diff output format, you can pipe the diff directly.
+
+```shell
+$ gofmt -s -d . | reviewdog -name="gofmt" -f=diff -f.diff.strip=0 -reporter=github-pr-review
+$ shellcheck -f diff $(shfmt -f .) | reviewdog -f=diff
+```
+
 ### checkstyle format
 
 reviewdog also accepts [checkstyle XML format](http://checkstyle.sourceforge.net/) as well.
@@ -213,7 +272,7 @@ If the linter supports checkstyle format as a report format, you can use
 $ eslint -f checkstyle . | reviewdog -f=checkstyle -diff="git diff"
 
 # CI (overwrite tool name which is shown in review comment by -name arg)
-$ eslint -f checkstyle . | reviewdog -f=checkstyle -name="eslint" -reporter=github-pr-check
+$ eslint -f checkstyle . | reviewdog -f=checkstyle -name="eslint" -reporter=github-check
 ```
 
 Also, if you want to pass other Json/XML/etc... format to reviewdog, you can write a converter.
@@ -221,6 +280,34 @@ Also, if you want to pass other Json/XML/etc... format to reviewdog, you can wri
 ```shell
 $ <linter> | <convert-to-checkstyle> | reviewdog -f=checkstyle -name="<linter>" -reporter=github-pr-check
 ```
+
+## Code Suggestions
+
+![eslint reviewdog suggestion demo](https://user-images.githubusercontent.com/3797062/97085944-87233a80-165b-11eb-94a8-0a47d5e24905.png)
+![reviewdog with gofmt example](https://user-images.githubusercontent.com/3797062/89168305-a3ad5a80-d5b7-11ea-8939-be7ac1976d30.png)
+
+reviewdog supports *code suggestions* feature with [rdformat](#reviewdog-diagnostic-format-rdformat) or [diff](#diff) input.
+You can also use [reviewdog/action-suggester](https://github.com/reviewdog/action-suggester) for GitHub Actions.
+
+reviewdog can suggests code changes along with diagnostic results if an diagnostic tools supports code suggestions data.
+You can integrate reviewdog with any code fixing tools and any code formatter with [diff](#diff) input as well.
+
+### Code Suggestions Support Table
+Note that not all reporters provide support of code suggestion.
+
+| `-reporter`     | Suggestion support |
+| ---------------------------- | ------- |
+| **`local`**                  | NO [1]  |
+| **`github-check`**           | NO [2]  |
+| **`github-pr-check`**        | NO [2]  |
+| **`github-pr-review`**       | OK      |
+| **`gitlab-mr-discussion`**   | NO [1]  |
+| **`gitlab-mr-commit`**       | NO [2]  |
+| **`gerrit-change-review`**   | NO [1]  |
+| **`bitbucket-code-report`**  | NO [2]  |
+
+- [1] The reporter service support code suggestion feature, but reviewdog does not support it yet. See [#678](https://github.com/reviewdog/reviewdog/issues/678) for the status.
+- [2] The reporter service itself doesn't support code suggestion feature.
 
 ## reviewdog config file
 
