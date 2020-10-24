@@ -91,7 +91,7 @@ func TestFilterCheckByAddedLines(t *testing.T) {
 			ShouldReport:  false,
 			InDiffFile:    true,
 			InDiffContext: true,
-			SourceLines:   []string{"unchanged, contextual line"},
+			SourceLines:   map[int]string{1: "unchanged, contextual line"},
 			OldPath:       "sample.old.txt",
 			OldLine:       1,
 		},
@@ -105,7 +105,7 @@ func TestFilterCheckByAddedLines(t *testing.T) {
 			ShouldReport:  true,
 			InDiffFile:    true,
 			InDiffContext: true,
-			SourceLines:   []string{"added line"},
+			SourceLines:   map[int]string{2: "added line"},
 			OldPath:       "sample.old.txt",
 			OldLine:       0,
 		},
@@ -119,7 +119,7 @@ func TestFilterCheckByAddedLines(t *testing.T) {
 			ShouldReport:  false,
 			InDiffFile:    true,
 			InDiffContext: true,
-			SourceLines:   []string{`" vim: nofixeol noendofline`},
+			SourceLines:   map[int]string{1: `" vim: nofixeol noendofline`},
 			OldPath:       "nonewline.old.txt",
 			OldLine:       1,
 		},
@@ -133,7 +133,7 @@ func TestFilterCheckByAddedLines(t *testing.T) {
 			ShouldReport:  true,
 			InDiffFile:    true,
 			InDiffContext: true,
-			SourceLines:   []string{"b"},
+			SourceLines:   map[int]string{3: "b"},
 			OldPath:       "nonewline.old.txt",
 			OldLine:       0,
 		},
@@ -151,7 +151,7 @@ func TestFilterCheckByAddedLines(t *testing.T) {
 			ShouldReport:  true,
 			InDiffFile:    true,
 			InDiffContext: true,
-			SourceLines:   []string{"unchanged, contextual line", "added line"},
+			SourceLines:   map[int]string{1: "unchanged, contextual line", 2: "added line"},
 			OldPath:       "sample.old.txt",
 			OldLine:       1,
 		},
@@ -184,6 +184,20 @@ func TestFilterCheckByDiffContext(t *testing.T) {
 				Range: &rdf.Range{Start: &rdf.Position{Line: 3}},
 			},
 		},
+		{
+			Location: &rdf.Location{
+				Path:  "sample.new.txt",
+				Range: &rdf.Range{Start: &rdf.Position{Line: 3}},
+			},
+			Suggestions: []*rdf.Suggestion{
+				{
+					Range: &rdf.Range{
+						Start: &rdf.Position{Line: 2},
+						End:   &rdf.Position{Line: 4},
+					},
+				},
+			},
+		},
 	}
 	want := []*FilteredDiagnostic{
 		{
@@ -196,7 +210,7 @@ func TestFilterCheckByDiffContext(t *testing.T) {
 			ShouldReport:  true,
 			InDiffFile:    true,
 			InDiffContext: true,
-			SourceLines:   []string{"unchanged, contextual line"},
+			SourceLines:   map[int]string{1: "unchanged, contextual line"},
 			OldPath:       "sample.old.txt",
 			OldLine:       1,
 		},
@@ -210,7 +224,7 @@ func TestFilterCheckByDiffContext(t *testing.T) {
 			ShouldReport:  true,
 			InDiffFile:    true,
 			InDiffContext: true,
-			SourceLines:   []string{"added line"},
+			SourceLines:   map[int]string{2: "added line"},
 			OldPath:       "sample.old.txt",
 			OldLine:       0,
 		},
@@ -224,9 +238,36 @@ func TestFilterCheckByDiffContext(t *testing.T) {
 			ShouldReport:  true,
 			InDiffFile:    true,
 			InDiffContext: true,
-			SourceLines:   []string{"added line"},
+			SourceLines:   map[int]string{3: "added line"},
 			OldPath:       "sample.old.txt",
 			OldLine:       0,
+		},
+		{
+			Diagnostic: &rdf.Diagnostic{
+				Location: &rdf.Location{
+					Path:  "sample.new.txt",
+					Range: &rdf.Range{Start: &rdf.Position{Line: 3}},
+				},
+				Suggestions: []*rdf.Suggestion{
+					{
+						Range: &rdf.Range{
+							Start: &rdf.Position{Line: 2},
+							End:   &rdf.Position{Line: 4},
+						},
+					},
+				},
+			},
+			ShouldReport:                 true,
+			InDiffFile:                   true,
+			InDiffContext:                true,
+			FirstSuggestionInDiffContext: true,
+			SourceLines: map[int]string{
+				2: "added line",
+				3: "added line",
+				4: "unchanged, contextual line",
+			},
+			OldPath: "sample.old.txt",
+			OldLine: 0,
 		},
 	}
 	filediffs, _ := diff.ParseMultiFile(strings.NewReader(diffContent))

@@ -18,10 +18,16 @@ type FilteredDiagnostic struct {
 	// hunk.
 	InDiffContext bool
 
-	// Source lines text of the diagnostic message's line-range.
-	// It contains a whole line even if the diagnostic range have column fields.
+	// Similar to InDiffContext but for suggestion. True if first
+	// suggestion is in diff context.
+	FirstSuggestionInDiffContext bool
+
+	// Source lines text of the diagnostic message's line-range. Key is line
+	// number. If a suggestion range is broader than the disagnostic message's
+	// line-range, suggestions' line-range are included too.  It contains a whole
+	// line even if the diagnostic range have column fields.
 	// Optional. Currently available only when it's in diff context.
-	SourceLines []string
+	SourceLines map[int]string
 
 	OldPath string
 	OldLine int
@@ -34,7 +40,7 @@ func FilterCheck(results []*rdf.Diagnostic, diff []*diff.FileDiff, strip int,
 	checks := make([]*FilteredDiagnostic, 0, len(results))
 	df := NewDiffFilter(diff, strip, cwd, mode)
 	for _, result := range results {
-		check := &FilteredDiagnostic{Diagnostic: result}
+		check := &FilteredDiagnostic{Diagnostic: result, SourceLines: make(map[int]string)}
 		loc := result.GetLocation()
 		loc.Path = NormalizePath(loc.GetPath(), cwd, "")
 		startLine := int(loc.GetRange().GetStart().GetLine())
@@ -43,14 +49,13 @@ func FilterCheck(results []*rdf.Diagnostic, diff []*diff.FileDiff, strip int,
 			endLine = startLine
 		}
 		check.InDiffContext = true
-		var sourceLines []string
 		for l := startLine; l <= endLine; l++ {
 			shouldReport, difffile, diffline := df.ShouldReport(loc.GetPath(), l)
 			check.ShouldReport = check.ShouldReport || shouldReport
 			// all lines must be in diff.
 			check.InDiffContext = check.InDiffContext && diffline != nil
 			if diffline != nil {
-				sourceLines = append(sourceLines, diffline.Content)
+				check.SourceLines[l] = diffline.Content
 			}
 			if difffile != nil {
 				check.InDiffFile = true
@@ -60,8 +65,21 @@ func FilterCheck(results []*rdf.Diagnostic, diff []*diff.FileDiff, strip int,
 				}
 			}
 		}
-		if check.InDiffContext {
-			check.SourceLines = sourceLines
+		// Add source lines for suggestions.
+		for i, s := range result.GetSuggestions() {
+			inDiffContext := true
+			start := int(s.GetRange().GetStart().GetLine())
+			end := int(s.GetRange().GetEnd().GetLine())
+			for l := start; l <= end; l++ {
+				if diffline := df.DiffLine(loc.GetPath(), l); diffline != nil {
+					check.SourceLines[l] = diffline.Content
+				} else {
+					inDiffContext = false
+				}
+			}
+			if i == 0 {
+				check.FirstSuggestionInDiffContext = inDiffContext
+			}
 		}
 		checks = append(checks, check)
 	}

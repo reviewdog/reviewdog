@@ -136,15 +136,15 @@ func (g *PullRequest) postAsReviewComment(ctx context.Context) error {
 // Document: https://docs.github.com/en/rest/reference/pulls#create-a-review-comment-for-a-pull-request
 func buildDraftReviewComment(c *reviewdog.Comment, body string) *github.DraftReviewComment {
 	loc := c.Result.Diagnostic.GetLocation()
-	line := githubCommentLine(c)
+	startLine, endLine := githubCommentLineRange(c)
 	r := &github.DraftReviewComment{
 		Path: github.String(loc.GetPath()),
 		Side: github.String("RIGHT"),
 		Body: github.String(body),
-		Line: github.Int(line),
+		Line: github.Int(endLine),
 	}
 	// GitHub API: Start line must precede the end line.
-	if startLine := int(loc.GetRange().GetStart().GetLine()); startLine < line {
+	if startLine < endLine {
 		r.StartSide = github.String("RIGHT")
 		r.StartLine = github.Int(startLine)
 	}
@@ -155,12 +155,30 @@ func buildDraftReviewComment(c *reviewdog.Comment, body string) *github.DraftRev
 // it's start line.
 // Document: https://docs.github.com/en/rest/reference/pulls#create-a-review-comment-for-a-pull-request
 func githubCommentLine(c *reviewdog.Comment) int {
-	loc := c.Result.Diagnostic.GetLocation()
-	line := loc.GetRange().GetEnd().GetLine()
-	if line == 0 {
-		line = loc.GetRange().GetStart().GetLine()
+	_, end := githubCommentLineRange(c)
+	return end
+}
+
+func githubCommentLineRange(c *reviewdog.Comment) (start int, end int) {
+	// Prefer first suggestion line range to diagnostic location if available so
+	// that reviewdog can post code suggestion as well when the line ranges are
+	// different between the diagnostic location and its suggestion.
+	if c.Result.FirstSuggestionInDiffContext && len(c.Result.Diagnostic.GetSuggestions()) > 0 {
+		s := c.Result.Diagnostic.GetSuggestions()[0]
+		startLine := s.GetRange().GetStart().GetLine()
+		endLine := s.GetRange().GetEnd().GetLine()
+		if endLine == 0 {
+			endLine = startLine
+		}
+		return int(startLine), int(endLine)
 	}
-	return int(line)
+	loc := c.Result.Diagnostic.GetLocation()
+	startLine := loc.GetRange().GetStart().GetLine()
+	endLine := loc.GetRange().GetEnd().GetLine()
+	if endLine == 0 {
+		endLine = startLine
+	}
+	return int(startLine), int(endLine)
 }
 
 func (g *PullRequest) remainingCommentsSummary(remaining []*reviewdog.Comment) string {
@@ -277,22 +295,16 @@ func buildSuggestions(c *reviewdog.Comment) string {
 
 func buildSingleSuggestion(c *reviewdog.Comment, s *rdf.Suggestion) (string, error) {
 	start := s.GetRange().GetStart()
+	startLine := int(start.GetLine())
 	end := s.GetRange().GetEnd()
-	endLine := end.GetLine()
+	endLine := int(end.GetLine())
 	if endLine == 0 {
-		endLine = start.GetLine()
+		endLine = startLine
 	}
-	drange := c.Result.Diagnostic.GetLocation().GetRange()
-	dendLine := drange.GetEnd().GetLine()
-	if dendLine == 0 {
-		// As long as suggestion has valid range, it's ok even if diagnostic
-		// location only contains start.
-		dendLine = drange.GetStart().GetLine()
-	}
-	if start.GetLine() != drange.GetStart().GetLine() ||
-		(endLine != dendLine) {
-		return "", fmt.Errorf("the Diagnostic's lines and Suggestion lines must be the same. L%d-L%d v.s. L%d-L%d",
-			drange.GetStart().GetLine(), dendLine, start.GetLine(), endLine)
+	gStart, gEnd := githubCommentLineRange(c)
+	if startLine != gStart || endLine != gEnd {
+		return "", fmt.Errorf("GitHub comment range and suggestion line range must be same. L%d-L%d v.s. L%d-L%d",
+			gStart, gEnd, startLine, endLine)
 	}
 	if start.GetColumn() > 0 || end.GetColumn() > 0 {
 		return buildNonLineBasedSuggestion(c, s)
@@ -309,22 +321,34 @@ func buildSingleSuggestion(c *reviewdog.Comment, s *rdf.Suggestion) (string, err
 
 func buildNonLineBasedSuggestion(c *reviewdog.Comment, s *rdf.Suggestion) (string, error) {
 	sourceLines := c.Result.SourceLines
-	slen := len(sourceLines)
-	if slen == 0 {
+	if len(sourceLines) == 0 {
 		return "", errors.New("source lines are not available")
 	}
 	start := s.GetRange().GetStart()
 	end := s.GetRange().GetEnd()
-	if slen != int(end.GetLine()-start.GetLine()+1) {
-		return "", errors.New("invalid source lines: not all source lines for this suggestion are available")
+	startLineContent, err := getSourceLine(sourceLines, int(start.GetLine()))
+	if err != nil {
+		return "", err
+	}
+	endLineContent, err := getSourceLine(sourceLines, int(end.GetLine()))
+	if err != nil {
+		return "", err
 	}
 	var sb strings.Builder
 	sb.WriteString("```suggestion\n")
-	sb.WriteString(sourceLines[0][:max(start.GetColumn()-1, 0)])
+	sb.WriteString(startLineContent[:max(start.GetColumn()-1, 0)])
 	sb.WriteString(s.GetText())
-	sb.WriteString(sourceLines[slen-1][max(end.GetColumn()-1, 0):])
+	sb.WriteString(endLineContent[max(end.GetColumn()-1, 0):])
 	sb.WriteString("\n```")
 	return sb.String(), nil
+}
+
+func getSourceLine(sourceLines map[int]string, line int) (string, error) {
+	lineContent, ok := sourceLines[line]
+	if !ok {
+		return "", fmt.Errorf("source line (L=%d) is not available for this suggestion", line)
+	}
+	return lineContent, nil
 }
 
 func max(x, y int32) int32 {

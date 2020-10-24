@@ -138,6 +138,19 @@ func (df *DiffFilter) ShouldReport(path string, lnum int) (bool, *diff.FileDiff,
 	return df.isSignificantLine(line), file, line
 }
 
+func (df *DiffFilter) DiffLine(path string, lnum int) *diff.Line {
+	npath := df.normalizePath(path)
+	lines, ok := df.difflines[npath]
+	if !ok {
+		return nil
+	}
+	line, ok := lines[lnum]
+	if !ok {
+		return nil
+	}
+	return line
+}
+
 func (df *DiffFilter) isSignificantLine(line *diff.Line) bool {
 	switch df.mode {
 	case ModeDiffContext, ModeFile, ModeNoFilter:
