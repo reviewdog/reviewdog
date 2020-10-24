@@ -53,6 +53,8 @@ type CheckRequest struct {
 	// Check suite external ID to associate with the check run.
 	// Optional.
 	ExternalID string `json:"external_id,omitempty"`
+
+	CheckRunID int64 `json:"check_run_id,omitempty"`
 }
 
 // CheckResponse represents doghouse GitHub check response.

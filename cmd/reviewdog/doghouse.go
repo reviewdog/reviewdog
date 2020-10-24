@@ -9,7 +9,6 @@ import (
 	"net/http"
 	"os"
 	"sort"
-	"strconv"
 
 	"golang.org/x/oauth2"
 	"golang.org/x/sync/errgroup"
@@ -113,41 +112,45 @@ func checkResultSet(ctx context.Context, r io.Reader, opt *option, isProject boo
 	return resultSet, nil
 }
 
-func maybeGetExternalID(ctx context.Context, ghInfo *cienv.BuildInfo) string {
-	runIDStr, err := nonEmptyEnv("GITHUB_RUN_ID")
+func maybeGetCheckRunID(ctx context.Context, ghInfo *cienv.BuildInfo) int64 {
+	jobName, err := nonEmptyEnv("GITHUB_JOB")
 	if err != nil {
-		return ""
+		return 0
 	}
-	runID, err := strconv.Atoi(runIDStr)
-	if err != nil {
-		return ""
-	}
+	// runIDStr, err := nonEmptyEnv("GITHUB_RUN_ID")
+	// if err != nil {
+	// 	return 0
+	// }
+	// runID, err := strconv.Atoi(runIDStr)
+	// if err != nil {
+	// 	return 0
+	// }
 	token, err := nonEmptyEnv("REVIEWDOG_GITHUB_API_TOKEN")
 	if err != nil {
-		return ""
+		return 0
 	}
 	ghcli, err := githubClient(ctx, token)
 	if err != nil {
-		return ""
+		return 0
 	}
-	jobs, _, err := ghcli.Actions.ListWorkflowJobs(ctx, ghInfo.Owner, ghInfo.Repo, int64(runID), nil)
-	if err != nil {
-		return ""
-	}
-	if len(jobs.Jobs) == 0 {
-		return ""
-	}
-	jobName := jobs.Jobs[0].GetName()
+	// jobs, _, err := ghcli.Actions.ListWorkflowJobs(ctx, ghInfo.Owner, ghInfo.Repo, int64(runID), nil)
+	// if err != nil {
+	// 	return 0
+	// }
+	// if len(jobs.Jobs) == 0 {
+	// 	return 0
+	// }
+	// jobName := jobs.Jobs[0].GetName()
 	checkRuns, _, err := ghcli.Checks.ListCheckRunsForRef(ctx, ghInfo.Owner, ghInfo.Repo, ghInfo.SHA, &github.ListCheckRunsOptions{
 		CheckName: github.String(jobName),
 	})
 	if err != nil {
-		return ""
+		return 0
 	}
 	for _, run := range checkRuns.CheckRuns {
-		return run.GetExternalID()
+		return run.GetID()
 	}
-	return ""
+	return 0
 }
 
 func postResultSet(ctx context.Context, resultSet *reviewdog.ResultMap,
@@ -158,8 +161,8 @@ func postResultSet(ctx context.Context, resultSet *reviewdog.ResultMap,
 	if err != nil {
 		return nil, err
 	}
-	externalID := maybeGetExternalID(ctx, ghInfo)
-	log.Printf("externalID: %s", externalID)
+	checkRunID := maybeGetCheckRunID(ctx, ghInfo)
+	log.Printf("checkRunID: %d", checkRunID)
 	filteredResultSet := new(reviewdog.FilteredResultMap)
 	resultSet.Range(func(name string, result *reviewdog.Result) {
 		diagnostics := result.Diagnostics
@@ -177,7 +180,7 @@ func postResultSet(ctx context.Context, resultSet *reviewdog.ResultMap,
 			Annotations: as,
 			Level:       result.Level,
 			FilterMode:  opt.filterMode,
-			ExternalID:  externalID,
+			CheckRunID:  checkRunID,
 		}
 		g.Go(func() error {
 			if err := result.CheckUnexpectedFailure(); err != nil {
