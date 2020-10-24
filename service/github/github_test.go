@@ -313,7 +313,38 @@ func TestGitHubPullRequest_Post_Flush_review_api(t *testing.T) {
 				Line:      github.Int(16),
 				Body: github.String(commentutil.BodyPrefix + strings.Join([]string{
 					"invalid lines suggestion comment",
-					invalidSuggestionPre + "the Diagnostic's lines and Suggestion lines must be the same. L15-L16 v.s. L16-L17" + invalidSuggestionPost,
+					invalidSuggestionPre + "GitHub comment range and suggestion line range must be same. L15-L16 v.s. L16-L17" + invalidSuggestionPost,
+				}, "\n") + "\n"),
+			},
+			{
+				Path:      github.String("reviewdog.go"),
+				Side:      github.String("RIGHT"),
+				StartSide: github.String("RIGHT"),
+				StartLine: github.Int(14),
+				Line:      github.Int(16),
+				Body: github.String(commentutil.BodyPrefix + strings.Join([]string{
+					"Use suggestion range as GitHub comment range if the suggestion is in diff context",
+					"```suggestion",
+					"line1",
+					"line2",
+					"line3",
+					"```",
+				}, "\n") + "\n"),
+			},
+			{
+				Path:      github.String("reviewdog.go"),
+				Side:      github.String("RIGHT"),
+				StartSide: github.String("RIGHT"),
+				StartLine: github.Int(14),
+				Line:      github.Int(16),
+				Body: github.String(commentutil.BodyPrefix + strings.Join([]string{
+					"Partially invalid suggestions",
+					"```suggestion",
+					"line1",
+					"line2",
+					"line3",
+					"```",
+					invalidSuggestionPre + "GitHub comment range and suggestion line range must be same. L14-L16 v.s. L14-L14" + invalidSuggestionPost,
 				}, "\n") + "\n"),
 			},
 			{
@@ -623,7 +654,89 @@ func TestGitHubPullRequest_Post_Flush_review_api(t *testing.T) {
 					},
 					Message: "invalid lines suggestion comment",
 				},
-				InDiffContext: true,
+				InDiffContext:                true,
+				FirstSuggestionInDiffContext: false,
+			},
+		},
+		{
+			Result: &filter.FilteredDiagnostic{
+				SourceLines: map[int]string{
+					14: "line 14 before",
+					15: "line 15 before",
+					16: "line 16 before",
+				},
+				Diagnostic: &rdf.Diagnostic{
+					Location: &rdf.Location{
+						Path: "reviewdog.go",
+						Range: &rdf.Range{
+							Start: &rdf.Position{
+								Line: 15,
+							},
+						},
+					},
+					Suggestions: []*rdf.Suggestion{
+						{
+							Range: &rdf.Range{
+								Start: &rdf.Position{
+									Line: 14,
+								},
+								End: &rdf.Position{
+									Line: 16,
+								},
+							},
+							Text: "line1\nline2\nline3",
+						},
+					},
+					Message: "Use suggestion range as GitHub comment range if the suggestion is in diff context",
+				},
+				InDiffContext:                true,
+				FirstSuggestionInDiffContext: true,
+			},
+		},
+		{
+			Result: &filter.FilteredDiagnostic{
+				SourceLines: map[int]string{
+					14: "line 14 before",
+					15: "line 15 before",
+					16: "line 16 before",
+				},
+				Diagnostic: &rdf.Diagnostic{
+					Location: &rdf.Location{
+						Path: "reviewdog.go",
+						Range: &rdf.Range{
+							Start: &rdf.Position{
+								Line: 15,
+							},
+						},
+					},
+					Suggestions: []*rdf.Suggestion{
+						{
+							Range: &rdf.Range{
+								Start: &rdf.Position{
+									Line: 14,
+								},
+								End: &rdf.Position{
+									Line: 16,
+								},
+							},
+							Text: "line1\nline2\nline3",
+						},
+						{
+							Range: &rdf.Range{
+								Start: &rdf.Position{
+									Line: 14,
+								},
+								End: &rdf.Position{
+									Line: 14,
+								},
+							},
+							Text: "line1\nline2",
+						},
+					},
+					Message: "Partially invalid suggestions",
+				},
+				InDiffContext:                true,
+				FirstSuggestionInDiffContext: true,
 			},
 		},
 		{
@@ -662,7 +775,7 @@ func TestGitHubPullRequest_Post_Flush_review_api(t *testing.T) {
 		},
 		{
 			Result: &filter.FilteredDiagnostic{
-				SourceLines: []string{"haya15busa"},
+				SourceLines: map[int]string{15: "haya15busa"},
 				Diagnostic: &rdf.Diagnostic{
 					Location: &rdf.Location{
 						Path: "reviewdog.go",
@@ -687,9 +800,9 @@ func TestGitHubPullRequest_Post_Flush_review_api(t *testing.T) {
 		},
 		{
 			Result: &filter.FilteredDiagnostic{
-				SourceLines: []string{
-					"haya???",
-					"???busa (multi-line)",
+				SourceLines: map[int]string{
+					15: "haya???",
+					16: "???busa (multi-line)",
 				},
 				Diagnostic: &rdf.Diagnostic{
 					Location: &rdf.Location{
@@ -715,10 +828,10 @@ func TestGitHubPullRequest_Post_Flush_review_api(t *testing.T) {
 		},
 		{
 			Result: &filter.FilteredDiagnostic{
-				SourceLines: []string{
-					"line 15 xxx",
-					"line 16",
-					"(content at line 15)",
+				SourceLines: map[int]string{
+					15: "line 15 xxx",
+					16: "line 16",
+					17: "(content at line 15)",
 				},
 				Diagnostic: &rdf.Diagnostic{
 					Location: &rdf.Location{
@@ -744,8 +857,8 @@ func TestGitHubPullRequest_Post_Flush_review_api(t *testing.T) {
 		},
 		{
 			Result: &filter.FilteredDiagnostic{
-				SourceLines: []string{
-					"hayabusa",
+				SourceLines: map[int]string{
+					15: "hayabusa",
 				},
 				Diagnostic: &rdf.Diagnostic{
 					Location: &rdf.Location{
@@ -771,7 +884,7 @@ func TestGitHubPullRequest_Post_Flush_review_api(t *testing.T) {
 		},
 		{
 			Result: &filter.FilteredDiagnostic{
-				SourceLines: []string{"haya??busa"},
+				SourceLines: map[int]string{15: "haya??busa"},
 				Diagnostic: &rdf.Diagnostic{
 					Location: &rdf.Location{
 						Path: "reviewdog.go",
@@ -810,7 +923,7 @@ func TestGitHubPullRequest_Post_Flush_review_api(t *testing.T) {
 		},
 		{
 			Result: &filter.FilteredDiagnostic{
-				SourceLines: []string{"haya15busa"},
+				SourceLines: map[int]string{15: "haya15busa"},
 				Diagnostic: &rdf.Diagnostic{
 					Location: &rdf.Location{
 						Path: "reviewdog.go",
