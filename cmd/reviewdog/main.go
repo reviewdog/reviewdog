@@ -25,6 +25,7 @@ import (
 	"github.com/reviewdog/errorformat/fmts"
 	"github.com/xanzy/go-gitlab"
 
+	"github.com/reviewdog/go-bitbucket"
 	"github.com/reviewdog/reviewdog"
 	"github.com/reviewdog/reviewdog/cienv"
 	"github.com/reviewdog/reviewdog/commands"
@@ -32,7 +33,6 @@ import (
 	"github.com/reviewdog/reviewdog/parser"
 	"github.com/reviewdog/reviewdog/project"
 	bbservice "github.com/reviewdog/reviewdog/service/bitbucket"
-	bitbucket "github.com/reviewdog/reviewdog/service/bitbucket/openapi"
 	gerritservice "github.com/reviewdog/reviewdog/service/gerrit"
 	githubservice "github.com/reviewdog/reviewdog/service/github"
 	"github.com/reviewdog/reviewdog/service/github/githubutils"

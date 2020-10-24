@@ -9,9 +9,9 @@ import (
 	"strings"
 	"sync"
 
+	bbapi "github.com/reviewdog/go-bitbucket"
 	"github.com/reviewdog/reviewdog"
 	"github.com/reviewdog/reviewdog/proto/rdf"
-	"github.com/reviewdog/reviewdog/service/bitbucket/openapi"
 	"google.golang.org/protobuf/proto"
 )
 
@@ -31,14 +31,14 @@ const (
 //  https://developer.atlassian.com/bitbucket/api/2/reference/resource/repositories/%7Bworkspace%7D/%7Brepo_slug%7D/commit/%7Bcommit%7D/reports/%7BreportId%7D/annotations#post
 //  POST /2.0/repositories/{username}/{repo_slug}/commit/{commit}/reports/{reportId}/annotations
 type ReportAnnotator struct {
-	cli         *openapi.APIClient
+	cli         *bbapi.APIClient
 	sha         string
 	owner, repo string
 
 	muAnnotations sync.Mutex
 	// store annotations in map per tool name
 	// so we can create report per tool
-	annotations map[string][]openapi.ReportAnnotation
+	annotations map[string][]bbapi.ReportAnnotation
 	severityMap map[rdf.Severity]string
 
 	// wd is working directory relative to root of repository.
@@ -47,13 +47,13 @@ type ReportAnnotator struct {
 }
 
 // NewReportAnnotator creates new Bitbucket Report Annotator
-func NewReportAnnotator(cli *openapi.APIClient, owner, repo, sha string, runners []string) *ReportAnnotator {
+func NewReportAnnotator(cli *bbapi.APIClient, owner, repo, sha string, runners []string) *ReportAnnotator {
 	r := &ReportAnnotator{
 		cli:         cli,
 		sha:         sha,
 		owner:       owner,
 		repo:        repo,
-		annotations: make(map[string][]openapi.ReportAnnotation, len(runners)),
+		annotations: make(map[string][]bbapi.ReportAnnotation, len(runners)),
 		severityMap: map[rdf.Severity]string{
 			rdf.Severity_INFO:    annotationSeverityLow,
 			rdf.Severity_WARNING: annotationSeverityMedium,
@@ -68,7 +68,7 @@ func NewReportAnnotator(cli *openapi.APIClient, owner, repo, sha string, runners
 		if len(runner) == 0 {
 			continue
 		}
-		r.annotations[runner] = []openapi.ReportAnnotation{}
+		r.annotations[runner] = []bbapi.ReportAnnotation{}
 		// create Pending report for each tool
 		_ = r.createOrUpdateReport(context.Background(), reportID(runner, reporter), reportTitle(runner, reporter), reportResultPending)
 	}
@@ -142,8 +142,8 @@ func (r *ReportAnnotator) Flush(ctx context.Context) error {
 	return nil
 }
 
-func (r *ReportAnnotator) annotationFromReviewDogComment(c reviewdog.Comment) openapi.ReportAnnotation {
-	a := openapi.NewReportAnnotation()
+func (r *ReportAnnotator) annotationFromReviewDogComment(c reviewdog.Comment) bbapi.ReportAnnotation {
+	a := bbapi.NewReportAnnotation()
 
 	// TODO: allow providing different annotation types in future
 	a.SetAnnotationType(annotationTypeCodeSmell)
@@ -164,7 +164,7 @@ func (r *ReportAnnotator) annotationFromReviewDogComment(c reviewdog.Comment) op
 }
 
 func (r *ReportAnnotator) createOrUpdateReport(ctx context.Context, id, title, reportStatus string) error {
-	var report = openapi.NewReport()
+	var report = bbapi.NewReport()
 	report.SetTitle(title)
 	// TODO: different report types?
 	report.SetReportType(reportTypeBug)

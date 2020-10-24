@@ -6,12 +6,12 @@ import (
 	"io/ioutil"
 	"net/http"
 
-	"github.com/reviewdog/reviewdog/service/bitbucket/openapi"
+	bbapi "github.com/reviewdog/go-bitbucket"
 )
 
 func checkAPIError(err error, resp *http.Response, expectedCode int) error {
 	if err != nil {
-		e, ok := err.(openapi.GenericOpenAPIError)
+		e, ok := err.(bbapi.GenericOpenAPIError)
 		if ok {
 			return fmt.Errorf(`bitbucket API error:
 	Response error: %s

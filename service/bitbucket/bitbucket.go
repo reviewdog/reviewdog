@@ -6,7 +6,7 @@ import (
 	"net/url"
 	"time"
 
-	"github.com/reviewdog/reviewdog/service/bitbucket/openapi"
+	bbapi "github.com/reviewdog/go-bitbucket"
 	"golang.org/x/oauth2"
 )
 
@@ -22,7 +22,7 @@ const (
 )
 
 // NewAPIClient creates Bitbucket API client
-func NewAPIClient(isInPipeline bool) *openapi.APIClient {
+func NewAPIClient(isInPipeline bool) *bbapi.APIClient {
 	httpClient := &http.Client{
 		Timeout: httpTimeout,
 	}
@@ -42,8 +42,8 @@ func NewAPIClient(isInPipeline bool) *openapi.APIClient {
 
 // NewAPIClientWithConfigurations allows to create new Bitbucket API client with
 // custom http client or server configurations
-func NewAPIClientWithConfigurations(client *http.Client, server openapi.ServerConfiguration) *openapi.APIClient {
-	config := openapi.NewConfiguration()
+func NewAPIClientWithConfigurations(client *http.Client, server bbapi.ServerConfiguration) *bbapi.APIClient {
+	config := bbapi.NewConfiguration()
 	if client != nil {
 		config.HTTPClient = client
 	} else {
@@ -51,15 +51,15 @@ func NewAPIClientWithConfigurations(client *http.Client, server openapi.ServerCo
 			Timeout: httpTimeout,
 		}
 	}
-	config.Servers = openapi.ServerConfigurations{server}
-	return openapi.NewAPIClient(config)
+	config.Servers = bbapi.ServerConfigurations{server}
+	return bbapi.NewAPIClient(config)
 
 }
 
 // WithBasicAuth adds basic auth credentials to context
 func WithBasicAuth(ctx context.Context, username, password string) context.Context {
-	return context.WithValue(ctx, openapi.ContextBasicAuth,
-		openapi.BasicAuth{
+	return context.WithValue(ctx, bbapi.ContextBasicAuth,
+		bbapi.BasicAuth{
 			UserName: username,
 			Password: password,
 		})
@@ -67,23 +67,23 @@ func WithBasicAuth(ctx context.Context, username, password string) context.Conte
 
 // WithAccessToken adds basic auth credentials to context
 func WithAccessToken(ctx context.Context, accessToken string) context.Context {
-	return context.WithValue(ctx, openapi.ContextAccessToken, accessToken)
+	return context.WithValue(ctx, bbapi.ContextAccessToken, accessToken)
 }
 
 // WithOAuth2 adds basic auth credentials to context
 func WithOAuth2(ctx context.Context, tokenSource oauth2.TokenSource) context.Context {
-	return context.WithValue(ctx, openapi.ContextOAuth2, tokenSource)
+	return context.WithValue(ctx, bbapi.ContextOAuth2, tokenSource)
 }
 
-func httpServer() openapi.ServerConfiguration {
-	return openapi.ServerConfiguration{
+func httpServer() bbapi.ServerConfiguration {
+	return bbapi.ServerConfiguration{
 		URL: "http://api.bitbucket.org/2.0",
 		Description: `If if called from Bitbucket Pipelines,
 using HTTP API endpoint and AuthProxy`,
 	}
 }
-func httpsServer() openapi.ServerConfiguration {
-	return openapi.ServerConfiguration{
+func httpsServer() bbapi.ServerConfiguration {
+	return bbapi.ServerConfiguration{
 		URL:         "https://api.bitbucket.org/2.0",
 		Description: `HTTPS API endpoint`,
 	}

@@ -12,10 +12,10 @@ import (
 	"testing"
 	"time"
 
+	bbapi "github.com/reviewdog/go-bitbucket"
 	"github.com/reviewdog/reviewdog"
 	"github.com/reviewdog/reviewdog/filter"
 	"github.com/reviewdog/reviewdog/proto/rdf"
-	"github.com/reviewdog/reviewdog/service/bitbucket/openapi"
 )
 
 func TestAnnotator(t *testing.T) {
@@ -127,7 +127,7 @@ func TestAnnotator(t *testing.T) {
 				}
 
 				if isPostAnnotationsCall {
-					var req []openapi.ReportAnnotation
+					var req []bbapi.ReportAnnotation
 					if err := json.Unmarshal(body, &req); err != nil {
 						t.Error(err)
 						w.WriteHeader(http.StatusInternalServerError)
@@ -135,7 +135,7 @@ func TestAnnotator(t *testing.T) {
 					// count how many annotations we created
 					annotations[reportID] += len(req)
 				} else {
-					var req openapi.Report
+					var req bbapi.Report
 					if err := json.Unmarshal(body, &req); err != nil {
 						t.Error(err)
 						w.WriteHeader(http.StatusInternalServerError)
@@ -147,7 +147,7 @@ func TestAnnotator(t *testing.T) {
 			}))
 			defer ts.Close()
 
-			client := NewAPIClientWithConfigurations(&http.Client{Timeout: 1 * time.Second}, openapi.ServerConfiguration{URL: ts.URL})
+			client := NewAPIClientWithConfigurations(&http.Client{Timeout: 1 * time.Second}, bbapi.ServerConfiguration{URL: ts.URL})
 			bb := NewReportAnnotator(client, username, repo, commit, test.runnersList)
 			ctx := context.Background()
 
