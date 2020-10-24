@@ -138,6 +138,8 @@ func (df *DiffFilter) ShouldReport(path string, lnum int) (bool, *diff.FileDiff,
 	return df.isSignificantLine(line), file, line
 }
 
+// DiffLine returns diff data from given new path and lnum. Returns nil if not
+// found.
 func (df *DiffFilter) DiffLine(path string, lnum int) *diff.Line {
 	npath := df.normalizePath(path)
 	lines, ok := df.difflines[npath]
