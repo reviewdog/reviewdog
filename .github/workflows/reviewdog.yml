@@ -7,7 +7,7 @@ on:
 
 jobs:
   reviewdog-github-check:
-    name: reviewdog (github-check)
+    # name: reviewdog (github-check)
     runs-on: ubuntu-latest
     steps:
       - uses: actions/setup-go@v2
@@ -45,7 +45,7 @@ jobs:
 
   reviewdog-pr:
     if: github.event_name == 'pull_request'
-    name: reviewdog on Pull Request
+    # name: reviewdog on Pull Request
     runs-on: ubuntu-latest
     steps:
       - uses: actions/setup-go@v2
