@@ -289,7 +289,7 @@ $ <linter> | <convert-to-checkstyle> | reviewdog -f=checkstyle -name="<linter>" 
 reviewdog supports *code suggestions* feature with [rdformat](#reviewdog-diagnostic-format-rdformat) or [diff](#diff) input.
 You can also use [reviewdog/action-suggester](https://github.com/reviewdog/action-suggester) for GitHub Actions.
 
-reviewdog can suggests code changes along with diagnostic results if an diagnostic tools supports code suggestions data.
+reviewdog can suggest code changes along with diagnostic results if a diagnostic tools supports code suggestions data.
 You can integrate reviewdog with any code fixing tools and any code formatter with [diff](#diff) input as well.
 
 ### Code Suggestions Support Table
