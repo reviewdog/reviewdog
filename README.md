@@ -430,12 +430,8 @@ things, so I cannot ensure that the server is running 24h and 365 days.
 and GitHub sponsor.
 See [Supporting reviewdog](#supporting-reviewdog)
 
-github-pr-check reporter is better than github-pr-review reporter in general
-because it provides more rich feature and has less scope, but please bear in
-mind the above caution and please use it on your own risk.
-
-You can use github-pr-review reporter if you don't want to depend on reviewdog
-server.
+You can use github-pr-review reporter or use run reviewdog under GitHub Actions
+if you don't want to depend on reviewdog server.
 
 ### Reporter: GitHub Checks (-reporter=github-check)
 
