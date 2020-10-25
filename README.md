@@ -209,7 +209,7 @@ You can add supported pre-defined 'errorformat' by contributing to [reviewdog/er
 
 reviewdog supports [Reviewdog Diagnostic Format (RDFormat)](./proto/rdf/) as a
 generic diagnostic format and it supports both [rdjson](./proto/rdf/#rdjson) and
-[rdjsonl](./proto/rdf/#rdjsonl) JSON.
+[rdjsonl](./proto/rdf/#rdjsonl) formats.
 
 This rdformat supports rich feature like multiline ranged comments, severity,
 rule code with URL, and [code suggestions](#code-suggestions).

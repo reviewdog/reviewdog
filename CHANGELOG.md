@@ -16,6 +16,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
  - [#675](https://github.com/reviewdog/reviewdog/pull/675) [#698](https://github.com/reviewdog/reviewdog/pull/698) github-pr-review: Support suggested changes
  - [#699](https://github.com/reviewdog/reviewdog/pull/699) Support diff input format (`-f=diff`). Useful for suggested changes.
  - [#700](https://github.com/reviewdog/reviewdog/pull/700) Support to show code(rule), code URL and severity in GitHub and GitLab reporters.
+- [#678](https://github.com/reviewdog/reviewdog/issues/678) github-pr-review: Support Code Suggestions
+  - Introduced [reviewdog/action-suggester](https://github.com/reviewdog/action-suggester) action.
 - Introduced [reviewdog/action-setup](https://github.com/reviewdog/action-setup) GitHub Action which installs reviewdog easily including nightly release.
 - [#769](https://github.com/reviewdog/reviewdog/pull/769) Integration with [Bitbucket Code Insights](https://support.atlassian.com/bitbucket-cloud/docs/code-insights/) and [Bitbucket Pipelines](https://bitbucket.org/product/ru/features/pipelines)
 - ...
