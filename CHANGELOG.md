@@ -6,11 +6,27 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
-### :book: Release Note <!-- optional -->
-<!-- TODO(haya14busa): Write about Reviewdog Diagnostic Format -->
+### :sparkles: Release Note <!-- optional -->
 
 ### :rocket: Enhancements
-- [#629](https://github.com/reviewdog/reviewdog/pull/629) Introduced Reviewdog Diagnostic Format. ([@haya14busa])
+- ...
+
+### :bug: Fixes
+- ...
+
+### :rotating_light: Breaking changes
+- ...
+
+---
+
+## [v0.11.0] - 2020-10-25
+
+### :sparkles: Release Note
+reviewdog v0.11 introduced [Reviewdog Diagnostic Format (RDFormat)](./README.md#reviewdog-diagnostic-format-rdformat)
+as generic machine-readable diagnostic format and it unlocks new rich features like code suggestions.
+
+### :rocket: Enhancements
+- [#629](https://github.com/reviewdog/reviewdog/pull/629) Introduced Reviewdog Diagnostic Format.
  - [#674](https://github.com/reviewdog/reviewdog/pull/674) [#703](https://github.com/reviewdog/reviewdog/pull/703) Support rdjsonl/rdjson as input format
  - [#680](https://github.com/reviewdog/reviewdog/pull/680) github-pr-review: Support multiline comments
  - [#675](https://github.com/reviewdog/reviewdog/pull/675) [#698](https://github.com/reviewdog/reviewdog/pull/698) github-pr-review: Support suggested changes
@@ -20,13 +36,6 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
   - Introduced [reviewdog/action-suggester](https://github.com/reviewdog/action-suggester) action.
 - Introduced [reviewdog/action-setup](https://github.com/reviewdog/action-setup) GitHub Action which installs reviewdog easily including nightly release.
 - [#769](https://github.com/reviewdog/reviewdog/pull/769) Integration with [Bitbucket Code Insights](https://support.atlassian.com/bitbucket-cloud/docs/code-insights/) and [Bitbucket Pipelines](https://bitbucket.org/product/ru/features/pipelines)
-- ...
-
-### :bug: Fixes
-- ...
-
-### :rotating_light: Breaking changes
-- ...
 
 ---
 
@@ -88,4 +97,5 @@ See https://github.com/reviewdog/reviewdog/releases for older release note.
 [v0.10.0]: https://github.com/reviewdog/reviewdog/compare/v0.9.17...v0.10.0
 [v0.10.1]: https://github.com/reviewdog/reviewdog/compare/v0.10.0...v0.10.1
 [v0.10.2]: https://github.com/reviewdog/reviewdog/compare/v0.10.1...v0.10.2
+[v0.11.0]: https://github.com/reviewdog/reviewdog/compare/v0.10.2...v0.11.0
 [@haya14busa]: https://github.com/haya14busa
