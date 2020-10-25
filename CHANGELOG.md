@@ -6,7 +6,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
-### :book: Release Note <!-- optional -->
+### :sparkles: Release Note <!-- optional -->
 
 ### :rocket: Enhancements
 - ...
@@ -21,7 +21,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [v0.11.0] - 2020-10-25
 
-### :book: Release Note
+### :sparkles: Release Note
 reviewdog v0.11 introduced [Reviewdog Diagnostic Format (RDFormat)](./README.md#reviewdog-diagnostic-format-rdformat)
 as generic machine-readable diagnostic format and it unlocks new rich features like code suggestions.
 
