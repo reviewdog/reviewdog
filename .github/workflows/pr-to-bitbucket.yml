@@ -1,0 +1,16 @@
+name: PR to bitbucket
+
+on: [pull_request]
+
+jobs:
+  to_bitbucket:
+    runs-on: ubuntu-latest
+    steps: 
+      - uses: actions/checkout@v1
+      - run: git checkout -b $GITHUB_REPOSITORY/${GITHUB_REF#refs/heads/} 
+      - uses: spyoungtech/mirror-action@master
+        with:
+          REMOTE: git@bitbucket.org:reviewdog/reviewdog.git
+          GIT_SSH_PRIVATE_KEY: ${{ secrets.BITBUCKET_SSH_PRIVATE_KEY }}
+          GIT_SSH_NO_VERIFY_HOST: "true"
+          PUSH_ALL_REFS: "false"
