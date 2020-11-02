@@ -3,7 +3,7 @@ module github.com/reviewdog/reviewdog
 go 1.14
 
 require (
-	cloud.google.com/go v0.70.0
+	cloud.google.com/go v0.71.0
 	cloud.google.com/go/datastore v1.1.0
 	contrib.go.opencensus.io/exporter/stackdriver v0.13.4
 	github.com/bradleyfalzon/ghinstallation v1.1.1
@@ -22,7 +22,6 @@ require (
 	github.com/xanzy/go-gitlab v0.39.0
 	go.opencensus.io v0.22.5
 	golang.org/x/build v0.0.0-20200616162219-07bebbe343e9
-	golang.org/x/net v0.0.0-20201024042810-be3efd7ff127 // indirect
 	golang.org/x/oauth2 v0.0.0-20200902213428-5d25da1a8d43
 	golang.org/x/sync v0.0.0-20201020160332-67f06af15bc9
 	google.golang.org/protobuf v1.25.0
