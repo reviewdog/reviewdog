@@ -18,11 +18,12 @@ const (
 	// https://support.atlassian.com/bitbucket-cloud/docs/code-insights/#Authentication
 	// However, if using proxy HTTP API endpoint need to be used
 	pipelineProxyURL = "http://localhost:29418"
+	pipeProxyURL     = "http://host.docker.internal:29418"
 	httpTimeout      = time.Second * 10
 )
 
 // NewAPIClient creates Bitbucket API client
-func NewAPIClient(isInPipeline bool) *bbapi.APIClient {
+func NewAPIClient(isInPipeline bool, isInPipe bool) *bbapi.APIClient {
 	httpClient := &http.Client{
 		Timeout: httpTimeout,
 	}
@@ -31,7 +32,12 @@ func NewAPIClient(isInPipeline bool) *bbapi.APIClient {
 	if isInPipeline {
 		// if we are on the Bitbucket Pipeline, use HTTP endpoint
 		// and proxy
-		proxyURL, _ := url.Parse(pipelineProxyURL)
+		proxy := pipelineProxyURL
+		if isInPipe {
+			proxy = pipeProxyURL
+		}
+
+		proxyURL, _ := url.Parse(proxy)
 		server = httpServer()
 		httpClient.Transport = &http.Transport{
 			Proxy: http.ProxyURL(proxyURL),

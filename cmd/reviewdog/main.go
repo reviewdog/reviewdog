@@ -616,7 +616,7 @@ func bitbucketBuildWithClient(ctx context.Context) (*cienv.BuildInfo, *bitbucket
 		ctx = bbservice.WithAccessToken(ctx, bbAccessToken)
 	}
 
-	client := bbservice.NewAPIClient(cienv.IsInBitbucketPipeline())
+	client := bbservice.NewAPIClient(cienv.IsInBitbucketPipeline(), cienv.IsInBitbucketPipe())
 	return build, client, ctx, nil
 }
 
