@@ -212,8 +212,8 @@ github.com/pmezard/go-difflib v1.0.0/go.mod h1:iKH77koFhYxTK1pcRnkKkqfTogsbg7gZN
 github.com/prometheus/client_model v0.0.0-20190812154241-14fe0d1b01d4/go.mod h1:xMI15A0UPsDsEKsMN9yxemIoYk6Tm2C1GtYGdfGttqA=
 github.com/rakyll/statik v0.1.7 h1:OF3QCZUuyPxuGEP7B4ypUa7sB/iHtqOTDYZXGM8KOdQ=
 github.com/rakyll/statik v0.1.7/go.mod h1:AlZONWzMtEnMs7W4e/1LURLiI49pIMmp6V9Unghqrcc=
-github.com/reviewdog/errorformat v0.0.0-20201213134116-55531c7dabdf h1:IIovZUdX4/KCbfRJpQ17dMMwa2jb2K7V9QhgyBelE38=
-github.com/reviewdog/errorformat v0.0.0-20201213134116-55531c7dabdf/go.mod h1:Akd5vemrJaAHgnEOFrC4yMbEKaOsddwF1LKkfovSFI8=
+github.com/reviewdog/errorformat v0.0.0-20201214112724-34272353d2f6 h1:eviyN1ICFM3mIRZyYwdAdjdFp7aU3Q41fc1IICrRsfY=
+github.com/reviewdog/errorformat v0.0.0-20201214112724-34272353d2f6/go.mod h1:Akd5vemrJaAHgnEOFrC4yMbEKaOsddwF1LKkfovSFI8=
 github.com/reviewdog/go-bitbucket v0.0.0-20201024094602-708c3f6a7de0 h1:XZ60Bp2UqwaJ6fDQExoFVrgs4nIzwBCy9ct6GCj9hH8=
 github.com/reviewdog/go-bitbucket v0.0.0-20201024094602-708c3f6a7de0/go.mod h1:5JbWAMFyq9hbISZawRyIe7QTcLaptvCIvmZnYo+1VvA=
 github.com/rogpeppe/go-internal v1.3.0/go.mod h1:M8bDsm7K2OlrFYOpmOWEs/qY81heoFRclV5y23lUDJ4=
