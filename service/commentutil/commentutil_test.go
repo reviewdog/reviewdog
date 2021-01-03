@@ -126,17 +126,12 @@ func TestMarkdownSuggestions(t *testing.T) {
 			want: "",
 		},
 		{
-			in: &reviewdog.Comment{
-				ToolName: "tool-name",
-				Result: &filter.FilteredDiagnostic{
-					Diagnostic: &rdf.Diagnostic{
-						Message: "one suggestion",
-						Suggestions: []*rdf.Suggestion{
-							buildTestsSuggestion("line1-fixed\nline2-fixed", 10, 10),
-						},
-					},
+			in: buildTestComment(
+				"one suggestion",
+				[]*rdf.Suggestion{
+					buildTestsSuggestion("line1-fixed\nline2-fixed", 10, 10),
 				},
-			},
+			),
 			want: strings.Join([]string{
 				"```suggestion:-0+0",
 				"line1-fixed",
@@ -145,18 +140,13 @@ func TestMarkdownSuggestions(t *testing.T) {
 			}, "\n"),
 		},
 		{
-			in: &reviewdog.Comment{
-				ToolName: "tool-name",
-				Result: &filter.FilteredDiagnostic{
-					Diagnostic: &rdf.Diagnostic{
-						Message: "two suggestions",
-						Suggestions: []*rdf.Suggestion{
-							buildTestsSuggestion("line1-fixed\nline2-fixed", 10, 11),
-							buildTestsSuggestion("line3-fixed\nline4-fixed", 20, 21),
-						},
-					},
+			in: buildTestComment(
+				"two suggestions",
+				[]*rdf.Suggestion{
+					buildTestsSuggestion("line1-fixed\nline2-fixed", 10, 11),
+					buildTestsSuggestion("line3-fixed\nline4-fixed", 20, 21),
 				},
-			},
+			),
 			want: strings.Join([]string{
 				"```suggestion:-0+1",
 				"line1-fixed",
@@ -169,21 +159,30 @@ func TestMarkdownSuggestions(t *testing.T) {
 				"```",
 			}, "\n"),
 		},
+	}
+	for _, tt := range tests {
+		suggestion := MarkdownSuggestions(tt.in)
+		if suggestion != tt.want {
+			t.Errorf("got unexpected suggestion.\ngot:\n%s\nwant:\n%s", suggestion, tt.want)
+		}
+	}
+}
+
+func TestMarkdownSuggestionsInvalid(t *testing.T) {
+	tests := []struct {
+		in   *reviewdog.Comment
+		want string
+	}{
 		{
-			in: &reviewdog.Comment{
-				ToolName: "tool-name",
-				Result: &filter.FilteredDiagnostic{
-					Diagnostic: &rdf.Diagnostic{
-						Message: "two suggestions, one without range",
-						Suggestions: []*rdf.Suggestion{
-							{
-								Text: "line3-fixed\nline4-fixed",
-							},
-							buildTestsSuggestion("line1-fixed\nline2-fixed", 10, 11),
-						},
+			in: buildTestComment(
+				"two suggestions, one without range",
+				[]*rdf.Suggestion{
+					{
+						Text: "line3-fixed\nline4-fixed",
 					},
+					buildTestsSuggestion("line1-fixed\nline2-fixed", 10, 11),
 				},
-			},
+			),
 			want: strings.Join([]string{
 				"```suggestion:-0+1",
 				"line1-fixed",
@@ -192,25 +191,19 @@ func TestMarkdownSuggestions(t *testing.T) {
 			}, "\n"),
 		},
 		{
-			in: &reviewdog.Comment{
-				ToolName: "tool-name",
-				Result: &filter.FilteredDiagnostic{
-					Diagnostic: &rdf.Diagnostic{
-						Message: "two suggestions, one without range end",
-						Suggestions: []*rdf.Suggestion{
-							{
-								Text: "line3-fixed\nline4-fixed",
-								Range: &rdf.Range{
-									Start: &rdf.Position{
-										Line: 20,
-									},
-								},
+			in: buildTestComment(
+				"two suggestions, one without range end",
+				[]*rdf.Suggestion{
+					{
+						Text: "line3-fixed\nline4-fixed",
+						Range: &rdf.Range{
+							Start: &rdf.Position{
+								Line: 20,
 							},
-							buildTestsSuggestion("line1-fixed\nline2-fixed", 10, 11),
 						},
 					},
-				},
-			},
+					buildTestsSuggestion("line1-fixed\nline2-fixed", 10, 11),
+				}),
 			want: strings.Join([]string{
 				"```suggestion:-0+1",
 				"line1-fixed",
@@ -236,6 +229,18 @@ func buildTestsSuggestion(text string, start int32, end int32) *rdf.Suggestion {
 			},
 			End: &rdf.Position{
 				Line: end,
+			},
+		},
+	}
+}
+
+func buildTestComment(message string, suggestions []*rdf.Suggestion) *reviewdog.Comment {
+	return &reviewdog.Comment{
+		ToolName: "tool-name",
+		Result: &filter.FilteredDiagnostic{
+			Diagnostic: &rdf.Diagnostic{
+				Message:     message,
+				Suggestions: suggestions,
 			},
 		},
 	}
