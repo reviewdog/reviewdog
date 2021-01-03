@@ -132,17 +132,7 @@ func TestMarkdownSuggestions(t *testing.T) {
 					Diagnostic: &rdf.Diagnostic{
 						Message: "one suggestion",
 						Suggestions: []*rdf.Suggestion{
-							{
-								Text: "line1-fixed\nline2-fixed",
-								Range: &rdf.Range{
-									Start: &rdf.Position{
-										Line: 10,
-									},
-									End: &rdf.Position{
-										Line: 10,
-									},
-								},
-							},
+							buildTestsSuggestion("line1-fixed\nline2-fixed", 10, 10),
 						},
 					},
 				},
@@ -161,28 +151,8 @@ func TestMarkdownSuggestions(t *testing.T) {
 					Diagnostic: &rdf.Diagnostic{
 						Message: "two suggestions",
 						Suggestions: []*rdf.Suggestion{
-							{
-								Text: "line1-fixed\nline2-fixed",
-								Range: &rdf.Range{
-									Start: &rdf.Position{
-										Line: 10,
-									},
-									End: &rdf.Position{
-										Line: 11,
-									},
-								},
-							},
-							{
-								Text: "line3-fixed\nline4-fixed",
-								Range: &rdf.Range{
-									Start: &rdf.Position{
-										Line: 20,
-									},
-									End: &rdf.Position{
-										Line: 21,
-									},
-								},
-							},
+							buildTestsSuggestion("line1-fixed\nline2-fixed", 10, 11),
+							buildTestsSuggestion("line3-fixed\nline4-fixed", 20, 21),
 						},
 					},
 				},
@@ -209,17 +179,7 @@ func TestMarkdownSuggestions(t *testing.T) {
 							{
 								Text: "line3-fixed\nline4-fixed",
 							},
-							{
-								Text: "line1-fixed\nline2-fixed",
-								Range: &rdf.Range{
-									Start: &rdf.Position{
-										Line: 10,
-									},
-									End: &rdf.Position{
-										Line: 11,
-									},
-								},
-							},
+							buildTestsSuggestion("line1-fixed\nline2-fixed", 10, 11),
 						},
 					},
 				},
@@ -246,17 +206,7 @@ func TestMarkdownSuggestions(t *testing.T) {
 									},
 								},
 							},
-							{
-								Text: "line1-fixed\nline2-fixed",
-								Range: &rdf.Range{
-									Start: &rdf.Position{
-										Line: 10,
-									},
-									End: &rdf.Position{
-										Line: 11,
-									},
-								},
-							},
+							buildTestsSuggestion("line1-fixed\nline2-fixed", 10, 11),
 						},
 					},
 				},
@@ -274,5 +224,19 @@ func TestMarkdownSuggestions(t *testing.T) {
 		if suggestion != tt.want {
 			t.Errorf("got unexpected suggestion.\ngot:\n%s\nwant:\n%s", suggestion, tt.want)
 		}
+	}
+}
+
+func buildTestsSuggestion(text string, start int32, end int32) *rdf.Suggestion {
+	return &rdf.Suggestion{
+		Text: text,
+		Range: &rdf.Range{
+			Start: &rdf.Position{
+				Line: start,
+			},
+			End: &rdf.Position{
+				Line: end,
+			},
+		},
 	}
 }

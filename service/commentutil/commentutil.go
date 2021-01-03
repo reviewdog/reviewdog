@@ -80,7 +80,7 @@ func MarkdownComment(c *reviewdog.Comment) string {
 // MarkdownSuggestions creates diff in markdown for suggested changes
 func MarkdownSuggestions(c *reviewdog.Comment) string {
 	suggestions := c.Result.Diagnostic.GetSuggestions()
-	if suggestions == nil || len(suggestions) == 0 {
+	if len(suggestions) == 0 {
 		return ""
 	}
 
