@@ -133,6 +133,14 @@ func TestGitLabMergeRequestDiscussionCommenter_Post_Flush_review_api(t *testing.
 				Suggestions: []*rdf.Suggestion{
 					{
 						Text: "line1-fixed\nline2-fixed",
+						Range: &rdf.Range{
+							Start: &rdf.Position{
+								Line: 14,
+							},
+							End: &rdf.Position{
+								Line: 15,
+							},
+						},
 					},
 				},
 			},

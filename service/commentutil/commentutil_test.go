@@ -134,15 +134,21 @@ func TestMarkdownSuggestions(t *testing.T) {
 						Suggestions: []*rdf.Suggestion{
 							{
 								Text: "line1-fixed\nline2-fixed",
+								Range: &rdf.Range{
+									Start: &rdf.Position{
+										Line: 10,
+									},
+									End: &rdf.Position{
+										Line: 10,
+									},
+								},
 							},
 						},
 					},
 				},
 			},
 			want: strings.Join([]string{
-				"Suggestions:",
-				"",
-				"```",
+				"```suggestion:-0+0",
 				"line1-fixed",
 				"line2-fixed",
 				"```",
@@ -157,23 +163,37 @@ func TestMarkdownSuggestions(t *testing.T) {
 						Suggestions: []*rdf.Suggestion{
 							{
 								Text: "line1-fixed\nline2-fixed",
+								Range: &rdf.Range{
+									Start: &rdf.Position{
+										Line: 10,
+									},
+									End: &rdf.Position{
+										Line: 11,
+									},
+								},
 							},
 							{
 								Text: "line3-fixed\nline4-fixed",
+								Range: &rdf.Range{
+									Start: &rdf.Position{
+										Line: 20,
+									},
+									End: &rdf.Position{
+										Line: 21,
+									},
+								},
 							},
 						},
 					},
 				},
 			},
 			want: strings.Join([]string{
-				"Suggestions:",
-				"",
-				"```",
+				"```suggestion:-0+1",
 				"line1-fixed",
 				"line2-fixed",
 				"```",
 				"",
-				"```",
+				"```suggestion:-0+1",
 				"line3-fixed",
 				"line4-fixed",
 				"```",

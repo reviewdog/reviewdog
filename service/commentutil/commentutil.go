@@ -80,19 +80,22 @@ func MarkdownComment(c *reviewdog.Comment) string {
 // MarkdownSuggestions creates diff in markdown for suggested changes
 func MarkdownSuggestions(c *reviewdog.Comment) string {
 	suggestions := c.Result.Diagnostic.GetSuggestions()
-	if len(suggestions) == 0 {
+	if suggestions == nil || len(suggestions) == 0 {
 		return ""
 	}
 
 	var sb strings.Builder
 
 	for index, s := range suggestions {
-		if index == 0 {
-			sb.WriteString("Suggestions:\n\n")
-		} else {
+		if s.Range == nil || s.Range.Start == nil || s.Range.End == nil {
+			continue
+		}
+		if index > 0 {
 			sb.WriteString("\n\n")
 		}
-		sb.WriteString("```\n")
+		sb.WriteString("```suggestion:-0+")
+		sb.WriteString(fmt.Sprintf("%d", s.Range.End.Line-s.Range.Start.Line))
+		sb.WriteString("\n")
 		sb.WriteString(strings.Trim(s.GetText(), "\n"))
 		sb.WriteString("\n```")
 	}
