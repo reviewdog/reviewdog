@@ -9,6 +9,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ### :sparkles: Release Note <!-- optional -->
 
 ### :rocket: Enhancements
+
+- [#x](https://github.com/reviewdog/reviewdog/pull/x) Incude suggestion as markdown diff while making Gitlab merge request comment
 - ...
 
 ### :bug: Fixes

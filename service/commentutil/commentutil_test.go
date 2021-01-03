@@ -108,3 +108,82 @@ func TestCommentBody(t *testing.T) {
 		}
 	}
 }
+
+func TestMarkdownSuggestion(t *testing.T) {
+	tests := []struct {
+		in   *reviewdog.Comment
+		want string
+	}{
+		{
+			in: &reviewdog.Comment{
+				ToolName: "tool-name",
+				Result: &filter.FilteredDiagnostic{
+					Diagnostic: &rdf.Diagnostic{
+						Message: "no suggestion",
+					},
+				},
+			},
+			want: "",
+		},
+		{
+			in: &reviewdog.Comment{
+				ToolName: "tool-name",
+				Result: &filter.FilteredDiagnostic{
+					Diagnostic: &rdf.Diagnostic{
+						Message: "one suggestion",
+						Suggestions: []*rdf.Suggestion{
+							{
+								Text: "line1-fixed\nline2-fixed",
+							},
+						},
+					},
+				},
+			},
+			want: strings.Join([]string{
+				"",
+				"",
+				"```diff",
+				"+line1-fixed",
+				"+line2-fixed",
+				"```",
+			}, "\n"),
+		},
+		{
+			in: &reviewdog.Comment{
+				ToolName: "tool-name",
+				Result: &filter.FilteredDiagnostic{
+					Diagnostic: &rdf.Diagnostic{
+						Message: "two suggestions",
+						Suggestions: []*rdf.Suggestion{
+							{
+								Text: "line1-fixed\nline2-fixed",
+							},
+							{
+								Text: "line3-fixed\nline4-fixed",
+							},
+						},
+					},
+				},
+			},
+			want: strings.Join([]string{
+				"",
+				"",
+				"```diff",
+				"+line1-fixed",
+				"+line2-fixed",
+				"```",
+				"",
+				"```diff",
+				"+line3-fixed",
+				"+line4-fixed",
+				"```",
+			}, "\n"),
+		},
+	}
+	for _, tt := range tests {
+		suggestion := MarkdownSuggestion(tt.in)
+		if suggestion != tt.want {
+			t.Errorf("got unexpected suggestion.\ngot:\n%s\nwant:\n%s", suggestion, tt.want)
+		}
+	}
+}
