@@ -240,8 +240,8 @@ func TestGitLabMergeRequestDiscussionCommenter_Post_Flush_review_api(t *testing.
 					t.Error(diff)
 				}
 			case "file3.go":
-				suggestion := commentutil.MarkdownSuggestion(newCommentWithSuggestion)
-				bodyExpected := commentutil.MarkdownComment(newCommentWithSuggestion) + suggestion
+				suggestions := commentutil.MarkdownSuggestions(newCommentWithSuggestion)
+				bodyExpected := commentutil.MarkdownComment(newCommentWithSuggestion) + "\n\n" + suggestions
 
 				want := &gitlab.CreateMergeRequestDiscussionOptions{
 					Body: gitlab.String(bodyExpected),

@@ -109,7 +109,7 @@ func TestCommentBody(t *testing.T) {
 	}
 }
 
-func TestMarkdownSuggestion(t *testing.T) {
+func TestMarkdownSuggestions(t *testing.T) {
 	tests := []struct {
 		in   *reviewdog.Comment
 		want string
@@ -140,11 +140,11 @@ func TestMarkdownSuggestion(t *testing.T) {
 				},
 			},
 			want: strings.Join([]string{
+				"Suggestions:",
 				"",
-				"",
-				"```diff",
-				"+line1-fixed",
-				"+line2-fixed",
+				"```",
+				"line1-fixed",
+				"line2-fixed",
 				"```",
 			}, "\n"),
 		},
@@ -166,22 +166,22 @@ func TestMarkdownSuggestion(t *testing.T) {
 				},
 			},
 			want: strings.Join([]string{
+				"Suggestions:",
 				"",
-				"",
-				"```diff",
-				"+line1-fixed",
-				"+line2-fixed",
+				"```",
+				"line1-fixed",
+				"line2-fixed",
 				"```",
 				"",
-				"```diff",
-				"+line3-fixed",
-				"+line4-fixed",
+				"```",
+				"line3-fixed",
+				"line4-fixed",
 				"```",
 			}, "\n"),
 		},
 	}
 	for _, tt := range tests {
-		suggestion := MarkdownSuggestion(tt.in)
+		suggestion := MarkdownSuggestions(tt.in)
 		if suggestion != tt.want {
 			t.Errorf("got unexpected suggestion.\ngot:\n%s\nwant:\n%s", suggestion, tt.want)
 		}

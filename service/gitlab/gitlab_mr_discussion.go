@@ -105,8 +105,8 @@ func (g *MergeRequestDiscussionCommenter) postCommentsForEach(ctx context.Contex
 		lnum := int(loc.GetRange().GetStart().GetLine())
 		body := commentutil.MarkdownComment(c)
 
-		if suggestion := commentutil.MarkdownSuggestion(c); suggestion != "" {
-			body = body + suggestion
+		if suggestion := commentutil.MarkdownSuggestions(c); suggestion != "" {
+			body = body + "\n\n" + suggestion
 		}
 
 		if !c.Result.InDiffFile || lnum == 0 || postedcs.IsPosted(c, lnum, body) {
