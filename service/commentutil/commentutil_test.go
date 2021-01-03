@@ -199,6 +199,75 @@ func TestMarkdownSuggestions(t *testing.T) {
 				"```",
 			}, "\n"),
 		},
+		{
+			in: &reviewdog.Comment{
+				ToolName: "tool-name",
+				Result: &filter.FilteredDiagnostic{
+					Diagnostic: &rdf.Diagnostic{
+						Message: "two suggestions, one without range",
+						Suggestions: []*rdf.Suggestion{
+							{
+								Text: "line3-fixed\nline4-fixed",
+							},
+							{
+								Text: "line1-fixed\nline2-fixed",
+								Range: &rdf.Range{
+									Start: &rdf.Position{
+										Line: 10,
+									},
+									End: &rdf.Position{
+										Line: 11,
+									},
+								},
+							},
+						},
+					},
+				},
+			},
+			want: strings.Join([]string{
+				"```suggestion:-0+1",
+				"line1-fixed",
+				"line2-fixed",
+				"```",
+			}, "\n"),
+		},
+		{
+			in: &reviewdog.Comment{
+				ToolName: "tool-name",
+				Result: &filter.FilteredDiagnostic{
+					Diagnostic: &rdf.Diagnostic{
+						Message: "two suggestions, one without range end",
+						Suggestions: []*rdf.Suggestion{
+							{
+								Text: "line3-fixed\nline4-fixed",
+								Range: &rdf.Range{
+									Start: &rdf.Position{
+										Line: 20,
+									},
+								},
+							},
+							{
+								Text: "line1-fixed\nline2-fixed",
+								Range: &rdf.Range{
+									Start: &rdf.Position{
+										Line: 10,
+									},
+									End: &rdf.Position{
+										Line: 11,
+									},
+								},
+							},
+						},
+					},
+				},
+			},
+			want: strings.Join([]string{
+				"```suggestion:-0+1",
+				"line1-fixed",
+				"line2-fixed",
+				"```",
+			}, "\n"),
+		},
 	}
 	for _, tt := range tests {
 		suggestion := MarkdownSuggestions(tt.in)

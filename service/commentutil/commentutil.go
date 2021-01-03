@@ -86,11 +86,12 @@ func MarkdownSuggestions(c *reviewdog.Comment) string {
 
 	var sb strings.Builder
 
-	for index, s := range suggestions {
+	suggestionsRendered := 0
+	for _, s := range suggestions {
 		if s.Range == nil || s.Range.Start == nil || s.Range.End == nil {
 			continue
 		}
-		if index > 0 {
+		if suggestionsRendered > 0 {
 			sb.WriteString("\n\n")
 		}
 		sb.WriteString("```suggestion:-0+")
@@ -98,6 +99,8 @@ func MarkdownSuggestions(c *reviewdog.Comment) string {
 		sb.WriteString("\n")
 		sb.WriteString(strings.Trim(s.GetText(), "\n"))
 		sb.WriteString("\n```")
+
+		suggestionsRendered++
 	}
 
 	return sb.String()
