@@ -33,8 +33,14 @@ func run() error {
 		return errors.New("DEPUP_GITHUB_API_TOKEN is empty")
 	}
 	cli := githubClient(ctx, token)
-	// TODO(haya14busa): Support pagination.
-	repos, _, err := cli.Repositories.ListByOrg(ctx, *targetOrg, &github.RepositoryListByOrgOptions{})
+	// TODO(haya14busa): Support pagination once the # of repo become more than 100.
+	repos, _, err := cli.Repositories.ListByOrg(ctx, *targetOrg, &github.RepositoryListByOrgOptions{
+		Sort:      "updated",
+		Direction: "desc",
+		ListOptions: github.ListOptions{
+			PerPage: 100,
+		},
+	})
 	if err != nil {
 		return err
 	}
