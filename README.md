@@ -48,7 +48,7 @@
   <a href="https://github.com/reviewdog/.github/blob/master/CODE_OF_CONDUCT.md">
     <img alt="Contributor Covenant" src="https://img.shields.io/badge/Contributor%20Covenant-v2.0%20adopted-ff69b4.svg">
   </a>
-  <a href="https://somsubhra.com/github-release-stats/?username=reviewdog&repository=reviewdog">
+  <a href="https://somsubhra.github.io/github-release-stats/?username=reviewdog&repository=reviewdog&per_page=30">
     <img alt="Github Releases Stats" src="https://img.shields.io/github/downloads/reviewdog/reviewdog/total.svg?logo=github">
   </a>
   <a href="https://starcharts.herokuapp.com/reviewdog/reviewdog"><img alt="Stars" src="https://img.shields.io/github/stars/reviewdog/reviewdog.svg?style=social"></a>
