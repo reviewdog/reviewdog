@@ -162,7 +162,7 @@ errorformat should be `%f:%l:%c: %m` and you can pass it as `-efm` arguments.
 ```shell
 $ golint ./...
 comment_iowriter.go:11:6: exported type CommentWriter should have comment or be unexported
-$ golint ./... | reviewdog -efm="%f:%l:%c: %m" -diff="git diff master"
+$ golint ./... | reviewdog -efm="%f:%l:%c: %m" -diff="git diff FETCH_HEAD"
 ```
 
 | name | description |
@@ -200,7 +200,7 @@ sbt             the interactive build tool                                      
 ```
 
 ```shell
-$ golint ./... | reviewdog -f=golint -diff="git diff master"
+$ golint ./... | reviewdog -f=golint -diff="git diff FETCH_HEAD"
 ```
 
 You can add supported pre-defined 'errorformat' by contributing to [reviewdog/errorformat](https://github.com/reviewdog/errorformat)
@@ -338,12 +338,12 @@ runner:
 ```
 
 ```shell
-$ reviewdog -diff="git diff master"
+$ reviewdog -diff="git diff FETCH_HEAD"
 project/run_test.go:61:28: [golint] error strings should not end with punctuation
 project/run.go:57:18: [errcheck]        defer os.Setenv(name, os.Getenv(name))
 project/run.go:58:12: [errcheck]        os.Setenv(name, "")
 # You can use -runners to run only specified runners.
-$ reviewdog -diff="git diff master" -runners=golint,govet
+$ reviewdog -diff="git diff FETCH_HEAD" -runners=golint,govet
 project/run_test.go:61:28: [golint] error strings should not end with punctuation
 # You can use -conf to specify config file path.
 $ reviewdog -conf=./.reviewdog.yml -reporter=github-pr-check
@@ -366,7 +366,7 @@ reviewdog can find newly introduced findings by filtering linter results
 using diff. You can pass diff command as `-diff` arg.
 
 ```shell
-$ golint ./... | reviewdog -f=golint -diff="git diff master"
+$ golint ./... | reviewdog -f=golint -diff="git diff FETCH_HEAD"
 ```
 
 ### Reporter: GitHub Checks (-reporter=github-pr-check)
