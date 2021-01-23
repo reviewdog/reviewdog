@@ -322,8 +322,9 @@ environment including editor integration with ease.
 runner:
   <tool-name>:
     cmd: <command> # (required)
-    errorformat: # (optional if there is supported format for <tool-name>. see reviewdog -list)
+    errorformat: # (optional if you use `format`)
       - <list of errorformat>
+    format: <format-name> # (optional if you use `errorformat`. e.g. golint,rdjson,rdjsonl)
     name: <tool-name> # (optional. you can overwrite <tool-name> defined by runner key)
     level: <level> # (optional. same as -level flag. [info,warning,error])
 
@@ -335,6 +336,11 @@ runner:
     level: warning
   govet:
     cmd: go vet -all .
+    format: govet
+  your-awesome-linter:
+    cmd: awesome-linter run
+    format: rdjson
+    name: AwesomeLinter
 ```
 
 ```shell
