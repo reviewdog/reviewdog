@@ -20,7 +20,7 @@ require (
 	github.com/reviewdog/go-bitbucket v0.0.0-20201024094602-708c3f6a7de0
 	github.com/vvakame/sdlog v0.0.0-20200409072131-7c0d359efddc
 	github.com/xanzy/go-gitlab v0.42.0
-	go.opencensus.io v0.22.5
+	go.opencensus.io v0.22.6
 	golang.org/x/build v0.0.0-20200616162219-07bebbe343e9
 	golang.org/x/oauth2 v0.0.0-20210126194326-f9ce19ea3013
 	golang.org/x/sync v0.0.0-20201207232520-09787c993a3a
