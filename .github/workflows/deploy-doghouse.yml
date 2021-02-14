@@ -1,8 +1,6 @@
 name: Deploy doghouse
 on:
   push:
-    branches:
-      - master
     tags:
       - 'v*.*.*'
   workflow_dispatch:
