@@ -3,9 +3,8 @@ on:
   push:
     branches:
       - master
-      - deploy-doghouse-github-actions # test
-    # tags:
-    #   - 'v*.*.*'
+    tags:
+      - 'v*.*.*'
   workflow_dispatch:
 
 jobs:
