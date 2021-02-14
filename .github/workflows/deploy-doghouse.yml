@@ -52,6 +52,5 @@ jobs:
         run: gcloud --quiet app deploy app.yaml
       - name: Cleanup
         run: |-
-          rm service_account_key.json
           rm secret/reviewdog.private-key.pem
           rm secret/secret.yaml
