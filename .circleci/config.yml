@@ -20,4 +20,4 @@ workflows:
   version: 2
   lint:
     jobs:
-      - lint:
+      - lint
