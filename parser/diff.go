@@ -55,7 +55,7 @@ func (p *DiffParser) Parse(r io.Reader) ([]*rdf.Diagnostic, error) {
 	if err != nil {
 		return nil, fmt.Errorf("fail to parse diff: %w", err)
 	}
-	var diagnostics []*rdf.Diagnostic
+	diagnostics := make([]*rdf.Diagnostic, 0, len(filediffs))
 	for _, fdiff := range filediffs {
 		path := filter.NormalizeDiffPath(fdiff.PathNew, p.strip)
 		for _, hunk := range fdiff.Hunks {

@@ -24,7 +24,7 @@ func RunAndParse(ctx context.Context, conf *Config, runners map[string]bool, def
 	// environment variables for each commands
 	envs := filteredEnviron()
 	cmdBuilder := newCmdBuilder(envs, teeMode)
-	var usedRunners []string
+	usedRunners := make([]string, 0, len(conf.Runner))
 	var g errgroup.Group
 	semaphoreNum := runtime.NumCPU()
 	if teeMode {
@@ -146,7 +146,7 @@ func checkUnknownRunner(specifiedRunners map[string]bool, usedRunners []string) 
 	for _, r := range usedRunners {
 		delete(specifiedRunners, r)
 	}
-	var rs []string
+	rs := make([]string, 0, len(specifiedRunners))
 	for r := range specifiedRunners {
 		rs = append(rs, r)
 	}

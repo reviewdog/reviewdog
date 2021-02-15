@@ -23,7 +23,7 @@ func (p *CheckStyleParser) Parse(r io.Reader) ([]*rdf.Diagnostic, error) {
 	if err := xml.NewDecoder(r).Decode(cs); err != nil {
 		return nil, err
 	}
-	var ds []*rdf.Diagnostic
+	ds := make([]*rdf.Diagnostic, 0, len(cs.Files))
 	for _, file := range cs.Files {
 		for _, cerr := range file.Errors {
 			d := &rdf.Diagnostic{

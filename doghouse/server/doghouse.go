@@ -84,7 +84,7 @@ func (ch *Checker) Check(ctx context.Context) (*doghouse.CheckResponse, error) {
 }
 
 func (ch *Checker) postCheck(ctx context.Context, checkID int64, checks []*filter.FilteredDiagnostic) (*github.CheckRun, string, error) {
-	var annotations []*github.CheckRunAnnotation
+	annotations := make([]*github.CheckRunAnnotation, 0, len(checks))
 	for _, c := range checks {
 		if !c.ShouldReport {
 			continue
@@ -198,8 +198,8 @@ func (ch *Checker) summary(checks []*filter.FilteredDiagnostic) string {
 	var lines []string
 	lines = append(lines, "reported by [reviewdog](https://github.com/reviewdog/reviewdog) :dog:")
 
-	var findings []*filter.FilteredDiagnostic
-	var filteredFindings []*filter.FilteredDiagnostic
+	findings := make([]*filter.FilteredDiagnostic, 0, len(checks))
+	filteredFindings := make([]*filter.FilteredDiagnostic, 0, len(checks))
 	for _, c := range checks {
 		if c.ShouldReport {
 			findings = append(findings, c)
