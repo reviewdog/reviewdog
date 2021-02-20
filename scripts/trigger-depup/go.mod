@@ -4,5 +4,5 @@ go 1.14
 
 require (
 	github.com/google/go-github/v32 v32.1.0
-	golang.org/x/oauth2 v0.0.0-20210216194517-16ff1888fd2e
+	golang.org/x/oauth2 v0.0.0-20210220000619-9bb904979d93
 )
