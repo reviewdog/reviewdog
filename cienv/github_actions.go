@@ -111,5 +111,6 @@ func HasReadOnlyPermissionGitHubToken() bool {
 	if err != nil {
 		return false
 	}
-	return event.PullRequest.Head.Repo.Owner.ID != event.PullRequest.Base.Repo.Owner.ID && event.ActionName != "pull_request_target"
+	isForkedRepo := event.PullRequest.Head.Repo.Owner.ID != event.PullRequest.Base.Repo.Owner.ID
+	return isForkedRepo && event.ActionName != "pull_request_target"
 }
