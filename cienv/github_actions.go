@@ -22,6 +22,7 @@ type GitHubEvent struct {
 	HeadCommit struct {
 		ID string `json:"id"`
 	} `json:"head_commit"`
+	ActionName string `json:"action_name"`
 }
 
 type GitHubRepo struct {
@@ -102,12 +103,13 @@ func IsInGitHubAction() bool {
 	return os.Getenv("GITHUB_ACTIONS") != ""
 }
 
-// IsGitHubPRFromForkedRepo returns true if reviewdog is running in GitHub
-// Actions and running for PullRequests from forked repository.
-func IsGitHubPRFromForkedRepo() bool {
+// HasReadOnlyPermissionGitHubToken returns true if reviewdog is running in GitHub
+// Actions and running for PullRequests from forked repository with read-only token.
+// https://docs.github.com/en/actions/reference/events-that-trigger-workflows#pull_request_target
+func HasReadOnlyPermissionGitHubToken() bool {
 	event, err := LoadGitHubEvent()
 	if err != nil {
 		return false
 	}
-	return event.PullRequest.Head.Repo.Owner.ID != event.PullRequest.Base.Repo.Owner.ID
+	return event.PullRequest.Head.Repo.Owner.ID != event.PullRequest.Base.Repo.Owner.ID && event.ActionName != "pull_request_target"
 }
