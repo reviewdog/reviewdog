@@ -25,7 +25,7 @@ jobs:
         working-directory: ./doghouse/appengine/
     steps:
       - uses: actions/checkout@v2
-      - uses: google-github-actions/setup-gcloud@v0.2.0
+      - uses: google-github-actions/setup-gcloud@v0.2.1
         with:
           project_id: review-dog
           service_account_key: ${{ secrets.GCP_SA_KEY }}
