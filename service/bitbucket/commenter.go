@@ -29,8 +29,6 @@ type PullRequestCommenter struct {
 	muComments   sync.Mutex
 	postComments []*reviewdog.Comment
 
-	postedcs commentutil.PostedComments
-
 	// wd is working directory relative to root of repository.
 	wd string
 }
