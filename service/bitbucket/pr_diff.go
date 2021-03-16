@@ -16,9 +16,9 @@ var _ reviewdog.DiffService = &PullRequestDiff{}
 
 // PullRequestDiff is a diff service for BitBucket PullRequest.
 type PullRequestDiff struct {
-	cli      *bbv1api.APIClient
-	pr       int
-	sha, owner, repo      string
+	cli              *bbv1api.APIClient
+	pr               int
+	sha, owner, repo string
 
 	// wd is working directory relative to root of repository.
 	wd string
@@ -32,12 +32,12 @@ func NewPullRequestDiff(cli *bbv1api.APIClient, owner, repo string, pr int, sha 
 		return nil, fmt.Errorf("PullRequestDiff needs 'git' command: %w", err)
 	}
 	return &PullRequestDiff{
-		cli:      cli,
-		pr:       pr,
-		sha:      sha,
-		owner:    owner,
-		repo:     repo,
-		wd:       workDir,
+		cli:   cli,
+		pr:    pr,
+		sha:   sha,
+		owner: owner,
+		repo:  repo,
+		wd:    workDir,
 	}, nil
 }
 

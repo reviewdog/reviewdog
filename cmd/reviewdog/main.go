@@ -663,7 +663,6 @@ func bitbucketv1BuildWithClient(ctx context.Context) (*cienv.BuildInfo, *bitbuck
 	bbPass := os.Getenv("BITBUCKET_PASSWORD")
 	bbAccessToken := os.Getenv("BITBUCKET_ACCESS_TOKEN")
 
-
 	if bbUser != "" && bbPass != "" {
 		basicAuth := bitbucketv1.BasicAuth{UserName: bbUser, Password: bbPass}
 		ctx = context.WithValue(ctx, bitbucketv1.ContextBasicAuth, basicAuth)

@@ -143,28 +143,28 @@ func TestBitBucketPullRequestCommenter_Post_Flush_review_api(t *testing.T) {
 		default:
 			resp := map[string]interface{}{
 				"nextPageStart": 2,
-				"isLastPage": false,
+				"isLastPage":    false,
 				"values": []bbv1api.Activity{
-						{
-							Action: bbv1api.ActionCommented,
-							Comment: bbv1api.ActivityComment{
-								Text: commentutil.BitBucketMarkdownComment(alreadyCommented1),
-							},
-							CommentAnchor: bbv1api.Anchor{
-								Path: alreadyCommented1.Result.Diagnostic.GetLocation().GetPath(),
-								Line: int(alreadyCommented1.Result.Diagnostic.GetLocation().GetRange().GetStart().GetLine()),
-							},
+					{
+						Action: bbv1api.ActionCommented,
+						Comment: bbv1api.ActivityComment{
+							Text: commentutil.BitBucketMarkdownComment(alreadyCommented1),
 						},
-						{
-							Action: bbv1api.ActionCommented,
-							Comment: bbv1api.ActivityComment{
-								Text: "unrelated commented",
-							},
-							CommentAnchor: bbv1api.Anchor{
-								Path: "file.go",
-								Line: 1,
-							},
+						CommentAnchor: bbv1api.Anchor{
+							Path: alreadyCommented1.Result.Diagnostic.GetLocation().GetPath(),
+							Line: int(alreadyCommented1.Result.Diagnostic.GetLocation().GetRange().GetStart().GetLine()),
 						},
+					},
+					{
+						Action: bbv1api.ActionCommented,
+						Comment: bbv1api.ActivityComment{
+							Text: "unrelated commented",
+						},
+						CommentAnchor: bbv1api.Anchor{
+							Path: "file.go",
+							Line: 1,
+						},
+					},
 				},
 			}
 			if err := json.NewEncoder(w).Encode(resp); err != nil {
@@ -208,8 +208,8 @@ func TestBitBucketPullRequestCommenter_Post_Flush_review_api(t *testing.T) {
 					DiffType: bbv1api.DiffTypeEffective,
 					LineType: bbv1api.LineTypeAdded,
 					FileType: bbv1api.FileTypeTo,
-					Path: "file.go",
-					Line: 14,
+					Path:     "file.go",
+					Line:     14,
 				},
 			}
 			if diff := cmp.Diff(got, want); diff != "" {
@@ -222,8 +222,8 @@ func TestBitBucketPullRequestCommenter_Post_Flush_review_api(t *testing.T) {
 					DiffType: bbv1api.DiffTypeEffective,
 					LineType: bbv1api.LineTypeAdded,
 					FileType: bbv1api.FileTypeTo,
-					Path: "file2.go",
-					Line: 15,
+					Path:     "file2.go",
+					Line:     15,
 				},
 			}
 			if diff := cmp.Diff(got, want); diff != "" {

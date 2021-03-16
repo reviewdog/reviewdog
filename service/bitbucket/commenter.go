@@ -22,9 +22,9 @@ var _ reviewdog.CommentService = &PullRequestCommenter{}
 //  https://docs.atlassian.com/bitbucket-server/rest/5.16.0/bitbucket-rest.html#idm8286336848
 //  POST /rest/api/1.0/projects/{projectKey}/repos/{repositorySlug}/pull-requests/{pullRequestId}/comments
 type PullRequestCommenter struct {
-	cli      *bbv1api.APIClient
-	pr       int64
-	sha, owner, repo      string
+	cli              *bbv1api.APIClient
+	pr               int64
+	sha, owner, repo string
 
 	muComments   sync.Mutex
 	postComments []*reviewdog.Comment
@@ -43,12 +43,12 @@ func NewPullRequestCommenter(cli *bbv1api.APIClient, owner, repo string, pr int,
 		return nil, fmt.Errorf("PullRequestCommenter needs 'git' command: %w", err)
 	}
 	return &PullRequestCommenter{
-		cli:      cli,
-		pr:       int64(pr),
-		sha:      sha,
-		owner:    owner,
-		repo:     repo,
-		wd:       workDir,
+		cli:   cli,
+		pr:    int64(pr),
+		sha:   sha,
+		owner: owner,
+		repo:  repo,
+		wd:    workDir,
 	}, nil
 }
 
