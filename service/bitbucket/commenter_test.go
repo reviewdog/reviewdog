@@ -19,7 +19,7 @@ import (
 	"github.com/reviewdog/reviewdog/service/commentutil"
 )
 
-func TestBitBucketPullRequestCommenter_Post_Flush_review_api(t *testing.T) {
+func TestBitBucketPullRequestCommenter(t *testing.T) {
 	cwd, _ := os.Getwd()
 	defer os.Chdir(cwd)
 	os.Chdir("../..")
@@ -135,7 +135,8 @@ func TestBitBucketPullRequestCommenter_Post_Flush_review_api(t *testing.T) {
 	const wantPostCalled = 3
 
 	mux := http.NewServeMux()
-	mux.HandleFunc("/rest/api/1.0/projects/o/repos/r/pull-requests/14/activities", func(w http.ResponseWriter, r *http.Request) {
+	mux.HandleFunc("/rest/api/1.0/projects/o/repos/r/pull-requests/14/activities", func(w http.ResponseWriter,
+		r *http.Request) {
 		if r.Method != http.MethodGet {
 			t.Errorf("unexpected access: %v %v", r.Method, r.URL)
 		}
@@ -191,7 +192,8 @@ func TestBitBucketPullRequestCommenter_Post_Flush_review_api(t *testing.T) {
 			}
 		}
 	})
-	mux.HandleFunc("/rest/api/1.0/projects/o/repos/r/pull-requests/14/comments", func(w http.ResponseWriter, r *http.Request) {
+	mux.HandleFunc("/rest/api/1.0/projects/o/repos/r/pull-requests/14/comments", func(w http.ResponseWriter,
+		r *http.Request) {
 		if r.Method != http.MethodPost {
 			t.Errorf("unexpected access: %v %v", r.Method, r.URL)
 		}

@@ -77,7 +77,7 @@ func MarkdownComment(c *reviewdog.Comment) string {
 	return sb.String()
 }
 
-// BitBucket gives very restricted markdown support in comments
+// BitBucketMarkdownComment creates BitBucket markdown comment (it has very restricted markdown support in comments)
 func BitBucketMarkdownComment(c *reviewdog.Comment) string {
 	var sb strings.Builder
 	if s := severity(c); s != "" {

@@ -17,7 +17,10 @@ func TestBitBucketPullRequestDiff_Diff(t *testing.T) {
 		if r.Method != http.MethodGet {
 			t.Errorf("unexpected access: %v %v", r.Method, r.URL)
 		}
-		w.Write([]byte(`{"toRef": {"latestCommit": "HEAD~"}}`))
+		_, err := w.Write([]byte(`{"toRef": {"latestCommit": "HEAD~"}}`))
+		if err != nil {
+			t.Fatal(err)
+		}
 	})
 
 	ts := httptest.NewServer(mux)

@@ -35,7 +35,8 @@ type PullRequestCommenter struct {
 
 // NewPullRequestCommenter returns a new PullRequestCommenter service.
 // PullRequestCommenter service needs git command in $PATH.
-func NewPullRequestCommenter(cli *bbv1api.APIClient, owner, repo string, pr int, sha string) (*PullRequestCommenter, error) {
+func NewPullRequestCommenter(cli *bbv1api.APIClient, owner, repo string, pr int, sha string) (*PullRequestCommenter,
+	error) {
 	workDir, err := serviceutil.GitRelWorkdir()
 	if err != nil {
 		return nil, fmt.Errorf("PullRequestCommenter needs 'git' command: %w", err)
@@ -87,7 +88,7 @@ func (g *PullRequestCommenter) createPostedComments() (commentutil.PostedComment
 	return postedcs, nil
 }
 
-func (g *PullRequestCommenter) postCommentsForEach(ctx context.Context, postedcs commentutil.PostedComments) error {
+func (g *PullRequestCommenter) postCommentsForEach(_ context.Context, postedcs commentutil.PostedComments) error {
 	var eg errgroup.Group
 	for _, c := range g.postComments {
 		c := c
@@ -110,7 +111,8 @@ func (g *PullRequestCommenter) postCommentsForEach(ctx context.Context, postedcs
 				Text:   body,
 				Anchor: anchor,
 			}
-			_, err := g.cli.DefaultApi.CreatePullRequestComment(g.owner, g.repo, int(g.pr), comment, []string{"application/json"})
+			_, err := g.cli.DefaultApi.CreatePullRequestComment(g.owner, g.repo, int(g.pr), comment,
+				[]string{"application/json"})
 			if err != nil {
 				return fmt.Errorf("failed to create pull request comment: %w", err)
 			}
@@ -120,7 +122,8 @@ func (g *PullRequestCommenter) postCommentsForEach(ctx context.Context, postedcs
 	return eg.Wait()
 }
 
-func listAllPullRequestActivities(cli *bbv1api.APIClient, owner, repo string, pr int64, opts map[string]interface{}) ([]bbv1api.Activity, error) {
+func listAllPullRequestActivities(cli *bbv1api.APIClient, owner, repo string, pr int64, opts map[string]interface{}) (
+	[]bbv1api.Activity, error) {
 	resp, err := cli.DefaultApi.GetActivities(owner, repo, pr, opts)
 	if err != nil {
 		return nil, err
