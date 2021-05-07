@@ -172,7 +172,6 @@ $ golint ./... | reviewdog -efm="%f:%l:%c: %m" -diff="git diff FETCH_HEAD"
 | %c | column number |
 | %m | error message |
 | %% | the single '%' character |
-| ... | ... |
 
 Please see [reviewdog/errorformat](https://github.com/reviewdog/errorformat)
 and [:h errorformat](https://vim-jp.org/vimdoc-en/quickfix.html#error-file-format)
