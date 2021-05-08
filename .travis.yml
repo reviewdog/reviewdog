@@ -17,4 +17,3 @@ install:
 
 script:
   - golint ./... | reviewdog -f=golint -name=golint-travis -reporter=github-pr-check
-  - $(npm bin)/textlint -f checkstyle README.md | reviewdog -f=checkstyle -name="textlint" -reporter=github-pr-check -level=info
