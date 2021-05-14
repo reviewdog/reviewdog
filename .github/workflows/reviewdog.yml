@@ -239,3 +239,15 @@ jobs:
           github_token: ${{ secrets.github_token }}
           reporter: github-check
           level: info
+
+  textlint:
+    name: runner / textlint
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v2
+      - use: reviewdog/action-setup@v1
+      - run: npm install
+      - name: textlint
+        run: |
+          $(npm bin)/textlint -f checkstyle README.md | \
+            reviewdog -f=checkstyle -name="textlint" -reporter=github-check -level=info
