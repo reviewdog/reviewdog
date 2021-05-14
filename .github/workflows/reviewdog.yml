@@ -248,6 +248,8 @@ jobs:
       - uses: reviewdog/action-setup@v1
       - run: npm install
       - name: textlint
+        env:
+          REVIEWDOG_GITHUB_API_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         run: |
           $(npm bin)/textlint -f checkstyle README.md | \
             reviewdog -f=checkstyle -name="textlint" -reporter=github-check -level=info
