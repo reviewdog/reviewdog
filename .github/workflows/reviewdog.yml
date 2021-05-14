@@ -20,7 +20,7 @@ jobs:
         run: '( cd linters && go get golang.org/x/lint/golint )'
 
       - name: Setup reviewdog
-        # use: reviewdog/action-setup@v1
+        # uses: reviewdog/action-setup@v1
         run: |
           go install ./cmd/reviewdog
 
@@ -72,7 +72,7 @@ jobs:
         run: '( cd linters && go get golang.org/x/lint/golint )'
 
       - name: Setup reviewdog
-        # use: reviewdog/action-setup@v1
+        # uses: reviewdog/action-setup@v1
         run: |
           go install ./cmd/reviewdog
 
@@ -245,7 +245,7 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v2
-      - use: reviewdog/action-setup@v1
+      - uses: reviewdog/action-setup@v1
       - run: npm install
       - name: textlint
         run: |
