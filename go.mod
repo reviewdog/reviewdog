@@ -14,7 +14,7 @@ require (
 	github.com/haya14busa/secretbox v0.0.0-20180525171038-07c7ecf409f5
 	github.com/justinas/nosurf v1.1.1
 	github.com/kylelemons/godebug v1.1.0
-	github.com/mattn/go-shellwords v1.0.11
+	github.com/mattn/go-shellwords v1.0.12
 	github.com/rakyll/statik v0.1.7
 	github.com/reviewdog/errorformat v0.0.0-20210517100703-fd739bda5dda
 	github.com/reviewdog/go-bitbucket v0.0.0-20201024094602-708c3f6a7de0
