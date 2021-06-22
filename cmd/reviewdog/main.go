@@ -531,13 +531,23 @@ func githubClient(ctx context.Context, token string) (*github.Client, error) {
 const defaultGitHubAPI = "https://api.github.com/"
 
 func githubBaseURL() (*url.URL, error) {
-	baseURL := os.Getenv("GITHUB_API")
-	if baseURL == "" {
-		baseURL = defaultGitHubAPI
+	if baseURL := os.Getenv("GITHUB_API"); baseURL != "" {
+		u, err := url.Parse(baseURL)
+		if err != nil {
+			return nil, fmt.Errorf("GitHub base URL from GITHUB_API is invalid: %v, %w", baseURL, err)
+		}
+		return u, nil
 	}
-	u, err := url.Parse(baseURL)
+	if baseURL := os.Getenv("GITHUB_API_URL"); baseURL != "" {
+		u, err := url.Parse(baseURL)
+		if err != nil {
+			return nil, fmt.Errorf("GitHub base URL from GITHUB_API_URL is invalid: %v, %w", baseURL, err)
+		}
+		return u, nil
+	}
+	u, err := url.Parse(defaultGitHubAPI)
 	if err != nil {
-		return nil, fmt.Errorf("GitHub base URL is invalid: %v, %w", baseURL, err)
+		return nil, fmt.Errorf("GitHub base URL from reviewdog default is invalid: %v, %w", defaultGitHubAPI, err)
 	}
 	return u, nil
 }
