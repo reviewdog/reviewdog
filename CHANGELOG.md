@@ -10,6 +10,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### :rocket: Enhancements
 - [#888](https://github.com/reviewdog/reviewdog/pull/888) Allow GitHub PR reporting for a forked repository iff it's triggered by `pull_request_target`
+- [#976](https://github.com/reviewdog/reviewdog/pull/976) Treat `GITHUB_API_URL` environment variable as same as `GITHUB_API`, so users can use reviewdog in GitHub Actions in Enterprise Server without setting `GITHUB_API`
 
 ### :bug: Fixes
 - ...
