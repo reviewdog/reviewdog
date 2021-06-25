@@ -539,7 +539,7 @@ func githubBaseURL() (*url.URL, error) {
 		return u, nil
 	}
 	if baseURL := os.Getenv("GITHUB_API_URL"); baseURL != "" {
-		u, err := url.Parse(baseURL)
+		u, err := url.Parse(baseURL + "/")
 		if err != nil {
 			return nil, fmt.Errorf("GitHub base URL from GITHUB_API_URL is invalid: %v, %w", baseURL, err)
 		}
