@@ -538,6 +538,8 @@ func githubBaseURL() (*url.URL, error) {
 		}
 		return u, nil
 	}
+	// get GitHub base URL from GitHub Actions' default environment variable GITHUB_API_URL
+	// ref: https://docs.github.com/en/actions/reference/environment-variables#default-environment-variables
 	if baseURL := os.Getenv("GITHUB_API_URL"); baseURL != "" {
 		u, err := url.Parse(baseURL + "/")
 		if err != nil {
