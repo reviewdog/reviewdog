@@ -63,3 +63,12 @@ jobs:
       - uses: actions/checkout@v2
       - name: Post bumpr status comment
         uses: haya14busa/action-bumpr@v1
+
+  release-test:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v2
+      - uses: goreleaser/goreleaser-action@v2
+        with:
+          version: latest
+          args: check
