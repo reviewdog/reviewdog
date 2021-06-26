@@ -1,11 +1,11 @@
 name: release
 on:
   push:
-    # branches:
-    #   - master
-    #   - release-*
-    # tags:
-    #   - 'v*.*.*'
+    branches:
+      - master
+      - release-*
+    tags:
+      - 'v*.*.*'
   pull_request:
     types:
       - labeled
