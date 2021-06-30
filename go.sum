@@ -133,8 +133,8 @@ github.com/google/go-github v17.0.0+incompatible h1:N0LgJ1j65A7kfXrZnUDaYCs/Sf4r
 github.com/google/go-github v17.0.0+incompatible/go.mod h1:zLgOLi98H3fifZn+44m+umXrS52loVEgC2AApnigrVQ=
 github.com/google/go-github/v29 v29.0.2 h1:opYN6Wc7DOz7Ku3Oh4l7prmkOMwEcQxpFtxdU8N8Pts=
 github.com/google/go-github/v29 v29.0.2/go.mod h1:CHKiKKPHJ0REzfwc14QMklvtHwCveD0PxlMjLlzAM5E=
-github.com/google/go-github/v35 v35.3.0 h1:fU+WBzuukn0VssbayTT+Zo3/ESKX9JYWjbZTLOTEyho=
-github.com/google/go-github/v35 v35.3.0/go.mod h1:yWB7uCcVWaUbUP74Aq3whuMySRMatyRmq5U9FTNlbio=
+github.com/google/go-github/v36 v36.0.0 h1:ndCzM616/oijwufI7nBRa+5eZHLldT+4yIB68ib5ogs=
+github.com/google/go-github/v36 v36.0.0/go.mod h1:LFlKC047IOqiglRGNqNb9s/iAPTnnjtlshm+bxp+kwk=
 github.com/google/go-querystring v1.0.0 h1:Xkwi/a1rcvNg1PPYe5vI8GbeBY/jrVuDX5ASuANWTrk=
 github.com/google/go-querystring v1.0.0/go.mod h1:odCYkC5MyYFN7vkCjXpyrEuKhc/BUO6wN/zVPAxq5ck=
 github.com/google/martian v2.1.0+incompatible/go.mod h1:9I4somxYTbIHy5NJKHRl3wXiIaQGbYVAs8BPL6v8lEs=
