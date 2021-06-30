@@ -33,7 +33,6 @@ jobs:
 
       # Setup Go for building reviewdog binary.
       - uses: actions/setup-go@v2
-        if: "steps.tag.outputs.value != ''"
         with:
           go-version: 1.16
 
