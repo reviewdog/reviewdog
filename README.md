@@ -141,10 +141,10 @@ $ brew install reviewdog/tap/reviewdog
 $ brew upgrade reviewdog/tap/reviewdog
 ```
 
-### Build from HEAD with go get
+### Build with go install
 
 ```shell
-$ go get -u github.com/reviewdog/reviewdog/cmd/reviewdog
+$ go install github.com/reviewdog/reviewdog/cmd/reviewdog@latest
 ```
 
 ## Input Format
