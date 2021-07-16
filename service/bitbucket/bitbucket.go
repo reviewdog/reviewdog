@@ -18,20 +18,30 @@ const (
 	// https://support.atlassian.com/bitbucket-cloud/docs/code-insights/#Authentication
 	// However, if using proxy HTTP API endpoint need to be used
 	pipelineProxyURL = "http://localhost:29418"
-	httpTimeout      = time.Second * 10
+	// PipeProxyURL is to be used when reviewdog is running within a Bitbucket Pipe
+	// Pipes run in docker containers and as a result will need to connect to the proxy via this Docker DNS.
+	pipeProxyURL = "http://host.docker.internal:29418"
+	httpTimeout  = time.Second * 10
 )
 
 // NewAPIClient creates Bitbucket API client
-func NewAPIClient(isInPipeline bool) *bbapi.APIClient {
+func NewAPIClient(isInPipeline bool, isInPipe bool) *bbapi.APIClient {
 	httpClient := &http.Client{
 		Timeout: httpTimeout,
 	}
 	server := httpsServer()
 
 	if isInPipeline {
-		// if we are on the Bitbucket Pipeline, use HTTP endpoint
-		// and proxy
-		proxyURL, _ := url.Parse(pipelineProxyURL)
+		var proxyURL *url.URL
+		if isInPipe {
+			// if we are executing a pipe within a pipeline, use docker endpoint
+			// and proxy
+			proxyURL, _ = url.Parse(pipeProxyURL)
+		} else {
+			// if we are on the Bitbucket Pipeline, use HTTP endpoint
+			// and proxy
+			proxyURL, _ = url.Parse(pipelineProxyURL)
+		}
 		server = httpServer()
 		httpClient.Transport = &http.Transport{
 			Proxy: http.ProxyURL(proxyURL),
