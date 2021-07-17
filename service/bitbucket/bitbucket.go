@@ -19,7 +19,7 @@ const (
 	// However, if using proxy HTTP API endpoint need to be used
 	pipelineProxyURL = "http://localhost:29418"
 
-  // PipeProxyURL is to be used when reviewdog is running within a Bitbucket Pipe
+	// PipeProxyURL is to be used when reviewdog is running within a Bitbucket Pipe
 	// Pipes run in docker containers and as a result will need to connect to the proxy via this Docker DNS.
 	pipeProxyURL = "http://host.docker.internal:29418"
 	httpTimeout  = time.Second * 10
