@@ -48,7 +48,7 @@
   <a href="https://github.com/reviewdog/.github/blob/master/CODE_OF_CONDUCT.md">
     <img alt="Contributor Covenant" src="https://img.shields.io/badge/Contributor%20Covenant-v2.0%20adopted-ff69b4.svg">
   </a>
-  <a href="https://somsubhra.com/github-release-stats/?username=reviewdog&repository=reviewdog">
+  <a href="https://somsubhra.github.io/github-release-stats/?username=reviewdog&repository=reviewdog&per_page=30">
     <img alt="Github Releases Stats" src="https://img.shields.io/github/downloads/reviewdog/reviewdog/total.svg?logo=github">
   </a>
   <a href="https://starcharts.herokuapp.com/reviewdog/reviewdog"><img alt="Stars" src="https://img.shields.io/github/stars/reviewdog/reviewdog.svg?style=social"></a>
@@ -141,10 +141,10 @@ $ brew install reviewdog/tap/reviewdog
 $ brew upgrade reviewdog/tap/reviewdog
 ```
 
-### Build from HEAD with go get
+### Build with go install
 
 ```shell
-$ go get -u github.com/reviewdog/reviewdog/cmd/reviewdog
+$ go install github.com/reviewdog/reviewdog/cmd/reviewdog@latest
 ```
 
 ## Input Format
@@ -162,7 +162,7 @@ errorformat should be `%f:%l:%c: %m` and you can pass it as `-efm` arguments.
 ```shell
 $ golint ./...
 comment_iowriter.go:11:6: exported type CommentWriter should have comment or be unexported
-$ golint ./... | reviewdog -efm="%f:%l:%c: %m" -diff="git diff master"
+$ golint ./... | reviewdog -efm="%f:%l:%c: %m" -diff="git diff FETCH_HEAD"
 ```
 
 | name | description |
@@ -200,7 +200,7 @@ sbt             the interactive build tool                                      
 ```
 
 ```shell
-$ golint ./... | reviewdog -f=golint -diff="git diff master"
+$ golint ./... | reviewdog -f=golint -diff="git diff FETCH_HEAD"
 ```
 
 You can add supported pre-defined 'errorformat' by contributing to [reviewdog/errorformat](https://github.com/reviewdog/errorformat)
@@ -322,8 +322,9 @@ environment including editor integration with ease.
 runner:
   <tool-name>:
     cmd: <command> # (required)
-    errorformat: # (optional if there is supported format for <tool-name>. see reviewdog -list)
+    errorformat: # (optional if you use `format`)
       - <list of errorformat>
+    format: <format-name> # (optional if you use `errorformat`. e.g. golint,rdjson,rdjsonl)
     name: <tool-name> # (optional. you can overwrite <tool-name> defined by runner key)
     level: <level> # (optional. same as -level flag. [info,warning,error])
 
@@ -335,15 +336,20 @@ runner:
     level: warning
   govet:
     cmd: go vet -all .
+    format: govet
+  your-awesome-linter:
+    cmd: awesome-linter run
+    format: rdjson
+    name: AwesomeLinter
 ```
 
 ```shell
-$ reviewdog -diff="git diff master"
+$ reviewdog -diff="git diff FETCH_HEAD"
 project/run_test.go:61:28: [golint] error strings should not end with punctuation
 project/run.go:57:18: [errcheck]        defer os.Setenv(name, os.Getenv(name))
 project/run.go:58:12: [errcheck]        os.Setenv(name, "")
 # You can use -runners to run only specified runners.
-$ reviewdog -diff="git diff master" -runners=golint,govet
+$ reviewdog -diff="git diff FETCH_HEAD" -runners=golint,govet
 project/run_test.go:61:28: [golint] error strings should not end with punctuation
 # You can use -conf to specify config file path.
 $ reviewdog -conf=./.reviewdog.yml -reporter=github-pr-check
@@ -366,7 +372,7 @@ reviewdog can find newly introduced findings by filtering linter results
 using diff. You can pass diff command as `-diff` arg.
 
 ```shell
-$ golint ./... | reviewdog -f=golint -diff="git diff master"
+$ golint ./... | reviewdog -f=golint -diff="git diff FETCH_HEAD"
 ```
 
 ### Reporter: GitHub Checks (-reporter=github-pr-check)
@@ -642,6 +648,8 @@ You can use public GitHub Actions to start using reviewdog with ease! :tada: :ar
 
 - Python
   - [wemake-python-styleguide](https://github.com/wemake-services/wemake-python-styleguide) - Run wemake-python-styleguide
+  - [tsuyoshicho/action-mypy](https://github.com/tsuyoshicho/action-mypy) - Run [mypy](https://pypi.org/project/mypy/)
+  - [jordemort/action-pyright](https://github.com/jordemort/action-pyright) - Run [pyright](https://github.com/Microsoft/pyright)
 - Kotlin
   - [ScaCap/action-ktlint](https://github.com/ScaCap/action-ktlint) - Run [ktlint](https://ktlint.github.io/).
 - Android Lint
@@ -895,6 +903,7 @@ reviewdog -filter-mode=nofilter -tee
 - [reviewdog — A code review dog who keeps your codebase healthy ](https://medium.com/@haya14busa/reviewdog-a-code-review-dog-who-keeps-your-codebase-healthy-d957c471938b)
 - [reviewdog ♡ GitHub Check — improved automated review experience](https://medium.com/@haya14busa/reviewdog-github-check-improved-automated-review-experience-58f89e0c95f3)
 - [Automated Code Review on GitHub Actions with reviewdog for any languages/tools](https://medium.com/@haya14busa/automated-code-review-on-github-actions-with-reviewdog-for-any-languages-tools-20285e04448e)
+- [GitHub Actions to guard your workflow](https://evrone.com/github-actions)
 
 ## :bird: Author
 haya14busa [![GitHub followers](https://img.shields.io/github/followers/haya14busa.svg?style=social&label=Follow)](https://github.com/haya14busa)

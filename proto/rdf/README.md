@@ -108,7 +108,7 @@ Example:
           "text": "<replacement text>"
         }
       ],
-      "sevrity": "WARNING"
+      "severity": "WARNING"
     }
   ]
 }

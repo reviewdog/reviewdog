@@ -191,11 +191,12 @@ func checkResultToAnnotation(d *rdf.Diagnostic, wd, gitRelWd string) *doghouse.A
 // It returns true if reviewdog should exit with 1.
 // e.g. At least one annotation result is in diff.
 func reportResults(w io.Writer, filteredResultSet *reviewdog.FilteredResultMap) bool {
-	if filteredResultSet.Len() != 0 && cienv.IsGitHubPRFromForkedRepo() {
-		fmt.Fprintln(w, `reviewdog: This is Pull-Request from forked repository.
-GitHub token doesn't have write permission of Check API, so reviewdog will
-report results via logging command [1].
-[1]: https://help.github.com/en/actions/automating-your-workflow-with-github-actions/development-tools-for-github-actions#logging-commands`)
+	if filteredResultSet.Len() != 0 && cienv.HasReadOnlyPermissionGitHubToken() {
+		fmt.Fprintln(w, `reviewdog: This GitHub token doesn't have write permission of Review API [1], 
+so reviewdog will report results via logging command [2] and create annotations similar to
+github-pr-check reporter as a fallback.
+[1]: https://docs.github.com/en/actions/reference/events-that-trigger-workflows#pull_request_target, 
+[2]: https://help.github.com/en/actions/automating-your-workflow-with-github-actions/development-tools-for-github-actions#logging-commands`)
 	}
 
 	// Sort names to get deterministic result.

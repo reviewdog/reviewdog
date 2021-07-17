@@ -12,7 +12,7 @@ jobs:
     steps:
       - uses: actions/setup-go@v2
         with:
-          go-version: 1.14
+          go-version: 1.16
 
       - uses: actions/checkout@v2
 
@@ -20,7 +20,7 @@ jobs:
         run: '( cd linters && go get golang.org/x/lint/golint )'
 
       - name: Setup reviewdog
-        # use: reviewdog/action-setup@v1
+        # uses: reviewdog/action-setup@v1
         run: |
           go install ./cmd/reviewdog
 
@@ -50,7 +50,7 @@ jobs:
     steps:
       - uses: actions/setup-go@v2
         with:
-          go-version: 1.14
+          go-version: 1.16
 
       - uses: actions/checkout@v2
 
@@ -72,7 +72,7 @@ jobs:
         run: '( cd linters && go get golang.org/x/lint/golint )'
 
       - name: Setup reviewdog
-        # use: reviewdog/action-setup@v1
+        # uses: reviewdog/action-setup@v1
         run: |
           go install ./cmd/reviewdog
 
@@ -239,3 +239,17 @@ jobs:
           github_token: ${{ secrets.github_token }}
           reporter: github-check
           level: info
+
+  textlint:
+    name: runner / textlint
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v2
+      - uses: reviewdog/action-setup@v1
+      - run: npm install
+      - name: textlint
+        env:
+          REVIEWDOG_GITHUB_API_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          $(npm bin)/textlint -f checkstyle README.md | \
+            reviewdog -f=checkstyle -name="textlint" -reporter=github-check -level=info

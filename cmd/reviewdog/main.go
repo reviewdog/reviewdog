@@ -20,7 +20,7 @@ import (
 	"golang.org/x/build/gerrit"
 	"golang.org/x/oauth2"
 
-	"github.com/google/go-github/v32/github"
+	"github.com/google/go-github/v37/github"
 	"github.com/mattn/go-shellwords"
 	"github.com/reviewdog/errorformat/fmts"
 	"github.com/xanzy/go-gitlab"
@@ -280,12 +280,12 @@ func run(r io.Reader, w io.Writer, opt *option) error {
 		// instead of review comment because if it's PR from forked repository,
 		// GitHub token doesn't have write permission due to security concern and
 		// cannot post results via Review API.
-		if cienv.IsInGitHubAction() && cienv.IsGitHubPRFromForkedRepo() {
-			fmt.Fprintln(w, `reviewdog: This is Pull-Request from forked repository.
-GitHub token doesn't have write permission of Review API, so reviewdog will
-report results via logging command [1] and create annotations similar to
+		if cienv.IsInGitHubAction() && cienv.HasReadOnlyPermissionGitHubToken() {
+			fmt.Fprintln(w, `reviewdog: This GitHub token doesn't have write permission of Review API [1], 
+so reviewdog will report results via logging command [2] and create annotations similar to
 github-pr-check reporter as a fallback.
-[1]: https://help.github.com/en/actions/automating-your-workflow-with-github-actions/development-tools-for-github-actions#logging-commands`)
+[1]: https://docs.github.com/en/actions/reference/events-that-trigger-workflows#pull_request_target, 
+[2]: https://help.github.com/en/actions/automating-your-workflow-with-github-actions/development-tools-for-github-actions#logging-commands`)
 			cs = githubutils.NewGitHubActionLogWriter(opt.level)
 		} else {
 			cs = reviewdog.MultiCommentService(gs, cs)
@@ -531,13 +531,25 @@ func githubClient(ctx context.Context, token string) (*github.Client, error) {
 const defaultGitHubAPI = "https://api.github.com/"
 
 func githubBaseURL() (*url.URL, error) {
-	baseURL := os.Getenv("GITHUB_API")
-	if baseURL == "" {
-		baseURL = defaultGitHubAPI
+	if baseURL := os.Getenv("GITHUB_API"); baseURL != "" {
+		u, err := url.Parse(baseURL)
+		if err != nil {
+			return nil, fmt.Errorf("GitHub base URL from GITHUB_API is invalid: %v, %w", baseURL, err)
+		}
+		return u, nil
 	}
-	u, err := url.Parse(baseURL)
+	// get GitHub base URL from GitHub Actions' default environment variable GITHUB_API_URL
+	// ref: https://docs.github.com/en/actions/reference/environment-variables#default-environment-variables
+	if baseURL := os.Getenv("GITHUB_API_URL"); baseURL != "" {
+		u, err := url.Parse(baseURL + "/")
+		if err != nil {
+			return nil, fmt.Errorf("GitHub base URL from GITHUB_API_URL is invalid: %v, %w", baseURL, err)
+		}
+		return u, nil
+	}
+	u, err := url.Parse(defaultGitHubAPI)
 	if err != nil {
-		return nil, fmt.Errorf("GitHub base URL is invalid: %v, %w", baseURL, err)
+		return nil, fmt.Errorf("GitHub base URL from reviewdog default is invalid: %v, %w", defaultGitHubAPI, err)
 	}
 	return u, nil
 }
