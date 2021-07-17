@@ -9,14 +9,16 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ### :sparkles: Release Note <!-- optional -->
 
 ### :rocket: Enhancements
-- [#888](https://github.com/reviewdog/reviewdog/pull/888) Allow GitHub PR reporting for a forked repository iff it's triggered by `pull_request_target`
 - [#911](https://github.com/reviewdog/reviewdog/pull/911) Added bitbucket server (v1 api) support
+- Added support for Bitbucket Pipes executed within Pipelines.
 
-### :bug: Fixes
-- ...
+---
 
-### :rotating_light: Breaking changes
-- ...
+## [v0.12.0] - 2021-06-26
+
+### :rocket: Enhancements
+- [#888](https://github.com/reviewdog/reviewdog/pull/888) Allow GitHub PR reporting for a forked repository iff it's triggered by `pull_request_target`
+- [#976](https://github.com/reviewdog/reviewdog/pull/976) Treat `GITHUB_API_URL` environment variable as same as `GITHUB_API`, so users can use reviewdog in GitHub Actions in Enterprise Server without setting `GITHUB_API`
 
 ---
 
@@ -94,9 +96,10 @@ $ cd subdir/ && reviewdog -filter-mode=file -fail-on-error -reporter=github-pr-r
 
 See https://github.com/reviewdog/reviewdog/releases for older release note.
 
-[Unreleased]: https://github.com/reviewdog/reviewdog/compare/v0.10.0...HEAD
+[Unreleased]: https://github.com/reviewdog/reviewdog/compare/v0.12.0...HEAD
 [v0.10.0]: https://github.com/reviewdog/reviewdog/compare/v0.9.17...v0.10.0
 [v0.10.1]: https://github.com/reviewdog/reviewdog/compare/v0.10.0...v0.10.1
 [v0.10.2]: https://github.com/reviewdog/reviewdog/compare/v0.10.1...v0.10.2
 [v0.11.0]: https://github.com/reviewdog/reviewdog/compare/v0.10.2...v0.11.0
+[v0.12.0]: https://github.com/reviewdog/reviewdog/compare/v0.11.0...v0.12.0
 [@haya14busa]: https://github.com/haya14busa

@@ -10,7 +10,7 @@ import (
 	"strings"
 	"testing"
 
-	"github.com/google/go-github/v33/github"
+	"github.com/google/go-github/v37/github"
 	"github.com/kylelemons/godebug/pretty"
 	"golang.org/x/oauth2"
 
