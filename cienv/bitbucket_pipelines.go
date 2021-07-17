@@ -10,6 +10,7 @@ func IsInBitbucketPipeline() bool {
 
 // IsInBitbucketPipe returns true if reviewdog is running in a Bitbucket Pipe.
 func IsInBitbucketPipe() bool {
-	//
-	return os.Getenv("BITBUCKET_PIPE_STORAGE_DIR") != ""
+	// https://support.atlassian.com/bitbucket-cloud/docs/write-a-pipe-for-bitbucket-pipelines/
+	// this env variables are not really documented, but they are present in the build environment
+	return os.Getenv("BITBUCKET_PIPE_STORAGE_DIR") != "" || os.Getenv("BITBUCKET_PIPE_SHARED_STORAGE_DIR") != ""
 }
