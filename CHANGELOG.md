@@ -10,6 +10,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### :rocket: Enhancements
 - Added support for Bitbucket Pipes executed within Pipelines.
+- Added support for Bitbucket Server to `bitbucket-code-report` reporter
 
 ---
 
