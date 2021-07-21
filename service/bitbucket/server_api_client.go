@@ -2,7 +2,6 @@ package bitbucket
 
 import (
 	"context"
-	"errors"
 	"fmt"
 	"io/ioutil"
 	"net/http"
@@ -10,6 +9,7 @@ import (
 	insights "github.com/reva2/bitbucket-insights-api"
 )
 
+// ServerAPIClient is wrapper for Bitbucket Server Code Insights API client
 type ServerAPIClient struct {
 	cli    *insights.APIClient
 	helper *ServerAPIHelper
@@ -49,7 +49,7 @@ func (c *ServerAPIClient) CreateOrUpdateReport(ctx context.Context, req *ReportR
 		Execute()
 
 	if err := c.checkAPIError(err, resp, http.StatusOK); err != nil {
-		return fmt.Errorf("insights.UpdateReport: %s", err)
+		return fmt.Errorf("failed to create code insights report: %w", err)
 	}
 
 	return nil
@@ -63,7 +63,7 @@ func (c *ServerAPIClient) CreateOrUpdateAnnotations(ctx context.Context, req *An
 		Execute()
 
 	if err := c.checkAPIError(err, resp, http.StatusNoContent); err != nil {
-		return fmt.Errorf("insights.CreateAnnotations: %s", err)
+		return fmt.Errorf("failed to create annotations: %w", err)
 	}
 
 	return nil
@@ -75,7 +75,7 @@ func (c *ServerAPIClient) deleteReport(ctx context.Context, report *ReportReques
 		Execute()
 
 	if err := c.checkAPIError(err, resp, http.StatusNoContent); err != nil {
-		return fmt.Errorf("insights.DeleteReport: %s", err)
+		return fmt.Errorf("failted to delete code insights report: %w", err)
 	}
 
 	return nil
@@ -83,25 +83,16 @@ func (c *ServerAPIClient) deleteReport(ctx context.Context, report *ReportReques
 
 func (c *ServerAPIClient) checkAPIError(err error, resp *http.Response, expectedCode int) error {
 	if err != nil {
-		e, ok := err.(insights.GenericOpenAPIError)
-		if ok {
-			return fmt.Errorf(`bitbucket API error:
-	Response error: %s
-	Response body: %s`,
-				e.Error(), string(e.Body()))
-		}
+		return fmt.Errorf("bitubucket API error: %w", err)
 	}
 
 	if resp != nil && resp.StatusCode != expectedCode {
-		body, err := ioutil.ReadAll(resp.Body)
-		if err != nil {
-			return err
+		body, _ := ioutil.ReadAll(resp.Body)
+
+		return UnexpectedResponseError{
+			Code: resp.StatusCode,
+			Body: body,
 		}
-		msg := fmt.Sprintf("received unexpected %d code from Bitbucket API", resp.StatusCode)
-		if len(body) > 0 {
-			msg += " with message:\n" + string(body)
-		}
-		return errors.New(msg)
 	}
 
 	return nil

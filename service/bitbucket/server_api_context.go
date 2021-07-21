@@ -9,9 +9,9 @@ import (
 )
 
 // BuildServerAPIContext builds context.Context used to call Bitbucket Server Code Insights API
-func BuildServerAPIContext(ctx context.Context, bbUrl, user, password, token string) (context.Context, error) {
+func BuildServerAPIContext(ctx context.Context, bbURL, user, password, token string) (context.Context, error) {
 	var err error
-	ctx, err = withServerVariables(ctx, bbUrl)
+	ctx, err = withServerVariables(ctx, bbURL)
 	if err != nil {
 		return ctx, err
 	}

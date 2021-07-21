@@ -2,12 +2,12 @@ package bitbucket
 
 import (
 	"context"
-	"errors"
 	"fmt"
-	bbapi "github.com/reviewdog/go-bitbucket"
 	"io/ioutil"
 	"net/http"
 	"net/url"
+
+	bbapi "github.com/reviewdog/go-bitbucket"
 )
 
 const (
@@ -92,7 +92,7 @@ func (c *CloudAPIClient) CreateOrUpdateReport(ctx context.Context, req *ReportRe
 		Execute()
 
 	if err := c.checkAPIError(err, resp, http.StatusOK); err != nil {
-		return fmt.Errorf("bitbucket.CreateOrUpdateReport: %s", err)
+		return fmt.Errorf("failed to create code insights report: %w", err)
 	}
 
 	return nil
@@ -106,7 +106,7 @@ func (c *CloudAPIClient) CreateOrUpdateAnnotations(ctx context.Context, req *Ann
 		Execute()
 
 	if err := c.checkAPIError(err, resp, http.StatusOK); err != nil {
-		return fmt.Errorf("bitbucket.BulkCreateOrUpdateAnnotations: %s", err)
+		return fmt.Errorf("failed to create code insighsts annotations: %w", err)
 	}
 
 	return nil
@@ -114,25 +114,16 @@ func (c *CloudAPIClient) CreateOrUpdateAnnotations(ctx context.Context, req *Ann
 
 func (c *CloudAPIClient) checkAPIError(err error, resp *http.Response, expectedCode int) error {
 	if err != nil {
-		e, ok := err.(bbapi.GenericOpenAPIError)
-		if ok {
-			return fmt.Errorf(`bitbucket API error:
-	Response error: %s
-	Response body: %s`,
-				e.Error(), string(e.Body()))
-		}
+		return fmt.Errorf("bitubucket API error: %w", err)
 	}
 
 	if resp != nil && resp.StatusCode != expectedCode {
-		body, err := ioutil.ReadAll(resp.Body)
-		if err != nil {
-			return err
+		body, _ := ioutil.ReadAll(resp.Body)
+
+		return UnexpectedResponseError{
+			Code: resp.StatusCode,
+			Body: body,
 		}
-		msg := fmt.Sprintf("received unexpected %d code from Bitbucket API", resp.StatusCode)
-		if len(body) > 0 {
-			msg += " with message:\n" + string(body)
-		}
-		return errors.New(msg)
 	}
 
 	return nil

@@ -55,7 +55,7 @@ func (s *AnnotatorTestSuite) TestNoComments() {
 func (s *AnnotatorTestSuite) TestOneComment() {
 	runners := []string{"runner1", "runner2"}
 	comments := []*reviewdog.Comment{
-		s.buildComment(runners[1], "main.go", "test", 1),
+		s.buildComment(runners[1], 1),
 	}
 
 	ctx, annotator := s.createAnnotator(runners)
@@ -76,8 +76,8 @@ func (s *AnnotatorTestSuite) TestOneComment() {
 func (s *AnnotatorTestSuite) TestDuplicateComments() {
 	runners := []string{"runner1", "runner2"}
 	comments := []*reviewdog.Comment{
-		s.buildComment(runners[1], "main.go", "test", 1),
-		s.buildComment(runners[1], "main.go", "test", 1),
+		s.buildComment(runners[1], 1),
+		s.buildComment(runners[1], 1),
 	}
 
 	ctx, annotator := s.createAnnotator(runners)
@@ -100,7 +100,7 @@ func (s *AnnotatorTestSuite) TestManyComments() {
 
 	comments := make([]*reviewdog.Comment, 333)
 	for idx := 0; idx < 333; idx++ {
-		comments[idx] = s.buildComment(runners[1], "main.go", "test", int32(idx))
+		comments[idx] = s.buildComment(runners[1], int32(idx))
 	}
 
 	ctx, annotator := s.createAnnotator(runners)
@@ -202,18 +202,18 @@ func (s *AnnotatorTestSuite) buildAnnotationsRequest(runner string, comments []*
 	}
 }
 
-func (s *AnnotatorTestSuite) buildComment(toolName, file, message string, line int32) *reviewdog.Comment {
+func (s *AnnotatorTestSuite) buildComment(toolName string, line int32) *reviewdog.Comment {
 	return &reviewdog.Comment{
 		ToolName: toolName,
 		Result: &filter.FilteredDiagnostic{
 			Diagnostic: &rdf.Diagnostic{
 				Location: &rdf.Location{
-					Path: file,
+					Path: "main.go",
 					Range: &rdf.Range{Start: &rdf.Position{
 						Line: line,
 					}},
 				},
-				Message: message,
+				Message: "test message",
 			},
 		},
 	}

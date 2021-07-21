@@ -625,7 +625,7 @@ func bitbucketBuildWithClient(ctx context.Context) (*cienv.BuildInfo, bbservice.
 	if bbServerURL != "" {
 		ctx, err = bbservice.BuildServerAPIContext(ctx, bbServerURL, bbUser, bbPass, bbAccessToken)
 		if err != nil {
-			return nil, nil, ctx, err
+			return nil, nil, ctx, fmt.Errorf("failed to build context for Bitbucket API calls: %w", err)
 		}
 		client = bbservice.NewServerAPIClient()
 	} else {

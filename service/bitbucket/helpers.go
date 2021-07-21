@@ -45,6 +45,9 @@ func convertSeverity(severity rdf.Severity) string {
 	case rdf.Severity_ERROR:
 		return annotationSeverityHigh
 
+	case rdf.Severity_UNKNOWN_SEVERITY:
+		return ""
+
 	default:
 		return ""
 	}

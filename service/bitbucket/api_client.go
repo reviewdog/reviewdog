@@ -2,6 +2,7 @@ package bitbucket
 
 import (
 	"context"
+	"fmt"
 
 	"github.com/reviewdog/reviewdog"
 )
@@ -37,4 +38,20 @@ type APIClient interface {
 
 	// CreateOrUpdateAnnotations creates or updates annotations
 	CreateOrUpdateAnnotations(ctx context.Context, req *AnnotationsRequest) error
+}
+
+// UnexpectedResponseError is triggered when we have unexpected response from Code Insights API
+type UnexpectedResponseError struct {
+	Code int
+	Body []byte
+}
+
+func (e UnexpectedResponseError) Error() string {
+	msg := fmt.Sprintf("received unexpected %d code from Bitbucket API", e.Code)
+
+	if len(e.Body) > 0 {
+		msg += " with message:\n" + string(e.Body)
+	}
+
+	return msg
 }

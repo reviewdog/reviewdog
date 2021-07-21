@@ -2,6 +2,7 @@ package bitbucket
 
 import (
 	"context"
+	"fmt"
 	"path/filepath"
 	"sync"
 
@@ -134,7 +135,7 @@ func (r *ReportAnnotator) Flush(ctx context.Context) error {
 
 			err := r.cli.CreateOrUpdateAnnotations(ctx, req)
 			if err != nil {
-				return err
+				return fmt.Errorf("failed to post annotations: %w", err)
 			}
 		}
 	}
