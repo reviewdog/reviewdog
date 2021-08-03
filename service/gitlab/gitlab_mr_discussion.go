@@ -4,14 +4,21 @@ import (
 	"context"
 	"fmt"
 	"path/filepath"
+	"strings"
 	"sync"
 
 	"github.com/xanzy/go-gitlab"
 	"golang.org/x/sync/errgroup"
 
 	"github.com/reviewdog/reviewdog"
+	"github.com/reviewdog/reviewdog/proto/rdf"
 	"github.com/reviewdog/reviewdog/service/commentutil"
 	"github.com/reviewdog/reviewdog/service/serviceutil"
+)
+
+const (
+	invalidSuggestionPre  = "<details><summary>reviewdog suggestion error</summary>"
+	invalidSuggestionPost = "</details>"
 )
 
 // MergeRequestDiscussionCommenter is a comment and diff service for GitLab MergeRequest.
@@ -104,6 +111,11 @@ func (g *MergeRequestDiscussionCommenter) postCommentsForEach(ctx context.Contex
 		loc := c.Result.Diagnostic.GetLocation()
 		lnum := int(loc.GetRange().GetStart().GetLine())
 		body := commentutil.MarkdownComment(c)
+
+		if suggestion := buildSuggestions(c); suggestion != "" {
+			body = body + "\n\n" + suggestion
+		}
+
 		if !c.Result.InDiffFile || lnum == 0 || postedcs.IsPosted(c, lnum, body) {
 			continue
 		}
@@ -151,4 +163,42 @@ func listAllMergeRequestDiscussion(cli *gitlab.Client, projectID string, mergeRe
 		return nil, err
 	}
 	return append(discussions, restDiscussions...), nil
+}
+
+// creates diff in markdown for suggested changes
+// Ref gitlab suggestion: https://docs.gitlab.com/ee/user/project/merge_requests/reviews/suggestions.html
+func buildSuggestions(c *reviewdog.Comment) string {
+	var sb strings.Builder
+	for _, s := range c.Result.Diagnostic.GetSuggestions() {
+		if s.Range == nil || s.Range.Start == nil || s.Range.End == nil {
+			continue
+		}
+
+		txt, err := buildSingleSuggestion(c, s)
+		if err != nil {
+			sb.WriteString(invalidSuggestionPre + err.Error() + invalidSuggestionPost + "\n")
+			continue
+		}
+		sb.WriteString(txt)
+		sb.WriteString("\n")
+	}
+
+	return sb.String()
+}
+
+func buildSingleSuggestion(c *reviewdog.Comment, s *rdf.Suggestion) (string, error) {
+	var sb strings.Builder
+
+	// user 4 backticks for safety: https://docs.gitlab.com/ee/user/project/merge_requests/reviews/suggestions.html#code-block-nested-in-suggestions
+	sb.WriteString("````suggestion:-0+")
+	sb.WriteString(fmt.Sprintf("%d", s.Range.End.Line-s.Range.Start.Line))
+	sb.WriteString("\n")
+
+	if txt := s.GetText(); txt != "" {
+		sb.WriteString(txt)
+		sb.WriteString("\n")
+	}
+
+	sb.WriteString("````")
+	return sb.String(), nil
 }
