@@ -6,7 +6,7 @@ import (
 	"os"
 )
 
-// https://help.github.com/en/articles/virtual-environments-for-github-actions#default-environment-variables
+// https://docs.github.com/en/actions/reference/environment-variables#default-environment-variables
 type GitHubEvent struct {
 	PullRequest GitHubPullRequest `json:"pull_request"`
 	Repository  struct {
@@ -22,7 +22,7 @@ type GitHubEvent struct {
 	HeadCommit struct {
 		ID string `json:"id"`
 	} `json:"head_commit"`
-	ActionName string `json:"-"` // env GITHUB_EVENT_NAME
+	ActionName string `json:"-"` // this is defined as env GITHUB_EVENT_NAME
 }
 
 type GitHubRepo struct {
