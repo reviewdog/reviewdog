@@ -22,7 +22,7 @@ type GitHubEvent struct {
 	HeadCommit struct {
 		ID string `json:"id"`
 	} `json:"head_commit"`
-	ActionName string `json:"-"`
+	ActionName string `json:"-"` // env GITHUB_EVENT_NAME
 }
 
 type GitHubRepo struct {
