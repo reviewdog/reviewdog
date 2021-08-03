@@ -22,7 +22,7 @@ type GitHubEvent struct {
 	HeadCommit struct {
 		ID string `json:"id"`
 	} `json:"head_commit"`
-	ActionName string `json:"action_name"`
+	ActionName string `json:"-"`
 }
 
 type GitHubRepo struct {
@@ -62,6 +62,7 @@ func loadGitHubEventFromPath(eventPath string) (*GitHubEvent, error) {
 	if err := json.NewDecoder(f).Decode(&event); err != nil {
 		return nil, err
 	}
+	event.ActionName = os.Getenv("GITHUB_EVENT_NAME")
 	return &event, nil
 }
 
