@@ -415,10 +415,11 @@ func countBackticks(s string) int {
 				}
 				count = 0
 			}
-		} else if r == '\n' {
-			inBackticks = true
 		}
-		// skip other runes
+		if r == '\n' {
+			inBackticks = true
+			count = 0
+		}
 	}
 	if count > maxCount {
 		maxCount = count
