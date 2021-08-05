@@ -309,13 +309,41 @@ func buildSingleSuggestion(c *reviewdog.Comment, s *rdf.Suggestion) (string, err
 	if start.GetColumn() > 0 || end.GetColumn() > 0 {
 		return buildNonLineBasedSuggestion(c, s)
 	}
+
+	// If the suggestion includes triple backticks ("```"), we need to wrap them inside quadruple backticks.
+	// https://docs.github.com/en/github/writing-on-github/working-with-advanced-formatting/creating-and-highlighting-code-blocks#fenced-code-blocks
+	//
+	// > To display triple backticks in a fenced code block, wrap them inside quadruple backticks.
+	// >
+	// >     ````
+	// >     ```
+	// >     Look! You can see my backticks.
+	// >     ```
+	// >     ````
+	//
+	// Fixes: https://github.com/reviewdog/reviewdog/issues/999
+	txt := s.GetText()
+	backticks := countBackticks(txt) + 1
+	if backticks < 3 {
+		// At least three backticks are required.
+		// https://github.github.com/gfm/#fenced-code-blocks
+		// > A code fence is a sequence of at least three consecutive backtick characters (`) or tildes (~). (Tildes and backticks cannot be mixed.)
+		backticks = 3
+	}
+
 	var sb strings.Builder
-	sb.WriteString("```suggestion\n")
-	if txt := s.GetText(); txt != "" {
+	sb.Grow(backticks + len("suggestion\n") + len(txt) + len("\n") + backticks)
+	for i := 0; i < backticks; i++ {
+		sb.WriteRune('`')
+	}
+	sb.WriteString("suggestion\n")
+	if txt != "" {
 		sb.WriteString(txt)
 		sb.WriteString("\n")
 	}
-	sb.WriteString("```")
+	for i := 0; i < backticks; i++ {
+		sb.WriteRune('`')
+	}
 	return sb.String(), nil
 }
 
@@ -334,12 +362,24 @@ func buildNonLineBasedSuggestion(c *reviewdog.Comment, s *rdf.Suggestion) (strin
 	if err != nil {
 		return "", err
 	}
+
+	txt := startLineContent[:max(start.GetColumn()-1, 0)] + s.GetText() + endLineContent[max(end.GetColumn()-1, 0):]
+	backticks := countBackticks(txt) + 1
+	if backticks < 3 {
+		backticks = 3
+	}
+
 	var sb strings.Builder
-	sb.WriteString("```suggestion\n")
-	sb.WriteString(startLineContent[:max(start.GetColumn()-1, 0)])
-	sb.WriteString(s.GetText())
-	sb.WriteString(endLineContent[max(end.GetColumn()-1, 0):])
-	sb.WriteString("\n```")
+	sb.Grow(backticks + len("suggestion\n") + len(txt) + len("\n") + backticks)
+	for i := 0; i < backticks; i++ {
+		sb.WriteRune('`')
+	}
+	sb.WriteString("suggestion\n")
+	sb.WriteString(txt)
+	sb.WriteString("\n")
+	for i := 0; i < backticks; i++ {
+		sb.WriteRune('`')
+	}
 	return sb.String(), nil
 }
 
@@ -356,4 +396,32 @@ func max(x, y int32) int32 {
 		return y
 	}
 	return x
+}
+
+// find code fences in s, and returns the maximum length of them.
+func countBackticks(s string) int {
+	inBackticks := true
+
+	var count int
+	var maxCount int
+	for _, r := range s {
+		if inBackticks {
+			if r == '`' {
+				count++
+			} else {
+				inBackticks = false
+				if count > maxCount {
+					maxCount = count
+				}
+				count = 0
+			}
+		} else if r == '\n' {
+			inBackticks = true
+		}
+		// skip other runes
+	}
+	if count > maxCount {
+		maxCount = count
+	}
+	return maxCount
 }
