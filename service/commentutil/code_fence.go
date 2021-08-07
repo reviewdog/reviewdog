@@ -2,7 +2,11 @@ package commentutil
 
 import "io"
 
-// GetCodeFenceLength returns the length of a code fence that wraps code.
+// GetCodeFenceLength returns the length of a code fence needed to wrap code.
+// A test suggestion that uses four backticks w/o code fence block.
+// Fixes: https://github.com/reviewdog/reviewdog/issues/999
+//
+// Code fenced blocks are supported by GitHub Flavor Markdown.
 // A code fence is typically three backticks.
 //
 //     ```

@@ -310,8 +310,6 @@ func buildSingleSuggestion(c *reviewdog.Comment, s *rdf.Suggestion) (string, err
 		return buildNonLineBasedSuggestion(c, s)
 	}
 
-	// A test suggestion that uses four backticks w/o code fence block.
-	// Fixes: https://github.com/reviewdog/reviewdog/issues/999
 	txt := s.GetText()
 	backticks := commentutil.GetCodeFenceLength(txt)
 
