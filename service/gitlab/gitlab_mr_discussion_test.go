@@ -360,6 +360,22 @@ func TestBuildSuggestions(t *testing.T) {
 				"",
 			}, "\n"),
 		},
+		{
+			in: buildTestComment(
+				"a suggestion that has fenced code block",
+				[]*rdf.Suggestion{
+					buildTestsSuggestion("```shell\ngit config --global receive.advertisepushoptions true\n```", 10, 12),
+				},
+			),
+			want: strings.Join([]string{
+				"````suggestion:-0+2",
+				"```shell",
+				"git config --global receive.advertisepushoptions true",
+				"```",
+				"````",
+				"",
+			}, "\n"),
+		},
 	}
 	for _, tt := range tests {
 		suggestion := buildSuggestions(tt.in)
