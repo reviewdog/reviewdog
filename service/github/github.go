@@ -310,7 +310,7 @@ func buildSingleSuggestion(c *reviewdog.Comment, s *rdf.Suggestion) (string, err
 		return buildNonLineBasedSuggestion(c, s)
 	}
 
-	// If the suggestion includes triple backticks ("```"), we need to wrap them inside quadruple backticks.
+A test suggestion that uses four backticks w/o code fence block.
 	// https://docs.github.com/en/github/writing-on-github/working-with-advanced-formatting/creating-and-highlighting-code-blocks#fenced-code-blocks
 	//
 	// > To display triple backticks in a fenced code block, wrap them inside quadruple backticks.
