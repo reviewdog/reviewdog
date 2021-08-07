@@ -4,6 +4,7 @@ import (
 	"context"
 	"fmt"
 	"path/filepath"
+	"strconv"
 	"strings"
 	"sync"
 
@@ -189,16 +190,27 @@ func buildSuggestions(c *reviewdog.Comment) string {
 func buildSingleSuggestion(c *reviewdog.Comment, s *rdf.Suggestion) (string, error) {
 	var sb strings.Builder
 
-	// user 4 backticks for safety: https://docs.gitlab.com/ee/user/project/merge_requests/reviews/suggestions.html#code-block-nested-in-suggestions
-	sb.WriteString("````suggestion:-0+")
-	sb.WriteString(fmt.Sprintf("%d", s.Range.End.Line-s.Range.Start.Line))
-	sb.WriteString("\n")
+	// we might need to use 4 or more backticks
+	//
+	// https://docs.gitlab.com/ee/user/project/merge_requests/reviews/suggestions.html#code-block-nested-in-suggestions
+	// > If you need to make a suggestion that involves a fenced code block, wrap your suggestion in four backticks instead of the usual three.
+	//
+	// The documentation doesn't explicitly say anything about cases more than 4 backticks,
+	// however it seems to be handled as intended.
+	txt := s.GetText()
+	backticks := commentutil.GetCodeFenceLength(txt)
 
-	if txt := s.GetText(); txt != "" {
+	lines := strconv.Itoa(int(s.Range.End.Line - s.Range.Start.Line))
+	sb.Grow(backticks + len("suggestion:-0+\n") + len(lines) + len(txt) + len("\n") + backticks)
+	commentutil.WriteCodeFence(&sb, backticks)
+	sb.WriteString("suggestion:-0+")
+	sb.WriteString(lines)
+	sb.WriteString("\n")
+	if txt != "" {
 		sb.WriteString(txt)
 		sb.WriteString("\n")
 	}
+	commentutil.WriteCodeFence(&sb, backticks)
 
-	sb.WriteString("````")
 	return sb.String(), nil
 }
