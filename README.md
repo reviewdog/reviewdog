@@ -51,7 +51,7 @@
   <a href="https://somsubhra.github.io/github-release-stats/?username=reviewdog&repository=reviewdog&per_page=30">
     <img alt="Github Releases Stats" src="https://img.shields.io/github/downloads/reviewdog/reviewdog/total.svg?logo=github">
   </a>
-  <a href="https://starcharts.herokuapp.com/reviewdog/reviewdog"><img alt="Stars" src="https://img.shields.io/github/stars/reviewdog/reviewdog.svg?style=social"></a>
+  <a href="https://starchart.cc/reviewdog/reviewdog"><img alt="Stars" src="https://img.shields.io/github/stars/reviewdog/reviewdog.svg?style=social"></a>
 </div>
 <br />
 
