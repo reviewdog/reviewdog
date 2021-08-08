@@ -9,7 +9,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ### :sparkles: Release Note <!-- optional -->
 
 ### :rocket: Enhancements
-- ...
+- [#1012](https://github.com/reviewdog/reviewdog/pull/1012) Use GitLab suggestions in merge request comments 
 
 ### :bug: Fixes
 - [#1014](https://github.com/reviewdog/reviewdog/pull/1014) Fix incorrect detection of the `GITHUB_TOKEN` permissions. fixes [#1010](https://github.com/reviewdog/reviewdog/issues/1010)
