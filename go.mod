@@ -3,7 +3,7 @@ module github.com/reviewdog/reviewdog
 go 1.16
 
 require (
-	cloud.google.com/go v0.92.3
+	cloud.google.com/go v0.93.3
 	cloud.google.com/go/datastore v1.1.0
 	cloud.google.com/go/monitoring v0.1.0 // indirect
 	cloud.google.com/go/trace v0.1.0 // indirect
