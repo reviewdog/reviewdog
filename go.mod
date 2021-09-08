@@ -8,7 +8,7 @@ require (
 	cloud.google.com/go/monitoring v0.1.0 // indirect
 	cloud.google.com/go/trace v0.1.0 // indirect
 	contrib.go.opencensus.io/exporter/stackdriver v0.13.8
-	github.com/bradleyfalzon/ghinstallation v1.1.1
+	github.com/bradleyfalzon/ghinstallation/v2 v2.0.2
 	github.com/golang/protobuf v1.5.2
 	github.com/google/go-cmp v0.5.6
 	github.com/google/go-github/v38 v38.1.0
@@ -36,7 +36,7 @@ require (
 	github.com/aws/aws-sdk-go v1.37.0 // indirect
 	github.com/census-instrumentation/opencensus-proto v0.3.0 // indirect
 	github.com/davecgh/go-spew v1.1.1 // indirect
-	github.com/dgrijalva/jwt-go v3.2.0+incompatible // indirect
+	github.com/dgrijalva/jwt-go/v4 v4.0.0-preview1 // indirect
 	github.com/golang/groupcache v0.0.0-20200121045136-8c9f03a8e57e // indirect
 	github.com/google/go-github/v29 v29.0.2 // indirect
 	github.com/google/go-querystring v1.0.0 // indirect
