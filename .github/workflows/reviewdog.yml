@@ -7,6 +7,10 @@ on:
 
 jobs:
   reviewdog-github-check:
+    permissions:
+      checks: write
+      contents: read
+      pull-requests: write
     name: reviewdog (github-check)
     runs-on: ubuntu-latest
     steps:
@@ -44,6 +48,10 @@ jobs:
             reviewdog -name="custom-rdjson" -f=rdjson -reporter=github-check -level=info
 
   reviewdog-pr:
+    permissions:
+      checks: write
+      contents: read
+      pull-requests: write
     if: github.event_name == 'pull_request'
     name: reviewdog on Pull Request
     runs-on: ubuntu-latest
@@ -167,6 +175,10 @@ jobs:
             reviewdog -name="gofmt" -f=diff -f.diff.strip=0 -reporter=github-pr-review
 
   golangci-lint:
+    permissions:
+      checks: write
+      contents: read
+      pull-requests: write
     if: github.event_name == 'pull_request'
     name: runner / golangci-lint
     runs-on: ubuntu-latest
@@ -180,6 +192,10 @@ jobs:
           reporter: github-pr-check
 
   staticcheck:
+    permissions:
+      checks: write
+      contents: read
+      pull-requests: write
     if: github.event_name == 'pull_request'
     name: runner / staticcheck
     runs-on: ubuntu-latest
