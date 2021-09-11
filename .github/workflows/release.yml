@@ -12,6 +12,9 @@ on:
 
 jobs:
   release:
+    permissions:
+      contents: write
+      pull-requests: write
     if: github.event.action != 'labeled'
     runs-on: ubuntu-latest
     steps:
@@ -65,6 +68,9 @@ jobs:
         run: go run ./scripts/trigger-depup/main.go
 
   release-check:
+    permissions:
+      contents: write
+      pull-requests: write
     if: github.event.action == 'labeled'
     runs-on: ubuntu-latest
     steps:
