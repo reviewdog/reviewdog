@@ -3,6 +3,8 @@ on: [push,pull_request]
 jobs:
 
   test:
+    permissions:
+      contents: read
     name: Test
     runs-on: ubuntu-latest
     steps:
