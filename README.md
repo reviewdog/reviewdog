@@ -840,6 +840,7 @@ $ reviewdog -conf=.reviewdog.yml -reporter=github-pr-check -guess
 
 #### Jenkins with Github pull request builder plugin
 - [GitHub pull request builder plugin - Jenkins - Jenkins Wiki](https://wiki.jenkins-ci.org/display/JENKINS/GitHub+pull+request+builder+plugin)
+- [Configuring a GitHub app account - Jenkins - CloudBees](https://docs.cloudbees.com/docs/cloudbees-ci/latest/cloud-admin-guide/github-app-auth) - required to use github-pr-check formatter without reviewdog server or GitHub actions.
 
 ```shell
 $ export CI_PULL_REQUEST=${ghprbPullId}
@@ -847,9 +848,13 @@ $ export CI_REPO_OWNER=haya14busa
 $ export CI_REPO_NAME=reviewdog
 $ export CI_COMMIT=${ghprbActualCommit}
 $ export REVIEWDOG_INSECURE_SKIP_VERIFY=true # set this as you need
+
+# To submit via reviewdog server using github-pr-check reporter
 $ REVIEWDOG_TOKEN="<token>" reviewdog -reporter=github-pr-check
-# Or
+# Or, to submit directly via API using github-pr-review reporter
 $ REVIEWDOG_GITHUB_API_TOKEN="<token>" reviewdog -reporter=github-pr-review
+# Or, to submit directly via API using github-pr-check reporter (requires GitHub App Account configured)
+$ REVIEWDOG_SKIP_DOGHOUSE=true REVIEWDOG_GITHUB_API_TOKEN="<token>" reviewdog -reporter=github-pr-check
 ```
 
 ## Exit codes
