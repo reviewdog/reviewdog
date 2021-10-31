@@ -4,7 +4,7 @@ go 1.17
 
 require (
 	cloud.google.com/go v0.97.0
-	cloud.google.com/go/datastore v1.1.0
+	cloud.google.com/go/datastore v1.6.0
 	cloud.google.com/go/monitoring v1.1.0 // indirect
 	cloud.google.com/go/trace v1.0.0 // indirect
 	contrib.go.opencensus.io/exporter/stackdriver v0.13.10
