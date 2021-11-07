@@ -104,7 +104,7 @@ $ cd subdir/ && reviewdog -filter-mode=file -fail-on-error -reporter=github-pr-r
 
 ### :rotating_light: Breaking changes
 - `github-check` reporter won't report results outside diff by default now. You
-  need to use `-filter-mode=nofilter` to keep the same bahavior.
+  need to use `-filter-mode=nofilter` to keep the same behavior.
 
 ---
 
