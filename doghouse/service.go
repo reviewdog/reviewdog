@@ -78,7 +78,7 @@ type Annotation struct {
 	// Optional.
 	Diagnostic *rdf.Diagnostic `json:"diagnostic,omitempty"`
 
-	// Deprecatedgo fields below. Need to support them for the old reviewdog CLI
+	// Deprecated fields below. Need to support them for the old reviewdog CLI
 	// version.
 
 	// Deprecated: Use Diagnostic.
