@@ -14,7 +14,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ### :bug: Fixes
 - [#1014](https://github.com/reviewdog/reviewdog/pull/1014) Fix incorrect detection of the `GITHUB_TOKEN` permissions. fixes [#1010](https://github.com/reviewdog/reviewdog/issues/1010)
 - [#1017](https://github.com/reviewdog/reviewdog/pull/1017) Fix suggestions that include fenced code blocks. fixes [#999](https://github.com/reviewdog/reviewdog/issues/999)
-- [#1074](https://github.com/reviewdog/reviewdog/pull/1074) Fix DEPRECATED to Deprecated
+- [#1084](https://github.com/reviewdog/reviewdog/pull/1084) Fix DEPRECATED to Deprecated
 
 ### :rotating_light: Breaking changes
 - ...
