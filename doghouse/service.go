@@ -22,7 +22,7 @@ type CheckRequest struct {
 
 	// Branch name.
 	// Optional.
-	// DEPRECATED: No need to fill this field.
+	// Deprecated: No need to fill this field.
 	Branch string `json:"branch,omitempty"`
 
 	// Annotations associated with the repository's commit and Pull Request.
@@ -78,15 +78,15 @@ type Annotation struct {
 	// Optional.
 	Diagnostic *rdf.Diagnostic `json:"diagnostic,omitempty"`
 
-	// DEPRECATED fields below. Need to support them for the old reviewdog CLI
+	// Deprecatedgo fields below. Need to support them for the old reviewdog CLI
 	// version.
 
-	// DEPRECATED: Use Diagnostic.
+	// Deprecated: Use Diagnostic.
 	Path string `json:"path,omitempty"`
-	// DEPRECATED: Use Diagnostic.
+	// Deprecated: Use Diagnostic.
 	Line int `json:"line,omitempty"`
-	// DEPRECATED: Use Diagnostic.
+	// Deprecated: Use Diagnostic.
 	Message string `json:"message,omitempty"`
-	// DEPRECATED: Use Diagnostic.
+	// Deprecated: Use Diagnostic.
 	RawMessage string `json:"raw_message,omitempty"`
 }
