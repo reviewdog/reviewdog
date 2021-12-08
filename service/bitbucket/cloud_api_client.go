@@ -3,7 +3,7 @@ package bitbucket
 import (
 	"context"
 	"fmt"
-	"io/ioutil"
+	"io"
 	"net/http"
 	"net/url"
 
@@ -118,7 +118,7 @@ func (c *CloudAPIClient) checkAPIError(err error, resp *http.Response, expectedC
 	}
 
 	if resp != nil && resp.StatusCode != expectedCode {
-		body, _ := ioutil.ReadAll(resp.Body)
+		body, _ := io.ReadAll(resp.Body)
 
 		return UnexpectedResponseError{
 			Code: resp.StatusCode,

@@ -3,7 +3,6 @@ package parser
 import (
 	"fmt"
 	"io"
-	"io/ioutil"
 
 	"google.golang.org/protobuf/encoding/protojson"
 
@@ -22,7 +21,7 @@ func NewRDJSONParser() *RDJSONParser {
 
 // Parse parses rdjson (JSON of DiagnosticResult).
 func (p *RDJSONParser) Parse(r io.Reader) ([]*rdf.Diagnostic, error) {
-	b, err := ioutil.ReadAll(r)
+	b, err := io.ReadAll(r)
 	if err != nil {
 		return nil, err
 	}

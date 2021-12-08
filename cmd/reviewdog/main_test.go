@@ -3,7 +3,6 @@ package main
 import (
 	"bytes"
 	"fmt"
-	"io/ioutil"
 	"os"
 	"path/filepath"
 	"strings"
@@ -25,13 +24,13 @@ line3
 `
 	)
 
-	beforef, err := ioutil.TempFile("", "reviewdog-test")
+	beforef, err := os.CreateTemp("", "reviewdog-test")
 	if err != nil {
 		t.Fatal(err)
 	}
 	defer beforef.Close()
 	defer os.Remove(beforef.Name())
-	afterf, err := ioutil.TempFile("", "reviewdog-test")
+	afterf, err := os.CreateTemp("", "reviewdog-test")
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -154,7 +153,7 @@ func TestRun_project(t *testing.T) {
 	})
 
 	t.Run("invalid config", func(t *testing.T) {
-		conffile, err := ioutil.TempFile("", "reviewdog-test")
+		conffile, err := os.CreateTemp("", "reviewdog-test")
 		if err != nil {
 			t.Fatal(err)
 		}
@@ -175,7 +174,7 @@ func TestRun_project(t *testing.T) {
 	})
 
 	t.Run("ok", func(t *testing.T) {
-		conffile, err := ioutil.TempFile("", "reviewdog-test")
+		conffile, err := os.CreateTemp("", "reviewdog-test")
 		if err != nil {
 			t.Fatal(err)
 		}

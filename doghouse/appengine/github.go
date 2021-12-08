@@ -8,7 +8,6 @@ import (
 	"errors"
 	"fmt"
 	"io"
-	"io/ioutil"
 	"net/http"
 	"net/url"
 	"strings"
@@ -194,7 +193,7 @@ func (g *GitHubHandler) requestAccessToken(ctx context.Context, code, state stri
 	}
 	defer res.Body.Close()
 
-	b, _ := ioutil.ReadAll(res.Body)
+	b, _ := io.ReadAll(res.Body)
 
 	var token struct {
 		AccessToken string `json:"access_token"`

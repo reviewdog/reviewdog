@@ -4,7 +4,6 @@ import (
 	"bytes"
 	"context"
 	"fmt"
-	"io/ioutil"
 	"os"
 	"path/filepath"
 	"strings"
@@ -138,7 +137,7 @@ func TestDiagnosticResultSet_Project(t *testing.T) {
 		return &wantDiagnosticResult, nil
 	}
 
-	tmp, err := ioutil.TempFile("", "")
+	tmp, err := os.CreateTemp("", "")
 	if err != nil {
 		t.Fatal(err)
 	}
