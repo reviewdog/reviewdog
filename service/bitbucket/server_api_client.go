@@ -3,7 +3,7 @@ package bitbucket
 import (
 	"context"
 	"fmt"
-	"io/ioutil"
+	"io"
 	"net/http"
 
 	insights "github.com/reva2/bitbucket-insights-api"
@@ -87,7 +87,7 @@ func (c *ServerAPIClient) checkAPIError(err error, resp *http.Response, expected
 	}
 
 	if resp != nil && resp.StatusCode != expectedCode {
-		body, _ := ioutil.ReadAll(resp.Body)
+		body, _ := io.ReadAll(resp.Body)
 
 		return UnexpectedResponseError{
 			Code: resp.StatusCode,

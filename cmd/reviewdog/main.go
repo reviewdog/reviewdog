@@ -7,7 +7,6 @@ import (
 	"flag"
 	"fmt"
 	"io"
-	"io/ioutil"
 	"log"
 	"net/http"
 	"net/url"
@@ -732,7 +731,7 @@ func readConf(conf string) ([]byte, error) {
 		}
 	}
 	for _, f := range conffiles {
-		bytes, err := ioutil.ReadFile(f)
+		bytes, err := os.ReadFile(f)
 		if err == nil {
 			return bytes, nil
 		}

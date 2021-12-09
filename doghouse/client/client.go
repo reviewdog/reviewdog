@@ -5,7 +5,7 @@ import (
 	"context"
 	"encoding/json"
 	"fmt"
-	"io/ioutil"
+	"io"
 	"log"
 	"net/http"
 	"net/url"
@@ -68,7 +68,7 @@ func (c *DogHouseClient) Check(ctx context.Context, req *doghouse.CheckRequest) 
 	}
 	defer httpResp.Body.Close()
 
-	respb, err := ioutil.ReadAll(httpResp.Body)
+	respb, err := io.ReadAll(httpResp.Body)
 	if err != nil {
 		return nil, err
 	}
