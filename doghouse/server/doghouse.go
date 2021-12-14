@@ -317,17 +317,21 @@ func annotationToDiagnostic(a *doghouse.Annotation) *rdf.Diagnostic {
 	if a.Diagnostic != nil {
 		return a.Diagnostic
 	}
-	// Old reviwedog CLI doesn't have the Diagnostic field.
+	// Old reviewdog CLI doesn't have the Diagnostic field.
 	return &rdf.Diagnostic{
 		Location: &rdf.Location{
+			//lint:ignore SA1019 use deprecated fields because of backward compatibility.
 			Path: a.Path,
 			Range: &rdf.Range{
 				Start: &rdf.Position{
+					//lint:ignore SA1019 use deprecated fields because of backward compatibility.
 					Line: int32(a.Line),
 				},
 			},
 		},
-		Message:        a.Message,
+		//lint:ignore SA1019 use deprecated fields because of backward compatibility.
+		Message: a.Message,
+		//lint:ignore SA1019 use deprecated fields because of backward compatibility.
 		OriginalOutput: a.RawMessage,
 	}
 }
