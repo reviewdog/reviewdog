@@ -33,8 +33,7 @@ func (gc *githubChecker) handleCheck(w http.ResponseWriter, r *http.Request) {
 
 	var req doghouse.CheckRequest
 	if err := json.NewDecoder(r.Body).Decode(&req); err != nil {
-		w.WriteHeader(http.StatusBadRequest)
-		fmt.Fprintf(w, "failed to decode request: %v", err)
+		http.Error(w, fmt.Sprintf("failed to decode request: %v", err), http.StatusBadRequest)
 		return
 	}
 
@@ -94,8 +93,8 @@ func (gc *githubChecker) validateCheckToken(ctx context.Context, w http.Response
 	token := extractBearerToken(r)
 	if token == "" {
 		w.Header().Set("The WWW-Authenticate", `error="invalid_request", error_description="The access token not provided"`)
-		w.WriteHeader(http.StatusUnauthorized)
-		fmt.Fprintf(w, "The access token not provided. Get token from %s", githubRepoURL(ctx, r, owner, repo))
+		msg := fmt.Sprintf("The access token not provided. Get token from %s", githubRepoURL(ctx, r, owner, repo))
+		http.Error(w, msg, http.StatusUnauthorized)
 		return false
 	}
 	_, wantToken, err := gc.ghRepoTokenStore.Get(ctx, owner, repo)
@@ -108,8 +107,8 @@ func (gc *githubChecker) validateCheckToken(ctx context.Context, w http.Response
 	}
 	if token != wantToken.Token {
 		w.Header().Set("The WWW-Authenticate", `error="invalid_token", error_description="The access token is invalid"`)
-		w.WriteHeader(http.StatusUnauthorized)
-		fmt.Fprintf(w, "The access token is invalid. Get valid token from %s", githubRepoURL(ctx, r, owner, repo))
+		msg := fmt.Sprintf("The access token is invalid. Get valid token from %s", githubRepoURL(ctx, r, owner, repo))
+		http.Error(w, msg, http.StatusUnauthorized)
 		return false
 	}
 	return true
