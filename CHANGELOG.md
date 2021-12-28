@@ -9,15 +9,23 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ### :sparkles: Release Note <!-- optional -->
 
 ### :rocket: Enhancements
+- ...
+
+### :bug: Fixes
+- ...
+
+### :rotating_light: Breaking changes
+- ...
+
+## [v0.13.1] - 2021-12-28
+
+### :rocket: Enhancements
 - [#1012](https://github.com/reviewdog/reviewdog/pull/1012) Use GitLab suggestions in merge request comments 
 
 ### :bug: Fixes
 - [#1014](https://github.com/reviewdog/reviewdog/pull/1014) Fix incorrect detection of the `GITHUB_TOKEN` permissions. fixes [#1010](https://github.com/reviewdog/reviewdog/issues/1010)
 - [#1017](https://github.com/reviewdog/reviewdog/pull/1017) Fix suggestions that include fenced code blocks. fixes [#999](https://github.com/reviewdog/reviewdog/issues/999)
 - [#1084](https://github.com/reviewdog/reviewdog/pull/1084) Fix DEPRECATED to Deprecated
-
-### :rotating_light: Breaking changes
-- ...
 
 ---
 
@@ -118,4 +126,5 @@ See https://github.com/reviewdog/reviewdog/releases for older release note.
 [v0.11.0]: https://github.com/reviewdog/reviewdog/compare/v0.10.2...v0.11.0
 [v0.12.0]: https://github.com/reviewdog/reviewdog/compare/v0.11.0...v0.12.0
 [v0.13.0]: https://github.com/reviewdog/reviewdog/compare/v0.12.0...v0.13.0
+[v0.13.1]: https://github.com/reviewdog/reviewdog/compare/v0.13.0...v0.13.1
 [@haya14busa]: https://github.com/haya14busa
