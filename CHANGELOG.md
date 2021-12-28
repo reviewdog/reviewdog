@@ -17,7 +17,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ### :rotating_light: Breaking changes
 - ...
 
-## [v0.13.1] - 2021-12-18
+## [v0.13.1] - 2021-12-28
 
 ### :rocket: Enhancements
 - [#1012](https://github.com/reviewdog/reviewdog/pull/1012) Use GitLab suggestions in merge request comments 
