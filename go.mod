@@ -3,7 +3,7 @@ module github.com/reviewdog/reviewdog
 go 1.17
 
 require (
-	cloud.google.com/go v0.100.1
+	cloud.google.com/go v0.100.2 // indirect
 	cloud.google.com/go/datastore v1.6.0
 	cloud.google.com/go/monitoring v1.1.0 // indirect
 	cloud.google.com/go/trace v1.0.0 // indirect
@@ -31,6 +31,8 @@ require (
 	google.golang.org/protobuf v1.27.1
 	gopkg.in/yaml.v2 v2.4.0
 )
+
+require cloud.google.com/go/compute v0.1.0
 
 require (
 	github.com/aws/aws-sdk-go v1.37.0 // indirect
