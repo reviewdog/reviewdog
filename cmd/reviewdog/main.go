@@ -280,7 +280,7 @@ func run(r io.Reader, w io.Writer, opt *option) error {
 		// GitHub token doesn't have write permission due to security concern and
 		// cannot post results via Review API.
 		if cienv.IsInGitHubAction() && cienv.HasReadOnlyPermissionGitHubToken() {
-			fmt.Fprintln(w, `reviewdog: This GitHub token doesn't have write permission of Review API [1], 
+			fmt.Fprintln(os.Stderr, `reviewdog: This GitHub token doesn't have write permission of Review API [1], 
 so reviewdog will report results via logging command [2] and create annotations similar to
 github-pr-check reporter as a fallback.
 [1]: https://docs.github.com/en/actions/reference/events-that-trigger-workflows#pull_request_target, 
