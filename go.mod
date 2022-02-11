@@ -23,7 +23,7 @@ require (
 	github.com/reviewdog/go-bitbucket v0.0.0-20201024094602-708c3f6a7de0
 	github.com/stretchr/testify v1.7.0
 	github.com/vvakame/sdlog v0.0.0-20200409072131-7c0d359efddc
-	github.com/xanzy/go-gitlab v0.55.0
+	github.com/xanzy/go-gitlab v0.55.1
 	go.opencensus.io v0.23.0
 	golang.org/x/build v0.0.0-20200616162219-07bebbe343e9
 	golang.org/x/oauth2 v0.0.0-20211104180415-d3ed0bb246c8
@@ -37,12 +37,7 @@ require cloud.google.com/go/compute v1.2.0
 require (
 	github.com/aws/aws-sdk-go v1.37.0 // indirect
 	github.com/census-instrumentation/opencensus-proto v0.3.0 // indirect
-	github.com/cespare/xxhash v1.1.0 // indirect
-	github.com/cncf/udpa/go v0.0.0-20201120205902-5459f2c99403 // indirect
-	github.com/cncf/xds/go v0.0.0-20210312221358-fbca930ec8ed // indirect
 	github.com/davecgh/go-spew v1.1.1 // indirect
-	github.com/envoyproxy/go-control-plane v0.9.9-0.20210512163311-63b5d3c536b0 // indirect
-	github.com/envoyproxy/protoc-gen-validate v0.1.0 // indirect
 	github.com/golang-jwt/jwt/v4 v4.0.0 // indirect
 	github.com/golang/groupcache v0.0.0-20200121045136-8c9f03a8e57e // indirect
 	github.com/google/go-github/v41 v41.0.0 // indirect
