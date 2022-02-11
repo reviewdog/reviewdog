@@ -20,7 +20,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ## [v0.14.0] - 2022-02-11
 
 ### :rocket: Enhancements
-- [#1118](https://github.com/reviewdog/reviewdog/pull/1118) Suport end_lnum (%e) and end_col (%k) errorformat
+- [#1118](https://github.com/reviewdog/reviewdog/pull/1118) Support end_lnum (%e) and end_col (%k) errorformat
 
 ---
 
