@@ -75,7 +75,7 @@ func (c *ServerAPIClient) deleteReport(ctx context.Context, report *ReportReques
 		Execute()
 
 	if err := c.checkAPIError(err, resp, http.StatusNoContent); err != nil {
-		return fmt.Errorf("failted to delete code insights report: %w", err)
+		return fmt.Errorf("failed to delete code insights report: %w", err)
 	}
 
 	return nil
@@ -83,7 +83,7 @@ func (c *ServerAPIClient) deleteReport(ctx context.Context, report *ReportReques
 
 func (c *ServerAPIClient) checkAPIError(err error, resp *http.Response, expectedCode int) error {
 	if err != nil {
-		return fmt.Errorf("bitubucket API error: %w", err)
+		return fmt.Errorf("Bitbucket Server API error: %w", err)
 	}
 
 	if resp != nil && resp.StatusCode != expectedCode {
