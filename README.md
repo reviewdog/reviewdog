@@ -633,6 +633,7 @@ You can use public GitHub Actions to start using reviewdog with ease! :tada: :ar
   - [dotenv-linter/action-dotenv-linter](https://github.com/dotenv-linter/action-dotenv-linter) - Run [dotenv-linter](https://github.com/dotenv-linter/dotenv-linter) to lint `.env` files.
 - Shell script
   - [reviewdog/action-shellcheck](https://github.com/reviewdog/action-shellcheck) - Run [shellcheck](https://github.com/koalaman/shellcheck).
+  - [reviewdog/action-shfmt](https://github.com/reviewdog/action-shfmt) - Run [shfmt](https://github.com/mvdan/sh).
 - Go
   - [reviewdog/action-staticcheck](https://github.com/reviewdog/action-staticcheck) - Run [staticcheck](https://staticcheck.io/).
   - [reviewdog/action-golangci-lint](https://github.com/reviewdog/action-golangci-lint) - Run [golangci-lint](https://github.com/golangci/golangci-lint) and supported linters individually by golangci-lint.
