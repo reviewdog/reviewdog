@@ -622,6 +622,7 @@ You can use public GitHub Actions to start using reviewdog with ease! :tada: :ar
 
 - Common
   - [reviewdog/action-misspell](https://github.com/reviewdog/action-misspell) - Run [misspell](https://github.com/client9/misspell).
+  - [EPMatt/reviewdog-action-prettier](https://github.com/EPMatt/reviewdog-action-prettier) - Run [Prettier](https://prettier.io/).
 - Text (e.g. Markdown)
   - [reviewdog/action-alex](https://github.com/reviewdog/action-alex) - Run [alex](https://github.com/get-alex/alex) which catches insensitive, inconsiderate writing. (e.g. master/slave)
   - [reviewdog/action-languagetool](https://github.com/reviewdog/action-languagetool) - Run [languagetool](https://github.com/languagetool-org/languagetool).
@@ -669,6 +670,8 @@ You can use public GitHub Actions to start using reviewdog with ease! :tada: :ar
   - [dvdandroid/action-android-lint](https://github.com/DVDAndroid/action-android-lint) - Run [Android Lint](https://developer.android.com/studio/write/lint)
 - Ansible
   - [reviewdog/action-ansiblelint](https://github.com/reviewdog/action-ansiblelint) - Run [ansible-lint](https://github.com/ansible/ansible-lint)
+- GitHub Actions
+  - [reviewdog/action-actionlint](https://github.com/reviewdog/action-actionlint) - Run [actionlint](https://github.com/rhysd/actionlint)
   
 ... and more on [GitHub Marketplace](https://github.com/marketplace?utf8=✓&type=actions&query=reviewdog).
 
