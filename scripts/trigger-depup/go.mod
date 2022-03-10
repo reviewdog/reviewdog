@@ -4,7 +4,7 @@ go 1.17
 
 require (
 	github.com/google/go-github/v39 v39.2.0
-	golang.org/x/oauth2 v0.0.0-20220223155221-ee480838109b
+	golang.org/x/oauth2 v0.0.0-20220309155454-6242fa91716a
 )
 
 require (
