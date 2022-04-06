@@ -662,7 +662,7 @@ You can use public GitHub Actions to start using reviewdog with ease! :tada: :ar
   - [wemake-python-styleguide](https://github.com/wemake-services/wemake-python-styleguide) - Run wemake-python-styleguide
   - [tsuyoshicho/action-mypy](https://github.com/tsuyoshicho/action-mypy) - Run [mypy](https://pypi.org/project/mypy/)
   - [jordemort/action-pyright](https://github.com/jordemort/action-pyright) - Run [pyright](https://github.com/Microsoft/pyright)
-  - [dciborow/action-pylint](https://github.com/dciborow/action-pylint) - Run [pyright](https://github.com/PyCQA/pylint)
+  - [dciborow/action-pylint](https://github.com/dciborow/action-pylint) - Run [pylint](https://github.com/PyCQA/pylint)
   - [reviewdog/action-black](https://github.com/reviewdog/action-black) - Run [black](https://github.com/psf/black)
 - Kotlin
   - [ScaCap/action-ktlint](https://github.com/ScaCap/action-ktlint) - Run [ktlint](https://ktlint.github.io/).
