@@ -70,11 +70,11 @@ func findDotGitPath(path string) (string, error) {
 			return path, nil
 		}
 
-		if parent := filepath.Dir(path); parent == path {
+		parent := filepath.Dir(path)
+		if parent == path {
 			return "", fmt.Errorf(".git not found")
-		} else {
-			path = parent
 		}
+		path = parent
 	}
 }
 
