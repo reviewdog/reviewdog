@@ -38,7 +38,7 @@ Reviewdog:
     - export GOPATH=${CI_PROJECT_DIR}/.cache
     - export PATH=$PATH:$GOPATH/bin
     - go install ./cmd/reviewdog
-    - ( cd linters && go get golang.org/x/lint/golint )
+    - go install golang.org/x/lint/golint@latest
   script:
     - golint ./... | reviewdog -f=golint -name=golint-discussion -reporter=gitlab-mr-discussion -filter-mode=nofilter
     - golint ./... | reviewdog -f=golint -name=golint-commit -reporter=gitlab-mr-commit
