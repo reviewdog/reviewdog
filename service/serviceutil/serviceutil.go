@@ -28,7 +28,7 @@ func GitRelWorkdir() (string, error) {
 	const separator = string(filepath.Separator)
 	path := strings.Trim(strings.TrimPrefix(cwd, root), separator)
 	if path != "" {
-		path = path + separator
+		path += separator
 	}
 	return path, nil
 }
