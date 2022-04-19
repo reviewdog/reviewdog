@@ -4,14 +4,14 @@ jobs:
   lint:
     working_directory: ~/reviewdog
     docker:
-      - image: circleci/golang:1.17
+      - image: circleci/golang:1.18
     steps:
       - checkout
       - run:
           name: System information
           command: 'echo "Golang $(go version)"'
       - run: 'curl -sfL https://raw.githubusercontent.com/reviewdog/reviewdog/master/install.sh| sh -s -- -b $(go env GOPATH)/bin'
-      - run: '( cd linters && go get golang.org/x/lint/golint )'
+      - run: go install golang.org/x/lint/golint@latest
       - run:
           command: |-
             set +o pipefail
