@@ -34,4 +34,4 @@ jobs:
     - name: Test
       run: go test -v -race -coverpkg=./... -coverprofile=coverage.txt ./...
 
-    - uses: codecov/codecov-action@v2
+    - uses: codecov/codecov-action@v3
