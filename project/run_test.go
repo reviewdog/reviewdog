@@ -152,7 +152,7 @@ func TestRun(t *testing.T) {
 		conf := &Config{
 			Runner: map[string]*Runner{
 				"test": {
-					Cmd:         "not found",
+					Cmd:         "not-found",
 					Errorformat: []string{`%f:%l:%c:%m`},
 				},
 			},
@@ -162,7 +162,7 @@ func TestRun(t *testing.T) {
 		} else {
 			t.Log(err)
 		}
-		want := "sh: 1: not: not found\n"
+		want := "sh: 1: not-found: not found\n"
 		if got := buf.String(); got != want {
 			t.Errorf("got stderr %q, want %q", got, want)
 		}
