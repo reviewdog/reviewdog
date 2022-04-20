@@ -47,12 +47,20 @@ func withServerVariables(ctx context.Context, bbURL string) (context.Context, er
 		return ctx, fmt.Errorf("failed to parse Bitbucket Server URL: %w", err)
 	}
 
+	if parsed.Scheme == "" {
+		return ctx, fmt.Errorf("unable to determine scheme of Bitbucket Server URL: %w", err)
+	}
+
+	if parsed.Host == "" {
+		return ctx, fmt.Errorf("unable to determine host of Bitbucket Server URL: %w", err)
+	}
+
 	return context.WithValue(
 		ctx,
 		insights.ContextServerVariables,
 		map[string]string{
 			"protocol":        parsed.Scheme,
-			"bitbucketDomain": parsed.Host,
+			"bitbucketDomain": parsed.Host + parsed.Path,
 		},
 	), nil
 }
