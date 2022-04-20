@@ -21,7 +21,7 @@ jobs:
       - uses: actions/checkout@v3
 
       - name: Install linters
-        run: '( cd linters && go get golang.org/x/lint/golint )'
+        run: go install golang.org/x/lint/golint@latest
 
       - name: Setup reviewdog
         # uses: reviewdog/action-setup@v1
@@ -77,7 +77,7 @@ jobs:
         run: go mod download
 
       - name: Install linters
-        run: '( cd linters && go get golang.org/x/lint/golint )'
+        run: go install golang.org/x/lint/golint@latest
 
       - name: Setup reviewdog
         # uses: reviewdog/action-setup@v1
