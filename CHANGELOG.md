@@ -9,6 +9,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ### :sparkles: Release Note <!-- optional -->
 
 ### :rocket: Enhancements
+- [#1160](https://github.com/reviewdog/reviewdog/pull/1160) Remove needless git command dependency by GitRelWorkdir func
 - ...
 
 ### :bug: Fixes
