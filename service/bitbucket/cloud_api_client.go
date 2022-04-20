@@ -114,7 +114,7 @@ func (c *CloudAPIClient) CreateOrUpdateAnnotations(ctx context.Context, req *Ann
 
 func (c *CloudAPIClient) checkAPIError(err error, resp *http.Response, expectedCode int) error {
 	if err != nil {
-		return fmt.Errorf("Bitbucket Cloud API error: %w", err)
+		return fmt.Errorf("bitbucket Cloud API error: %w", err)
 	}
 
 	if resp != nil && resp.StatusCode != expectedCode {
