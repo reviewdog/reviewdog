@@ -364,14 +364,13 @@ func parseLS(ls string) (l, s int, err error) {
 	return l, s, nil
 }
 
-// readline reads lines from bufio.Reader with size limit. It consumes
-// remaining content even if the line size reaches size limit.
+// readline reads a whole line.
 func readline(r *bufio.Reader) (string, error) {
 	line, isPrefix, err := r.ReadLine()
 	if err != nil {
 		return "", err
 	}
-	// consume all remaining line content
+	// append all remaining line content
 	if isPrefix {
 		l := make([]byte, len(line))
 		copy(l, line)
