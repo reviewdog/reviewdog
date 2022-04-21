@@ -6,16 +6,16 @@ import (
 	"net/http"
 	"net/http/httptest"
 	"os"
+	"strings"
 	"sync/atomic"
 	"testing"
 
 	"github.com/google/go-cmp/cmp"
-	"github.com/xanzy/go-gitlab"
-
 	"github.com/reviewdog/reviewdog"
 	"github.com/reviewdog/reviewdog/filter"
 	"github.com/reviewdog/reviewdog/proto/rdf"
 	"github.com/reviewdog/reviewdog/service/commentutil"
+	"github.com/xanzy/go-gitlab"
 )
 
 func TestGitLabMergeRequestDiscussionCommenter_Post_Flush_review_api(t *testing.T) {
@@ -121,6 +121,34 @@ func TestGitLabMergeRequestDiscussionCommenter_Post_Flush_review_api(t *testing.
 		},
 	}
 
+	newCommentWithSuggestion := &reviewdog.Comment{
+		Result: &filter.FilteredDiagnostic{
+			Diagnostic: &rdf.Diagnostic{
+				Location: &rdf.Location{
+					Path: "file3.go",
+					Range: &rdf.Range{Start: &rdf.Position{
+						Line: 14,
+					}},
+				},
+				Message: "new comment with suggestion",
+				Suggestions: []*rdf.Suggestion{
+					{
+						Text: "line1-fixed\nline2-fixed",
+						Range: &rdf.Range{
+							Start: &rdf.Position{
+								Line: 14,
+							},
+							End: &rdf.Position{
+								Line: 15,
+							},
+						},
+					},
+				},
+			},
+			InDiffFile: true,
+		},
+	}
+
 	comments := []*reviewdog.Comment{
 		alreadyCommented1,
 		alreadyCommented2,
@@ -129,9 +157,10 @@ func TestGitLabMergeRequestDiscussionCommenter_Post_Flush_review_api(t *testing.
 		newComment3,
 		commentOutsideDiff,
 		commentWithoutLnum,
+		newCommentWithSuggestion,
 	}
 	var postCalled int32
-	const wantPostCalled = 3
+	const wantPostCalled = 4
 
 	mux := http.NewServeMux()
 	mux.HandleFunc("/api/v4/projects/o/r/merge_requests/14/discussions", func(w http.ResponseWriter, r *http.Request) {
@@ -219,6 +248,18 @@ func TestGitLabMergeRequestDiscussionCommenter_Post_Flush_review_api(t *testing.
 				if diff := cmp.Diff(got, want); diff != "" {
 					t.Error(diff)
 				}
+			case "file3.go":
+				suggestions := buildSuggestions(newCommentWithSuggestion)
+				bodyExpected := commentutil.MarkdownComment(newCommentWithSuggestion) + "\n\n" + suggestions
+
+				want := &gitlab.CreateMergeRequestDiscussionOptions{
+					Body: gitlab.String(bodyExpected),
+					Position: &gitlab.NotePosition{
+						BaseSHA: "xxx", StartSHA: "xxx", HeadSHA: "sha", PositionType: "text", NewPath: "file3.go", NewLine: 14},
+				}
+				if diff := cmp.Diff(got, want); diff != "" {
+					t.Error(diff)
+				}
 			default:
 				t.Errorf("got unexpected discussion: %#v", got)
 			}
@@ -265,5 +306,161 @@ func TestGitLabMergeRequestDiscussionCommenter_Post_Flush_review_api(t *testing.
 	}
 	if postCalled != wantPostCalled {
 		t.Errorf("%d discussions posted, but want %d", postCalled, wantPostCalled)
+	}
+}
+
+func TestBuildSuggestions(t *testing.T) {
+	tests := []struct {
+		in   *reviewdog.Comment
+		want string
+	}{
+		{
+			in: &reviewdog.Comment{
+				ToolName: "tool-name",
+				Result: &filter.FilteredDiagnostic{
+					Diagnostic: &rdf.Diagnostic{
+						Message: "no suggestion",
+					},
+				},
+			},
+			want: "",
+		},
+		{
+			in: buildTestComment(
+				"one suggestion",
+				[]*rdf.Suggestion{
+					buildTestsSuggestion("line1-fixed\nline2-fixed", 10, 10),
+				},
+			),
+			want: strings.Join([]string{
+				"```suggestion:-0+0",
+				"line1-fixed",
+				"line2-fixed",
+				"```",
+				"",
+			}, "\n"),
+		},
+		{
+			in: buildTestComment(
+				"two suggestions",
+				[]*rdf.Suggestion{
+					buildTestsSuggestion("line1-fixed\nline2-fixed", 10, 11),
+					buildTestsSuggestion("line3-fixed\nline4-fixed", 20, 21),
+				},
+			),
+			want: strings.Join([]string{
+				"```suggestion:-0+1",
+				"line1-fixed",
+				"line2-fixed",
+				"```",
+				"```suggestion:-0+1",
+				"line3-fixed",
+				"line4-fixed",
+				"```",
+				"",
+			}, "\n"),
+		},
+		{
+			in: buildTestComment(
+				"a suggestion that has fenced code block",
+				[]*rdf.Suggestion{
+					buildTestsSuggestion("```shell\ngit config --global receive.advertisepushoptions true\n```", 10, 12),
+				},
+			),
+			want: strings.Join([]string{
+				"````suggestion:-0+2",
+				"```shell",
+				"git config --global receive.advertisepushoptions true",
+				"```",
+				"````",
+				"",
+			}, "\n"),
+		},
+	}
+	for _, tt := range tests {
+		suggestion := buildSuggestions(tt.in)
+		if suggestion != tt.want {
+			t.Errorf("got unexpected suggestion.\ngot:\n%s\nwant:\n%s", suggestion, tt.want)
+		}
+	}
+}
+
+func TestBuildSuggestionsInvalid(t *testing.T) {
+	tests := []struct {
+		in   *reviewdog.Comment
+		want string
+	}{
+		{
+			in: buildTestComment(
+				"two suggestions, one without range",
+				[]*rdf.Suggestion{
+					{
+						Text: "line3-fixed\nline4-fixed",
+					},
+					buildTestsSuggestion("line1-fixed\nline2-fixed", 10, 11),
+				},
+			),
+			want: strings.Join([]string{
+				"```suggestion:-0+1",
+				"line1-fixed",
+				"line2-fixed",
+				"```",
+				"",
+			}, "\n"),
+		},
+		{
+			in: buildTestComment(
+				"two suggestions, one without range end",
+				[]*rdf.Suggestion{
+					{
+						Text: "line3-fixed\nline4-fixed",
+						Range: &rdf.Range{
+							Start: &rdf.Position{
+								Line: 20,
+							},
+						},
+					},
+					buildTestsSuggestion("line1-fixed\nline2-fixed", 10, 11),
+				}),
+			want: strings.Join([]string{
+				"```suggestion:-0+1",
+				"line1-fixed",
+				"line2-fixed",
+				"```",
+				"",
+			}, "\n"),
+		},
+	}
+	for _, tt := range tests {
+		suggestion := buildSuggestions(tt.in)
+		if suggestion != tt.want {
+			t.Errorf("got unexpected suggestion.\ngot:\n%s\nwant:\n%s", suggestion, tt.want)
+		}
+	}
+}
+
+func buildTestsSuggestion(text string, start int32, end int32) *rdf.Suggestion {
+	return &rdf.Suggestion{
+		Text: text,
+		Range: &rdf.Range{
+			Start: &rdf.Position{
+				Line: start,
+			},
+			End: &rdf.Position{
+				Line: end,
+			},
+		},
+	}
+}
+
+func buildTestComment(message string, suggestions []*rdf.Suggestion) *reviewdog.Comment {
+	return &reviewdog.Comment{
+		ToolName: "tool-name",
+		Result: &filter.FilteredDiagnostic{
+			Diagnostic: &rdf.Diagnostic{
+				Message:     message,
+				Suggestions: suggestions,
+			},
+		},
 	}
 }

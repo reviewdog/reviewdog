@@ -1,7 +1,6 @@
 package main
 
 import (
-	"io/ioutil"
 	"log"
 	"net/http"
 	"os"
@@ -37,7 +36,7 @@ func mustCookieMan() *cookieman.CookieMan {
 
 func mustGitHubAppsPrivateKey() []byte {
 	// Private keys https://github.com/settings/apps/reviewdog
-	githubAppsPrivateKey, err := ioutil.ReadFile(mustGetenv("GITHUB_PRIVATE_KEY_FILE"))
+	githubAppsPrivateKey, err := os.ReadFile(mustGetenv("GITHUB_PRIVATE_KEY_FILE"))
 	if err != nil {
 		log.Fatalf("could not read private key: %s", err)
 	}

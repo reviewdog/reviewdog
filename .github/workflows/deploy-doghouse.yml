@@ -7,16 +7,20 @@ on:
 
 jobs:
   test:
+    permissions:
+      contents: read
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v2
+      - uses: actions/checkout@v3
         with:
           fetch-depth: 50 # Need git history for testing.
-      - uses: actions/setup-go@v2
+      - uses: actions/setup-go@v3
         with:
           go-version: 1.15
       - run: go test -v -race  ./...
   deploy:
+    permissions:
+      contents: read
     needs: [test]
     runs-on: ubuntu-latest
     defaults:
@@ -24,8 +28,8 @@ jobs:
         shell: bash
         working-directory: ./doghouse/appengine/
     steps:
-      - uses: actions/checkout@v2
-      - uses: google-github-actions/setup-gcloud@v0.2.1
+      - uses: actions/checkout@v3
+      - uses: google-github-actions/setup-gcloud@v0.6.0
         with:
           project_id: review-dog
           service_account_key: ${{ secrets.GCP_SA_KEY }}

@@ -9,13 +9,58 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ### :sparkles: Release Note <!-- optional -->
 
 ### :rocket: Enhancements
-- [#888](https://github.com/reviewdog/reviewdog/pull/888) Allow GitHub PR reporting for a forked repository iff it's triggered by `pull_request_target`
+- ...
 
 ### :bug: Fixes
 - ...
 
 ### :rotating_light: Breaking changes
 - ...
+
+---
+
+## [v0.14.1] - 2022-04-21
+
+### :rocket: Enhancements
+- [#1160](https://github.com/reviewdog/reviewdog/pull/1160) Remove needless git command dependency by GitRelWorkdir func
+
+### :bug: Fixes
+- [#1125](https://github.com/reviewdog/reviewdog/pull/1125) Allow BITBUCKET_SERVER_URL to have subpath
+
+---
+
+## [v0.14.0] - 2022-02-11
+
+### :rocket: Enhancements
+- [#1118](https://github.com/reviewdog/reviewdog/pull/1118) Support end_lnum (%e) and end_col (%k) errorformat
+
+---
+
+## [v0.13.1] - 2021-12-28
+
+### :rocket: Enhancements
+- [#1012](https://github.com/reviewdog/reviewdog/pull/1012) Use GitLab suggestions in merge request comments
+
+### :bug: Fixes
+- [#1014](https://github.com/reviewdog/reviewdog/pull/1014) Fix incorrect detection of the `GITHUB_TOKEN` permissions. fixes [#1010](https://github.com/reviewdog/reviewdog/issues/1010)
+- [#1017](https://github.com/reviewdog/reviewdog/pull/1017) Fix suggestions that include fenced code blocks. fixes [#999](https://github.com/reviewdog/reviewdog/issues/999)
+- [#1084](https://github.com/reviewdog/reviewdog/pull/1084) Fix DEPRECATED to Deprecated
+
+---
+
+## [v0.13.0] - 2021-07-22
+
+### :rocket: Enhancements
+- [#996](https://github.com/reviewdog/reviewdog/pull/996) Added support for Bitbucket Pipes executed within Pipelines.
+- [#997](https://github.com/reviewdog/reviewdog/pull/997) Added support for Bitbucket Server to `bitbucket-code-report` reporter
+
+---
+
+## [v0.12.0] - 2021-06-26
+
+### :rocket: Enhancements
+- [#888](https://github.com/reviewdog/reviewdog/pull/888) Allow GitHub PR reporting for a forked repository iff it's triggered by `pull_request_target`
+- [#976](https://github.com/reviewdog/reviewdog/pull/976) Treat `GITHUB_API_URL` environment variable as same as `GITHUB_API`, so users can use reviewdog in GitHub Actions in Enterprise Server without setting `GITHUB_API`
 
 ---
 
@@ -87,15 +132,20 @@ $ cd subdir/ && reviewdog -filter-mode=file -fail-on-error -reporter=github-pr-r
 
 ### :rotating_light: Breaking changes
 - `github-check` reporter won't report results outside diff by default now. You
-  need to use `-filter-mode=nofilter` to keep the same bahavior.
+  need to use `-filter-mode=nofilter` to keep the same behavior.
 
 ---
 
 See https://github.com/reviewdog/reviewdog/releases for older release note.
 
-[Unreleased]: https://github.com/reviewdog/reviewdog/compare/v0.10.0...HEAD
+[Unreleased]: https://github.com/reviewdog/reviewdog/compare/v0.13.0...HEAD
 [v0.10.0]: https://github.com/reviewdog/reviewdog/compare/v0.9.17...v0.10.0
 [v0.10.1]: https://github.com/reviewdog/reviewdog/compare/v0.10.0...v0.10.1
 [v0.10.2]: https://github.com/reviewdog/reviewdog/compare/v0.10.1...v0.10.2
 [v0.11.0]: https://github.com/reviewdog/reviewdog/compare/v0.10.2...v0.11.0
+[v0.12.0]: https://github.com/reviewdog/reviewdog/compare/v0.11.0...v0.12.0
+[v0.13.0]: https://github.com/reviewdog/reviewdog/compare/v0.12.0...v0.13.0
+[v0.13.1]: https://github.com/reviewdog/reviewdog/compare/v0.13.0...v0.13.1
+[v0.14.0]: https://github.com/reviewdog/reviewdog/compare/v0.13.1...v0.14.0
+[v0.14.1]: https://github.com/reviewdog/reviewdog/compare/v0.14.0...v0.14.1
 [@haya14busa]: https://github.com/haya14busa

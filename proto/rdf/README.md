@@ -108,7 +108,7 @@ Example:
           "text": "<replacement text>"
         }
       ],
-      "sevrity": "WARNING"
+      "severity": "WARNING"
     }
   ]
 }
@@ -155,9 +155,9 @@ format, but not everyone wants to support it.
   output format is actually not well-documented and not meant to be
   used as generic format. Some linters just happens to use the same format(?).
 
-## Background: Altenatives
+## Background: Alternatives
 
-There are altenative solutions out there (which are not used by reviewdog) as
+There are alternative solutions out there (which are not used by reviewdog) as
 well.
 
 ### The Static Analysis Results Interchange Format (SARIF)
@@ -221,7 +221,7 @@ RDFormat message is actually inspired by LSP Diagnostic message too.
 Problems:
 - LSP and the Diagnostic message is basically per one file. It's not always
   suited to be used as diagnostic tools output because they often need to
-  report diagnostic results for multiple files and outputing json per file does
+  report diagnostic results for multiple files and outputting json per file does
   not make very much sense.
 - LSP's Diagnostic message doesn't have code suggestions (code action) data.
   Code action have data about associated diagnostic on the contrary and the
@@ -246,7 +246,7 @@ tools and development tools regardless of their programming languages.
 [![Reviewdog Diagnostic Format Concept](https://user-images.githubusercontent.com/3797062/87955046-2b8b6300-cae8-11ea-983f-6554e2aeb8f2.png)](https://docs.google.com/drawings/d/15GZu5Iq6wukFtrpy91srQO_ry1iFQUisVAJd_yEprLc/edit?usp=sharing)
 
 ### Diagnostic tools' RDFormat Support
-Ideally, diagnostic tools themselves should support outputing their results as
+Ideally, diagnostic tools themselves should support outputting their results as
 RDFormat compliant format, but not all tools does support RDFormat especially
 in early stage. But we can still introduce RDFormat by supporting RDFormat with
 errorformat for most diagnostic tools. Also, we can write a converter and add
@@ -291,7 +291,7 @@ not all tools support their desired format. It takes time to implement many
 formats for each tool and it's actually not worth doing it for most of the
 cases, IMO.
 
-Reviewdog Diagnostic Formatter should support formating of diagnostic
+Reviewdog Diagnostic Formatter should support formatting of diagnostic
 results based on RDfFormat. Then, diagnostic tools can focus on improving
 diagnostic feature and let the formatter to format the results.
 

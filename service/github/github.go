@@ -8,7 +8,7 @@ import (
 	"strings"
 	"sync"
 
-	"github.com/google/go-github/v35/github"
+	"github.com/google/go-github/v39/github"
 
 	"github.com/reviewdog/reviewdog"
 	"github.com/reviewdog/reviewdog/cienv"
@@ -309,13 +309,19 @@ func buildSingleSuggestion(c *reviewdog.Comment, s *rdf.Suggestion) (string, err
 	if start.GetColumn() > 0 || end.GetColumn() > 0 {
 		return buildNonLineBasedSuggestion(c, s)
 	}
+
+	txt := s.GetText()
+	backticks := commentutil.GetCodeFenceLength(txt)
+
 	var sb strings.Builder
-	sb.WriteString("```suggestion\n")
-	if txt := s.GetText(); txt != "" {
+	sb.Grow(backticks + len("suggestion\n") + len(txt) + len("\n") + backticks)
+	commentutil.WriteCodeFence(&sb, backticks)
+	sb.WriteString("suggestion\n")
+	if txt != "" {
 		sb.WriteString(txt)
 		sb.WriteString("\n")
 	}
-	sb.WriteString("```")
+	commentutil.WriteCodeFence(&sb, backticks)
 	return sb.String(), nil
 }
 
@@ -334,12 +340,17 @@ func buildNonLineBasedSuggestion(c *reviewdog.Comment, s *rdf.Suggestion) (strin
 	if err != nil {
 		return "", err
 	}
+
+	txt := startLineContent[:max(start.GetColumn()-1, 0)] + s.GetText() + endLineContent[max(end.GetColumn()-1, 0):]
+	backticks := commentutil.GetCodeFenceLength(txt)
+
 	var sb strings.Builder
-	sb.WriteString("```suggestion\n")
-	sb.WriteString(startLineContent[:max(start.GetColumn()-1, 0)])
-	sb.WriteString(s.GetText())
-	sb.WriteString(endLineContent[max(end.GetColumn()-1, 0):])
-	sb.WriteString("\n```")
+	sb.Grow(backticks + len("suggestion\n") + len(txt) + len("\n") + backticks)
+	commentutil.WriteCodeFence(&sb, backticks)
+	sb.WriteString("suggestion\n")
+	sb.WriteString(txt)
+	sb.WriteString("\n")
+	commentutil.WriteCodeFence(&sb, backticks)
 	return sb.String(), nil
 }
 

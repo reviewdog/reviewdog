@@ -8,12 +8,11 @@ import (
 	"errors"
 	"fmt"
 	"io"
-	"io/ioutil"
 	"net/http"
 	"net/url"
 	"strings"
 
-	"github.com/google/go-github/v35/github"
+	"github.com/google/go-github/v39/github"
 	"github.com/justinas/nosurf"
 	"github.com/vvakame/sdlog/aelog"
 	"golang.org/x/oauth2"
@@ -194,7 +193,7 @@ func (g *GitHubHandler) requestAccessToken(ctx context.Context, code, state stri
 	}
 	defer res.Body.Close()
 
-	b, _ := ioutil.ReadAll(res.Body)
+	b, _ := io.ReadAll(res.Body)
 
 	var token struct {
 		AccessToken string `json:"access_token"`

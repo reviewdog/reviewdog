@@ -85,7 +85,7 @@ message Location {
 // A range in a text document expressed as start and end positions.
 
 // The end position is *exclusive*. It might be a bit unnatural for you or for
-// some diagnostic tools to use exlusive range, but it's necessary to represent
+// some diagnostic tools to use exclusive range, but it's necessary to represent
 // zero-width range especially when using it in Suggestion context to support
 // code insertion.
 // Example: "14" in "haya14busa"

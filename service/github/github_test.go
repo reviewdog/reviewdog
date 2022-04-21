@@ -10,7 +10,7 @@ import (
 	"strings"
 	"testing"
 
-	"github.com/google/go-github/v35/github"
+	"github.com/google/go-github/v39/github"
 	"github.com/kylelemons/godebug/pretty"
 	"golang.org/x/oauth2"
 
@@ -432,6 +432,48 @@ func TestGitHubPullRequest_Post_Flush_review_api(t *testing.T) {
 					"```suggestion",
 					"haya14busa",
 					"```",
+				}, "\n") + "\n"),
+			},
+			{
+				Path:      github.String("reviewdog.go"),
+				Side:      github.String("RIGHT"),
+				StartSide: github.String("RIGHT"),
+				StartLine: github.Int(15),
+				Line:      github.Int(16),
+				Body: github.String(commentutil.BodyPrefix + strings.Join([]string{
+					"multiline suggestion comment including a code fence block",
+					"````suggestion",
+					"```",
+					"some code",
+					"```",
+					"````",
+				}, "\n") + "\n"),
+			},
+			{
+				Path: github.String("reviewdog.go"),
+				Side: github.String("RIGHT"),
+				Line: github.Int(15),
+				Body: github.String(commentutil.BodyPrefix + strings.Join([]string{
+					"singleline suggestion comment including a code fence block",
+					"````suggestion",
+					"```",
+					"some code",
+					"```",
+					"````",
+				}, "\n") + "\n"),
+			},
+			{
+				Path:      github.String("reviewdog.go"),
+				Side:      github.String("RIGHT"),
+				StartSide: github.String("RIGHT"),
+				StartLine: github.Int(15),
+				Line:      github.Int(16),
+				Body: github.String(commentutil.BodyPrefix + strings.Join([]string{
+					"multiline suggestion comment including an empty code fence block",
+					"``````suggestion",
+					"```",
+					"`````",
+					"``````",
 				}, "\n") + "\n"),
 			},
 		}
@@ -941,6 +983,96 @@ func TestGitHubPullRequest_Post_Flush_review_api(t *testing.T) {
 						},
 					},
 					Message: "range suggestion with start only location",
+				},
+				InDiffContext: true,
+			},
+		},
+		{
+			Result: &filter.FilteredDiagnostic{
+				Diagnostic: &rdf.Diagnostic{
+					Location: &rdf.Location{
+						Path: "reviewdog.go",
+						Range: &rdf.Range{
+							Start: &rdf.Position{
+								Line: 15,
+							},
+							End: &rdf.Position{
+								Line: 16,
+							},
+						},
+					},
+					Suggestions: []*rdf.Suggestion{
+						{
+							Range: &rdf.Range{
+								Start: &rdf.Position{
+									Line: 15,
+								},
+								End: &rdf.Position{
+									Line: 16,
+								},
+							},
+							Text: "```\nsome code\n```",
+						},
+					},
+					Message: "multiline suggestion comment including a code fence block",
+				},
+				InDiffContext: true,
+			},
+		},
+		{
+			Result: &filter.FilteredDiagnostic{
+				Diagnostic: &rdf.Diagnostic{
+					Location: &rdf.Location{
+						Path: "reviewdog.go",
+						Range: &rdf.Range{
+							Start: &rdf.Position{
+								Line: 15,
+							},
+						},
+					},
+					Suggestions: []*rdf.Suggestion{
+						{
+							Range: &rdf.Range{
+								Start: &rdf.Position{
+									Line: 15,
+								},
+							},
+							Text: "```\nsome code\n```",
+						},
+					},
+					Message: "singleline suggestion comment including a code fence block",
+				},
+				InDiffContext: true,
+			},
+		},
+		{
+			Result: &filter.FilteredDiagnostic{
+				Diagnostic: &rdf.Diagnostic{
+					Location: &rdf.Location{
+						Path: "reviewdog.go",
+						Range: &rdf.Range{
+							Start: &rdf.Position{
+								Line: 15,
+							},
+							End: &rdf.Position{
+								Line: 16,
+							},
+						},
+					},
+					Suggestions: []*rdf.Suggestion{
+						{
+							Range: &rdf.Range{
+								Start: &rdf.Position{
+									Line: 15,
+								},
+								End: &rdf.Position{
+									Line: 16,
+								},
+							},
+							Text: "```\n`````",
+						},
+					},
+					Message: "multiline suggestion comment including an empty code fence block",
 				},
 				InDiffContext: true,
 			},

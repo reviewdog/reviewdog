@@ -3,22 +3,24 @@ on: [push,pull_request]
 jobs:
 
   test:
+    permissions:
+      contents: read
     name: Test
     runs-on: ubuntu-latest
     steps:
 
-    - uses: actions/setup-go@v2
+    - uses: actions/setup-go@v3
       with:
-        go-version: 1.14
+        go-version: 1.17
 
-    - uses: actions/checkout@v2
+    - uses: actions/checkout@v3
       with:
         fetch-depth: 50 # Need git history for testing.
 
     # https://github.com/actions/cache/blob/master/examples.md#go---modules
     - name: Cache Go Modules
       id: cache
-      uses: actions/cache@v2
+      uses: actions/cache@v3
       with:
         path: ~/go/pkg/mod
         key: ${{ runner.os }}-go-${{ hashFiles('**/go.sum') }}
@@ -32,4 +34,4 @@ jobs:
     - name: Test
       run: go test -v -race -coverpkg=./... -coverprofile=coverage.txt ./...
 
-    - uses: codecov/codecov-action@v1
+    - uses: codecov/codecov-action@v3

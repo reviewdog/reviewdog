@@ -12,10 +12,13 @@ on:
 
 jobs:
   release:
+    permissions:
+      contents: write
+      pull-requests: write
     if: github.event.action != 'labeled'
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v2
+      - uses: actions/checkout@v3
 
       # Bump version on merging Pull Requests with specific labels.
       # (bump:major,bump:minor,bump:patch)
@@ -32,13 +35,21 @@ jobs:
           if_false: ${{ steps.bumpr.outputs.next_version }}
 
       # Setup Go for building reviewdog binary.
-      - uses: actions/setup-go@v2
-        if: "steps.tag.outputs.value != ''"
+      - uses: actions/setup-go@v3
         with:
-          go-version: 1.14
+          go-version: 1.17
+
+      # Test goreleaser if the tag is empty.
+      - name: Test goreleaser
+        uses: goreleaser/goreleaser-action@v2
+        if: "steps.tag.outputs.value == ''"
+        with:
+          version: latest
+          args: check
 
       # Create release.
-      - uses: goreleaser/goreleaser-action@v2
+      - name: Create release with goreleaser
+        uses: goreleaser/goreleaser-action@v2
         if: "steps.tag.outputs.value != ''"
         with:
           version: latest
@@ -57,9 +68,12 @@ jobs:
         run: go run ./scripts/trigger-depup/main.go
 
   release-check:
+    permissions:
+      contents: write
+      pull-requests: write
     if: github.event.action == 'labeled'
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v2
+      - uses: actions/checkout@v3
       - name: Post bumpr status comment
         uses: haya14busa/action-bumpr@v1

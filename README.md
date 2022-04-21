@@ -51,7 +51,7 @@
   <a href="https://somsubhra.github.io/github-release-stats/?username=reviewdog&repository=reviewdog&per_page=30">
     <img alt="Github Releases Stats" src="https://img.shields.io/github/downloads/reviewdog/reviewdog/total.svg?logo=github">
   </a>
-  <a href="https://starcharts.herokuapp.com/reviewdog/reviewdog"><img alt="Stars" src="https://img.shields.io/github/stars/reviewdog/reviewdog.svg?style=social"></a>
+  <a href="https://starchart.cc/reviewdog/reviewdog"><img alt="Stars" src="https://img.shields.io/github/stars/reviewdog/reviewdog.svg?style=social"></a>
 </div>
 <br />
 
@@ -141,10 +141,10 @@ $ brew install reviewdog/tap/reviewdog
 $ brew upgrade reviewdog/tap/reviewdog
 ```
 
-### Build from HEAD with go get
+### Build with go install
 
 ```shell
-$ go get -u github.com/reviewdog/reviewdog/cmd/reviewdog
+$ go install github.com/reviewdog/reviewdog/cmd/reviewdog@latest
 ```
 
 ## Input Format
@@ -552,6 +552,14 @@ $ export BITBUCKET_PASSWORD="my_password"
 $ reviewdog -reporter=bitbucket-code-report
 ```
 
+To post report to Bitbucket Server use `BITBUCKET_SERVER_URL` variable:
+```shell
+$ export BITBUCKET_USER="my_user"
+$ export BITBUCKET_PASSWORD="my_password"
+$ export BITBUCKET_SERVER_URL="https://bitbucket.my-company.com"
+$ reviewdog -reporter=bitbucket-code-report
+```
+
 ## Supported CI services
 
 ### [GitHub Actions](https://github.com/features/actions)
@@ -614,6 +622,7 @@ You can use public GitHub Actions to start using reviewdog with ease! :tada: :ar
 
 - Common
   - [reviewdog/action-misspell](https://github.com/reviewdog/action-misspell) - Run [misspell](https://github.com/client9/misspell).
+  - [EPMatt/reviewdog-action-prettier](https://github.com/EPMatt/reviewdog-action-prettier) - Run [Prettier](https://prettier.io/).
 - Text (e.g. Markdown)
   - [reviewdog/action-alex](https://github.com/reviewdog/action-alex) - Run [alex](https://github.com/get-alex/alex) which catches insensitive, inconsiderate writing. (e.g. master/slave)
   - [reviewdog/action-languagetool](https://github.com/reviewdog/action-languagetool) - Run [languagetool](https://github.com/languagetool-org/languagetool).
@@ -625,11 +634,14 @@ You can use public GitHub Actions to start using reviewdog with ease! :tada: :ar
   - [dotenv-linter/action-dotenv-linter](https://github.com/dotenv-linter/action-dotenv-linter) - Run [dotenv-linter](https://github.com/dotenv-linter/dotenv-linter) to lint `.env` files.
 - Shell script
   - [reviewdog/action-shellcheck](https://github.com/reviewdog/action-shellcheck) - Run [shellcheck](https://github.com/koalaman/shellcheck).
+  - [reviewdog/action-shfmt](https://github.com/reviewdog/action-shfmt) - Run [shfmt](https://github.com/mvdan/sh).
 - Go
   - [reviewdog/action-staticcheck](https://github.com/reviewdog/action-staticcheck) - Run [staticcheck](https://staticcheck.io/).
   - [reviewdog/action-golangci-lint](https://github.com/reviewdog/action-golangci-lint) - Run [golangci-lint](https://github.com/golangci/golangci-lint) and supported linters individually by golangci-lint.
 - JavaScript
   - [reviewdog/action-eslint](https://github.com/reviewdog/action-eslint) - Run [eslint](https://github.com/eslint/eslint).
+- TypeScript
+  - [EPMatt/reviewdog-action-tsc](https://github.com/EPMatt/reviewdog-action-tsc) - Run [tsc](https://www.typescriptlang.org/docs/handbook/compiler-options.html).
 - CSS
   - [reviewdog/action-stylelint](https://github.com/reviewdog/action-stylelint) - Run [stylelint](https://github.com/stylelint/stylelint).
 - Vim script
@@ -650,12 +662,16 @@ You can use public GitHub Actions to start using reviewdog with ease! :tada: :ar
   - [wemake-python-styleguide](https://github.com/wemake-services/wemake-python-styleguide) - Run wemake-python-styleguide
   - [tsuyoshicho/action-mypy](https://github.com/tsuyoshicho/action-mypy) - Run [mypy](https://pypi.org/project/mypy/)
   - [jordemort/action-pyright](https://github.com/jordemort/action-pyright) - Run [pyright](https://github.com/Microsoft/pyright)
+  - [dciborow/action-pylint](https://github.com/dciborow/action-pylint) - Run [pylint](https://github.com/PyCQA/pylint)
+  - [reviewdog/action-black](https://github.com/reviewdog/action-black) - Run [black](https://github.com/psf/black)
 - Kotlin
   - [ScaCap/action-ktlint](https://github.com/ScaCap/action-ktlint) - Run [ktlint](https://ktlint.github.io/).
 - Android Lint
   - [dvdandroid/action-android-lint](https://github.com/DVDAndroid/action-android-lint) - Run [Android Lint](https://developer.android.com/studio/write/lint)
 - Ansible
   - [reviewdog/action-ansiblelint](https://github.com/reviewdog/action-ansiblelint) - Run [ansible-lint](https://github.com/ansible/ansible-lint)
+- GitHub Actions
+  - [reviewdog/action-actionlint](https://github.com/reviewdog/action-actionlint) - Run [actionlint](https://github.com/rhysd/actionlint)
   
 ... and more on [GitHub Marketplace](https://github.com/marketplace?utf8=✓&type=actions&query=reviewdog).
 
@@ -829,6 +845,7 @@ $ reviewdog -conf=.reviewdog.yml -reporter=github-pr-check -guess
 
 #### Jenkins with Github pull request builder plugin
 - [GitHub pull request builder plugin - Jenkins - Jenkins Wiki](https://wiki.jenkins-ci.org/display/JENKINS/GitHub+pull+request+builder+plugin)
+- [Configuring a GitHub app account - Jenkins - CloudBees](https://docs.cloudbees.com/docs/cloudbees-ci/latest/cloud-admin-guide/github-app-auth) - required to use github-pr-check formatter without reviewdog server or GitHub actions.
 
 ```shell
 $ export CI_PULL_REQUEST=${ghprbPullId}
@@ -836,9 +853,13 @@ $ export CI_REPO_OWNER=haya14busa
 $ export CI_REPO_NAME=reviewdog
 $ export CI_COMMIT=${ghprbActualCommit}
 $ export REVIEWDOG_INSECURE_SKIP_VERIFY=true # set this as you need
+
+# To submit via reviewdog server using github-pr-check reporter
 $ REVIEWDOG_TOKEN="<token>" reviewdog -reporter=github-pr-check
-# Or
+# Or, to submit directly via API using github-pr-review reporter
 $ REVIEWDOG_GITHUB_API_TOKEN="<token>" reviewdog -reporter=github-pr-review
+# Or, to submit directly via API using github-pr-check reporter (requires GitHub App Account configured)
+$ REVIEWDOG_SKIP_DOGHOUSE=true REVIEWDOG_GITHUB_API_TOKEN="<token>" reviewdog -reporter=github-pr-check
 ```
 
 ## Exit codes

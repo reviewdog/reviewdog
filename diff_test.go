@@ -2,7 +2,7 @@ package reviewdog
 
 import (
 	"context"
-	"io/ioutil"
+	"os"
 	"os/exec"
 	"strings"
 	"sync"
@@ -40,7 +40,7 @@ index 34cacb9..a727dd3 100644
 }
 
 func TestDiffCmd(t *testing.T) {
-	wantb, err := ioutil.ReadFile("./diff/testdata/golint.diff")
+	wantb, err := os.ReadFile("./diff/testdata/golint.diff")
 	if err != nil {
 		t.Fatal(err)
 	}

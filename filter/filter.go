@@ -23,7 +23,7 @@ type FilteredDiagnostic struct {
 	FirstSuggestionInDiffContext bool
 
 	// Source lines text of the diagnostic message's line-range. Key is line
-	// number. If a suggestion range is broader than the disagnostic message's
+	// number. If a suggestion range is broader than the diagnostic message's
 	// line-range, suggestions' line-range are included too.  It contains a whole
 	// line even if the diagnostic range have column fields.
 	// Optional. Currently available only when it's in diff context.

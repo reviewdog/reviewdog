@@ -2,10 +2,10 @@ package server
 
 import (
 	"context"
-	"io/ioutil"
+	"io"
 	"time"
 
-	"github.com/google/go-github/v35/github"
+	"github.com/google/go-github/v39/github"
 	"github.com/vvakame/sdlog/aelog"
 )
 
@@ -38,7 +38,7 @@ func (c *checkerGitHubClient) UpdateCheckRun(ctx context.Context, owner, repo st
 		checkRun, resp, err1 := c.Checks.UpdateCheckRun(ctx, owner, repo, checkID, opt)
 		if err1 != nil {
 			err = err1
-			b, err1 := ioutil.ReadAll(resp.Body)
+			b, err1 := io.ReadAll(resp.Body)
 			if err1 != nil {
 				aelog.Errorf(ctx, "failed to read error response body: %v", err1)
 			}

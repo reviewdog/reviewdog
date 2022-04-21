@@ -17,7 +17,7 @@
       },
       "distinct": true,
       "id": "8bc5e712cca1bf1b2e35df4a87405b16e085a084",
-      "message": "chagne tool name for golint with reviewdog on push",
+      "message": "change tool name for golint with reviewdog on push",
       "modified": [
         ".github/workflows/reviewdog_on_push.yml"
       ],

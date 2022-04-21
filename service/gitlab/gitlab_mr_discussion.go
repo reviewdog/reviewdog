@@ -4,14 +4,22 @@ import (
 	"context"
 	"fmt"
 	"path/filepath"
+	"strconv"
+	"strings"
 	"sync"
 
 	"github.com/xanzy/go-gitlab"
 	"golang.org/x/sync/errgroup"
 
 	"github.com/reviewdog/reviewdog"
+	"github.com/reviewdog/reviewdog/proto/rdf"
 	"github.com/reviewdog/reviewdog/service/commentutil"
 	"github.com/reviewdog/reviewdog/service/serviceutil"
+)
+
+const (
+	invalidSuggestionPre  = "<details><summary>reviewdog suggestion error</summary>"
+	invalidSuggestionPost = "</details>"
 )
 
 // MergeRequestDiscussionCommenter is a comment and diff service for GitLab MergeRequest.
@@ -104,6 +112,11 @@ func (g *MergeRequestDiscussionCommenter) postCommentsForEach(ctx context.Contex
 		loc := c.Result.Diagnostic.GetLocation()
 		lnum := int(loc.GetRange().GetStart().GetLine())
 		body := commentutil.MarkdownComment(c)
+
+		if suggestion := buildSuggestions(c); suggestion != "" {
+			body = body + "\n\n" + suggestion
+		}
+
 		if !c.Result.InDiffFile || lnum == 0 || postedcs.IsPosted(c, lnum, body) {
 			continue
 		}
@@ -151,4 +164,53 @@ func listAllMergeRequestDiscussion(cli *gitlab.Client, projectID string, mergeRe
 		return nil, err
 	}
 	return append(discussions, restDiscussions...), nil
+}
+
+// creates diff in markdown for suggested changes
+// Ref gitlab suggestion: https://docs.gitlab.com/ee/user/project/merge_requests/reviews/suggestions.html
+func buildSuggestions(c *reviewdog.Comment) string {
+	var sb strings.Builder
+	for _, s := range c.Result.Diagnostic.GetSuggestions() {
+		if s.Range == nil || s.Range.Start == nil || s.Range.End == nil {
+			continue
+		}
+
+		txt, err := buildSingleSuggestion(c, s)
+		if err != nil {
+			sb.WriteString(invalidSuggestionPre + err.Error() + invalidSuggestionPost + "\n")
+			continue
+		}
+		sb.WriteString(txt)
+		sb.WriteString("\n")
+	}
+
+	return sb.String()
+}
+
+func buildSingleSuggestion(c *reviewdog.Comment, s *rdf.Suggestion) (string, error) {
+	var sb strings.Builder
+
+	// we might need to use 4 or more backticks
+	//
+	// https://docs.gitlab.com/ee/user/project/merge_requests/reviews/suggestions.html#code-block-nested-in-suggestions
+	// > If you need to make a suggestion that involves a fenced code block, wrap your suggestion in four backticks instead of the usual three.
+	//
+	// The documentation doesn't explicitly say anything about cases more than 4 backticks,
+	// however it seems to be handled as intended.
+	txt := s.GetText()
+	backticks := commentutil.GetCodeFenceLength(txt)
+
+	lines := strconv.Itoa(int(s.Range.End.Line - s.Range.Start.Line))
+	sb.Grow(backticks + len("suggestion:-0+\n") + len(lines) + len(txt) + len("\n") + backticks)
+	commentutil.WriteCodeFence(&sb, backticks)
+	sb.WriteString("suggestion:-0+")
+	sb.WriteString(lines)
+	sb.WriteString("\n")
+	if txt != "" {
+		sb.WriteString(txt)
+		sb.WriteString("\n")
+	}
+	commentutil.WriteCodeFence(&sb, backticks)
+
+	return sb.String(), nil
 }
