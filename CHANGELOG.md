@@ -9,15 +9,25 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ### :sparkles: Release Note <!-- optional -->
 
 ### :rocket: Enhancements
-- [#1160](https://github.com/reviewdog/reviewdog/pull/1160) Remove needless git command dependency by GitRelWorkdir func
 - ...
 
 ### :bug: Fixes
-- [#1125](https://github.com/reviewdog/reviewdog/pull/1125) Allow BITBUCKET_SERVER_URL to have subpath
 - ...
 
 ### :rotating_light: Breaking changes
 - ...
+
+---
+
+## [v0.14.1] - 2022-04-21
+
+### :rocket: Enhancements
+- [#1160](https://github.com/reviewdog/reviewdog/pull/1160) Remove needless git command dependency by GitRelWorkdir func
+
+### :bug: Fixes
+- [#1125](https://github.com/reviewdog/reviewdog/pull/1125) Allow BITBUCKET_SERVER_URL to have subpath
+
+---
 
 ## [v0.14.0] - 2022-02-11
 
@@ -137,4 +147,5 @@ See https://github.com/reviewdog/reviewdog/releases for older release note.
 [v0.13.0]: https://github.com/reviewdog/reviewdog/compare/v0.12.0...v0.13.0
 [v0.13.1]: https://github.com/reviewdog/reviewdog/compare/v0.13.0...v0.13.1
 [v0.14.0]: https://github.com/reviewdog/reviewdog/compare/v0.13.1...v0.14.0
+[v0.14.1]: https://github.com/reviewdog/reviewdog/compare/v0.14.0...v0.14.1
 [@haya14busa]: https://github.com/haya14busa
