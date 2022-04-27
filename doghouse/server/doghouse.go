@@ -97,10 +97,7 @@ func (ch *Checker) postCheck(ctx context.Context, checkID int64, checks []*filte
 		}
 	}
 
-	conclusion := "success"
-	if len(annotations) > 0 {
-		conclusion = ch.conclusion()
-	}
+	conclusion := ch.conclusion(annotations)
 	opt := github.UpdateCheckRunOptions{
 		Name:        ch.checkName(),
 		Status:      github.String("completed"),
@@ -160,8 +157,35 @@ func (ch *Checker) checkTitle() string {
 }
 
 // https://developer.github.com/v3/checks/runs/#parameters-1
-func (ch *Checker) conclusion() string {
-	switch strings.ToLower(ch.req.Level) {
+func (ch *Checker) conclusion(annotations []*github.CheckRunAnnotation) string {
+	checkResult := "success"
+
+	if ch.req.Level != "" {
+		// Level takes precedence when configured (for backwards compatibility)
+		if len(annotations) > 0 {
+			checkResult = strings.ToLower(ch.req.Level)
+		}
+	} else {
+		levelSeverity := map[string]int{
+			"success": 0,
+			"notice":  1,
+			"warning": 2,
+			"failure": 3,
+		}
+
+		highestLevel := "success"
+		for _, a := range annotations {
+			annotationLevel := *a.AnnotationLevel
+			if levelSeverity[annotationLevel] > levelSeverity[highestLevel] {
+				highestLevel = annotationLevel
+			}
+		}
+		checkResult = highestLevel
+	}
+
+	switch checkResult {
+	case "success":
+		return "success"
 	case "info", "warning":
 		return "neutral"
 	}
