@@ -166,7 +166,7 @@ func (ch *Checker) conclusion(annotations []*github.CheckRunAnnotation) string {
 			checkResult = strings.ToLower(ch.req.Level)
 		}
 	} else {
-		levelSeverity := map[string]int{
+		precedence := map[string]int{
 			"success": 0,
 			"notice":  1,
 			"warning": 2,
@@ -176,7 +176,7 @@ func (ch *Checker) conclusion(annotations []*github.CheckRunAnnotation) string {
 		highestLevel := "success"
 		for _, a := range annotations {
 			annotationLevel := *a.AnnotationLevel
-			if levelSeverity[annotationLevel] > levelSeverity[highestLevel] {
+			if precedence[annotationLevel] > precedence[highestLevel] {
 				highestLevel = annotationLevel
 			}
 		}
