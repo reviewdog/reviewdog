@@ -658,6 +658,7 @@ You can use public GitHub Actions to start using reviewdog with ease! :tada: :ar
   - [vk26/action-fasterer](https://github.com/vk26/action-fasterer) - Run [fasterer](https://github.com/DamirSvrtan/fasterer).
   - [SennaLabs/action-standardrb](https://github.com/SennaLabs/action-standardrb) - Run [standardrb](https://github.com/testdouble/standard).
   - [tk0miya/action-erblint](https://github.com/tk0miya/action-erblint) - Run [erb-lint](https://github.com/Shopify/erb-lint)
+  - [blooper05/action-rails_best_practices](https://github.com/blooper05/action-rails_best_practices) - Run [rails_best_practices](https://github.com/flyerhzm/rails_best_practices)
 - Python
   - [wemake-python-styleguide](https://github.com/wemake-services/wemake-python-styleguide) - Run wemake-python-styleguide
   - [tsuyoshicho/action-mypy](https://github.com/tsuyoshicho/action-mypy) - Run [mypy](https://pypi.org/project/mypy/)
