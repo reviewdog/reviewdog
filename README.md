@@ -141,6 +141,12 @@ $ brew install reviewdog/tap/reviewdog
 $ brew upgrade reviewdog/tap/reviewdog
 ```
 
+### [Scoop](https://scoop.sh/) on Windows
+
+```
+> scoop install reviewdog
+```
+
 ### Build with go install
 
 ```shell
