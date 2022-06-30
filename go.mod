@@ -26,7 +26,7 @@ require (
 	github.com/xanzy/go-gitlab v0.68.2
 	go.opencensus.io v0.23.0
 	golang.org/x/build v0.0.0-20200616162219-07bebbe343e9
-	golang.org/x/oauth2 v0.0.0-20220628200809-02e64fa58f26
+	golang.org/x/oauth2 v0.0.0-20220630143837-2104d58473e0
 	golang.org/x/sync v0.0.0-20220601150217-0de741cfad7f
 	google.golang.org/protobuf v1.28.0
 	gopkg.in/yaml.v2 v2.4.0
@@ -51,7 +51,7 @@ require (
 	github.com/prometheus/prometheus v2.5.0+incompatible // indirect
 	github.com/stretchr/objx v0.4.0 // indirect
 	golang.org/x/crypto v0.0.0-20210817164053-32db794688a5 // indirect
-	golang.org/x/net v0.0.0-20220607020251-c690dde0001d // indirect
+	golang.org/x/net v0.0.0-20220624214902-1bab6f366d9e // indirect
 	golang.org/x/sys v0.0.0-20220610221304-9f5ed59c137d // indirect
 	golang.org/x/text v0.3.7 // indirect
 	golang.org/x/time v0.0.0-20220411224347-583f2d630306 // indirect
