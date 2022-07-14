@@ -682,6 +682,8 @@ You can use public GitHub Actions to start using reviewdog with ease! :tada: :ar
   - [reviewdog/action-ansiblelint](https://github.com/reviewdog/action-ansiblelint) - Run [ansible-lint](https://github.com/ansible/ansible-lint)
 - GitHub Actions
   - [reviewdog/action-actionlint](https://github.com/reviewdog/action-actionlint) - Run [actionlint](https://github.com/rhysd/actionlint)
+- Protocol Buffers
+  - [yoheimuta/action-protolint](https://github.com/yoheimuta/action-protolint) - Run [protolint](https://github.com/yoheimuta/protolint)
   
 ... and more on [GitHub Marketplace](https://github.com/marketplace?utf8=✓&type=actions&query=reviewdog).
 
