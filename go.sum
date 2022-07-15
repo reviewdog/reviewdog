@@ -284,8 +284,8 @@ github.com/stretchr/testify v1.8.0/go.mod h1:yNjHg4UonilssWZ8iaSj1OCr/vHnekPRkoO
 github.com/tarm/serial v0.0.0-20180830185346-98f6abe2eb07/go.mod h1:kDXzergiv9cbyO7IOYJZWg1U88JhDg3PB6klq9Hg2pA=
 github.com/vvakame/sdlog v0.0.0-20200409072131-7c0d359efddc h1:El7LEavRpa49dYFE9ezO8aQxQn5E7u7eQkFsaXsoQAY=
 github.com/vvakame/sdlog v0.0.0-20200409072131-7c0d359efddc/go.mod h1:MmhrKtbECoUJTctfak+MnOFoJ9XQqYZ7chcwV9O7v3I=
-github.com/xanzy/go-gitlab v0.68.2 h1:bRVpa+czzpR2j2UV9oeJRU3SO40ieOHlgKlVwW0LRBw=
-github.com/xanzy/go-gitlab v0.68.2/go.mod h1:o4yExCtdaqlM8YGdDJWuZoBmfxBsmA9TPEjs9mx1UO4=
+github.com/xanzy/go-gitlab v0.69.0 h1:sPci9xHzlX+lcJvPqNu3y3BQpePuR2R694Bal4AeyB8=
+github.com/xanzy/go-gitlab v0.69.0/go.mod h1:o4yExCtdaqlM8YGdDJWuZoBmfxBsmA9TPEjs9mx1UO4=
 github.com/yuin/goldmark v1.1.25/go.mod h1:3hX8gzYuyVAZsxl0MRgGTJEmQBFcNTphYh9decYSb74=
 github.com/yuin/goldmark v1.1.27/go.mod h1:3hX8gzYuyVAZsxl0MRgGTJEmQBFcNTphYh9decYSb74=
 github.com/yuin/goldmark v1.1.32/go.mod h1:3hX8gzYuyVAZsxl0MRgGTJEmQBFcNTphYh9decYSb74=
