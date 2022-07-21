@@ -5,8 +5,8 @@ go 1.18
 require (
 	cloud.google.com/go v0.102.1 // indirect
 	cloud.google.com/go/datastore v1.8.0
-	cloud.google.com/go/monitoring v1.1.0 // indirect
-	cloud.google.com/go/trace v1.0.0 // indirect
+	cloud.google.com/go/monitoring v1.4.0 // indirect
+	cloud.google.com/go/trace v1.2.0 // indirect
 	contrib.go.opencensus.io/exporter/stackdriver v0.13.12
 	github.com/bradleyfalzon/ghinstallation/v2 v2.1.0
 	github.com/golang/protobuf v1.5.2
@@ -25,7 +25,7 @@ require (
 	github.com/vvakame/sdlog v0.0.0-20200409072131-7c0d359efddc
 	github.com/xanzy/go-gitlab v0.69.0
 	go.opencensus.io v0.23.0
-	golang.org/x/build v0.0.0-20200616162219-07bebbe343e9
+	golang.org/x/build v0.0.0-20220721200758-d35cb804da1f
 	golang.org/x/oauth2 v0.0.0-20220718184931-c8730f7fcb92
 	golang.org/x/sync v0.0.0-20220601150217-0de741cfad7f
 	google.golang.org/protobuf v1.28.0
@@ -50,7 +50,7 @@ require (
 	github.com/pmezard/go-difflib v1.0.0 // indirect
 	github.com/prometheus/prometheus v2.5.0+incompatible // indirect
 	github.com/stretchr/objx v0.4.0 // indirect
-	golang.org/x/crypto v0.0.0-20210817164053-32db794688a5 // indirect
+	golang.org/x/crypto v0.0.0-20220307211146-efcb8507fb70 // indirect
 	golang.org/x/net v0.0.0-20220624214902-1bab6f366d9e // indirect
 	golang.org/x/sys v0.0.0-20220610221304-9f5ed59c137d // indirect
 	golang.org/x/text v0.3.7 // indirect
