@@ -186,7 +186,7 @@ func (ch *Checker) conclusion(annotations []*github.CheckRunAnnotation) string {
 	switch checkResult {
 	case "success":
 		return "success"
-	case "info", "warning":
+	case "notice", "warning":
 		return "neutral"
 	}
 	return "failure"
