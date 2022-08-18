@@ -32,7 +32,7 @@ require (
 	gopkg.in/yaml.v2 v2.4.0
 )
 
-require cloud.google.com/go/compute v1.8.0
+require cloud.google.com/go/compute v1.9.0
 
 require (
 	github.com/aws/aws-sdk-go v1.43.31 // indirect
