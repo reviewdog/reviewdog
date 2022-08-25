@@ -4,6 +4,7 @@ import (
 	"context"
 	"errors"
 	"net/http"
+	"strings"
 	"testing"
 
 	"github.com/google/go-cmp/cmp"
@@ -661,5 +662,25 @@ func TestCheck_fail_check_with_403(t *testing.T) {
 	}
 	if resp.CheckedResults == nil {
 		t.Error("resp.CheckedResults should not be nil")
+	}
+}
+func TestCheck_too_many_findings_cut_off_correctly(t *testing.T) {
+	checker := &Checker{req: &doghouse.CheckRequest{}}
+
+	var diagnostics []*filter.FilteredDiagnostic
+	for i := 0; i < 1000; i++ {
+		diagnostics = append(diagnostics, &filter.FilteredDiagnostic{
+			ShouldReport: true,
+			Diagnostic: &rdf.Diagnostic{
+				Message: "this is a pretty long test message that will lead to overshooting the maximum allowed size",
+			},
+		})
+	}
+	summaryText := checker.summary(diagnostics)
+	if len(summaryText) > maxAllowedSize {
+		t.Errorf("summary text is %d bytes long, but the maximum allowed size is %d", len(summaryText), maxAllowedSize)
+	}
+	if !strings.Contains(summaryText, "... (Too many findings. Dropped some findings)\n</details>") {
+		t.Error("summary text was not cut off correctly")
 	}
 }
