@@ -23,7 +23,7 @@ import (
 //  https://api.github.com/repos/easymotion/vim-easymotion/check-runs: 422
 //  Invalid request.
 //  Only 65535 characters are allowed; 250684 were supplied. []
-const maxFilteredFinding = 150
+const maxAllowedSize = 65535
 
 // > The Checks API limits the number of annotations to a maximum of 50 per API
 // > request.
@@ -196,8 +196,9 @@ func (ch *Checker) reqAnnotationLevel() string {
 
 func (ch *Checker) summary(checks []*filter.FilteredDiagnostic) string {
 	var lines []string
+	var usedBytes int
 	lines = append(lines, "reported by [reviewdog](https://github.com/reviewdog/reviewdog) :dog:")
-
+	usedBytes += len(lines[0]) + 1
 	var findings []*filter.FilteredDiagnostic
 	var filteredFindings []*filter.FilteredDiagnostic
 	for _, c := range checks {
@@ -207,27 +208,39 @@ func (ch *Checker) summary(checks []*filter.FilteredDiagnostic) string {
 			filteredFindings = append(filteredFindings, c)
 		}
 	}
-	lines = append(lines, ch.summaryFindings("Findings", findings)...)
-	lines = append(lines, ch.summaryFindings("Filtered Findings", filteredFindings)...)
 
+	findingMsgs, usedBytes := ch.summaryFindings("Findings", usedBytes, findings)
+	lines = append(lines, findingMsgs...)
+	filteredFindingsMsgs, _ := ch.summaryFindings("Filtered Findings", usedBytes, filteredFindings)
+	lines = append(lines, filteredFindingsMsgs...)
 	return strings.Join(lines, "\n")
 }
 
-func (ch *Checker) summaryFindings(name string, checks []*filter.FilteredDiagnostic) []string {
+func (ch *Checker) summaryFindings(name string, usedBytes int, checks []*filter.FilteredDiagnostic) ([]string, int) {
 	var lines []string
-	lines = append(lines, "<details>")
-	lines = append(lines, fmt.Sprintf("<summary>%s (%d)</summary>", name, len(checks)))
-	lines = append(lines, "")
-	for i, c := range checks {
-		if i >= maxFilteredFinding {
-			lines = append(lines, "... (Too many findings. Dropped some findings)")
+	lines = append(lines, fmt.Sprintf("<details>\n<summary>%s (%d)</summary>\n", name, len(checks)))
+	if len(lines[0])+1+usedBytes > maxAllowedSize {
+		// bail out if we're already over the limit
+		return nil, usedBytes
+	}
+	usedBytes += len(lines[0]) + 1
+	for _, c := range checks {
+		nextLine := githubutils.LinkedMarkdownDiagnostic(ch.req.Owner, ch.req.Repo, ch.req.SHA, c.Diagnostic)
+		// existing lines + newline + closing details tag must be smaller than the max allowed size
+		if usedBytes+len(nextLine)+1+10 >= maxAllowedSize {
+			cutoffMsg := "... (Too many findings. Dropped some findings)"
+			if usedBytes+len(cutoffMsg)+1+10 <= maxAllowedSize {
+				lines = append(lines, cutoffMsg)
+				usedBytes += len(cutoffMsg) + 1
+			}
 			break
 		}
-		lines = append(lines, githubutils.LinkedMarkdownDiagnostic(
-			ch.req.Owner, ch.req.Repo, ch.req.SHA, c.Diagnostic))
+		lines = append(lines, nextLine)
+		usedBytes += len(nextLine) + 1
 	}
 	lines = append(lines, "</details>")
-	return lines
+	usedBytes += 10 + 1
+	return lines, usedBytes
 }
 
 func (ch *Checker) toCheckRunAnnotation(c *filter.FilteredDiagnostic) *github.CheckRunAnnotation {
