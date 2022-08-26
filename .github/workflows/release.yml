@@ -41,7 +41,7 @@ jobs:
 
       # Test goreleaser if the tag is empty.
       - name: Test goreleaser
-        uses: goreleaser/goreleaser-action@v2
+        uses: goreleaser/goreleaser-action@v3
         if: "steps.tag.outputs.value == ''"
         with:
           version: latest
@@ -49,7 +49,7 @@ jobs:
 
       # Create release.
       - name: Create release with goreleaser
-        uses: goreleaser/goreleaser-action@v2
+        uses: goreleaser/goreleaser-action@v3
         if: "steps.tag.outputs.value != ''"
         with:
           version: latest
