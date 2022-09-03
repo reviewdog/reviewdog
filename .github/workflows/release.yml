@@ -38,6 +38,7 @@ jobs:
       - uses: actions/setup-go@v3
         with:
           go-version: '1.19'
+          cache: true
 
       # Test goreleaser if the tag is empty.
       - name: Test goreleaser
