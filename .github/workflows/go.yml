@@ -9,27 +9,14 @@ jobs:
     runs-on: ubuntu-latest
     steps:
 
-    - uses: actions/setup-go@v3
-      with:
-        go-version: 1.17
-
     - uses: actions/checkout@v3
       with:
         fetch-depth: 50 # Need git history for testing.
 
-    # https://github.com/actions/cache/blob/master/examples.md#go---modules
-    - name: Cache Go Modules
-      id: cache
-      uses: actions/cache@v3
+    - uses: actions/setup-go@v3
       with:
-        path: ~/go/pkg/mod
-        key: ${{ runner.os }}-go-${{ hashFiles('**/go.sum') }}
-        restore-keys: |
-          ${{ runner.os }}-go-
-
-    - name: Download Go Modules
-      if: steps.cache.outputs.cache-hit != 'true'
-      run: go mod download
+        go-version: '1.19'
+        cache: true
 
     - name: Test
       run: go test -v -race -coverpkg=./... -coverprofile=coverage.txt ./...

@@ -1,9 +1,10 @@
 module github.com/reviewdog/reviewdog
 
-go 1.18
+go 1.19
 
 require (
 	cloud.google.com/go v0.102.1 // indirect
+	cloud.google.com/go/compute v1.9.0
 	cloud.google.com/go/datastore v1.8.0
 	cloud.google.com/go/monitoring v1.4.0 // indirect
 	cloud.google.com/go/trace v1.2.0 // indirect
@@ -31,8 +32,6 @@ require (
 	google.golang.org/protobuf v1.28.1
 	gopkg.in/yaml.v2 v2.4.0
 )
-
-require cloud.google.com/go/compute v1.9.0
 
 require (
 	github.com/aws/aws-sdk-go v1.43.31 // indirect
