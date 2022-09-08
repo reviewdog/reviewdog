@@ -1,6 +1,6 @@
 module github.com/reviewdog/reviewdog/scripts/trigger-depup
 
-go 1.18
+go 1.19
 
 require (
 	github.com/google/go-github/v39 v39.2.0
