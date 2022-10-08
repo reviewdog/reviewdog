@@ -11,21 +11,13 @@ import (
 
 func TestGitLabMergeRequestDiff_Diff(t *testing.T) {
 	getMRAPICall := 0
-	getBranchAPICall := 0
 	mux := http.NewServeMux()
 	mux.HandleFunc("/api/v4/projects/o/r/merge_requests/14", func(w http.ResponseWriter, r *http.Request) {
 		getMRAPICall++
 		if r.Method != http.MethodGet {
 			t.Errorf("unexpected access: %v %v", r.Method, r.URL)
 		}
-		w.Write([]byte(`{"target_project_id": 14, "target_branch": "test-branch"}`))
-	})
-	mux.HandleFunc("/api/v4/projects/14/repository/branches/test-branch", func(w http.ResponseWriter, r *http.Request) {
-		getBranchAPICall++
-		if r.Method != http.MethodGet {
-			t.Errorf("unexpected access: %v %v", r.Method, r.URL)
-		}
-		w.Write([]byte(`{"commit": {"id": "HEAD~"}}`))
+		w.Write([]byte(`{"target_project_id": 14, "target_branch": "test-branch","diff_refs": {"base_sha": "HEAD~", "head_sha": "HEAD", "start_sha": "HEAD"}}`))
 	})
 
 	ts := httptest.NewServer(mux)
@@ -45,8 +37,5 @@ func TestGitLabMergeRequestDiff_Diff(t *testing.T) {
 	}
 	if getMRAPICall != 1 {
 		t.Errorf("Get GitLab MergeRequest API called %v times, want once", getMRAPICall)
-	}
-	if getBranchAPICall != 1 {
-		t.Errorf("Get GitLab Branch API called %v times, want once", getBranchAPICall)
 	}
 }
