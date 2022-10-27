@@ -33,7 +33,7 @@ require (
 	gopkg.in/yaml.v2 v2.4.0
 )
 
-require cloud.google.com/go/compute/metadata v0.1.0
+require cloud.google.com/go/compute/metadata v0.1.1
 
 require (
 	github.com/aws/aws-sdk-go v1.43.31 // indirect
