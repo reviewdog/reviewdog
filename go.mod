@@ -32,9 +32,10 @@ require (
 	gopkg.in/yaml.v2 v2.4.0
 )
 
-require cloud.google.com/go/compute/metadata v0.2.0
+require cloud.google.com/go/compute/metadata v0.2.1
 
 require (
+	cloud.google.com/go/compute v1.12.1 // indirect
 	github.com/aws/aws-sdk-go v1.43.31 // indirect
 	github.com/census-instrumentation/opencensus-proto v0.3.0 // indirect
 	github.com/davecgh/go-spew v1.1.1 // indirect
