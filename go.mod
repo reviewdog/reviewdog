@@ -4,7 +4,7 @@ go 1.19
 
 require (
 	cloud.google.com/go v0.104.0 // indirect
-	cloud.google.com/go/datastore v1.8.0
+	cloud.google.com/go/datastore v1.9.0
 	cloud.google.com/go/monitoring v1.4.0 // indirect
 	cloud.google.com/go/trace v1.2.0 // indirect
 	contrib.go.opencensus.io/exporter/stackdriver v0.13.12
