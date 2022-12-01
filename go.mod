@@ -32,7 +32,7 @@ require (
 	gopkg.in/yaml.v2 v2.4.0
 )
 
-require cloud.google.com/go/compute/metadata v0.2.1
+require cloud.google.com/go/compute/metadata v0.2.2
 
 require (
 	cloud.google.com/go/compute v1.12.1 // indirect
