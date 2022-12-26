@@ -4,6 +4,7 @@ go 1.19
 
 require (
 	cloud.google.com/go v0.105.0 // indirect
+	cloud.google.com/go/compute/metadata v0.2.3
 	cloud.google.com/go/datastore v1.10.0
 	cloud.google.com/go/monitoring v1.8.0 // indirect
 	cloud.google.com/go/trace v1.4.0 // indirect
@@ -30,11 +31,6 @@ require (
 	golang.org/x/sync v0.1.0
 	google.golang.org/protobuf v1.28.1
 	gopkg.in/yaml.v2 v2.4.0
-)
-
-require (
-	cloud.google.com/go/compute/metadata v0.2.3
-	github.com/google/go-github/v39 v39.2.0
 )
 
 require (

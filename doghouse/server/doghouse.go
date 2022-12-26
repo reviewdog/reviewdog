@@ -8,7 +8,7 @@ import (
 	"strings"
 	"time"
 
-	"github.com/google/go-github/v39/github"
+	"github.com/google/go-github/v48/github"
 
 	"github.com/reviewdog/reviewdog/diff"
 	"github.com/reviewdog/reviewdog/doghouse"
@@ -20,9 +20,10 @@ import (
 // GitHub check runs API cannot handle too large requests.
 // Set max number of filtered findings to be shown in check-run summary.
 // ERROR:
-//  https://api.github.com/repos/easymotion/vim-easymotion/check-runs: 422
-//  Invalid request.
-//  Only 65535 characters are allowed; 250684 were supplied. []
+//
+//	https://api.github.com/repos/easymotion/vim-easymotion/check-runs: 422
+//	Invalid request.
+//	Only 65535 characters are allowed; 250684 were supplied. []
 const maxAllowedSize = 65535
 
 // > The Checks API limits the number of annotations to a maximum of 50 per API
