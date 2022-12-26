@@ -8,7 +8,7 @@ import (
 	"strings"
 	"sync"
 
-	"github.com/google/go-github/v39/github"
+	"github.com/google/go-github/v48/github"
 
 	"github.com/reviewdog/reviewdog"
 	"github.com/reviewdog/reviewdog/cienv"
@@ -31,6 +31,7 @@ const (
 // PullRequest is a comment and diff service for GitHub PullRequest.
 //
 // API:
+//
 //	https://developer.github.com/v3/pulls/comments/#create-a-comment
 //	POST /repos/:owner/:repo/pulls/:number/comments
 type PullRequest struct {

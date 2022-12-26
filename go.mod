@@ -4,6 +4,7 @@ go 1.19
 
 require (
 	cloud.google.com/go v0.105.0 // indirect
+	cloud.google.com/go/compute/metadata v0.2.3
 	cloud.google.com/go/datastore v1.10.0
 	cloud.google.com/go/monitoring v1.8.0 // indirect
 	cloud.google.com/go/trace v1.4.0 // indirect
@@ -11,7 +12,7 @@ require (
 	github.com/bradleyfalzon/ghinstallation/v2 v2.1.0
 	github.com/golang/protobuf v1.5.2
 	github.com/google/go-cmp v0.5.9
-	github.com/google/go-github/v39 v39.2.0
+	github.com/google/go-github/v48 v48.2.0
 	github.com/haya14busa/go-actions-toolkit v0.0.0-20200105081403-ca0307860f01
 	github.com/haya14busa/secretbox v0.0.0-20180525171038-07c7ecf409f5
 	github.com/justinas/nosurf v1.1.1
@@ -31,8 +32,6 @@ require (
 	google.golang.org/protobuf v1.28.1
 	gopkg.in/yaml.v2 v2.4.0
 )
-
-require cloud.google.com/go/compute/metadata v0.2.3
 
 require (
 	cloud.google.com/go/compute v1.14.0 // indirect
