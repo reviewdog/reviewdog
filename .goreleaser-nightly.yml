@@ -9,7 +9,7 @@ release:
   github:
     owner: reviewdog
     name: nightly
-  # Do not set prelease so that https://github.com/reviewdog/nightly/releases/latest always points to the latest version.
+  # Do not set prerelease so that https://github.com/reviewdog/nightly/releases/latest always points to the latest version.
   prerelease: false
 
 builds:
@@ -29,15 +29,20 @@ builds:
  
 archives:
   - id: main
-    replacements:
-      darwin: Darwin
-      linux: Linux
-      windows: Windows
-      386: i386
-      amd64: x86_64
+    name_template: >-
+      {{ .ProjectName }}_
+      {{- .Version }}_
+      {{- title .Os }}_
+      {{- if eq .Arch "amd64" }}x86_64
+      {{- else if eq .Arch "386" }}i386
+      {{- else }}{{ .Arch }}{{ end }}
+      {{- with .Arm }}v{{ . }}{{ end }}
+      {{- with .Mips }}_{{ . }}{{ end }}
+      {{- if not (eq .Amd64 "v1") }}{{ .Amd64 }}{{ end }}
     files:
       - LICENSE
       - README.md
+    rlcp: true
 
 checksum:
   name_template: 'checksums.txt'
