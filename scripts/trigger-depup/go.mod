@@ -3,7 +3,6 @@ module github.com/reviewdog/reviewdog/scripts/trigger-depup
 go 1.19
 
 require (
-	github.com/google/go-github/v48 v48.2.0
 	github.com/google/go-github/v49 v49.0.0
 	golang.org/x/oauth2 v0.3.0
 )
