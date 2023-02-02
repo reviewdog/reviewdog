@@ -20,7 +20,7 @@ require (
 	github.com/mattn/go-shellwords v1.0.12
 	github.com/rakyll/statik v0.1.7
 	github.com/reva2/bitbucket-insights-api v1.0.0
-	github.com/reviewdog/errorformat v0.0.0-20220521153531-8483be00dc0b
+	github.com/reviewdog/errorformat v0.0.0-20230202135222-f4f4fedc5d1b
 	github.com/reviewdog/go-bitbucket v0.0.0-20201024094602-708c3f6a7de0
 	github.com/stretchr/testify v1.8.1
 	github.com/vvakame/sdlog v0.0.0-20200409072131-7c0d359efddc
