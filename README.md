@@ -664,7 +664,7 @@ You can use public GitHub Actions to start using reviewdog with ease! :tada: :ar
   - [reviewdog/action-reek](https://github.com/reviewdog/action-reek) - Run [reek](https://github.com/troessner/reek).
   - [reviewdog/action-rubocop](https://github.com/reviewdog/action-rubocop) - Run [rubocop](https://github.com/rubocop-hq/rubocop).
   - [vk26/action-fasterer](https://github.com/vk26/action-fasterer) - Run [fasterer](https://github.com/DamirSvrtan/fasterer).
-  - [SennaLabs/action-standardrb](https://github.com/SennaLabs/action-standardrb) - Run [standardrb](https://github.com/testdouble/standard).
+  - [PrintReleaf/action-standardrb](https://github.com/PrintReleaf/action-standardrb) - Run [standardrb](https://github.com/testdouble/standard).
   - [tk0miya/action-erblint](https://github.com/tk0miya/action-erblint) - Run [erb-lint](https://github.com/Shopify/erb-lint)
   - [blooper05/action-rails_best_practices](https://github.com/blooper05/action-rails_best_practices) - Run [rails_best_practices](https://github.com/flyerhzm/rails_best_practices)
   - [tomferreira/action-bundler-audit](https://github.com/tomferreira/action-bundler-audit) - Run [bundler-audit](https://github.com/rubysec/bundler-audit)
