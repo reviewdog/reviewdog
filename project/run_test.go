@@ -296,10 +296,7 @@ func TestFilteredEnviron(t *testing.T) {
 	}
 
 	for _, name := range names {
-		defer func(name, value string) {
-			os.Setenv(name, value)
-		}(name, os.Getenv(name))
-		os.Setenv(name, "value")
+		t.Setenv(name, "value")
 	}
 
 	filtered := filteredEnviron()

@@ -34,22 +34,6 @@ func setupGitHubClient() *github.Client {
 	return github.NewClient(tc)
 }
 
-func setupEnvs() (cleanup func()) {
-	var cleanEnvs = []string{
-		"GITHUB_ACTIONS",
-	}
-	saveEnvs := make(map[string]string)
-	for _, key := range cleanEnvs {
-		saveEnvs[key] = os.Getenv(key)
-		os.Unsetenv(key)
-	}
-	return func() {
-		for key, value := range saveEnvs {
-			os.Setenv(key, value)
-		}
-	}
-}
-
 func moveToRootDir() {
 	os.Chdir("../..")
 }
@@ -107,12 +91,12 @@ index b380b67..6abc0f1 100644
 @@ -4,6 +4,9 @@ import (
  	"os/exec"
  )
- 
+
 +func TestNewExportedFunc() {
 +}
 +
  var _ DiffService = &DiffString{}
- 
+
  type DiffString struct {
 diff --git a/reviewdog.go b/reviewdog.go
 index 61450f3..f63f149 100644
@@ -121,7 +105,7 @@ index 61450f3..f63f149 100644
 @@ -10,18 +10,18 @@ import (
  	"github.com/reviewdog/reviewdog/diff"
  )
- 
+
 +var TestExportedVarWithoutComment = 1
 +
 +func NewReviewdog(p Parser, c CommentService, d DiffService) *Reviewdog {
@@ -133,7 +117,7 @@ index 61450f3..f63f149 100644
  	c CommentService
  	d DiffService
  }
- 
+
 -func NewReviewdog(p Parser, c CommentService, d DiffService) *Reviewdog {
 -	return &Reviewdog{p: p, c: c, d: d}
 -}
@@ -197,7 +181,6 @@ func TestGitHubPullRequest_Post_Flush_review_api(t *testing.T) {
 	cwd, _ := os.Getwd()
 	defer os.Chdir(cwd)
 	moveToRootDir()
-	defer setupEnvs()()
 
 	listCommentsAPICalled := 0
 	postCommentsAPICalled := 0
@@ -1098,7 +1081,6 @@ func TestGitHubPullRequest_Post_toomany(t *testing.T) {
 	cwd, _ := os.Getwd()
 	defer os.Chdir(cwd)
 	moveToRootDir()
-	defer setupEnvs()()
 
 	listCommentsAPICalled := 0
 	postCommentsAPICalled := 0
@@ -1167,7 +1149,6 @@ func TestGitHubPullRequest_workdir(t *testing.T) {
 	cwd, _ := os.Getwd()
 	defer os.Chdir(cwd)
 	moveToRootDir()
-	defer setupEnvs()()
 
 	g, err := NewGitHubPullRequest(nil, "", "", 0, "")
 	if err != nil {

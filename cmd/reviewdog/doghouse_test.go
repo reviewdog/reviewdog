@@ -22,30 +22,23 @@ import (
 	"github.com/reviewdog/reviewdog/proto/rdf"
 )
 
-func setupEnvs(testEnvs map[string]string) (cleanup func()) {
-	saveEnvs := make(map[string]string)
+func setupEnvs(t *testing.T, testEnvs map[string]string) {
+	t.Helper()
 	for key, value := range testEnvs {
-		saveEnvs[key] = os.Getenv(key)
 		if value == "" {
 			os.Unsetenv(key)
 		} else {
-			os.Setenv(key, value)
-		}
-	}
-	return func() {
-		for key, value := range saveEnvs {
-			os.Setenv(key, value)
+			t.Setenv(key, value)
 		}
 	}
 }
 
 func TestNewDoghouseCli_returnGitHubClient(t *testing.T) {
-	cleanup := setupEnvs(map[string]string{
+	setupEnvs(t, map[string]string{
 		"REVIEWDOG_TOKEN":            "",
 		"GITHUB_ACTIONS":             "xxx",
 		"REVIEWDOG_GITHUB_API_TOKEN": "xxx",
 	})
-	defer cleanup()
 	cli, err := newDoghouseCli(context.Background())
 	if err != nil {
 		t.Fatalf("failed to create new client: %v", err)
@@ -56,24 +49,17 @@ func TestNewDoghouseCli_returnGitHubClient(t *testing.T) {
 }
 
 func TestNewDoghouseCli_returnErrorForGitHubClient(t *testing.T) {
-	cleanup := setupEnvs(map[string]string{
+	setupEnvs(t, map[string]string{
 		"REVIEWDOG_TOKEN":            "",
 		"GITHUB_ACTIONS":             "true",
 		"REVIEWDOG_GITHUB_API_TOKEN": "", // missing
 	})
-	defer cleanup()
 	if _, err := newDoghouseCli(context.Background()); err == nil {
 		t.Error("got no error but want REVIEWDOG_GITHUB_API_TOKEN missing error")
 	}
 }
 
 func TestNewDoghouseCli_returnDogHouseClientWithReviewdogToken(t *testing.T) {
-	cleanup := setupEnvs(map[string]string{
-		"REVIEWDOG_TOKEN":            "xxx",
-		"GITHUB_ACTIONS":             "true",
-		"REVIEWDOG_GITHUB_API_TOKEN": "xxx",
-	})
-	defer cleanup()
 	cli, err := newDoghouseCli(context.Background())
 	if err != nil {
 		t.Fatalf("failed to create new client: %v", err)
@@ -84,12 +70,6 @@ func TestNewDoghouseCli_returnDogHouseClientWithReviewdogToken(t *testing.T) {
 }
 
 func TestNewDoghouseCli_returnDogHouseClient(t *testing.T) {
-	cleanup := setupEnvs(map[string]string{
-		"REVIEWDOG_TOKEN":            "",
-		"GITHUB_ACTIONS":             "",
-		"REVIEWDOG_GITHUB_API_TOKEN": "",
-	})
-	defer cleanup()
 	cli, err := newDoghouseCli(context.Background())
 	if err != nil {
 		t.Fatalf("failed to create new client: %v", err)
@@ -104,10 +84,9 @@ func TestNewDoghouseServerCli(t *testing.T) {
 		t.Error("got oauth2 http client, want default client")
 	}
 
-	cleanup := setupEnvs(map[string]string{
+	setupEnvs(t, map[string]string{
 		"REVIEWDOG_TOKEN": "xxx",
 	})
-	defer cleanup()
 
 	if _, ok := newDoghouseServerCli(context.Background()).Client.Transport.(*oauth2.Transport); !ok {
 		t.Error("w/ TOKEN: got unexpected http client, want oauth client")
@@ -420,11 +399,10 @@ func TestPostResultSet_withEmptyResponse(t *testing.T) {
 }
 
 func TestReportResults(t *testing.T) {
-	cleanup := setupEnvs(map[string]string{
+	setupEnvs(t, map[string]string{
 		"GITHUB_ACTIONS":    "",
 		"GITHUB_EVENT_PATH": "",
 	})
-	defer cleanup()
 	filteredResultSet := new(reviewdog.FilteredResultMap)
 	filteredResultSet.Store("name1", &reviewdog.FilteredResult{
 		FilteredDiagnostic: []*filter.FilteredDiagnostic{
@@ -469,11 +447,10 @@ reviewdog: No results found for "name2". 1 results found outside diff.
 }
 
 func TestReportResults_inGitHubAction(t *testing.T) {
-	cleanup := setupEnvs(map[string]string{
+	setupEnvs(t, map[string]string{
 		"GITHUB_ACTIONS":    "true",
 		"GITHUB_EVENT_PATH": "",
 	})
-	defer cleanup()
 	filteredResultSet := new(reviewdog.FilteredResultMap)
 	filteredResultSet.Store("name1", &reviewdog.FilteredResult{
 		FilteredDiagnostic: []*filter.FilteredDiagnostic{
@@ -495,11 +472,6 @@ func TestReportResults_inGitHubAction(t *testing.T) {
 }
 
 func TestReportResults_noResultsShouldReport(t *testing.T) {
-	cleanup := setupEnvs(map[string]string{
-		"GITHUB_ACTIONS":    "",
-		"GITHUB_EVENT_PATH": "",
-	})
-	defer cleanup()
 	filteredResultSet := new(reviewdog.FilteredResultMap)
 	filteredResultSet.Store("name1", &reviewdog.FilteredResult{
 		FilteredDiagnostic: []*filter.FilteredDiagnostic{
