@@ -108,6 +108,9 @@ func IsInGitHubAction() bool {
 // Actions and running for PullRequests from forked repository with read-only token.
 // https://docs.github.com/en/actions/reference/events-that-trigger-workflows#pull_request_target
 func HasReadOnlyPermissionGitHubToken() bool {
+	if os.Getenv("REVIEWDOG_GITHUB_ACTIONS_TOKEN_HAS_WRITE_PERMISSION") != "" {
+		return false;
+	}
 	event, err := LoadGitHubEvent()
 	if err != nil {
 		return false
