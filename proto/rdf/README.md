@@ -16,7 +16,7 @@ in issue [#628](https://github.com/reviewdog/reviewdog/issues/628) or
 file [an issue](https://github.com/reviewdog/reviewdog/issues).
 
 The document and the actual definition are currently under the
-https://github.com/reviewdog/reviewdog repository, but we may create a separate
+<https://github.com/reviewdog/reviewdog> repository, but we may create a separate
 repository once it's reviewed and stabilized.
 
 # Reviewdog Diagnostic Format (RDFormat)
@@ -32,7 +32,7 @@ development tools (e.g. editors, reviewdog, code review API etc..) communicate.
 See [reviewdog.proto](reviewdog.proto) for the actual definition.
 [JSON Schema](./jsonschema) is available as well.
 
-## Wire formats of Reviewdog Diagnostic Format.
+## Wire formats of Reviewdog Diagnostic Format
 
 RDFormat uses [Protocol Buffer](https://developers.google.com/protocol-buffers) to
 define the message structure, but the recommended wire format is JSON considering
@@ -40,9 +40,11 @@ it's widely used and easy to support both from diagnostic tools and development
 tools.
 
 ### **rdjsonl**
-JSON Lines (http://jsonlines.org/) of the [`Diagnostic`](reviewdog.proto) message ([JSON Schema](./jsonschema/Diagnostic.jsonschema)).
+
+JSON Lines (<http://jsonlines.org/>) of the [`Diagnostic`](reviewdog.proto) message ([JSON Schema](./jsonschema/Diagnostic.jsonschema)).
 
 Example:
+
 ```json
 {"message": "<msg>", "location": {"path": "<file path>", "range": {"start": {"line": 14, "column": 15}}}, "severity": "ERROR"}
 {"message": "<msg>", "location": {"path": "<file path>", "range": {"start": {"line": 14, "column": 15}, "end": {"line": 14, "column": 18}}}, "suggestions": [{"range": {"start": {"line": 14, "column": 15}, "end": {"line": 14, "column": 18}}, "text": "<replacement text>"}], "severity": "WARNING"}
@@ -50,9 +52,11 @@ Example:
 ```
 
 ### **rdjson**
+
 JSON format of the [`DiagnosticResult`](reviewdog.proto) message ([JSON Schema](./jsonschema/DiagnosticResult.jsonschema)).
 
 Example:
+
 ```json
 {
   "source": {
@@ -136,17 +140,21 @@ regardless of programming languages. However, these solutions doesn't solve
 everything.
 
 ### *errorformat*
+
 [errorformat](https://github.com/reviewdog/errorformat)
 
 Problems:
+
 - No support for diagnostics for code range. It only supports start position.
 - No support for code suggestions (also known as auto-correct or fix).
 - It's hard to write errorformat for complicated output.
 
 ### *checkstyle XML format*
+
 [checkstyle](https://checkstyle.sourceforge.io/)
 
 Problems:
+
 - No support for diagnostics for code range. It only supports start position.
 - No support for code suggestions (also known as auto-correct or fix).
 - It's ..... XML. It's true that some diagnostic tools support checkstyle
@@ -161,6 +169,7 @@ There are alternative solutions out there (which are not used by reviewdog) as
 well.
 
 ### The Static Analysis Results Interchange Format (SARIF)
+
 [The Static Analysis Results Interchange Format (SARIF)](https://sarifweb.azurewebsites.net/)
 has been approved as an OASIS standard.
 
@@ -171,8 +180,9 @@ A promising usage example is [GitHub Code Scanning](https://docs.github.com/en/g
 Other examples: [spotbugs](https://github.com/spotbugs/discuss/issues/95).
 
 Problems:
+
 - No stream output support and static analysis tools cannot output each diagnostic result one by one.
-- `columnKind` doesn't support byte count. https://github.com/oasis-tcs/sarif-spec/issues/466
+- `columnKind` doesn't support byte count. <https://github.com/oasis-tcs/sarif-spec/issues/466>
 - The spec is too big and complex ([SARIF v2.1.0 PDF](https://docs.oasis-open.org/sarif/sarif/v2.1.0/sarif-v2.1.0.pdf) is 227 pages!)
   for developer tools as consumer of SARIF (e.g.  reviewdog). Probably most
   tools end up with supporting SARIF partially.  GitHub Code Scanning feature
@@ -200,17 +210,20 @@ Reviewdog Diagnostic Format can be used as simpler format and we can create
 converters between RD Format and SARIF.
 
 ### *Problem Matcher*
+
 [VSCode](https://vscode-docs.readthedocs.io/en/stable/editor/tasks/#defining-a-problem-matcher)
 and [GitHub Actions](https://github.com/actions/toolkit/blob/master/docs/problem-matchers.md)
 uses [Problem Matcher](https://github.com/actions/toolkit/blob/master/docs/problem-matchers.md)
 to support arbitrary diagnostic tools. It's similar to errorformat, but it uses regex.
 
 Problems:
+
 - No support for code suggestions (also known as auto-correct or fix).
 - Output format of matched results are undocumented and it seems to be used internally in VSCode and GitHub Actions.
 - It's hard to write problem matchers for complicated output.
 
 ### *Language Server Protocol (LSP)*
+
 [Language Server Protocol Specification](https://microsoft.github.io/language-server-protocol/specifications/specification-current/)
 
 LSP supports [Diagnostic](https://microsoft.github.io/language-server-protocol/specifications/specification-current/#diagnostic)
@@ -219,6 +232,7 @@ It's great for editor integration and is widely used these days as well.
 RDFormat message is actually inspired by LSP Diagnostic message too.
 
 Problems:
+
 - LSP and the Diagnostic message is basically per one file. It's not always
   suited to be used as diagnostic tools output because they often need to
   report diagnostic results for multiple files and outputting json per file does
@@ -234,6 +248,7 @@ Problems:
   In addition, UTF-8 is defact-standard of text file encoding as well these days.
 
 ## Reviewdog Diagnostic Format Concept
+
 Again, the idea behind the Reviewdog Diagnostic Format (RDFormat) is to
 standardize the protocol for how diagnostic tools (e.g. compilers, linters,
 etc..) and development tools (e.g. editors, reviewdog, code review API etc..)
@@ -246,6 +261,7 @@ tools and development tools regardless of their programming languages.
 [![Reviewdog Diagnostic Format Concept](https://user-images.githubusercontent.com/3797062/87955046-2b8b6300-cae8-11ea-983f-6554e2aeb8f2.png)](https://docs.google.com/drawings/d/15GZu5Iq6wukFtrpy91srQO_ry1iFQUisVAJd_yEprLc/edit?usp=sharing)
 
 ### Diagnostic tools' RDFormat Support
+
 Ideally, diagnostic tools themselves should support outputting their results as
 RDFormat compliant format, but not all tools does support RDFormat especially
 in early stage. But we can still introduce RDFormat by supporting RDFormat with
@@ -253,6 +269,7 @@ errorformat for most diagnostic tools. Also, we can write a converter and add
 RPD support in diagnostic tools incrementally.
 
 ### Consumer: reviewdog
+
 *Not implemented yet*
 
 reviewdog can support RDFormat and consume `rdjsonl`/`rdjson` as structured input
@@ -265,6 +282,7 @@ As for suggestion support with local reporter, reviewdog should be able to
 apply suggestions only in diff for example.
 
 ### Consumer: Editor & Language Server Protocol
+
 *Not implemented yet*
 
 It's going to be easier for editors to support arbitrary diagnostic tools by
@@ -281,12 +299,13 @@ errorformat and errorformat lacks some features like diagnostics for code range.
 It should be able to support code action to apply suggested fix as well.
 
 ### Consumer: Reviewdog Diagnostic Formatter (RDFormatter)
+
 *Not implemented yet*
 
 There are many diagnostic output formats (report formats) and each diagnostic
 tool implements them on their own. e.g. [eslint](https://eslint.org/docs/user-guide/formatters)
 support more than 10 formats like stylish, compact, codeframe, html, etc...
-Users may want to use a certain format for every diagnostic tools they use, but 
+Users may want to use a certain format for every diagnostic tools they use, but
 not all tools support their desired format. It takes time to implement many
 formats for each tool and it's actually not worth doing it for most of the
 cases, IMO.
@@ -303,7 +322,17 @@ languages. However, many diagnostic tools and users should not always want to
 depend on the CLI, so providing libraries for their implementation languages
 should be useful to format results natively by each diagnostic tool.
 
+## Updating Generated Code
+
+To compile the generated code run the following steps:
+
+```shell
+docker build -t rdjson .
+docker run --rm -it -v "${PWD}:/workdir" rdjson
+```
+
 ## Open Questions
+
 - Protocol Version Representation and Backward/Future Compatibility
   - Should we add version or some capability data in RD Format?
   - RD Format should be stable, but there are still a possibility to extend it with

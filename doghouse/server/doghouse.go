@@ -3,6 +3,7 @@ package server
 import (
 	"bytes"
 	"context"
+	"encoding/json"
 	"fmt"
 	"net/http"
 	"strings"
@@ -135,6 +136,35 @@ func (ch *Checker) postAnnotations(ctx context.Context, checkID int64, annotatio
 			Title:       github.String(ch.checkTitle()),
 			Summary:     github.String(""), // Post summary with the last request.
 			Annotations: annotations[:min(maxAnnotationsPerRequest, len(annotations))],
+		},
+	}
+	if _, err := ch.gh.UpdateCheckRun(ctx, ch.req.Owner, ch.req.Repo, checkID, opt); err != nil {
+		return err
+	}
+	if len(annotations) > maxAnnotationsPerRequest {
+		return ch.postAnnotations(ctx, checkID, annotations[maxAnnotationsPerRequest:])
+	}
+	return nil
+}
+
+func (ch *Checker) postImages(ctx context.Context, checkID int64, annotations []*github.CheckRunAnnotation) error {
+	images := make([]*github.CheckRunImage, 0)
+	for _, annotation := range annotations[:min(maxAnnotationsPerRequest, len(annotations))] {
+		// []*github.CheckRunImage{
+		// 	Alt:      github.String(ch.checkTitle()),
+		// 	ImageURL: github.String(check.Diagnostic.GetImageURL()),
+		// }
+		j, _ := json.Marshal(annotation)
+		fmt.Printf("annotation: %s\n", j)
+	}
+
+	opt := github.UpdateCheckRunOptions{
+		Name: ch.checkName(),
+		Output: &github.CheckRunOutput{
+			Title:       github.String(ch.checkTitle()),
+			Summary:     github.String(""), // Post summary with the last request.
+			Annotations: annotations[:min(maxAnnotationsPerRequest, len(annotations))],
+			Images:      images,
 		},
 	}
 	if _, err := ch.gh.UpdateCheckRun(ctx, ch.req.Owner, ch.req.Repo, checkID, opt); err != nil {

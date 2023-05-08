@@ -1,0 +1,23 @@
+{
+    "$schema": "http://json-schema.org/draft-04/schema#",
+    "$ref": "#/definitions/Image",
+    "definitions": {
+        "Image": {
+            "properties": {
+                "image_url": {
+                    "type": "string",
+                    "description": "COMMENT"
+                },
+                "alt": {
+                    "type": "string"
+                },
+                "caption": {
+                    "type": "string"
+                }
+            },
+            "additionalProperties": true,
+            "type": "object",
+            "title": "Image"
+        }
+    }
+}

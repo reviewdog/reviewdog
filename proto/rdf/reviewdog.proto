@@ -30,6 +30,9 @@ message DiagnosticResult {
   // This diagnostics' overall severity.
   // Optional.
   Severity severity = 3;
+
+  // COMMENT
+  repeated Image images = 4;
 }
 
 // Represents a diagnostic, such as a compiler error or warning.
@@ -220,4 +223,11 @@ message Code {
   // A URL to open with more information about this rule code.
   // Optional.
   string url = 2;
+}
+
+message Image {
+  // COMMENT
+  string image_url = 1;
+  string alt = 2;
+  string caption = 3;
 }
