@@ -30,9 +30,6 @@ message DiagnosticResult {
   // This diagnostics' overall severity.
   // Optional.
   Severity severity = 3;
-
-  // COMMENT
-  repeated Image images = 4;
 }
 
 // Represents a diagnostic, such as a compiler error or warning.
@@ -67,6 +64,9 @@ message Diagnostic {
   // diagnostic.
   // Optional.
   string original_output = 7;
+
+  // COMMENT
+  repeated Image images = 8;
 }
 
 enum Severity {

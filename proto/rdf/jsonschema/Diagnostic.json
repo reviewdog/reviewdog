@@ -54,6 +54,13 @@
                 "original_output": {
                     "type": "string",
                     "description": "Experimental: If this diagnostic is converted from other formats, original_output represents the original output which corresponds to this diagnostic. Optional."
+                },
+                "images": {
+                    "items": {
+                        "$ref": "#/definitions/reviewdog.rdf.Image"
+                    },
+                    "type": "array",
+                    "description": "COMMENT"
                 }
             },
             "additionalProperties": true,
@@ -75,6 +82,23 @@
             "additionalProperties": true,
             "type": "object",
             "title": "Code"
+        },
+        "reviewdog.rdf.Image": {
+            "properties": {
+                "image_url": {
+                    "type": "string",
+                    "description": "COMMENT"
+                },
+                "alt": {
+                    "type": "string"
+                },
+                "caption": {
+                    "type": "string"
+                }
+            },
+            "additionalProperties": true,
+            "type": "object",
+            "title": "Image"
         },
         "reviewdog.rdf.Location": {
             "properties": {

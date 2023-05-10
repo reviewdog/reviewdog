@@ -35,13 +35,6 @@
                         }
                     ],
                     "title": "Severity"
-                },
-                "images": {
-                    "items": {
-                        "$ref": "#/definitions/reviewdog.rdf.Image"
-                    },
-                    "type": "array",
-                    "description": "COMMENT"
                 }
             },
             "additionalProperties": true,
@@ -116,6 +109,13 @@
                 "original_output": {
                     "type": "string",
                     "description": "Experimental: If this diagnostic is converted from other formats, original_output represents the original output which corresponds to this diagnostic. Optional."
+                },
+                "images": {
+                    "items": {
+                        "$ref": "#/definitions/reviewdog.rdf.Image"
+                    },
+                    "type": "array",
+                    "description": "COMMENT"
                 }
             },
             "additionalProperties": true,

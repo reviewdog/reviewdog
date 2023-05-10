@@ -3,7 +3,6 @@ package server
 import (
 	"bytes"
 	"context"
-	"encoding/json"
 	"fmt"
 	"net/http"
 	"strings"
@@ -87,15 +86,22 @@ func (ch *Checker) Check(ctx context.Context) (*doghouse.CheckResponse, error) {
 
 func (ch *Checker) postCheck(ctx context.Context, checkID int64, checks []*filter.FilteredDiagnostic) (*github.CheckRun, string, error) {
 	var annotations []*github.CheckRunAnnotation
+	var images []*github.CheckRunImage
 	for _, c := range checks {
 		if !c.ShouldReport {
 			continue
 		}
 		annotations = append(annotations, ch.toCheckRunAnnotation(c))
+		images = append(images, ch.toCheckRunImages(c)...)
 	}
 	if len(annotations) > 0 {
 		if err := ch.postAnnotations(ctx, checkID, annotations); err != nil {
 			return nil, "", fmt.Errorf("failed to post annotations: %w", err)
+		}
+	}
+	if len(images) > 0 {
+		if err := ch.postImages(ctx, checkID, images); err != nil {
+			return nil, "", fmt.Errorf("failed to post images: %w", err)
 		}
 	}
 
@@ -147,31 +153,17 @@ func (ch *Checker) postAnnotations(ctx context.Context, checkID int64, annotatio
 	return nil
 }
 
-func (ch *Checker) postImages(ctx context.Context, checkID int64, annotations []*github.CheckRunAnnotation) error {
-	images := make([]*github.CheckRunImage, 0)
-	for _, annotation := range annotations[:min(maxAnnotationsPerRequest, len(annotations))] {
-		// []*github.CheckRunImage{
-		// 	Alt:      github.String(ch.checkTitle()),
-		// 	ImageURL: github.String(check.Diagnostic.GetImageURL()),
-		// }
-		j, _ := json.Marshal(annotation)
-		fmt.Printf("annotation: %s\n", j)
-	}
-
+func (ch *Checker) postImages(ctx context.Context, checkID int64, images []*github.CheckRunImage) error {
 	opt := github.UpdateCheckRunOptions{
 		Name: ch.checkName(),
 		Output: &github.CheckRunOutput{
-			Title:       github.String(ch.checkTitle()),
-			Summary:     github.String(""), // Post summary with the last request.
-			Annotations: annotations[:min(maxAnnotationsPerRequest, len(annotations))],
-			Images:      images,
+			Title:   github.String(ch.checkTitle()),
+			Summary: github.String(""), // Post summary with the last request.
+			Images:  images,
 		},
 	}
 	if _, err := ch.gh.UpdateCheckRun(ctx, ch.req.Owner, ch.req.Repo, checkID, opt); err != nil {
 		return err
-	}
-	if len(annotations) > maxAnnotationsPerRequest {
-		return ch.postAnnotations(ctx, checkID, annotations[maxAnnotationsPerRequest:])
 	}
 	return nil
 }
@@ -300,6 +292,18 @@ func (ch *Checker) toCheckRunAnnotation(c *filter.FilteredDiagnostic) *github.Ch
 		a.RawDetails = github.String(s)
 	}
 	return a
+}
+
+func (ch *Checker) toCheckRunImages(c *filter.FilteredDiagnostic) []*github.CheckRunImage {
+	images := make([]*github.CheckRunImage, 0)
+	for _, image := range c.Diagnostic.Images {
+		images = append(images, &github.CheckRunImage{
+			Alt:      github.String(image.Alt),
+			ImageURL: github.String(image.ImageUrl),
+			Caption:  github.String(image.Caption),
+		})
+	}
+	return images
 }
 
 func (ch *Checker) buildTitle(c *filter.FilteredDiagnostic) string {
