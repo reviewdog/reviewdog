@@ -99,16 +99,17 @@ func (ch *Checker) postCheck(ctx context.Context, checkID int64, checks []*filte
 			return nil, "", fmt.Errorf("failed to post annotations: %w", err)
 		}
 	}
+	conclusion := "success"
+	if len(annotations) > 0 {
+		conclusion = ch.conclusion()
+	}
+
 	if len(images) > 0 {
 		if err := ch.postImages(ctx, checkID, images); err != nil {
 			return nil, "", fmt.Errorf("failed to post images: %w", err)
 		}
 	}
 
-	conclusion := "success"
-	if len(annotations) > 0 {
-		conclusion = ch.conclusion()
-	}
 	opt := github.UpdateCheckRunOptions{
 		Name:        ch.checkName(),
 		Status:      github.String("completed"),

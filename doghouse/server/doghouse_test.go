@@ -84,6 +84,13 @@ func TestCheck_OK(t *testing.T) {
 						},
 					},
 					OriginalOutput: "raw test message",
+					Images: []*rdf.Image{
+						{
+							Alt:      "Garbage Text",
+							ImageUrl: "URL_Garbage",
+							Caption:  "SUPER_GARBAGE",
+						},
+					},
 				},
 			},
 			{
@@ -212,7 +219,19 @@ func TestCheck_OK(t *testing.T) {
 		}
 		annotations := opt.Output.Annotations
 		if len(annotations) == 0 {
-			if *opt.Conclusion != conclusion {
+			images := opt.Output.Images
+			if len(images) > 0 {
+				wantImages := []*github.CheckRunImage{
+					{
+						Alt:      github.String("Garbage Text"),
+						ImageURL: github.String("URL_Garbage"),
+						Caption:  github.String("SUPER_GARBAGE"),
+					},
+				}
+				if i := cmp.Diff(images, wantImages); i != "" {
+					t.Errorf("Image diff found:\n%s", i)
+				}
+			} else if *opt.Conclusion != conclusion {
 				t.Errorf("UpdateCheckRunOptions.Conclusion = %q, want %q", *opt.Conclusion, conclusion)
 			}
 		} else {
