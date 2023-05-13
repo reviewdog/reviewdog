@@ -35,7 +35,7 @@ jobs:
           if_false: ${{ steps.bumpr.outputs.next_version }}
 
       # Setup Go for building reviewdog binary.
-      - uses: actions/setup-go@v3
+      - uses: actions/setup-go@v4
         with:
           go-version: '1.19'
           cache: true
