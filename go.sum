@@ -260,6 +260,8 @@ github.com/stretchr/testify v1.8.2 h1:+h33VjcLVPDHtOdpUCuF+7gSuG3yGIftsP1YvFihtJ
 github.com/stretchr/testify v1.8.2/go.mod h1:w2LPCIKwWwSfY2zedu0+kehJoqGctiVI29o6fzry7u4=
 github.com/vvakame/sdlog v0.0.0-20200409072131-7c0d359efddc h1:El7LEavRpa49dYFE9ezO8aQxQn5E7u7eQkFsaXsoQAY=
 github.com/vvakame/sdlog v0.0.0-20200409072131-7c0d359efddc/go.mod h1:MmhrKtbECoUJTctfak+MnOFoJ9XQqYZ7chcwV9O7v3I=
+github.com/vvakame/sdlog v1.1.2 h1:hWV5ESsYMn/vubf1uFWdkMJomrQucAU+9gc/S3A/JE8=
+github.com/vvakame/sdlog v1.1.2/go.mod h1:jQWcS5V7V6xNIpNUEdLRwWlub0SYicmkE9c6N6FgJ44=
 github.com/xanzy/go-gitlab v0.83.0 h1:37p0MpTPNbsTMKX/JnmJtY8Ch1sFiJzVF342+RvZEGw=
 github.com/xanzy/go-gitlab v0.83.0/go.mod h1:5ryv+MnpZStBH8I/77HuQBsMbBGANtVpLWC15qOjWAw=
 github.com/yuin/goldmark v1.1.25/go.mod h1:3hX8gzYuyVAZsxl0MRgGTJEmQBFcNTphYh9decYSb74=
