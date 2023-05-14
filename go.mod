@@ -23,7 +23,7 @@ require (
 	github.com/reviewdog/errorformat v0.0.0-20230202135222-f4f4fedc5d1b
 	github.com/reviewdog/go-bitbucket v0.0.0-20201024094602-708c3f6a7de0
 	github.com/stretchr/testify v1.8.2
-	github.com/vvakame/sdlog v0.0.0-20200409072131-7c0d359efddc
+	github.com/vvakame/sdlog v1.1.2
 	github.com/xanzy/go-gitlab v0.83.0
 	go.opencensus.io v0.24.0
 	golang.org/x/build v0.0.0-20230202190423-357881e10382
