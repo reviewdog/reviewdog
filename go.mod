@@ -22,7 +22,7 @@ require (
 	github.com/reva2/bitbucket-insights-api v1.0.0
 	github.com/reviewdog/errorformat v0.0.0-20230426131747-622861bd0fe4
 	github.com/reviewdog/go-bitbucket v0.0.0-20201024094602-708c3f6a7de0
-	github.com/stretchr/testify v1.8.2
+	github.com/stretchr/testify v1.8.3
 	github.com/vvakame/sdlog v1.1.2
 	github.com/xanzy/go-gitlab v0.83.0
 	go.opencensus.io v0.24.0
