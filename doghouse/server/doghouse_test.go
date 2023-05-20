@@ -684,3 +684,97 @@ func TestCheck_too_many_findings_cut_off_correctly(t *testing.T) {
 		t.Error("summary text was not cut off correctly")
 	}
 }
+
+func TestConclusion_calculate_level_from_annotations(t *testing.T) {
+	req := &doghouse.CheckRequest{PullRequest: 1}
+	checker := &Checker{req: req}
+
+	// Highest level = failure
+	annotations := []*github.CheckRunAnnotation{
+		{
+			AnnotationLevel: github.String("notice"),
+		},
+		{
+			AnnotationLevel: github.String("warning"),
+		},
+		{
+			AnnotationLevel: github.String("failure"),
+		},
+	}
+
+	conclusion := checker.conclusion(annotations)
+
+	expected := "failure"
+	if conclusion != expected {
+		t.Errorf("got conclusion %s, want %s", conclusion, expected)
+	}
+
+	// Highest level = warning
+	annotations = []*github.CheckRunAnnotation{
+		{
+			AnnotationLevel: github.String("notice"),
+		},
+		{
+			AnnotationLevel: github.String("warning"),
+		},
+	}
+
+	conclusion = checker.conclusion(annotations)
+
+	expected = "neutral"
+	if conclusion != expected {
+		t.Errorf("got conclusion %s, want %s", conclusion, expected)
+	}
+
+	// Highest level = notice
+	annotations = []*github.CheckRunAnnotation{
+		{
+			AnnotationLevel: github.String("notice"),
+		},
+	}
+
+	conclusion = checker.conclusion(annotations)
+
+	expected = "neutral"
+	if conclusion != expected {
+		t.Errorf("got conclusion %s, want %s", conclusion, expected)
+	}
+
+	// No annotations = success
+	annotations = []*github.CheckRunAnnotation{}
+
+	conclusion = checker.conclusion(annotations)
+
+	expected = "success"
+	if conclusion != expected {
+		t.Errorf("got conclusion %s, want %s", conclusion, expected)
+	}
+}
+
+func TestConclusion_with_level_config(t *testing.T) {
+	req := &doghouse.CheckRequest{Level: "failure"}
+	checker := &Checker{req: req}
+
+	annotations := []*github.CheckRunAnnotation{
+		{
+			AnnotationLevel: github.String("notice"),
+		},
+	}
+
+	conclusion := checker.conclusion(annotations)
+
+	expected := "failure"
+	if conclusion != expected {
+		t.Errorf("got conclusion %s, want %s", conclusion, expected)
+	}
+
+	// No annotations = success
+	annotations = []*github.CheckRunAnnotation{}
+
+	conclusion = checker.conclusion(annotations)
+
+	expected = "success"
+	if conclusion != expected {
+		t.Errorf("got conclusion %s, want %s", conclusion, expected)
+	}
+}
