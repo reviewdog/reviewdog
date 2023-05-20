@@ -38,7 +38,11 @@ func (c *CloudAPIHelper) buildAnnotation(comment *reviewdog.Comment) bbapi.Repor
 	data := bbapi.NewReportAnnotation()
 	data.SetExternalId(externalIDFromDiagnostic(comment.Result.Diagnostic))
 	data.SetAnnotationType(annotationTypeCodeSmell)
-	data.SetSummary(comment.Result.Diagnostic.GetMessage())
+	summary := comment.Result.Diagnostic.GetMessage()
+	if len(summary) > MAX_SUMMARY_LENGTH {
+		summary = summary[:MAX_SUMMARY_LENGTH]
+	}
+	data.SetSummary(summary)
 	data.SetDetails(fmt.Sprintf(`[%s] %s`, comment.ToolName, comment.Result.Diagnostic.GetMessage()))
 	data.SetLine(comment.Result.Diagnostic.GetLocation().GetRange().GetStart().GetLine())
 	data.SetPath(comment.Result.Diagnostic.GetLocation().GetPath())
