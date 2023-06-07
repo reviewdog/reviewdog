@@ -16,7 +16,6 @@ import (
 )
 
 type fakeCheckerGitHubCli struct {
-	checkerGitHubClientInterface
 	FakeGetPullRequestDiff func(ctx context.Context, owner, repo string, number int) ([]byte, error)
 	FakeCreateCheckRun     func(ctx context.Context, owner, repo string, opt github.CreateCheckRunOptions) (*github.CheckRun, error)
 	FakeUpdateCheckRun     func(ctx context.Context, owner, repo string, checkID int64, opt github.UpdateCheckRunOptions) (*github.CheckRun, error)
