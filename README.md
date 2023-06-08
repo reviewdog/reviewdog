@@ -830,8 +830,8 @@ environment variables.
 | ---- | ----------- |
 | `CI_PULL_REQUEST` | Pull Request number (e.g. 14) |
 | `CI_COMMIT`       | SHA1 for the current build |
-| `CI_REPO_OWNER`   | repository owner (e.g. "haya14busa" for https://github.com/reviewdog/reviewdog) |
-| `CI_REPO_NAME`    | repository name (e.g. "reviewdog" for https://github.com/reviewdog/reviewdog) |
+| `CI_REPO_OWNER`   | repository owner (e.g. "reviewdog" for https://github.com/reviewdog/errorformat) |
+| `CI_REPO_NAME`    | repository name (e.g. "errorformat" for https://github.com/reviewdog/errorformat) |
 | `CI_BRANCH`       | [optional] branch of the commit |
 
 ```shell
