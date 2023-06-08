@@ -49,7 +49,7 @@
     <img alt="Contributor Covenant" src="https://img.shields.io/badge/Contributor%20Covenant-v2.0%20adopted-ff69b4.svg">
   </a>
   <a href="https://somsubhra.github.io/github-release-stats/?username=reviewdog&repository=reviewdog&per_page=30">
-    <img alt="Github Releases Stats" src="https://img.shields.io/github/downloads/reviewdog/reviewdog/total.svg?logo=github">
+    <img alt="GitHub Releases Stats" src="https://img.shields.io/github/downloads/reviewdog/reviewdog/total.svg?logo=github">
   </a>
   <a href="https://starchart.cc/reviewdog/reviewdog"><img alt="Stars" src="https://img.shields.io/github/stars/reviewdog/reviewdog.svg?style=social"></a>
 </div>
@@ -91,7 +91,7 @@ by diff.
   * [GitLab CI](#gitlab-ci)
   * [Bitbucket Pipelines](#bitbucket-pipelines)
   * [Common (Jenkins, local, etc...)](#common-jenkins-local-etc)
-    + [Jenkins with Github pull request builder plugin](#jenkins-with-github-pull-request-builder-plugin)
+    + [Jenkins with GitHub pull request builder plugin](#jenkins-with-github-pull-request-builder-plugin)
 - [Exit codes](#exit-codes)
 - [Filter mode](#filter-mode)
 - [Articles](#articles)
@@ -855,7 +855,7 @@ Just pass the flag `guess`:
 $ reviewdog -conf=.reviewdog.yml -reporter=github-pr-check -guess
 ```
 
-#### Jenkins with Github pull request builder plugin
+#### Jenkins with GitHub pull request builder plugin
 - [GitHub pull request builder plugin - Jenkins - Jenkins Wiki](https://wiki.jenkins-ci.org/display/JENKINS/GitHub+pull+request+builder+plugin)
 - [Configuring a GitHub app account - Jenkins - CloudBees](https://docs.cloudbees.com/docs/cloudbees-ci/latest/cloud-admin-guide/github-app-auth) - required to use github-pr-check formatter without reviewdog server or GitHub actions.
 
