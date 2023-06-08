@@ -163,9 +163,14 @@ func (ch *Checker) conclusion(annotations []*github.CheckRunAnnotation) string {
 
 	if ch.req.Level != "" {
 		// Level takes precedence when configured (for backwards compatibility)
-		if len(annotations) > 0 {
-			checkResult = strings.ToLower(ch.req.Level)
+		if len(annotations) == 0 {
+			return checkResult
 		}
+		switch strings.ToLower(ch.req.Level) {
+		case "info", "warning":
+			return "neutral"
+		}
+		return "failure"
 	} else {
 		precedence := map[string]int{
 			"success": 0,

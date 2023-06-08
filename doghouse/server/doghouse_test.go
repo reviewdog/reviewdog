@@ -3,6 +3,7 @@ package server
 import (
 	"context"
 	"errors"
+	"fmt"
 	"net/http"
 	"strings"
 	"testing"
@@ -16,7 +17,6 @@ import (
 )
 
 type fakeCheckerGitHubCli struct {
-	checkerGitHubClientInterface
 	FakeGetPullRequestDiff func(ctx context.Context, owner, repo string, number int) ([]byte, error)
 	FakeCreateCheckRun     func(ctx context.Context, owner, repo string, opt github.CreateCheckRunOptions) (*github.CheckRun, error)
 	FakeUpdateCheckRun     func(ctx context.Context, owner, repo string, checkID int64, opt github.UpdateCheckRunOptions) (*github.CheckRun, error)
@@ -752,29 +752,43 @@ func TestConclusion_calculate_level_from_annotations(t *testing.T) {
 }
 
 func TestConclusion_with_level_config(t *testing.T) {
-	req := &doghouse.CheckRequest{Level: "failure"}
-	checker := &Checker{req: req}
-
-	annotations := []*github.CheckRunAnnotation{
-		{
-			AnnotationLevel: github.String("notice"),
-		},
+	testcases := []struct {
+		level    string
+		expected string
+	}{
+		{"info", "neutral"},
+		{"warning", "neutral"},
+		{"error", "failure"},
 	}
 
-	conclusion := checker.conclusion(annotations)
+	for _, test := range testcases {
+		test := test
+		t.Run(fmt.Sprintf("level: %s", test.level), func(t *testing.T) {
+			req := &doghouse.CheckRequest{Level: test.level}
+			checker := &Checker{req: req}
 
-	expected := "failure"
-	if conclusion != expected {
-		t.Errorf("got conclusion %s, want %s", conclusion, expected)
-	}
+			annotations := []*github.CheckRunAnnotation{
+				{
+					AnnotationLevel: github.String("notice"),
+				},
+			}
 
-	// No annotations = success
-	annotations = []*github.CheckRunAnnotation{}
+			conclusion := checker.conclusion(annotations)
 
-	conclusion = checker.conclusion(annotations)
+			expected := test.expected
+			if conclusion != expected {
+				t.Errorf("got conclusion %s, want %s", conclusion, expected)
+			}
 
-	expected = "success"
-	if conclusion != expected {
-		t.Errorf("got conclusion %s, want %s", conclusion, expected)
+			// No annotations = success
+			annotations = []*github.CheckRunAnnotation{}
+
+			conclusion = checker.conclusion(annotations)
+
+			expected = "success"
+			if conclusion != expected {
+				t.Errorf("got conclusion %s, want %s", conclusion, expected)
+			}
+		})
 	}
 }
