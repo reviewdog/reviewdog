@@ -3,7 +3,7 @@ package client
 import (
 	"context"
 
-	"github.com/google/go-github/v49/github"
+	"github.com/google/go-github/v53/github"
 
 	"github.com/reviewdog/reviewdog/doghouse"
 	"github.com/reviewdog/reviewdog/doghouse/server"
