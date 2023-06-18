@@ -11,6 +11,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ### :rocket: Enhancements
 - [#1170](https://github.com/reviewdog/reviewdog/pull/1170) Calculate check conclusion from annotations
 - [#1433](https://github.com/reviewdog/reviewdog/pull/1433) Add path link support for GitHub Enterprise
+- [#1447](https://github.com/reviewdog/reviewdog/pull/1447) Support determining build info on more GitHub Actions events
 - ...
 
 ### :bug: Fixes
