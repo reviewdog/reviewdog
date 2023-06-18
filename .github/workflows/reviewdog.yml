@@ -18,8 +18,7 @@ jobs:
 
       - uses: actions/setup-go@v4
         with:
-          go-version: '1.x'
-          cache: true
+          go-version-file: "go.mod"
 
       - name: Install linters
         run: go install golang.org/x/lint/golint@latest
@@ -61,8 +60,7 @@ jobs:
 
       - uses: actions/setup-go@v4
         with:
-          go-version: '1.x'
-          cache: true
+          go-version-file: "go.mod"
 
       - name: Install linters
         run: go install golang.org/x/lint/golint@latest
@@ -191,8 +189,7 @@ jobs:
       - uses: actions/checkout@v3
       - uses: actions/setup-go@v4
         with:
-          go-version: '1.x'
-          cache: true
+          go-version-file: "go.mod"
       - uses: reviewdog/action-staticcheck@v1
         with:
           github_token: ${{ secrets.github_token }}
