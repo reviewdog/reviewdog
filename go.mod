@@ -1,6 +1,6 @@
 module github.com/reviewdog/reviewdog
 
-go 1.19
+go 1.20
 
 require (
 	cloud.google.com/go v0.110.0 // indirect
