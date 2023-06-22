@@ -666,6 +666,7 @@ You can use public GitHub Actions to start using reviewdog with ease! :tada: :ar
   - [vk26/action-fasterer](https://github.com/vk26/action-fasterer) - Run [fasterer](https://github.com/DamirSvrtan/fasterer).
   - [SennaLabs/action-standardrb](https://github.com/SennaLabs/action-standardrb) - Run [standardrb](https://github.com/standardrb/standard).
   - [tk0miya/action-erblint](https://github.com/tk0miya/action-erblint) - Run [erb-lint](https://github.com/Shopify/erb-lint)
+  - [tk0miya/action-steep](https://github.com/tk0miya/action-steep) - Run [steep](https://github.com/soutaro/steep)
   - [blooper05/action-rails_best_practices](https://github.com/blooper05/action-rails_best_practices) - Run [rails_best_practices](https://github.com/flyerhzm/rails_best_practices)
   - [tomferreira/action-bundler-audit](https://github.com/tomferreira/action-bundler-audit) - Run [bundler-audit](https://github.com/rubysec/bundler-audit)
 - Python
