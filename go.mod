@@ -9,7 +9,7 @@ require (
 	cloud.google.com/go/monitoring v1.13.0 // indirect
 	cloud.google.com/go/trace v1.9.0 // indirect
 	contrib.go.opencensus.io/exporter/stackdriver v0.13.12
-	github.com/bradleyfalzon/ghinstallation/v2 v2.5.0
+	github.com/bradleyfalzon/ghinstallation/v2 v2.6.0
 	github.com/golang/protobuf v1.5.3
 	github.com/google/go-cmp v0.5.9
 	github.com/google/go-github/v53 v53.2.0
