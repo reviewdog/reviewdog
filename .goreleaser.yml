@@ -36,7 +36,7 @@ archives:
       - README.md
 
 brews:
-  - tap:
+  - repository:
       owner: reviewdog
       name: homebrew-tap
     folder: Formula
