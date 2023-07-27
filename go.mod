@@ -5,7 +5,7 @@ go 1.20
 require (
 	cloud.google.com/go v0.110.2 // indirect
 	cloud.google.com/go/compute/metadata v0.2.3
-	cloud.google.com/go/datastore v1.12.1
+	cloud.google.com/go/datastore v1.13.0
 	cloud.google.com/go/monitoring v1.13.0 // indirect
 	cloud.google.com/go/trace v1.9.0 // indirect
 	contrib.go.opencensus.io/exporter/stackdriver v0.13.12
