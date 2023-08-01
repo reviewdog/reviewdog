@@ -6,7 +6,7 @@ before:
 
 builds:
   - env:
-    - CGO_ENABLED=0
+      - CGO_ENABLED=0
     main: ./cmd/reviewdog/
     ldflags: -s -w -X github.com/reviewdog/reviewdog/commands.Version={{.Version}}
     goos:
@@ -34,20 +34,19 @@ archives:
     files:
       - LICENSE
       - README.md
-    rlcp: true
 
 brews:
-  - tap:
+  - repository:
       owner: reviewdog
       name: homebrew-tap
     folder: Formula
-    homepage:  https://github.com/reviewdog/reviewdog
+    homepage: https://github.com/reviewdog/reviewdog
     description: Automated code review tool integrated with any code analysis tools regardless of programming language.
     test: |
       system "#{bin}/reviewdog -version"
 
 checksum:
-  name_template: 'checksums.txt'
+  name_template: "checksums.txt"
 
 snapshot:
   name_template: "{{ .Tag }}-next"
@@ -56,6 +55,6 @@ changelog:
   sort: asc
   filters:
     exclude:
-    - '^docs:'
-    - '^test:'
-    - '^chore'
+      - "^docs:"
+      - "^test:"
+      - "^chore"

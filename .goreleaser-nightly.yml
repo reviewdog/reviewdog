@@ -14,7 +14,7 @@ release:
 
 builds:
   - env:
-    - CGO_ENABLED=0
+      - CGO_ENABLED=0
     main: ./cmd/reviewdog/
     ldflags: -s -w -X github.com/reviewdog/reviewdog/commands.Version={{.Version}}
     goos:
@@ -26,7 +26,7 @@ builds:
       - amd64
       - arm
       - arm64
- 
+
 archives:
   - id: main
     name_template: >-
@@ -42,10 +42,9 @@ archives:
     files:
       - LICENSE
       - README.md
-    rlcp: true
 
 checksum:
-  name_template: 'checksums.txt'
+  name_template: "checksums.txt"
 
 snapshot:
   name_template: "{{ .Tag }}-next"
