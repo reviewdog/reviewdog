@@ -49,7 +49,7 @@
     <img alt="Contributor Covenant" src="https://img.shields.io/badge/Contributor%20Covenant-v2.0%20adopted-ff69b4.svg">
   </a>
   <a href="https://somsubhra.github.io/github-release-stats/?username=reviewdog&repository=reviewdog&per_page=30">
-    <img alt="Github Releases Stats" src="https://img.shields.io/github/downloads/reviewdog/reviewdog/total.svg?logo=github">
+    <img alt="GitHub Releases Stats" src="https://img.shields.io/github/downloads/reviewdog/reviewdog/total.svg?logo=github">
   </a>
   <a href="https://starchart.cc/reviewdog/reviewdog"><img alt="Stars" src="https://img.shields.io/github/stars/reviewdog/reviewdog.svg?style=social"></a>
 </div>
@@ -91,7 +91,7 @@ by diff.
   * [GitLab CI](#gitlab-ci)
   * [Bitbucket Pipelines](#bitbucket-pipelines)
   * [Common (Jenkins, local, etc...)](#common-jenkins-local-etc)
-    + [Jenkins with Github pull request builder plugin](#jenkins-with-github-pull-request-builder-plugin)
+    + [Jenkins with GitHub pull request builder plugin](#jenkins-with-github-pull-request-builder-plugin)
 - [Exit codes](#exit-codes)
 - [Filter mode](#filter-mode)
 - [Articles](#articles)
@@ -386,7 +386,7 @@ $ golint ./... | reviewdog -f=golint -diff="git diff FETCH_HEAD"
 [![github-pr-check sample annotation with option 1](https://user-images.githubusercontent.com/3797062/64875597-65016f80-d688-11e9-843f-4679fb666f0d.png)](https://github.com/reviewdog/reviewdog/pull/275/files#annotation_6177941961779419)
 [![github-pr-check sample](https://user-images.githubusercontent.com/3797062/40884858-6efd82a0-6756-11e8-9f1a-c6af4f920fb0.png)](https://github.com/reviewdog/reviewdog/pull/131/checks)
 
-github-pr-check reporter reports results to [GitHub Checks](https://help.github.com/articles/about-status-checks/).
+github-pr-check reporter reports results to [GitHub Checks](https://docs.github.com/en/pull-requests/collaborating-with-pull-requests/collaborating-on-repositories-with-code-quality-features/about-status-checks).
 
 You can change report level for this reporter by `level` field in [config
 file](#reviewdog-config-file) or `-level` flag. You can control GitHub status
@@ -460,7 +460,7 @@ You can create [reviewdog badge](#reviewdog-badge-) for this reporter.
 
 github-pr-review reporter reports results to GitHub PullRequest review comments
 using GitHub Personal API Access Token.
-[GitHub Enterprise](https://enterprise.github.com/home) is supported too.
+[GitHub Enterprise](https://github.com/enterprise) is supported too.
 
 - Go to https://github.com/settings/tokens and generate new API token.
 - Check `repo` for private repositories or `public_repo` for public repositories.
@@ -482,7 +482,7 @@ Actions. You can also use public reviewdog GitHub Actions.
 
 ### Reporter: GitLab MergeRequest discussions (-reporter=gitlab-mr-discussion)
 
-[![gitlab-mr-discussion sample](https://user-images.githubusercontent.com/3797062/41810718-f91bc540-773d-11e8-8598-fbc09ce9b1c7.png)](https://gitlab.com/haya14busa/reviewdog/merge_requests/113#note_83411103)
+[![gitlab-mr-discussion sample](https://user-images.githubusercontent.com/3797062/41810718-f91bc540-773d-11e8-8598-fbc09ce9b1c7.png)](https://gitlab.com/reviewdog/reviewdog/-/merge_requests/113#note_83411103)
 
 Required GitLab version: >= v10.8.0
 
@@ -653,26 +653,27 @@ You can use public GitHub Actions to start using reviewdog with ease! :tada: :ar
 - CSS
   - [reviewdog/action-stylelint](https://github.com/reviewdog/action-stylelint) - Run [stylelint](https://github.com/stylelint/stylelint).
 - Vim script
-  - [reviewdog/action-vint](https://github.com/reviewdog/action-vint) - Run [vint](https://github.com/Kuniwak/vint).
+  - [reviewdog/action-vint](https://github.com/reviewdog/action-vint) - Run [vint](https://github.com/Vimjas/vint).
   - [tsuyoshicho/action-vimlint](https://github.com/tsuyoshicho/action-vimlint) - Run [vim-vimlint](https://github.com/syngan/vim-vimlint)
 - Terraform
-  - [reviewdog/action-tflint](https://github.com/reviewdog/action-tflint) - Run [tflint](https://github.com/wata727/tflint).
+  - [reviewdog/action-tflint](https://github.com/reviewdog/action-tflint) - Run [tflint](https://github.com/terraform-linters/tflint).
 - YAML
   - [reviewdog/action-yamllint](https://github.com/reviewdog/action-yamllint) - Run [yamllint](https://github.com/adrienverge/yamllint).
 - Ruby
   - [reviewdog/action-brakeman](https://github.com/reviewdog/action-brakeman) - Run [brakeman](https://github.com/presidentbeef/brakeman).
   - [reviewdog/action-reek](https://github.com/reviewdog/action-reek) - Run [reek](https://github.com/troessner/reek).
-  - [reviewdog/action-rubocop](https://github.com/reviewdog/action-rubocop) - Run [rubocop](https://github.com/rubocop-hq/rubocop).
+  - [reviewdog/action-rubocop](https://github.com/reviewdog/action-rubocop) - Run [rubocop](https://github.com/rubocop/rubocop).
   - [vk26/action-fasterer](https://github.com/vk26/action-fasterer) - Run [fasterer](https://github.com/DamirSvrtan/fasterer).
-  - [SennaLabs/action-standardrb](https://github.com/SennaLabs/action-standardrb) - Run [standardrb](https://github.com/testdouble/standard).
+  - [SennaLabs/action-standardrb](https://github.com/SennaLabs/action-standardrb) - Run [standardrb](https://github.com/standardrb/standard).
   - [tk0miya/action-erblint](https://github.com/tk0miya/action-erblint) - Run [erb-lint](https://github.com/Shopify/erb-lint)
+  - [tk0miya/action-steep](https://github.com/tk0miya/action-steep) - Run [steep](https://github.com/soutaro/steep)
   - [blooper05/action-rails_best_practices](https://github.com/blooper05/action-rails_best_practices) - Run [rails_best_practices](https://github.com/flyerhzm/rails_best_practices)
   - [tomferreira/action-bundler-audit](https://github.com/tomferreira/action-bundler-audit) - Run [bundler-audit](https://github.com/rubysec/bundler-audit)
 - Python
   - [wemake-python-styleguide](https://github.com/wemake-services/wemake-python-styleguide) - Run wemake-python-styleguide
   - [tsuyoshicho/action-mypy](https://github.com/tsuyoshicho/action-mypy) - Run [mypy](https://pypi.org/project/mypy/)
   - [jordemort/action-pyright](https://github.com/jordemort/action-pyright) - Run [pyright](https://github.com/Microsoft/pyright)
-  - [dciborow/action-pylint](https://github.com/dciborow/action-pylint) - Run [pylint](https://github.com/PyCQA/pylint)
+  - [dciborow/action-pylint](https://github.com/dciborow/action-pylint) - Run [pylint](https://github.com/pylint-dev/pylint)
   - [reviewdog/action-black](https://github.com/reviewdog/action-black) - Run [black](https://github.com/psf/black)
 - Kotlin
   - [ScaCap/action-ktlint](https://github.com/ScaCap/action-ktlint) - Run [ktlint](https://ktlint.github.io/).
@@ -699,12 +700,12 @@ Example: [action-tflint](https://github.com/reviewdog/reviewdog/issues/322).
 
 `GITHUB_TOKEN` for Pull Requests from forked repository doesn't have write
 access to Check API nor Review API due to [GitHub Actions
-restriction](https://docs.github.com/en/actions/configuring-and-managing-workflows/authenticating-with-the-github_token#permissions-for-the-github_token).
+restriction](https://docs.github.com/en/actions/security-guides/automatic-token-authentication#permissions-for-the-github_token).
 
 Instead, reviewdog uses [Logging commands of GitHub
-Actions](https://help.github.com/en/actions/automating-your-workflow-with-github-actions/development-tools-for-github-actions#set-an-error-message-error)
+Actions](https://docs.github.com/en/actions/using-workflows/workflow-commands-for-github-actions#set-an-error-message-error)
 to post results as
-[annotations](https://developer.github.com/v3/checks/runs/#annotations-object)
+[annotations](https://docs.github.com/en/rest/checks/runs#annotations-object)
 similar to `github-pr-check` reporter.
 
 Note that there is a limitation for annotations created by logging commands,
@@ -714,7 +715,7 @@ You can check GitHub Actions log to see full results in such cases.
 #### reviewdog badge [![reviewdog](https://github.com/reviewdog/reviewdog/workflows/reviewdog/badge.svg?branch=master&event=push)](https://github.com/reviewdog/reviewdog/actions?query=workflow%3Areviewdog+event%3Apush+branch%3Amaster)
 
 As [`github-check` reporter](#reporter-github-checks--reportergithub-pr-check) support running on commit, we can create reviewdog
-[GitHub Action badge](https://help.github.com/en/actions/automating-your-workflow-with-github-actions/configuring-a-workflow#adding-a-workflow-status-badge-to-your-repository)
+[GitHub Action badge](https://docs.github.com/en/actions/using-workflows#adding-a-workflow-status-badge-to-your-repository)
 to check the result against master commit for example. :tada:
 
 Example:
@@ -830,8 +831,8 @@ environment variables.
 | ---- | ----------- |
 | `CI_PULL_REQUEST` | Pull Request number (e.g. 14) |
 | `CI_COMMIT`       | SHA1 for the current build |
-| `CI_REPO_OWNER`   | repository owner (e.g. "haya14busa" for https://github.com/haya14busa/reviewdog) |
-| `CI_REPO_NAME`    | repository name (e.g. "reviewdog" for https://github.com/haya14busa/reviewdog) |
+| `CI_REPO_OWNER`   | repository owner (e.g. "reviewdog" for https://github.com/reviewdog/errorformat) |
+| `CI_REPO_NAME`    | repository name (e.g. "errorformat" for https://github.com/reviewdog/errorformat) |
 | `CI_BRANCH`       | [optional] branch of the commit |
 
 ```shell
@@ -855,7 +856,7 @@ Just pass the flag `guess`:
 $ reviewdog -conf=.reviewdog.yml -reporter=github-pr-check -guess
 ```
 
-#### Jenkins with Github pull request builder plugin
+#### Jenkins with GitHub pull request builder plugin
 - [GitHub pull request builder plugin - Jenkins - Jenkins Wiki](https://wiki.jenkins-ci.org/display/JENKINS/GitHub+pull+request+builder+plugin)
 - [Configuring a GitHub app account - Jenkins - CloudBees](https://docs.cloudbees.com/docs/cloudbees-ci/latest/cloud-admin-guide/github-app-auth) - required to use github-pr-check formatter without reviewdog server or GitHub actions.
 
@@ -905,8 +906,8 @@ $ reviewdog -reporter=github-pr-review -filter-mode=nofilter -fail-on-error
 ### Filter Mode Support Table
 Note that not all reporters provide full support of filter mode due to API limitation.
 e.g. `github-pr-review` reporter uses [GitHub Review
-API](https://developer.github.com/v3/pulls/reviews/) but it doesn't support posting comment outside diff (`diff_context`),
-so reviewdog will use [Check annotation](https://developer.github.com/v3/checks/runs/) as fallback to post those comments [1]. 
+API](https://docs.github.com/en/rest/pulls/reviews) but it doesn't support posting comment outside diff (`diff_context`),
+so reviewdog will use [Check annotation](https://docs.github.com/en/rest/checks/runs) as fallback to post those comments [1]. 
 
 | `-reporter` \ `-filter-mode` | `added` | `diff_context` | `file`                  | `nofilter` |
 | ---------------------------- | ------- | -------------- | ----------------------- | ---------- |
@@ -936,7 +937,7 @@ reviewdog -filter-mode=nofilter -tee
 - [reviewdog — A code review dog who keeps your codebase healthy ](https://medium.com/@haya14busa/reviewdog-a-code-review-dog-who-keeps-your-codebase-healthy-d957c471938b)
 - [reviewdog ♡ GitHub Check — improved automated review experience](https://medium.com/@haya14busa/reviewdog-github-check-improved-automated-review-experience-58f89e0c95f3)
 - [Automated Code Review on GitHub Actions with reviewdog for any languages/tools](https://medium.com/@haya14busa/automated-code-review-on-github-actions-with-reviewdog-for-any-languages-tools-20285e04448e)
-- [GitHub Actions to guard your workflow](https://evrone.com/github-actions)
+- [GitHub Actions to guard your workflow](https://evrone.com/blog/github-actions)
 
 ## :bird: Author
 haya14busa [![GitHub followers](https://img.shields.io/github/followers/haya14busa.svg?style=social&label=Follow)](https://github.com/haya14busa)

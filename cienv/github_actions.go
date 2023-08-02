@@ -95,6 +95,9 @@ func getBuildInfoFromGitHubActionEventPath(eventPath string) (*BuildInfo, bool, 
 	if info.SHA == "" {
 		info.SHA = event.HeadCommit.ID
 	}
+	if info.SHA == "" {
+		info.SHA = os.Getenv("GITHUB_SHA")
+	}
 	return info, info.PullRequest != 0, nil
 }
 

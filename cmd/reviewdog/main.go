@@ -19,7 +19,7 @@ import (
 	"golang.org/x/build/gerrit"
 	"golang.org/x/oauth2"
 
-	"github.com/google/go-github/v49/github"
+	"github.com/google/go-github/v53/github"
 	"github.com/mattn/go-shellwords"
 	"github.com/reviewdog/errorformat/fmts"
 	"github.com/xanzy/go-gitlab"
@@ -198,7 +198,7 @@ func init() {
 	flag.StringVar(&opt.conf, "conf", "", confDoc)
 	flag.StringVar(&opt.runners, "runners", "", runnersDoc)
 	flag.StringVar(&opt.reporter, "reporter", "local", reporterDoc)
-	flag.StringVar(&opt.level, "level", "error", levelDoc)
+	flag.StringVar(&opt.level, "level", "", levelDoc)
 	flag.BoolVar(&opt.guessPullRequest, "guess", false, guessPullRequestDoc)
 	flag.BoolVar(&opt.tee, "tee", false, teeDoc)
 	flag.Var(&opt.filterMode, "filter-mode", filterModeDoc)

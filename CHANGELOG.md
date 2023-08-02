@@ -11,13 +11,26 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ### :rocket: Enhancements
 - ...
 
+### :rotating_light: Breaking changes
+- ...
+
 ### :bug: Fixes
 - [#967](https://github.com/reviewdog/reviewdog/pull/967) Fix parsing long lines in diffs #967
 - [#1406](https://github.com/reviewdog/reviewdog/pull/1406) Add REVIEWDOG_GITHUB_ACTIONS_TOKEN_HAS_WRITE_PERMISSION to force enable the write permission of the github token.
-- ...
+- [#1426](https://github.com/reviewdog/reviewdog/pull/1426) Remove default error level
 
-### :rotating_light: Breaking changes
-- ...
+---
+
+## [v0.14.2] - 2023-06-17
+
+### :rocket: Enhancements
+- [#1170](https://github.com/reviewdog/reviewdog/pull/1170) Calculate check conclusion from annotations
+- [#1433](https://github.com/reviewdog/reviewdog/pull/1433) Add path link support for GitHub Enterprise
+- [#1447](https://github.com/reviewdog/reviewdog/pull/1447) Support determining build info on more GitHub Actions events
+
+### :bug: Fixes
+- [#967](https://github.com/reviewdog/reviewdog/pull/967) Fix parsing long lines in diffs #967
+- [#1426](https://github.com/reviewdog/reviewdog/pull/1426) Remove default error level
 
 ---
 
@@ -140,7 +153,7 @@ $ cd subdir/ && reviewdog -filter-mode=file -fail-on-error -reporter=github-pr-r
 
 See https://github.com/reviewdog/reviewdog/releases for older release note.
 
-[Unreleased]: https://github.com/reviewdog/reviewdog/compare/v0.13.0...HEAD
+[Unreleased]: https://github.com/reviewdog/reviewdog/compare/v0.14.2...HEAD
 [v0.10.0]: https://github.com/reviewdog/reviewdog/compare/v0.9.17...v0.10.0
 [v0.10.1]: https://github.com/reviewdog/reviewdog/compare/v0.10.0...v0.10.1
 [v0.10.2]: https://github.com/reviewdog/reviewdog/compare/v0.10.1...v0.10.2
@@ -150,4 +163,5 @@ See https://github.com/reviewdog/reviewdog/releases for older release note.
 [v0.13.1]: https://github.com/reviewdog/reviewdog/compare/v0.13.0...v0.13.1
 [v0.14.0]: https://github.com/reviewdog/reviewdog/compare/v0.13.1...v0.14.0
 [v0.14.1]: https://github.com/reviewdog/reviewdog/compare/v0.14.0...v0.14.1
+[v0.14.2]: https://github.com/reviewdog/reviewdog/compare/v0.14.1...v0.14.2
 [@haya14busa]: https://github.com/haya14busa
