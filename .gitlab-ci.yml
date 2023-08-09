@@ -1,4 +1,4 @@
-# Go to https://gitlab.com/reviewdog/reviewdog/-/settings/repository#js-push-remote-settings
+# Go to https://gitlab.com/reviewtool/reviewdog/-/settings/repository#js-push-remote-settings
 # to sync the repository manually.
 
 # Open merge request automatically and run reviewdog against created MR.

@@ -5,7 +5,7 @@ import (
 	"os"
 	"path/filepath"
 
-	"github.com/reviewdog/reviewdog/diff"
+	"github.com/reviewtool/reviewdog/diff"
 )
 
 func main() {

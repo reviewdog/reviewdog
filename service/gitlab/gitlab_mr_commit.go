@@ -11,9 +11,9 @@ import (
 	"github.com/xanzy/go-gitlab"
 	"golang.org/x/sync/errgroup"
 
-	"github.com/reviewdog/reviewdog"
-	"github.com/reviewdog/reviewdog/service/commentutil"
-	"github.com/reviewdog/reviewdog/service/serviceutil"
+	"github.com/reviewtool/reviewdog"
+	"github.com/reviewtool/reviewdog/service/commentutil"
+	"github.com/reviewtool/reviewdog/service/serviceutil"
 )
 
 var _ reviewdog.CommentService = &MergeRequestCommitCommenter{}
@@ -21,8 +21,9 @@ var _ reviewdog.CommentService = &MergeRequestCommitCommenter{}
 // MergeRequestCommitCommenter is a comment service for GitLab MergeRequest.
 //
 // API:
-//  https://docs.gitlab.com/ce/api/commits.html#post-comment-to-commit
-//  POST /projects/:id/repository/commits/:sha/comments
+//
+//	https://docs.gitlab.com/ce/api/commits.html#post-comment-to-commit
+//	POST /projects/:id/repository/commits/:sha/comments
 type MergeRequestCommitCommenter struct {
 	cli      *gitlab.Client
 	pr       int

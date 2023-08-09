@@ -4,7 +4,7 @@ import (
 	"fmt"
 
 	bbapi "github.com/reviewdog/go-bitbucket"
-	"github.com/reviewdog/reviewdog"
+	"github.com/reviewtool/reviewdog"
 )
 
 // CloudAPIHelper is collection of utility functions used to build requests

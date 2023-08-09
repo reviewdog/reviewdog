@@ -6,7 +6,7 @@ import (
 	"fmt"
 	"io"
 
-	"github.com/reviewdog/reviewdog/doghouse/server/storage"
+	"github.com/reviewtool/reviewdog/doghouse/server/storage"
 )
 
 func GenerateRepositoryToken() string {

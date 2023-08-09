@@ -13,8 +13,8 @@ import (
 	"go.opencensus.io/plugin/ochttp"
 	"go.opencensus.io/trace"
 
-	"github.com/reviewdog/reviewdog/doghouse/server/cookieman"
-	"github.com/reviewdog/reviewdog/doghouse/server/storage"
+	"github.com/reviewtool/reviewdog/doghouse/server/cookieman"
+	"github.com/reviewtool/reviewdog/doghouse/server/storage"
 )
 
 func mustCookieMan() *cookieman.CookieMan {

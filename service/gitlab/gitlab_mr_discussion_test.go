@@ -11,10 +11,10 @@ import (
 	"testing"
 
 	"github.com/google/go-cmp/cmp"
-	"github.com/reviewdog/reviewdog"
-	"github.com/reviewdog/reviewdog/filter"
-	"github.com/reviewdog/reviewdog/proto/rdf"
-	"github.com/reviewdog/reviewdog/service/commentutil"
+	"github.com/reviewtool/reviewdog"
+	"github.com/reviewtool/reviewdog/filter"
+	"github.com/reviewtool/reviewdog/proto/rdf"
+	"github.com/reviewtool/reviewdog/service/commentutil"
 	"github.com/xanzy/go-gitlab"
 )
 

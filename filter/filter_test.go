@@ -7,8 +7,8 @@ import (
 	"github.com/google/go-cmp/cmp"
 	"google.golang.org/protobuf/testing/protocmp"
 
-	"github.com/reviewdog/reviewdog/diff"
-	"github.com/reviewdog/reviewdog/proto/rdf"
+	"github.com/reviewtool/reviewdog/diff"
+	"github.com/reviewtool/reviewdog/proto/rdf"
 )
 
 const diffContent = `--- sample.old.txt	2016-10-13 05:09:35.820791185 +0900

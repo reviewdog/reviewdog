@@ -1,8 +1,8 @@
 package doghouse
 
 import (
-	"github.com/reviewdog/reviewdog/filter"
-	"github.com/reviewdog/reviewdog/proto/rdf"
+	"github.com/reviewtool/reviewdog/filter"
+	"github.com/reviewtool/reviewdog/proto/rdf"
 )
 
 // CheckRequest represents doghouse GitHub check request.

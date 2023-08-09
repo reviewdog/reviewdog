@@ -11,12 +11,12 @@ This document proposes Reviewdog Diagnostic Format and it's still
 in experimental stage.
 
 Any review, suggestion, feedback, criticism, and comments from anyone is very
-much welcome. Please leave comments in Pull Request ([#629](https://github.com/reviewdog/reviewdog/pull/629)),
-in issue [#628](https://github.com/reviewdog/reviewdog/issues/628) or
-file [an issue](https://github.com/reviewdog/reviewdog/issues).
+much welcome. Please leave comments in Pull Request ([#629](https://github.com/reviewtool/reviewdog/pull/629)),
+in issue [#628](https://github.com/reviewtool/reviewdog/issues/628) or
+file [an issue](https://github.com/reviewtool/reviewdog/issues).
 
 The document and the actual definition are currently under the
-https://github.com/reviewdog/reviewdog repository, but we may create a separate
+https://github.com/reviewtool/reviewdog repository, but we may create a separate
 repository once it's reviewed and stabilized.
 
 # Reviewdog Diagnostic Format (RDFormat)
@@ -128,7 +128,7 @@ The fact that there are no standard formats for diagnostic tools' output makes
 it hard to integrate diagnostic tools with development tools such as editors or
 automated code review tools/services.
 
-[reviewdog](https://github.com/reviewdog/reviewdog) resolves the above problem
+[reviewdog](https://github.com/reviewtool/reviewdog) resolves the above problem
 by introducing [errorformat](https://github.com/reviewdog/errorformat) to
 support unstructured output and checkstyle XML format as structured output.
 It works great so far and reviewdog can support arbitrary diagnostic tools

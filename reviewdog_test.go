@@ -8,8 +8,8 @@ import (
 
 	"github.com/reviewdog/errorformat"
 
-	"github.com/reviewdog/reviewdog/filter"
-	"github.com/reviewdog/reviewdog/parser"
+	"github.com/reviewtool/reviewdog/filter"
+	"github.com/reviewtool/reviewdog/parser"
 )
 
 var _ CommentService = &testWriter{}

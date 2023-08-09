@@ -1,4 +1,4 @@
-module github.com/reviewdog/reviewdog
+module github.com/reviewtool/reviewdog
 
 go 1.20
 

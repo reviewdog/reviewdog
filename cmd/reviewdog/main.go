@@ -24,17 +24,17 @@ import (
 	"github.com/reviewdog/errorformat/fmts"
 	"github.com/xanzy/go-gitlab"
 
-	"github.com/reviewdog/reviewdog"
-	"github.com/reviewdog/reviewdog/cienv"
-	"github.com/reviewdog/reviewdog/commands"
-	"github.com/reviewdog/reviewdog/filter"
-	"github.com/reviewdog/reviewdog/parser"
-	"github.com/reviewdog/reviewdog/project"
-	bbservice "github.com/reviewdog/reviewdog/service/bitbucket"
-	gerritservice "github.com/reviewdog/reviewdog/service/gerrit"
-	githubservice "github.com/reviewdog/reviewdog/service/github"
-	"github.com/reviewdog/reviewdog/service/github/githubutils"
-	gitlabservice "github.com/reviewdog/reviewdog/service/gitlab"
+	"github.com/reviewtool/reviewdog"
+	"github.com/reviewtool/reviewdog/cienv"
+	"github.com/reviewtool/reviewdog/commands"
+	"github.com/reviewtool/reviewdog/filter"
+	"github.com/reviewtool/reviewdog/parser"
+	"github.com/reviewtool/reviewdog/project"
+	bbservice "github.com/reviewtool/reviewdog/service/bitbucket"
+	gerritservice "github.com/reviewtool/reviewdog/service/gerrit"
+	githubservice "github.com/reviewtool/reviewdog/service/github"
+	"github.com/reviewtool/reviewdog/service/github/githubutils"
+	gitlabservice "github.com/reviewtool/reviewdog/service/gitlab"
 )
 
 const usageMessage = "" +
@@ -210,7 +210,7 @@ func usage() {
 	fmt.Fprintln(os.Stderr, "Flags:")
 	flag.PrintDefaults()
 	fmt.Fprintln(os.Stderr, "")
-	fmt.Fprintln(os.Stderr, "See https://github.com/reviewdog/reviewdog for more detail.")
+	fmt.Fprintln(os.Stderr, "See https://github.com/reviewtool/reviewdog for more detail.")
 	os.Exit(2)
 }
 
@@ -395,8 +395,8 @@ github-pr-check reporter as a fallback.
 
 func runList(w io.Writer) error {
 	tabw := tabwriter.NewWriter(w, 0, 8, 0, '\t', 0)
-	fmt.Fprintf(tabw, "%s\t%s\t- %s\n", "rdjson", "Reviewdog Diagnostic JSON Format (JSON of DiagnosticResult message)", "https://github.com/reviewdog/reviewdog")
-	fmt.Fprintf(tabw, "%s\t%s\t- %s\n", "rdjsonl", "Reviewdog Diagnostic JSONL Format (JSONL of Diagnostic message)", "https://github.com/reviewdog/reviewdog")
+	fmt.Fprintf(tabw, "%s\t%s\t- %s\n", "rdjson", "Reviewdog Diagnostic JSON Format (JSON of DiagnosticResult message)", "https://github.com/reviewtool/reviewdog")
+	fmt.Fprintf(tabw, "%s\t%s\t- %s\n", "rdjsonl", "Reviewdog Diagnostic JSONL Format (JSONL of Diagnostic message)", "https://github.com/reviewtool/reviewdog")
 	fmt.Fprintf(tabw, "%s\t%s\t- %s\n", "diff", "Unified Diff Format", "https://en.wikipedia.org/wiki/Diff#Unified_format")
 	fmt.Fprintf(tabw, "%s\t%s\t- %s\n", "checkstyle", "checkstyle XML format", "http://checkstyle.sourceforge.net/")
 	for _, f := range sortedFmts(fmts.DefinedFmts()) {
