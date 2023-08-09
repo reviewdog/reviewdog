@@ -11,7 +11,7 @@ func TestLinkedMarkdownDiagnostic(t *testing.T) {
 	tests := []struct {
 		owner, repo, sha string
 		d                *rdf.Diagnostic
-		serverUrl	     string
+		serverUrl        string
 		want             string
 	}{
 		{
@@ -29,7 +29,7 @@ func TestLinkedMarkdownDiagnostic(t *testing.T) {
 				Message: "msg",
 			},
 			serverUrl: "",
-			want: "[path/to/file.txt|1414 col 14|](https://github.com/o/r/blob/s/path/to/file.txt#L1414) msg",
+			want:      "[path/to/file.txt|1414 col 14|](https://github.com/o/r/blob/s/path/to/file.txt#L1414) msg",
 		},
 		{
 			owner: "o",
@@ -46,7 +46,7 @@ func TestLinkedMarkdownDiagnostic(t *testing.T) {
 				Message: "msg",
 			},
 			serverUrl: "",
-			want: "[path/to/file.txt|1414|](https://github.com/o/r/blob/s/path/to/file.txt#L1414) msg",
+			want:      "[path/to/file.txt|1414|](https://github.com/o/r/blob/s/path/to/file.txt#L1414) msg",
 		},
 		{
 			owner: "o",
@@ -59,7 +59,7 @@ func TestLinkedMarkdownDiagnostic(t *testing.T) {
 				Message: "msg",
 			},
 			serverUrl: "",
-			want: "[path/to/file.txt||](https://github.com/o/r/blob/s/path/to/file.txt) msg",
+			want:      "[path/to/file.txt||](https://github.com/o/r/blob/s/path/to/file.txt) msg",
 		},
 		{
 			owner: "o",
@@ -72,7 +72,7 @@ func TestLinkedMarkdownDiagnostic(t *testing.T) {
 				Message: "msg",
 			},
 			serverUrl: "https://xpto.com",
-			want: "[path/to/file.txt||](https://xpto.com/o/r/blob/s/path/to/file.txt) msg",
+			want:      "[path/to/file.txt||](https://xpto.com/o/r/blob/s/path/to/file.txt) msg",
 		},
 	}
 	for _, tt := range tests {

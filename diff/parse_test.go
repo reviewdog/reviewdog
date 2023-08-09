@@ -253,7 +253,7 @@ func TestParseFileHeader(t *testing.T) {
 		timestamp string
 	}{
 		{
-			in: "--- sample.old.txt	2016-10-13 05:09:35.820791185 +0900",
+			in:        "--- sample.old.txt	2016-10-13 05:09:35.820791185 +0900",
 			filename:  "sample.old.txt",
 			timestamp: "2016-10-13 05:09:35.820791185 +0900",
 		},

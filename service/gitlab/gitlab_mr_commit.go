@@ -21,8 +21,9 @@ var _ reviewdog.CommentService = &MergeRequestCommitCommenter{}
 // MergeRequestCommitCommenter is a comment service for GitLab MergeRequest.
 //
 // API:
-//  https://docs.gitlab.com/ce/api/commits.html#post-comment-to-commit
-//  POST /projects/:id/repository/commits/:sha/comments
+//
+//	https://docs.gitlab.com/ce/api/commits.html#post-comment-to-commit
+//	POST /projects/:id/repository/commits/:sha/comments
 type MergeRequestCommitCommenter struct {
 	cli      *gitlab.Client
 	pr       int
