@@ -67,7 +67,7 @@ func TestGitHubPullRequest_Post(t *testing.T) {
 	pr := 2
 	sha := "cce89afa9ac5519a7f5b1734db2e3aa776b138a7"
 
-	g, err := NewGitHubPullRequest(client, owner, repo, pr, sha)
+	g, err := NewGitHubPullRequest(client, owner, repo, pr, sha, "warning")
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -149,7 +149,7 @@ index 61450f3..f63f149 100644
 	owner := "haya14busa"
 	repo := "reviewdog"
 	pr := 2
-	g, err := NewGitHubPullRequest(client, owner, repo, pr, "")
+	g, err := NewGitHubPullRequest(client, owner, repo, pr, "", "warning")
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -174,7 +174,7 @@ func TestGitHubPullRequest_comment(t *testing.T) {
 	owner := "haya14busa"
 	repo := "reviewdog"
 	pr := 2
-	g, err := NewGitHubPullRequest(client, owner, repo, pr, "")
+	g, err := NewGitHubPullRequest(client, owner, repo, pr, "", "warning")
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -486,7 +486,7 @@ func TestGitHubPullRequest_Post_Flush_review_api(t *testing.T) {
 
 	cli := github.NewClient(nil)
 	cli.BaseURL, _ = url.Parse(ts.URL + "/")
-	g, err := NewGitHubPullRequest(cli, "o", "r", 14, "sha")
+	g, err := NewGitHubPullRequest(cli, "o", "r", 14, "sha", "warning")
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -1125,7 +1125,7 @@ func TestGitHubPullRequest_Post_toomany(t *testing.T) {
 
 	cli := github.NewClient(nil)
 	cli.BaseURL, _ = url.Parse(ts.URL + "/")
-	g, err := NewGitHubPullRequest(cli, "o", "r", 14, "sha")
+	g, err := NewGitHubPullRequest(cli, "o", "r", 14, "sha", "warning")
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -1169,7 +1169,7 @@ func TestGitHubPullRequest_workdir(t *testing.T) {
 	moveToRootDir()
 	defer setupEnvs()()
 
-	g, err := NewGitHubPullRequest(nil, "", "", 0, "")
+	g, err := NewGitHubPullRequest(nil, "", "", 0, "", "warning")
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -1188,7 +1188,7 @@ func TestGitHubPullRequest_workdir(t *testing.T) {
 	if err := os.Chdir(subDir); err != nil {
 		t.Fatal(err)
 	}
-	g, _ = NewGitHubPullRequest(nil, "", "", 0, "")
+	g, _ = NewGitHubPullRequest(nil, "", "", 0, "", "warning")
 	if g.wd != subDir {
 		t.Fatalf("gitRelWorkdir() = %q, want %q", g.wd, subDir)
 	}
@@ -1219,7 +1219,7 @@ func TestGitHubPullRequest_Diff_fake(t *testing.T) {
 
 	cli := github.NewClient(nil)
 	cli.BaseURL, _ = url.Parse(ts.URL + "/")
-	g, err := NewGitHubPullRequest(cli, "o", "r", 14, "sha")
+	g, err := NewGitHubPullRequest(cli, "o", "r", 14, "sha", "warning")
 	if err != nil {
 		t.Fatal(err)
 	}
