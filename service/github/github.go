@@ -362,3 +362,10 @@ func getSourceLine(sourceLines map[int]string, line int) (string, error) {
 	}
 	return lineContent, nil
 }
+
+func max(x, y int32) int32 {
+	if x < y {
+		return y
+	}
+	return x
+}

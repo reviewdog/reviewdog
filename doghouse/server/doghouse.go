@@ -378,3 +378,10 @@ func annotationToDiagnostic(a *doghouse.Annotation) *rdf.Diagnostic {
 		OriginalOutput: a.RawMessage,
 	}
 }
+
+func min(x, y int) int {
+	if x > y {
+		return y
+	}
+	return x
+}
