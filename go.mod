@@ -1,6 +1,8 @@
 module github.com/reviewdog/reviewdog
 
-go 1.20
+go 1.21
+
+toolchain go1.21.0
 
 require (
 	cloud.google.com/go v0.110.2 // indirect
@@ -23,7 +25,7 @@ require (
 	github.com/reviewdog/errorformat v0.0.0-20230810075619-82e5d4ad20d2
 	github.com/reviewdog/go-bitbucket v0.0.0-20201024094602-708c3f6a7de0
 	github.com/stretchr/testify v1.8.4
-	github.com/vvakame/sdlog v1.1.2
+	github.com/vvakame/sdlog v1.2.0
 	github.com/xanzy/go-gitlab v0.90.0
 	go.opencensus.io v0.24.0
 	golang.org/x/build v0.0.0-20230811195019-049da809c1e8
@@ -34,7 +36,7 @@ require (
 )
 
 require (
-	cloud.google.com/go/compute v1.20.1 // indirect
+	cloud.google.com/go/compute v1.23.0 // indirect
 	github.com/ProtonMail/go-crypto v0.0.0-20230217124315-7d5c6f04bbb8 // indirect
 	github.com/aws/aws-sdk-go v1.43.31 // indirect
 	github.com/census-instrumentation/opencensus-proto v0.4.1 // indirect
