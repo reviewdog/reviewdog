@@ -3,12 +3,13 @@ package server
 import (
 	"context"
 	"errors"
+	"fmt"
 	"net/http"
 	"strings"
 	"testing"
 
 	"github.com/google/go-cmp/cmp"
-	"github.com/google/go-github/v49/github"
+	"github.com/google/go-github/v53/github"
 
 	"github.com/reviewdog/reviewdog/doghouse"
 	"github.com/reviewdog/reviewdog/filter"
@@ -16,7 +17,6 @@ import (
 )
 
 type fakeCheckerGitHubCli struct {
-	checkerGitHubClientInterface
 	FakeGetPullRequestDiff func(ctx context.Context, owner, repo string, number int) ([]byte, error)
 	FakeCreateCheckRun     func(ctx context.Context, owner, repo string, opt github.CreateCheckRunOptions) (*github.CheckRun, error)
 	FakeUpdateCheckRun     func(ctx context.Context, owner, repo string, checkID int64, opt github.UpdateCheckRunOptions) (*github.CheckRun, error)
@@ -682,5 +682,113 @@ func TestCheck_too_many_findings_cut_off_correctly(t *testing.T) {
 	}
 	if !strings.Contains(summaryText, "... (Too many findings. Dropped some findings)\n</details>") {
 		t.Error("summary text was not cut off correctly")
+	}
+}
+
+func TestConclusion_calculate_level_from_annotations(t *testing.T) {
+	req := &doghouse.CheckRequest{PullRequest: 1}
+	checker := &Checker{req: req}
+
+	// Highest level = failure
+	annotations := []*github.CheckRunAnnotation{
+		{
+			AnnotationLevel: github.String("notice"),
+		},
+		{
+			AnnotationLevel: github.String("warning"),
+		},
+		{
+			AnnotationLevel: github.String("failure"),
+		},
+	}
+
+	conclusion := checker.conclusion(annotations)
+
+	expected := "failure"
+	if conclusion != expected {
+		t.Errorf("got conclusion %s, want %s", conclusion, expected)
+	}
+
+	// Highest level = warning
+	annotations = []*github.CheckRunAnnotation{
+		{
+			AnnotationLevel: github.String("notice"),
+		},
+		{
+			AnnotationLevel: github.String("warning"),
+		},
+	}
+
+	conclusion = checker.conclusion(annotations)
+
+	expected = "neutral"
+	if conclusion != expected {
+		t.Errorf("got conclusion %s, want %s", conclusion, expected)
+	}
+
+	// Highest level = notice
+	annotations = []*github.CheckRunAnnotation{
+		{
+			AnnotationLevel: github.String("notice"),
+		},
+	}
+
+	conclusion = checker.conclusion(annotations)
+
+	expected = "neutral"
+	if conclusion != expected {
+		t.Errorf("got conclusion %s, want %s", conclusion, expected)
+	}
+
+	// No annotations = success
+	annotations = []*github.CheckRunAnnotation{}
+
+	conclusion = checker.conclusion(annotations)
+
+	expected = "success"
+	if conclusion != expected {
+		t.Errorf("got conclusion %s, want %s", conclusion, expected)
+	}
+}
+
+func TestConclusion_with_level_config(t *testing.T) {
+	testcases := []struct {
+		level    string
+		expected string
+	}{
+		{"info", "neutral"},
+		{"warning", "neutral"},
+		{"error", "failure"},
+	}
+
+	for _, test := range testcases {
+		test := test
+		t.Run(fmt.Sprintf("level: %s", test.level), func(t *testing.T) {
+			req := &doghouse.CheckRequest{Level: test.level}
+			checker := &Checker{req: req}
+
+			annotations := []*github.CheckRunAnnotation{
+				{
+					AnnotationLevel: github.String("notice"),
+				},
+			}
+
+			conclusion := checker.conclusion(annotations)
+
+			expected := test.expected
+			if conclusion != expected {
+				t.Errorf("got conclusion %s, want %s", conclusion, expected)
+			}
+
+			// No annotations = success
+			annotations = []*github.CheckRunAnnotation{}
+
+			conclusion = checker.conclusion(annotations)
+
+			expected = "success"
+			if conclusion != expected {
+				t.Errorf("got conclusion %s, want %s", conclusion, expected)
+			}
+		})
 	}
 }

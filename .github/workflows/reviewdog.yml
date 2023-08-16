@@ -16,10 +16,9 @@ jobs:
     steps:
       - uses: actions/checkout@v3
 
-      - uses: actions/setup-go@v3
+      - uses: actions/setup-go@v4
         with:
-          go-version: '1.x'
-          cache: true
+          go-version-file: "go.mod"
 
       - name: Install linters
         run: go install golang.org/x/lint/golint@latest
@@ -59,10 +58,9 @@ jobs:
     steps:
       - uses: actions/checkout@v3
 
-      - uses: actions/setup-go@v3
+      - uses: actions/setup-go@v4
         with:
-          go-version: '1.x'
-          cache: true
+          go-version-file: "go.mod"
 
       - name: Install linters
         run: go install golang.org/x/lint/golint@latest
@@ -189,10 +187,9 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v3
-      - uses: actions/setup-go@v3
+      - uses: actions/setup-go@v4
         with:
-          go-version: '1.x'
-          cache: true
+          go-version-file: "go.mod"
       - uses: reviewdog/action-staticcheck@v1
         with:
           github_token: ${{ secrets.github_token }}
@@ -259,5 +256,5 @@ jobs:
         env:
           REVIEWDOG_GITHUB_API_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         run: |
-          $(npm bin)/textlint -f checkstyle README.md | \
+          npx textlint -f checkstyle README.md | \
             reviewdog -f=checkstyle -name="textlint" -reporter=github-check -level=info

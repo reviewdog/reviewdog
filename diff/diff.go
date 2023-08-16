@@ -5,8 +5,9 @@ package diff
 // FileDiff represents a unified diff for a single file.
 //
 // Example:
-//   --- oldname	2009-10-11 15:12:20.000000000 -0700
-//   +++ newname	2009-10-11 15:12:30.000000000 -0700
+//
+//	--- oldname	2009-10-11 15:12:20.000000000 -0700
+//	+++ newname	2009-10-11 15:12:30.000000000 -0700
 type FileDiff struct {
 	// the old path of the file
 	PathOld string
@@ -30,17 +31,18 @@ type FileDiff struct {
 // Hunk represents change hunks that contain the line differences in the file.
 //
 // Example:
-//   @@ -1,3 +1,4 @@ optional section heading
-//    unchanged, contextual line
-//   -deleted line
-//   +added line
-//   +added line
-//    unchanged, contextual line
 //
-//  -1 -> the starting line number of the old file
-//  3  -> the number of lines the change hunk applies to for the old file
-//  +1 -> the starting line number of the new file
-//  4  -> the number of lines the change hunk applies to for the new file
+//	 @@ -1,3 +1,4 @@ optional section heading
+//	  unchanged, contextual line
+//	 -deleted line
+//	 +added line
+//	 +added line
+//	  unchanged, contextual line
+//
+//	-1 -> the starting line number of the old file
+//	3  -> the number of lines the change hunk applies to for the old file
+//	+1 -> the starting line number of the new file
+//	4  -> the number of lines the change hunk applies to for the new file
 type Hunk struct {
 	// the starting line number of the old file
 	StartLineOld int
