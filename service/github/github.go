@@ -4,6 +4,7 @@ import (
 	"context"
 	"errors"
 	"fmt"
+	"log"
 	"net/http"
 	"os"
 	"path/filepath"
@@ -157,6 +158,9 @@ func (g *PullRequest) postAsReviewComment(ctx context.Context) error {
 		Body:     github.String(g.remainingCommentsSummary(remaining)),
 	}
 	_, _, err := g.cli.PullRequests.CreateReview(ctx, g.owner, g.repo, g.pr, review)
+	if err != nil {
+		log.Println(err)
+	}
 
 	// fallback to log if we don't have permission to post a review comment.
 	var githubErr *github.ErrorResponse
