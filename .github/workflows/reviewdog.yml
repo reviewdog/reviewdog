@@ -168,7 +168,7 @@ jobs:
       pull-requests: none
       contents: read
     if: github.event_name == 'pull_request'
-    name: reviewdog on Pull Request
+    name: reviewdog on Pull Request without write permission
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v3
