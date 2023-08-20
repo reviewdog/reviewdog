@@ -164,8 +164,8 @@ jobs:
   # write permission to the repository.
   reviewdog-pr-no-permission:
     permissions:
-      checks: none
-      pull-requests: none
+      checks: read
+      pull-requests: read
       contents: read
     if: github.event_name == 'pull_request'
     name: reviewdog on Pull Request without write permission
