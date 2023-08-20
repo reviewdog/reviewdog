@@ -160,6 +160,121 @@ jobs:
           gofmt -s -d . | \
             reviewdog -name="gofmt" -f=diff -f.diff.strip=0 -reporter=github-pr-review
 
+  # The reviewdog-pr-no-permission job is for testing reviewdog on pull request without
+  # write permission to the repository.
+  reviewdog-pr-no-permission:
+    permissions:
+      checks: none
+      pull-requests: none
+      contents: read
+    if: github.event_name == 'pull_request'
+    name: reviewdog on Pull Request
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v3
+
+      - uses: actions/setup-go@v4
+        with:
+          go-version-file: "go.mod"
+
+      - name: Install linters
+        run: go install golang.org/x/lint/golint@latest
+
+      - name: Setup reviewdog
+        # uses: reviewdog/action-setup@v1
+        run: |
+          go install ./cmd/reviewdog
+
+      - name: Run reviewdog (github-pr-check)
+        continue-on-error: true
+        env:
+          REVIEWDOG_GITHUB_API_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          reviewdog -reporter=github-pr-check -runners=golint,govet -fail-on-error
+
+      - name: Run reviewdog (github-pr-review with tee)
+        env:
+          REVIEWDOG_GITHUB_API_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          # Remove Go Problem Matchers [1] as it reports duplicate results with
+          # reviewdog.
+          # [1]: https://github.com/actions/toolkit/blob/master/docs/commands.md#problem-matchers
+          echo "::remove-matcher owner=go::"
+          golint ./... | reviewdog -f=golint -name=golint-pr-review -reporter=github-pr-review -tee
+
+      - name: Run reviewdog with sub-dir (github-pr-review)
+        env:
+          REVIEWDOG_GITHUB_API_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          cd ./_testdata/ && golint ./... | reviewdog -f=golint -name=golint-pr-review-subdir -reporter=github-pr-review -tee
+
+      - name: Run reviewdog with sub-dir (local+fail-on-error)
+        run: |
+          echo 'var LocalTest = 14' >> ./_testdata/golint.go
+          cd ./_testdata/ && golint ./... | reviewdog -f=golint -diff="git diff" -fail-on-error || EXIT_CODE=$?
+          git reset --hard @
+          test "${EXIT_CODE}" = 1
+
+      - name: Run reviewdog (github-pr-check with fail-on-error)
+        continue-on-error: true
+        env:
+          REVIEWDOG_GITHUB_API_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          cd ./_testdata/ && golint ./... | reviewdog -f=golint -name=golint-pr-check-fail-on-error -reporter=github-pr-check -fail-on-error
+
+      - name: Run reviewdog (github-pr-check with -filter-mode=file)
+        env:
+          REVIEWDOG_GITHUB_API_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          golint | reviewdog -f=golint -name=golint-pr-check-filter-mode-file -reporter=github-pr-check -filter-mode=file -level=warning
+
+      - name: Run reviewdog (github-pr-review -filter-mode=nofilter)
+        env:
+          REVIEWDOG_GITHUB_API_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          cd ./_testdata/ && golint ./... | reviewdog -f=golint -name=golint-pr-review-nofilter -reporter=github-pr-review -filter-mode=nofilter -fail-on-error || EXIT_CODE=$?
+          test "${EXIT_CODE}" = 1
+
+      - name: Unexpected failure (github-pr-review)
+        env:
+          REVIEWDOG_GITHUB_API_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          cd ./_testdata/ && reviewdog -conf=reviewdog_error.yml \
+            -reporter=github-pr-review || EXIT_CODE=$?
+          test "${EXIT_CODE}" = 1
+      - name: Unexpected failure (github-check)
+        env:
+          REVIEWDOG_GITHUB_API_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          cd ./_testdata/ && reviewdog -conf=reviewdog_error.yml \
+            -reporter=github-check || EXIT_CODE=$?
+          test "${EXIT_CODE}" = 1
+      - name: Unexpected failure (local)
+        run: |
+          cd ./_testdata/ && reviewdog -conf=reviewdog_error.yml \
+            -reporter=local -diff='git diff master' || EXIT_CODE=$?
+          test "${EXIT_CODE}" = 1
+      - name: Suggestion (rdjsonl)
+        env:
+          REVIEWDOG_GITHUB_API_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          cat ./_testdata/suggestions.json | \
+            reviewdog -name="suggestion-test" -f=rdjsonl -reporter=github-pr-review
+
+      - name: Custom rdjsonl test (github-pr-review)
+        env:
+          REVIEWDOG_GITHUB_API_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          cat ./_testdata/custom_rdjson.json | \
+            reviewdog -name="custom-rdjson" -f=rdjson -reporter=github-pr-review
+
+      - name: gofmt -s with reviewdog
+        env:
+          REVIEWDOG_GITHUB_API_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          gofmt -s -d . | \
+            reviewdog -name="gofmt" -f=diff -f.diff.strip=0 -reporter=github-pr-review
+
   golangci-lint:
     permissions:
       checks: write
