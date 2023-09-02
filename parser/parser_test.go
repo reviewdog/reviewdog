@@ -35,6 +35,12 @@ func TestNewParser(t *testing.T) {
 			},
 			typ: &ErrorformatParser{},
 		},
+		{
+			in: &Option{
+				FormatName: "sarif",
+			},
+			typ: &SarifParser{},
+		},
 		{ // empty
 			in:      &Option{},
 			wantErr: true,

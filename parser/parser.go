@@ -41,6 +41,8 @@ func New(opt *Option) (Parser, error) {
 		return NewRDJSONParser(), nil
 	case "diff":
 		return NewDiffParser(opt.DiffStrip), nil
+	case "sarif":
+		return NewSarifParser(), nil
 	}
 
 	// use defined errorformat
