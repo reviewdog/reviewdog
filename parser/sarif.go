@@ -172,7 +172,7 @@ type SarifOriginalURI struct {
 type SarifArtifactLocation struct {
 	URI       string `json:"uri"`
 	URIBaseID string `json:"uriBaseId"`
-	Index     string `json:"index"`
+	Index     int    `json:"index"`
 }
 
 func (l *SarifArtifactLocation) GetPath(
