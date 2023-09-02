@@ -298,8 +298,6 @@ You can use reviewdog with -f=sarif option.
 $ eslint -f @microsoft/eslint-formatter-sarif . | reviewdog -f=sarif -diff="git diff"
 ````
 
-
-
 ## Code Suggestions
 
 ![eslint reviewdog suggestion demo](https://user-images.githubusercontent.com/3797062/97085944-87233a80-165b-11eb-94a8-0a47d5e24905.png)
