@@ -290,7 +290,7 @@ $ <linter> | <convert-to-checkstyle> | reviewdog -f=checkstyle -name="<linter>" 
 
 ### SARIF format
 
-reviewdog support [SARIF 2.1.0 JSON format](https://sarifweb.azurewebsites.net/).
+reviewdog supports [SARIF 2.1.0 JSON format](https://sarifweb.azurewebsites.net/).
 You can use reviewdog with -f=sarif option.
 
 ```shell
