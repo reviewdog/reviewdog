@@ -9,7 +9,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ### :sparkles: Release Note <!-- optional -->
 
 ### :rocket: Enhancements
-- ...
+- [#1554](https://github.com/reviewdog/reviewdog/pull/1554) Add SARIF format input support.
 
 ### :bug: Fixes
 - ...

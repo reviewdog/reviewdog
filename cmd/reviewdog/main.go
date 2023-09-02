@@ -399,6 +399,7 @@ func runList(w io.Writer) error {
 	fmt.Fprintf(tabw, "%s\t%s\t- %s\n", "rdjsonl", "Reviewdog Diagnostic JSONL Format (JSONL of Diagnostic message)", "https://github.com/reviewdog/reviewdog")
 	fmt.Fprintf(tabw, "%s\t%s\t- %s\n", "diff", "Unified Diff Format", "https://en.wikipedia.org/wiki/Diff#Unified_format")
 	fmt.Fprintf(tabw, "%s\t%s\t- %s\n", "checkstyle", "checkstyle XML format", "http://checkstyle.sourceforge.net/")
+	fmt.Fprintf(tabw, "%s\t%s\t- %s\n", "sarif", "SARIF JSON format", "https://sarifweb.azurewebsites.net/")
 	for _, f := range sortedFmts(fmts.DefinedFmts()) {
 		fmt.Fprintf(tabw, "%s\t%s\t- %s\n", f.Name, f.Description, f.URL)
 	}
