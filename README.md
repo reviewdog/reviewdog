@@ -290,13 +290,15 @@ $ <linter> | <convert-to-checkstyle> | reviewdog -f=checkstyle -name="<linter>" 
 
 ### SARIF format
 
-reviewdog support [SARIF JSON format](https://sarifweb.azurewebsites.net/).
+reviewdog support [SARIF 2.1.0 JSON format](https://sarifweb.azurewebsites.net/).
 You can use reviewdog with -f=sarif option.
 
 ```shell
 # Local
 $ eslint -f @microsoft/eslint-formatter-sarif . | reviewdog -f=sarif -diff="git diff"
 ````
+
+
 
 ## Code Suggestions
 
