@@ -74,6 +74,7 @@ by diff.
   * [Reviewdog Diagnostic Format (RDFormat)](#reviewdog-diagnostic-format-rdformat)
   * [Diff](#diff)
   * [checkstyle format](#checkstyle-format)
+  * [SARIF format](#sarif-format)
 - [Code Suggestions](#code-suggestions)
 - [reviewdog config file](#reviewdog-config-file)
 - [Reporters](#reporters)
@@ -286,6 +287,16 @@ Also, if you want to pass other Json/XML/etc... format to reviewdog, you can wri
 ```shell
 $ <linter> | <convert-to-checkstyle> | reviewdog -f=checkstyle -name="<linter>" -reporter=github-pr-check
 ```
+
+### SARIF format
+
+reviewdog support [SARIF JSON format](https://sarifweb.azurewebsites.net/).
+You can use reviewdog with -f=sarif option.
+
+```shell
+# Local
+$ eslint -f @microsoft/eslint-formatter-sarif . | reviewdog -f=sarif -diff="git diff"
+````
 
 ## Code Suggestions
 
