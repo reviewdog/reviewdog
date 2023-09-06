@@ -167,5 +167,5 @@ See https://github.com/reviewdog/reviewdog/releases for older release note.
 [v0.14.0]: https://github.com/reviewdog/reviewdog/compare/v0.13.1...v0.14.0
 [v0.14.1]: https://github.com/reviewdog/reviewdog/compare/v0.14.0...v0.14.1
 [v0.14.2]: https://github.com/reviewdog/reviewdog/compare/v0.14.1...v0.14.2
-[v0.14.2]: https://github.com/reviewdog/reviewdog/compare/v0.14.2...v0.15.0
+[v0.15.0]: https://github.com/reviewdog/reviewdog/compare/v0.14.2...v0.15.0
 [@haya14busa]: https://github.com/haya14busa
