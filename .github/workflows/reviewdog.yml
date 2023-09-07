@@ -173,6 +173,11 @@ jobs:
     steps:
       - uses: actions/checkout@v4
 
+      - name: dump environment values
+        run: |
+          env
+          jq . < "$GITHUB_EVENT_PATH"
+
       - uses: actions/setup-go@v4
         with:
           go-version-file: "go.mod"
