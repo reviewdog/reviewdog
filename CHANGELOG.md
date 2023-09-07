@@ -17,12 +17,12 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ### :rotating_light: Breaking changes
 - ...
 
+## [v0.15.0] - 2023-09-02
+
+### :rocket: Enhancements
+- [#1554](https://github.com/reviewdog/reviewdog/pull/1554) Add SARIF format input support.
+
 ---
-
-### :bug: Fixes
-- [#967](https://github.com/reviewdog/reviewdog/pull/967) Fix parsing long lines in diffs #967
-- [#1426](https://github.com/reviewdog/reviewdog/pull/1426) Remove default error level
-
 
 ## [v0.14.2] - 2023-06-17
 
@@ -156,7 +156,7 @@ $ cd subdir/ && reviewdog -filter-mode=file -fail-on-error -reporter=github-pr-r
 
 See https://github.com/reviewdog/reviewdog/releases for older release note.
 
-[Unreleased]: https://github.com/reviewdog/reviewdog/compare/v0.14.2...HEAD
+[Unreleased]: https://github.com/reviewdog/reviewdog/compare/v0.15.0...HEAD
 [v0.10.0]: https://github.com/reviewdog/reviewdog/compare/v0.9.17...v0.10.0
 [v0.10.1]: https://github.com/reviewdog/reviewdog/compare/v0.10.0...v0.10.1
 [v0.10.2]: https://github.com/reviewdog/reviewdog/compare/v0.10.1...v0.10.2
@@ -167,4 +167,5 @@ See https://github.com/reviewdog/reviewdog/releases for older release note.
 [v0.14.0]: https://github.com/reviewdog/reviewdog/compare/v0.13.1...v0.14.0
 [v0.14.1]: https://github.com/reviewdog/reviewdog/compare/v0.14.0...v0.14.1
 [v0.14.2]: https://github.com/reviewdog/reviewdog/compare/v0.14.1...v0.14.2
+[v0.15.0]: https://github.com/reviewdog/reviewdog/compare/v0.14.2...v0.15.0
 [@haya14busa]: https://github.com/haya14busa

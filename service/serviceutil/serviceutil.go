@@ -33,6 +33,14 @@ func GitRelWorkdir() (string, error) {
 	return path, nil
 }
 
+func GetGitRoot() (string, error) {
+	cwd, err := os.Getwd()
+	if err != nil {
+		return "", err
+	}
+	return findGitRoot(cwd)
+}
+
 func findGitRoot(path string) (string, error) {
 	gitPath, err := findDotGitPath(path)
 	if err != nil {

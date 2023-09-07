@@ -11,7 +11,7 @@ jobs:
       contents: read
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v3
+      - uses: actions/checkout@v4
         with:
           fetch-depth: 50 # Need git history for testing.
       - uses: actions/setup-go@v4
@@ -29,7 +29,7 @@ jobs:
         shell: bash
         working-directory: ./doghouse/appengine/
     steps:
-      - uses: actions/checkout@v3
+      - uses: actions/checkout@v4
       - uses: google-github-actions/setup-gcloud@v1.1.1
         with:
           project_id: review-dog
