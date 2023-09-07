@@ -426,7 +426,3 @@ func max(x, y int32) int32 {
 	}
 	return x
 }
-
-func RevertMe() {
-	// it is a test for pull request review comment.
-}
