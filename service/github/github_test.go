@@ -1230,3 +1230,65 @@ func TestGitHubPullRequest_Diff_fake(t *testing.T) {
 		t.Errorf("GitHub API should be called once; called %v times", apiCalled)
 	}
 }
+
+func TestGitHubPullRequest_Post_NoPermission(t *testing.T) {
+	cwd, _ := os.Getwd()
+	defer os.Chdir(cwd)
+	moveToRootDir()
+	t.Setenv("GITHUB_ACTIONS", "true")
+
+	listCommentsAPICalled := 0
+	postCommentsAPICalled := 0
+
+	mux := http.NewServeMux()
+	mux.HandleFunc("/repos/o/r/pulls/14/comments", func(w http.ResponseWriter, r *http.Request) {
+		listCommentsAPICalled++
+		if err := json.NewEncoder(w).Encode([]*github.PullRequestComment{}); err != nil {
+			t.Fatal(err)
+		}
+	})
+	mux.HandleFunc("/repos/o/r/pulls/14/reviews", func(w http.ResponseWriter, r *http.Request) {
+		postCommentsAPICalled++
+		w.WriteHeader(http.StatusNotFound)
+	})
+	ts := httptest.NewServer(mux)
+	defer ts.Close()
+
+	cli := github.NewClient(nil)
+	cli.BaseURL, _ = url.Parse(ts.URL + "/")
+	g, err := NewGitHubPullRequest(cli, "o", "r", 14, "sha", "warning")
+	if err != nil {
+		t.Fatal(err)
+	}
+	comments := []*reviewdog.Comment{
+		{
+			Result: &filter.FilteredDiagnostic{
+				Diagnostic: &rdf.Diagnostic{
+					Location: &rdf.Location{
+						Path: "reviewdog.go",
+						Range: &rdf.Range{Start: &rdf.Position{
+							Line: 1,
+						}},
+					},
+					Message: "comment",
+				},
+				InDiffContext: true,
+			},
+			ToolName: "tool",
+		},
+	}
+	for _, c := range comments {
+		if err := g.Post(context.Background(), c); err != nil {
+			t.Error(err)
+		}
+	}
+	if err := g.Flush(context.Background()); err != nil {
+		t.Error(err)
+	}
+	if want := 1; listCommentsAPICalled != want {
+		t.Errorf("GitHub List PullRequest comments API called %v times, want %d times", listCommentsAPICalled, want)
+	}
+	if want := 1; postCommentsAPICalled != want {
+		t.Errorf("GitHub post PullRequest comments API called %v times, want %d times", postCommentsAPICalled, want)
+	}
+}
