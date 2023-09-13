@@ -9,7 +9,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ### :sparkles: Release Note <!-- optional -->
 
 ### :rocket: Enhancements
-- ...
+- [#1573](https://github.com/reviewdog/reviewdog/pull/1573) Add filter tests for file/nofilter mode
 
 ### :bug: Fixes
 - ...
