@@ -93,7 +93,7 @@ func (g *PullRequest) postAsReviewComment(ctx context.Context) error {
 	comments := make([]*github.DraftReviewComment, 0, len(g.postComments))
 	remaining := make([]*reviewdog.Comment, 0)
 	for _, c := range g.postComments {
-		if !c.Result.InDiffContext {
+		if !c.Result.InDiffFile {
 			// GitHub Review API cannot report results outside diff. If it's running
 			// in GitHub Actions, fallback to GitHub Actions log as report .
 			if cienv.IsInGitHubAction() {
@@ -103,6 +103,16 @@ func (g *PullRequest) postAsReviewComment(ctx context.Context) error {
 		}
 		body := buildBody(c)
 		if g.postedcs.IsPosted(c, githubCommentLine(c), body) {
+			continue
+		}
+		if !c.Result.InDiffContext {
+			// If the result is outside of diff context, fallback to GitHub Review
+			// Comment API.
+			comment := buildPullRequestComment(c, body, g.sha)
+			_, _, err := g.cli.PullRequests.CreateComment(ctx, g.owner, g.repo, g.pr, comment)
+			if err != nil {
+				return err
+			}
 			continue
 		}
 		// Only posts maxCommentsPerRequest comments per 1 request to avoid spammy
@@ -152,10 +162,24 @@ func buildDraftReviewComment(c *reviewdog.Comment, body string) *github.DraftRev
 	return r
 }
 
+// Document: https://docs.github.com/en/rest/pulls/comments?apiVersion=2022-11-28#create-a-review-comment-for-a-pull-request
+func buildPullRequestComment(c *reviewdog.Comment, body, commitID string) *github.PullRequestComment {
+	loc := c.Result.Diagnostic.GetLocation()
+	return &github.PullRequestComment{
+		Body:        github.String(body),
+		CommitID:    github.String(commitID),
+		Path:        github.String(loc.GetPath()),
+		SubjectType: github.String("file"),
+	}
+}
+
 // line represents end line if it's a multiline comment in GitHub, otherwise
 // it's start line.
 // Document: https://docs.github.com/en/rest/reference/pulls#create-a-review-comment-for-a-pull-request
 func githubCommentLine(c *reviewdog.Comment) int {
+	if !c.Result.InDiffContext {
+		return 0
+	}
 	_, end := githubCommentLineRange(c)
 	return end
 }
@@ -213,10 +237,14 @@ func (g *PullRequest) setPostedComment(ctx context.Context) error {
 		return err
 	}
 	for _, c := range cs {
-		if c.Line == nil || c.Path == nil || c.Body == nil {
+		if c.Line == nil || c.Path == nil || c.Body == nil || c.SubjectType == nil {
 			continue
 		}
-		g.postedcs.AddPostedComment(c.GetPath(), c.GetLine(), c.GetBody())
+		var line int
+		if c.GetSubjectType() == "line" {
+			line = c.GetLine()
+		}
+		g.postedcs.AddPostedComment(c.GetPath(), line, c.GetBody())
 	}
 	return nil
 }
