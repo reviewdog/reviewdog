@@ -4,7 +4,6 @@ import (
 	"context"
 	"fmt"
 	"os/exec"
-	"strings"
 
 	"github.com/xanzy/go-gitlab"
 
@@ -51,20 +50,12 @@ func (g *MergeRequestDiff) Diff(ctx context.Context) ([]byte, error) {
 	if err != nil {
 		return nil, err
 	}
-	targetBranch, _, err := g.cli.Branches.GetBranch(mr.TargetProjectID, mr.TargetBranch, nil)
-	if err != nil {
-		return nil, err
-	}
-	return g.gitDiff(ctx, g.sha, targetBranch.Commit.ID)
+	targetSha := mr.DiffRefs.BaseSha
+	return g.gitDiff(ctx, g.sha, targetSha)
 }
 
 func (g *MergeRequestDiff) gitDiff(_ context.Context, baseSha, targetSha string) ([]byte, error) {
-	b, err := exec.Command("git", "merge-base", targetSha, baseSha).Output()
-	if err != nil {
-		return nil, fmt.Errorf("failed to get merge-base commit: %w", err)
-	}
-	mergeBase := strings.Trim(string(b), "\n")
-	bytes, err := exec.Command("git", "diff", "--find-renames", mergeBase, baseSha).Output()
+	bytes, err := exec.Command("git", "diff", "--find-renames", targetSha, baseSha).Output()
 	if err != nil {
 		return nil, fmt.Errorf("failed to run git diff: %w", err)
 	}
