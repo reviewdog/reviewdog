@@ -7,7 +7,7 @@ toolchain go1.21.0
 require (
 	cloud.google.com/go v0.110.7 // indirect
 	cloud.google.com/go/compute/metadata v0.2.3
-	cloud.google.com/go/datastore v1.14.0
+	cloud.google.com/go/datastore v1.15.0
 	cloud.google.com/go/monitoring v1.15.1 // indirect
 	cloud.google.com/go/trace v1.10.1 // indirect
 	contrib.go.opencensus.io/exporter/stackdriver v0.13.12
