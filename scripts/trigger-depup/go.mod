@@ -3,7 +3,7 @@ module github.com/reviewdog/reviewdog/scripts/trigger-depup
 go 1.21
 
 require (
-	github.com/google/go-github/v55 v55.0.0
+	github.com/google/go-github/v56 v56.0.0
 	github.com/google/go-github/v56 v56.0.0
 	golang.org/x/oauth2 v0.13.0
 )
