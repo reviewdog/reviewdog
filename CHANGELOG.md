@@ -11,6 +11,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ### :rocket: Enhancements
 - [#1573](https://github.com/reviewdog/reviewdog/pull/1573) Add filter tests for file/nofilter mode
 - [#1576](https://github.com/reviewdog/reviewdog/pull/1576) Support `--filter-mode=file` in `github-pr-review`
+- [#1596](https://github.com/reviewdog/reviewdog/pull/1596) Use `CI_MERGE_REQUEST_DIFF_BASE_SHA` envvar if available in `gitlab-mr-discussion`
 
 ### :bug: Fixes
 - ...
