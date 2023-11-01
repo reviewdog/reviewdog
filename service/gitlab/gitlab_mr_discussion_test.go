@@ -217,12 +217,18 @@ func TestGitLabMergeRequestDiscussionCommenter_Post_Flush_review_api(t *testing.
 			if err := json.NewDecoder(r.Body).Decode(got); err != nil {
 				t.Error(err)
 			}
-			switch got.Position.NewPath {
+			switch *got.Position.NewPath {
 			case "file.go":
 				want := &gitlab.CreateMergeRequestDiscussionOptions{
 					Body: gitlab.String(commentutil.MarkdownComment(newComment1)),
-					Position: &gitlab.NotePosition{
-						BaseSHA: "xxx", StartSHA: "xxx", HeadSHA: "sha", PositionType: "text", NewPath: "file.go", NewLine: 14},
+					Position: &gitlab.PositionOptions{
+						BaseSHA:      gitlab.String("xxx"),
+						StartSHA:     gitlab.String("xxx"),
+						HeadSHA:      gitlab.String("sha"),
+						PositionType: gitlab.String("text"),
+						NewPath:      gitlab.String("file.go"),
+						NewLine:      gitlab.Int(14),
+					},
 				}
 				if diff := cmp.Diff(got, want); diff != "" {
 					t.Error(diff)
@@ -230,8 +236,14 @@ func TestGitLabMergeRequestDiscussionCommenter_Post_Flush_review_api(t *testing.
 			case "file2.go":
 				want := &gitlab.CreateMergeRequestDiscussionOptions{
 					Body: gitlab.String(commentutil.MarkdownComment(newComment2)),
-					Position: &gitlab.NotePosition{
-						BaseSHA: "xxx", StartSHA: "xxx", HeadSHA: "sha", PositionType: "text", NewPath: "file2.go", NewLine: 15},
+					Position: &gitlab.PositionOptions{
+						BaseSHA:      gitlab.String("xxx"),
+						StartSHA:     gitlab.String("xxx"),
+						HeadSHA:      gitlab.String("sha"),
+						PositionType: gitlab.String("text"),
+						NewPath:      gitlab.String("file2.go"),
+						NewLine:      gitlab.Int(15),
+					},
 				}
 				if diff := cmp.Diff(got, want); diff != "" {
 					t.Error(diff)
@@ -239,10 +251,15 @@ func TestGitLabMergeRequestDiscussionCommenter_Post_Flush_review_api(t *testing.
 			case "new_file.go":
 				want := &gitlab.CreateMergeRequestDiscussionOptions{
 					Body: gitlab.String(commentutil.MarkdownComment(newComment3)),
-					Position: &gitlab.NotePosition{
-						BaseSHA: "xxx", StartSHA: "xxx", HeadSHA: "sha", PositionType: "text",
-						NewPath: "new_file.go", NewLine: 14,
-						OldPath: "old_file.go", OldLine: 7,
+					Position: &gitlab.PositionOptions{
+						BaseSHA:      gitlab.String("xxx"),
+						StartSHA:     gitlab.String("xxx"),
+						HeadSHA:      gitlab.String("sha"),
+						PositionType: gitlab.String("text"),
+						NewPath:      gitlab.String("new_file.go"),
+						NewLine:      gitlab.Int(14),
+						OldPath:      gitlab.String("old_file.go"),
+						OldLine:      gitlab.Int(7),
 					},
 				}
 				if diff := cmp.Diff(got, want); diff != "" {
@@ -254,8 +271,14 @@ func TestGitLabMergeRequestDiscussionCommenter_Post_Flush_review_api(t *testing.
 
 				want := &gitlab.CreateMergeRequestDiscussionOptions{
 					Body: gitlab.String(bodyExpected),
-					Position: &gitlab.NotePosition{
-						BaseSHA: "xxx", StartSHA: "xxx", HeadSHA: "sha", PositionType: "text", NewPath: "file3.go", NewLine: 14},
+					Position: &gitlab.PositionOptions{
+						BaseSHA:      gitlab.String("xxx"),
+						StartSHA:     gitlab.String("xxx"),
+						HeadSHA:      gitlab.String("sha"),
+						PositionType: gitlab.String("text"),
+						NewPath:      gitlab.String("file3.go"),
+						NewLine:      gitlab.Int(14),
+					},
 				}
 				if diff := cmp.Diff(got, want); diff != "" {
 					t.Error(diff)

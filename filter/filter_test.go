@@ -277,6 +277,296 @@ func TestFilterCheckByDiffContext(t *testing.T) {
 	}
 }
 
+func TestFilterCheckByFile(t *testing.T) {
+	results := []*rdf.Diagnostic{
+		{
+			Location: &rdf.Location{
+				Path:  "sample.new.txt",
+				Range: &rdf.Range{Start: &rdf.Position{Line: 1}},
+			},
+		},
+		{
+			Location: &rdf.Location{
+				Path:  "sample.new.txt",
+				Range: &rdf.Range{Start: &rdf.Position{Line: 2}},
+			},
+		},
+		{
+			Message: "outside line",
+			Location: &rdf.Location{
+				Path:  "sample.new.txt",
+				Range: &rdf.Range{Start: &rdf.Position{Line: 5}},
+			},
+		},
+		{
+			Message: "outside range (start)",
+			Location: &rdf.Location{
+				Path: "sample.new.txt",
+				Range: &rdf.Range{
+					Start: &rdf.Position{Line: 1},
+					End:   &rdf.Position{Line: 2},
+				},
+			},
+		},
+		{
+			Message: "without line",
+			Location: &rdf.Location{
+				Path:  "sample.new.txt",
+				Range: &rdf.Range{Start: &rdf.Position{}},
+			},
+		},
+		{
+			Location: &rdf.Location{
+				Path:  "unchanged.txt",
+				Range: &rdf.Range{Start: &rdf.Position{Line: 1}},
+			},
+		},
+	}
+	want := []*FilteredDiagnostic{
+		{
+			Diagnostic: &rdf.Diagnostic{
+				Location: &rdf.Location{
+					Path:  "sample.new.txt",
+					Range: &rdf.Range{Start: &rdf.Position{Line: 1}},
+				},
+			},
+			ShouldReport:  true,
+			InDiffFile:    true,
+			InDiffContext: true,
+			SourceLines:   map[int]string{1: "unchanged, contextual line"},
+			OldPath:       "sample.old.txt",
+			OldLine:       1,
+		},
+		{
+			Diagnostic: &rdf.Diagnostic{
+				Location: &rdf.Location{
+					Path:  "sample.new.txt",
+					Range: &rdf.Range{Start: &rdf.Position{Line: 2}},
+				},
+			},
+			ShouldReport:  true,
+			InDiffFile:    true,
+			InDiffContext: true,
+			SourceLines:   map[int]string{2: "added line"},
+			OldPath:       "sample.old.txt",
+			OldLine:       0,
+		},
+		{
+			Diagnostic: &rdf.Diagnostic{
+				Message: "outside line",
+				Location: &rdf.Location{
+					Path:  "sample.new.txt",
+					Range: &rdf.Range{Start: &rdf.Position{Line: 5}},
+				},
+			},
+			ShouldReport:  true,
+			InDiffFile:    true,
+			InDiffContext: false,
+			SourceLines:   map[int]string{},
+			OldPath:       "sample.old.txt",
+			OldLine:       4,
+		},
+		{
+			Diagnostic: &rdf.Diagnostic{
+				Message: "outside range (start)",
+				Location: &rdf.Location{
+					Path: "sample.new.txt",
+					Range: &rdf.Range{
+						Start: &rdf.Position{Line: 1},
+						End:   &rdf.Position{Line: 2},
+					},
+				},
+			},
+			ShouldReport:  true,
+			InDiffFile:    true,
+			InDiffContext: true,
+			SourceLines: map[int]string{
+				1: "unchanged, contextual line",
+				2: "added line",
+			},
+			OldPath: "sample.old.txt",
+			OldLine: 1,
+		},
+		{
+			Diagnostic: &rdf.Diagnostic{
+				Message: "without line",
+				Location: &rdf.Location{
+					Path:  "sample.new.txt",
+					Range: &rdf.Range{Start: &rdf.Position{}},
+				},
+			},
+			ShouldReport:  true,
+			InDiffFile:    true,
+			InDiffContext: false,
+			SourceLines:   map[int]string{},
+			OldPath:       "sample.old.txt",
+			OldLine:       0,
+		},
+		{
+			Diagnostic: &rdf.Diagnostic{
+				Location: &rdf.Location{
+					Path:  "unchanged.txt",
+					Range: &rdf.Range{Start: &rdf.Position{Line: 1}},
+				},
+			},
+			ShouldReport:  false,
+			InDiffFile:    false,
+			InDiffContext: false,
+			SourceLines:   map[int]string{},
+		},
+	}
+	filediffs, _ := diff.ParseMultiFile(strings.NewReader(diffContent))
+	got := FilterCheck(results, filediffs, 0, "", ModeFile)
+	if value := cmp.Diff(got, want, protocmp.Transform()); value != "" {
+		t.Error(value)
+	}
+}
+
+func TestFilterCheckByNoFilter(t *testing.T) {
+	results := []*rdf.Diagnostic{
+		{
+			Location: &rdf.Location{
+				Path:  "sample.new.txt",
+				Range: &rdf.Range{Start: &rdf.Position{Line: 1}},
+			},
+		},
+		{
+			Location: &rdf.Location{
+				Path:  "sample.new.txt",
+				Range: &rdf.Range{Start: &rdf.Position{Line: 2}},
+			},
+		},
+		{
+			Message: "outside line",
+			Location: &rdf.Location{
+				Path:  "sample.new.txt",
+				Range: &rdf.Range{Start: &rdf.Position{Line: 5}},
+			},
+		},
+		{
+			Message: "outside range (start)",
+			Location: &rdf.Location{
+				Path: "sample.new.txt",
+				Range: &rdf.Range{
+					Start: &rdf.Position{Line: 1},
+					End:   &rdf.Position{Line: 2},
+				},
+			},
+		},
+		{
+			Message: "without line",
+			Location: &rdf.Location{
+				Path:  "sample.new.txt",
+				Range: &rdf.Range{Start: &rdf.Position{}},
+			},
+		},
+		{
+			Location: &rdf.Location{
+				Path:  "unchanged.txt",
+				Range: &rdf.Range{Start: &rdf.Position{Line: 1}},
+			},
+		},
+	}
+	want := []*FilteredDiagnostic{
+		{
+			Diagnostic: &rdf.Diagnostic{
+				Location: &rdf.Location{
+					Path:  "sample.new.txt",
+					Range: &rdf.Range{Start: &rdf.Position{Line: 1}},
+				},
+			},
+			ShouldReport:  true,
+			InDiffFile:    true,
+			InDiffContext: true,
+			SourceLines:   map[int]string{1: "unchanged, contextual line"},
+			OldPath:       "sample.old.txt",
+			OldLine:       1,
+		},
+		{
+			Diagnostic: &rdf.Diagnostic{
+				Location: &rdf.Location{
+					Path:  "sample.new.txt",
+					Range: &rdf.Range{Start: &rdf.Position{Line: 2}},
+				},
+			},
+			ShouldReport:  true,
+			InDiffFile:    true,
+			InDiffContext: true,
+			SourceLines:   map[int]string{2: "added line"},
+			OldPath:       "sample.old.txt",
+			OldLine:       0,
+		},
+		{
+			Diagnostic: &rdf.Diagnostic{
+				Message: "outside line",
+				Location: &rdf.Location{
+					Path:  "sample.new.txt",
+					Range: &rdf.Range{Start: &rdf.Position{Line: 5}},
+				},
+			},
+			ShouldReport:  true,
+			InDiffFile:    true,
+			InDiffContext: false,
+			SourceLines:   map[int]string{},
+			OldPath:       "sample.old.txt",
+			OldLine:       4,
+		},
+		{
+			Diagnostic: &rdf.Diagnostic{
+				Message: "outside range (start)",
+				Location: &rdf.Location{
+					Path: "sample.new.txt",
+					Range: &rdf.Range{
+						Start: &rdf.Position{Line: 1},
+						End:   &rdf.Position{Line: 2},
+					},
+				},
+			},
+			ShouldReport:  true,
+			InDiffFile:    true,
+			InDiffContext: true,
+			SourceLines: map[int]string{
+				1: "unchanged, contextual line",
+				2: "added line",
+			},
+			OldPath: "sample.old.txt",
+			OldLine: 1,
+		},
+		{
+			Diagnostic: &rdf.Diagnostic{
+				Message: "without line",
+				Location: &rdf.Location{
+					Path:  "sample.new.txt",
+					Range: &rdf.Range{Start: &rdf.Position{}},
+				},
+			},
+			ShouldReport:  true,
+			InDiffFile:    true,
+			InDiffContext: false,
+			SourceLines:   map[int]string{},
+			OldPath:       "sample.old.txt",
+			OldLine:       0,
+		},
+		{
+			Diagnostic: &rdf.Diagnostic{
+				Location: &rdf.Location{
+					Path:  "unchanged.txt",
+					Range: &rdf.Range{Start: &rdf.Position{Line: 1}},
+				},
+			},
+			ShouldReport:  true,
+			InDiffFile:    false,
+			InDiffContext: false,
+			SourceLines:   map[int]string{},
+		},
+	}
+	filediffs, _ := diff.ParseMultiFile(strings.NewReader(diffContent))
+	got := FilterCheck(results, filediffs, 0, "", ModeNoFilter)
+	if value := cmp.Diff(got, want, protocmp.Transform()); value != "" {
+		t.Error(value)
+	}
+}
+
 func findFileDiff(filediffs []*diff.FileDiff, path string, strip int) *diff.FileDiff {
 	for _, file := range filediffs {
 		if NormalizeDiffPath(file.PathNew, strip) == path {

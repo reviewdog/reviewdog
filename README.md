@@ -74,6 +74,7 @@ by diff.
   * [Reviewdog Diagnostic Format (RDFormat)](#reviewdog-diagnostic-format-rdformat)
   * [Diff](#diff)
   * [checkstyle format](#checkstyle-format)
+  * [SARIF format](#sarif-format)
 - [Code Suggestions](#code-suggestions)
 - [reviewdog config file](#reviewdog-config-file)
 - [Reporters](#reporters)
@@ -286,6 +287,16 @@ Also, if you want to pass other Json/XML/etc... format to reviewdog, you can wri
 ```shell
 $ <linter> | <convert-to-checkstyle> | reviewdog -f=checkstyle -name="<linter>" -reporter=github-pr-check
 ```
+
+### SARIF format
+
+reviewdog supports [SARIF 2.1.0 JSON format](https://sarifweb.azurewebsites.net/).
+You can use reviewdog with -f=sarif option.
+
+```shell
+# Local
+$ eslint -f @microsoft/eslint-formatter-sarif . | reviewdog -f=sarif -diff="git diff"
+````
 
 ## Code Suggestions
 
@@ -664,7 +675,7 @@ You can use public GitHub Actions to start using reviewdog with ease! :tada: :ar
   - [reviewdog/action-reek](https://github.com/reviewdog/action-reek) - Run [reek](https://github.com/troessner/reek).
   - [reviewdog/action-rubocop](https://github.com/reviewdog/action-rubocop) - Run [rubocop](https://github.com/rubocop/rubocop).
   - [vk26/action-fasterer](https://github.com/vk26/action-fasterer) - Run [fasterer](https://github.com/DamirSvrtan/fasterer).
-  - [SennaLabs/action-standardrb](https://github.com/SennaLabs/action-standardrb) - Run [standardrb](https://github.com/standardrb/standard).
+  - [PrintReleaf/action-standardrb](https://github.com/PrintReleaf/action-standardrb) - Run [standardrb](https://github.com/standardrb/standard).
   - [tk0miya/action-erblint](https://github.com/tk0miya/action-erblint) - Run [erb-lint](https://github.com/Shopify/erb-lint)
   - [tk0miya/action-steep](https://github.com/tk0miya/action-steep) - Run [steep](https://github.com/soutaro/steep)
   - [blooper05/action-rails_best_practices](https://github.com/blooper05/action-rails_best_practices) - Run [rails_best_practices](https://github.com/flyerhzm/rails_best_practices)
@@ -906,7 +917,8 @@ $ reviewdog -reporter=github-pr-review -filter-mode=nofilter -fail-on-error
 ### Filter Mode Support Table
 Note that not all reporters provide full support of filter mode due to API limitation.
 e.g. `github-pr-review` reporter uses [GitHub Review
-API](https://docs.github.com/en/rest/pulls/reviews) but it doesn't support posting comment outside diff (`diff_context`),
+API](https://docs.github.com/en/rest/pulls/reviews) and [GitHub Review
+Comment API](https://docs.github.com/en/rest/pulls/comments) but these APIs don't support posting comment outside diff file,
 so reviewdog will use [Check annotation](https://docs.github.com/en/rest/checks/runs) as fallback to post those comments [1]. 
 
 | `-reporter` \ `-filter-mode` | `added` | `diff_context` | `file`                  | `nofilter` |
@@ -914,13 +926,13 @@ so reviewdog will use [Check annotation](https://docs.github.com/en/rest/checks/
 | **`local`**                  | OK      | OK             | OK                      | OK |
 | **`github-check`**           | OK      | OK             | OK                      | OK |
 | **`github-pr-check`**        | OK      | OK             | OK                      | OK |
-| **`github-pr-review`**       | OK      | OK             | Partially Supported [1] | Partially Supported [1] |
+| **`github-pr-review`**       | OK      | OK             | OK                      | Partially Supported [1] |
 | **`gitlab-mr-discussion`**   | OK      | OK             | OK                      | Partially Supported [2] |
 | **`gitlab-mr-commit`**       | OK      | Partially Supported [2] | Partially Supported [2] | Partially Supported [2] |
 | **`gerrit-change-review`**   | OK      | OK? [3]        | OK? [3]                 | Partially Supported? [2][3] |
 | **`bitbucket-code-report`**  | NO [4]  | NO [4]         | NO [4]                  | OK |
 
-- [1] Report results which is outside diff context with Check annotation as fallback if it's running in GitHub actions instead of Review API (comments). All results will be reported to console as well.
+- [1] Report results which is outside diff file with Check annotation as fallback if it's running in GitHub actions instead of Review API (comments). All results will be reported to console as well.
 - [2] Report results which is outside diff file to console.
 - [3] It should work, but not verified yet.
 - [4] Not implemented at the moment

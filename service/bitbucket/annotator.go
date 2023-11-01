@@ -22,12 +22,14 @@ const (
 // ReportAnnotator is a comment service for Bitbucket Code Insights reports.
 //
 // Cloud API:
-//  https://developer.atlassian.com/bitbucket/api/2/reference/resource/repositories/%7Bworkspace%7D/%7Brepo_slug%7D/commit/%7Bcommit%7D/reports/%7BreportId%7D/annotations#post
-//  POST /2.0/repositories/{username}/{repo_slug}/commit/{commit}/reports/{reportId}/annotations
+//
+//	https://developer.atlassian.com/bitbucket/api/2/reference/resource/repositories/%7Bworkspace%7D/%7Brepo_slug%7D/commit/%7Bcommit%7D/reports/%7BreportId%7D/annotations#post
+//	POST /2.0/repositories/{username}/{repo_slug}/commit/{commit}/reports/{reportId}/annotations
 //
 // Server API:
-//  https://docs.atlassian.com/bitbucket-server/rest/5.15.0/bitbucket-code-insights-rest.html#idm288218233536
-//  /rest/insights/1.0/projects/{projectKey}/repos/{repositorySlug}/commits/{commitId}/reports/{key}/annotations
+//
+//	https://docs.atlassian.com/bitbucket-server/rest/5.15.0/bitbucket-code-insights-rest.html#idm288218233536
+//	/rest/insights/1.0/projects/{projectKey}/repos/{repositorySlug}/commits/{commitId}/reports/{key}/annotations
 type ReportAnnotator struct {
 	cli         APIClient
 	sha         string

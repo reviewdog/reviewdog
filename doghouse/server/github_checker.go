@@ -5,7 +5,7 @@ import (
 	"io"
 	"time"
 
-	"github.com/google/go-github/v53/github"
+	"github.com/google/go-github/v56/github"
 	"github.com/vvakame/sdlog/aelog"
 )
 
