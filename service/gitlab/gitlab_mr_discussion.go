@@ -122,17 +122,17 @@ func (g *MergeRequestDiscussionCommenter) postCommentsForEach(ctx context.Contex
 			continue
 		}
 		eg.Go(func() error {
-			pos := &gitlab.NotePosition{
-				StartSHA:     targetBranch.Commit.ID,
-				HeadSHA:      g.sha,
-				BaseSHA:      targetBranch.Commit.ID,
-				PositionType: "text",
-				NewPath:      loc.GetPath(),
-				NewLine:      lnum,
+			pos := &gitlab.PositionOptions{
+				StartSHA:     gitlab.String(targetBranch.Commit.ID),
+				HeadSHA:      gitlab.String(g.sha),
+				BaseSHA:      gitlab.String(targetBranch.Commit.ID),
+				PositionType: gitlab.String("text"),
+				NewPath:      gitlab.String(loc.GetPath()),
+				NewLine:      gitlab.Int(lnum),
 			}
 			if c.Result.OldPath != "" && c.Result.OldLine != 0 {
-				pos.OldPath = c.Result.OldPath
-				pos.OldLine = c.Result.OldLine
+				pos.OldPath = gitlab.String(c.Result.OldPath)
+				pos.OldLine = gitlab.Int(c.Result.OldLine)
 			}
 			discussion := &gitlab.CreateMergeRequestDiscussionOptions{
 				Body:     gitlab.String(body),

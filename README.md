@@ -917,7 +917,8 @@ $ reviewdog -reporter=github-pr-review -filter-mode=nofilter -fail-on-error
 ### Filter Mode Support Table
 Note that not all reporters provide full support of filter mode due to API limitation.
 e.g. `github-pr-review` reporter uses [GitHub Review
-API](https://docs.github.com/en/rest/pulls/reviews) but it doesn't support posting comment outside diff (`diff_context`),
+API](https://docs.github.com/en/rest/pulls/reviews) and [GitHub Review
+Comment API](https://docs.github.com/en/rest/pulls/comments) but these APIs don't support posting comment outside diff file,
 so reviewdog will use [Check annotation](https://docs.github.com/en/rest/checks/runs) as fallback to post those comments [1]. 
 
 | `-reporter` \ `-filter-mode` | `added` | `diff_context` | `file`                  | `nofilter` |
@@ -925,13 +926,13 @@ so reviewdog will use [Check annotation](https://docs.github.com/en/rest/checks/
 | **`local`**                  | OK      | OK             | OK                      | OK |
 | **`github-check`**           | OK      | OK             | OK                      | OK |
 | **`github-pr-check`**        | OK      | OK             | OK                      | OK |
-| **`github-pr-review`**       | OK      | OK             | Partially Supported [1] | Partially Supported [1] |
+| **`github-pr-review`**       | OK      | OK             | OK                      | Partially Supported [1] |
 | **`gitlab-mr-discussion`**   | OK      | OK             | OK                      | Partially Supported [2] |
 | **`gitlab-mr-commit`**       | OK      | Partially Supported [2] | Partially Supported [2] | Partially Supported [2] |
 | **`gerrit-change-review`**   | OK      | OK? [3]        | OK? [3]                 | Partially Supported? [2][3] |
 | **`bitbucket-code-report`**  | NO [4]  | NO [4]         | NO [4]                  | OK |
 
-- [1] Report results which is outside diff context with Check annotation as fallback if it's running in GitHub actions instead of Review API (comments). All results will be reported to console as well.
+- [1] Report results which is outside diff file with Check annotation as fallback if it's running in GitHub actions instead of Review API (comments). All results will be reported to console as well.
 - [2] Report results which is outside diff file to console.
 - [3] It should work, but not verified yet.
 - [4] Not implemented at the moment
