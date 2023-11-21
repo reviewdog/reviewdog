@@ -177,12 +177,12 @@ func (g *PullRequest) postAsReviewComment(ctx context.Context) error {
 		Body:     github.String(g.remainingCommentsSummary(remaining)),
 	}
 	_, _, err := g.cli.PullRequests.CreateReview(ctx, g.owner, g.repo, g.pr, review)
-	if err != nil {
-		log.Println(err)
-	}
 
 	// GitHub returns 403 or 404 if we don't have permission to post a review comment.
 	// fallback to log message in this case.
+	if err != nil {
+		log.Printf("reviewdog: failed to post review comments: %v", err)
+	}
 	if isPermissionError(err) && cienv.IsInGitHubAction() {
 		fmt.Fprintln(os.Stderr, `reviewdog: This GitHub Token doesn't have write permission of Review API [1],
 so reviewdog will report results via logging command [2] and create annotations similar to
