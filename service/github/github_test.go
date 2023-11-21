@@ -1402,6 +1402,7 @@ func TestGitHubPullRequest_Post_NoPermission(t *testing.T) {
 					},
 					Message: "comment",
 				},
+				InDiffFile:    true,
 				InDiffContext: true,
 			},
 			ToolName: "tool",
