@@ -5,6 +5,7 @@ import (
 	"errors"
 	"fmt"
 	"log"
+	"net/http"
 	"os"
 	"path/filepath"
 	"strings"
@@ -30,9 +31,13 @@ const (
 	invalidSuggestionPost = "</details>"
 )
 
-func isClientError(err error) bool {
+func isPermissionError(err error) bool {
 	var githubErr *github.ErrorResponse
-	return errors.As(err, &githubErr) && githubErr.Response.StatusCode >= 400 && githubErr.Response.StatusCode < 500
+	if !errors.As(err, &githubErr) {
+		return false
+	}
+	status := githubErr.Response.StatusCode
+	return status == http.StatusForbidden || status == http.StatusNotFound
 }
 
 // PullRequest is a comment and diff service for GitHub PullRequest.
@@ -178,7 +183,7 @@ func (g *PullRequest) postAsReviewComment(ctx context.Context) error {
 
 	// GitHub returns 403 or 404 if we don't have permission to post a review comment.
 	// fallback to log message in this case.
-	if isClientError(err) && cienv.IsInGitHubAction() {
+	if isPermissionError(err) && cienv.IsInGitHubAction() {
 		fmt.Fprintln(os.Stderr, `reviewdog: This GitHub Token doesn't have write permission of Review API [1],
 so reviewdog will report results via logging command [2] and create annotations similar to
 github-pr-check reporter as a fallback.
