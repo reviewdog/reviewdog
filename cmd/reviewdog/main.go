@@ -639,8 +639,8 @@ func bitbucketBuildWithClient(ctx context.Context) (*cienv.BuildInfo, bbservice.
 func fetchMergeRequestIDFromCommit(cli *gitlab.Client, projectID, sha string) (id int, err error) {
 	// https://docs.gitlab.com/ce/api/merge_requests.html#list-project-merge-requests
 	opt := &gitlab.ListProjectMergeRequestsOptions{
-		State:   gitlab.String("opened"),
-		OrderBy: gitlab.String("updated_at"),
+		State:   gitlab.Ptr("opened"),
+		OrderBy: gitlab.Ptr("updated_at"),
 	}
 	mrs, _, err := cli.MergeRequests.ListProjectMergeRequests(projectID, opt)
 	if err != nil {
