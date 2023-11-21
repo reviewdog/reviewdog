@@ -116,12 +116,21 @@ func (g *PullRequest) postAsReviewComment(ctx context.Context) error {
 	if g.fallbackToLog {
 		// we don't have permission to post a review comment.
 		// Fallback to GitHub Actions log as report.
-		return g.postAsLogMessage(ctx)
+		for _, c := range g.postComments {
+			if err := g.logWriter.Post(ctx, c); err != nil {
+				return err
+			}
+		}
+		return g.logWriter.Flush(ctx)
 	}
 
-	comments := make([]*github.DraftReviewComment, 0, len(g.postComments))
+	postComments := g.postComments
+	g.postComments = nil
+	rawComments := make([]*reviewdog.Comment, 0, len(postComments))
+	plainComments := make([]*github.PullRequestComment, 0, len(postComments))
+	reviewComments := make([]*github.DraftReviewComment, 0, len(postComments))
 	remaining := make([]*reviewdog.Comment, 0)
-	for _, c := range g.postComments {
+	for _, c := range postComments {
 		if !c.Result.InDiffFile {
 			// GitHub Review API cannot report results outside diff. If it's running
 			// in GitHub Actions, fallback to GitHub Actions log as report.
@@ -137,14 +146,13 @@ func (g *PullRequest) postAsReviewComment(ctx context.Context) error {
 			// it's already posted. skip it.
 			continue
 		}
+
+		rawComments = append(rawComments, c)
 		if !c.Result.InDiffContext {
 			// If the result is outside of diff context, fallback to GitHub Review
 			// Comment API.
 			comment := buildPullRequestComment(c, body, g.sha)
-			_, _, err := g.cli.PullRequests.CreateComment(ctx, g.owner, g.repo, g.pr, comment)
-			if err != nil {
-				return err
-			}
+			plainComments = append(plainComments, comment)
 			continue
 		}
 		// Only posts maxCommentsPerRequest comments per 1 request to avoid spammy
@@ -155,49 +163,64 @@ func (g *PullRequest) postAsReviewComment(ctx context.Context) error {
 		// > temporarily blocked from content creation. Please retry your request
 		// > again later.
 		// https://docs.github.com/en/rest/overview/resources-in-the-rest-api?apiVersion=2022-11-28#rate-limiting
-		if len(comments) >= maxCommentsPerRequest {
+		if len(reviewComments) >= maxCommentsPerRequest {
 			remaining = append(remaining, c)
 			continue
 		}
-		comments = append(comments, buildDraftReviewComment(c, body))
+		reviewComments = append(reviewComments, buildDraftReviewComment(c, body))
 	}
 	if err := g.logWriter.Flush(ctx); err != nil {
 		return err
 	}
 
-	if len(comments) == 0 {
-		return nil
+	if len(plainComments) > 0 {
+		// send pull request comments to GitHub.
+		for _, c := range plainComments {
+			_, _, err := g.cli.PullRequests.CreateComment(ctx, g.owner, g.repo, g.pr, c)
+			if err != nil {
+				log.Printf("reviewdog: failed to post a pull request comment: %v", err)
+				// GitHub returns 403 or 404 if we don't have permission to post a review comment.
+				// fallback to log message in this case.
+				if isPermissionError(err) && cienv.IsInGitHubAction() {
+					goto FALLBACK
+				}
+				return err
+			}
+		}
 	}
 
-	// send review comments to GitHub.
-	review := &github.PullRequestReviewRequest{
-		CommitID: &g.sha,
-		Event:    github.String("COMMENT"),
-		Comments: comments,
-		Body:     github.String(g.remainingCommentsSummary(remaining)),
+	if len(reviewComments) > 0 {
+		// send review comments to GitHub.
+		review := &github.PullRequestReviewRequest{
+			CommitID: &g.sha,
+			Event:    github.String("COMMENT"),
+			Comments: reviewComments,
+			Body:     github.String(g.remainingCommentsSummary(remaining)),
+		}
+		_, _, err := g.cli.PullRequests.CreateReview(ctx, g.owner, g.repo, g.pr, review)
+		if err != nil {
+			log.Printf("reviewdog: failed to post a review comment: %v", err)
+			// GitHub returns 403 or 404 if we don't have permission to post a review comment.
+			// fallback to log message in this case.
+			if isPermissionError(err) && cienv.IsInGitHubAction() {
+				goto FALLBACK
+			}
+			return err
+		}
 	}
-	_, _, err := g.cli.PullRequests.CreateReview(ctx, g.owner, g.repo, g.pr, review)
 
-	// GitHub returns 403 or 404 if we don't have permission to post a review comment.
-	// fallback to log message in this case.
-	if err != nil {
-		log.Printf("reviewdog: failed to post review comments: %v", err)
-	}
-	if isPermissionError(err) && cienv.IsInGitHubAction() {
-		fmt.Fprintln(os.Stderr, `reviewdog: This GitHub Token doesn't have write permission of Review API [1],
+	return nil
+
+FALLBACK:
+	// fallback to GitHub Actions log as report.
+	fmt.Fprintln(os.Stderr, `reviewdog: This GitHub Token doesn't have write permission of Review API [1],
 so reviewdog will report results via logging command [2] and create annotations similar to
 github-pr-check reporter as a fallback.
 [1]: https://docs.github.com/en/actions/reference/events-that-trigger-workflows#pull_request_target
 [2]: https://docs.github.com/en/actions/using-workflows/workflow-commands-for-github-actions`)
-		g.fallbackToLog = true
-		return g.postAsLogMessage(ctx)
-	}
-	return err
-}
+	g.fallbackToLog = true
 
-// postAsLogMessage posts comments as GitHub Actions log message.
-func (g *PullRequest) postAsLogMessage(ctx context.Context) error {
-	for _, c := range g.postComments {
+	for _, c := range rawComments {
 		if err := g.logWriter.Post(ctx, c); err != nil {
 			return err
 		}
