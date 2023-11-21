@@ -109,7 +109,7 @@ func (g *PullRequest) Flush(ctx context.Context) error {
 
 func (g *PullRequest) postAsReviewComment(ctx context.Context) error {
 	if g.fallbackToLog {
-		// we doesn't have permission to post a review comment.
+		// we don't have permission to post a review comment.
 		// Fallback to GitHub Actions log as report.
 		return g.postAsLogMessage(ctx)
 	}
