@@ -1395,17 +1395,17 @@ func TestGitHubPullRequest_Post_NoPermission(t *testing.T) {
 			Result: &filter.FilteredDiagnostic{
 				Diagnostic: &rdf.Diagnostic{
 					Location: &rdf.Location{
-						Path: "reviewdog.go",
+						Path: "service/github/github_test.go",
 						Range: &rdf.Range{Start: &rdf.Position{
 							Line: 1,
 						}},
 					},
-					Message: "comment",
+					Message: "test message for TestGitHubPullRequest_Post_NoPermission",
 				},
 				InDiffFile:    true,
 				InDiffContext: true,
 			},
-			ToolName: "tool",
+			ToolName: "service/github/github_test.go",
 		},
 	}
 	for _, c := range comments {
