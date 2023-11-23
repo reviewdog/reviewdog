@@ -2,7 +2,7 @@ package reviewdog
 
 import "context"
 
-var _ BulkCommentService = &multiCommentService{}
+var _ BulkCommentService = (*multiCommentService)(nil)
 
 type multiCommentService struct {
 	services []CommentService
