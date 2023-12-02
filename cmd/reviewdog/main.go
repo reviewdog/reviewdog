@@ -19,7 +19,7 @@ import (
 	"golang.org/x/build/gerrit"
 	"golang.org/x/oauth2"
 
-	"github.com/google/go-github/v49/github"
+	"github.com/google/go-github/v57/github"
 	"github.com/mattn/go-shellwords"
 	"github.com/reviewdog/errorformat/fmts"
 	"github.com/xanzy/go-gitlab"
@@ -33,7 +33,6 @@ import (
 	bbservice "github.com/reviewdog/reviewdog/service/bitbucket"
 	gerritservice "github.com/reviewdog/reviewdog/service/gerrit"
 	githubservice "github.com/reviewdog/reviewdog/service/github"
-	"github.com/reviewdog/reviewdog/service/github/githubutils"
 	gitlabservice "github.com/reviewdog/reviewdog/service/gitlab"
 )
 
@@ -198,7 +197,7 @@ func init() {
 	flag.StringVar(&opt.conf, "conf", "", confDoc)
 	flag.StringVar(&opt.runners, "runners", "", runnersDoc)
 	flag.StringVar(&opt.reporter, "reporter", "local", reporterDoc)
-	flag.StringVar(&opt.level, "level", "error", levelDoc)
+	flag.StringVar(&opt.level, "level", "", levelDoc)
 	flag.BoolVar(&opt.guessPullRequest, "guess", false, guessPullRequestDoc)
 	flag.BoolVar(&opt.tee, "tee", false, teeDoc)
 	flag.Var(&opt.filterMode, "filter-mode", filterModeDoc)
@@ -274,21 +273,7 @@ func run(r io.Reader, w io.Writer, opt *option) error {
 			fmt.Fprintln(os.Stderr, "reviewdog: this is not PullRequest build.")
 			return nil
 		}
-		// If it's running in GitHub Actions and it's PR from forked repository,
-		// replace comment writer to GitHubActionLogWriter to create annotations
-		// instead of review comment because if it's PR from forked repository,
-		// GitHub token doesn't have write permission due to security concern and
-		// cannot post results via Review API.
-		if cienv.IsInGitHubAction() && cienv.HasReadOnlyPermissionGitHubToken() {
-			fmt.Fprintln(os.Stderr, `reviewdog: This GitHub token doesn't have write permission of Review API [1], 
-so reviewdog will report results via logging command [2] and create annotations similar to
-github-pr-check reporter as a fallback.
-[1]: https://docs.github.com/en/actions/reference/events-that-trigger-workflows#pull_request_target, 
-[2]: https://help.github.com/en/actions/automating-your-workflow-with-github-actions/development-tools-for-github-actions#logging-commands`)
-			cs = githubutils.NewGitHubActionLogWriter(opt.level)
-		} else {
-			cs = reviewdog.MultiCommentService(gs, cs)
-		}
+		cs = reviewdog.MultiCommentService(gs, cs)
 		ds = gs
 	case "gitlab-mr-discussion":
 		build, cli, err := gitlabBuildWithClient()
@@ -399,6 +384,7 @@ func runList(w io.Writer) error {
 	fmt.Fprintf(tabw, "%s\t%s\t- %s\n", "rdjsonl", "Reviewdog Diagnostic JSONL Format (JSONL of Diagnostic message)", "https://github.com/reviewdog/reviewdog")
 	fmt.Fprintf(tabw, "%s\t%s\t- %s\n", "diff", "Unified Diff Format", "https://en.wikipedia.org/wiki/Diff#Unified_format")
 	fmt.Fprintf(tabw, "%s\t%s\t- %s\n", "checkstyle", "checkstyle XML format", "http://checkstyle.sourceforge.net/")
+	fmt.Fprintf(tabw, "%s\t%s\t- %s\n", "sarif", "SARIF JSON format", "https://sarifweb.azurewebsites.net/")
 	for _, f := range sortedFmts(fmts.DefinedFmts()) {
 		fmt.Fprintf(tabw, "%s\t%s\t- %s\n", f.Name, f.Description, f.URL)
 	}
@@ -477,7 +463,7 @@ func githubService(ctx context.Context, opt *option) (gs *githubservice.PullRequ
 		g.PullRequest = prID
 	}
 
-	gs, err = githubservice.NewGitHubPullRequest(client, g.Owner, g.Repo, g.PullRequest, g.SHA)
+	gs, err = githubservice.NewGitHubPullRequest(client, g.Owner, g.Repo, g.PullRequest, g.SHA, opt.level)
 	if err != nil {
 		return nil, false, err
 	}
@@ -638,8 +624,8 @@ func bitbucketBuildWithClient(ctx context.Context) (*cienv.BuildInfo, bbservice.
 func fetchMergeRequestIDFromCommit(cli *gitlab.Client, projectID, sha string) (id int, err error) {
 	// https://docs.gitlab.com/ce/api/merge_requests.html#list-project-merge-requests
 	opt := &gitlab.ListProjectMergeRequestsOptions{
-		State:   gitlab.String("opened"),
-		OrderBy: gitlab.String("updated_at"),
+		State:   gitlab.Ptr("opened"),
+		OrderBy: gitlab.Ptr("updated_at"),
 	}
 	mrs, _, err := cli.MergeRequests.ListProjectMergeRequests(projectID, opt)
 	if err != nil {

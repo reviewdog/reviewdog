@@ -2,6 +2,8 @@ package githubutils
 
 import (
 	"fmt"
+	"net/url"
+	"os"
 
 	"github.com/reviewdog/reviewdog/proto/rdf"
 )
@@ -16,12 +18,20 @@ func LinkedMarkdownDiagnostic(owner, repo, sha string, d *rdf.Diagnostic) string
 	}
 	loc := BasicLocationFormat(d)
 	line := int(d.GetLocation().GetRange().GetStart().GetLine())
-	link := PathLink(owner, repo, sha, path, line)
+	link, err := PathLink(owner, repo, sha, path, line)
+	if err != nil {
+		return fmt.Sprintf("%s %s", loc, msg)
+	}
 	return fmt.Sprintf("[%s](%s) %s", loc, link, msg)
 }
 
 // PathLink build a link to GitHub path to given sha, file, and line.
-func PathLink(owner, repo, sha, path string, line int) string {
+func PathLink(owner, repo, sha, path string, line int) (string, error) {
+	serverURL, err := githubServerURL()
+	if err != nil {
+		return "", err
+	}
+
 	if sha == "" {
 		sha = "master"
 	}
@@ -29,8 +39,11 @@ func PathLink(owner, repo, sha, path string, line int) string {
 	if line > 0 {
 		fragment = fmt.Sprintf("#L%d", line)
 	}
-	return fmt.Sprintf("http://github.com/%s/%s/blob/%s/%s%s",
-		owner, repo, sha, path, fragment)
+
+	result := fmt.Sprintf("%s/%s/%s/blob/%s/%s%s",
+		serverURL.String(), owner, repo, sha, path, fragment)
+
+	return result, nil
 }
 
 // BasicLocationFormat format a diagnostic to %f|%l col %c| errorformat.
@@ -46,4 +59,23 @@ func BasicLocationFormat(d *rdf.Diagnostic) string {
 		}
 	}
 	return out + "|"
+}
+
+const defaultGitHubServerURL = "https://github.com"
+
+func githubServerURL() (*url.URL, error) {
+	// get GitHub server URL from GitHub Actions' default environment variable GITHUB_SERVER_URL
+	// ref: https://docs.github.com/en/actions/reference/environment-variables#default-environment-variables
+	if baseURL := os.Getenv("GITHUB_SERVER_URL"); baseURL != "" {
+		u, err := url.Parse(baseURL)
+		if err != nil {
+			return nil, fmt.Errorf("GitHub server URL from GITHUB_SERVER_URL is invalid: %v, %w", baseURL, err)
+		}
+		return u, nil
+	}
+	u, err := url.Parse(defaultGitHubServerURL)
+	if err != nil {
+		return nil, fmt.Errorf("GitHub server URL from reviewdog default is invalid: %v, %w", defaultGitHubServerURL, err)
+	}
+	return u, nil
 }
