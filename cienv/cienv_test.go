@@ -7,7 +7,7 @@ import (
 )
 
 func setupEnvs() (cleanup func()) {
-	var cleanEnvs = []string{
+	cleanEnvs := []string{
 		"CIRCLE_BRANCH",
 		"CIRCLE_PROJECT_REPONAME",
 		"CIRCLE_PROJECT_USERNAME",
@@ -15,11 +15,13 @@ func setupEnvs() (cleanup func()) {
 		"CIRCLE_PULL_REQUEST",
 		"CIRCLE_SHA1",
 		"CI_BRANCH",
+		"CI_COMMIT_BRANCH",
 		"CI_COMMIT",
 		"CI_COMMIT_SHA",
 		"CI_PROJECT_NAME",
 		"CI_PROJECT_NAMESPACE",
 		"CI_PULL_REQUEST",
+		"CI_COMMIT_PULL_REQUEST",
 		"CI_REPO_NAME",
 		"CI_REPO_OWNER",
 		"DRONE_COMMIT",
