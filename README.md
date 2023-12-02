@@ -322,6 +322,7 @@ Note that not all reporters provide support for code suggestions.
 | **`gitlab-mr-commit`**       | NO [2]  |
 | **`gerrit-change-review`**   | NO [1]  |
 | **`bitbucket-code-report`**  | NO [2]  |
+| **`gitea-pr-review`**        | NO [2]  |
 
 - [1] The reporter service supports the code suggestion feature, but reviewdog does not support it yet. See [#678](https://github.com/reviewdog/reviewdog/issues/678) for the status.
 - [2] The reporter service itself doesn't support the code suggestion feature.
@@ -931,6 +932,7 @@ so reviewdog will use [Check annotation](https://docs.github.com/en/rest/checks/
 | **`gitlab-mr-commit`**       | OK      | Partially Supported [2] | Partially Supported [2] | Partially Supported [2] |
 | **`gerrit-change-review`**   | OK      | OK? [3]        | OK? [3]                 | Partially Supported? [2][3] |
 | **`bitbucket-code-report`**  | NO [4]  | NO [4]         | NO [4]                  | OK |
+| **`gitea-pr-review`**        | OK      | OK? [3]        | OK? [3]                 | OK |
 
 - [1] Report results that are outside the diff file with Check annotation as fallback if it's running in GitHub actions instead of Review API (comments). All results will be reported to console as well.
 - [2] Report results that are outside the diff file to console.
