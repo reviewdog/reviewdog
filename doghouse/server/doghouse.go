@@ -8,7 +8,7 @@ import (
 	"strings"
 	"time"
 
-	"github.com/google/go-github/v56/github"
+	"github.com/google/go-github/v57/github"
 
 	"github.com/reviewdog/reviewdog/diff"
 	"github.com/reviewdog/reviewdog/doghouse"
