@@ -56,8 +56,8 @@ cloud.google.com/go/storage v1.10.0/go.mod h1:FLPqc6j+Ki4BU591ie1oL6qBQGu2Bl/tZ9
 cloud.google.com/go/trace v1.0.0/go.mod h1:4iErSByzxkyHWzzlAj63/Gmjz0NH1ASqhJguHpGcr6A=
 cloud.google.com/go/trace v1.10.1 h1:EwGdOLCNfYOOPtgqo+D2sDLZmRCEO1AagRTJCU6ztdg=
 cloud.google.com/go/trace v1.10.1/go.mod h1:gbtL94KE5AJLH3y+WVpfWILmqgc6dXcqgNXdOPAQTYk=
-code.gitea.io/sdk/gitea v0.16.1-0.20231202094448-8bb2d30fbd0e h1:ccfP96+zU6mktP7Cx6Gh8nKquhdAacWgPT/TvOmZCMM=
-code.gitea.io/sdk/gitea v0.16.1-0.20231202094448-8bb2d30fbd0e/go.mod h1:ndkDk99BnfiUCCYEUhpNzi0lpmApXlwRFqClBlOlEBg=
+code.gitea.io/sdk/gitea v0.17.0 h1:8JPBss4+Jf7AE1YcfyiGrngTXE8dFSG3si/bypsTH34=
+code.gitea.io/sdk/gitea v0.17.0/go.mod h1:ndkDk99BnfiUCCYEUhpNzi0lpmApXlwRFqClBlOlEBg=
 contrib.go.opencensus.io/exporter/stackdriver v0.13.12 h1:bjBKzIf7/TAkxd7L2utGaLM78bmUWlCval5K9UeElbY=
 contrib.go.opencensus.io/exporter/stackdriver v0.13.12/go.mod h1:mmxnWlrvrFdpiOHOhxBaVi1rkc0WOqhgfknj4Yg0SeQ=
 dmitri.shuralyov.com/gpu/mtl v0.0.0-20190408044501-666a987793e9/go.mod h1:H6x//7gZCb22OMCxBHrMx7a5I7Hp++hsVxbQ4BYO7hU=
