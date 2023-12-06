@@ -14,7 +14,7 @@ jobs:
       - uses: actions/checkout@v4
         with:
           fetch-depth: 50 # Need git history for testing.
-      - uses: actions/setup-go@v4
+      - uses: actions/setup-go@v5
         with:
           # must sync doghouse/appengine/app.yaml
           go-version: "1.20"
