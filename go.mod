@@ -5,11 +5,9 @@ go 1.21
 toolchain go1.21.0
 
 require (
-	cloud.google.com/go v0.110.7 // indirect
 	cloud.google.com/go/compute/metadata v0.2.3
 	cloud.google.com/go/datastore v1.15.0
-	cloud.google.com/go/monitoring v1.15.1 // indirect
-	cloud.google.com/go/trace v1.10.1 // indirect
+	code.gitea.io/sdk/gitea v0.17.0
 	contrib.go.opencensus.io/exporter/stackdriver v0.13.12
 	github.com/bradleyfalzon/ghinstallation/v2 v2.8.0
 	github.com/golang/protobuf v1.5.3
@@ -36,10 +34,15 @@ require (
 )
 
 require (
+	cloud.google.com/go v0.110.7 // indirect
 	cloud.google.com/go/compute v1.23.0 // indirect
+	cloud.google.com/go/monitoring v1.15.1 // indirect
+	cloud.google.com/go/trace v1.10.1 // indirect
 	github.com/aws/aws-sdk-go v1.43.31 // indirect
 	github.com/census-instrumentation/opencensus-proto v0.4.1 // indirect
 	github.com/davecgh/go-spew v1.1.1 // indirect
+	github.com/davidmz/go-pageant v1.0.2 // indirect
+	github.com/go-fed/httpsig v1.1.0 // indirect
 	github.com/golang-jwt/jwt/v4 v4.5.0 // indirect
 	github.com/golang/groupcache v0.0.0-20210331224755-41bb18bfe9da // indirect
 	github.com/google/go-github/v56 v56.0.0 // indirect
@@ -49,6 +52,7 @@ require (
 	github.com/googleapis/gax-go/v2 v2.12.0 // indirect
 	github.com/hashicorp/go-cleanhttp v0.5.2 // indirect
 	github.com/hashicorp/go-retryablehttp v0.7.2 // indirect
+	github.com/hashicorp/go-version v1.6.0 // indirect
 	github.com/jmespath/go-jmespath v0.4.0 // indirect
 	github.com/pmezard/go-difflib v1.0.0 // indirect
 	github.com/prometheus/prometheus v2.5.0+incompatible // indirect
