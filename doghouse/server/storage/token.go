@@ -3,6 +3,7 @@ package storage
 import (
 	"context"
 	"fmt"
+	"github.com/philippgille/gokv"
 
 	"cloud.google.com/go/datastore"
 )
@@ -28,17 +29,44 @@ type GitHubRepositoryTokenStore interface {
 	Get(ctx context.Context, owner, repo string) (ok bool, token *GitHubRepositoryToken, err error)
 }
 
-// GitHubRepoTokenDatastore is store of GitHubRepositoryToken by Datastore of
+// GoogleGitHubRepoTokenDatastore is kvStore of GitHubRepositoryToken by Datastore of
 // Google Appengine.
-type GitHubRepoTokenDatastore struct{}
+type GoogleGitHubRepoTokenDatastore struct{}
 
-func (g *GitHubRepoTokenDatastore) newKey(owner, repo string) *datastore.Key {
+type LocalKVGitHubRepoTokenStore struct {
+	KvStore gokv.Store
+}
+
+func (l LocalKVGitHubRepoTokenStore) Put(ctx context.Context, token *GitHubRepositoryToken) error {
+
+	err := l.KvStore.Set(token.RepositoryOwner+"/"+token.RepositoryName, token)
+
+	if err != nil {
+		return err
+	}
+
+	return nil
+}
+
+func (l LocalKVGitHubRepoTokenStore) Get(ctx context.Context, owner, repo string) (ok bool, token *GitHubRepositoryToken, err error) {
+
+	token = &GitHubRepositoryToken{}
+
+	get, err := l.KvStore.Get(owner+"/"+repo, token)
+	if err != nil {
+		return false, nil, err
+	}
+
+	return get, token, nil
+}
+
+func (g *GoogleGitHubRepoTokenDatastore) newKey(owner, repo string) *datastore.Key {
 	kind := "GitHubRepositoryToken"
 	return datastore.NameKey(kind, fmt.Sprintf("%s/%s", owner, repo), nil)
 }
 
 // Put upserts GitHubRepositoryToken.
-func (g *GitHubRepoTokenDatastore) Put(ctx context.Context, token *GitHubRepositoryToken) error {
+func (g *GoogleGitHubRepoTokenDatastore) Put(ctx context.Context, token *GitHubRepositoryToken) error {
 	key := g.newKey(token.RepositoryOwner, token.RepositoryName)
 	d, err := datastoreClient(ctx)
 	if err != nil {
@@ -48,7 +76,7 @@ func (g *GitHubRepoTokenDatastore) Put(ctx context.Context, token *GitHubReposit
 	return err
 }
 
-func (g *GitHubRepoTokenDatastore) Get(ctx context.Context, owner, repo string) (ok bool, token *GitHubRepositoryToken, err error) {
+func (g *GoogleGitHubRepoTokenDatastore) Get(ctx context.Context, owner, repo string) (ok bool, token *GitHubRepositoryToken, err error) {
 	key := g.newKey(owner, repo)
 	token = new(GitHubRepositoryToken)
 	d, err := datastoreClient(ctx)

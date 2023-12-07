@@ -4,6 +4,7 @@ import (
 	"context"
 	"fmt"
 	"net/http"
+	"os"
 
 	"github.com/bradleyfalzon/ghinstallation/v2"
 	"github.com/google/go-github/v56/github"
@@ -34,18 +35,28 @@ func NewGitHubClient(ctx context.Context, opt *NewGitHubClientOption) (*github.C
 	}
 
 	client.Transport = itr
-	return github.NewClient(client), nil
+
+	ghcli := github.NewClient(client)
+	if IsGithubEnterpriseApi() {
+		url := GetGithubHostUrl()
+		ghcli, err = ghcli.WithEnterpriseURLs(url, url)
+	}
+	return ghcli, nil
 }
 
 func githubAppTransport(ctx context.Context, client *http.Client, opt *NewGitHubClientOption) (http.RoundTripper, error) {
 	if opt.RepoOwner == "" {
-		return ghinstallation.NewAppsTransport(getTransport(client), int64(opt.IntegrationID), opt.PrivateKey)
+		transport, err := ghinstallation.NewAppsTransport(getTransport(client), int64(opt.IntegrationID), opt.PrivateKey)
+		transport.BaseURL = GetGithubApiUrl()
+		return transport, err
 	}
 	installationID, err := findInstallationID(ctx, opt)
 	if err != nil {
 		return nil, err
 	}
-	return ghinstallation.New(getTransport(client), int64(opt.IntegrationID), installationID, opt.PrivateKey)
+	transport, err := ghinstallation.New(getTransport(client), int64(opt.IntegrationID), installationID, opt.PrivateKey)
+	transport.BaseURL = GetGithubApiUrl()
+	return transport, err
 }
 
 func getTransport(client *http.Client) http.RoundTripper {
@@ -70,4 +81,33 @@ func findInstallationID(ctx context.Context, opt *NewGitHubClientOption) (int64,
 		return 0, err
 	}
 	return inst.GetID(), nil
+}
+
+func getBaseEnterpriseUrl() string {
+	return os.Getenv("GITHUB_ENTERPRISE_BASE_URL")
+}
+
+func IsGithubEnterpriseApi() bool {
+	return getBaseEnterpriseUrl() != ""
+}
+
+// GetGithubHostUrl Used for login methods, that not directly related to GitHub API.
+func GetGithubHostUrl() string {
+	enterpriseUrl := getBaseEnterpriseUrl()
+
+	if enterpriseUrl != "" {
+		return enterpriseUrl
+	} else {
+		return "https://github.com"
+	}
+}
+
+func GetGithubApiUrl() string {
+	enterpriseUrl := getBaseEnterpriseUrl()
+
+	if enterpriseUrl != "" {
+		return enterpriseUrl + "/api/v3"
+	} else {
+		return "https://api.github.com"
+	}
 }

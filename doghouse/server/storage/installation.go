@@ -4,6 +4,8 @@ import (
 	"context"
 
 	"cloud.google.com/go/datastore"
+
+	"github.com/philippgille/gokv"
 )
 
 // GitHubInstallation represents GitHub Apps Installation data.
@@ -26,17 +28,44 @@ type GitHubInstallationStore interface {
 	Get(ctx context.Context, accountName string) (ok bool, inst *GitHubInstallation, err error)
 }
 
-// GitHubInstallationDatastore is store of GitHubInstallation by Datastore of
+// GoogleGitHubInstallationDatastore is store of GitHubInstallation by Datastore of
 // Google Appengine.
-type GitHubInstallationDatastore struct{}
+type GoogleGitHubInstallationDatastore struct{}
 
-func (g *GitHubInstallationDatastore) newKey(accountName string) *datastore.Key {
+type LocalKVGitHubInstallationStore struct {
+	KvStore gokv.Store
+}
+
+func (l LocalKVGitHubInstallationStore) Put(ctx context.Context, inst *GitHubInstallation) error {
+
+	err := l.KvStore.Set(inst.AccountName, inst)
+
+	if err != nil {
+		return err
+	}
+
+	return nil
+}
+
+func (l LocalKVGitHubInstallationStore) Get(ctx context.Context, accountName string) (ok bool, inst *GitHubInstallation, err error) {
+
+	inst = &GitHubInstallation{} // Initialize inst
+
+	get, err := l.KvStore.Get(accountName, inst)
+	if err != nil {
+		return false, nil, err
+	}
+
+	return get, inst, nil
+}
+
+func (g *GoogleGitHubInstallationDatastore) newKey(accountName string) *datastore.Key {
 	const kind = "GitHubInstallation"
 	return datastore.NameKey(kind, accountName, nil)
 }
 
 // Put save GitHubInstallation. It reduces datastore write call as much as possible.
-func (g *GitHubInstallationDatastore) Put(ctx context.Context, inst *GitHubInstallation) error {
+func (g *GoogleGitHubInstallationDatastore) Put(ctx context.Context, inst *GitHubInstallation) error {
 	d, err := datastoreClient(ctx)
 	if err != nil {
 		return err
@@ -61,7 +90,7 @@ func (g *GitHubInstallationDatastore) Put(ctx context.Context, inst *GitHubInsta
 	return err
 }
 
-func (g *GitHubInstallationDatastore) Get(ctx context.Context, accountName string) (ok bool, inst *GitHubInstallation, err error) {
+func (g *GoogleGitHubInstallationDatastore) Get(ctx context.Context, accountName string) (ok bool, inst *GitHubInstallation, err error) {
 	key := g.newKey(accountName)
 	inst = new(GitHubInstallation)
 	d, err := datastoreClient(ctx)

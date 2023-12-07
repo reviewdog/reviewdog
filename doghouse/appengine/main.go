@@ -1,6 +1,7 @@
 package main
 
 import (
+	"github.com/reviewdog/reviewdog/doghouse/server"
 	"log"
 	"net/http"
 	"os"
@@ -13,6 +14,7 @@ import (
 	"go.opencensus.io/plugin/ochttp"
 	"go.opencensus.io/trace"
 
+	"github.com/philippgille/gokv/bbolt"
 	"github.com/reviewdog/reviewdog/doghouse/server/cookieman"
 	"github.com/reviewdog/reviewdog/doghouse/server/storage"
 )
@@ -27,11 +29,16 @@ func mustCookieMan() *cookieman.CookieMan {
 	c := cookieman.CookieOption{
 		Cookie: http.Cookie{
 			HttpOnly: true,
-			Secure:   true,
+			Secure:   secureCookie(),
 			Path:     "/",
 		},
 	}
 	return cookieman.New(cipher, c)
+}
+
+// To test server locally, set REVIEWDOG_INSECURE_COOKIE=true
+func secureCookie() bool {
+	return os.Getenv("REVIEWDOG_INSECURE_COOKIE") != "true"
 }
 
 func mustGitHubAppsPrivateKey() []byte {
@@ -64,14 +71,32 @@ func mustIntEnv(name string) int {
 }
 
 func main() {
-	configureTrace()
+	if os.Getenv("REVIEWDOG_TRACING_DISABLED") != "true" {
+		configureTrace()
+	}
 	initTemplates()
 
 	integrationID := mustIntEnv("GITHUB_INTEGRATION_ID")
 	ghPrivateKey := mustGitHubAppsPrivateKey()
 
-	ghInstStore := storage.GitHubInstallationDatastore{}
-	ghRepoTokenStore := storage.GitHubRepoTokenDatastore{}
+	var ghInstStore storage.GitHubInstallationStore
+	var ghRepoTokenStore storage.GitHubRepositoryTokenStore
+
+	if server.IsGithubEnterpriseApi() {
+		newStore, err := bbolt.NewStore(bbolt.Options{})
+		if err != nil {
+			log.Fatal(err)
+		}
+		ghInstStore = &storage.LocalKVGitHubInstallationStore{
+			KvStore: newStore,
+		}
+		ghRepoTokenStore = storage.LocalKVGitHubRepoTokenStore{
+			KvStore: newStore,
+		}
+	} else {
+		ghInstStore = &storage.GoogleGitHubInstallationDatastore{}
+		ghRepoTokenStore = &storage.GoogleGitHubRepoTokenDatastore{}
+	}
 
 	ghHandler := NewGitHubHandler(
 		mustGetenv("GITHUB_CLIENT_ID"),
@@ -79,13 +104,14 @@ func main() {
 		mustCookieMan(),
 		ghPrivateKey,
 		integrationID,
+		ghRepoTokenStore,
 	)
 
 	ghChecker := githubChecker{
 		privateKey:       ghPrivateKey,
 		integrationID:    integrationID,
-		ghInstStore:      &ghInstStore,
-		ghRepoTokenStore: &ghRepoTokenStore,
+		ghInstStore:      ghInstStore,
+		ghRepoTokenStore: ghRepoTokenStore,
 		tr: &ochttp.Transport{
 			// Use Google Cloud propagation format.
 			Propagation: &propagation.HTTPFormat{},
@@ -94,7 +120,7 @@ func main() {
 
 	ghWebhookHandler := githubWebhookHandler{
 		secret:      []byte(mustGetenv("GITHUB_WEBHOOK_SECRET")),
-		ghInstStore: &ghInstStore,
+		ghInstStore: ghInstStore,
 	}
 
 	mu := http.NewServeMux()

@@ -36,14 +36,14 @@ type GitHubHandler struct {
 	integrationID int
 }
 
-func NewGitHubHandler(clientID, clientSecret string, c *cookieman.CookieMan, privateKey []byte, integrationID int) *GitHubHandler {
+func NewGitHubHandler(clientID, clientSecret string, c *cookieman.CookieMan, privateKey []byte, integrationID int, repoTokenStorage storage.GitHubRepositoryTokenStore) *GitHubHandler {
 	return &GitHubHandler{
 		clientID:       clientID,
 		clientSecret:   clientSecret,
 		tokenStore:     c.NewCookieStore("github-token", nil),
 		redirURLStore:  c.NewCookieStore("github-redirect-url", nil),
 		authStateStore: c.NewCookieStore("github-auth-state", nil),
-		repoTokenStore: &storage.GitHubRepoTokenDatastore{},
+		repoTokenStore: repoTokenStorage,
 		integrationID:  integrationID,
 		privateKey:     privateKey,
 	}
@@ -93,9 +93,10 @@ func (g *GitHubHandler) buildGithubAuthURL(r *http.Request, state string) string
 	redirURL.Path = "/gh/_auth/callback"
 	redirURL.RawQuery = ""
 	redirURL.Fragment = ""
-	const baseURL = "https://github.com/login/oauth/authorize"
-	authURL := fmt.Sprintf("%s?client_id=%s&redirect_url=%s&state=%s",
-		baseURL, g.clientID, redirURL.RequestURI(), state)
+
+	var ghHostUrl = server.GetGithubHostUrl()
+	authURL := fmt.Sprintf("%s/login/oauth/authorize?client_id=%s&redirect_url=%s&state=%s",
+		ghHostUrl, g.clientID, redirURL.RequestURI(), state)
 	return authURL
 }
 
@@ -170,7 +171,8 @@ func securerandom(n int) string {
 // https://developer.github.com/apps/building-github-apps/identifying-and-authorizing-users-for-github-apps/#2-users-are-redirected-back-to-your-site-by-github
 // POST https://github.com/login/oauth/access_token
 func (g *GitHubHandler) requestAccessToken(ctx context.Context, code, state string) (string, error) {
-	const u = "https://github.com/login/oauth/access_token"
+	var ghHostUrl = server.GetGithubHostUrl()
+	var u = fmt.Sprintf("%s/login/oauth/access_token", ghHostUrl)
 	cli := &http.Client{}
 	data := url.Values{}
 	data.Set("client_id", g.clientID)
@@ -231,6 +233,10 @@ func (g *GitHubHandler) HandleGitHubTop(w http.ResponseWriter, r *http.Request) 
 		&oauth2.Token{AccessToken: token},
 	)
 	ghcli := github.NewClient(NewAuthClient(ctx, http.DefaultTransport, ts))
+	if server.IsGithubEnterpriseApi() {
+		githubApiUrl := server.GetGithubApiUrl()
+		ghcli, _ = ghcli.WithEnterpriseURLs(githubApiUrl, githubApiUrl)
+	}
 
 	// /gh/{owner}/{repo}
 	paths := strings.Split(strings.Trim(r.URL.Path, "/"), "/")
