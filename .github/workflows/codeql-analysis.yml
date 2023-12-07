@@ -22,7 +22,7 @@ jobs:
     # Initializes the Golang environment for the CodeQL tools.
     # https://github.com/github/codeql-action/issues/1842#issuecomment-1704398087
     - name: Install Go
-      uses: actions/setup-go@v4
+      uses: actions/setup-go@v5
       with:
         go-version-file: go.mod
 
