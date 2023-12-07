@@ -13,6 +13,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - [#1576](https://github.com/reviewdog/reviewdog/pull/1576) Support `--filter-mode=file` in `github-pr-review`
 - [#1596](https://github.com/reviewdog/reviewdog/pull/1596) Use `CI_MERGE_REQUEST_DIFF_BASE_SHA` envvar if available in `gitlab-mr-discussion`
 - [#1521](https://github.com/reviewdog/reviewdog/pull/1521) strict check of pr-review write permission
+- [#1617](https://github.com/reviewdog/reviewdog/pull/1617) Add reporter to Gitea PR review comments `gitea-pr-review`
 
 ### :bug: Fixes
 - ...

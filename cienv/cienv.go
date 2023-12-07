@@ -86,6 +86,7 @@ func GetBuildInfo() (prInfo *BuildInfo, isPR bool, err error) {
 		"TRAVIS_PULL_REQUEST_BRANCH",
 		"CIRCLE_BRANCH",
 		"DRONE_COMMIT_BRANCH",
+		"CI_COMMIT_BRANCH", // Woodpecker CI
 		// present only if PR pipeline
 		"BITBUCKET_PR_DESTINATION_BRANCH",
 		"BITBUCKET_BRANCH",
@@ -140,6 +141,8 @@ func getPullRequestNum() int {
 		// GitLab CI MergeTrains
 		"CI_MERGE_REQUEST_IID",
 		"BITBUCKET_PR_ID",
+		// Woodpecker CI
+		"CI_COMMIT_PULL_REQUEST",
 	}
 	// regexp.MustCompile() in func intentionally because this func is called
 	// once for one run.

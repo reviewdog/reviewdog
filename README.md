@@ -55,12 +55,12 @@
 </div>
 <br />
 
-reviewdog provides a way to post review comments to code hosting service,
+reviewdog provides a way to post review comments to code hosting services,
 such as GitHub, automatically by integrating with any linter tools with ease.
 It uses an output of lint tools and posts them as a comment if findings are in
-diff of patches to review.
+the diff of patches to review.
 
-reviewdog also supports run in the local environment to filter an output of lint tools
+reviewdog also supports running in the local environment to filter the output of lint tools
 by diff.
 
 [design doc](https://docs.google.com/document/d/1mGOX19SSqRowWGbXieBfGPtLnM0BdTkIc9JelTiu6wA/edit?usp=sharing)
@@ -188,7 +188,7 @@ complex output like a multi-line error message.
 
 You can also try errorformat on [the Playground](https://reviewdog.github.io/errorformat-playground/)!
 
-By this 'errorformat' feature, reviewdog can support any tools output with ease.
+With this 'errorformat' feature, reviewdog can support any tool output with ease.
 
 ### Available pre-defined 'errorformat'
 
@@ -218,7 +218,7 @@ reviewdog supports [Reviewdog Diagnostic Format (RDFormat)](./proto/rdf/) as a
 generic diagnostic format and it supports both [rdjson](./proto/rdf/#rdjson) and
 [rdjsonl](./proto/rdf/#rdjsonl) formats.
 
-This rdformat supports rich feature like multiline ranged comments, severity,
+This rdformat supports rich features like multiline ranged comments, severity,
 rule code with URL, and [code suggestions](#code-suggestions).
 
 ```shell
@@ -306,11 +306,11 @@ $ eslint -f @microsoft/eslint-formatter-sarif . | reviewdog -f=sarif -diff="git 
 reviewdog supports *code suggestions* feature with [rdformat](#reviewdog-diagnostic-format-rdformat) or [diff](#diff) input.
 You can also use [reviewdog/action-suggester](https://github.com/reviewdog/action-suggester) for GitHub Actions.
 
-reviewdog can suggest code changes along with diagnostic results if a diagnostic tools supports code suggestions data.
+reviewdog can suggest code changes along with diagnostic results if a diagnostic tool supports code suggestions data.
 You can integrate reviewdog with any code fixing tools and any code formatter with [diff](#diff) input as well.
 
 ### Code Suggestions Support Table
-Note that not all reporters provide support of code suggestion.
+Note that not all reporters provide support for code suggestions.
 
 | `-reporter`     | Suggestion support |
 | ---------------------------- | ------- |
@@ -322,15 +322,16 @@ Note that not all reporters provide support of code suggestion.
 | **`gitlab-mr-commit`**       | NO [2]  |
 | **`gerrit-change-review`**   | NO [1]  |
 | **`bitbucket-code-report`**  | NO [2]  |
+| **`gitea-pr-review`**        | NO [2]  |
 
-- [1] The reporter service support code suggestion feature, but reviewdog does not support it yet. See [#678](https://github.com/reviewdog/reviewdog/issues/678) for the status.
-- [2] The reporter service itself doesn't support code suggestion feature.
+- [1] The reporter service supports the code suggestion feature, but reviewdog does not support it yet. See [#678](https://github.com/reviewdog/reviewdog/issues/678) for the status.
+- [2] The reporter service itself doesn't support the code suggestion feature.
 
 ## reviewdog config file
 
 reviewdog can also be controlled via the .reviewdog.yml configuration file instead of "-f" or "-efm" arguments.
 
-With .reviewdog.yml, you can run the same commands both CI service and local
+With .reviewdog.yml, you can run the same commands for both CI service and local
 environment including editor integration with ease.
 
 #### .reviewdog.yml
@@ -380,13 +381,13 @@ Output format for project config based run is one of the following formats.
 
 ## Reporters
 
-reviewdog can report results both in local environment and review services as
+reviewdog can report results both in the local environment and review services as
 continuous integration.
 
 ### Reporter: Local (-reporter=local) [default]
 
 reviewdog can find newly introduced findings by filtering linter results
-using diff. You can pass diff command as `-diff` arg.
+using diff. You can pass the diff command as `-diff` arg.
 
 ```shell
 $ golint ./... | reviewdog -f=golint -diff="git diff FETCH_HEAD"
@@ -399,9 +400,9 @@ $ golint ./... | reviewdog -f=golint -diff="git diff FETCH_HEAD"
 
 github-pr-check reporter reports results to [GitHub Checks](https://docs.github.com/en/pull-requests/collaborating-with-pull-requests/collaborating-on-repositories-with-code-quality-features/about-status-checks).
 
-You can change report level for this reporter by `level` field in [config
+You can change the report level for this reporter by `level` field in [config
 file](#reviewdog-config-file) or `-level` flag. You can control GitHub status
-check result with this feature. (default: error)
+check results with this feature. (default: error)
 
 | Level     | GitHub Status |
 | --------- | ------------- |
@@ -427,8 +428,8 @@ See [GitHub Actions](#github-actions) section too. You can also use public
 reviewdog GitHub Actions.
 
 #### Option 2) Install reviewdog GitHub Apps
-reviewdog CLI send a request to reviewdog GitHub App server and the server post
-results as GitHub Checks, because Check API only supported for GitHub App and
+reviewdog CLI sends a request to reviewdog GitHub App server and the server post
+results as GitHub Checks, because Check API is only supported for GitHub App and
 GitHub Actions.
 
 1. Install reviewdog Apps. https://github.com/apps/reviewdog
@@ -458,7 +459,7 @@ if you don't want to depend on reviewdog server.
 
 ### Reporter: GitHub Checks (-reporter=github-check)
 
-It's basically same as `-reporter=github-pr-check` except it works not only for
+It's basically the same as `-reporter=github-pr-check` except it works not only for
 Pull Request but also for commit.
 
 [![sample comment outside diff](https://user-images.githubusercontent.com/3797062/69917921-e0680580-14ae-11ea-9a56-de9e3cbac005.png)](https://github.com/reviewdog/reviewdog/pull/364/files)
@@ -473,7 +474,7 @@ github-pr-review reporter reports results to GitHub PullRequest review comments
 using GitHub Personal API Access Token.
 [GitHub Enterprise](https://github.com/enterprise) is supported too.
 
-- Go to https://github.com/settings/tokens and generate new API token.
+- Go to https://github.com/settings/tokens and generate a new API token.
 - Check `repo` for private repositories or `public_repo` for public repositories.
 
 ```shell
@@ -481,7 +482,7 @@ $ export REVIEWDOG_GITHUB_API_TOKEN="<token>"
 $ reviewdog -reporter=github-pr-review
 ```
 
-For GitHub Enterprise, set API endpoint by environment variable.
+For GitHub Enterprise, set the API endpoint by an environment variable.
 
 ```shell
 $ export GITHUB_API="https://example.githubenterprise.com/api/v3/"
@@ -529,11 +530,11 @@ $ reviewdog -reporter=gitlab-mr-commit
 
 ### Reporter: Gerrit Change review (-reporter=gerrit-change-review)
 
-gerrit-change-review reporter reports result to Gerrit Change using Gerrit Rest APIs.
+gerrit-change-review reporter reports results to Gerrit Change using Gerrit Rest APIs.
 
 The reporter supports Basic Authentication and Git-cookie based authentication for reporting results.
 
-Set `GERRIT_USERNAME` and `GERRIT_PASSWORD` environment variables for basic authentication, and put `GIT_GITCOOKIE_PATH` for git cookie based authentication.
+Set `GERRIT_USERNAME` and `GERRIT_PASSWORD` environment variables for basic authentication, and put `GIT_GITCOOKIE_PATH` for git cookie-based authentication.
 
 ```shell
 $ export GERRIT_CHANGE_ID=changeID
@@ -551,7 +552,7 @@ $ reviewdog -reporter=gerrit-change-review
 bitbucket-code-report generates the annotated
 [Bitbucket Code Insights](https://support.atlassian.com/bitbucket-cloud/docs/code-insights/) report.
 
-For now, only the `no-filter` mode supported, so the whole project is scanned on every run.
+For now, only the `no-filter` mode is supported, so the whole project is scanned on every run.
 Reports are stored per commit and can be viewed per commit from Bitbucket Pipelines UI or
 in Pull Request. In the Pull Request UI affected code lines will be annotated in the diff,
 as well as you will be able to filter the annotations by **This pull request** or **All**.
@@ -559,7 +560,7 @@ as well as you will be able to filter the annotations by **This pull request** o
 If running from [Bitbucket Pipelines](#bitbucket-pipelines), no additional configuration is needed (even credentials).
 If running locally or from some other CI system you would need to provide Bitbucket API credentials:
 
-- For Basic Auth you need to set following env variables:
+- For Basic Auth you need to set the following env variables:
     `BITBUCKET_USER` and `BITBUCKET_PASSWORD`
 - For AccessToken Auth you need to set `BITBUCKET_ACCESS_TOKEN`
 
@@ -569,7 +570,7 @@ $ export BITBUCKET_PASSWORD="my_password"
 $ reviewdog -reporter=bitbucket-code-report
 ```
 
-To post report to Bitbucket Server use `BITBUCKET_SERVER_URL` variable:
+To post a report to the Bitbucket Server use `BITBUCKET_SERVER_URL` variable:
 ```shell
 $ export BITBUCKET_USER="my_user"
 $ export BITBUCKET_PASSWORD="my_password"
@@ -609,7 +610,7 @@ jobs:
 
 [.github/workflows/reviewdog](.github/workflows/reviewdog.yml)
 
-Only `github-check` reporter can run on push event too.
+Only `github-check` reporter can run on the push event too.
 
 ```yaml
 name: reviewdog (github-check)
@@ -709,7 +710,7 @@ Example: [action-tflint](https://github.com/reviewdog/reviewdog/issues/322).
 
 ![Graceful Degradation example](https://user-images.githubusercontent.com/3797062/71781334-e2266b00-3010-11ea-8a38-dee6e30c8162.png)
 
-`GITHUB_TOKEN` for Pull Requests from forked repository doesn't have write
+`GITHUB_TOKEN` for Pull Requests from a forked repository doesn't have write
 access to Check API nor Review API due to [GitHub Actions
 restriction](https://docs.github.com/en/actions/security-guides/automatic-token-authentication#permissions-for-the-github_token).
 
@@ -860,7 +861,7 @@ $ REVIEWDOG_GITHUB_API_TOKEN="<token>"
 $ REVIEWDOG_GITLAB_API_TOKEN="<token>"
 ```
 
-If a CI service doesn't provide information such as Pull Request ID - reviewdog can guess it by branch name and commit SHA.
+If a CI service doesn't provide information such as Pull Request ID - reviewdog can guess it by a branch name and commit SHA.
 Just pass the flag `guess`:
 
 ```shell
@@ -915,10 +916,10 @@ $ reviewdog -reporter=github-pr-review -filter-mode=nofilter -fail-on-error
 ```
 
 ### Filter Mode Support Table
-Note that not all reporters provide full support of filter mode due to API limitation.
+Note that not all reporters provide full support for filter mode due to API limitation.
 e.g. `github-pr-review` reporter uses [GitHub Review
 API](https://docs.github.com/en/rest/pulls/reviews) and [GitHub Review
-Comment API](https://docs.github.com/en/rest/pulls/comments) but these APIs don't support posting comment outside diff file,
+Comment API](https://docs.github.com/en/rest/pulls/comments) but these APIs don't support posting comments outside diff file,
 so reviewdog will use [Check annotation](https://docs.github.com/en/rest/checks/runs) as fallback to post those comments [1]. 
 
 | `-reporter` \ `-filter-mode` | `added` | `diff_context` | `file`                  | `nofilter` |
@@ -931,10 +932,11 @@ so reviewdog will use [Check annotation](https://docs.github.com/en/rest/checks/
 | **`gitlab-mr-commit`**       | OK      | Partially Supported [2] | Partially Supported [2] | Partially Supported [2] |
 | **`gerrit-change-review`**   | OK      | OK? [3]        | OK? [3]                 | Partially Supported? [2][3] |
 | **`bitbucket-code-report`**  | NO [4]  | NO [4]         | NO [4]                  | OK |
+| **`gitea-pr-review`**        | OK      | OK             | Partially Supported [2] | Partially Supported [2] |
 
-- [1] Report results which is outside diff file with Check annotation as fallback if it's running in GitHub actions instead of Review API (comments). All results will be reported to console as well.
-- [2] Report results which is outside diff file to console.
-- [3] It should work, but not verified yet.
+- [1] Report results that are outside the diff file with Check annotation as fallback if it's running in GitHub actions instead of Review API (comments). All results will be reported to console as well.
+- [2] Report results that are outside the diff file to console.
+- [3] It should work, but not been verified yet.
 - [4] Not implemented at the moment
 
 ## Debugging

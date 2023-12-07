@@ -16,10 +16,11 @@ import (
 	"strings"
 	"text/tabwriter"
 
+	"code.gitea.io/sdk/gitea"
 	"golang.org/x/build/gerrit"
 	"golang.org/x/oauth2"
 
-	"github.com/google/go-github/v56/github"
+	"github.com/google/go-github/v57/github"
 	"github.com/mattn/go-shellwords"
 	"github.com/reviewdog/errorformat/fmts"
 	"github.com/xanzy/go-gitlab"
@@ -32,6 +33,7 @@ import (
 	"github.com/reviewdog/reviewdog/project"
 	bbservice "github.com/reviewdog/reviewdog/service/bitbucket"
 	gerritservice "github.com/reviewdog/reviewdog/service/gerrit"
+	giteaservice "github.com/reviewdog/reviewdog/service/gitea"
 	githubservice "github.com/reviewdog/reviewdog/service/github"
 	gitlabservice "github.com/reviewdog/reviewdog/service/gitlab"
 )
@@ -86,7 +88,7 @@ const (
 		"nofilter"
 			Do not filter any results.
 `
-	reporterDoc = `reporter of reviewdog results. (local, github-check, github-pr-check, github-pr-review, gitlab-mr-discussion, gitlab-mr-commit)
+	reporterDoc = `reporter of reviewdog results. (local, github-check, github-pr-check, github-pr-review, gitlab-mr-discussion, gitlab-mr-commit, gitea-pr-review)
 	"local" (default)
 		Report results to stdout.
 
@@ -166,7 +168,16 @@ const (
 		
 		To post results to Bitbucket Server specify BITBUCKET_SERVER_URL.
 
-	For GitHub Enterprise and self hosted GitLab, set
+	"gitea-pr-review"
+		Report results to Gitea review comments.
+
+		1. Set REVIEWDOG_GITEA_API_TOKEN environment variable.
+		Go to https://<gitea-server>/user/settings/applications and create new Access Token token with repo scope.
+		2. Set GITEA_ADDRESS environment variable to your Gitea server base address.
+		For example:
+			$ export GITEA_ADDRESS=http://localhost:3000
+
+	For GitHub Enterprise and self hosted GitLab or Gitea, set
 	REVIEWDOG_INSECURE_SKIP_VERIFY to skip verifying SSL (please use this at your own risk)
 		$ export REVIEWDOG_INSECURE_SKIP_VERIFY=true
 
@@ -353,6 +364,17 @@ func run(r io.Reader, w io.Writer, opt *option) error {
 		}
 		opt.filterMode = filter.ModeNoFilter
 		ds = &reviewdog.EmptyDiff{}
+	case "gitea-pr-review":
+		gs, isPR, err := giteaService(ctx, opt)
+		if err != nil {
+			return err
+		}
+		if !isPR {
+			fmt.Fprintln(os.Stderr, "reviewdog: this is not PullRequest build.")
+			return nil
+		}
+		cs = reviewdog.MultiCommentService(gs, cs)
+		ds = gs
 	case "local":
 		if opt.diffCmd == "" && opt.filterMode == filter.ModeNoFilter {
 			ds = &reviewdog.EmptyDiff{}
@@ -429,6 +451,111 @@ func newHTTPClient() *http.Client {
 
 func insecureSkipVerify() bool {
 	return os.Getenv("REVIEWDOG_INSECURE_SKIP_VERIFY") == "true"
+}
+
+func giteaService(ctx context.Context, opt *option) (gs *giteaservice.PullRequest, isPR bool, err error) {
+	token, err := nonEmptyEnv("REVIEWDOG_GITEA_API_TOKEN")
+	if err != nil {
+		return nil, isPR, err
+	}
+
+	giteaAddr := os.Getenv("GITEA_ADDRESS")
+	if giteaAddr == "" {
+		return nil, isPR, errors.New("cannot get Gitea host address from environment variable. Set GITEA_ADDRESS ?")
+	}
+
+	g, isPR, err := cienv.GetBuildInfo()
+	if err != nil {
+		return nil, isPR, err
+	}
+
+	client, err := giteaClient(ctx, giteaAddr, token)
+	if err != nil {
+		return nil, isPR, err
+	}
+
+	if !isPR {
+		if !opt.guessPullRequest {
+			return nil, false, nil
+		}
+
+		if g.Branch == "" && g.SHA == "" {
+			return nil, false, nil
+		}
+
+		prID, err := getGiteaPullRequestIDByBranchOrCommit(client, g)
+		if err != nil {
+			fmt.Fprintln(os.Stderr, err)
+			return nil, false, nil
+		}
+		g.PullRequest = int(prID)
+	}
+
+	gs, err = giteaservice.NewGiteaPullRequest(client, g.Owner, g.Repo, int64(g.PullRequest), g.SHA)
+	if err != nil {
+		return nil, false, err
+	}
+	return gs, true, nil
+}
+
+func getGiteaPullRequestIDByBranchOrCommit(client *gitea.Client, info *cienv.BuildInfo) (int64, error) {
+	options := gitea.ListPullRequestsOptions{
+		Sort:  "updated",
+		State: gitea.StateOpen,
+		ListOptions: gitea.ListOptions{
+			Page:     1,
+			PageSize: 100,
+		},
+	}
+
+	for {
+		pullRequests, resp, err := client.ListRepoPullRequests(info.Owner, info.Repo, options)
+		if err != nil {
+			return 0, err
+		}
+
+		for _, pr := range pullRequests {
+			if info.Branch != "" && info.Branch == pr.Head.Name {
+				return pr.Index, nil
+			}
+			if info.SHA != "" && info.SHA == pr.Head.Sha {
+				return pr.Index, nil
+			}
+		}
+
+		if resp.NextPage == 0 {
+			break
+		}
+		options.Page = resp.NextPage
+	}
+
+	// Build query just for error output
+	query := []string{
+		"type:pr",
+		"state:open",
+		fmt.Sprintf("repo:%s/%s", info.Owner, info.Repo),
+	}
+	if info.Branch != "" {
+		query = append(query, fmt.Sprintf("head:%s", info.Branch))
+	}
+	if info.SHA != "" {
+		query = append(query, info.SHA)
+	}
+
+	return 0, fmt.Errorf("reviewdog: PullRequest not found, query: %s", strings.Join(query, " "))
+}
+
+func giteaClient(ctx context.Context, url, token string) (*gitea.Client, error) {
+	client, err := gitea.NewClient(url,
+		gitea.SetContext(ctx),
+		gitea.SetToken(token),
+		gitea.SetHTTPClient(newHTTPClient()),
+	)
+	if err != nil {
+		return nil, err
+	}
+
+	return client, client.CheckServerVersionConstraint(">=1.17.0")
 }
 
 func githubService(ctx context.Context, opt *option) (gs *githubservice.PullRequest, isPR bool, err error) {

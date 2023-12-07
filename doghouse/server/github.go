@@ -7,7 +7,7 @@ import (
 	"os"
 
 	"github.com/bradleyfalzon/ghinstallation/v2"
-	"github.com/google/go-github/v56/github"
+	"github.com/google/go-github/v57/github"
 )
 
 type NewGitHubClientOption struct {
