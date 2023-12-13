@@ -335,7 +335,8 @@ func (x *Location) GetRange() *Range {
 
 // start: { line: 2, column: 1 }
 // end:   { line: 2, column: 4 }
-//   => "abc" (without line-break)
+//
+//	=> "abc" (without line-break)
 type Range struct {
 	state         protoimpl.MessageState
 	sizeCache     protoimpl.SizeCache
@@ -461,36 +462,42 @@ func (x *Position) GetColumn() int32 {
 // problem.
 //
 // Insert example ('hayabusa' -> 'haya15busa'):
-//   range {
-//     start {
-//       line: 1
-//       column: 5
-//     }
-//     end {
-//       line: 1
-//       column: 5
-//     }
-//   }
-//   text: 15
+//
+//	range {
+//	  start {
+//	    line: 1
+//	    column: 5
+//	  }
+//	  end {
+//	    line: 1
+//	    column: 5
+//	  }
+//	}
+//	text: 15
+//
 // |h|a|y|a|b|u|s|a|
 // 1 2 3 4 5 6 7 8 9
-//         ^--- insert '15'
+//
+//	^--- insert '15'
 //
 // Update example ('haya15busa' -> 'haya14busa'):
-//   range {
-//     start {
-//       line: 1
-//       column: 5
-//     }
-//     end {
-//       line: 1
-//       column: 7
-//     }
-//   }
-//   text: 14
+//
+//	range {
+//	  start {
+//	    line: 1
+//	    column: 5
+//	  }
+//	  end {
+//	    line: 1
+//	    column: 7
+//	  }
+//	}
+//	text: 14
+//
 // |h|a|y|a|1|5|b|u|s|a|
 // 1 2 3 4 5 6 7 8 9 0 1
-//         ^---^ replace with '14'
+//
+//	^---^ replace with '14'
 type Suggestion struct {
 	state         protoimpl.MessageState
 	sizeCache     protoimpl.SizeCache

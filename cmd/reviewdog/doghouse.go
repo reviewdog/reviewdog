@@ -164,7 +164,7 @@ func postResultSet(ctx context.Context, resultSet *reviewdog.ResultMap,
 			}
 			// If failOnError is on, return error when at least one report
 			// returns failure conclusion (status). Users can check this
-			// reviewdoc run status (#446) to merge PRs for example.
+			// reviewdog run status (#446) to merge PRs for example.
 			//
 			// Also, the individual report conclusions are associated to random check
 			// suite due to the GitHub bug (#403), so actually users cannot depends

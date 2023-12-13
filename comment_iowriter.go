@@ -32,6 +32,7 @@ var _ CommentService = &UnifiedCommentWriter{}
 //   - <file>: [<tool name>] <message>
 //   - <file>:<lnum>: [<tool name>] <message>
 //   - <file>:<lnum>:<col>: [<tool name>] <message>
+//
 // where <message> can be multiple lines.
 type UnifiedCommentWriter struct {
 	w io.Writer

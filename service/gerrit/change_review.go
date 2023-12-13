@@ -16,8 +16,9 @@ var _ reviewdog.CommentService = &ChangeReviewCommenter{}
 
 // ChangeReviewCommenter is a comment service for Gerrit Change Review
 // API:
-// 	https://gerrit-review.googlesource.com/Documentation/rest-api-changes.html#set-review
-// 	POST /changes/{change-id}/revisions/{revision-id}/review
+//
+//	https://gerrit-review.googlesource.com/Documentation/rest-api-changes.html#set-review
+//	POST /changes/{change-id}/revisions/{revision-id}/review
 type ChangeReviewCommenter struct {
 	cli        *gerrit.Client
 	changeID   string
