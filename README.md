@@ -318,7 +318,7 @@ Note that not all reporters provide support for code suggestions.
 | **`github-check`**           | NO [2]  |
 | **`github-pr-check`**        | NO [2]  |
 | **`github-pr-review`**       | OK      |
-| **`gitlab-mr-discussion`**   | NO [1]  |
+| **`gitlab-mr-discussion`**   | OK      |
 | **`gitlab-mr-commit`**       | NO [2]  |
 | **`gerrit-change-review`**   | NO [1]  |
 | **`bitbucket-code-report`**  | NO [2]  |
