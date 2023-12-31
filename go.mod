@@ -7,7 +7,7 @@ toolchain go1.21.0
 require (
 	cloud.google.com/go/compute/metadata v0.2.3
 	cloud.google.com/go/datastore v1.15.0
-	code.gitea.io/sdk/gitea v0.17.0
+	code.gitea.io/sdk/gitea v0.17.1
 	contrib.go.opencensus.io/exporter/stackdriver v0.13.12
 	github.com/bradleyfalzon/ghinstallation/v2 v2.8.0
 	github.com/golang/protobuf v1.5.3
