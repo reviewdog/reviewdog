@@ -19,7 +19,7 @@ const baseEndpoint = "https://reviewdog.app"
 
 // DogHouseClientInterface is interface for doghouse client.
 type DogHouseClientInterface interface {
-	Check(ctx context.Context, req *doghouse.CheckRequest) (*doghouse.CheckResponse, error)
+	Check(ctx context.Context, req *doghouse.CheckRequest, sendRequest bool) (*doghouse.CheckResponse, error)
 }
 
 // DogHouseClient is client for doghouse server.
@@ -48,7 +48,7 @@ func New(client *http.Client) *DogHouseClient {
 }
 
 // Check send check requests to doghouse.
-func (c *DogHouseClient) Check(ctx context.Context, req *doghouse.CheckRequest) (*doghouse.CheckResponse, error) {
+func (c *DogHouseClient) Check(ctx context.Context, req *doghouse.CheckRequest, sendRequest bool) (*doghouse.CheckResponse, error) {
 	checkURL := c.BaseURL.String() + "/check"
 	b, err := json.Marshal(req)
 	if err != nil {

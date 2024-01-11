@@ -272,9 +272,11 @@ func run(r io.Reader, w io.Writer, opt *option) error {
 	default:
 		return fmt.Errorf("unknown -reporter: %s", opt.reporter)
 	case "github-check":
-		return runDoghouse(ctx, r, w, opt, isProject, false)
+		return runDoghouse(ctx, r, w, opt, isProject, false, false)
 	case "github-pr-check":
-		return runDoghouse(ctx, r, w, opt, isProject, true)
+		return runDoghouse(ctx, r, w, opt, isProject, true, false)
+	case "github-pr-annotations":
+		return runDoghouse(ctx, r, w, opt, isProject, true, true)
 	case "github-pr-review":
 		gs, isPR, err := githubService(ctx, opt)
 		if err != nil {

@@ -24,7 +24,7 @@ import (
 	"github.com/reviewdog/reviewdog/service/serviceutil"
 )
 
-func runDoghouse(ctx context.Context, r io.Reader, w io.Writer, opt *option, isProject bool, forPr bool) error {
+func runDoghouse(ctx context.Context, r io.Reader, w io.Writer, opt *option, isProject bool, forPr bool, useAnnotationReporter bool) error {
 	ghInfo, isPr, err := cienv.GetBuildInfo()
 	if err != nil {
 		return err
@@ -41,11 +41,11 @@ func runDoghouse(ctx context.Context, r io.Reader, w io.Writer, opt *option, isP
 	if err != nil {
 		return err
 	}
-	filteredResultSet, err := postResultSet(ctx, resultSet, ghInfo, cli, opt)
+	filteredResultSet, err := postResultSet(ctx, resultSet, ghInfo, cli, opt, useAnnotationReporter)
 	if err != nil {
 		return err
 	}
-	if foundResultShouldReport := reportResults(w, filteredResultSet); foundResultShouldReport {
+	if foundResultShouldReport := reportResults(w, filteredResultSet, useAnnotationReporter); foundResultShouldReport {
 		return errors.New("found at least one result in diff")
 	}
 	return nil
@@ -112,7 +112,7 @@ func checkResultSet(ctx context.Context, r io.Reader, opt *option, isProject boo
 }
 
 func postResultSet(ctx context.Context, resultSet *reviewdog.ResultMap,
-	ghInfo *cienv.BuildInfo, cli client.DogHouseClientInterface, opt *option) (*reviewdog.FilteredResultMap, error) {
+	ghInfo *cienv.BuildInfo, cli client.DogHouseClientInterface, opt *option, useAnnotationReporter bool) (*reviewdog.FilteredResultMap, error) {
 	var g errgroup.Group
 	wd, _ := os.Getwd()
 	gitRelWd, err := serviceutil.GitRelWorkdir()
@@ -141,7 +141,9 @@ func postResultSet(ctx context.Context, resultSet *reviewdog.ResultMap,
 			if err := result.CheckUnexpectedFailure(); err != nil {
 				return err
 			}
-			res, err := cli.Check(ctx, req)
+
+			res, err := cli.Check(ctx, req, !useAnnotationReporter)
+
 			if err != nil {
 				return fmt.Errorf("post failed for %s: %w", name, err)
 			}
@@ -190,7 +192,7 @@ func checkResultToAnnotation(d *rdf.Diagnostic, wd, gitRelWd string) *doghouse.A
 //
 // It returns true if reviewdog should exit with 1.
 // e.g. At least one annotation result is in diff.
-func reportResults(w io.Writer, filteredResultSet *reviewdog.FilteredResultMap) bool {
+func reportResults(w io.Writer, filteredResultSet *reviewdog.FilteredResultMap, useAnnotationReporter bool) bool {
 	if filteredResultSet.Len() != 0 && cienv.HasReadOnlyPermissionGitHubToken() {
 		fmt.Fprintln(os.Stderr, `reviewdog: This GitHub token doesn't have write permission of Review API [1], 
 so reviewdog will report results via logging command [2] and create annotations similar to
@@ -229,13 +231,16 @@ github-pr-check reporter as a fallback.
 			shouldFail = shouldFail || !cienv.IsInGitHubAction() ||
 				!(results.Level == "warning" || results.Level == "info")
 
+			// If using the annotation reporter, the action should fail
+			shouldFail = shouldFail || !useAnnotationReporter
+
 			if foundNumOverall == githubutils.MaxLoggingAnnotationsPerStep {
 				githubutils.WarnTooManyAnnotationOnce()
 				shouldFail = true
 			}
 
 			foundResultPerName = true
-			if cienv.IsInGitHubAction() {
+			if cienv.IsInGitHubAction() || useAnnotationReporter {
 				githubutils.ReportAsGitHubActionsLog(name, results.Level, result.Diagnostic)
 			} else {
 				// Output original lines.

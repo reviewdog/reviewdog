@@ -40,7 +40,7 @@ func NewChecker(req *doghouse.CheckRequest, gh *github.Client) *Checker {
 	return &Checker{req: req, gh: &checkerGitHubClient{Client: gh}}
 }
 
-func (ch *Checker) Check(ctx context.Context) (*doghouse.CheckResponse, error) {
+func (ch *Checker) Check(ctx context.Context, makeRequest bool) (*doghouse.CheckResponse, error) {
 	var filediffs []*diff.FileDiff
 	if ch.req.PullRequest != 0 {
 		var err error
@@ -59,7 +59,16 @@ func (ch *Checker) Check(ctx context.Context) (*doghouse.CheckResponse, error) {
 		filterMode = filter.ModeNoFilter
 	}
 	filtered := filter.FilterCheck(results, filediffs, 1, "", filterMode)
-	check, err := ch.createCheck(ctx)
+
+	// If we're not making a request, we can just return the filtered results.
+	if !makeRequest {
+		return &doghouse.CheckResponse{CheckedResults: filtered}, nil
+	}
+
+	var check *github.CheckRun
+	var err error
+
+	check, err = ch.createCheck(ctx)
 	if err != nil {
 		// If this error is StatusForbidden (403) here, it means reviewdog is
 		// running on GitHub Actions and has only read permission (because it's

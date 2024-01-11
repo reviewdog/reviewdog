@@ -196,11 +196,11 @@ func TestDiagnosticResultSet_NonProject(t *testing.T) {
 
 type fakeDoghouseServerCli struct {
 	client.DogHouseClientInterface
-	FakeCheck func(context.Context, *doghouse.CheckRequest) (*doghouse.CheckResponse, error)
+	FakeCheck func(context.Context, *doghouse.CheckRequest, bool) (*doghouse.CheckResponse, error)
 }
 
-func (f *fakeDoghouseServerCli) Check(ctx context.Context, req *doghouse.CheckRequest) (*doghouse.CheckResponse, error) {
-	return f.FakeCheck(ctx, req)
+func (f *fakeDoghouseServerCli) Check(ctx context.Context, req *doghouse.CheckRequest, makeRequest bool) (*doghouse.CheckResponse, error) {
+	return f.FakeCheck(ctx, req, makeRequest)
 }
 
 func TestPostResultSet_withReportURL(t *testing.T) {
@@ -212,7 +212,7 @@ func TestPostResultSet_withReportURL(t *testing.T) {
 	)
 
 	fakeCli := &fakeDoghouseServerCli{}
-	fakeCli.FakeCheck = func(ctx context.Context, req *doghouse.CheckRequest) (*doghouse.CheckResponse, error) {
+	fakeCli.FakeCheck = func(ctx context.Context, req *doghouse.CheckRequest, makeRequest bool) (*doghouse.CheckResponse, error) {
 		if req.Owner != owner {
 			t.Errorf("req.Owner = %q, want %q", req.Owner, owner)
 		}
@@ -313,7 +313,7 @@ func TestPostResultSet_withReportURL(t *testing.T) {
 	}
 
 	opt := &option{filterMode: filter.ModeAdded}
-	if _, err := postResultSet(context.Background(), &resultSet, ghInfo, fakeCli, opt); err != nil {
+	if _, err := postResultSet(context.Background(), &resultSet, ghInfo, fakeCli, opt, true); err != nil {
 		t.Fatal(err)
 	}
 }
@@ -328,7 +328,7 @@ func TestPostResultSet_withoutReportURL(t *testing.T) {
 
 	wantResults := []*filter.FilteredDiagnostic{{ShouldReport: true}}
 	fakeCli := &fakeDoghouseServerCli{}
-	fakeCli.FakeCheck = func(ctx context.Context, req *doghouse.CheckRequest) (*doghouse.CheckResponse, error) {
+	fakeCli.FakeCheck = func(ctx context.Context, req *doghouse.CheckRequest, makeRequest bool) (*doghouse.CheckResponse, error) {
 		return &doghouse.CheckResponse{CheckedResults: wantResults}, nil
 	}
 
@@ -338,7 +338,7 @@ func TestPostResultSet_withoutReportURL(t *testing.T) {
 	ghInfo := &cienv.BuildInfo{Owner: owner, Repo: repo, PullRequest: prNum, SHA: sha}
 
 	opt := &option{filterMode: filter.ModeAdded}
-	resp, err := postResultSet(context.Background(), &resultSet, ghInfo, fakeCli, opt)
+	resp, err := postResultSet(context.Background(), &resultSet, ghInfo, fakeCli, opt, true)
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -381,12 +381,12 @@ func TestPostResultSet_conclusion(t *testing.T) {
 
 	for _, tt := range tests {
 		tt := tt
-		fakeCli.FakeCheck = func(ctx context.Context, req *doghouse.CheckRequest) (*doghouse.CheckResponse, error) {
+		fakeCli.FakeCheck = func(ctx context.Context, req *doghouse.CheckRequest, makeRequest bool) (*doghouse.CheckResponse, error) {
 			return &doghouse.CheckResponse{ReportURL: "xxx", Conclusion: tt.conclusion}, nil
 		}
 		opt := &option{filterMode: filter.ModeAdded, failOnError: tt.failOnError}
 		id := fmt.Sprintf("[conclusion=%s, failOnError=%v]", tt.conclusion, tt.failOnError)
-		_, err := postResultSet(context.Background(), &resultSet, ghInfo, fakeCli, opt)
+		_, err := postResultSet(context.Background(), &resultSet, ghInfo, fakeCli, opt, true)
 		if tt.wantErr && err == nil {
 			t.Errorf("[%s] want err, but got nil.", id)
 		} else if !tt.wantErr && err != nil {
@@ -404,7 +404,7 @@ func TestPostResultSet_withEmptyResponse(t *testing.T) {
 	)
 
 	fakeCli := &fakeDoghouseServerCli{}
-	fakeCli.FakeCheck = func(ctx context.Context, req *doghouse.CheckRequest) (*doghouse.CheckResponse, error) {
+	fakeCli.FakeCheck = func(ctx context.Context, req *doghouse.CheckRequest, makeRequest bool) (*doghouse.CheckResponse, error) {
 		return &doghouse.CheckResponse{}, nil
 	}
 
@@ -414,7 +414,7 @@ func TestPostResultSet_withEmptyResponse(t *testing.T) {
 	ghInfo := &cienv.BuildInfo{Owner: owner, Repo: repo, PullRequest: prNum, SHA: sha}
 
 	opt := &option{filterMode: filter.ModeAdded}
-	if _, err := postResultSet(context.Background(), &resultSet, ghInfo, fakeCli, opt); err == nil {
+	if _, err := postResultSet(context.Background(), &resultSet, ghInfo, fakeCli, opt, true); err == nil {
 		t.Error("got no error but want report missing error")
 	}
 }
@@ -453,7 +453,7 @@ func TestReportResults(t *testing.T) {
 		},
 	})
 	stdout := new(bytes.Buffer)
-	foundResultShouldReport := reportResults(stdout, filteredResultSet)
+	foundResultShouldReport := reportResults(stdout, filteredResultSet, false)
 	if !foundResultShouldReport {
 		t.Errorf("foundResultShouldReport = %v, want true", foundResultShouldReport)
 	}
@@ -486,7 +486,7 @@ func TestReportResults_inGitHubAction(t *testing.T) {
 		},
 	})
 	stdout := new(bytes.Buffer)
-	_ = reportResults(stdout, filteredResultSet)
+	_ = reportResults(stdout, filteredResultSet, false)
 	want := `reviewdog: Reporting results for "name1"
 `
 	if got := stdout.String(); got != want {
@@ -528,7 +528,7 @@ func TestReportResults_noResultsShouldReport(t *testing.T) {
 		},
 	})
 	stdout := new(bytes.Buffer)
-	foundResultShouldReport := reportResults(stdout, filteredResultSet)
+	foundResultShouldReport := reportResults(stdout, filteredResultSet, false)
 	if foundResultShouldReport {
 		t.Errorf("foundResultShouldReport = %v, want false", foundResultShouldReport)
 	}

@@ -5,6 +5,7 @@ import (
 	"context"
 	"errors"
 	"os"
+	"runtime"
 	"strings"
 	"testing"
 
@@ -162,7 +163,12 @@ func TestRun(t *testing.T) {
 		} else {
 			t.Log(err)
 		}
-		want := "sh: 1: not-found: not found\n"
+		var want string
+		if runtime.GOOS == "darwin" {
+			want = "sh: not-found: command not found\n"
+		} else {
+			want = "sh: 1: not-found: not found\n"
+		}
 		if got := buf.String(); got != want {
 			t.Errorf("got stderr %q, want %q", got, want)
 		}
