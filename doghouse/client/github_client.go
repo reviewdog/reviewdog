@@ -15,6 +15,6 @@ type GitHubClient struct {
 	Client *github.Client
 }
 
-func (c *GitHubClient) Check(ctx context.Context, req *doghouse.CheckRequest) (*doghouse.CheckResponse, error) {
-	return server.NewChecker(req, c.Client).Check(ctx)
+func (c *GitHubClient) Check(ctx context.Context, req *doghouse.CheckRequest, makeRequest bool) (*doghouse.CheckResponse, error) {
+	return server.NewChecker(req, c.Client).Check(ctx, makeRequest)
 }

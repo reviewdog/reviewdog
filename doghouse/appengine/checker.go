@@ -59,7 +59,7 @@ func (gc *githubChecker) handleCheck(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	res, err := server.NewChecker(&req, gh).Check(ctx)
+	res, err := server.NewChecker(&req, gh).Check(ctx, true)
 	if err != nil {
 		aelog.Errorf(ctx, "failed to run checker: %v", err)
 		w.WriteHeader(http.StatusBadRequest)
