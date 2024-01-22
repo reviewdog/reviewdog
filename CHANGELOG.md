@@ -9,13 +9,18 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ### :sparkles: Release Note <!-- optional -->
 
 ### :rocket: Enhancements
-- [#1623](https://github.com/reviewdog/reviewdog/pull/1623) Add reporter for GitHub PR annotations `github-pr-annotations`
+- ...
 
 ### :bug: Fixes
 - ...
 
 ### :rotating_light: Breaking changes
 - ...
+
+## [v0.17.0] - 2024-01-22
+
+### :rocket: Enhancements
+- [#1623](https://github.com/reviewdog/reviewdog/pull/1623) Add reporter for GitHub PR annotations `github-pr-annotations`
 
 ## [v0.16.0] - 2023-12-17
 
