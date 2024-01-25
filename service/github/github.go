@@ -127,11 +127,10 @@ func (g *PullRequest) postAsReviewComment(ctx context.Context) error {
 	postComments := g.postComments
 	g.postComments = nil
 	rawComments := make([]*reviewdog.Comment, 0, len(postComments))
-	plainComments := make([]*github.PullRequestComment, 0, len(postComments))
 	reviewComments := make([]*github.DraftReviewComment, 0, len(postComments))
 	remaining := make([]*reviewdog.Comment, 0)
 	for _, c := range postComments {
-		if !c.Result.InDiffFile {
+		if !c.Result.InDiffContext {
 			// GitHub Review API cannot report results outside diff. If it's running
 			// in GitHub Actions, fallback to GitHub Actions log as report.
 			if cienv.IsInGitHubAction() {
@@ -147,14 +146,6 @@ func (g *PullRequest) postAsReviewComment(ctx context.Context) error {
 			continue
 		}
 
-		rawComments = append(rawComments, c)
-		if !c.Result.InDiffContext {
-			// If the result is outside of diff context, fallback to GitHub Review
-			// Comment API.
-			comment := buildPullRequestComment(c, body, g.sha)
-			plainComments = append(plainComments, comment)
-			continue
-		}
 		// Only posts maxCommentsPerRequest comments per 1 request to avoid spammy
 		// review comments. An example GitHub error if we don't limit the # of
 		// review comments.
@@ -171,22 +162,6 @@ func (g *PullRequest) postAsReviewComment(ctx context.Context) error {
 	}
 	if err := g.logWriter.Flush(ctx); err != nil {
 		return err
-	}
-
-	if len(plainComments) > 0 {
-		// send pull request comments to GitHub.
-		for _, c := range plainComments {
-			_, _, err := g.cli.PullRequests.CreateComment(ctx, g.owner, g.repo, g.pr, c)
-			if err != nil {
-				log.Printf("reviewdog: failed to post a pull request comment: %v", err)
-				// GitHub returns 403 or 404 if we don't have permission to post a review comment.
-				// fallback to log message in this case.
-				if isPermissionError(err) && cienv.IsInGitHubAction() {
-					goto FALLBACK
-				}
-				return err
-			}
-		}
 	}
 
 	if len(reviewComments) > 0 {

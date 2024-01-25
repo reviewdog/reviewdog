@@ -202,7 +202,6 @@ func TestGitHubPullRequest_Post_Flush_review_api(t *testing.T) {
 
 	listCommentsAPICalled := 0
 	postCommentsAPICalled := 0
-	postCommentAPICalled := 0
 	mux := http.NewServeMux()
 	mux.HandleFunc("/repos/o/r/pulls/14/comments", func(w http.ResponseWriter, r *http.Request) {
 		switch r.Method {
@@ -260,29 +259,6 @@ func TestGitHubPullRequest_Post_Flush_review_api(t *testing.T) {
 				if err := json.NewEncoder(w).Encode(cs); err != nil {
 					t.Fatal(err)
 				}
-			}
-		case http.MethodPost:
-			defer func() { postCommentAPICalled++ }()
-			var req github.PullRequestComment
-			if err := json.NewDecoder(r.Body).Decode(&req); err != nil {
-				t.Error(err)
-			}
-			want := []*github.PullRequestComment{
-				{
-					Body:        github.String(commentutil.BodyPrefix + "file comment (no-line)"),
-					CommitID:    github.String("sha"),
-					Path:        github.String("reviewdog.go"),
-					SubjectType: github.String("file"),
-				},
-				{
-					Body:        github.String(commentutil.BodyPrefix + "file comment (outside diff-context)"),
-					CommitID:    github.String("sha"),
-					Path:        github.String("reviewdog.go"),
-					SubjectType: github.String("file"),
-				},
-			}
-			if diff := pretty.Compare(want[postCommentAPICalled], req); diff != "" {
-				t.Errorf("req.Comments diff: (-got +want)\n%s", diff)
 			}
 		default:
 			t.Errorf("unexpected access: %v %v", r.Method, r.URL)
@@ -1217,9 +1193,6 @@ func TestGitHubPullRequest_Post_Flush_review_api(t *testing.T) {
 	}
 	if postCommentsAPICalled != 1 {
 		t.Errorf("GitHub post PullRequest comments API called %v times, want 1 times", postCommentsAPICalled)
-	}
-	if postCommentAPICalled != 2 {
-		t.Errorf("GitHub post PullRequest comment API called %v times, want 2 times", postCommentAPICalled)
 	}
 }
 
