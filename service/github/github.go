@@ -221,17 +221,6 @@ func buildDraftReviewComment(c *reviewdog.Comment, body string) *github.DraftRev
 	return r
 }
 
-// Document: https://docs.github.com/en/rest/pulls/comments?apiVersion=2022-11-28#create-a-review-comment-for-a-pull-request
-func buildPullRequestComment(c *reviewdog.Comment, body, commitID string) *github.PullRequestComment {
-	loc := c.Result.Diagnostic.GetLocation()
-	return &github.PullRequestComment{
-		Body:        github.String(body),
-		CommitID:    github.String(commitID),
-		Path:        github.String(loc.GetPath()),
-		SubjectType: github.String("file"),
-	}
-}
-
 // line represents end line if it's a multiline comment in GitHub, otherwise
 // it's start line.
 // Document: https://docs.github.com/en/rest/reference/pulls#create-a-review-comment-for-a-pull-request
