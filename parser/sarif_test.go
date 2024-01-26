@@ -24,16 +24,16 @@ func TestExampleSarifParser(t *testing.T) {
 		}
 		for _, d := range diagnostics {
 			rdjson, _ := protojson.MarshalOptions{Indent: "  "}.Marshal(d)
-			var actualJson map[string]interface{}
-			var expectJson map[string]interface{}
-			json.Unmarshal([]byte(rdjson), &actualJson)
-			json.Unmarshal([]byte(fixture[1]), &expectJson)
-			expectJson["originalOutput"] = actualJson["originalOutput"]
-			if !reflect.DeepEqual(actualJson, expectJson) {
+			var actualJSON map[string]interface{}
+			var expectJSON map[string]interface{}
+			json.Unmarshal([]byte(rdjson), &actualJSON)
+			json.Unmarshal([]byte(fixture[1]), &expectJSON)
+			expectJSON["originalOutput"] = actualJSON["originalOutput"]
+			if !reflect.DeepEqual(actualJSON, expectJSON) {
 				var out bytes.Buffer
 				json.Indent(&out, rdjson, "", "\t")
 				actual := out.String()
-				expect, _ := json.MarshalIndent(expectJson, "", "\t")
+				expect, _ := json.MarshalIndent(expectJSON, "", "\t")
 				t.Errorf("actual(%v):\n%v\n---\nexpect(%v):\n%v", i, actual, i, string(expect))
 			}
 		}
