@@ -12,6 +12,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - ...
 
 ### :bug: Fixes
+- [#1653](https://github.com/reviewdog/reviewdog/pull/1653) fix: SARIF parser: parse with no region result. fix originalOutput field
 - ...
 
 ### :rotating_light: Breaking changes
