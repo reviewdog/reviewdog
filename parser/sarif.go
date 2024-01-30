@@ -349,12 +349,3 @@ type SarifRule struct {
 		Rank  int    `json:"rank"`
 	} `json:"defaultConfiguration"`
 }
-
-func getActualStartColumn(r *rdf.Range) int32 {
-	startColumn := r.Start.Column
-	if startColumn == 0 {
-		// startColumn's default value means column 1
-		startColumn = 1
-	}
-	return startColumn
-}
