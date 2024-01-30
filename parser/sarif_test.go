@@ -1,13 +1,12 @@
 package parser
 
 import (
-	"bytes"
 	"encoding/json"
 	"fmt"
-	"reflect"
 	"strings"
 	"testing"
 
+	"github.com/google/go-cmp/cmp"
 	"github.com/reviewdog/reviewdog/service/serviceutil"
 	"google.golang.org/protobuf/encoding/protojson"
 )
@@ -23,18 +22,21 @@ func TestExampleSarifParser(t *testing.T) {
 			t.Errorf("empty diagnostics")
 		}
 		for _, d := range diagnostics {
-			rdjson, _ := protojson.MarshalOptions{Indent: "  "}.Marshal(d)
-			var actualJSON map[string]interface{}
-			var expectJSON map[string]interface{}
-			json.Unmarshal([]byte(rdjson), &actualJSON)
-			json.Unmarshal([]byte(fixture[1]), &expectJSON)
+			rdjson, err := protojson.MarshalOptions{Indent: "  "}.Marshal(d)
+			if err != nil {
+				t.Fatal(err)
+			}
+			var actualJSON map[string]any
+			var expectJSON map[string]any
+			if err := json.Unmarshal([]byte(rdjson), &actualJSON); err != nil {
+				t.Fatal(err)
+			}
+			if err := json.Unmarshal([]byte(fixture[1]), &expectJSON); err != nil {
+				t.Fatal(err)
+			}
 			expectJSON["originalOutput"] = actualJSON["originalOutput"]
-			if !reflect.DeepEqual(actualJSON, expectJSON) {
-				var out bytes.Buffer
-				json.Indent(&out, rdjson, "", "\t")
-				actual := out.String()
-				expect, _ := json.MarshalIndent(expectJSON, "", "\t")
-				t.Errorf("actual(%v):\n%v\n---\nexpect(%v):\n%v", i, actual, i, string(expect))
+			if diff := cmp.Diff(actualJSON, expectJSON); diff != "" {
+				t.Errorf("fixtures[%d] (-got, +want):\n%s", i, diff)
 			}
 		}
 	}
