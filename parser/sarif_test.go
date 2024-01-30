@@ -28,7 +28,7 @@ func TestExampleSarifParser(t *testing.T) {
 			}
 			var actualJSON map[string]any
 			var expectJSON map[string]any
-			if err := json.Unmarshal([]byte(rdjson), &actualJSON); err != nil {
+			if err := json.Unmarshal(rdjson, &actualJSON); err != nil {
 				t.Fatal(err)
 			}
 			if err := json.Unmarshal([]byte(fixture[1]), &expectJSON); err != nil {
