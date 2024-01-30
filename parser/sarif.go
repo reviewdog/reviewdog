@@ -2,7 +2,6 @@ package parser
 
 import (
 	"encoding/json"
-	"fmt"
 	"io"
 	"net/url"
 	"os"
@@ -46,6 +45,10 @@ func (p *SarifParser) Parse(r io.Reader) ([]*rdf.Diagnostic, error) {
 			rules[rule.ID] = rule
 		}
 		for _, result := range run.Results {
+			original, err := json.Marshal(result)
+			if err != nil {
+				return nil, err
+			}
 			message := result.Message.GetText()
 			ruleID := result.RuleID
 			rule := rules[ruleID]
@@ -88,10 +91,6 @@ func (p *SarifParser) Parse(r io.Reader) ([]*rdf.Diagnostic, error) {
 				}
 				region := physicalLocation.Region
 				rng := region.GetRdfRange()
-				if rng == nil {
-					// No line information in result
-					continue
-				}
 				var code *rdf.Code
 				if ruleID != "" {
 					code = &rdf.Code{
@@ -110,12 +109,9 @@ func (p *SarifParser) Parse(r io.Reader) ([]*rdf.Diagnostic, error) {
 						Name: name,
 						Url:  informationURI,
 					},
-					Code:        code,
-					Suggestions: suggestionsMap[path],
-					OriginalOutput: fmt.Sprintf(
-						"%v:%d:%d: %v: %v (%v)",
-						path, rng.Start.Line, getActualStartColumn(rng), level, message, ruleID,
-					),
+					Code:           code,
+					Suggestions:    suggestionsMap[path],
+					OriginalOutput: string(original),
 				}
 				ds = append(ds, d)
 			}
@@ -132,27 +128,27 @@ type SarifJson struct {
 	Runs []struct {
 		OriginalURIBaseIds map[string]SarifOriginalURI `json:"originalUriBaseIds"`
 		Results            []struct {
-			Level     string `json:"level"`
+			Level     string `json:"level,omitempty"`
 			Locations []struct {
 				PhysicalLocation struct {
-					ArtifactLocation SarifArtifactLocation `json:"artifactLocation"`
-					Region           SarifRegion           `json:"region"`
-				} `json:"physicalLocation"`
+					ArtifactLocation SarifArtifactLocation `json:"artifactLocation,omitempty"`
+					Region           SarifRegion           `json:"region,omitempty"`
+				} `json:"physicalLocation,omitempty"`
 			} `json:"locations"`
 			Message SarifText `json:"message"`
-			RuleID  string    `json:"ruleId"`
+			RuleID  string    `json:"ruleId,omitempty"`
 			Fixes   []struct {
 				Description     SarifText `json:"description"`
 				ArtifactChanges []struct {
-					ArtifactLocation SarifArtifactLocation `json:"artifactLocation"`
+					ArtifactLocation SarifArtifactLocation `json:"artifactLocation,omitempty"`
 					Replacements     []struct {
 						DeletedRegion   SarifRegion `json:"deletedRegion"`
 						InsertedContent struct {
 							Text string `json:"text"`
-						} `json:"insertedContent"`
+						} `json:"insertedContent,omitempty"`
 					} `json:"replacements"`
 				} `json:"artifactChanges"`
-			} `json:"fixes"`
+			} `json:"fixes,omitempty"`
 		} `json:"results"`
 		Tool struct {
 			Driver struct {
@@ -170,9 +166,9 @@ type SarifOriginalURI struct {
 }
 
 type SarifArtifactLocation struct {
-	URI       string `json:"uri"`
+	URI       string `json:"uri,omitempty"`
 	URIBaseID string `json:"uriBaseId"`
-	Index     int    `json:"index"`
+	Index     int    `json:"index,omitempty"`
 }
 
 func (l *SarifArtifactLocation) GetPath(
@@ -198,8 +194,8 @@ func (l *SarifArtifactLocation) GetPath(
 }
 
 type SarifText struct {
-	Text     string  `json:"text"`
-	Markdown *string `json:"markdown"`
+	Text     string  `json:"text,omitempty"`
+	Markdown *string `json:"markdown,omitempty"`
 }
 
 func (t *SarifText) GetText() string {
@@ -212,9 +208,9 @@ func (t *SarifText) GetText() string {
 
 type SarifRegion struct {
 	StartLine   *int `json:"startLine"`
-	StartColumn *int `json:"startColumn"`
-	EndLine     *int `json:"endLine"`
-	EndColumn   *int `json:"endColumn"`
+	StartColumn *int `json:"startColumn,omitempty"`
+	EndLine     *int `json:"endLine,omitempty"`
+	EndColumn   *int `json:"endColumn,omitempty"`
 }
 
 // convert SARIF Region to RDF Range
@@ -352,13 +348,4 @@ type SarifRule struct {
 		Level string `json:"level"`
 		Rank  int    `json:"rank"`
 	} `json:"defaultConfiguration"`
-}
-
-func getActualStartColumn(r *rdf.Range) int32 {
-	startColumn := r.Start.Column
-	if startColumn == 0 {
-		// startColumn's default value means column 1
-		startColumn = 1
-	}
-	return startColumn
 }

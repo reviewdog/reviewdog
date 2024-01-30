@@ -1,13 +1,12 @@
 package parser
 
 import (
-	"bytes"
 	"encoding/json"
 	"fmt"
-	"reflect"
 	"strings"
 	"testing"
 
+	"github.com/google/go-cmp/cmp"
 	"github.com/reviewdog/reviewdog/service/serviceutil"
 	"google.golang.org/protobuf/encoding/protojson"
 )
@@ -19,18 +18,25 @@ func TestExampleSarifParser(t *testing.T) {
 		if err != nil {
 			panic(err)
 		}
+		if len(diagnostics) == 0 {
+			t.Errorf("empty diagnostics")
+		}
 		for _, d := range diagnostics {
-			rdjson, _ := protojson.MarshalOptions{Indent: "  "}.Marshal(d)
-			var actualJson interface{}
-			var expectJson interface{}
-			json.Unmarshal([]byte(rdjson), &actualJson)
-			json.Unmarshal([]byte(fixture[1]), &expectJson)
-			if !reflect.DeepEqual(actualJson, expectJson) {
-				var out bytes.Buffer
-				json.Indent(&out, rdjson, "", "\t")
-				actual := out.String()
-				expect := fixture[1]
-				t.Errorf("actual(%v):\n%v\n---\nexpect(%v):\n%v", i, actual, i, expect)
+			rdjson, err := protojson.MarshalOptions{Indent: "  "}.Marshal(d)
+			if err != nil {
+				t.Fatal(err)
+			}
+			var actualJSON map[string]any
+			var expectJSON map[string]any
+			if err := json.Unmarshal(rdjson, &actualJSON); err != nil {
+				t.Fatal(err)
+			}
+			if err := json.Unmarshal([]byte(fixture[1]), &expectJSON); err != nil {
+				t.Fatal(err)
+			}
+			expectJSON["originalOutput"] = actualJSON["originalOutput"]
+			if diff := cmp.Diff(actualJSON, expectJSON); diff != "" {
+				t.Errorf("fixtures[%d] (-got, +want):\n%s", i, diff)
 			}
 		}
 	}
@@ -121,8 +127,7 @@ var fixtures = [][]string{{
 	"code": {
 		"value": "rule_id",
 		"url": "https://example.com"
-	},
-	"originalOutput": "src/MyClass.kt:10:5: warning: result message (rule_id)"
+	}
 }`},
 	{`{
 	"runs": [
@@ -184,8 +189,7 @@ var fixtures = [][]string{{
 	},
 	"code": {
 		"value": "rule_id"
-	},
-	"originalOutput": "src/MyClass.kt:10:1: error: message (rule_id)"
+	}
 }`},
 	{`{
 	"runs": [
@@ -270,7 +274,85 @@ var fixtures = [][]string{{
 			},
 			"text": "// "
 		}
-	],
-	"originalOutput": "src/MyClass.kt:10:1: : message (rule_id)"
+	]
+}`},
+	{fmt.Sprintf(`{
+	"runs": [
+	  {
+		"originalUriBaseIds": {
+			"ROOTPATH": {
+			  "uri": "%s"
+			}
+		  },
+		"tool": {
+		  "driver": {
+			"name": "Trivy",
+			"informationUri": "https://github.com/aquasecurity/trivy",
+			"fullName": "Trivy Vulnerability Scanner",
+			"version": "0.15.0",
+			"rules": [
+			  {
+				"id": "CVE-2018-14618/curl",
+				"name": "OS Package Vulnerability (Alpine)",
+				"shortDescription": {
+				  "text": "CVE-2018-14618 Package: curl"
+				},
+				"fullDescription": {
+				  "text": "curl: NTLM password overflow via integer overflow."
+				},
+				"defaultConfiguration": {
+				  "level": "error"
+				},
+				"helpUri": "https://avd.aquasec.com/nvd/cve-2018-14618",
+				"help": {
+				  "text": "Vulnerability CVE-2018-14618\nSeverity: CRITICAL\n...",
+				  "markdown": "**Vulnerability CVE-2018-14618**\n| Severity..."
+				},
+				"properties": {
+				  "tags": [
+					"vulnerability",
+					"CRITICAL",
+					"curl"
+				  ],
+				  "precision": "very-high"
+				}
+			  }
+			]
+		  }
+		},
+		"results": [
+		  {
+			"ruleId": "CVE-2018-14618/curl",
+			"ruleIndex": 0,
+			"level": "error",
+			"message": {
+			  "text": "curl before version 7.61.1 is..."
+			},
+			"locations": [{
+			  "physicalLocation": {
+				"artifactLocation": {
+				  "uri": "knqyf263/vuln-image (alpine 3.7.1)",
+				  "uriBaseId": "ROOTPATH"
+				}
+			  }
+			}]
+		  }]
+	  }
+	]
+  }
+`, basedir()), `{
+	"message": "curl before version 7.61.1 is...",
+	"location": {
+		"path": "knqyf263/vuln-image (alpine 3.7.1)"
+	},
+	"severity": "ERROR",
+	"source": {
+		"name": "Trivy",
+		"url": "https://github.com/aquasecurity/trivy"
+	},
+	"code": {
+		"value": "CVE-2018-14618/curl",
+		"url": "https://avd.aquasec.com/nvd/cve-2018-14618"
+	}
 }`},
 }
