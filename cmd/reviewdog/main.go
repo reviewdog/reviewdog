@@ -7,7 +7,7 @@ import (
 	"flag"
 	"fmt"
 	"io"
-	"log"
+	"log/slog"
 	"net/http"
 	"net/url"
 	"os"
@@ -61,6 +61,7 @@ type option struct {
 	tee              bool
 	filterMode       filter.Mode
 	failOnError      bool
+	logLevel         string
 }
 
 const (
@@ -192,6 +193,7 @@ const (
 		$ export CI_REPO_NAME="reviewdog" # repository name
 `
 	failOnErrorDoc = `Returns 1 as exit code if any errors/warnings found in input`
+	logLevelDoc    = `log level for reviewdog itself. (debug, info, warning, error)`
 )
 
 var opt = &option{}
@@ -213,6 +215,7 @@ func init() {
 	flag.BoolVar(&opt.tee, "tee", false, teeDoc)
 	flag.Var(&opt.filterMode, "filter-mode", filterModeDoc)
 	flag.BoolVar(&opt.failOnError, "fail-on-error", false, failOnErrorDoc)
+	flag.StringVar(&opt.logLevel, "log-level", "info", logLevelDoc)
 }
 
 func usage() {
@@ -222,6 +225,29 @@ func usage() {
 	fmt.Fprintln(os.Stderr, "")
 	fmt.Fprintln(os.Stderr, "See https://github.com/reviewdog/reviewdog for more detail.")
 	os.Exit(2)
+}
+
+func configureLogger(ctx context.Context, logLevel string) {
+	var lv slog.Level
+	switch logLevel {
+	case "debug":
+		lv = slog.LevelDebug
+	case "info":
+		lv = slog.LevelInfo
+	case "warning":
+		lv = slog.LevelWarn
+	case "error":
+		lv = slog.LevelError
+	default:
+		slog.WarnContext(ctx, "unknown log level", "log-level", logLevel)
+	}
+
+	opts := &slog.HandlerOptions{
+		Level: lv,
+	}
+	h := slog.NewTextHandler(os.Stderr, opts)
+	logger := slog.New(h)
+	slog.SetDefault(logger)
 }
 
 func main() {
@@ -235,6 +261,8 @@ func main() {
 
 func run(r io.Reader, w io.Writer, opt *option) error {
 	ctx := context.Background()
+
+	configureLogger(ctx, opt.logLevel)
 
 	if opt.version {
 		fmt.Fprintln(w, commands.Version)
@@ -362,7 +390,7 @@ func run(r io.Reader, w io.Writer, opt *option) error {
 			// filtering of annotations dividing them in two groups:
 			// - This pull request (10)
 			// - All (50)
-			log.Printf("reviewdog: [bitbucket-code-report] supports only with filter.ModeNoFilter for now")
+			slog.WarnContext(ctx, "reviewdog: [bitbucket-code-report] supports only with filter.ModeNoFilter for now")
 		}
 		opt.filterMode = filter.ModeNoFilter
 		ds = &reviewdog.EmptyDiff{}
@@ -372,7 +400,7 @@ func run(r io.Reader, w io.Writer, opt *option) error {
 			return err
 		}
 		if !isPR {
-			fmt.Fprintln(os.Stderr, "reviewdog: this is not PullRequest build.")
+			slog.ErrorContext(ctx, "reviewdog: this is not PullRequest build.")
 			return nil
 		}
 		cs = reviewdog.MultiCommentService(gs, cs)
