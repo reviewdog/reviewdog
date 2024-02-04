@@ -14,6 +14,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ### :bug: Fixes
 - [#1651](https://github.com/reviewdog/reviewdog/pull/1651) Revert #1576: Support `--filter-mode=file` in `github-pr-review`. Reasons: #1645
 - [#1653](https://github.com/reviewdog/reviewdog/pull/1653) fix: SARIF parser: parse with no region result. fix originalOutput field
+- [#1657](https://github.com/reviewdog/reviewdog/pull/1657) Fix sending incorrect line numbers to BitBucket Server Code Insight API. (fixes #1652)
 - ...
 
 ### :rotating_light: Breaking changes
