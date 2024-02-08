@@ -12,13 +12,18 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - ...
 
 ### :bug: Fixes
-- [#1651](https://github.com/reviewdog/reviewdog/pull/1651) Revert #1576: Support `--filter-mode=file` in `github-pr-review`. Reasons: #1645
-- [#1653](https://github.com/reviewdog/reviewdog/pull/1653) fix: SARIF parser: parse with no region result. fix originalOutput field
-- [#1657](https://github.com/reviewdog/reviewdog/pull/1657) Fix sending incorrect line numbers to BitBucket Server Code Insight API. (fixes #1652)
 - ...
 
 ### :rotating_light: Breaking changes
 - ...
+
+
+## [v0.17.1] - 2024-02-08
+
+### :bug: Fixes
+- [#1651](https://github.com/reviewdog/reviewdog/pull/1651) Revert #1576: Support `--filter-mode=file` in `github-pr-review`. Reasons: [#1645](https://github.com/reviewdog/reviewdog/pull/1645)
+- [#1653](https://github.com/reviewdog/reviewdog/pull/1653) fix: SARIF parser: parse with no region result. fix originalOutput field
+- [#1657](https://github.com/reviewdog/reviewdog/pull/1657) Fix sending incorrect line numbers to BitBucket Server Code Insight API. (fixes #1652)
 
 ## [v0.17.0] - 2024-01-22
 
@@ -175,7 +180,7 @@ $ cd subdir/ && reviewdog -filter-mode=file -fail-on-error -reporter=github-pr-r
 
 See https://github.com/reviewdog/reviewdog/releases for older release note.
 
-[Unreleased]: https://github.com/reviewdog/reviewdog/compare/v0.16.0...HEAD
+[Unreleased]: https://github.com/reviewdog/reviewdog/compare/v0.17.1...HEAD
 [v0.10.0]: https://github.com/reviewdog/reviewdog/compare/v0.9.17...v0.10.0
 [v0.10.1]: https://github.com/reviewdog/reviewdog/compare/v0.10.0...v0.10.1
 [v0.10.2]: https://github.com/reviewdog/reviewdog/compare/v0.10.1...v0.10.2
@@ -188,4 +193,6 @@ See https://github.com/reviewdog/reviewdog/releases for older release note.
 [v0.14.2]: https://github.com/reviewdog/reviewdog/compare/v0.14.1...v0.14.2
 [v0.15.0]: https://github.com/reviewdog/reviewdog/compare/v0.14.2...v0.15.0
 [v0.16.0]: https://github.com/reviewdog/reviewdog/compare/v0.15.0...v0.16.0
+[v0.17.0]: https://github.com/reviewdog/reviewdog/compare/v0.16.0...v0.17.0
+[v0.17.1]: https://github.com/reviewdog/reviewdog/compare/v0.17.0...v0.17.1
 [@haya14busa]: https://github.com/haya14busa
