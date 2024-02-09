@@ -350,7 +350,7 @@ func listAllPullRequestsComments(ctx context.Context, cli *github.Client,
 }
 
 func buildBody(c *reviewdog.Comment) string {
-	cbody := commentutil.GitHubAlertComemnt(c)
+	cbody := commentutil.GitHubAlertComment(c)
 	if suggestion := buildSuggestions(c); suggestion != "" {
 		cbody += "\n" + suggestion
 	}

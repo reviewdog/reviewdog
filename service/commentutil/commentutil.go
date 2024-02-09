@@ -100,7 +100,7 @@ func severity(c *reviewdog.Comment) string {
 
 // GitHubAlertComment creates a markdown comment using GitHub Alerts syntax.
 // https://docs.github.com/en/get-started/writing-on-github/getting-started-with-writing-and-formatting-on-github/basic-writing-and-formatting-syntax#alerts
-func GitHubAlertComemnt(c *reviewdog.Comment) string {
+func GitHubAlertComment(c *reviewdog.Comment) string {
 	var sb strings.Builder
 	alert := githubAlert(c)
 	if alert != "" {
@@ -117,6 +117,7 @@ func GitHubAlertComemnt(c *reviewdog.Comment) string {
 			sb.WriteString(fmt.Sprintf("<%s> ", code))
 		}
 	}
+	sb.WriteRune('\n')
 	sb.WriteString(c.Result.Diagnostic.GetMessage())
 	sb.WriteString("<p align='right'>")
 	sb.WriteString(BodyPrefix)
