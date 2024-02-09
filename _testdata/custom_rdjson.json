@@ -82,7 +82,7 @@
         "path": "_testdata/custom.txt",
         "range": {
           "start": {
-            "line": 3,
+            "line": 20,
             "column": 5
           }
         }
@@ -90,12 +90,12 @@
       "severity": "INFO"
     },
     {
-      "message": "severity test 2 (INFO)",
+      "message": "severity test 2 (INFO by number)",
       "location": {
         "path": "_testdata/custom.txt",
         "range": {
           "start": {
-            "line": 3,
+            "line": 20,
             "column": 4
           }
         }
@@ -108,7 +108,7 @@
         "path": "_testdata/custom.txt",
         "range": {
           "start": {
-            "line": 3,
+            "line": 20,
             "column": 5
           }
         }
@@ -121,7 +121,7 @@
         "path": "_testdata/custom.txt",
         "range": {
           "start": {
-            "line": 3,
+            "line": 20,
             "column": 5
           }
         }
