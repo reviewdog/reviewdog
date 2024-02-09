@@ -100,7 +100,7 @@
           }
         }
       },
-      "severity": 2
+      "severity": 1
     },
     {
       "message": "severity test 3 (WARNING)",
