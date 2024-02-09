@@ -49,7 +49,7 @@ func (lw *GitHubActionLogWriter) Flush(_ context.Context) error {
 // annotations.
 // https://help.github.com/en/actions/automating-your-workflow-with-github-actions/development-tools-for-github-actions#example-5
 func ReportAsGitHubActionsLog(toolName, defaultLevel string, d *rdf.Diagnostic) {
-	mes := fmt.Sprintf("[%s] reported by reviewdog 🐶\n%s\n\nRaw Output:\n%s",
+	mes := fmt.Sprintf("[%s]\n%s\n\nRaw Output:\n%s",
 		toolName, d.GetMessage(), d.GetOriginalOutput())
 	loc := d.GetLocation()
 	start := loc.GetRange().GetStart()
