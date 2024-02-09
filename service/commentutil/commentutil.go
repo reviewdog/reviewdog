@@ -119,13 +119,7 @@ func GitHubAlertComment(c *reviewdog.Comment) string {
 	}
 	sb.WriteRune('\n')
 	sb.WriteString(c.Result.Diagnostic.GetMessage())
-	sb.WriteString("<p align='right'>")
-	sb.WriteString(BodyPrefix)
-	sb.WriteString("</p>")
-	if alert == "" {
-		return sb.String()
-	}
-	return toMarkdownQuote(sb.String())
+	return toMarkdownQuote(sb.String()) + "\n<p align='right'>" + BodyPrefix + "</p>"
 }
 
 func toMarkdownQuote(str string) string {
