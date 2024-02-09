@@ -498,7 +498,7 @@ github-pr-annotations uses the GitHub Actions annotation format to output errors
 and warnings to `stdout` e.g.
 
 ```
-::error line=11,col=41,file=app/index.md::[vale] reported by reviewdog 🐶%0A[demo.Spelling] Did you really mean 'boobarbaz'?%0A%0ARaw Output:%0A{"message": "[demo.Spelling] Did you really mean 'boobarbaz'?", "location": {"path": "app/index.md", "range": {"start": {"line": 11, "column": 41}}}, "severity": "ERROR"}
+::error line=11,col=41,file=app/index.md::[vale]%0A[demo.Spelling] Did you really mean 'boobarbaz'?%0A%0ARaw Output:%0A{"message": "[demo.Spelling] Did you really mean 'boobarbaz'?", "location": {"path": "app/index.md", "range": {"start": {"line": 11, "column": 41}}}, "severity": "ERROR"}
 ```
 
 This reporter requires a valid GitHub API token to generate a diff, but will not
