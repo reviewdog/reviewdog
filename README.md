@@ -682,6 +682,7 @@ You can use public GitHub Actions to start using reviewdog with ease! :tada: :ar
   - [tsuyoshicho/action-vimlint](https://github.com/tsuyoshicho/action-vimlint) - Run [vim-vimlint](https://github.com/syngan/vim-vimlint)
 - Terraform
   - [reviewdog/action-tflint](https://github.com/reviewdog/action-tflint) - Run [tflint](https://github.com/terraform-linters/tflint).
+  - [reviewdog/action-terraform-validate](https://github.com/reviewdog/action-terraform-validate) - Run [terraform validate](https://developer.hashicorp.com/terraform/cli/commands/validate).
 - YAML
   - [reviewdog/action-yamllint](https://github.com/reviewdog/action-yamllint) - Run [yamllint](https://github.com/adrienverge/yamllint).
 - Ruby
