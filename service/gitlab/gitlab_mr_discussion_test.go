@@ -293,7 +293,7 @@ func TestGitLabMergeRequestDiscussionCommenter_Post_Flush_review_api(t *testing.
 			t.Errorf("unexpected access: %v %v", r.Method, r.URL)
 		}
 	})
-	mux.HandleFunc("/api/v4/projects/o/r/merge_requests/14", func(w http.ResponseWriter, r *http.Request) {
+	mux.HandleFunc("/api/v4/projects/o%2Fr/merge_requests/14", func(w http.ResponseWriter, r *http.Request) {
 		if r.Method != http.MethodGet {
 			t.Errorf("unexpected access: %v %v", r.Method, r.URL)
 		}

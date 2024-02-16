@@ -3,6 +3,7 @@ package gitlab
 import (
 	"context"
 	"fmt"
+	"net/url"
 	"os"
 	"os/exec"
 	"strings"
@@ -37,7 +38,7 @@ func NewGitLabMergeRequestDiff(cli *gitlab.Client, owner, repo string, pr int, s
 		cli:      cli,
 		pr:       pr,
 		sha:      sha,
-		projects: owner + "/" + repo,
+		projects: url.QueryEscape(owner + "/" + repo),
 		wd:       workDir,
 	}, nil
 }

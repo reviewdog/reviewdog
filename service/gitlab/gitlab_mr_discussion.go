@@ -3,6 +3,7 @@ package gitlab
 import (
 	"context"
 	"fmt"
+	"net/url"
 	"path/filepath"
 	"strconv"
 	"strings"
@@ -52,7 +53,7 @@ func NewGitLabMergeRequestDiscussionCommenter(cli *gitlab.Client, owner, repo st
 		cli:      cli,
 		pr:       pr,
 		sha:      sha,
-		projects: owner + "/" + repo,
+		projects: url.QueryEscape(owner + "/" + repo),
 		wd:       workDir,
 	}, nil
 }
