@@ -20,7 +20,7 @@ require (
 	github.com/reva2/bitbucket-insights-api v1.0.0
 	github.com/reviewdog/errorformat v0.0.0-20231214114315-6dd01ea41b1f
 	github.com/reviewdog/go-bitbucket v0.0.0-20201024094602-708c3f6a7de0
-	github.com/stretchr/testify v1.8.4
+	github.com/stretchr/testify v1.9.0
 	github.com/vvakame/sdlog v1.2.0
 	github.com/xanzy/go-gitlab v0.98.0
 	go.opencensus.io v0.24.0
@@ -54,7 +54,7 @@ require (
 	github.com/jmespath/go-jmespath v0.4.0 // indirect
 	github.com/pmezard/go-difflib v1.0.0 // indirect
 	github.com/prometheus/prometheus v2.5.0+incompatible // indirect
-	github.com/stretchr/objx v0.5.0 // indirect
+	github.com/stretchr/objx v0.5.2 // indirect
 	golang.org/x/crypto v0.19.0 // indirect
 	golang.org/x/net v0.21.0 // indirect
 	golang.org/x/sys v0.17.0 // indirect
