@@ -10,7 +10,6 @@ require (
 	github.com/bradleyfalzon/ghinstallation/v2 v2.9.0
 	github.com/golang/protobuf v1.5.4
 	github.com/google/go-cmp v0.6.0
-	github.com/google/go-github/v58 v58.0.0
 	github.com/google/go-github/v60 v60.0.0
 	github.com/haya14busa/go-actions-toolkit v0.0.0-20200105081403-ca0307860f01
 	github.com/haya14busa/secretbox v0.0.0-20180525171038-07c7ecf409f5
