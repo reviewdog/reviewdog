@@ -11,7 +11,6 @@ require (
 	github.com/golang/protobuf v1.5.4
 	github.com/google/go-cmp v0.6.0
 	github.com/google/go-github/v58 v58.0.0
-	github.com/google/go-github/v60 v60.0.0
 	github.com/haya14busa/go-actions-toolkit v0.0.0-20200105081403-ca0307860f01
 	github.com/haya14busa/secretbox v0.0.0-20180525171038-07c7ecf409f5
 	github.com/justinas/nosurf v1.1.1
@@ -19,7 +18,7 @@ require (
 	github.com/mattn/go-shellwords v1.0.12
 	github.com/rakyll/statik v0.1.7
 	github.com/reva2/bitbucket-insights-api v1.0.0
-	github.com/reviewdog/errorformat v0.0.0-20231214114315-6dd01ea41b1f
+	github.com/reviewdog/errorformat v0.0.0-20240311054359-739e471a49b3
 	github.com/reviewdog/go-bitbucket v0.0.0-20201024094602-708c3f6a7de0
 	github.com/stretchr/testify v1.9.0
 	github.com/vvakame/sdlog v1.2.0
