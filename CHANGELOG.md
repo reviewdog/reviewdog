@@ -17,6 +17,10 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ### :rotating_light: Breaking changes
 - ...
 
+## [v0.17.2] - 2024-03-11
+
+### :bug: Fixes
+- [#933](https://github.com/reviewdog/reviewdog/issues/933) Fix go vet errorformat
 
 ## [v0.17.1] - 2024-02-08
 
@@ -195,4 +199,5 @@ See https://github.com/reviewdog/reviewdog/releases for older release note.
 [v0.16.0]: https://github.com/reviewdog/reviewdog/compare/v0.15.0...v0.16.0
 [v0.17.0]: https://github.com/reviewdog/reviewdog/compare/v0.16.0...v0.17.0
 [v0.17.1]: https://github.com/reviewdog/reviewdog/compare/v0.17.0...v0.17.1
+[v0.17.2]: https://github.com/reviewdog/reviewdog/compare/v0.17.1...v0.17.2
 [@haya14busa]: https://github.com/haya14busa
