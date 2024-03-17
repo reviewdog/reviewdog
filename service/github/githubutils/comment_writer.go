@@ -95,5 +95,5 @@ Limitation:
 - 50 annotations per job (sum of annotations from all the steps)
 - 50 annotations per run (separate from the job annotations, these annotations aren't created by users)
 
-Source: https://github.community/t5/GitHub-Actions/Maximum-number-of-annotations-that-can-be-created-using-GitHub/m-p/39085`, nil)
+Source: https://github.com/orgs/community/discussions/26680#discussioncomment-3252835`, nil)
 }
