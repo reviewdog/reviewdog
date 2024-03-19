@@ -59,7 +59,7 @@ func NewCloudAPIClient(isInPipeline bool, isInPipe bool) APIClient {
 
 		server = bbapi.ServerConfiguration{
 			URL:         "http://api.bitbucket.org/2.0",
-			Description: `If if called from Bitbucket Pipelines, using HTTP API endpoint and AuthProxy`,
+			Description: `If called from Bitbucket Pipelines, using HTTP API endpoint and AuthProxy`,
 		}
 	}
 
