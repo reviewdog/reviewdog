@@ -549,3 +549,16 @@ func absPath(t *testing.T, path string) string {
 	}
 	return p
 }
+
+func TestGetDiff(t *testing.T) {
+	cleanup := setupEnvs(map[string]string{
+		"GITHUB_ACTIONS":    "",
+		"GITHUB_EVENT_PATH": "",
+	})
+	defer cleanup()
+	diff, err := getDiff(context.Background(), "haya14busa", "reviewdog", 14, "1414")
+	if err != nil {
+		t.Errorf("getDiff failed: %v", err)
+	}
+	want := `diff --git a/README.md b/README.md
+}
