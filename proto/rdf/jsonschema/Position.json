@@ -1,0 +1,21 @@
+{
+    "$schema": "http://json-schema.org/draft-04/schema#",
+    "$ref": "#/definitions/Position",
+    "definitions": {
+        "Position": {
+            "properties": {
+                "line": {
+                    "type": "integer",
+                    "description": "Line number, starting at 1. Optional."
+                },
+                "column": {
+                    "type": "integer",
+                    "description": "Column number, starting at 1 (byte count in UTF-8). Example: 'a𐐀b'  The column of a: 1  The column of 𐐀: 2  The column of b: 6 since 𐐀 is represented with 4 bytes in UTF-8. Optional."
+                }
+            },
+            "additionalProperties": true,
+            "type": "object",
+            "title": "Position"
+        }
+    }
+}

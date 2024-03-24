@@ -9,11 +9,8 @@ RUN curl -OL https://github.com/protocolbuffers/protobuf/releases/download/v${PR
     unzip -o protoc-${PROTOC_VERSION}-linux-x86_64.zip -d /usr/local include/* && \
     rm -rf protoc-${PROTOC_VERSION}-linux-x86_64.zip
 
-RUN go get -u google.golang.org/protobuf/cmd/protoc-gen-go && \
-    go get github.com/chrusty/protoc-gen-jsonschema/cmd/protoc-gen-jsonschema
-
-RUN mkdir /workdir
-WORKDIR /workdir
+RUN go install google.golang.org/protobuf/cmd/protoc-gen-go@latest && \
+    go install github.com/chrusty/protoc-gen-jsonschema/cmd/protoc-gen-jsonschema@latest
 
 COPY entrypoint.sh /entrypoint.sh
-ENTRYPOINT ["/entrypoint.sh"]
+ENTRYPOINT ["./entrypoint.sh"]

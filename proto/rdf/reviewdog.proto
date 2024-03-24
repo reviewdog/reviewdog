@@ -71,6 +71,10 @@ enum Severity {
   ERROR = 1;
   WARNING = 2;
   INFO = 3;
+  // TIP and IMPORTANT is inspired by GitHub Alerts Markdown syntax
+  // https://docs.github.com/en/get-started/writing-on-github/getting-started-with-writing-and-formatting-on-github/basic-writing-and-formatting-syntax#alerts
+  TIP = 4;
+  IMPORTANT = 5;
 }
 
 message Location {

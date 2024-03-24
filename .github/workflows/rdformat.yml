@@ -1,0 +1,13 @@
+name: RDFormat
+on: [push,pull_request]
+jobs:
+  build:
+    name: Built
+    runs-on: ubuntu-latest
+    steps:
+    - uses: actions/checkout@v4
+    - name: Build
+      working-directory: proto/rdf/
+      run: ./update.sh
+    - name: Check diff
+      run: git diff --exit-code
