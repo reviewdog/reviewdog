@@ -41,6 +41,7 @@ func (g *GitHubInstallationDatastore) Put(ctx context.Context, inst *GitHubInsta
 	if err != nil {
 		return err
 	}
+	defer d.Close()
 	_, err = d.RunInTransaction(ctx, func(t *datastore.Transaction) error {
 		var foundInst GitHubInstallation
 		var ok bool
@@ -68,6 +69,7 @@ func (g *GitHubInstallationDatastore) Get(ctx context.Context, accountName strin
 	if err != nil {
 		return false, nil, err
 	}
+	defer d.Close()
 	if err := d.Get(ctx, key, inst); err != nil {
 		if err == datastore.ErrNoSuchEntity {
 			return false, nil, nil

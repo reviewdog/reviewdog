@@ -44,6 +44,7 @@ func (g *GitHubRepoTokenDatastore) Put(ctx context.Context, token *GitHubReposit
 	if err != nil {
 		return err
 	}
+	defer d.Close()
 	_, err = d.Put(ctx, key, token)
 	return err
 }
@@ -55,6 +56,7 @@ func (g *GitHubRepoTokenDatastore) Get(ctx context.Context, owner, repo string) 
 	if err != nil {
 		return false, nil, err
 	}
+	defer d.Close()
 	if err := d.Get(ctx, key, token); err != nil {
 		if err == datastore.ErrNoSuchEntity {
 			return false, nil, nil
