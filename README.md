@@ -604,6 +604,9 @@ jobs:
     name: reviewdog
     runs-on: ubuntu-latest
     steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0 # In order to take diff, commits other than the target are also required
       # ...
       - uses: reviewdog/action-setup@v1
         with:
@@ -637,6 +640,9 @@ jobs:
     name: reviewdog
     runs-on: ubuntu-latest
     steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0 # In order to take diff, commits other than the target are also required
       # ...
       - name: Run reviewdog
         env:

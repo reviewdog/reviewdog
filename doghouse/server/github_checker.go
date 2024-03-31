@@ -2,7 +2,9 @@ package server
 
 import (
 	"context"
+	"fmt"
 	"io"
+	"os/exec"
 	"time"
 
 	"github.com/google/go-github/v60/github"
@@ -20,9 +22,17 @@ type checkerGitHubClient struct {
 }
 
 func (c *checkerGitHubClient) GetPullRequestDiff(ctx context.Context, owner, repo string, number int) ([]byte, error) {
-	opt := github.RawOptions{Type: github.Diff}
-	d, _, err := c.PullRequests.GetRaw(ctx, owner, repo, number, opt)
-	return []byte(d), err
+	pr, _, err := c.PullRequests.Get(ctx, owner, repo, number)
+	if err != nil {
+		return nil, err
+	}
+
+	bytes, err := exec.Command("git", "diff", "--find-renames", pr.GetBase().GetSHA(), pr.GetHead().GetSHA()).CombinedOutput()
+	if err != nil {
+		return nil, fmt.Errorf("failed to run git diff: %s%w", bytes, err)
+	}
+
+	return bytes, nil
 }
 
 func (c *checkerGitHubClient) CreateCheckRun(ctx context.Context, owner, repo string, opt github.CreateCheckRunOptions) (*github.CheckRun, error) {

@@ -101,55 +101,23 @@ func TestGitHubPullRequest_Diff(t *testing.T) {
 		t.Skip(notokenSkipTestMes)
 	}
 
-	want := `diff --git a/diff.go b/diff.go
-index b380b67..6abc0f1 100644
---- a/diff.go
-+++ b/diff.go
-@@ -4,6 +4,9 @@ import (
- 	"os/exec"
- )
+	want := `diff --git a/.codecov.yml b/.codecov.yml
+index aa49124..781ee24 100644
+--- a/.codecov.yml
++++ b/.codecov.yml
+@@ -7,5 +7,4 @@ coverage:
+       default:
+         target: 0%
  
-+func TestNewExportedFunc() {
-+}
-+
- var _ DiffService = &DiffString{}
- 
- type DiffString struct {
-diff --git a/reviewdog.go b/reviewdog.go
-index 61450f3..f63f149 100644
---- a/reviewdog.go
-+++ b/reviewdog.go
-@@ -10,18 +10,18 @@ import (
- 	"github.com/reviewdog/reviewdog/diff"
- )
- 
-+var TestExportedVarWithoutComment = 1
-+
-+func NewReviewdog(p Parser, c CommentService, d DiffService) *Reviewdog {
-+	return &Reviewdog{p: p, c: c, d: d}
-+}
-+
- type Reviewdog struct {
- 	p Parser
- 	c CommentService
- 	d DiffService
- }
- 
--func NewReviewdog(p Parser, c CommentService, d DiffService) *Reviewdog {
--	return &Reviewdog{p: p, c: c, d: d}
--}
--
--// CheckResult represents a checked result of static analysis tools.
--// :h error-file-format
- type CheckResult struct {
- 	Path    string   // file path
- 	Lnum    int      // line number
+-comment:
+-  layout: "header"
++comment: false
 `
 
-	// https://github.com/reviewdog/reviewdog/pull/2
+	// https://github.com/reviewdog/reviewdog/pull/73
 	owner := "haya14busa"
 	repo := "reviewdog"
-	pr := 2
+	pr := 73
 	g, err := NewGitHubPullRequest(client, owner, repo, pr, "", "warning")
 	if err != nil {
 		t.Fatal(err)
@@ -1312,10 +1280,28 @@ func TestGitHubPullRequest_Diff_fake(t *testing.T) {
 		if r.Method != http.MethodGet {
 			t.Errorf("unexpected access: %v %v", r.Method, r.URL)
 		}
-		if accept := r.Header.Get("Accept"); !strings.Contains(accept, "diff") {
+		if accept := r.Header.Get("Accept"); accept != "application/vnd.github.v3+json" {
 			t.Errorf("Accept header doesn't contain 'diff': %v", accept)
 		}
-		w.Write([]byte("Pull Request diff"))
+
+		headSHA := "HEAD^"
+		baseSHA := "HEAD"
+
+		pullRequestJSON, err := json.Marshal(github.PullRequest{
+			Head: &github.PullRequestBranch{
+				SHA: &headSHA,
+			},
+			Base: &github.PullRequestBranch{
+				SHA: &baseSHA,
+			},
+		})
+		if err != nil {
+			t.Fatal(err)
+		}
+
+		if _, err := w.Write(pullRequestJSON); err != nil {
+			t.Fatal(err)
+		}
 	})
 	ts := httptest.NewServer(mux)
 	defer ts.Close()
