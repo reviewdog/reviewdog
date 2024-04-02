@@ -32,20 +32,20 @@ jobs:
         env:
           REVIEWDOG_GITHUB_API_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         run: |
-          golint ./... | reviewdog -f=golint -name=golint-github-check -level=warning
+          golint ./... | reviewdog -f=golint -name=golint-github-check -diff="git diff ${{github.base_ref}} ${{github.head_ref}}" -level=warning
 
       - name: Run reviewdog with sub-dir (github-check)
         env:
           REVIEWDOG_GITHUB_API_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         run: |
-          cd ./_testdata/ && golint ./... | reviewdog -f=golint -name=golint-check-subdir -level=info -filter-mode=nofilter
+          cd ./_testdata/ && golint ./... | reviewdog -f=golint -name=golint-check-subdir -diff="git diff ${{github.base_ref}} ${{github.head_ref}}" -level=info -filter-mode=nofilter
 
       - name: Custom rdjson test (github-check)
         env:
           REVIEWDOG_GITHUB_API_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         run: |
           cat ./_testdata/custom_rdjson.json | \
-            reviewdog -name="custom-rdjson" -f=rdjson -level=info
+            reviewdog -name="custom-rdjson" -f=rdjson -diff="git diff ${{github.base_ref}} ${{github.head_ref}}" -level=info
 
   reviewdog-pr:
     permissions:
@@ -132,7 +132,7 @@ jobs:
           REVIEWDOG_GITHUB_API_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         run: |
           cd ./_testdata/ && reviewdog -conf=reviewdog_error.yml \
-             || EXIT_CODE=$?
+            -diff="git diff ${{github.base_ref}} ${{github.head_ref}}" || EXIT_CODE=$?
           test "${EXIT_CODE}" = 1
       - name: Unexpected failure (local)
         run: |
@@ -257,7 +257,7 @@ jobs:
           REVIEWDOG_GITHUB_API_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         run: |
           npx textlint -f checkstyle README.md | \
-            reviewdog -f=checkstyle -name="textlint" -level=info
+            reviewdog -f=checkstyle -name="textlint" -diff="git diff ${{github.base_ref}} ${{github.head_ref}}" -level=info
 
   sarif:
     name: runner / textlint sarif
@@ -271,4 +271,4 @@ jobs:
           REVIEWDOG_GITHUB_API_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         run: |
           npx textlint -f @microsoft/eslint-formatter-sarif README.md | \
-            reviewdog -f=sarif -name="textlint" -level=info
+            reviewdog -f=sarif -name="textlint" -diff="git diff ${{github.base_ref}} ${{github.head_ref}}" -level=info
