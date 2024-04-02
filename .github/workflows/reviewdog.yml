@@ -30,7 +30,11 @@ jobs:
         run: |
           go install ./cmd/reviewdog
 
-      - run: echo "REVIEWDOG_FLAG=-diff='git diff ${{github.event.pull_request.base.sha}} ${{github.event.pull_request.head.sha}}'" >> $GITHUB_ENV
+      - if: github.repository == github.event.pull_request.head.repo.full_name
+        run: echo "REVIEWDOG_FLAG=-diff='git diff ${{github.event.pull_request.base.sha}} ${{github.event.pull_request.head.sha}}'" >> $GITHUB_ENV
+
+      - if: github.repository != github.event.pull_request.head.repo.full_name
+        run: echo "REVIEWDOG_FLAG=-reporter=github-check" >> $GITHUB_ENV
 
       - name: Run reviewdog
         env:
@@ -133,7 +137,10 @@ jobs:
           cd ./_testdata/ && reviewdog -conf=reviewdog_error.yml \
             -reporter=github-pr-review || EXIT_CODE=$?
           test "${EXIT_CODE}" = 1
-      - run: echo "REVIEWDOG_FLAG=-diff='git diff ${{github.event.pull_request.base.sha}} ${{github.event.pull_request.head.sha}}'" >> $GITHUB_ENV
+      - if: github.repository == github.event.pull_request.head.repo.full_name
+        run: echo "REVIEWDOG_FLAG=-diff='git diff ${{github.event.pull_request.base.sha}} ${{github.event.pull_request.head.sha}}'" >> $GITHUB_ENV
+      - if: github.repository != github.event.pull_request.head.repo.full_name
+        run: echo "REVIEWDOG_FLAG=-reporter=github-check" >> $GITHUB_ENV
       - name: Unexpected failure (github-check)
         env:
           REVIEWDOG_GITHUB_API_TOKEN: ${{ secrets.GITHUB_TOKEN }}
@@ -261,7 +268,10 @@ jobs:
           fetch-depth: 0
       - uses: reviewdog/action-setup@v1
       - run: npm install
-      - run: echo "REVIEWDOG_FLAG=-diff='git diff ${{github.event.pull_request.base.sha}} ${{github.event.pull_request.head.sha}}'" >> $GITHUB_ENV
+      - if: github.repository == github.event.pull_request.head.repo.full_name
+        run: echo "REVIEWDOG_FLAG=-diff='git diff ${{github.event.pull_request.base.sha}} ${{github.event.pull_request.head.sha}}'" >> $GITHUB_ENV
+      - if: github.repository != github.event.pull_request.head.repo.full_name
+        run: echo "REVIEWDOG_FLAG=-reporter=github-check" >> $GITHUB_ENV
       - name: textlint
         env:
           REVIEWDOG_GITHUB_API_TOKEN: ${{ secrets.GITHUB_TOKEN }}
@@ -278,7 +288,10 @@ jobs:
           fetch-depth: 0
       - uses: reviewdog/action-setup@v1
       - run: npm install
-      - run: echo "REVIEWDOG_FLAG=-diff='git diff ${{github.event.pull_request.base.sha}} ${{github.event.pull_request.head.sha}}'" >> $GITHUB_ENV
+      - if: github.repository == github.event.pull_request.head.repo.full_name
+        run: echo "REVIEWDOG_FLAG=-diff='git diff ${{github.event.pull_request.base.sha}} ${{github.event.pull_request.head.sha}}'" >> $GITHUB_ENV
+      - if: github.repository != github.event.pull_request.head.repo.full_name
+        run: echo "REVIEWDOG_FLAG=-reporter=github-check" >> $GITHUB_ENV
       - name: textlint sarif
         env:
           REVIEWDOG_GITHUB_API_TOKEN: ${{ secrets.GITHUB_TOKEN }}
