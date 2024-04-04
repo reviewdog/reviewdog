@@ -26,7 +26,7 @@ require (
 	go.opencensus.io v0.24.0
 	golang.org/x/build v0.0.0-20230906094020-6ed658a430ec
 	golang.org/x/oauth2 v0.19.0
-	golang.org/x/sync v0.6.0
+	golang.org/x/sync v0.7.0
 	google.golang.org/protobuf v1.33.0
 	gopkg.in/yaml.v3 v3.0.1
 )
