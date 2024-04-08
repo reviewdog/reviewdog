@@ -301,6 +301,12 @@ func (g *PullRequest) setPostedComment(ctx context.Context) error {
 
 // Diff returns a diff of PullRequest.
 func (g *PullRequest) Diff(ctx context.Context) ([]byte, error) {
+	opt := github.RawOptions{Type: github.Diff}
+	d, _, err := g.cli.PullRequests.GetRaw(ctx, g.owner, g.repo, g.pr, opt)
+	if err == nil {
+		return []byte(d), nil
+	}
+
 	pr, _, err := g.cli.PullRequests.Get(ctx, g.owner, g.repo, g.pr)
 	if err != nil {
 		return nil, err
