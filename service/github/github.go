@@ -180,10 +180,12 @@ func (g *PullRequest) postAsReviewComment(ctx context.Context) error {
 			if isPermissionError(err) && cienv.IsInGitHubAction() {
 				goto FALLBACK
 			}
+			println("CCCCCCCCCCCCCCCCCCCCC")
 			return err
 		}
 	}
 
+	println("DDDDDDDDDDDDDDDDDDD")
 	return nil
 
 FALLBACK:
@@ -197,9 +199,11 @@ github-pr-check reporter as a fallback.
 
 	for _, c := range rawComments {
 		if err := g.logWriter.Post(ctx, c); err != nil {
+			fmt.Printf("AAAAAAAAAAA\n%v\n", err)
 			return err
 		}
 	}
+	println("BBBBBBBBBBBBBBBBBBBBBB")
 	return g.logWriter.Flush(ctx)
 }
 
