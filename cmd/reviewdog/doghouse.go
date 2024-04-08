@@ -231,7 +231,7 @@ github-pr-check reporter as a fallback.
 			// If it's not running in GitHub Actions and not using the annotation reporter, reviewdog should exit with 1
 			// if there are at least one result in diff regardless of error level.
 			fmt.Printf("AA: %t\n", shouldFail)
-			shouldFail = shouldFail || !cienv.IsInGitHubAction() ||
+			shouldFail = shouldFail || !(cienv.IsInGitHubAction() || useAnnotationReporter) ||
 				!(results.Level == "warning" || results.Level == "info")
 			fmt.Printf("BB: %t\n", shouldFail)
 
