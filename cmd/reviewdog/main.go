@@ -255,6 +255,7 @@ func main() {
 	flag.Parse()
 	if err := run(os.Stdin, os.Stdout, opt); err != nil {
 		fmt.Fprintf(os.Stderr, "reviewdog: %v\n", err)
+		println("GGGGGGGGGGGGGGG")
 		os.Exit(1)
 	}
 }
@@ -300,6 +301,7 @@ func run(r io.Reader, w io.Writer, opt *option) error {
 	default:
 		return fmt.Errorf("unknown -reporter: %s", opt.reporter)
 	case "github-check":
+		println("FFFFFFFFFFFFFFFFF")
 		return runDoghouse(ctx, r, w, opt, isProject, false, false)
 	case "github-pr-check":
 		return runDoghouse(ctx, r, w, opt, isProject, true, false)
