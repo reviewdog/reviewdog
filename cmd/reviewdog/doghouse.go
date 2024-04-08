@@ -236,7 +236,7 @@ github-pr-check reporter as a fallback.
 			fmt.Printf("BB: %t\n", shouldFail)
 
 			// If using the annotation reporter, the action should fail
-			shouldFail = shouldFail || !useAnnotationReporter
+			shouldFail = shouldFail || useAnnotationReporter
 			fmt.Printf("CC: %t\n", shouldFail)
 
 			if foundNumOverall == githubutils.MaxLoggingAnnotationsPerStep {
