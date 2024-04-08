@@ -306,7 +306,16 @@ func (g *PullRequest) Diff(ctx context.Context) ([]byte, error) {
 		return nil, err
 	}
 
-	bytes, err := exec.Command("git", "diff", "--find-renames", pr.GetBase().GetSHA(), pr.GetHead().GetSHA()).CombinedOutput()
+	headSha := pr.GetHead().GetSHA()
+
+	mergeBaseBytes, err := exec.Command("git", "merge-base", headSha, pr.GetBase().GetSHA()).Output()
+	if err != nil {
+		return nil, fmt.Errorf("failed to get merge-base commit: %w", err)
+	}
+
+	mergeBase := strings.Trim(string(mergeBaseBytes), "\n")
+
+	bytes, err := exec.Command("git", "diff", "--find-renames", mergeBase, headSha).CombinedOutput()
 	if err != nil {
 		return nil, fmt.Errorf("failed to run git diff: %s%w", bytes, err)
 	}
