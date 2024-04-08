@@ -46,6 +46,7 @@ func runDoghouse(ctx context.Context, r io.Reader, w io.Writer, opt *option, isP
 		return err
 	}
 	if foundResultShouldReport := reportResults(w, filteredResultSet, useAnnotationReporter); foundResultShouldReport {
+		println("EEEEEEEEEEEEEEE")
 		return errors.New("found at least one result in diff")
 	}
 	return nil
@@ -199,6 +200,7 @@ so reviewdog will report results via logging command [2] and create annotations 
 github-pr-check reporter as a fallback.
 [1]: https://docs.github.com/en/actions/reference/events-that-trigger-workflows#pull_request_target, 
 [2]: https://help.github.com/en/actions/automating-your-workflow-with-github-actions/development-tools-for-github-actions#logging-commands`)
+		println("DDDDDDDDDDDDDDDDDD")
 	}
 
 	// Sort names to get deterministic result.
