@@ -15,8 +15,6 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
-        with:
-          fetch-depth: 0 # In order to take diff, commits other than the target are also required
 
       - uses: actions/setup-go@v5
         with:
@@ -59,8 +57,6 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
-        with:
-          fetch-depth: 0 # In order to take diff, commits other than the target are also required
 
       - uses: actions/setup-go@v5
         with:
@@ -174,8 +170,6 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
-        with:
-          fetch-depth: 0 # In order to take diff, commits other than the target are also required
       - uses: reviewdog/action-golangci-lint@v2
         with:
           github_token: ${{ secrets.github_token }}
@@ -193,8 +187,6 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
-        with:
-          fetch-depth: 0 # In order to take diff, commits other than the target are also required
       - uses: actions/setup-go@v5
         with:
           go-version-file: "go.mod"
@@ -211,8 +203,6 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
-        with:
-          fetch-depth: 0 # In order to take diff, commits other than the target are also required
       - uses: reviewdog/action-misspell@v1
         with:
           github_token: ${{ secrets.github_token }}
@@ -224,8 +214,6 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
-        with:
-          fetch-depth: 0 # In order to take diff, commits other than the target are also required
       - uses: reviewdog/action-languagetool@v1
         with:
           github_token: ${{ secrets.github_token }}
@@ -241,8 +229,6 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
-        with:
-          fetch-depth: 0 # In order to take diff, commits other than the target are also required
       - uses: reviewdog/action-shellcheck@v1
         with:
           github_token: ${{ secrets.github_token }}
@@ -253,8 +239,6 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
-        with:
-          fetch-depth: 0 # In order to take diff, commits other than the target are also required
       - uses: reviewdog/action-alex@v1
         with:
           github_token: ${{ secrets.github_token }}
@@ -266,8 +250,6 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
-        with:
-          fetch-depth: 0 # In order to take diff, commits other than the target are also required
       - uses: reviewdog/action-setup@v1
       - run: npm install
       - name: textlint
@@ -282,8 +264,6 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
-        with:
-          fetch-depth: 0 # In order to take diff, commits other than the target are also required
       - uses: reviewdog/action-setup@v1
       - run: npm install
       - name: textlint sarif
