@@ -226,13 +226,10 @@ github-pr-check reporter as a fallback.
 				continue
 			}
 			foundNumOverall++
-			// If it's not running in GitHub Actions, reviewdog should exit with 1
+			// If it's not running in GitHub Actions and not using the annotation reporter, reviewdog should exit with 1
 			// if there are at least one result in diff regardless of error level.
-			shouldFail = shouldFail || !cienv.IsInGitHubAction() ||
+			shouldFail = shouldFail || (!cienv.IsInGitHubAction() && !useAnnotationReporter) ||
 				!(results.Level == "warning" || results.Level == "info")
-
-			// If using the annotation reporter, the action should fail
-			shouldFail = shouldFail || !useAnnotationReporter
 
 			if foundNumOverall == githubutils.MaxLoggingAnnotationsPerStep {
 				githubutils.WarnTooManyAnnotationOnce()

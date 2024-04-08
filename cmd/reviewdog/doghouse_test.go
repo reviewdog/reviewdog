@@ -484,9 +484,14 @@ func TestReportResults_inGitHubAction(t *testing.T) {
 				ShouldReport: true,
 			},
 		},
+		Level: "warning",
 	})
 	stdout := new(bytes.Buffer)
-	_ = reportResults(stdout, filteredResultSet, false)
+	foundResultShouldReport := reportResults(stdout, filteredResultSet, false)
+	if foundResultShouldReport {
+		t.Errorf("foundResultShouldReport = %v, want false", foundResultShouldReport)
+	}
+
 	want := `reviewdog: Reporting results for "name1"
 `
 	if got := stdout.String(); got != want {
