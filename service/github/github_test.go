@@ -102,7 +102,7 @@ func TestGitHubPullRequest_Diff(t *testing.T) {
 	}
 
 	want := `diff --git a/.codecov.yml b/.codecov.yml
-index aa49124..781ee24 100644
+index aa49124774..781ee2492f 100644
 --- a/.codecov.yml
 +++ b/.codecov.yml
 @@ -7,5 +7,4 @@ coverage:
@@ -1280,6 +1280,40 @@ func TestGitHubPullRequest_Diff_fake(t *testing.T) {
 		if r.Method != http.MethodGet {
 			t.Errorf("unexpected access: %v %v", r.Method, r.URL)
 		}
+		if accept := r.Header.Get("Accept"); !strings.Contains(accept, "diff") {
+			t.Errorf("Accept header doesn't contain 'diff': %v", accept)
+		}
+		w.Write([]byte("Pull Request diff"))
+	})
+	ts := httptest.NewServer(mux)
+	defer ts.Close()
+
+	cli := github.NewClient(nil)
+	cli.BaseURL, _ = url.Parse(ts.URL + "/")
+	g, err := NewGitHubPullRequest(cli, "o", "r", 14, "sha", "warning")
+	if err != nil {
+		t.Fatal(err)
+	}
+	if _, err := g.Diff(context.Background()); err != nil {
+		t.Fatal(err)
+	}
+	if apiCalled != 1 {
+		t.Errorf("GitHub API should be called once; called %v times", apiCalled)
+	}
+}
+
+func TestGitHubPullRequest_Diff_fake_fallback(t *testing.T) {
+	apiCalled := 0
+	mux := http.NewServeMux()
+	mux.HandleFunc("/repos/o/r/pulls/14", func(w http.ResponseWriter, r *http.Request) {
+		apiCalled++
+		if r.Method != http.MethodGet {
+			t.Errorf("unexpected access: %v %v", r.Method, r.URL)
+		}
+		if accept := r.Header.Get("Accept"); strings.Contains(accept, "diff") {
+			w.WriteHeader(http.StatusNotAcceptable)
+			return
+		}
 		if accept := r.Header.Get("Accept"); accept != "application/vnd.github.v3+json" {
 			t.Errorf("Accept header doesn't contain 'diff': %v", accept)
 		}
@@ -1315,8 +1349,8 @@ func TestGitHubPullRequest_Diff_fake(t *testing.T) {
 	if _, err := g.Diff(context.Background()); err != nil {
 		t.Fatal(err)
 	}
-	if apiCalled != 1 {
-		t.Errorf("GitHub API should be called once; called %v times", apiCalled)
+	if apiCalled != 2 {
+		t.Errorf("GitHub API should be called twice; called %v times", apiCalled)
 	}
 }
 
