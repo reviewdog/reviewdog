@@ -311,7 +311,6 @@ func (g *PullRequest) Diff(ctx context.Context) ([]byte, error) {
 
 		return nil, err
 	}
-
 	return []byte(d), nil
 }
 
