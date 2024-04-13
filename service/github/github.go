@@ -303,14 +303,20 @@ func (g *PullRequest) setPostedComment(ctx context.Context) error {
 func (g *PullRequest) Diff(ctx context.Context) ([]byte, error) {
 	opt := github.RawOptions{Type: github.Diff}
 	d, resp, err := g.cli.PullRequests.GetRaw(ctx, g.owner, g.repo, g.pr, opt)
-	if err == nil {
-		return []byte(d), nil
-	} else if resp == nil || resp.StatusCode != 406 {
+	if err != nil {
+		if resp != nil && resp.StatusCode == 406 {
+			log.Print("fallback to use git command")
+			return g.diffUsingGitCommand(ctx)
+		}
+
 		return nil, err
 	}
 
-	log.Print("fallback to use git command")
+	return []byte(d), nil
+}
 
+// diffUsingGitCommand returns a diff of PullRequest using git command.
+func (g *PullRequest) diffUsingGitCommand(ctx context.Context) ([]byte, error) {
 	pr, _, err := g.cli.PullRequests.Get(ctx, g.owner, g.repo, g.pr)
 	if err != nil {
 		return nil, err
