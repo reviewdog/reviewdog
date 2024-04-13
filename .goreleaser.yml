@@ -39,7 +39,7 @@ brews:
   - repository:
       owner: reviewdog
       name: homebrew-tap
-    folder: Formula
+    directory: Formula
     homepage: https://github.com/reviewdog/reviewdog
     description: Automated code review tool integrated with any code analysis tools regardless of programming language.
     test: |
