@@ -7,6 +7,7 @@ import (
 	"log"
 	"net/http"
 	"os"
+	"os/exec"
 	"path/filepath"
 	"strings"
 	"sync"
@@ -301,11 +302,40 @@ func (g *PullRequest) setPostedComment(ctx context.Context) error {
 // Diff returns a diff of PullRequest.
 func (g *PullRequest) Diff(ctx context.Context) ([]byte, error) {
 	opt := github.RawOptions{Type: github.Diff}
-	d, _, err := g.cli.PullRequests.GetRaw(ctx, g.owner, g.repo, g.pr, opt)
+	d, resp, err := g.cli.PullRequests.GetRaw(ctx, g.owner, g.repo, g.pr, opt)
 	if err != nil {
+		if resp != nil && resp.StatusCode == http.StatusNotAcceptable {
+			log.Print("fallback to use git command")
+			return g.diffUsingGitCommand(ctx)
+		}
+
 		return nil, err
 	}
 	return []byte(d), nil
+}
+
+// diffUsingGitCommand returns a diff of PullRequest using git command.
+func (g *PullRequest) diffUsingGitCommand(ctx context.Context) ([]byte, error) {
+	pr, _, err := g.cli.PullRequests.Get(ctx, g.owner, g.repo, g.pr)
+	if err != nil {
+		return nil, err
+	}
+
+	headSha := pr.GetHead().GetSHA()
+
+	mergeBaseBytes, err := exec.Command("git", "merge-base", headSha, pr.GetBase().GetSHA()).Output()
+	if err != nil {
+		return nil, fmt.Errorf("failed to get merge-base commit: %w", err)
+	}
+
+	mergeBase := strings.Trim(string(mergeBaseBytes), "\n")
+
+	bytes, err := exec.Command("git", "diff", "--find-renames", mergeBase, headSha).CombinedOutput()
+	if err != nil {
+		return nil, fmt.Errorf("failed to run git diff: %s%w", bytes, err)
+	}
+
+	return bytes, nil
 }
 
 // Strip returns 1 as a strip of git diff.

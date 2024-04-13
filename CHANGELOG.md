@@ -13,6 +13,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### :bug: Fixes
 - Fix: no longer fails if it runs in GitHub Actions and does not use the annotation reporter
+- Add a fallback to `git diff` command to get diff of a GitHub pull request
 
 ### :rotating_light: Breaking changes
 - ...
