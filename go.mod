@@ -3,7 +3,7 @@ module github.com/reviewdog/reviewdog
 go 1.21.7
 
 require (
-	cloud.google.com/go/compute/metadata v0.2.3
+	cloud.google.com/go/compute/metadata v0.3.0
 	cloud.google.com/go/datastore v1.15.0
 	code.gitea.io/sdk/gitea v0.17.1
 	contrib.go.opencensus.io/exporter/stackdriver v0.13.12
@@ -11,7 +11,6 @@ require (
 	github.com/golang/protobuf v1.5.4
 	github.com/google/go-cmp v0.6.0
 	github.com/google/go-github/v60 v60.0.0
-	github.com/google/go-github/v61 v61.0.0
 	github.com/haya14busa/go-actions-toolkit v0.0.0-20200105081403-ca0307860f01
 	github.com/haya14busa/secretbox v0.0.0-20180525171038-07c7ecf409f5
 	github.com/justinas/nosurf v1.1.1
@@ -34,7 +33,6 @@ require (
 
 require (
 	cloud.google.com/go v0.110.7 // indirect
-	cloud.google.com/go/compute v1.23.0 // indirect
 	cloud.google.com/go/monitoring v1.15.1 // indirect
 	cloud.google.com/go/trace v1.10.1 // indirect
 	github.com/aws/aws-sdk-go v1.43.31 // indirect
