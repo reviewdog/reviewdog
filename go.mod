@@ -5,7 +5,7 @@ go 1.21.7
 require (
 	cloud.google.com/go/compute/metadata v0.3.0
 	cloud.google.com/go/datastore v1.15.0
-	code.gitea.io/sdk/gitea v0.17.1
+	code.gitea.io/sdk/gitea v0.18.0
 	contrib.go.opencensus.io/exporter/stackdriver v0.13.12
 	github.com/bradleyfalzon/ghinstallation/v2 v2.10.0
 	github.com/golang/protobuf v1.5.4
@@ -53,9 +53,9 @@ require (
 	github.com/pmezard/go-difflib v1.0.0 // indirect
 	github.com/prometheus/prometheus v2.5.0+incompatible // indirect
 	github.com/stretchr/objx v0.5.2 // indirect
-	golang.org/x/crypto v0.21.0 // indirect
+	golang.org/x/crypto v0.22.0 // indirect
 	golang.org/x/net v0.22.0 // indirect
-	golang.org/x/sys v0.18.0 // indirect
+	golang.org/x/sys v0.19.0 // indirect
 	golang.org/x/text v0.14.0 // indirect
 	golang.org/x/time v0.3.0 // indirect
 	golang.org/x/xerrors v0.0.0-20220907171357-04be3eba64a2 // indirect
