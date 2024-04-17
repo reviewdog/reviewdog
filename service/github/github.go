@@ -333,6 +333,13 @@ func (g *PullRequest) diffUsingGitCommand(ctx context.Context) ([]byte, error) {
 
 	mergeBase := *commits.MergeBaseCommit.SHA
 
+	if os.Getenv("SKIP_GIT_FETCH") != "true" {
+		b, err := exec.Command("git", "fetch", "--depth=1", "origin", mergeBase).CombinedOutput()
+		if err != nil {
+			return nil, fmt.Errorf("failed to run git fetch: %s%w", b, err)
+		}
+	}
+
 	bytes, err := exec.Command("git", "diff", "--find-renames", mergeBase, headSha).CombinedOutput()
 	if err != nil {
 		return nil, fmt.Errorf("failed to run git diff: %s%w", bytes, err)
