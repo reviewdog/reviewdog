@@ -323,12 +323,15 @@ func (g *PullRequest) diffUsingGitCommand(ctx context.Context) ([]byte, error) {
 
 	headSha := pr.GetHead().GetSHA()
 
-	mergeBaseBytes, err := exec.Command("git", "merge-base", headSha, pr.GetBase().GetSHA()).Output()
+	commits, _, err := g.cli.Repositories.CompareCommits(ctx, g.owner, g.repo, headSha, pr.GetBase().GetSHA(), nil)
 	if err != nil {
-		return nil, fmt.Errorf("failed to get merge-base commit: %w", err)
+		return nil, err
+	}
+	if commits == nil || commits.MergeBaseCommit == nil || commits.MergeBaseCommit.SHA == nil {
+		return nil, errors.New("cannot to get merge base commit")
 	}
 
-	mergeBase := strings.Trim(string(mergeBaseBytes), "\n")
+	mergeBase := *commits.MergeBaseCommit.SHA
 
 	bytes, err := exec.Command("git", "diff", "--find-renames", mergeBase, headSha).CombinedOutput()
 	if err != nil {
