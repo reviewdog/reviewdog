@@ -46,9 +46,6 @@ func RunAndParse(ctx context.Context, conf *Config, runners map[string]bool, def
 		}
 		opt := &parser.Option{FormatName: fname, Errorformat: runner.Errorformat}
 		p, err := parser.New(opt)
-		if err != nil {
-			return nil, err
-		}
 		cmd, stdout, stderr, err := cmdBuilder.build(ctx, runner.Cmd)
 		if err != nil {
 			return nil, err
