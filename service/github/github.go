@@ -336,9 +336,13 @@ func (g *PullRequest) diffUsingGitCommand(ctx context.Context) ([]byte, error) {
 			return nil, fmt.Errorf("failed to run git rev-parse: %s%w", upstreamRef, err)
 		}
 
-		remoteRepo := strings.Split(string(upstreamRef), "/")[0]
+		remoteRepoSlice := strings.Split(string(upstreamRef), "/")
 
-		b, err := exec.Command("git", "fetch", "--depth=1", remoteRepo, mergeBaseSha).CombinedOutput()
+		if len(remoteRepoSlice) <= 1 {
+			return nil, fmt.Errorf("failed to run git rev-parse: %s", upstreamRef)
+		}
+
+		b, err := exec.Command("git", "fetch", "--depth=1", remoteRepoSlice[0], mergeBaseSha).CombinedOutput()
 		if err != nil {
 			return nil, fmt.Errorf("failed to run git fetch: %s%w", b, err)
 		}
