@@ -334,7 +334,7 @@ func (g *PullRequest) diffUsingGitCommand(ctx context.Context) ([]byte, error) {
 	}
 
 	if os.Getenv("REVIEWDOG_SKIP_GIT_FETCH") != "true" {
-		upstreamRef, err := exec.Command("git", "rev-parse", "--abbrev-ref", "--symbolic-full-name", "@{u}").CombinedOutput()
+		upstreamRef, err := exec.Command("git", "rev-parse", "--abbrev-ref", "--symbolic-full-name", pr.GetHead().GetRef()+"@{u}").CombinedOutput()
 		if err != nil {
 			return nil, fmt.Errorf("failed to run git rev-parse: %s%w", upstreamRef, err)
 		}
