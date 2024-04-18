@@ -336,9 +336,9 @@ func (g *PullRequest) diffUsingGitCommand(ctx context.Context) ([]byte, error) {
 	if os.Getenv("REVIEWDOG_SKIP_GIT_FETCH") != "true" {
 		remoteRepo := "reviewdog_origin"
 
-		_, err = exec.Command("git", "remote", "add", remoteRepo, pr.GetHead().GetRepo().GetHTMLURL()).CombinedOutput()
+		b, err := exec.Command("git", "remote", "add", remoteRepo, pr.GetHead().GetRepo().GetHTMLURL()).CombinedOutput()
 		if err != nil {
-			return nil, err
+			return nil, fmt.Errorf("failed to run git remote add: %s%w", b, err)
 		}
 
 		for _, sha := range []string{mergeBaseSha, headSha} {
