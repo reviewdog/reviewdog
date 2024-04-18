@@ -321,7 +321,8 @@ func (g *PullRequest) diffUsingGitCommand(ctx context.Context) ([]byte, error) {
 		return nil, err
 	}
 
-	headSha := pr.GetHead().GetSHA()
+	head := pr.GetHead()
+	headSha := head.GetSHA()
 
 	commitsComparison, _, err := g.cli.Repositories.CompareCommits(ctx, g.owner, g.repo, headSha, pr.GetBase().GetSHA(), nil)
 	if err != nil {
@@ -335,7 +336,8 @@ func (g *PullRequest) diffUsingGitCommand(ctx context.Context) ([]byte, error) {
 
 		if _, err := exec.Command("git", "remote", "get-url", remoteRepo).CombinedOutput(); err != nil {
 			log.Printf("failed to run git remote get-url: %s", err)
-			_, err := exec.Command("git", "remote", "add", remoteRepo, pr.GetHead().GetRepo().GetHTMLURL()).CombinedOutput()
+
+			_, err := exec.Command("git", "remote", "add", remoteRepo, head.GetRepo().GetHTMLURL()).CombinedOutput()
 			if err != nil {
 				return nil, fmt.Errorf("failed to run git remote add: %w", err)
 			}
