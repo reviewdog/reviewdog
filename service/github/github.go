@@ -341,9 +341,10 @@ func (g *PullRequest) diffUsingGitCommand(ctx context.Context) ([]byte, error) {
 			}
 		}
 
-		_, err = exec.Command("git", "fetch", "--depth=1", remoteRepo, mergeBaseSha).CombinedOutput()
-		if err != nil {
-			return nil, fmt.Errorf("failed to run git fetch: %w", err)
+		for _, sha := range []string{mergeBaseSha, headSha} {
+			if _, err := exec.Command("git", "fetch", "--depth=1", remoteRepo, sha).CombinedOutput(); err != nil {
+				return nil, fmt.Errorf("failed to run git fetch: %w", err)
+			}
 		}
 	}
 
