@@ -343,7 +343,7 @@ func (g *PullRequest) diffUsingGitCommand(ctx context.Context) ([]byte, error) {
 		return nil, errors.New("failed to get merge base commit sha")
 	}
 
-	if os.Getenv("SKIP_GIT_FETCH") != "true" {
+	if os.Getenv("REVIEWDOG_SKIP_GIT_FETCH") != "true" {
 		b, err := exec.Command("git", "fetch", "--depth=1", "origin", mergeBaseSha).CombinedOutput()
 		if err != nil {
 			return nil, fmt.Errorf("failed to run git fetch: %s%w", b, err)
