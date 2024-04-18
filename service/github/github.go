@@ -333,7 +333,7 @@ func (g *PullRequest) diffUsingGitCommand(ctx context.Context) ([]byte, error) {
 	if os.Getenv("REVIEWDOG_SKIP_GIT_FETCH") != "true" {
 		upstreamRef, err := exec.Command("git", "rev-parse", "--abbrev-ref", "--symbolic-full-name", "@{u}").CombinedOutput()
 		if err != nil {
-			return nil, fmt.Errorf("failed to run git rev-parse: %s%w", upstreamRef, err)
+			return nil, fmt.Errorf("failed to run git rev-parse: %w", err)
 		}
 
 		remoteRepoSlice := strings.Split(string(upstreamRef), "/")
@@ -342,15 +342,15 @@ func (g *PullRequest) diffUsingGitCommand(ctx context.Context) ([]byte, error) {
 			return nil, fmt.Errorf("failed to run git rev-parse: %s", upstreamRef)
 		}
 
-		b, err := exec.Command("git", "fetch", "--depth=1", remoteRepoSlice[0], mergeBaseSha).CombinedOutput()
+		_, err = exec.Command("git", "fetch", "--depth=1", remoteRepoSlice[0], mergeBaseSha).CombinedOutput()
 		if err != nil {
-			return nil, fmt.Errorf("failed to run git fetch: %s%w", b, err)
+			return nil, fmt.Errorf("failed to run git fetch: %w", err)
 		}
 	}
 
 	bytes, err := exec.Command("git", "diff", "--find-renames", mergeBaseSha, headSha).CombinedOutput()
 	if err != nil {
-		return nil, fmt.Errorf("failed to run git diff: %s%w", bytes, err)
+		return nil, fmt.Errorf("failed to run git diff: %w", err)
 	}
 
 	return bytes, nil
