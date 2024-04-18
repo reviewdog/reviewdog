@@ -327,21 +327,8 @@ func (g *PullRequest) diffUsingGitCommand(ctx context.Context) ([]byte, error) {
 	if err != nil {
 		return nil, err
 	}
-	if commitsComparison == nil {
-		return nil, errors.New("failed to get commits comparison")
-	}
 
-	mergeBaseCommit := commitsComparison.GetMergeBaseCommit()
-
-	if mergeBaseCommit == nil {
-		return nil, errors.New("failed to get merge base commit")
-	}
-
-	mergeBaseSha := mergeBaseCommit.GetSHA()
-
-	if mergeBaseSha == "" {
-		return nil, errors.New("failed to get merge base commit sha")
-	}
+	mergeBaseSha := commitsComparison.GetMergeBaseCommit().GetSHA()
 
 	if os.Getenv("REVIEWDOG_SKIP_GIT_FETCH") != "true" {
 		upstreamRef, err := exec.Command("git", "rev-parse", "--abbrev-ref", "--symbolic-full-name", "@{u}").CombinedOutput()
