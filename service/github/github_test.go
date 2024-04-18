@@ -1362,9 +1362,7 @@ func TestGitHubPullRequest_Diff_fake_fallback(t *testing.T) {
 	ts := httptest.NewServer(mux)
 	defer ts.Close()
 
-	if err := os.Setenv("SKIP_GIT_FETCH", "true"); err != nil {
-		t.Fatal(err)
-	}
+	t.Setenv("SKIP_GIT_FETCH", "true")
 
 	cli := github.NewClient(nil)
 	cli.BaseURL, _ = url.Parse(ts.URL + "/")
