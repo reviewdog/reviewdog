@@ -344,7 +344,14 @@ func (g *PullRequest) diffUsingGitCommand(ctx context.Context) ([]byte, error) {
 	}
 
 	if os.Getenv("REVIEWDOG_SKIP_GIT_FETCH") != "true" {
-		b, err := exec.Command("git", "fetch", "--depth=1", "origin", mergeBaseSha).CombinedOutput()
+		upstreamRef, err := exec.Command("git", "rev-parse", "--abbrev-ref", "@{u}").CombinedOutput()
+		if err != nil {
+			return nil, fmt.Errorf("failed to run git rev-parse: %s%w", upstreamRef, err)
+		}
+
+		remoteRepo := strings.Split(string(upstreamRef), "/")[0]
+
+		b, err := exec.Command("git", "fetch", "--depth=1", remoteRepo, mergeBaseSha).CombinedOutput()
 		if err != nil {
 			return nil, fmt.Errorf("failed to run git fetch: %s%w", b, err)
 		}
