@@ -331,18 +331,17 @@ func (g *PullRequest) diffUsingGitCommand(ctx context.Context) ([]byte, error) {
 	mergeBaseSha := commitsComparison.GetMergeBaseCommit().GetSHA()
 
 	if os.Getenv("REVIEWDOG_SKIP_GIT_FETCH") != "true" {
-		upstreamRef, err := exec.Command("git", "rev-parse", "--abbrev-ref", "--symbolic-full-name", "@{u}").CombinedOutput()
-		if err != nil {
-			return nil, fmt.Errorf("failed to run git rev-parse: %w", err)
+		remoteRepo := "reviewdog_origin"
+
+		if _, err := exec.Command("git", "remote", "get-url", remoteRepo).CombinedOutput(); err != nil {
+			log.Printf("failed to run git remote get-url: %s", err)
+			_, err := exec.Command("git", "remote", "add", remoteRepo, pr.GetHead().GetRepo().GetHTMLURL()).CombinedOutput()
+			if err != nil {
+				return nil, fmt.Errorf("failed to run git remote add: %w", err)
+			}
 		}
 
-		remoteRepoSlice := strings.Split(string(upstreamRef), "/")
-
-		if len(remoteRepoSlice) <= 1 {
-			return nil, fmt.Errorf("failed to run git rev-parse: %s", upstreamRef)
-		}
-
-		_, err = exec.Command("git", "fetch", "--depth=1", remoteRepoSlice[0], mergeBaseSha).CombinedOutput()
+		_, err = exec.Command("git", "fetch", "--depth=1", remoteRepo, mergeBaseSha).CombinedOutput()
 		if err != nil {
 			return nil, fmt.Errorf("failed to run git fetch: %w", err)
 		}
