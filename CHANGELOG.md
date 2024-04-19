@@ -12,10 +12,15 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - ...
 
 ### :bug: Fixes
-- [#1714](https://github.com/reviewdog/reviewdog/pull/1714) Use GitHub API to get a merge base commit and add `git fetch` command to get merge base and head commits
+- ...
 
 ### :rotating_light: Breaking changes
 - ...
+
+## [v0.17.4] - 2024-04-19
+
+### :bug: Fixes
+- [#1714](https://github.com/reviewdog/reviewdog/pull/1714) Use GitHub API to get a merge base commit and add `git fetch` command to get merge base and head commits
 
 ## [v0.17.3] - 2024-04-14
 
@@ -189,7 +194,7 @@ $ cd subdir/ && reviewdog -filter-mode=file -fail-on-error -reporter=github-pr-r
 
 See https://github.com/reviewdog/reviewdog/releases for older release note.
 
-[Unreleased]: https://github.com/reviewdog/reviewdog/compare/v0.17.1...HEAD
+[Unreleased]: https://github.com/reviewdog/reviewdog/compare/v0.17.4...HEAD
 [v0.10.0]: https://github.com/reviewdog/reviewdog/compare/v0.9.17...v0.10.0
 [v0.10.1]: https://github.com/reviewdog/reviewdog/compare/v0.10.0...v0.10.1
 [v0.10.2]: https://github.com/reviewdog/reviewdog/compare/v0.10.1...v0.10.2
@@ -206,4 +211,5 @@ See https://github.com/reviewdog/reviewdog/releases for older release note.
 [v0.17.1]: https://github.com/reviewdog/reviewdog/compare/v0.17.0...v0.17.1
 [v0.17.2]: https://github.com/reviewdog/reviewdog/compare/v0.17.1...v0.17.2
 [v0.17.3]: https://github.com/reviewdog/reviewdog/compare/v0.17.2...v0.17.3
+[v0.17.4]: https://github.com/reviewdog/reviewdog/compare/v0.17.3...v0.17.4
 [@haya14busa]: https://github.com/haya14busa
