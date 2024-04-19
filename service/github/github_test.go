@@ -1305,6 +1305,8 @@ func TestGitHubPullRequest_Diff_fake(t *testing.T) {
 func TestGitHubPullRequest_Diff_fake_fallback(t *testing.T) {
 	apiCalled := 0
 	mux := http.NewServeMux()
+	headSHA := "HEAD^"
+	baseSHA := "HEAD"
 	mux.HandleFunc("/repos/o/r/pulls/14", func(w http.ResponseWriter, r *http.Request) {
 		apiCalled++
 		if r.Method != http.MethodGet {
@@ -1317,9 +1319,6 @@ func TestGitHubPullRequest_Diff_fake_fallback(t *testing.T) {
 		if accept := r.Header.Get("Accept"); accept != "application/vnd.github.v3+json" {
 			t.Errorf("Accept header doesn't contain 'diff': %v", accept)
 		}
-
-		headSHA := "HEAD^"
-		baseSHA := "HEAD"
 
 		pullRequestJSON, err := json.Marshal(github.PullRequest{
 			Head: &github.PullRequestBranch{
@@ -1337,8 +1336,33 @@ func TestGitHubPullRequest_Diff_fake_fallback(t *testing.T) {
 			t.Fatal(err)
 		}
 	})
+	mux.HandleFunc("/repos/o/r/compare/"+headSHA+"..."+baseSHA, func(w http.ResponseWriter, r *http.Request) {
+		if r.Method != http.MethodGet {
+			t.Errorf("unexpected access: %v %v", r.Method, r.URL)
+		}
+		if accept := r.Header.Get("Accept"); accept != "application/vnd.github.v3+json" {
+			t.Errorf("Accept header doesn't contain 'diff': %v", accept)
+		}
+
+		mergeBaseSha := "HEAD^"
+
+		commitsComparisonJSON, err := json.Marshal(github.CommitsComparison{
+			MergeBaseCommit: &github.RepositoryCommit{
+				SHA: &mergeBaseSha,
+			},
+		})
+		if err != nil {
+			t.Fatal(err)
+		}
+
+		if _, err := w.Write(commitsComparisonJSON); err != nil {
+			t.Fatal(err)
+		}
+	})
 	ts := httptest.NewServer(mux)
 	defer ts.Close()
+
+	t.Setenv("REVIEWDOG_SKIP_GIT_FETCH", "true")
 
 	cli := github.NewClient(nil)
 	cli.BaseURL, _ = url.Parse(ts.URL + "/")

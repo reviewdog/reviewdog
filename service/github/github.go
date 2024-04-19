@@ -321,18 +321,28 @@ func (g *PullRequest) diffUsingGitCommand(ctx context.Context) ([]byte, error) {
 		return nil, err
 	}
 
-	headSha := pr.GetHead().GetSHA()
+	head := pr.GetHead()
+	headSha := head.GetSHA()
 
-	mergeBaseBytes, err := exec.Command("git", "merge-base", headSha, pr.GetBase().GetSHA()).Output()
+	commitsComparison, _, err := g.cli.Repositories.CompareCommits(ctx, g.owner, g.repo, headSha, pr.GetBase().GetSHA(), nil)
 	if err != nil {
-		return nil, fmt.Errorf("failed to get merge-base commit: %w", err)
+		return nil, err
 	}
 
-	mergeBase := strings.Trim(string(mergeBaseBytes), "\n")
+	mergeBaseSha := commitsComparison.GetMergeBaseCommit().GetSHA()
 
-	bytes, err := exec.Command("git", "diff", "--find-renames", mergeBase, headSha).CombinedOutput()
+	if os.Getenv("REVIEWDOG_SKIP_GIT_FETCH") != "true" {
+		for _, sha := range []string{mergeBaseSha, headSha} {
+			_, err := exec.Command("git", "fetch", "--depth=1", head.GetRepo().GetHTMLURL(), sha).CombinedOutput()
+			if err != nil {
+				return nil, fmt.Errorf("failed to run git fetch: %w", err)
+			}
+		}
+	}
+
+	bytes, err := exec.Command("git", "diff", "--find-renames", mergeBaseSha, headSha).CombinedOutput()
 	if err != nil {
-		return nil, fmt.Errorf("failed to run git diff: %s%w", bytes, err)
+		return nil, fmt.Errorf("failed to run git diff: %w", err)
 	}
 
 	return bytes, nil
