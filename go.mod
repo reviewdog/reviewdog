@@ -54,7 +54,7 @@ require (
 	github.com/prometheus/prometheus v2.5.0+incompatible // indirect
 	github.com/stretchr/objx v0.5.2 // indirect
 	golang.org/x/crypto v0.22.0 // indirect
-	golang.org/x/net v0.22.0 // indirect
+	golang.org/x/net v0.23.0 // indirect
 	golang.org/x/sys v0.19.0 // indirect
 	golang.org/x/text v0.14.0 // indirect
 	golang.org/x/time v0.3.0 // indirect
