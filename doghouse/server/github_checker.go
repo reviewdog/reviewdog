@@ -2,7 +2,12 @@ package server
 
 import (
 	"context"
+	"fmt"
 	"io"
+	"log"
+	"net/http"
+	"os"
+	"os/exec"
 	"time"
 
 	"github.com/google/go-github/v60/github"
@@ -21,8 +26,56 @@ type checkerGitHubClient struct {
 
 func (c *checkerGitHubClient) GetPullRequestDiff(ctx context.Context, owner, repo string, number int) ([]byte, error) {
 	opt := github.RawOptions{Type: github.Diff}
-	d, _, err := c.PullRequests.GetRaw(ctx, owner, repo, number, opt)
+	d, resp, err := c.PullRequests.GetRaw(ctx, owner, repo, number, opt)
+	if err != nil {
+		if resp != nil && resp.StatusCode == http.StatusNotAcceptable && c.checkInstallGitCommand() {
+			log.Print("fallback to use git command")
+			return c.getPullRequestDiffUsingGitCommand(ctx, owner, repo, number)
+		}
+
+		return nil, err
+	}
 	return []byte(d), err
+}
+
+// checkInstallGitCommand checks if git command is installed.
+func (c *checkerGitHubClient) checkInstallGitCommand() bool {
+	_, err := exec.Command("git", "-v").CombinedOutput()
+	return err == nil
+}
+
+// getPullRequestDiffUsingGitCommand returns a diff of PullRequest using git command.
+func (c *checkerGitHubClient) getPullRequestDiffUsingGitCommand(ctx context.Context, owner, repo string, number int) ([]byte, error) {
+	pr, _, err := c.PullRequests.Get(ctx, owner, repo, number)
+	if err != nil {
+		return nil, err
+	}
+
+	head := pr.GetHead()
+	headSha := head.GetSHA()
+
+	commitsComparison, _, err := c.Repositories.CompareCommits(ctx, owner, repo, headSha, pr.GetBase().GetSHA(), nil)
+	if err != nil {
+		return nil, err
+	}
+
+	mergeBaseSha := commitsComparison.GetMergeBaseCommit().GetSHA()
+
+	if os.Getenv("REVIEWDOG_SKIP_GIT_FETCH") != "true" {
+		for _, sha := range []string{mergeBaseSha, headSha} {
+			_, err := exec.Command("git", "fetch", "--depth=1", head.GetRepo().GetHTMLURL(), sha).CombinedOutput()
+			if err != nil {
+				return nil, fmt.Errorf("failed to run git fetch: %w", err)
+			}
+		}
+	}
+
+	bytes, err := exec.Command("git", "diff", "--find-renames", mergeBaseSha, headSha).CombinedOutput()
+	if err != nil {
+		return nil, fmt.Errorf("failed to run git diff: %w", err)
+	}
+
+	return bytes, nil
 }
 
 func (c *checkerGitHubClient) CreateCheckRun(ctx context.Context, owner, repo string, opt github.CreateCheckRunOptions) (*github.CheckRun, error) {
