@@ -56,6 +56,10 @@ func (g *MergeRequestDiff) Diff(ctx context.Context) ([]byte, error) {
 	if err != nil {
 		return nil, err
 	}
+	targetSha := os.Getenv("CI_MERGE_REQUEST_TARGET_BRANCH_SHA")
+	if targetSha == "" {
+		targetSha = targetBranch.Commit.ID
+	}
 	return g.gitDiff(ctx, g.sha, targetBranch.Commit.ID)
 }
 
