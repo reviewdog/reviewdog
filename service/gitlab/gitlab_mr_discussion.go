@@ -11,10 +11,10 @@ import (
 	"github.com/xanzy/go-gitlab"
 	"golang.org/x/sync/errgroup"
 
-	"github.com/reviewdog/reviewdog"
-	"github.com/reviewdog/reviewdog/proto/rdf"
-	"github.com/reviewdog/reviewdog/service/commentutil"
-	"github.com/reviewdog/reviewdog/service/serviceutil"
+	"github.com/sezzle/reviewdog"
+	"github.com/sezzle/reviewdog/proto/rdf"
+	"github.com/sezzle/reviewdog/service/commentutil"
+	"github.com/sezzle/reviewdog/service/serviceutil"
 )
 
 const (

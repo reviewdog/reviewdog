@@ -5,7 +5,7 @@ import (
 	"net/url"
 	"os"
 
-	"github.com/reviewdog/reviewdog/proto/rdf"
+	"github.com/sezzle/reviewdog/proto/rdf"
 )
 
 // LinkedMarkdownDiagnostic returns Markdown string which contains a link to the

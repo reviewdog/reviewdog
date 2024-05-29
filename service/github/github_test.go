@@ -14,10 +14,10 @@ import (
 	"github.com/kylelemons/godebug/pretty"
 	"golang.org/x/oauth2"
 
-	"github.com/reviewdog/reviewdog"
-	"github.com/reviewdog/reviewdog/filter"
-	"github.com/reviewdog/reviewdog/proto/rdf"
-	"github.com/reviewdog/reviewdog/service/commentutil"
+	"github.com/sezzle/reviewdog"
+	"github.com/sezzle/reviewdog/filter"
+	"github.com/sezzle/reviewdog/proto/rdf"
+	"github.com/sezzle/reviewdog/service/commentutil"
 )
 
 const notokenSkipTestMes = "skipping test (requires actual Personal access tokens. export REVIEWDOG_TEST_GITHUB_API_TOKEN=<GitHub Personal Access Token>)"
@@ -61,7 +61,7 @@ func TestGitHubPullRequest_Post(t *testing.T) {
 		t.Skip(notokenSkipTestMes)
 	}
 
-	// https://github.com/reviewdog/reviewdog/pull/2
+	// https://github.com/sezzle/reviewdog/pull/2
 	owner := "haya14busa"
 	repo := "reviewdog"
 	pr := 2
@@ -83,7 +83,7 @@ func TestGitHubPullRequest_Post(t *testing.T) {
 			InDiffContext: true,
 		},
 	}
-	// https://github.com/reviewdog/reviewdog/pull/2/files#diff-ed1d019a10f54464cfaeaf6a736b7d27L20
+	// https://github.com/sezzle/reviewdog/pull/2/files#diff-ed1d019a10f54464cfaeaf6a736b7d27L20
 	if err := g.Post(context.Background(), comment); err != nil {
 		t.Error(err)
 	}
@@ -114,7 +114,7 @@ index aa49124774..781ee2492f 100644
 +comment: false
 `
 
-	// https://github.com/reviewdog/reviewdog/pull/73
+	// https://github.com/sezzle/reviewdog/pull/73
 	owner := "haya14busa"
 	repo := "reviewdog"
 	pr := 73
@@ -139,7 +139,7 @@ func TestGitHubPullRequest_comment(t *testing.T) {
 	if client == nil {
 		t.Skip(notokenSkipTestMes)
 	}
-	// https://github.com/reviewdog/reviewdog/pull/2
+	// https://github.com/sezzle/reviewdog/pull/2
 	owner := "haya14busa"
 	repo := "reviewdog"
 	pr := 2

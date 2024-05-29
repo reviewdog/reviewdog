@@ -12,7 +12,7 @@ import (
 // It should return the same output as `git rev-parse --show-prefix`.
 // It does not execute `git` command to avoid needless git binary dependency.
 //
-// An example problem due to `git` command dependency: https://github.com/reviewdog/reviewdog/issues/1158
+// An example problem due to `git` command dependency: https://github.com/sezzle/reviewdog/issues/1158
 func GitRelWorkdir() (string, error) {
 	cwd, err := os.Getwd()
 	if err != nil {

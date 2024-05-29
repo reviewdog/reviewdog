@@ -8,7 +8,7 @@ import (
 
 	"github.com/rakyll/statik/fs"
 
-	_ "github.com/reviewdog/reviewdog/doghouse/appengine/statik"
+	_ "github.com/sezzle/reviewdog/doghouse/appengine/statik"
 )
 
 var tmplFiles http.FileSystem

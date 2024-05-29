@@ -24,7 +24,7 @@
       "removed": [],
       "timestamp": "2019-09-29T13:46:46Z",
       "tree_id": "84b30c9ea4a8ca1aba03c85ffcd1b9f225d56a66",
-      "url": "https://github.com/reviewdog/reviewdog/commit/8bc5e712cca1bf1b2e35df4a87405b16e085a084"
+      "url": "https://github.com/sezzle/reviewdog/commit/8bc5e712cca1bf1b2e35df4a87405b16e085a084"
     },
     {
       "added": [],
@@ -47,10 +47,10 @@
       "removed": [],
       "timestamp": "2019-09-29T13:47:21Z",
       "tree_id": "83e3cb65fa825f47f618fd1b9c49d5d949831d6f",
-      "url": "https://github.com/reviewdog/reviewdog/commit/febdd4bf26c6e8856c792303cfc66fa5e7bc975b"
+      "url": "https://github.com/sezzle/reviewdog/commit/febdd4bf26c6e8856c792303cfc66fa5e7bc975b"
     }
   ],
-  "compare": "https://github.com/reviewdog/reviewdog/compare/7a17ca64b1fe...febdd4bf26c6",
+  "compare": "https://github.com/sezzle/reviewdog/compare/7a17ca64b1fe...febdd4bf26c6",
   "created": false,
   "deleted": false,
   "forced": false,
@@ -75,7 +75,7 @@
     "removed": [],
     "timestamp": "2019-09-29T13:47:21Z",
     "tree_id": "83e3cb65fa825f47f618fd1b9c49d5d949831d6f",
-    "url": "https://github.com/reviewdog/reviewdog/commit/febdd4bf26c6e8856c792303cfc66fa5e7bc975b"
+    "url": "https://github.com/sezzle/reviewdog/commit/febdd4bf26c6e8856c792303cfc66fa5e7bc975b"
   },
   "organization": {
     "avatar_url": "https://avatars2.githubusercontent.com/u/48765237?v=4",
@@ -102,7 +102,7 @@
     "assignees_url": "https://api.github.com/repos/reviewdog/reviewdog/assignees{/user}",
     "blobs_url": "https://api.github.com/repos/reviewdog/reviewdog/git/blobs{/sha}",
     "branches_url": "https://api.github.com/repos/reviewdog/reviewdog/branches{/branch}",
-    "clone_url": "https://github.com/reviewdog/reviewdog.git",
+    "clone_url": "https://github.com/sezzle/reviewdog.git",
     "collaborators_url": "https://api.github.com/repos/reviewdog/reviewdog/collaborators{/collaborator}",
     "comments_url": "https://api.github.com/repos/reviewdog/reviewdog/comments{/number}",
     "commits_url": "https://api.github.com/repos/reviewdog/reviewdog/commits{/sha}",
@@ -124,7 +124,7 @@
     "git_commits_url": "https://api.github.com/repos/reviewdog/reviewdog/git/commits{/sha}",
     "git_refs_url": "https://api.github.com/repos/reviewdog/reviewdog/git/refs{/sha}",
     "git_tags_url": "https://api.github.com/repos/reviewdog/reviewdog/git/tags{/sha}",
-    "git_url": "git://github.com/reviewdog/reviewdog.git",
+    "git_url": "git://github.com/sezzle/reviewdog.git",
     "has_downloads": true,
     "has_issues": true,
     "has_pages": false,
@@ -132,7 +132,7 @@
     "has_wiki": true,
     "homepage": "https://medium.com/@haya14busa/reviewdog-a-code-review-dog-who-keeps-your-codebase-healthy-d957c471938b#.8xctbaw5u",
     "hooks_url": "https://api.github.com/repos/reviewdog/reviewdog/hooks",
-    "html_url": "https://github.com/reviewdog/reviewdog",
+    "html_url": "https://github.com/sezzle/reviewdog",
     "id": 71133469,
     "issue_comment_url": "https://api.github.com/repos/reviewdog/reviewdog/issues/comments{/number}",
     "issue_events_url": "https://api.github.com/repos/reviewdog/reviewdog/issues/events{/number}",
@@ -192,12 +192,12 @@
     "statuses_url": "https://api.github.com/repos/reviewdog/reviewdog/statuses/{sha}",
     "subscribers_url": "https://api.github.com/repos/reviewdog/reviewdog/subscribers",
     "subscription_url": "https://api.github.com/repos/reviewdog/reviewdog/subscription",
-    "svn_url": "https://github.com/reviewdog/reviewdog",
+    "svn_url": "https://github.com/sezzle/reviewdog",
     "tags_url": "https://api.github.com/repos/reviewdog/reviewdog/tags",
     "teams_url": "https://api.github.com/repos/reviewdog/reviewdog/teams",
     "trees_url": "https://api.github.com/repos/reviewdog/reviewdog/git/trees{/sha}",
     "updated_at": "2019-09-29T11:53:30Z",
-    "url": "https://github.com/reviewdog/reviewdog",
+    "url": "https://github.com/sezzle/reviewdog",
     "watchers": 1217,
     "watchers_count": 1217
   },

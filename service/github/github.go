@@ -14,12 +14,12 @@ import (
 
 	"github.com/google/go-github/v60/github"
 
-	"github.com/reviewdog/reviewdog"
-	"github.com/reviewdog/reviewdog/cienv"
-	"github.com/reviewdog/reviewdog/proto/rdf"
-	"github.com/reviewdog/reviewdog/service/commentutil"
-	"github.com/reviewdog/reviewdog/service/github/githubutils"
-	"github.com/reviewdog/reviewdog/service/serviceutil"
+	"github.com/sezzle/reviewdog"
+	"github.com/sezzle/reviewdog/cienv"
+	"github.com/sezzle/reviewdog/proto/rdf"
+	"github.com/sezzle/reviewdog/service/commentutil"
+	"github.com/sezzle/reviewdog/service/github/githubutils"
+	"github.com/sezzle/reviewdog/service/serviceutil"
 )
 
 var _ reviewdog.CommentService = (*PullRequest)(nil)

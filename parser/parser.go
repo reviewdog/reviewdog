@@ -7,7 +7,7 @@ import (
 
 	"github.com/reviewdog/errorformat/fmts"
 
-	"github.com/reviewdog/reviewdog/proto/rdf"
+	"github.com/sezzle/reviewdog/proto/rdf"
 )
 
 // Parser is an interface which parses compilers, linters, or any tools

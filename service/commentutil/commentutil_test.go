@@ -4,9 +4,9 @@ import (
 	"strings"
 	"testing"
 
-	"github.com/reviewdog/reviewdog"
-	"github.com/reviewdog/reviewdog/filter"
-	"github.com/reviewdog/reviewdog/proto/rdf"
+	"github.com/sezzle/reviewdog"
+	"github.com/sezzle/reviewdog/filter"
+	"github.com/sezzle/reviewdog/proto/rdf"
 )
 
 func TestCommentBody(t *testing.T) {
@@ -24,7 +24,7 @@ func TestCommentBody(t *testing.T) {
 				},
 			},
 			want: `
-**[tool-name]** <sub>reported by [reviewdog](https://github.com/reviewdog/reviewdog) :dog:</sub><br>test message 1
+**[tool-name]** <sub>reported by [reviewdog](https://github.com/sezzle/reviewdog) :dog:</sub><br>test message 1
 `,
 		},
 		{
@@ -36,7 +36,7 @@ func TestCommentBody(t *testing.T) {
 				},
 			},
 			want: `
-<sub>reported by [reviewdog](https://github.com/reviewdog/reviewdog) :dog:</sub><br>test message 2 (no tool)
+<sub>reported by [reviewdog](https://github.com/sezzle/reviewdog) :dog:</sub><br>test message 2 (no tool)
 `,
 		},
 		{
@@ -50,7 +50,7 @@ func TestCommentBody(t *testing.T) {
 				},
 			},
 			want: `
-**[custom-tool-name]** <sub>reported by [reviewdog](https://github.com/reviewdog/reviewdog) :dog:</sub><br>test message 3
+**[custom-tool-name]** <sub>reported by [reviewdog](https://github.com/sezzle/reviewdog) :dog:</sub><br>test message 3
 `,
 		},
 		{
@@ -64,7 +64,7 @@ func TestCommentBody(t *testing.T) {
 				},
 			},
 			want: `
-⚠️ **[tool-name]** <sub>reported by [reviewdog](https://github.com/reviewdog/reviewdog) :dog:</sub><br>test message 4
+⚠️ **[tool-name]** <sub>reported by [reviewdog](https://github.com/sezzle/reviewdog) :dog:</sub><br>test message 4
 `,
 		},
 		{
@@ -80,7 +80,7 @@ func TestCommentBody(t *testing.T) {
 				},
 			},
 			want: `
-**[tool-name]** <CODE14> <sub>reported by [reviewdog](https://github.com/reviewdog/reviewdog) :dog:</sub><br>test message 5 (code)
+**[tool-name]** <CODE14> <sub>reported by [reviewdog](https://github.com/sezzle/reviewdog) :dog:</sub><br>test message 5 (code)
 `,
 		},
 		{
@@ -97,7 +97,7 @@ func TestCommentBody(t *testing.T) {
 				},
 			},
 			want: `
-**[tool-name]** <[CODE14](https://example.com/#CODE14)> <sub>reported by [reviewdog](https://github.com/reviewdog/reviewdog) :dog:</sub><br>test message 6 (code with URL)
+**[tool-name]** <[CODE14](https://example.com/#CODE14)> <sub>reported by [reviewdog](https://github.com/sezzle/reviewdog) :dog:</sub><br>test message 6 (code with URL)
 `,
 		},
 	}

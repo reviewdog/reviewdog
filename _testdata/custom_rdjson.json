@@ -148,7 +148,7 @@
       "message": "code test 2 (rule w/ URL)",
       "code": {
         "value": "E14",
-        "url": "https://github.com/reviewdog/reviewdog#E14"
+        "url": "https://github.com/sezzle/reviewdog#E14"
       },
       "location": {
         "path": "_testdata/custom.txt",

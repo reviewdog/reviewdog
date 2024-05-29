@@ -25,17 +25,17 @@ import (
 	"github.com/reviewdog/errorformat/fmts"
 	"github.com/xanzy/go-gitlab"
 
-	"github.com/reviewdog/reviewdog"
-	"github.com/reviewdog/reviewdog/cienv"
-	"github.com/reviewdog/reviewdog/commands"
-	"github.com/reviewdog/reviewdog/filter"
-	"github.com/reviewdog/reviewdog/parser"
-	"github.com/reviewdog/reviewdog/project"
-	bbservice "github.com/reviewdog/reviewdog/service/bitbucket"
-	gerritservice "github.com/reviewdog/reviewdog/service/gerrit"
-	giteaservice "github.com/reviewdog/reviewdog/service/gitea"
-	githubservice "github.com/reviewdog/reviewdog/service/github"
-	gitlabservice "github.com/reviewdog/reviewdog/service/gitlab"
+	"github.com/sezzle/reviewdog"
+	"github.com/sezzle/reviewdog/cienv"
+	"github.com/sezzle/reviewdog/commands"
+	"github.com/sezzle/reviewdog/filter"
+	"github.com/sezzle/reviewdog/parser"
+	"github.com/sezzle/reviewdog/project"
+	bbservice "github.com/sezzle/reviewdog/service/bitbucket"
+	gerritservice "github.com/sezzle/reviewdog/service/gerrit"
+	giteaservice "github.com/sezzle/reviewdog/service/gitea"
+	githubservice "github.com/sezzle/reviewdog/service/github"
+	gitlabservice "github.com/sezzle/reviewdog/service/gitlab"
 )
 
 const usageMessage = "" +
@@ -223,7 +223,7 @@ func usage() {
 	fmt.Fprintln(os.Stderr, "Flags:")
 	flag.PrintDefaults()
 	fmt.Fprintln(os.Stderr, "")
-	fmt.Fprintln(os.Stderr, "See https://github.com/reviewdog/reviewdog for more detail.")
+	fmt.Fprintln(os.Stderr, "See https://github.com/sezzle/reviewdog for more detail.")
 	os.Exit(2)
 }
 
@@ -432,8 +432,8 @@ func run(r io.Reader, w io.Writer, opt *option) error {
 
 func runList(w io.Writer) error {
 	tabw := tabwriter.NewWriter(w, 0, 8, 0, '\t', 0)
-	fmt.Fprintf(tabw, "%s\t%s\t- %s\n", "rdjson", "Reviewdog Diagnostic JSON Format (JSON of DiagnosticResult message)", "https://github.com/reviewdog/reviewdog")
-	fmt.Fprintf(tabw, "%s\t%s\t- %s\n", "rdjsonl", "Reviewdog Diagnostic JSONL Format (JSONL of Diagnostic message)", "https://github.com/reviewdog/reviewdog")
+	fmt.Fprintf(tabw, "%s\t%s\t- %s\n", "rdjson", "Reviewdog Diagnostic JSON Format (JSON of DiagnosticResult message)", "https://github.com/sezzle/reviewdog")
+	fmt.Fprintf(tabw, "%s\t%s\t- %s\n", "rdjsonl", "Reviewdog Diagnostic JSONL Format (JSONL of Diagnostic message)", "https://github.com/sezzle/reviewdog")
 	fmt.Fprintf(tabw, "%s\t%s\t- %s\n", "diff", "Unified Diff Format", "https://en.wikipedia.org/wiki/Diff#Unified_format")
 	fmt.Fprintf(tabw, "%s\t%s\t- %s\n", "checkstyle", "checkstyle XML format", "http://checkstyle.sourceforge.net/")
 	fmt.Fprintf(tabw, "%s\t%s\t- %s\n", "sarif", "SARIF JSON format", "https://sarifweb.azurewebsites.net/")

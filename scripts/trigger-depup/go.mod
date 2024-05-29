@@ -1,4 +1,4 @@
-module github.com/reviewdog/reviewdog/scripts/trigger-depup
+module github.com/sezzle/reviewdog/scripts/trigger-depup
 
 go 1.21
 

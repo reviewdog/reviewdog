@@ -3,7 +3,7 @@ package bitbucket
 import (
 	"fmt"
 	insights "github.com/reva2/bitbucket-insights-api"
-	"github.com/reviewdog/reviewdog"
+	"github.com/sezzle/reviewdog"
 )
 
 // ServerAPIHelper is collection of utility functions used to build requests

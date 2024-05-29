@@ -5,8 +5,8 @@ import (
 	"path/filepath"
 	"strings"
 
-	"github.com/reviewdog/reviewdog/diff"
-	"github.com/reviewdog/reviewdog/service/serviceutil"
+	"github.com/sezzle/reviewdog/diff"
+	"github.com/sezzle/reviewdog/service/serviceutil"
 )
 
 // Mode represents enumeration of available filter modes

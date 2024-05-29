@@ -1,4 +1,4 @@
-module github.com/reviewdog/reviewdog
+module github.com/sezzle/reviewdog
 
 go 1.21.7
 

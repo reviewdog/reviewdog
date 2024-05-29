@@ -15,7 +15,7 @@
 syntax = "proto3";
 package reviewdog.rdf;
 
-option go_package = "github.com/reviewdog/reviewdog/proto/rdf";
+option go_package = "github.com/sezzle/reviewdog/proto/rdf";
 
 // Result of diagnostic tool such as a compiler or a linter.
 // It's intended to be used as top-level structured format which represents a

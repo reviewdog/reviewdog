@@ -6,7 +6,7 @@ import (
 	"path/filepath"
 	"sync"
 
-	"github.com/reviewdog/reviewdog"
+	"github.com/sezzle/reviewdog"
 )
 
 var _ reviewdog.CommentService = &ReportAnnotator{}

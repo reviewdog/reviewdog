@@ -7,8 +7,8 @@ import (
 	"os"
 	"path/filepath"
 
-	"github.com/reviewdog/reviewdog/proto/rdf"
-	"github.com/reviewdog/reviewdog/service/serviceutil"
+	"github.com/sezzle/reviewdog/proto/rdf"
+	"github.com/sezzle/reviewdog/service/serviceutil"
 )
 
 var _ Parser = &SarifParser{}

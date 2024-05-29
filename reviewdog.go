@@ -7,10 +7,10 @@ import (
 	"io"
 	"os"
 
-	"github.com/reviewdog/reviewdog/diff"
-	"github.com/reviewdog/reviewdog/filter"
-	"github.com/reviewdog/reviewdog/parser"
-	"github.com/reviewdog/reviewdog/proto/rdf"
+	"github.com/sezzle/reviewdog/diff"
+	"github.com/sezzle/reviewdog/filter"
+	"github.com/sezzle/reviewdog/parser"
+	"github.com/sezzle/reviewdog/proto/rdf"
 )
 
 // Reviewdog represents review dog application which parses result of compiler

@@ -7,7 +7,7 @@ import (
 	"testing"
 
 	"github.com/google/go-cmp/cmp"
-	"github.com/reviewdog/reviewdog/service/serviceutil"
+	"github.com/sezzle/reviewdog/service/serviceutil"
 	"google.golang.org/protobuf/encoding/protojson"
 )
 

@@ -6,9 +6,9 @@ import (
 	"path/filepath"
 	"sync"
 
-	"github.com/reviewdog/reviewdog"
-	"github.com/reviewdog/reviewdog/service/commentutil"
-	"github.com/reviewdog/reviewdog/service/serviceutil"
+	"github.com/sezzle/reviewdog"
+	"github.com/sezzle/reviewdog/service/commentutil"
+	"github.com/sezzle/reviewdog/service/serviceutil"
 
 	"code.gitea.io/sdk/gitea"
 )

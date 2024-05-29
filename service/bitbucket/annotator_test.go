@@ -4,10 +4,10 @@ import (
 	"context"
 	"testing"
 
-	"github.com/reviewdog/reviewdog/filter"
-	"github.com/reviewdog/reviewdog/proto/rdf"
+	"github.com/sezzle/reviewdog/filter"
+	"github.com/sezzle/reviewdog/proto/rdf"
 
-	"github.com/reviewdog/reviewdog"
+	"github.com/sezzle/reviewdog"
 
 	"github.com/stretchr/testify/suite"
 )

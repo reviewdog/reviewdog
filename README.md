@@ -1,5 +1,5 @@
 <div align="center">
-  <a href="https://github.com/reviewdog/reviewdog">
+  <a href="https://github.com/sezzle/reviewdog">
     <img alt="reviewdog" src="https://raw.githubusercontent.com/haya14busa/i/d598ed7dc49fefb0018e422e4c43e5ab8f207a6b/reviewdog/reviewdog.logo.png">
   </a>
 </div>
@@ -12,7 +12,7 @@
   <a href="./LICENSE">
     <img alt="LICENSE" src="https://img.shields.io/badge/license-MIT-blue.svg?maxAge=43200">
   </a>
-  <a href="https://godoc.org/github.com/reviewdog/reviewdog">
+  <a href="https://godoc.org/github.com/sezzle/reviewdog">
     <img alt="GoDoc" src="https://img.shields.io/badge/godoc-reference-4F73B3.svg?label=godoc.org&maxAge=43200&logo=go">
   </a>
   <a href="./CHANGELOG.md">
@@ -24,14 +24,14 @@
 </div>
 
 <div align="center">
-  <a href="https://github.com/reviewdog/reviewdog/actions?query=workflow%3AGo+event%3Apush+branch%3Amaster">
-    <img alt="GitHub Actions" src="https://github.com/reviewdog/reviewdog/workflows/Go/badge.svg">
+  <a href="https://github.com/sezzle/reviewdog/actions?query=workflow%3AGo+event%3Apush+branch%3Amaster">
+    <img alt="GitHub Actions" src="https://github.com/sezzle/reviewdog/workflows/Go/badge.svg">
   </a>
-  <a href="https://github.com/reviewdog/reviewdog/actions?query=workflow%3Areviewdog+event%3Apush+branch%3Amaster">
-    <img alt="reviewdog" src="https://github.com/reviewdog/reviewdog/workflows/reviewdog/badge.svg?branch=master&event=push">
+  <a href="https://github.com/sezzle/reviewdog/actions?query=workflow%3Areviewdog+event%3Apush+branch%3Amaster">
+    <img alt="reviewdog" src="https://github.com/sezzle/reviewdog/workflows/reviewdog/badge.svg?branch=master&event=push">
   </a>
-  <a href="https://github.com/reviewdog/reviewdog/actions?query=workflow%3Arelease">
-    <img alt="release" src="https://github.com/reviewdog/reviewdog/workflows/release/badge.svg">
+  <a href="https://github.com/sezzle/reviewdog/actions?query=workflow%3Arelease">
+    <img alt="release" src="https://github.com/sezzle/reviewdog/workflows/release/badge.svg">
   </a>
   <a href="https://travis-ci.org/reviewdog/reviewdog"><img alt="Travis Status" src="https://img.shields.io/travis/reviewdog/reviewdog/master.svg?label=Travis&logo=travis"></a>
   <a href="https://circleci.com/gh/reviewdog/reviewdog"><img alt="CircleCI Status" src="http://img.shields.io/circleci/build/github/reviewdog/reviewdog/master.svg?label=CircleCI&logo=circleci"></a>
@@ -97,10 +97,10 @@ by diff.
 - [Filter mode](#filter-mode)
 - [Articles](#articles)
 
-[![github-pr-check sample](https://user-images.githubusercontent.com/3797062/40884858-6efd82a0-6756-11e8-9f1a-c6af4f920fb0.png)](https://github.com/reviewdog/reviewdog/pull/131/checks)
+[![github-pr-check sample](https://user-images.githubusercontent.com/3797062/40884858-6efd82a0-6756-11e8-9f1a-c6af4f920fb0.png)](https://github.com/sezzle/reviewdog/pull/131/checks)
 ![comment in pull-request](https://user-images.githubusercontent.com/3797062/40941822-1d775064-6887-11e8-98e9-4775d37d47f8.png)
 ![commit status](https://user-images.githubusercontent.com/3797062/40941738-d62acb0a-6886-11e8-858d-7b97aded2a42.png)
-[![sample-comment.png](https://raw.githubusercontent.com/haya14busa/i/dc0ccb1e110515ea407c146d99b749018db05c45/reviewdog/sample-comment.png)](https://github.com/reviewdog/reviewdog/pull/24#discussion_r84599728)
+[![sample-comment.png](https://raw.githubusercontent.com/haya14busa/i/dc0ccb1e110515ea407c146d99b749018db05c45/reviewdog/sample-comment.png)](https://github.com/sezzle/reviewdog/pull/24#discussion_r84599728)
 ![reviewdog-local-demo.gif](https://raw.githubusercontent.com/haya14busa/i/dc0ccb1e110515ea407c146d99b749018db05c45/reviewdog/reviewdog-local-demo.gif)
 
 ## Installation
@@ -151,7 +151,7 @@ $ brew upgrade reviewdog/tap/reviewdog
 ### Build with go install
 
 ```shell
-$ go install github.com/reviewdog/reviewdog/cmd/reviewdog@latest
+$ go install github.com/sezzle/reviewdog/cmd/reviewdog@latest
 ```
 
 ## Input Format
@@ -324,7 +324,7 @@ Note that not all reporters provide support for code suggestions.
 | **`bitbucket-code-report`**  | NO [2]  |
 | **`gitea-pr-review`**        | NO [2]  |
 
-- [1] The reporter service supports the code suggestion feature, but reviewdog does not support it yet. See [#678](https://github.com/reviewdog/reviewdog/issues/678) for the status.
+- [1] The reporter service supports the code suggestion feature, but reviewdog does not support it yet. See [#678](https://github.com/sezzle/reviewdog/issues/678) for the status.
 - [2] The reporter service itself doesn't support the code suggestion feature.
 
 ## reviewdog config file
@@ -395,8 +395,8 @@ $ golint ./... | reviewdog -f=golint -diff="git diff FETCH_HEAD"
 
 ### Reporter: GitHub Checks (-reporter=github-pr-check)
 
-[![github-pr-check sample annotation with option 1](https://user-images.githubusercontent.com/3797062/64875597-65016f80-d688-11e9-843f-4679fb666f0d.png)](https://github.com/reviewdog/reviewdog/pull/275/files#annotation_6177941961779419)
-[![github-pr-check sample](https://user-images.githubusercontent.com/3797062/40884858-6efd82a0-6756-11e8-9f1a-c6af4f920fb0.png)](https://github.com/reviewdog/reviewdog/pull/131/checks)
+[![github-pr-check sample annotation with option 1](https://user-images.githubusercontent.com/3797062/64875597-65016f80-d688-11e9-843f-4679fb666f0d.png)](https://github.com/sezzle/reviewdog/pull/275/files#annotation_6177941961779419)
+[![github-pr-check sample](https://user-images.githubusercontent.com/3797062/40884858-6efd82a0-6756-11e8-9f1a-c6af4f920fb0.png)](https://github.com/sezzle/reviewdog/pull/131/checks)
 
 github-pr-check reporter reports results to [GitHub Checks](https://docs.github.com/en/pull-requests/collaborating-with-pull-requests/collaborating-on-repositories-with-code-quality-features/about-status-checks).
 
@@ -462,13 +462,13 @@ if you don't want to depend on reviewdog server.
 It's basically the same as `-reporter=github-pr-check` except it works not only for
 Pull Request but also for commit.
 
-[![sample comment outside diff](https://user-images.githubusercontent.com/3797062/69917921-e0680580-14ae-11ea-9a56-de9e3cbac005.png)](https://github.com/reviewdog/reviewdog/pull/364/files)
+[![sample comment outside diff](https://user-images.githubusercontent.com/3797062/69917921-e0680580-14ae-11ea-9a56-de9e3cbac005.png)](https://github.com/sezzle/reviewdog/pull/364/files)
 
 You can create [reviewdog badge](#reviewdog-badge-) for this reporter.
 
 ### Reporter: GitHub PullRequest review comment (-reporter=github-pr-review)
 
-[![sample-comment.png](https://raw.githubusercontent.com/haya14busa/i/dc0ccb1e110515ea407c146d99b749018db05c45/reviewdog/sample-comment.png)](https://github.com/reviewdog/reviewdog/pull/24#discussion_r84599728)
+[![sample-comment.png](https://raw.githubusercontent.com/haya14busa/i/dc0ccb1e110515ea407c146d99b749018db05c45/reviewdog/sample-comment.png)](https://github.com/sezzle/reviewdog/pull/24#discussion_r84599728)
 
 github-pr-review reporter reports results to GitHub PullRequest review comments
 using GitHub Personal API Access Token.
@@ -718,7 +718,7 @@ Missing actions? Check out [reviewdog/action-template](https://github.com/review
 
 Please open a Pull Request to add your created reviewdog actions here :sparkles:.
 I can also put your repositories under reviewdog org and co-maintain the actions.
-Example: [action-tflint](https://github.com/reviewdog/reviewdog/issues/322).
+Example: [action-tflint](https://github.com/sezzle/reviewdog/issues/322).
 
 #### Graceful Degradation for Pull Requests from forked repositories
 
@@ -735,10 +735,10 @@ to post results as
 similar to `github-pr-check` reporter.
 
 Note that there is a limitation for annotations created by logging commands,
-such as [max # of annotations per run](https://github.com/reviewdog/reviewdog/issues/411#issuecomment-570893427).
+such as [max # of annotations per run](https://github.com/sezzle/reviewdog/issues/411#issuecomment-570893427).
 You can check GitHub Actions log to see full results in such cases.
 
-#### reviewdog badge [![reviewdog](https://github.com/reviewdog/reviewdog/workflows/reviewdog/badge.svg?branch=master&event=push)](https://github.com/reviewdog/reviewdog/actions?query=workflow%3Areviewdog+event%3Apush+branch%3Amaster)
+#### reviewdog badge [![reviewdog](https://github.com/sezzle/reviewdog/workflows/reviewdog/badge.svg?branch=master&event=push)](https://github.com/sezzle/reviewdog/actions?query=workflow%3Areviewdog+event%3Apush+branch%3Amaster)
 
 As [`github-check` reporter](#reporter-github-checks--reportergithub-pr-check) support running on commit, we can create reviewdog
 [GitHub Action badge](https://docs.github.com/en/actions/using-workflows#adding-a-workflow-status-badge-to-your-repository)
@@ -972,11 +972,11 @@ haya14busa [![GitHub followers](https://img.shields.io/github/followers/haya14bu
 
 ## Contributors
 
-[![Contributors](https://opencollective.com/reviewdog/contributors.svg?width=890)](https://github.com/reviewdog/reviewdog/graphs/contributors)
+[![Contributors](https://opencollective.com/reviewdog/contributors.svg?width=890)](https://github.com/sezzle/reviewdog/graphs/contributors)
 
 ### Supporting reviewdog
 
-Become GitHub Sponsor for [each contributor](https://github.com/reviewdog/reviewdog/graphs/contributors)
+Become GitHub Sponsor for [each contributor](https://github.com/sezzle/reviewdog/graphs/contributors)
 or become a backer or sponsor from [opencollective](https://opencollective.com/reviewdog).
 
 [![Become a backer](https://opencollective.com/reviewdog/tiers/backer.svg?avatarHeight=64)](https://opencollective.com/reviewdog#backers)
