@@ -56,14 +56,13 @@ func (g *MergeRequestDiff) Diff(ctx context.Context) ([]byte, error) {
 	if err != nil {
 		return nil, err
 	}
-	targetSha := os.Getenv("CI_MERGE_REQUEST_TARGET_BRANCH_SHA")
-	if targetSha == "" {
-		targetSha = targetBranch.Commit.ID
-	}
 	return g.gitDiff(ctx, g.sha, targetBranch.Commit.ID)
 }
 
 func (g *MergeRequestDiff) gitDiff(_ context.Context, baseSha, targetSha string) ([]byte, error) {
+	fmt.Printf("baseSha: %s\n", baseSha)
+	fmt.Printf("targetSha: %s\n", targetSha)
+
 	mergeBase := os.Getenv("CI_MERGE_REQUEST_DIFF_BASE_SHA")
 	if mergeBase == "" {
 		b, err := exec.Command("git", "merge-base", targetSha, baseSha).Output()
@@ -72,6 +71,9 @@ func (g *MergeRequestDiff) gitDiff(_ context.Context, baseSha, targetSha string)
 		}
 		mergeBase = strings.Trim(string(b), "\n")
 	}
+
+	fmt.Printf("mergeBase: %s\n", mergeBase)
+
 	bytes, err := exec.Command("git", "diff", "--find-renames", mergeBase, baseSha).Output()
 	if err != nil {
 		return nil, fmt.Errorf("failed to run git diff: %w", err)
