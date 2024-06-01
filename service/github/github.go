@@ -304,7 +304,8 @@ func (g *PullRequest) Diff(ctx context.Context) ([]byte, error) {
 	opt := github.RawOptions{Type: github.Diff}
 	d, resp, err := g.cli.PullRequests.GetRaw(ctx, g.owner, g.repo, g.pr, opt)
 	if err != nil {
-		if resp != nil && resp.StatusCode == http.StatusNotAcceptable && g.checkInstallGitCommand() {
+		if resp != nil && resp.StatusCode == http.StatusNotAcceptable {
+			// git command should exist here. See NewGitHubPullRequest.
 			log.Print("fallback to use git command")
 			return g.diffUsingGitCommand(ctx)
 		}
@@ -312,12 +313,6 @@ func (g *PullRequest) Diff(ctx context.Context) ([]byte, error) {
 		return nil, err
 	}
 	return []byte(d), nil
-}
-
-// checkInstallGitCommand checks if git command is installed.
-func (g *PullRequest) checkInstallGitCommand() bool {
-	_, err := exec.Command("git", "-v").CombinedOutput()
-	return err == nil
 }
 
 // diffUsingGitCommand returns a diff of PullRequest using git command.

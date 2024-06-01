@@ -11,6 +11,7 @@ import (
 	"time"
 
 	"github.com/google/go-github/v60/github"
+	"github.com/reviewdog/reviewdog/service/serviceutil"
 	"github.com/vvakame/sdlog/aelog"
 )
 
@@ -28,7 +29,7 @@ func (c *checkerGitHubClient) GetPullRequestDiff(ctx context.Context, owner, rep
 	opt := github.RawOptions{Type: github.Diff}
 	d, resp, err := c.PullRequests.GetRaw(ctx, owner, repo, number, opt)
 	if err != nil {
-		if fallbackToGitCLI && resp != nil && resp.StatusCode == http.StatusNotAcceptable && c.checkInstallGitCommand() {
+		if fallbackToGitCLI && resp != nil && resp.StatusCode == http.StatusNotAcceptable && serviceutil.GitCommandExists() {
 			log.Print("fallback to use git command")
 			return c.getPullRequestDiffUsingGitCommand(ctx, owner, repo, number)
 		}
