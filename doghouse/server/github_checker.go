@@ -39,12 +39,6 @@ func (c *checkerGitHubClient) GetPullRequestDiff(ctx context.Context, owner, rep
 	return []byte(d), err
 }
 
-// checkInstallGitCommand checks if git command is installed.
-func (c *checkerGitHubClient) checkInstallGitCommand() bool {
-	_, err := exec.Command("git", "-v").CombinedOutput()
-	return err == nil
-}
-
 // getPullRequestDiffUsingGitCommand returns a diff of PullRequest using git command.
 func (c *checkerGitHubClient) getPullRequestDiffUsingGitCommand(ctx context.Context, owner, repo string, number int) ([]byte, error) {
 	pr, _, err := c.PullRequests.Get(ctx, owner, repo, number)
