@@ -55,7 +55,7 @@ index aa49124774..781ee2492f 100644
 	owner := "haya14busa"
 	repo := "reviewdog"
 	pr := 73
-	b, err := NewChecker(&doghouse.CheckRequest{}, client).gh.GetPullRequestDiff(context.Background(), owner, repo, pr)
+	b, err := NewChecker(&doghouse.CheckRequest{}, client, false /* inDogHouseServer */).gh.GetPullRequestDiff(context.Background(), owner, repo, pr, false /* fallbackToGitCLI */)
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -83,9 +83,9 @@ func TestChecker_GetPullRequestDiff_fake(t *testing.T) {
 	cli := github.NewClient(nil)
 	cli.BaseURL, _ = url.Parse(ts.URL + "/")
 
-	gh := NewChecker(&doghouse.CheckRequest{}, cli).gh
+	gh := NewChecker(&doghouse.CheckRequest{}, cli, false /* inDoghouseServer */).gh
 
-	if _, err := gh.GetPullRequestDiff(context.Background(), "o", "r", 14); err != nil {
+	if _, err := gh.GetPullRequestDiff(context.Background(), "o", "r", 14, false /* fallbackToGitCli */); err != nil {
 		t.Fatal(err)
 	}
 	if apiCalled != 1 {
@@ -158,9 +158,9 @@ func TestChecker_GetPullRequestDiff_fake_fallback(t *testing.T) {
 	cli := github.NewClient(nil)
 	cli.BaseURL, _ = url.Parse(ts.URL + "/")
 
-	gh := NewChecker(&doghouse.CheckRequest{}, cli).gh
+	gh := NewChecker(&doghouse.CheckRequest{}, cli, false /* inDogHouseServer */).gh
 
-	if _, err := gh.GetPullRequestDiff(context.Background(), "o", "r", 14); err != nil {
+	if _, err := gh.GetPullRequestDiff(context.Background(), "o", "r", 14, true /* fallbackToGitCli */); err != nil {
 		t.Fatal(err)
 	}
 	if apiCalled != 2 {

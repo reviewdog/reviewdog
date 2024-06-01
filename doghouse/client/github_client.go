@@ -16,5 +16,5 @@ type GitHubClient struct {
 }
 
 func (c *GitHubClient) Check(ctx context.Context, req *doghouse.CheckRequest, makeRequest bool) (*doghouse.CheckResponse, error) {
-	return server.NewChecker(req, c.Client).Check(ctx, makeRequest)
+	return server.NewChecker(req, c.Client, false /* inDogHouseServer */).Check(ctx, makeRequest)
 }

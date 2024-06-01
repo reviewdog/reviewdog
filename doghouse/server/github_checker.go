@@ -15,7 +15,7 @@ import (
 )
 
 type checkerGitHubClientInterface interface {
-	GetPullRequestDiff(ctx context.Context, owner, repo string, number int) ([]byte, error)
+	GetPullRequestDiff(ctx context.Context, owner, repo string, number int, fallbackToGitCLI bool) ([]byte, error)
 	CreateCheckRun(ctx context.Context, owner, repo string, opt github.CreateCheckRunOptions) (*github.CheckRun, error)
 	UpdateCheckRun(ctx context.Context, owner, repo string, checkID int64, opt github.UpdateCheckRunOptions) (*github.CheckRun, error)
 }
@@ -24,11 +24,11 @@ type checkerGitHubClient struct {
 	*github.Client
 }
 
-func (c *checkerGitHubClient) GetPullRequestDiff(ctx context.Context, owner, repo string, number int) ([]byte, error) {
+func (c *checkerGitHubClient) GetPullRequestDiff(ctx context.Context, owner, repo string, number int, fallbackToGitCLI bool) ([]byte, error) {
 	opt := github.RawOptions{Type: github.Diff}
 	d, resp, err := c.PullRequests.GetRaw(ctx, owner, repo, number, opt)
 	if err != nil {
-		if resp != nil && resp.StatusCode == http.StatusNotAcceptable && c.checkInstallGitCommand() {
+		if fallbackToGitCLI && resp != nil && resp.StatusCode == http.StatusNotAcceptable && c.checkInstallGitCommand() {
 			log.Print("fallback to use git command")
 			return c.getPullRequestDiffUsingGitCommand(ctx, owner, repo, number)
 		}
