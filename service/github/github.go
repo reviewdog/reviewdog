@@ -305,6 +305,7 @@ func (g *PullRequest) Diff(ctx context.Context) ([]byte, error) {
 	d, resp, err := g.cli.PullRequests.GetRaw(ctx, g.owner, g.repo, g.pr, opt)
 	if err != nil {
 		if resp != nil && resp.StatusCode == http.StatusNotAcceptable {
+			// git command should exist here. See NewGitHubPullRequest.
 			log.Print("fallback to use git command")
 			return g.diffUsingGitCommand(ctx)
 		}

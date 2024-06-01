@@ -17,13 +17,13 @@ import (
 )
 
 type fakeCheckerGitHubCli struct {
-	FakeGetPullRequestDiff func(ctx context.Context, owner, repo string, number int) ([]byte, error)
+	FakeGetPullRequestDiff func(ctx context.Context, owner, repo string, number int, fallbackToGitCLI bool) ([]byte, error)
 	FakeCreateCheckRun     func(ctx context.Context, owner, repo string, opt github.CreateCheckRunOptions) (*github.CheckRun, error)
 	FakeUpdateCheckRun     func(ctx context.Context, owner, repo string, checkID int64, opt github.UpdateCheckRunOptions) (*github.CheckRun, error)
 }
 
-func (f *fakeCheckerGitHubCli) GetPullRequestDiff(ctx context.Context, owner, repo string, number int) ([]byte, error) {
-	return f.FakeGetPullRequestDiff(ctx, owner, repo, number)
+func (f *fakeCheckerGitHubCli) GetPullRequestDiff(ctx context.Context, owner, repo string, number int, fallbackToGitCLI bool) ([]byte, error) {
+	return f.FakeGetPullRequestDiff(ctx, owner, repo, number, fallbackToGitCLI)
 }
 
 func (f *fakeCheckerGitHubCli) CreateCheckRun(ctx context.Context, owner, repo string, opt github.CreateCheckRunOptions) (*github.CheckRun, error) {
@@ -191,7 +191,7 @@ func TestCheck_OK(t *testing.T) {
 	}
 
 	cli := &fakeCheckerGitHubCli{}
-	cli.FakeGetPullRequestDiff = func(ctx context.Context, owner, repo string, number int) ([]byte, error) {
+	cli.FakeGetPullRequestDiff = func(ctx context.Context, owner, repo string, number int, fallbackToGitCLI bool) ([]byte, error) {
 		return []byte(sampleDiff), nil
 	}
 	cli.FakeCreateCheckRun = func(ctx context.Context, owner, repo string, opt github.CreateCheckRunOptions) (*github.CheckRun, error) {
@@ -361,7 +361,7 @@ func testOutsideDiff(t *testing.T, outsideDiff bool, filterMode filter.Mode) {
 	}
 
 	cli := &fakeCheckerGitHubCli{}
-	cli.FakeGetPullRequestDiff = func(ctx context.Context, owner, repo string, number int) ([]byte, error) {
+	cli.FakeGetPullRequestDiff = func(ctx context.Context, owner, repo string, number int, fallbackToGitCLI bool) ([]byte, error) {
 		return []byte(sampleDiff), nil
 	}
 	cli.FakeCreateCheckRun = func(ctx context.Context, owner, repo string, opt github.CreateCheckRunOptions) (*github.CheckRun, error) {
@@ -451,7 +451,7 @@ func TestCheck_OK_multiple_update_runs(t *testing.T) {
 	}
 
 	cli := &fakeCheckerGitHubCli{}
-	cli.FakeGetPullRequestDiff = func(ctx context.Context, owner, repo string, number int) ([]byte, error) {
+	cli.FakeGetPullRequestDiff = func(ctx context.Context, owner, repo string, number int, fallbackToGitCLI bool) ([]byte, error) {
 		return []byte(sampleDiff), nil
 	}
 	cli.FakeCreateCheckRun = func(ctx context.Context, owner, repo string, opt github.CreateCheckRunOptions) (*github.CheckRun, error) {
@@ -532,7 +532,7 @@ func TestCheck_OK_nonPullRequests(t *testing.T) {
 	}
 
 	cli := &fakeCheckerGitHubCli{}
-	cli.FakeGetPullRequestDiff = func(ctx context.Context, owner, repo string, number int) ([]byte, error) {
+	cli.FakeGetPullRequestDiff = func(ctx context.Context, owner, repo string, number int, fallbackToGitCLI bool) ([]byte, error) {
 		t.Errorf("GetPullRequestDiff should not be called")
 		return nil, nil
 	}
@@ -589,7 +589,7 @@ func TestCheck_OK_nonPullRequests(t *testing.T) {
 func TestCheck_fail_diff(t *testing.T) {
 	req := &doghouse.CheckRequest{PullRequest: 1}
 	cli := &fakeCheckerGitHubCli{}
-	cli.FakeGetPullRequestDiff = func(ctx context.Context, owner, repo string, number int) ([]byte, error) {
+	cli.FakeGetPullRequestDiff = func(ctx context.Context, owner, repo string, number int, fallbackToGitCLI bool) ([]byte, error) {
 		return nil, errors.New("test diff failure")
 	}
 	cli.FakeCreateCheckRun = func(ctx context.Context, owner, repo string, opt github.CreateCheckRunOptions) (*github.CheckRun, error) {
@@ -608,7 +608,7 @@ func TestCheck_fail_invalid_diff(t *testing.T) {
 	t.Skip("Parse invalid diff function somehow doesn't return error")
 	req := &doghouse.CheckRequest{PullRequest: 1}
 	cli := &fakeCheckerGitHubCli{}
-	cli.FakeGetPullRequestDiff = func(ctx context.Context, owner, repo string, number int) ([]byte, error) {
+	cli.FakeGetPullRequestDiff = func(ctx context.Context, owner, repo string, number int, fallbackToGitCLI bool) ([]byte, error) {
 		return []byte("invalid diff"), nil
 	}
 	cli.FakeCreateCheckRun = func(ctx context.Context, owner, repo string, opt github.CreateCheckRunOptions) (*github.CheckRun, error) {
@@ -626,7 +626,7 @@ func TestCheck_fail_invalid_diff(t *testing.T) {
 func TestCheck_fail_check(t *testing.T) {
 	req := &doghouse.CheckRequest{PullRequest: 1}
 	cli := &fakeCheckerGitHubCli{}
-	cli.FakeGetPullRequestDiff = func(ctx context.Context, owner, repo string, number int) ([]byte, error) {
+	cli.FakeGetPullRequestDiff = func(ctx context.Context, owner, repo string, number int, fallbackToGitCLI bool) ([]byte, error) {
 		return []byte(sampleDiff), nil
 	}
 	cli.FakeCreateCheckRun = func(ctx context.Context, owner, repo string, opt github.CreateCheckRunOptions) (*github.CheckRun, error) {
@@ -644,7 +644,7 @@ func TestCheck_fail_check(t *testing.T) {
 func TestCheck_fail_check_with_403(t *testing.T) {
 	req := &doghouse.CheckRequest{PullRequest: 1}
 	cli := &fakeCheckerGitHubCli{}
-	cli.FakeGetPullRequestDiff = func(ctx context.Context, owner, repo string, number int) ([]byte, error) {
+	cli.FakeGetPullRequestDiff = func(ctx context.Context, owner, repo string, number int, fallbackToGitCLI bool) ([]byte, error) {
 		return []byte(sampleDiff), nil
 	}
 	cli.FakeCreateCheckRun = func(ctx context.Context, owner, repo string, opt github.CreateCheckRunOptions) (*github.CheckRun, error) {

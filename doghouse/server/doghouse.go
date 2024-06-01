@@ -32,12 +32,17 @@ const maxAllowedSize = 65535
 const maxAnnotationsPerRequest = 50
 
 type Checker struct {
-	req *doghouse.CheckRequest
-	gh  checkerGitHubClientInterface
+	req              *doghouse.CheckRequest
+	gh               checkerGitHubClientInterface
+	inDogHouseServer bool // If true, this checker runs in the DogHouse server.
 }
 
-func NewChecker(req *doghouse.CheckRequest, gh *github.Client) *Checker {
-	return &Checker{req: req, gh: &checkerGitHubClient{Client: gh}}
+func NewChecker(req *doghouse.CheckRequest, gh *github.Client, inDogHouseServer bool) *Checker {
+	return &Checker{
+		req:              req,
+		gh:               &checkerGitHubClient{Client: gh},
+		inDogHouseServer: inDogHouseServer,
+	}
 }
 
 func (ch *Checker) Check(ctx context.Context, makeRequest bool) (*doghouse.CheckResponse, error) {
@@ -350,7 +355,8 @@ func (ch *Checker) pullRequestDiff(ctx context.Context, pr int) ([]*diff.FileDif
 }
 
 func (ch *Checker) rawPullRequestDiff(ctx context.Context, pr int) ([]byte, error) {
-	d, err := ch.gh.GetPullRequestDiff(ctx, ch.req.Owner, ch.req.Repo, pr)
+	fallbackToGitCLI := !ch.inDogHouseServer
+	d, err := ch.gh.GetPullRequestDiff(ctx, ch.req.Owner, ch.req.Repo, pr, fallbackToGitCLI)
 	if err != nil {
 		return nil, err
 	}
