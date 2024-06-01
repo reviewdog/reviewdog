@@ -12,7 +12,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - ...
 
 ### :bug: Fixes
-- [#1722](https://github.com/reviewdog/reviewdog/pull/1722) Add a fallback to `git diff` command to get diff of a GitHub pull request on doghouse
+- [#1722](https://github.com/reviewdog/reviewdog/pull/1722) Add a fallback to `git diff` command to get diff for `github-check` / `github-pr-check` reporters with GitHub Actions (in other words, when not in DogHouse server).
 
 ### :rotating_light: Breaking changes
 - ...
