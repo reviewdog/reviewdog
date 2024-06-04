@@ -12,10 +12,15 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - ...
 
 ### :bug: Fixes
-- [#1722](https://github.com/reviewdog/reviewdog/pull/1722) Add a fallback to `git diff` command to get diff for `github-check` / `github-pr-check` reporters with GitHub Actions (in other words, when not in DogHouse server).
+- ...
 
 ### :rotating_light: Breaking changes
 - ...
+
+## [v0.17.5] - 2024-06-01
+
+### :bug: Fixes
+- [#1722](https://github.com/reviewdog/reviewdog/pull/1722) Add a fallback to `git diff` command to get diff for `github-check` / `github-pr-check` reporters with GitHub Actions (in other words, when not in DogHouse server).
 
 ## [v0.17.4] - 2024-04-19
 
@@ -212,4 +217,5 @@ See https://github.com/reviewdog/reviewdog/releases for older release note.
 [v0.17.2]: https://github.com/reviewdog/reviewdog/compare/v0.17.1...v0.17.2
 [v0.17.3]: https://github.com/reviewdog/reviewdog/compare/v0.17.2...v0.17.3
 [v0.17.4]: https://github.com/reviewdog/reviewdog/compare/v0.17.3...v0.17.4
+[v0.17.5]: https://github.com/reviewdog/reviewdog/compare/v0.17.4...v0.17.5
 [@haya14busa]: https://github.com/haya14busa
