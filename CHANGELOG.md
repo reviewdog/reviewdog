@@ -9,6 +9,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ### :sparkles: Release Note <!-- optional -->
 
 ### :rocket: Enhancements
+- [#1770](https://github.com/reviewdog/reviewdog/pull/1770) Add related locations support for `github-pr-review` reporter
 - ...
 
 ### :bug: Fixes
