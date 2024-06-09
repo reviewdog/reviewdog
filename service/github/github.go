@@ -130,6 +130,7 @@ func (g *PullRequest) postAsReviewComment(ctx context.Context) error {
 	rawComments := make([]*reviewdog.Comment, 0, len(postComments))
 	reviewComments := make([]*github.DraftReviewComment, 0, len(postComments))
 	remaining := make([]*reviewdog.Comment, 0)
+	repoBaseHTMLURLForRelatedLoc := ""
 	for _, c := range postComments {
 		if !c.Result.InDiffContext {
 			// GitHub Review API cannot report results outside diff. If it's running
@@ -141,7 +142,14 @@ func (g *PullRequest) postAsReviewComment(ctx context.Context) error {
 			}
 			continue
 		}
-		body := buildBody(c)
+		if repoBaseHTMLURLForRelatedLoc == "" && len(c.Result.Diagnostic.GetRelatedLocations()) > 0 {
+			repo, _, err := g.cli.Repositories.Get(ctx, g.owner, g.repo)
+			if err != nil {
+				return err
+			}
+			repoBaseHTMLURLForRelatedLoc = repo.GetHTMLURL() + "/blob/" + g.sha
+		}
+		body := buildBody(c, repoBaseHTMLURLForRelatedLoc)
 		if g.postedcs.IsPosted(c, githubCommentLine(c), body) {
 			// it's already posted. skip it.
 			continue
@@ -390,10 +398,21 @@ func listAllPullRequestsComments(ctx context.Context, cli *github.Client,
 	return append(comments, restComments...), nil
 }
 
-func buildBody(c *reviewdog.Comment) string {
+func buildBody(c *reviewdog.Comment, baseRelatedLocURL string) string {
 	cbody := commentutil.MarkdownComment(c)
 	if suggestion := buildSuggestions(c); suggestion != "" {
 		cbody += "\n" + suggestion
+	}
+	for _, relatedLoc := range c.Result.Diagnostic.GetRelatedLocations() {
+		loc := relatedLoc.GetLocation()
+		if loc.GetPath() == "" || loc.GetRange().GetStart().GetLine() == 0 {
+			continue
+		}
+		relatedURL := fmt.Sprintf("%s/%s#L%d", baseRelatedLocURL, loc.GetPath(), loc.GetRange().GetStart().GetLine())
+		if endLine := loc.GetRange().GetEnd().GetLine(); endLine > 0 {
+			relatedURL += fmt.Sprintf("-L%d", endLine)
+		}
+		cbody += "\n<hr>\n" + relatedLoc.GetMessage() + "\n" + relatedURL
 	}
 	return cbody
 }

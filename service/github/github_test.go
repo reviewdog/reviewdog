@@ -170,6 +170,7 @@ func TestGitHubPullRequest_Post_Flush_review_api(t *testing.T) {
 
 	listCommentsAPICalled := 0
 	postCommentsAPICalled := 0
+	repoCommentsAPICalled := 0
 	mux := http.NewServeMux()
 	mux.HandleFunc("/repos/o/r/pulls/14/comments", func(w http.ResponseWriter, r *http.Request) {
 		switch r.Method {
@@ -463,9 +464,33 @@ func TestGitHubPullRequest_Post_Flush_review_api(t *testing.T) {
 					"``````",
 				}, "\n") + "\n"),
 			},
+			{
+				Path:      github.String("reviewdog.go"),
+				Side:      github.String("RIGHT"),
+				StartSide: github.String("RIGHT"),
+				StartLine: github.Int(15),
+				Line:      github.Int(16),
+				Body: github.String(commentutil.BodyPrefix + strings.Join([]string{
+					"related location test",
+					"<hr>",
+					"related loc test",
+					"https://test/repo/path/blob/sha/reviewdog.go#L14-L16",
+					"<hr>",
+					"related loc test (2)",
+					"https://test/repo/path/blob/sha/reviewdog2.go#L14",
+				}, "\n")),
+			},
 		}
 		if diff := pretty.Compare(want, req.Comments); diff != "" {
 			t.Errorf("req.Comments diff: (-got +want)\n%s", diff)
+		}
+	})
+	mux.HandleFunc("/repos/o/r", func(w http.ResponseWriter, r *http.Request) {
+		repoCommentsAPICalled++
+		if err := json.NewEncoder(w).Encode(&github.Repository{
+			HTMLURL: github.String("https://test/repo/path"),
+		}); err != nil {
+			t.Fatal(err)
 		}
 	})
 	ts := httptest.NewServer(mux)
@@ -1142,6 +1167,53 @@ func TestGitHubPullRequest_Post_Flush_review_api(t *testing.T) {
 						},
 					},
 					Message: "multiline suggestion comment including an empty code fence block",
+				},
+				InDiffFile:    true,
+				InDiffContext: true,
+			},
+		},
+		{
+			Result: &filter.FilteredDiagnostic{
+				Diagnostic: &rdf.Diagnostic{
+					Location: &rdf.Location{
+						Path: "reviewdog.go",
+						Range: &rdf.Range{
+							Start: &rdf.Position{
+								Line: 15,
+							},
+							End: &rdf.Position{
+								Line: 16,
+							},
+						},
+					},
+					RelatedLocations: []*rdf.RelatedLocation{
+						{
+							Location: &rdf.Location{
+								Path: "reviewdog.go",
+								Range: &rdf.Range{
+									Start: &rdf.Position{
+										Line: 14,
+									},
+									End: &rdf.Position{
+										Line: 16,
+									},
+								},
+							},
+							Message: "related loc test",
+						},
+						{
+							Location: &rdf.Location{
+								Path: "reviewdog2.go",
+								Range: &rdf.Range{
+									Start: &rdf.Position{
+										Line: 14,
+									},
+								},
+							},
+							Message: "related loc test (2)",
+						},
+					},
+					Message: "related location test",
 				},
 				InDiffFile:    true,
 				InDiffContext: true,
