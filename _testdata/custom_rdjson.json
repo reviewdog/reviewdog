@@ -240,7 +240,10 @@
             "path": "_testdata/suggestions.txt",
             "range": {
               "start": {
-                "line": 10
+                "line": 6
+              },
+              "end": {
+                "line": 8
               }
             }
           }
