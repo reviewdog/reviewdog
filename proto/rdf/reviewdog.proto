@@ -64,6 +64,8 @@ message Diagnostic {
   // diagnostic.
   // Optional.
   string original_output = 7;
+
+  repeated RelatedLocation related_locations = 8;
 }
 
 enum Severity {
@@ -80,6 +82,12 @@ message Location {
   // Range in the file path.
   // Optional.
   Range range = 3;
+}
+
+message RelatedLocation {
+  string message = 1;
+
+  Location location = 2;
 }
 
 // A range in a text document expressed as start and end positions.
