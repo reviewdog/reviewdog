@@ -75,7 +75,8 @@ func ExampleRDJSONParser() {
           }
         }
       },
-      "severity": 1
+      "severity": 1,
+      "unknown_field": "this field will be ignored"
     }
   ]
 }`
