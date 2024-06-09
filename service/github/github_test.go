@@ -473,9 +473,11 @@ func TestGitHubPullRequest_Post_Flush_review_api(t *testing.T) {
 				Body: github.String(commentutil.BodyPrefix + strings.Join([]string{
 					"related location test",
 					"<hr>",
+					"",
 					"related loc test",
 					"https://test/repo/path/blob/sha/reviewdog.go#L14-L16",
 					"<hr>",
+					"",
 					"related loc test (2)",
 					"https://test/repo/path/blob/sha/reviewdog2.go#L14",
 				}, "\n")),

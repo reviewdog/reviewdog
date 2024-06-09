@@ -412,7 +412,7 @@ func buildBody(c *reviewdog.Comment, baseRelatedLocURL string) string {
 		if endLine := loc.GetRange().GetEnd().GetLine(); endLine > 0 {
 			relatedURL += fmt.Sprintf("-L%d", endLine)
 		}
-		cbody += "\n<hr>\n" + relatedLoc.GetMessage() + "\n" + relatedURL
+		cbody += "\n<hr>\n\n" + relatedLoc.GetMessage() + "\n" + relatedURL
 	}
 	return cbody
 }
