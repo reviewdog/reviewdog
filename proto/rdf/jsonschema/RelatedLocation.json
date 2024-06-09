@@ -5,11 +5,13 @@
         "RelatedLocation": {
             "properties": {
                 "message": {
-                    "type": "string"
+                    "type": "string",
+                    "description": "Explanation of this related location. Optional."
                 },
                 "location": {
                     "$ref": "#/definitions/reviewdog.rdf.Location",
-                    "additionalProperties": true
+                    "additionalProperties": true,
+                    "description": "Required."
                 }
             },
             "additionalProperties": true,

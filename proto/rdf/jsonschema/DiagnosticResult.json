@@ -114,7 +114,8 @@
                     "items": {
                         "$ref": "#/definitions/reviewdog.rdf.RelatedLocation"
                     },
-                    "type": "array"
+                    "type": "array",
+                    "description": "Related locations for this diagnostic. Optional."
                 }
             },
             "additionalProperties": true,
@@ -174,11 +175,13 @@
         "reviewdog.rdf.RelatedLocation": {
             "properties": {
                 "message": {
-                    "type": "string"
+                    "type": "string",
+                    "description": "Explanation of this related location. Optional."
                 },
                 "location": {
                     "$ref": "#/definitions/reviewdog.rdf.Location",
-                    "additionalProperties": true
+                    "additionalProperties": true,
+                    "description": "Required."
                 }
             },
             "additionalProperties": true,

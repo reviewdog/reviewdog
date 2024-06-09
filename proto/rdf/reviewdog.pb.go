@@ -185,7 +185,9 @@ type Diagnostic struct {
 	// original_output represents the original output which corresponds to this
 	// diagnostic.
 	// Optional.
-	OriginalOutput   string             `protobuf:"bytes,7,opt,name=original_output,json=originalOutput,proto3" json:"original_output,omitempty"`
+	OriginalOutput string `protobuf:"bytes,7,opt,name=original_output,json=originalOutput,proto3" json:"original_output,omitempty"`
+	// Related locations for this diagnostic.
+	// Optional.
 	RelatedLocations []*RelatedLocation `protobuf:"bytes,8,rep,name=related_locations,json=relatedLocations,proto3" json:"related_locations,omitempty"`
 }
 
@@ -340,7 +342,10 @@ type RelatedLocation struct {
 	sizeCache     protoimpl.SizeCache
 	unknownFields protoimpl.UnknownFields
 
-	Message  string    `protobuf:"bytes,1,opt,name=message,proto3" json:"message,omitempty"`
+	// Explanation of this related location.
+	// Optional.
+	Message string `protobuf:"bytes,1,opt,name=message,proto3" json:"message,omitempty"`
+	// Required.
 	Location *Location `protobuf:"bytes,2,opt,name=location,proto3" json:"location,omitempty"`
 }
 

@@ -65,6 +65,8 @@ message Diagnostic {
   // Optional.
   string original_output = 7;
 
+  // Related locations for this diagnostic.
+  // Optional.
   repeated RelatedLocation related_locations = 8;
 }
 
@@ -85,8 +87,11 @@ message Location {
 }
 
 message RelatedLocation {
+  // Explanation of this related location.
+  // Optional.
   string message = 1;
 
+  // Required.
   Location location = 2;
 }
 
