@@ -1,6 +1,7 @@
 package commentutil
 
 import (
+	"bufio"
 	"fmt"
 	"log"
 	"strings"
@@ -94,5 +95,38 @@ func severity(c *reviewdog.Comment) string {
 		return "📝"
 	default:
 		return ""
+	}
+}
+
+// GitHubAlertComment creates a markdown comment using GitHub Alerts syntax.
+// https://docs.github.com/en/get-started/writing-on-github/getting-started-with-writing-and-formatting-on-github/basic-writing-and-formatting-syntax#alerts
+func GitHubAlertComment(c *reviewdog.Comment) string {
+	return "> " + githubAlert(c) + "\n" + toMarkdownQuote(MarkdownComment(c))
+}
+
+func toMarkdownQuote(str string) string {
+	var sb strings.Builder
+	scanner := bufio.NewScanner(strings.NewReader(str))
+	for scanner.Scan() {
+		sb.WriteString("> ")
+		sb.Write(scanner.Bytes())
+		sb.WriteRune('\n')
+	}
+	return sb.String()
+}
+
+func githubAlert(c *reviewdog.Comment) string {
+	// TODO: Maybe we should support TIP and IMPORTANT severity.
+	switch c.Result.Diagnostic.GetSeverity() {
+	case rdf.Severity_ERROR:
+		return "[!CAUTION]"
+	case rdf.Severity_WARNING:
+		return "[!WARNING]"
+	case rdf.Severity_INFO:
+		return "[!NOTE]"
+	default:
+		// I'm not 100% sure what's the best default alert notation, but let's use
+		// warning as default.
+		return "[!WARNING]"
 	}
 }
