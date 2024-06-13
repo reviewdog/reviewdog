@@ -183,6 +183,7 @@ func (g *PullRequest) postAsReviewComment(ctx context.Context) error {
 			}
 			return err
 		}
+
 	}
 
 	return nil
