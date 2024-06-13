@@ -1,0 +1,40 @@
+name: depup
+on:
+  schedule:
+    - cron:  '14 14 * * *' # Runs at 14:14 UTC every day
+  repository_dispatch:
+    types: [depup]
+
+jobs:
+  protoc:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: haya14busa/action-depup/with-pr@v1
+        id: depup
+        with:
+          file: proto/rdf/Dockerfile
+          version_name: PROTOC_VERSION
+          repo: protocolbuffers/protobuf
+
+  protoc-gen-go:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: haya14busa/action-depup/with-pr@v1
+        id: depup
+        with:
+          file: proto/rdf/Dockerfile
+          version_name: PROTOC_GEN_GO_VERSION
+          repo: protocolbuffers/protobuf-go
+
+  protoc-gen-jsonschema:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: haya14busa/action-depup/with-pr@v1
+        id: depup
+        with:
+          file: proto/rdf/Dockerfile
+          version_name: PROTOC_GEN_JSONSCHEMA_VERSION
+          repo: chrusty/protoc-gen-jsonschema
