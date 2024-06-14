@@ -8,6 +8,7 @@ import (
 	"google.golang.org/protobuf/testing/protocmp"
 
 	"github.com/reviewdog/reviewdog/diff"
+	"github.com/reviewdog/reviewdog/pathutil"
 	"github.com/reviewdog/reviewdog/proto/rdf"
 )
 
@@ -569,7 +570,7 @@ func TestFilterCheckByNoFilter(t *testing.T) {
 
 func findFileDiff(filediffs []*diff.FileDiff, path string, strip int) *diff.FileDiff {
 	for _, file := range filediffs {
-		if NormalizeDiffPath(file.PathNew, strip) == path {
+		if pathutil.NormalizeDiffPath(file.PathNew, strip) == path {
 			return file
 		}
 	}
