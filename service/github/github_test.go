@@ -7,6 +7,7 @@ import (
 	"net/http/httptest"
 	"net/url"
 	"os"
+	"path/filepath"
 	"strings"
 	"testing"
 
@@ -479,7 +480,7 @@ func TestGitHubPullRequest_Post_Flush_review_api(t *testing.T) {
 					"<hr>",
 					"",
 					"related loc test (2)",
-					"https://test/repo/path/blob/sha/reviewdog2.go#L14",
+					"https://test/repo/path/blob/sha/service/github/reviewdog2.go#L14",
 				}, "\n")),
 			},
 		}
@@ -1205,7 +1206,7 @@ func TestGitHubPullRequest_Post_Flush_review_api(t *testing.T) {
 						},
 						{
 							Location: &rdf.Location{
-								Path: "reviewdog2.go",
+								Path: filepath.Join(cwd, "reviewdog2.go"),
 								Range: &rdf.Range{
 									Start: &rdf.Position{
 										Line: 14,

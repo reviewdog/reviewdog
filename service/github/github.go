@@ -16,6 +16,7 @@ import (
 
 	"github.com/reviewdog/reviewdog"
 	"github.com/reviewdog/reviewdog/cienv"
+	"github.com/reviewdog/reviewdog/pathutil"
 	"github.com/reviewdog/reviewdog/proto/rdf"
 	"github.com/reviewdog/reviewdog/service/commentutil"
 	"github.com/reviewdog/reviewdog/service/github/githubutils"
@@ -131,6 +132,10 @@ func (g *PullRequest) postAsReviewComment(ctx context.Context) error {
 	reviewComments := make([]*github.DraftReviewComment, 0, len(postComments))
 	remaining := make([]*reviewdog.Comment, 0)
 	repoBaseHTMLURLForRelatedLoc := ""
+	rootPath, err := serviceutil.GetGitRoot()
+	if err != nil {
+		return err
+	}
 	for _, c := range postComments {
 		if !c.Result.InDiffContext {
 			// GitHub Review API cannot report results outside diff. If it's running
@@ -149,7 +154,7 @@ func (g *PullRequest) postAsReviewComment(ctx context.Context) error {
 			}
 			repoBaseHTMLURLForRelatedLoc = repo.GetHTMLURL() + "/blob/" + g.sha
 		}
-		body := buildBody(c, repoBaseHTMLURLForRelatedLoc)
+		body := buildBody(c, repoBaseHTMLURLForRelatedLoc, rootPath)
 		if g.postedcs.IsPosted(c, githubCommentLine(c), body) {
 			// it's already posted. skip it.
 			continue
@@ -398,7 +403,7 @@ func listAllPullRequestsComments(ctx context.Context, cli *github.Client,
 	return append(comments, restComments...), nil
 }
 
-func buildBody(c *reviewdog.Comment, baseRelatedLocURL string) string {
+func buildBody(c *reviewdog.Comment, baseRelatedLocURL string, gitRootPath string) string {
 	cbody := commentutil.MarkdownComment(c)
 	if suggestion := buildSuggestions(c); suggestion != "" {
 		cbody += "\n" + suggestion
@@ -408,7 +413,8 @@ func buildBody(c *reviewdog.Comment, baseRelatedLocURL string) string {
 		if loc.GetPath() == "" || loc.GetRange().GetStart().GetLine() == 0 {
 			continue
 		}
-		relatedURL := fmt.Sprintf("%s/%s#L%d", baseRelatedLocURL, loc.GetPath(), loc.GetRange().GetStart().GetLine())
+		relPath := pathutil.NormalizePath(loc.GetPath(), gitRootPath, "")
+		relatedURL := fmt.Sprintf("%s/%s#L%d", baseRelatedLocURL, relPath, loc.GetRange().GetStart().GetLine())
 		if endLine := loc.GetRange().GetEnd().GetLine(); endLine > 0 {
 			relatedURL += fmt.Sprintf("-L%d", endLine)
 		}
