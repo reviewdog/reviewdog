@@ -6,7 +6,7 @@ import (
 	"strings"
 
 	"github.com/reviewdog/reviewdog/diff"
-	"github.com/reviewdog/reviewdog/filter"
+	"github.com/reviewdog/reviewdog/pathutil"
 	"github.com/reviewdog/reviewdog/proto/rdf"
 )
 
@@ -57,7 +57,7 @@ func (p *DiffParser) Parse(r io.Reader) ([]*rdf.Diagnostic, error) {
 	}
 	var diagnostics []*rdf.Diagnostic
 	for _, fdiff := range filediffs {
-		path := filter.NormalizeDiffPath(fdiff.PathNew, p.strip)
+		path := pathutil.NormalizeDiffPath(fdiff.PathNew, p.strip)
 		for _, hunk := range fdiff.Hunks {
 			lnum := hunk.StartLineOld - 1
 			prevState := diff.LineUnchanged
