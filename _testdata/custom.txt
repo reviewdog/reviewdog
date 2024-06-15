@@ -15,3 +15,5 @@ haya14busa
 function f()
 {
 }
+
+RelatedLoc
