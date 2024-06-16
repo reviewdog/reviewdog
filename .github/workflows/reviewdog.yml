@@ -209,6 +209,13 @@ jobs:
           locale: "US"
           reporter: github-check
 
+  typos:
+    name: runner / typos
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: reviewdog/action-typos@v1
+
   languagetool:
     name: runner / languagetool
     runs-on: ubuntu-latest
