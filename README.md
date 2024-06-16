@@ -711,7 +711,9 @@ You can use public GitHub Actions to start using reviewdog with ease! :tada: :ar
   - [reviewdog/action-actionlint](https://github.com/reviewdog/action-actionlint) - Run [actionlint](https://github.com/rhysd/actionlint)
 - Protocol Buffers
   - [yoheimuta/action-protolint](https://github.com/yoheimuta/action-protolint) - Run [protolint](https://github.com/yoheimuta/protolint)
-  
+- Rego
+  - [reviewdog/action-regal](https://github.com/reviewdog/action-regal) - Run [Regal](https://github.com/StyraInc/regal)
+
 ... and more on [GitHub Marketplace](https://github.com/marketplace?utf8=✓&type=actions&query=reviewdog).
 
 Missing actions? Check out [reviewdog/action-template](https://github.com/reviewdog/action-template) and create a new reviewdog action!
