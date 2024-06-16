@@ -357,4 +357,83 @@ var fixtures = [][]string{{
 		"url": "https://avd.aquasec.com/nvd/cve-2018-14618"
 	}
 }`},
+	{fmt.Sprintf(`{
+	"runs": [ {
+		"originalUriBaseIds": {
+			"ROOTPATH": {
+			  "uri": "%s"
+			}
+		},
+		"tool": {
+			"driver": {
+				"name": "driver_name"
+			}
+		},
+		"results": [
+			{
+				"ruleId": "PY2335",
+				"message": {
+          "text": "Use of tainted variable 'expr' in the insecure function 'eval'."
+        },
+				"locations": [
+					{
+						"physicalLocation": {
+							"artifactLocation": {
+								"uri": "3-Beyond-basics/bad-eval.py"
+							},
+							"region": {
+								"startLine": 4
+							}
+						}
+					}
+				],
+				"relatedLocations": [
+					{
+						"message": {
+							"text": "The tainted data entered the system here."
+						},
+						"physicalLocation": {
+							"artifactLocation": {
+								"uri": "3-Beyond-basics/bad-eval.py"
+							},
+							"region": {
+								"startLine": 3
+							}
+						}
+					}
+				]
+			}
+			]
+	  } ]
+  }
+`, basedir()), `{
+	"message": "Use of tainted variable 'expr' in the insecure function 'eval'.",
+	"location": {
+		"path": "3-Beyond-basics/bad-eval.py",
+    "range": {
+      "start": {
+        "line": 4
+      }
+    }
+	},
+	"source": {
+		"name": "driver_name"
+	},
+	"code": {
+		"value": "PY2335"
+	},
+  "relatedLocations": [
+    {
+      "message": "The tainted data entered the system here.",
+			"location": {
+				"path": "3-Beyond-basics/bad-eval.py",
+				"range": {
+					"start": {
+						"line": 3
+					}
+				}
+			}
+    }
+  ]
+}`},
 }

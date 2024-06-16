@@ -91,23 +91,23 @@ func (p *SarifParser) Parse(r io.Reader) ([]*rdf.Diagnostic, error) {
 					suggestionsMap[path] = suggestions
 				}
 			}
-			for _, location := range result.Locations {
-				physicalLocation := location.PhysicalLocation
-				artifactLocation := physicalLocation.ArtifactLocation
-				loc := sarif.ArtifactLocation{}
-				if artifactLocation != nil {
-					loc = *artifactLocation
-				}
-				path, err := getPath(loc, baseURIs, basedir)
+
+			relatedLocs := []*rdf.RelatedLocation{}
+			for _, relLoc := range result.RelatedLocations {
+				loc, err := toRDFormatLocation(relLoc, baseURIs, basedir)
 				if err != nil {
-					// invalid path
 					return nil, err
 				}
-				region := sarif.Region{}
-				if physicalLocation.Region != nil {
-					region = *physicalLocation.Region
+				l := &rdf.RelatedLocation{
+					Location: loc,
 				}
-				rng := getRdfRange(region)
+				if relLoc.Message != nil {
+					l.Message = getText(*relLoc.Message)
+				}
+				relatedLocs = append(relatedLocs, l)
+			}
+
+			for _, location := range result.Locations {
 				var code *rdf.Code
 				if ruleID != "" {
 					code = &rdf.Code{
@@ -117,26 +117,53 @@ func (p *SarifParser) Parse(r io.Reader) ([]*rdf.Diagnostic, error) {
 						code.Url = *rule.HelpURI
 					}
 				}
+				loc, err := toRDFormatLocation(location, baseURIs, basedir)
+				if err != nil {
+					return nil, err
+				}
 				d := &rdf.Diagnostic{
-					Message: message,
-					Location: &rdf.Location{
-						Path:  path,
-						Range: rng,
-					},
+					Message:  message,
+					Location: loc,
 					Severity: severity(level),
 					Source: &rdf.Source{
 						Name: name,
 						Url:  informationURI,
 					},
-					Code:           code,
-					Suggestions:    suggestionsMap[path],
-					OriginalOutput: string(original),
+					Code:             code,
+					Suggestions:      suggestionsMap[loc.GetPath()],
+					RelatedLocations: relatedLocs,
+					OriginalOutput:   string(original),
 				}
 				ds = append(ds, d)
 			}
 		}
 	}
 	return ds, nil
+}
+
+func toRDFormatLocation(location sarif.Location,
+	baseURIs map[string]sarif.ArtifactLocation,
+	basedir string,
+) (*rdf.Location, error) {
+	physicalLocation := location.PhysicalLocation
+	artifactLocation := physicalLocation.ArtifactLocation
+	loc := sarif.ArtifactLocation{}
+	if artifactLocation != nil {
+		loc = *artifactLocation
+	}
+	path, err := getPath(loc, baseURIs, basedir)
+	if err != nil {
+		// invalid path
+		return nil, err
+	}
+	region := sarif.Region{}
+	if physicalLocation.Region != nil {
+		region = *physicalLocation.Region
+	}
+	return &rdf.Location{
+		Path:  path,
+		Range: getRdfRange(region),
+	}, nil
 }
 
 func getPath(
