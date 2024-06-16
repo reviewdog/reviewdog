@@ -134,7 +134,9 @@ var fixtures = [][]string{{
 		{
 			"originalUriBaseIds": {
 				"SRCROOT": {
-					"description": "uri deleted root"
+					"description": {
+						"text": "uri deleted root"
+					}
 				}
 			},
 			"results": [
