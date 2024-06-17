@@ -24,7 +24,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 This release supports related locations for`github-pr-review` reporter.
 You can pass `related_locations` with `rdjson` / `rdjsonl` format.
 
-![related locations support](https://github.com/reviewdog/reviewdog/assets/3797062/6b6a4e53-33dd-4006-8446-af3dbb6becaa)
+![related locations support](https://github.com/reviewdog/reviewdog/assets/3797062/55c29d26-d163-4758-846d-5b3473323366)
 
 ### :rocket: Enhancements
 - [#1770](https://github.com/reviewdog/reviewdog/pull/1770) Add related locations support for `github-pr-review` reporter
