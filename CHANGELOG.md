@@ -8,13 +8,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### :sparkles: Release Note <!-- optional -->
 
-This release supports related locations for`github-pr-review` reporter.
-You can pass `related_locations` with `rdjson` / `rdjsonl` format.
-
-![related locations support](https://github.com/reviewdog/reviewdog/assets/3797062/6b6a4e53-33dd-4006-8446-af3dbb6becaa)
-
 ### :rocket: Enhancements
-- [#1770](https://github.com/reviewdog/reviewdog/pull/1770) Add related locations support for `github-pr-review` reporter
 - ...
 
 ### :bug: Fixes
@@ -22,6 +16,18 @@ You can pass `related_locations` with `rdjson` / `rdjsonl` format.
 
 ### :rotating_light: Breaking changes
 - ...
+
+## [v0.18.0] - 2024-06-17
+
+### :sparkles: Release Note
+
+This release supports related locations for`github-pr-review` reporter.
+You can pass `related_locations` with `rdjson` / `rdjsonl` format.
+
+![related locations support](https://github.com/reviewdog/reviewdog/assets/3797062/6b6a4e53-33dd-4006-8446-af3dbb6becaa)
+
+### :rocket: Enhancements
+- [#1770](https://github.com/reviewdog/reviewdog/pull/1770) Add related locations support for `github-pr-review` reporter
 
 ## [v0.17.5] - 2024-06-01
 
@@ -224,4 +230,5 @@ See https://github.com/reviewdog/reviewdog/releases for older release note.
 [v0.17.3]: https://github.com/reviewdog/reviewdog/compare/v0.17.2...v0.17.3
 [v0.17.4]: https://github.com/reviewdog/reviewdog/compare/v0.17.3...v0.17.4
 [v0.17.5]: https://github.com/reviewdog/reviewdog/compare/v0.17.4...v0.17.5
+[v0.18.0]: https://github.com/reviewdog/reviewdog/compare/v0.17.5...v0.18.0
 [@haya14busa]: https://github.com/haya14busa
