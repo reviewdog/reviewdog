@@ -1,4 +1,4 @@
-name: RDFormat
+name: Proto
 on: [push,pull_request]
 jobs:
   build:
@@ -7,7 +7,7 @@ jobs:
     steps:
     - uses: actions/checkout@v4
     - name: Build
-      working-directory: proto/rdf/
+      working-directory: proto/
       run: ./update.sh
     - name: Check diff
       run: git diff --exit-code
