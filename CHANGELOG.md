@@ -22,7 +22,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ### :sparkles: Release Note
 
 This release supports related locations for`github-pr-review` reporter.
-You can pass `related_locations` with `rdjson` / `rdjsonl` format.
+You can pass `related_locations` with `rdjson` / `rdjsonl` and `sarif` format.
 
 ![related locations support](https://github.com/reviewdog/reviewdog/assets/3797062/55c29d26-d163-4758-846d-5b3473323366)
 
