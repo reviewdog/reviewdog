@@ -33,9 +33,9 @@
   <a href="https://github.com/reviewdog/reviewdog/actions?query=workflow%3Arelease">
     <img alt="release" src="https://github.com/reviewdog/reviewdog/workflows/release/badge.svg">
   </a>
-  <a href="https://travis-ci.org/reviewdog/reviewdog"><img alt="Travis Status" src="https://img.shields.io/travis/reviewdog/reviewdog/master.svg?label=Travis&logo=travis"></a>
   <a href="https://circleci.com/gh/reviewdog/reviewdog"><img alt="CircleCI Status" src="http://img.shields.io/circleci/build/github/reviewdog/reviewdog/master.svg?label=CircleCI&logo=circleci"></a>
   <a href="https://codecov.io/github/reviewdog/reviewdog"><img alt="Coverage Status" src="https://img.shields.io/codecov/c/github/reviewdog/reviewdog/master.svg?logo=codecov"></a>
+  <a href="https://github.com/haya14busa/github-used-by/tree/main/repo/reviewdog#reviewdog"><img src="https://img.shields.io/badge/Used%20By-many%20repos-181717.svg?logo=github"></a>
 </div>
 
 <div align="center">
