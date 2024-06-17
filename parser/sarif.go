@@ -7,6 +7,7 @@ import (
 	"os"
 	"path/filepath"
 
+	"github.com/haya14busa/go-sarif/sarif"
 	"github.com/reviewdog/reviewdog/proto/rdf"
 	"github.com/reviewdog/reviewdog/service/serviceutil"
 )
@@ -22,7 +23,7 @@ func NewSarifParser() Parser {
 }
 
 func (p *SarifParser) Parse(r io.Reader) ([]*rdf.Diagnostic, error) {
-	slf := new(SarifJson)
+	slf := new(sarif.Sarif)
 	if err := json.NewDecoder(r).Decode(slf); err != nil {
 		return nil, err
 	}
@@ -38,9 +39,12 @@ func (p *SarifParser) Parse(r io.Reader) ([]*rdf.Diagnostic, error) {
 		tool := run.Tool
 		driver := tool.Driver
 		name := driver.Name
-		informationURI := driver.InformationURI
-		baseURIs := run.OriginalURIBaseIds
-		rules := map[string]SarifRule{}
+		informationURI := ""
+		if driver.InformationURI != nil {
+			informationURI = *driver.InformationURI
+		}
+		baseURIs := run.OriginalURIBaseIDS
+		rules := map[string]sarif.ReportingDescriptor{}
 		for _, rule := range driver.Rules {
 			rules[rule.ID] = rule
 		}
@@ -49,69 +53,86 @@ func (p *SarifParser) Parse(r io.Reader) ([]*rdf.Diagnostic, error) {
 			if err != nil {
 				return nil, err
 			}
-			message := result.Message.GetText()
-			ruleID := result.RuleID
-			rule := rules[ruleID]
-			level := result.Level
-			if level == "" {
-				level = rule.DefaultConfiguration.Level
+			message := getText(result.Message)
+			rule := sarif.ReportingDescriptor{}
+			ruleID := ""
+			if result.RuleID != nil {
+				ruleID = *result.RuleID
+			}
+			rule = rules[ruleID]
+			level := ""
+			if result.Level != nil {
+				level = string(*result.Level)
+			} else if rule.DefaultConfiguration != nil && rule.DefaultConfiguration.Level != nil {
+				level = string(*rule.DefaultConfiguration.Level)
 			}
 			suggestionsMap := map[string][]*rdf.Suggestion{}
 			for _, fix := range result.Fixes {
 				for _, artifactChange := range fix.ArtifactChanges {
 					suggestions := []*rdf.Suggestion{}
-					path, err := artifactChange.ArtifactLocation.GetPath(baseURIs, basedir)
+					path, err := getPath(artifactChange.ArtifactLocation, baseURIs, basedir)
 					if err != nil {
 						// invalid path
 						return nil, err
 					}
 					for _, replacement := range artifactChange.Replacements {
 						deletedRegion := replacement.DeletedRegion
-						rng := deletedRegion.GetRdfRange()
-						if rng == nil {
+						rng := getRdfRange(deletedRegion)
+						if rng == nil || replacement.InsertedContent.Text == nil {
 							// No line information in fix
 							continue
 						}
 						s := &rdf.Suggestion{
 							Range: rng,
-							Text:  replacement.InsertedContent.Text,
+							Text:  *replacement.InsertedContent.Text,
 						}
 						suggestions = append(suggestions, s)
 					}
 					suggestionsMap[path] = suggestions
 				}
 			}
-			for _, location := range result.Locations {
-				physicalLocation := location.PhysicalLocation
-				artifactLocation := physicalLocation.ArtifactLocation
-				path, err := artifactLocation.GetPath(baseURIs, basedir)
+
+			relatedLocs := []*rdf.RelatedLocation{}
+			for _, relLoc := range result.RelatedLocations {
+				loc, err := toRDFormatLocation(relLoc, baseURIs, basedir)
 				if err != nil {
-					// invalid path
 					return nil, err
 				}
-				region := physicalLocation.Region
-				rng := region.GetRdfRange()
+				l := &rdf.RelatedLocation{
+					Location: loc,
+				}
+				if relLoc.Message != nil {
+					l.Message = getText(*relLoc.Message)
+				}
+				relatedLocs = append(relatedLocs, l)
+			}
+
+			for _, location := range result.Locations {
 				var code *rdf.Code
 				if ruleID != "" {
 					code = &rdf.Code{
 						Value: ruleID,
-						Url:   rule.HelpURI,
+					}
+					if rule.HelpURI != nil {
+						code.Url = *rule.HelpURI
 					}
 				}
+				loc, err := toRDFormatLocation(location, baseURIs, basedir)
+				if err != nil {
+					return nil, err
+				}
 				d := &rdf.Diagnostic{
-					Message: message,
-					Location: &rdf.Location{
-						Path:  path,
-						Range: rng,
-					},
+					Message:  message,
+					Location: loc,
 					Severity: severity(level),
 					Source: &rdf.Source{
 						Name: name,
 						Url:  informationURI,
 					},
-					Code:           code,
-					Suggestions:    suggestionsMap[path],
-					OriginalOutput: string(original),
+					Code:             code,
+					Suggestions:      suggestionsMap[loc.GetPath()],
+					RelatedLocations: relatedLocs,
+					OriginalOutput:   string(original),
 				}
 				ds = append(ds, d)
 			}
@@ -120,65 +141,47 @@ func (p *SarifParser) Parse(r io.Reader) ([]*rdf.Diagnostic, error) {
 	return ds, nil
 }
 
-// SARIF JSON Format
-//
-// References:
-//   - https://sarifweb.azurewebsites.net/
-type SarifJson struct {
-	Runs []struct {
-		OriginalURIBaseIds map[string]SarifOriginalURI `json:"originalUriBaseIds"`
-		Results            []struct {
-			Level     string `json:"level,omitempty"`
-			Locations []struct {
-				PhysicalLocation struct {
-					ArtifactLocation SarifArtifactLocation `json:"artifactLocation,omitempty"`
-					Region           SarifRegion           `json:"region,omitempty"`
-				} `json:"physicalLocation,omitempty"`
-			} `json:"locations"`
-			Message SarifText `json:"message"`
-			RuleID  string    `json:"ruleId,omitempty"`
-			Fixes   []struct {
-				Description     SarifText `json:"description"`
-				ArtifactChanges []struct {
-					ArtifactLocation SarifArtifactLocation `json:"artifactLocation,omitempty"`
-					Replacements     []struct {
-						DeletedRegion   SarifRegion `json:"deletedRegion"`
-						InsertedContent struct {
-							Text string `json:"text"`
-						} `json:"insertedContent,omitempty"`
-					} `json:"replacements"`
-				} `json:"artifactChanges"`
-			} `json:"fixes,omitempty"`
-		} `json:"results"`
-		Tool struct {
-			Driver struct {
-				FullName       string      `json:"fullName"`
-				InformationURI string      `json:"informationUri"`
-				Name           string      `json:"name"`
-				Rules          []SarifRule `json:"rules"`
-			} `json:"driver"`
-		} `json:"tool"`
-	} `json:"runs"`
+func toRDFormatLocation(location sarif.Location,
+	baseURIs map[string]sarif.ArtifactLocation,
+	basedir string,
+) (*rdf.Location, error) {
+	physicalLocation := location.PhysicalLocation
+	artifactLocation := physicalLocation.ArtifactLocation
+	loc := sarif.ArtifactLocation{}
+	if artifactLocation != nil {
+		loc = *artifactLocation
+	}
+	path, err := getPath(loc, baseURIs, basedir)
+	if err != nil {
+		// invalid path
+		return nil, err
+	}
+	region := sarif.Region{}
+	if physicalLocation.Region != nil {
+		region = *physicalLocation.Region
+	}
+	return &rdf.Location{
+		Path:  path,
+		Range: getRdfRange(region),
+	}, nil
 }
 
-type SarifOriginalURI struct {
-	URI string `json:"uri"`
-}
-
-type SarifArtifactLocation struct {
-	URI       string `json:"uri,omitempty"`
-	URIBaseID string `json:"uriBaseId"`
-	Index     int    `json:"index,omitempty"`
-}
-
-func (l *SarifArtifactLocation) GetPath(
-	baseURIs map[string]SarifOriginalURI,
+func getPath(
+	l sarif.ArtifactLocation,
+	baseURIs map[string]sarif.ArtifactLocation,
 	basedir string,
 ) (string, error) {
-	uri := l.URI
-	baseURI := baseURIs[l.URIBaseID].URI
-	if baseURI != "" {
-		if u, err := url.JoinPath(baseURI, uri); err == nil {
+	uri := ""
+	if l.URI != nil {
+		uri = *l.URI
+	}
+	urlBaseID := ""
+	if l.URIBaseID != nil {
+		urlBaseID = *l.URIBaseID
+	}
+	baseURI := baseURIs[urlBaseID].URI
+	if baseURI != nil && *baseURI != "" {
+		if u, err := url.JoinPath(*baseURI, uri); err == nil {
 			uri = u
 		}
 	}
@@ -193,24 +196,15 @@ func (l *SarifArtifactLocation) GetPath(
 	return path, nil
 }
 
-type SarifText struct {
-	Text     string  `json:"text,omitempty"`
-	Markdown *string `json:"markdown,omitempty"`
-}
-
-func (t *SarifText) GetText() string {
-	text := t.Text
-	if t.Markdown != nil {
-		text = *t.Markdown
+func getText(msg sarif.Message) string {
+	text := ""
+	if msg.Text != nil {
+		text = *msg.Text
+	}
+	if msg.Markdown != nil {
+		text = *msg.Markdown
 	}
 	return text
-}
-
-type SarifRegion struct {
-	StartLine   *int `json:"startLine"`
-	StartColumn *int `json:"startColumn,omitempty"`
-	EndLine     *int `json:"endLine,omitempty"`
-	EndColumn   *int `json:"endColumn,omitempty"`
 }
 
 // convert SARIF Region to RDF Range
@@ -277,13 +271,13 @@ type SarifRegion struct {
 // -> RDF: { "start": { "line": 1, "column": 1 } }
 //
 //	= { "start": { "line": 1, "column": 1 }, "end": { "line": 1, "column": 1 } }
-func (r *SarifRegion) GetRdfRange() *rdf.Range {
+func getRdfRange(r sarif.Region) *rdf.Range {
 	if r.StartLine == nil {
 		// No line information
 		return nil
 	}
 	startLine := *r.StartLine
-	startColumn := 1 // default value of startColumn in SARIF is 1
+	var startColumn int64 = 1 // default value of startColumn in SARIF is 1
 	if r.StartColumn != nil {
 		startColumn = *r.StartColumn
 	}
@@ -291,7 +285,7 @@ func (r *SarifRegion) GetRdfRange() *rdf.Range {
 	if r.EndLine != nil {
 		endLine = *r.EndLine
 	}
-	endColumn := 0 // default value of endColumn in SARIF is null (that means EOL)
+	var endColumn int64 = 0 // default value of endColumn in SARIF is null (that means EOL)
 	if r.EndColumn != nil {
 		endColumn = *r.EndColumn
 	}
@@ -335,17 +329,4 @@ func (r *SarifRegion) GetRdfRange() *rdf.Range {
 		End: end,
 	}
 	return rng
-}
-
-type SarifRule struct {
-	ID                   string    `json:"id"`
-	Name                 string    `json:"name"`
-	ShortDescription     SarifText `json:"shortDescription"`
-	FullDescription      SarifText `json:"fullDescription"`
-	Help                 SarifText `json:"help"`
-	HelpURI              string    `json:"helpUri"`
-	DefaultConfiguration struct {
-		Level string `json:"level"`
-		Rank  int    `json:"rank"`
-	} `json:"defaultConfiguration"`
 }
