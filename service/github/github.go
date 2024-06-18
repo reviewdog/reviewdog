@@ -346,7 +346,6 @@ func DecodeMetaComment(metaBase64 string) (*metacomment.MetaComment, error) {
 	}
 	meta := &metacomment.MetaComment{}
 	if err := proto.Unmarshal(b, meta); err != nil {
-		// log.Printf("failed to unmarshal MetaComment: %v", err)
 		return nil, err
 	}
 	return meta, nil
