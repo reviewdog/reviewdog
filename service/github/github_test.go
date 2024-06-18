@@ -8,6 +8,7 @@ import (
 	"net/url"
 	"os"
 	"path/filepath"
+	"regexp"
 	"strings"
 	"testing"
 
@@ -257,7 +258,7 @@ func TestGitHubPullRequest_Post_Flush_review_api(t *testing.T) {
 				Path: github.String("reviewdog.go"),
 				Side: github.String("RIGHT"),
 				Line: github.Int(15),
-				Body: github.String(commentutil.BodyPrefix + "new comment" + "\n<!-- __reviewdog__:ChA4NjA2Mzk3ZGNhMGViOWMw -->\n"),
+				Body: github.String(commentutil.BodyPrefix + "new comment" + "\n<!-- __reviewdog__:xxxxxxxxxx -->\n"),
 			},
 			{
 				Path:      github.String("reviewdog.go"),
@@ -265,7 +266,7 @@ func TestGitHubPullRequest_Post_Flush_review_api(t *testing.T) {
 				StartSide: github.String("RIGHT"),
 				StartLine: github.Int(15),
 				Line:      github.Int(16),
-				Body:      github.String(commentutil.BodyPrefix + "multiline new comment" + "\n<!-- __reviewdog__:ChBjNGFmMTRlYWJkYjBhNTU1 -->\n"),
+				Body:      github.String(commentutil.BodyPrefix + "multiline new comment" + "\n<!-- __reviewdog__:xxxxxxxxxx -->\n"),
 			},
 			{
 				Path:      github.String("reviewdog.go"),
@@ -281,7 +282,7 @@ func TestGitHubPullRequest_Post_Flush_review_api(t *testing.T) {
 					"line3",
 					"```",
 					"",
-					"<!-- __reviewdog__:ChBlZTZhOWZjZjFkMDQ2OTgx -->",
+					"<!-- __reviewdog__:xxxxxxxxxx -->",
 				}, "\n") + "\n"),
 			},
 			{
@@ -295,7 +296,7 @@ func TestGitHubPullRequest_Post_Flush_review_api(t *testing.T) {
 					"line2",
 					"```",
 					"",
-					"<!-- __reviewdog__:ChBlOGViMDE3YTQ3MmIwMDc0 -->",
+					"<!-- __reviewdog__:xxxxxxxxxx -->",
 				}, "\n") + "\n"),
 			},
 			{
@@ -308,7 +309,7 @@ func TestGitHubPullRequest_Post_Flush_review_api(t *testing.T) {
 					"invalid lines suggestion comment",
 					invalidSuggestionPre + "GitHub comment range and suggestion line range must be same. L15-L16 v.s. L16-L17" + invalidSuggestionPost,
 					"",
-					"<!-- __reviewdog__:ChAyNjJlYTIzNWUxYzgzZjBj -->",
+					"<!-- __reviewdog__:xxxxxxxxxx -->",
 				}, "\n") + "\n"),
 			},
 			{
@@ -325,7 +326,7 @@ func TestGitHubPullRequest_Post_Flush_review_api(t *testing.T) {
 					"line3",
 					"```",
 					"",
-					"<!-- __reviewdog__:ChAyMTYwNmIyODI4MTBkMmUx -->",
+					"<!-- __reviewdog__:xxxxxxxxxx -->",
 				}, "\n") + "\n"),
 			},
 			{
@@ -343,7 +344,7 @@ func TestGitHubPullRequest_Post_Flush_review_api(t *testing.T) {
 					"```",
 					invalidSuggestionPre + "GitHub comment range and suggestion line range must be same. L14-L16 v.s. L14-L14" + invalidSuggestionPost,
 					"",
-					"<!-- __reviewdog__:ChA3ZDIwNzM1MTFhMmRmMTVh -->",
+					"<!-- __reviewdog__:xxxxxxxxxx -->",
 				}, "\n") + "\n"),
 			},
 			{
@@ -356,7 +357,7 @@ func TestGitHubPullRequest_Post_Flush_review_api(t *testing.T) {
 					"non-line based suggestion comment (no source lines)",
 					invalidSuggestionPre + "source lines are not available" + invalidSuggestionPost,
 					"",
-					"<!-- __reviewdog__:ChA3ODliZTFlZTYzMDM3Njhj -->",
+					"<!-- __reviewdog__:xxxxxxxxxx -->",
 				}, "\n") + "\n"),
 			},
 			{
@@ -369,7 +370,7 @@ func TestGitHubPullRequest_Post_Flush_review_api(t *testing.T) {
 					"haya14busa",
 					"```",
 					"",
-					"<!-- __reviewdog__:ChA2NzE4OTdhYjExNzZlZjAw -->",
+					"<!-- __reviewdog__:xxxxxxxxxx -->",
 				}, "\n") + "\n"),
 			},
 			{
@@ -384,7 +385,7 @@ func TestGitHubPullRequest_Post_Flush_review_api(t *testing.T) {
 					"haya14busa (multi-line)",
 					"```",
 					"",
-					"<!-- __reviewdog__:ChAzNzYyZTE3N2Q3OWNlYjA3 -->",
+					"<!-- __reviewdog__:xxxxxxxxxx -->",
 				}, "\n") + "\n"),
 			},
 			{
@@ -399,7 +400,7 @@ func TestGitHubPullRequest_Post_Flush_review_api(t *testing.T) {
 					"line 15 (content at line 15)",
 					"```",
 					"",
-					"<!-- __reviewdog__:ChBmMTFmMjhjNTEzY2ZkNDMw -->",
+					"<!-- __reviewdog__:xxxxxxxxxx -->",
 				}, "\n") + "\n"),
 			},
 			{
@@ -412,7 +413,7 @@ func TestGitHubPullRequest_Post_Flush_review_api(t *testing.T) {
 					"haya14busa",
 					"```",
 					"",
-					"<!-- __reviewdog__:ChBmNDNmODgyMWMwYTYzNWRl -->",
+					"<!-- __reviewdog__:xxxxxxxxxx -->",
 				}, "\n") + "\n"),
 			},
 			{
@@ -431,7 +432,7 @@ func TestGitHubPullRequest_Post_Flush_review_api(t *testing.T) {
 					"haya14busa",
 					"```",
 					"",
-					"<!-- __reviewdog__:ChA1ZjAzYTQ4MzU1MWRhZjYw -->",
+					"<!-- __reviewdog__:xxxxxxxxxx -->",
 				}, "\n") + "\n"),
 			},
 			{
@@ -444,7 +445,7 @@ func TestGitHubPullRequest_Post_Flush_review_api(t *testing.T) {
 					"haya14busa",
 					"```",
 					"",
-					"<!-- __reviewdog__:ChA3YWMyOGVkN2MzN2Y4MTY1 -->",
+					"<!-- __reviewdog__:xxxxxxxxxx -->",
 				}, "\n") + "\n"),
 			},
 			{
@@ -461,7 +462,7 @@ func TestGitHubPullRequest_Post_Flush_review_api(t *testing.T) {
 					"```",
 					"````",
 					"",
-					"<!-- __reviewdog__:ChA5MWQ0YTY4N2RjZDJlOGZj -->",
+					"<!-- __reviewdog__:xxxxxxxxxx -->",
 				}, "\n") + "\n"),
 			},
 			{
@@ -476,7 +477,7 @@ func TestGitHubPullRequest_Post_Flush_review_api(t *testing.T) {
 					"```",
 					"````",
 					"",
-					"<!-- __reviewdog__:ChAzNTA4YTViNTc1NjViY2Y0 -->",
+					"<!-- __reviewdog__:xxxxxxxxxx -->",
 				}, "\n") + "\n"),
 			},
 			{
@@ -492,7 +493,7 @@ func TestGitHubPullRequest_Post_Flush_review_api(t *testing.T) {
 					"`````",
 					"``````",
 					"",
-					"<!-- __reviewdog__:ChA3ZGVhN2U3Zjk2NDVmOTVk -->",
+					"<!-- __reviewdog__:xxxxxxxxxx -->",
 				}, "\n") + "\n"),
 			},
 			{
@@ -511,10 +512,17 @@ func TestGitHubPullRequest_Post_Flush_review_api(t *testing.T) {
 					"",
 					"related loc test (2)",
 					"https://test/repo/path/blob/sha/service/github/reviewdog2.go#L14",
-					"<!-- __reviewdog__:ChBlMDY2NzMwMmE3ZDFlZTBk -->",
+					"<!-- __reviewdog__:xxxxxxxxxx -->",
 					"",
 				}, "\n")),
 			},
+		}
+		// Replace __reviewdog__ comment so that the test pass regardless of environments.
+		// Proto serialization is not canonical, and test could break unless
+		// replacing the metacomment string.
+		for i := 0; i < len(req.Comments); i++ {
+			metaCommentRe := regexp.MustCompile(`__reviewdog__:\S+`)
+			req.Comments[i].Body = github.String(metaCommentRe.ReplaceAllString(*req.Comments[i].Body, `__reviewdog__:xxxxxxxxxx`))
 		}
 		if diff := pretty.Compare(want, req.Comments); diff != "" {
 			t.Errorf("req.Comments diff: (-got +want)\n%s", diff)

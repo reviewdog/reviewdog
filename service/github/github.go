@@ -327,14 +327,9 @@ func extractMetaComment(body string) *metacomment.MetaComment {
 	for _, line := range strings.Split(body, "\n") {
 		if after, found := strings.CutPrefix(line, prefix); found {
 			if metastring, foundSuffix := strings.CutSuffix(after, " -->"); foundSuffix {
-				b, err := base64.StdEncoding.DecodeString(metastring)
+				meta, err := DecodeMetaComment(metastring)
 				if err != nil {
 					log.Printf("failed to decode MetaComment: %v", err)
-					continue
-				}
-				meta := &metacomment.MetaComment{}
-				if err := proto.Unmarshal(b, meta); err != nil {
-					log.Printf("failed to unmarshal MetaComment: %v", err)
 					continue
 				}
 				return meta
@@ -342,6 +337,19 @@ func extractMetaComment(body string) *metacomment.MetaComment {
 		}
 	}
 	return nil
+}
+
+func DecodeMetaComment(metaBase64 string) (*metacomment.MetaComment, error) {
+	b, err := base64.StdEncoding.DecodeString(metaBase64)
+	if err != nil {
+		return nil, err
+	}
+	meta := &metacomment.MetaComment{}
+	if err := proto.Unmarshal(b, meta); err != nil {
+		// log.Printf("failed to unmarshal MetaComment: %v", err)
+		return nil, err
+	}
+	return meta, nil
 }
 
 // Diff returns a diff of PullRequest.
@@ -551,6 +559,12 @@ func getSourceLine(sourceLines map[int]string, line int) (string, error) {
 
 func fingerprint(d *rdf.Diagnostic) (string, error) {
 	h := fnv.New64a()
+	// Ideally, we should not use proto.Marshal since Proto Serialization Is Not
+	// Canonical.
+	// https://protobuf.dev/programming-guides/serialization-not-canonical/
+	//
+	// However, I left it as-is for now considering the same reviewdog binary
+	// should re-calcurate and compare fingerprint for almost all cases.
 	data, err := proto.Marshal(d)
 	if err != nil {
 		return "", err
