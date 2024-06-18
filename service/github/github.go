@@ -564,7 +564,7 @@ func fingerprint(d *rdf.Diagnostic) (string, error) {
 	// https://protobuf.dev/programming-guides/serialization-not-canonical/
 	//
 	// However, I left it as-is for now considering the same reviewdog binary
-	// should re-calcurate and compare fingerprint for almost all cases.
+	// should re-calculate and compare fingerprint for almost all cases.
 	data, err := proto.Marshal(d)
 	if err != nil {
 		return "", err
