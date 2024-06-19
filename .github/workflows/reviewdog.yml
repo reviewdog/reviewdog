@@ -64,6 +64,8 @@ jobs:
           echo "https://github.com/reviewdog/reviewdog/blob/98aeb1f6c8d21f486b19f766b55e3ec3dd6b12ee/.github/workflows/reviewdog.yml#L36-L40" >> $GITHUB_STEP_SUMMARY
           yes | head -n 50k >> $GITHUB_STEP_SUMMARY
 
+      - run: echo '${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}'
+
   reviewdog-pr:
     permissions:
       checks: write
