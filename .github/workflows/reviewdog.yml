@@ -66,9 +66,28 @@ jobs:
           echo "https://github.com/reviewdog/reviewdog/blob/98aeb1f6c8d21f486b19f766b55e3ec3dd6b12ee/.github/workflows/reviewdog.yml#L36-L40" >> $GITHUB_STEP_SUMMARY
 
       - run: echo '${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}'
-      - run: echo '${{ github.run_attempt }}'
-      - run: echo '${{ github.job }}'
-      - run: echo '${{ github.workflow }}'
+      - name: Get Current Job Log URL
+        uses: Tiryoh/gha-jobid-action@v1
+        id: jobs
+        with:
+          github_token: ${{ secrets.GITHUB_TOKEN }}
+          job_name: ${{ github.job }}
+      - run: echo '${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}#summary-${{ steps.jobs.outputs.job_id }}'
+
+
+  summary-test:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Test GITHUB_STEP_SUMMARY
+        run: |
+          echo "# Summary test" >> $GITHUB_STEP_SUMMARY
+      - name: Get Current Job Log URL
+        uses: Tiryoh/gha-jobid-action@v1
+        id: jobs
+        with:
+          github_token: ${{ secrets.GITHUB_TOKEN }}
+          job_name: ${{ github.job }}
+      - run: echo '${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}#summary-${{ steps.jobs.outputs.job_id }}'
 
   reviewdog-pr:
     permissions:
