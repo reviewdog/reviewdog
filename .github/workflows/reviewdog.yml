@@ -71,7 +71,7 @@ jobs:
         id: jobs
         with:
           github_token: ${{ secrets.GITHUB_TOKEN }}
-          job_name: ${{ github.job }}
+          job_name: ${{ github.jobs[github.job].name }}
       - run: echo '${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}#summary-${{ steps.jobs.outputs.job_id }}'
 
 
