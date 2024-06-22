@@ -17,11 +17,6 @@ import (
 
 const baseEndpoint = "https://reviewdog.app"
 
-// DogHouseClientInterface is interface for doghouse client.
-type DogHouseClientInterface interface {
-	Check(ctx context.Context, req *doghouse.CheckRequest) (*doghouse.CheckResponse, error)
-}
-
 // DogHouseClient is client for doghouse server.
 type DogHouseClient struct {
 	Client *http.Client

@@ -49,7 +49,7 @@ func skipDoghouseServer() bool {
 	return (os.Getenv("REVIEWDOG_SKIP_DOGHOUSE") == "true" || cienv.IsInGitHubAction()) && os.Getenv("REVIEWDOG_TOKEN") == ""
 }
 
-func newDoghouseCli(ctx context.Context) client.DogHouseClientInterface {
+func newDoghouseCli(ctx context.Context) *client.DogHouseClient {
 	httpCli := http.DefaultClient
 	if token := os.Getenv("REVIEWDOG_TOKEN"); token != "" {
 		ts := oauth2.StaticTokenSource(
@@ -91,7 +91,7 @@ func checkResultSet(ctx context.Context, r io.Reader, opt *option, isProject boo
 }
 
 func postResultSet(ctx context.Context, resultSet *reviewdog.ResultMap,
-	ghInfo *cienv.BuildInfo, cli client.DogHouseClientInterface, opt *option) error {
+	ghInfo *cienv.BuildInfo, cli *client.DogHouseClient, opt *option) error {
 	var g errgroup.Group
 	wd, _ := os.Getwd()
 	gitRelWd, err := serviceutil.GitRelWorkdir()
