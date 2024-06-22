@@ -9,7 +9,6 @@ import (
 	"log"
 	"net/http"
 	"os"
-	"os/exec"
 	"path/filepath"
 	"strings"
 	"sync"
@@ -361,40 +360,6 @@ func (g *PullRequest) Diff(ctx context.Context) ([]byte, error) {
 		SHA:              g.sha,
 		FallBackToGitCLI: true,
 	}).Diff(ctx)
-}
-
-// diffUsingGitCommand returns a diff of PullRequest using git command.
-func (g *PullRequest) diffUsingGitCommand(ctx context.Context) ([]byte, error) {
-	pr, _, err := g.cli.PullRequests.Get(ctx, g.owner, g.repo, g.pr)
-	if err != nil {
-		return nil, err
-	}
-
-	head := pr.GetHead()
-	headSha := head.GetSHA()
-
-	commitsComparison, _, err := g.cli.Repositories.CompareCommits(ctx, g.owner, g.repo, headSha, pr.GetBase().GetSHA(), nil)
-	if err != nil {
-		return nil, err
-	}
-
-	mergeBaseSha := commitsComparison.GetMergeBaseCommit().GetSHA()
-
-	if os.Getenv("REVIEWDOG_SKIP_GIT_FETCH") != "true" {
-		for _, sha := range []string{mergeBaseSha, headSha} {
-			_, err := exec.Command("git", "fetch", "--depth=1", head.GetRepo().GetHTMLURL(), sha).CombinedOutput()
-			if err != nil {
-				return nil, fmt.Errorf("failed to run git fetch: %w", err)
-			}
-		}
-	}
-
-	bytes, err := exec.Command("git", "diff", "--find-renames", mergeBaseSha, headSha).CombinedOutput()
-	if err != nil {
-		return nil, fmt.Errorf("failed to run git diff: %w", err)
-	}
-
-	return bytes, nil
 }
 
 // Strip returns 1 as a strip of git diff.

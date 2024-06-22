@@ -13,6 +13,7 @@ import (
 	"github.com/reviewdog/reviewdog"
 	"github.com/reviewdog/reviewdog/filter"
 	"github.com/reviewdog/reviewdog/proto/rdf"
+	"github.com/reviewdog/reviewdog/service/github/githubutils"
 )
 
 // GitHub check runs API cannot handle too large requests.
@@ -126,8 +127,8 @@ func (ch *Check) postCheck(ctx context.Context, checkID int64) (*github.CheckRun
 		Conclusion:  github.String(conclusion),
 		CompletedAt: &github.Timestamp{Time: time.Now()},
 		Output: &github.CheckRunOutput{
-			Title: github.String(ch.checkTitle()),
-			// Summary: github.String(ch.summary(checks)), // TODO
+			Title:   github.String(ch.checkTitle()),
+			Summary: github.String(ch.summary(ch.postComments)),
 		},
 	}
 	checkRun, _, err := ch.CLI.Checks.UpdateCheckRun(ctx, ch.Owner, ch.Repo, checkID, opt)
@@ -289,4 +290,53 @@ func (ch *Check) reqAnnotationLevel() string {
 		return "failure"
 	}
 	return "failure"
+}
+
+func (ch *Check) summary(checks []*reviewdog.Comment) string {
+	var lines []string
+	var usedBytes int
+	lines = append(lines, "reported by [reviewdog](https://github.com/reviewdog/reviewdog) :dog:")
+	usedBytes += len(lines[0]) + 1
+	var findings []*filter.FilteredDiagnostic
+	var filteredFindings []*filter.FilteredDiagnostic
+	for _, c := range checks {
+		if c.Result.ShouldReport {
+			findings = append(findings, c.Result)
+		} else {
+			filteredFindings = append(filteredFindings, c.Result)
+		}
+	}
+
+	findingMsgs, usedBytes := ch.summaryFindings("Findings", usedBytes, findings)
+	lines = append(lines, findingMsgs...)
+	filteredFindingsMsgs, _ := ch.summaryFindings("Filtered Findings", usedBytes, filteredFindings)
+	lines = append(lines, filteredFindingsMsgs...)
+	return strings.Join(lines, "\n")
+}
+
+func (ch *Check) summaryFindings(name string, usedBytes int, checks []*filter.FilteredDiagnostic) ([]string, int) {
+	var lines []string
+	lines = append(lines, fmt.Sprintf("<details>\n<summary>%s (%d)</summary>\n", name, len(checks)))
+	if len(lines[0])+1+usedBytes > maxAllowedSize {
+		// bail out if we're already over the limit
+		return nil, usedBytes
+	}
+	usedBytes += len(lines[0]) + 1
+	for _, c := range checks {
+		nextLine := githubutils.LinkedMarkdownDiagnostic(ch.Owner, ch.Repo, ch.SHA, c.Diagnostic)
+		// existing lines + newline + closing details tag must be smaller than the max allowed size
+		if usedBytes+len(nextLine)+1+10 >= maxAllowedSize {
+			cutoffMsg := "... (Too many findings. Dropped some findings)"
+			if usedBytes+len(cutoffMsg)+1+10 <= maxAllowedSize {
+				lines = append(lines, cutoffMsg)
+				usedBytes += len(cutoffMsg) + 1
+			}
+			break
+		}
+		lines = append(lines, nextLine)
+		usedBytes += len(nextLine) + 1
+	}
+	lines = append(lines, "</details>")
+	usedBytes += 10 + 1
+	return lines, usedBytes
 }

@@ -16,20 +16,6 @@ import (
 	ghService "github.com/reviewdog/reviewdog/service/github"
 )
 
-// GitHub check runs API cannot handle too large requests.
-// Set max number of filtered findings to be shown in check-run summary.
-// ERROR:
-//
-//	https://api.github.com/repos/easymotion/vim-easymotion/check-runs: 422
-//	Invalid request.
-//	Only 65535 characters are allowed; 250684 were supplied. []
-const maxAllowedSize = 65535
-
-// > The Checks API limits the number of annotations to a maximum of 50 per API
-// > request.
-// https://developer.github.com/v3/checks/runs/#output-object
-const maxAnnotationsPerRequest = 50
-
 type Checker struct {
 	req              *doghouse.CheckRequest
 	gh               checkerGitHubClientInterface
