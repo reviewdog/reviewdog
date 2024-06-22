@@ -353,18 +353,14 @@ func DecodeMetaComment(metaBase64 string) (*metacomment.MetaComment, error) {
 
 // Diff returns a diff of PullRequest.
 func (g *PullRequest) Diff(ctx context.Context) ([]byte, error) {
-	opt := github.RawOptions{Type: github.Diff}
-	d, resp, err := g.cli.PullRequests.GetRaw(ctx, g.owner, g.repo, g.pr, opt)
-	if err != nil {
-		if resp != nil && resp.StatusCode == http.StatusNotAcceptable {
-			// git command should exist here. See NewGitHubPullRequest.
-			log.Print("fallback to use git command")
-			return g.diffUsingGitCommand(ctx)
-		}
-
-		return nil, err
-	}
-	return []byte(d), nil
+	return (&PullRequestDiffService{
+		Cli:              g.cli,
+		Owner:            g.owner,
+		Repo:             g.repo,
+		PR:               g.pr,
+		SHA:              g.sha,
+		FallBackToGitCLI: true,
+	}).Diff(ctx)
 }
 
 // diffUsingGitCommand returns a diff of PullRequest using git command.
