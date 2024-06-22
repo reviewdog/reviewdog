@@ -1,0 +1,21 @@
+syntax = "proto3";
+package reviewdog.rdf;
+
+option go_package = "github.com/reviewdog/reviewdog/proto/metacomment";
+
+// Represents a metadata of a diagnostic result.
+// It's expected to be base64 encoded and included into reporter comments such
+// as GitHub Pull Request Review comment.
+//
+// This metadata allow reviewdog to identify the same existing comment and
+// avoid posting duplicated comments. It can also be used for resolving or
+// deleting existing comments.
+message MetaComment {
+  // An unique identity, or "fingerprint", of the diagnostic result.
+  string fingerprint = 1;
+
+  // Source (tool) name of the diagnostic result.
+  // It's important to have source name so that reviewdog can handle existing
+  // comments with the same source properly.
+  string source_name = 2;
+}

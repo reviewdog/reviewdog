@@ -8,6 +8,7 @@ import (
 	"net/url"
 	"os"
 	"path/filepath"
+	"regexp"
 	"strings"
 	"testing"
 
@@ -183,7 +184,7 @@ func TestGitHubPullRequest_Post_Flush_review_api(t *testing.T) {
 					{
 						Path:        github.String("reviewdog.go"),
 						Line:        github.Int(2),
-						Body:        github.String(commentutil.BodyPrefix + "already commented"),
+						Body:        github.String(commentutil.BodyPrefix + "already commented" + "\n<!-- __reviewdog__:ChBmMzg0YTRlZDRkYTViOTZl -->\n"),
 						SubjectType: github.String("line"),
 					},
 				}
@@ -196,21 +197,21 @@ func TestGitHubPullRequest_Post_Flush_review_api(t *testing.T) {
 					{
 						Path:        github.String("reviewdog.go"),
 						Line:        github.Int(15),
-						Body:        github.String(commentutil.BodyPrefix + "already commented 2"),
+						Body:        github.String(commentutil.BodyPrefix + "already commented 2" + "\n<!-- __reviewdog__:ChAxNDgzY2EyNTY0MjU2NmYx -->\n"),
 						SubjectType: github.String("line"),
 					},
 					{
 						Path:        github.String("reviewdog.go"),
 						StartLine:   github.Int(15),
 						Line:        github.Int(16),
-						Body:        github.String(commentutil.BodyPrefix + "multiline existing comment"),
+						Body:        github.String(commentutil.BodyPrefix + "multiline existing comment" + "\n<!-- __reviewdog__:ChBjNGNiNTRjMDc2YjNhMjcx -->\n"),
 						SubjectType: github.String("line"),
 					},
 					{
 						Path:        github.String("reviewdog.go"),
 						StartLine:   github.Int(15),
 						Line:        github.Int(17),
-						Body:        github.String(commentutil.BodyPrefix + "multiline existing comment (line-break)"),
+						Body:        github.String(commentutil.BodyPrefix + "multiline existing comment (line-break)" + "\n<!-- __reviewdog__:ChA2NjI1ZDI2MGJmNTdhNjUw -->\n"),
 						SubjectType: github.String("line"),
 					},
 					{
@@ -257,7 +258,7 @@ func TestGitHubPullRequest_Post_Flush_review_api(t *testing.T) {
 				Path: github.String("reviewdog.go"),
 				Side: github.String("RIGHT"),
 				Line: github.Int(15),
-				Body: github.String(commentutil.BodyPrefix + "new comment"),
+				Body: github.String(commentutil.BodyPrefix + "new comment" + "\n<!-- __reviewdog__:xxxxxxxxxx -->\n"),
 			},
 			{
 				Path:      github.String("reviewdog.go"),
@@ -265,7 +266,7 @@ func TestGitHubPullRequest_Post_Flush_review_api(t *testing.T) {
 				StartSide: github.String("RIGHT"),
 				StartLine: github.Int(15),
 				Line:      github.Int(16),
-				Body:      github.String(commentutil.BodyPrefix + "multiline new comment"),
+				Body:      github.String(commentutil.BodyPrefix + "multiline new comment" + "\n<!-- __reviewdog__:xxxxxxxxxx -->\n"),
 			},
 			{
 				Path:      github.String("reviewdog.go"),
@@ -280,6 +281,8 @@ func TestGitHubPullRequest_Post_Flush_review_api(t *testing.T) {
 					"line2",
 					"line3",
 					"```",
+					"",
+					"<!-- __reviewdog__:xxxxxxxxxx -->",
 				}, "\n") + "\n"),
 			},
 			{
@@ -292,6 +295,8 @@ func TestGitHubPullRequest_Post_Flush_review_api(t *testing.T) {
 					"line1",
 					"line2",
 					"```",
+					"",
+					"<!-- __reviewdog__:xxxxxxxxxx -->",
 				}, "\n") + "\n"),
 			},
 			{
@@ -303,6 +308,8 @@ func TestGitHubPullRequest_Post_Flush_review_api(t *testing.T) {
 				Body: github.String(commentutil.BodyPrefix + strings.Join([]string{
 					"invalid lines suggestion comment",
 					invalidSuggestionPre + "GitHub comment range and suggestion line range must be same. L15-L16 v.s. L16-L17" + invalidSuggestionPost,
+					"",
+					"<!-- __reviewdog__:xxxxxxxxxx -->",
 				}, "\n") + "\n"),
 			},
 			{
@@ -318,6 +325,8 @@ func TestGitHubPullRequest_Post_Flush_review_api(t *testing.T) {
 					"line2",
 					"line3",
 					"```",
+					"",
+					"<!-- __reviewdog__:xxxxxxxxxx -->",
 				}, "\n") + "\n"),
 			},
 			{
@@ -334,6 +343,8 @@ func TestGitHubPullRequest_Post_Flush_review_api(t *testing.T) {
 					"line3",
 					"```",
 					invalidSuggestionPre + "GitHub comment range and suggestion line range must be same. L14-L16 v.s. L14-L14" + invalidSuggestionPost,
+					"",
+					"<!-- __reviewdog__:xxxxxxxxxx -->",
 				}, "\n") + "\n"),
 			},
 			{
@@ -345,6 +356,8 @@ func TestGitHubPullRequest_Post_Flush_review_api(t *testing.T) {
 				Body: github.String(commentutil.BodyPrefix + strings.Join([]string{
 					"non-line based suggestion comment (no source lines)",
 					invalidSuggestionPre + "source lines are not available" + invalidSuggestionPost,
+					"",
+					"<!-- __reviewdog__:xxxxxxxxxx -->",
 				}, "\n") + "\n"),
 			},
 			{
@@ -356,6 +369,8 @@ func TestGitHubPullRequest_Post_Flush_review_api(t *testing.T) {
 					"```suggestion",
 					"haya14busa",
 					"```",
+					"",
+					"<!-- __reviewdog__:xxxxxxxxxx -->",
 				}, "\n") + "\n"),
 			},
 			{
@@ -369,6 +384,8 @@ func TestGitHubPullRequest_Post_Flush_review_api(t *testing.T) {
 					"```suggestion",
 					"haya14busa (multi-line)",
 					"```",
+					"",
+					"<!-- __reviewdog__:xxxxxxxxxx -->",
 				}, "\n") + "\n"),
 			},
 			{
@@ -382,6 +399,8 @@ func TestGitHubPullRequest_Post_Flush_review_api(t *testing.T) {
 					"```suggestion",
 					"line 15 (content at line 15)",
 					"```",
+					"",
+					"<!-- __reviewdog__:xxxxxxxxxx -->",
 				}, "\n") + "\n"),
 			},
 			{
@@ -393,6 +412,8 @@ func TestGitHubPullRequest_Post_Flush_review_api(t *testing.T) {
 					"```suggestion",
 					"haya14busa",
 					"```",
+					"",
+					"<!-- __reviewdog__:xxxxxxxxxx -->",
 				}, "\n") + "\n"),
 			},
 			{
@@ -410,6 +431,8 @@ func TestGitHubPullRequest_Post_Flush_review_api(t *testing.T) {
 					"```suggestion",
 					"haya14busa",
 					"```",
+					"",
+					"<!-- __reviewdog__:xxxxxxxxxx -->",
 				}, "\n") + "\n"),
 			},
 			{
@@ -421,6 +444,8 @@ func TestGitHubPullRequest_Post_Flush_review_api(t *testing.T) {
 					"```suggestion",
 					"haya14busa",
 					"```",
+					"",
+					"<!-- __reviewdog__:xxxxxxxxxx -->",
 				}, "\n") + "\n"),
 			},
 			{
@@ -436,6 +461,8 @@ func TestGitHubPullRequest_Post_Flush_review_api(t *testing.T) {
 					"some code",
 					"```",
 					"````",
+					"",
+					"<!-- __reviewdog__:xxxxxxxxxx -->",
 				}, "\n") + "\n"),
 			},
 			{
@@ -449,6 +476,8 @@ func TestGitHubPullRequest_Post_Flush_review_api(t *testing.T) {
 					"some code",
 					"```",
 					"````",
+					"",
+					"<!-- __reviewdog__:xxxxxxxxxx -->",
 				}, "\n") + "\n"),
 			},
 			{
@@ -463,6 +492,8 @@ func TestGitHubPullRequest_Post_Flush_review_api(t *testing.T) {
 					"```",
 					"`````",
 					"``````",
+					"",
+					"<!-- __reviewdog__:xxxxxxxxxx -->",
 				}, "\n") + "\n"),
 			},
 			{
@@ -481,8 +512,17 @@ func TestGitHubPullRequest_Post_Flush_review_api(t *testing.T) {
 					"",
 					"related loc test (2)",
 					"https://test/repo/path/blob/sha/service/github/reviewdog2.go#L14",
+					"<!-- __reviewdog__:xxxxxxxxxx -->",
+					"",
 				}, "\n")),
 			},
+		}
+		// Replace __reviewdog__ comment so that the test pass regardless of environments.
+		// Proto serialization is not canonical, and test could break unless
+		// replacing the metacomment string.
+		for i := 0; i < len(req.Comments); i++ {
+			metaCommentRe := regexp.MustCompile(`__reviewdog__:\S+`)
+			req.Comments[i].Body = github.String(metaCommentRe.ReplaceAllString(*req.Comments[i].Body, `__reviewdog__:xxxxxxxxxx`))
 		}
 		if diff := pretty.Compare(want, req.Comments); diff != "" {
 			t.Errorf("req.Comments diff: (-got +want)\n%s", diff)
