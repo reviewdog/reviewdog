@@ -12,10 +12,15 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - ...
 
 ### :bug: Fixes
-- [#1792](https://github.com/reviewdog/reviewdog/pull/1792) Introduce `__reviewdog__` HTML comment metadata and fingerprint for identifying existing posted comments for `github-pr-review` reporter. This resolve duplicated comments issue with related location feature.
+- ...
 
 ### :rotating_light: Breaking changes
 - ...
+
+## [v0.18.1] - 2024-06-22
+
+### :bug: Fixes
+- [#1792](https://github.com/reviewdog/reviewdog/pull/1792) Introduce `__reviewdog__` HTML comment metadata and fingerprint for identifying existing posted comments for `github-pr-review` reporter. This resolve duplicated comments issue with related location feature.
 
 ## [v0.18.0] - 2024-06-17
 
@@ -231,4 +236,5 @@ See https://github.com/reviewdog/reviewdog/releases for older release note.
 [v0.17.4]: https://github.com/reviewdog/reviewdog/compare/v0.17.3...v0.17.4
 [v0.17.5]: https://github.com/reviewdog/reviewdog/compare/v0.17.4...v0.17.5
 [v0.18.0]: https://github.com/reviewdog/reviewdog/compare/v0.17.5...v0.18.0
+[v0.18.1]: https://github.com/reviewdog/reviewdog/compare/v0.18.0...v0.18.1
 [@haya14busa]: https://github.com/haya14busa
