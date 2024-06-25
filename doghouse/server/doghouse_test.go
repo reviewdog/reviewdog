@@ -301,7 +301,7 @@ func TestCheck_OK(t *testing.T) {
 		return &github.CheckRun{HTMLURL: github.String(reportURL)}, nil
 	}
 	checker := &Checker{req: req, gh: cli}
-	res, err := checker.Check(context.Background(), true)
+	res, err := checker.Check(context.Background())
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -401,7 +401,7 @@ func testOutsideDiff(t *testing.T, outsideDiff bool, filterMode filter.Mode) {
 		return &github.CheckRun{HTMLURL: github.String(reportURL)}, nil
 	}
 	checker := &Checker{req: req, gh: cli}
-	if _, err := checker.Check(context.Background(), true); err != nil {
+	if _, err := checker.Check(context.Background()); err != nil {
 		t.Fatal(err)
 	}
 }
@@ -480,7 +480,7 @@ func TestCheck_OK_multiple_update_runs(t *testing.T) {
 		return &github.CheckRun{HTMLURL: github.String(reportURL)}, nil
 	}
 	checker := &Checker{req: req, gh: cli}
-	if _, err := checker.Check(context.Background(), true); err != nil {
+	if _, err := checker.Check(context.Background()); err != nil {
 		t.Fatal(err)
 	}
 }
@@ -576,7 +576,7 @@ func TestCheck_OK_nonPullRequests(t *testing.T) {
 		return &github.CheckRun{HTMLURL: github.String(reportURL)}, nil
 	}
 	checker := &Checker{req: req, gh: cli}
-	res, err := checker.Check(context.Background(), true)
+	res, err := checker.Check(context.Background())
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -597,7 +597,7 @@ func TestCheck_fail_diff(t *testing.T) {
 	}
 	checker := &Checker{req: req, gh: cli}
 
-	if _, err := checker.Check(context.Background(), true); err == nil {
+	if _, err := checker.Check(context.Background()); err == nil {
 		t.Fatalf("got no error, want some error")
 	} else {
 		t.Log(err)
@@ -616,7 +616,7 @@ func TestCheck_fail_invalid_diff(t *testing.T) {
 	}
 	checker := &Checker{req: req, gh: cli}
 
-	if _, err := checker.Check(context.Background(), true); err == nil {
+	if _, err := checker.Check(context.Background()); err == nil {
 		t.Fatalf("got no error, want some error")
 	} else {
 		t.Log(err)
@@ -634,7 +634,7 @@ func TestCheck_fail_check(t *testing.T) {
 	}
 	checker := &Checker{req: req, gh: cli}
 
-	if _, err := checker.Check(context.Background(), true); err == nil {
+	if _, err := checker.Check(context.Background()); err == nil {
 		t.Fatalf("got no error, want some error")
 	} else {
 		t.Log(err)
@@ -656,7 +656,7 @@ func TestCheck_fail_check_with_403(t *testing.T) {
 	}
 	checker := &Checker{req: req, gh: cli}
 
-	resp, err := checker.Check(context.Background(), true)
+	resp, err := checker.Check(context.Background())
 	if err != nil {
 		t.Fatalf("got unexpected error: %v", err)
 	}
