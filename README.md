@@ -35,7 +35,7 @@
   </a>
   <a href="https://circleci.com/gh/reviewdog/reviewdog"><img alt="CircleCI Status" src="http://img.shields.io/circleci/build/github/reviewdog/reviewdog/master.svg?label=CircleCI&logo=circleci"></a>
   <a href="https://codecov.io/github/reviewdog/reviewdog"><img alt="Coverage Status" src="https://img.shields.io/codecov/c/github/reviewdog/reviewdog/master.svg?logo=codecov"></a>
-  <a href="https://github.com/haya14busa/github-used-by/tree/main/repo/reviewdog#reviewdog"><img src="https://img.shields.io/badge/Used%20By-many%20repos-181717.svg?logo=github"></a>
+  <a href="https://github.com/haya14busa/github-used-by/tree/main/repo/reviewdog#reviewdog-"><img src="https://img.shields.io/endpoint?url=https://haya14busa.github.io/github-used-by/data/reviewdog/shieldsio.json"></a>
 </div>
 
 <div align="center">
