@@ -14,6 +14,7 @@ import (
 
 var _ reviewdog.DiffService = (*PullRequestDiffService)(nil)
 
+// PullRequestDiffService is a DiffService which uses GitHub Diff API.
 type PullRequestDiffService struct {
 	Cli              *github.Client
 	Owner            string

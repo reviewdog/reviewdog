@@ -32,6 +32,7 @@ const maxAnnotationsPerRequest = 50
 
 var _ reviewdog.CommentService = (*Check)(nil)
 
+// Check is a CommentService which uses GitHub Check API.
 type Check struct {
 	CLI      *github.Client
 	Owner    string
@@ -48,11 +49,13 @@ type Check struct {
 	result   *CheckResult
 }
 
+// CheckResult represents result of Check.
 type CheckResult struct {
 	ReportURL  string
 	Conclusion string
 }
 
+// Post posts a reviewdog comment.
 func (ch *Check) Post(_ context.Context, c *reviewdog.Comment) error {
 	ch.muComments.Lock()
 	defer ch.muComments.Unlock()
@@ -60,6 +63,7 @@ func (ch *Check) Post(_ context.Context, c *reviewdog.Comment) error {
 	return nil
 }
 
+// PostFiltered posts a filtered reviewdog comment.
 func (ch *Check) PostFiltered(_ context.Context, c *reviewdog.Comment) error {
 	ch.muComments.Lock()
 	defer ch.muComments.Unlock()
@@ -67,12 +71,14 @@ func (ch *Check) PostFiltered(_ context.Context, c *reviewdog.Comment) error {
 	return nil
 }
 
+// GetResult returns result of Check run.
 func (ch *Check) GetResult() *CheckResult {
 	ch.muResult.Lock()
 	defer ch.muResult.Unlock()
 	return ch.result
 }
 
+// Flush actually posts comments.
 func (ch *Check) Flush(ctx context.Context) error {
 	ch.muComments.Lock()
 	defer ch.muComments.Unlock()
@@ -237,23 +243,23 @@ func (ch *Check) conclusion(annotations []*github.CheckRunAnnotation) string {
 			return "neutral"
 		}
 		return "failure"
-	} else {
-		precedence := map[string]int{
-			"success": 0,
-			"notice":  1,
-			"warning": 2,
-			"failure": 3,
-		}
-
-		highestLevel := "success"
-		for _, a := range annotations {
-			annotationLevel := *a.AnnotationLevel
-			if precedence[annotationLevel] > precedence[highestLevel] {
-				highestLevel = annotationLevel
-			}
-		}
-		checkResult = highestLevel
 	}
+
+	precedence := map[string]int{
+		"success": 0,
+		"notice":  1,
+		"warning": 2,
+		"failure": 3,
+	}
+
+	highestLevel := "success"
+	for _, a := range annotations {
+		annotationLevel := *a.AnnotationLevel
+		if precedence[annotationLevel] > precedence[highestLevel] {
+			highestLevel = annotationLevel
+		}
+	}
+	checkResult = highestLevel
 
 	switch checkResult {
 	case "success":
