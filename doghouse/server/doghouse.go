@@ -18,7 +18,6 @@ import (
 
 type Checker struct {
 	req              *doghouse.CheckRequest
-	gh               checkerGitHubClientInterface
 	cli              *github.Client
 	inDogHouseServer bool // If true, this checker runs in the DogHouse server.
 }
@@ -26,7 +25,6 @@ type Checker struct {
 func NewChecker(req *doghouse.CheckRequest, gh *github.Client, inDogHouseServer bool) *Checker {
 	return &Checker{
 		req:              req,
-		gh:               &checkerGitHubClient{Client: gh},
 		cli:              gh,
 		inDogHouseServer: inDogHouseServer,
 	}

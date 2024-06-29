@@ -49,14 +49,14 @@ func (c *DogHouseClient) Check(ctx context.Context, req *doghouse.CheckRequest) 
 	if err != nil {
 		return nil, err
 	}
-	httpReq, err := http.NewRequest(http.MethodPost, checkURL, bytes.NewReader(b))
+	httpReq, err := http.NewRequestWithContext(ctx, http.MethodPost, checkURL, bytes.NewReader(b))
 	if err != nil {
 		return nil, err
 	}
-	httpReq = httpReq.WithContext(ctx)
 	httpReq.Header.Set("Content-Type", "application/json")
 	httpReq.Header.Set("User-Agent", fmt.Sprintf("reviewdog/%s", commands.Version))
 
+	fmt.Printf("req=%#v", httpReq)
 	httpResp, err := c.Client.Do(httpReq)
 	if err != nil {
 		return nil, fmt.Errorf("Check request failed: %w", err)
@@ -67,6 +67,8 @@ func (c *DogHouseClient) Check(ctx context.Context, req *doghouse.CheckRequest) 
 	if err != nil {
 		return nil, err
 	}
+
+	fmt.Printf("respb=%s\n", respb)
 
 	if httpResp.StatusCode != http.StatusOK {
 		return nil, fmt.Errorf("status=%v: %s", httpResp.StatusCode, respb)

@@ -2,7 +2,6 @@ package github
 
 import (
 	"context"
-	"errors"
 	"fmt"
 	"net/http"
 	"strings"
@@ -11,6 +10,7 @@ import (
 
 	"github.com/google/go-github/v60/github"
 	"github.com/reviewdog/reviewdog"
+	"github.com/reviewdog/reviewdog/cienv"
 	"github.com/reviewdog/reviewdog/filter"
 	"github.com/reviewdog/reviewdog/proto/rdf"
 	"github.com/reviewdog/reviewdog/service/github/githubutils"
@@ -69,7 +69,6 @@ func (ch *Check) GetResult() *CheckResult {
 func (ch *Check) Flush(ctx context.Context) error {
 	ch.muComments.Lock()
 	defer ch.muComments.Unlock()
-
 	check, err := ch.createCheck(ctx)
 	if err != nil {
 		// If this error is StatusForbidden (403) here, it means reviewdog is
@@ -78,8 +77,14 @@ func (ch *Check) Flush(ctx context.Context) error {
 		// is invalid, reviewdog should return an error earlier (e.g. when reading
 		// Pull Requests diff), so it should be ok not to return error here and
 		// return results instead.
-		if err, ok := err.(*github.ErrorResponse); ok && err.Response.StatusCode == http.StatusForbidden {
-			return errors.New("TODO: graceful degradation here")
+		if err, ok := err.(*github.ErrorResponse); ok && err.Response.StatusCode == http.StatusForbidden && cienv.IsInGitHubAction() {
+			logWriter := githubutils.NewGitHubActionLogWriter(ch.Level)
+			for _, c := range ch.postComments {
+				if err := logWriter.Post(ctx, c); err != nil {
+					return err
+				}
+			}
+			return logWriter.Flush(ctx)
 		}
 		return fmt.Errorf("failed to create check: %w", err)
 	}
