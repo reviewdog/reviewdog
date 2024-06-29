@@ -300,8 +300,7 @@ func run(r io.Reader, w io.Writer, opt *option) error {
 	switch opt.reporter {
 	default:
 		return fmt.Errorf("unknown -reporter: %s", opt.reporter)
-	case "github-check":
-	case "github-pr-check":
+	case "github-check", "github-pr-check":
 		if !skipDoghouseServer() {
 			return runDoghouse(ctx, r, w, opt, isProject)
 		}
