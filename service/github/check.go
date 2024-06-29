@@ -60,6 +60,13 @@ func (ch *Check) Post(_ context.Context, c *reviewdog.Comment) error {
 	return nil
 }
 
+func (ch *Check) PostFiltered(_ context.Context, c *reviewdog.Comment) error {
+	ch.muComments.Lock()
+	defer ch.muComments.Unlock()
+	ch.postComments = append(ch.postComments, c)
+	return nil
+}
+
 func (ch *Check) GetResult() *CheckResult {
 	ch.muResult.Lock()
 	defer ch.muResult.Unlock()

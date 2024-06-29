@@ -290,8 +290,14 @@ func TestCheck_OK(t *testing.T) {
 	}
 
 	for _, c := range comments {
-		if err := check.Post(context.Background(), c); err != nil {
-			t.Errorf("failed to post: error=%v\ncomment=%v", err, c)
+		if c.Result.ShouldReport {
+			if err := check.Post(context.Background(), c); err != nil {
+				t.Errorf("failed to post: error=%v\ncomment=%v", err, c)
+			}
+		} else {
+			if err := check.PostFiltered(context.Background(), c); err != nil {
+				t.Errorf("failed to post: error=%v\ncomment=%v", err, c)
+			}
 		}
 	}
 	if err := check.Flush(context.Background()); err != nil {
