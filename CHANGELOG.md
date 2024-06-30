@@ -9,7 +9,10 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ### :sparkles: Release Note <!-- optional -->
 
 ### :rocket: Enhancements
-- [#1804](https://github.com/reviewdog/reviewdog/pull/1804) Support deleting outdated comments in github-pr-review reporter
+- [#1804](https://github.com/reviewdog/reviewdog/pull/1804) Support deleting
+  outdated comments in github-pr-review reporter. Note that it won't delete
+  comments if there is a reply considering there can be a meaningful
+  disucssion.
 
 ### :bug: Fixes
 - ...
