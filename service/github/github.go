@@ -255,21 +255,19 @@ func githubCommentLine(c *reviewdog.Comment) int {
 }
 
 func githubCommentLineRange(c *reviewdog.Comment) (start int, end int) {
+	var rdfRange *rdf.Range
+
 	// Prefer first suggestion line range to diagnostic location if available so
 	// that reviewdog can post code suggestion as well when the line ranges are
 	// different between the diagnostic location and its suggestion.
 	if c.Result.FirstSuggestionInDiffContext && len(c.Result.Diagnostic.GetSuggestions()) > 0 {
-		s := c.Result.Diagnostic.GetSuggestions()[0]
-		startLine := s.GetRange().GetStart().GetLine()
-		endLine := s.GetRange().GetEnd().GetLine()
-		if endLine == 0 {
-			endLine = startLine
-		}
-		return int(startLine), int(endLine)
+		rdfRange = c.Result.Diagnostic.GetSuggestions()[0].GetRange()
+	} else {
+		rdfRange = c.Result.Diagnostic.GetLocation().GetRange()
 	}
-	loc := c.Result.Diagnostic.GetLocation()
-	startLine := loc.GetRange().GetStart().GetLine()
-	endLine := loc.GetRange().GetEnd().GetLine()
+
+	startLine := rdfRange.GetStart().GetLine()
+	endLine := rdfRange.GetEnd().GetLine()
 	if endLine == 0 {
 		endLine = startLine
 	}
