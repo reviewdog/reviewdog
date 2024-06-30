@@ -114,7 +114,7 @@ func TestPostResultSet_withReportURL(t *testing.T) {
 	mux := http.NewServeMux()
 	mux.HandleFunc("/check", func(w http.ResponseWriter, r *http.Request) {
 		if r.Method != http.MethodPost {
-			t.Fatalf("unexpected method=%s", r.Method)
+			t.Errorf("unexpected method=%s", r.Method)
 		}
 		var req doghouse.CheckRequest
 		if err := json.NewDecoder(r.Body).Decode(&req); err != nil {
@@ -188,7 +188,7 @@ func TestPostResultSet_withReportURL(t *testing.T) {
 	ts := httptest.NewServer(mux)
 	defer ts.Close()
 
-	cli := client.New(&http.Client{})
+	cli := client.New(ts.Client())
 	cli.BaseURL, _ = url.Parse(ts.URL)
 
 	// It assumes the current dir is ./cmd/reviewdog/
