@@ -647,7 +647,7 @@ func githubService(ctx context.Context, opt *option) (gs *githubservice.PullRequ
 		g.PullRequest = prID
 	}
 
-	gs, err = githubservice.NewGitHubPullRequest(client, g.Owner, g.Repo, g.PullRequest, g.SHA, opt.level)
+	gs, err = githubservice.NewGitHubPullRequest(client, g.Owner, g.Repo, g.PullRequest, g.SHA, opt.level, toolName(opt))
 	if err != nil {
 		return nil, false, err
 	}
