@@ -65,7 +65,7 @@ type option struct {
 }
 
 const (
-	diffCmdDoc    = `diff command (e.g. "git diff") for local reporter. Do not use --relative flag for git command.`
+	diffCmdDoc    = `diff command (e.g. "git diff") for local reporters. Do not use --relative flag for git command.`
 	diffStripDoc  = "strip NUM leading components from diff file names (equivalent to 'patch -p') (default is 1 for git diff)"
 	efmsDoc       = `list of supported machine-readable format and errorformat (https://github.com/reviewdog/errorformat)`
 	fDoc          = `format name (run -list to see supported format name) for input. It's also used as tool name in review comment if -name is empty`
@@ -89,9 +89,15 @@ const (
 		"nofilter"
 			Do not filter any results.
 `
-	reporterDoc = `reporter of reviewdog results. (local, github-check, github-pr-check, github-pr-review, gitlab-mr-discussion, gitlab-mr-commit, gitea-pr-review)
+	reporterDoc = `reporter of reviewdog results.
 	"local" (default)
 		Report results to stdout.
+
+	"rjson"
+		Report results to stdout in rdjson format.
+
+	"rjsonl"
+		Report results to stdout in rdjsonl format.
 
 	"github-check"
 		Report results to GitHub Check. It works both for Pull Requests and commits.
@@ -406,15 +412,25 @@ func run(r io.Reader, w io.Writer, opt *option) error {
 		cs = reviewdog.MultiCommentService(gs, cs)
 		ds = gs
 	case "local":
-		if opt.diffCmd == "" && opt.filterMode == filter.ModeNoFilter {
-			ds = &reviewdog.EmptyDiff{}
-		} else {
-			d, err := diffService(opt.diffCmd, opt.diffStrip)
-			if err != nil {
-				return err
-			}
-			ds = d
+		d, err := localDiffService(opt)
+		if err != nil {
+			return err
 		}
+		ds = d
+	case "rdjson":
+		d, err := localDiffService(opt)
+		if err != nil {
+			return err
+		}
+		ds = d
+		cs = reviewdog.NewRDJSONCommentWriter(w, toolName(opt))
+	case "rdjsonl":
+		d, err := localDiffService(opt)
+		if err != nil {
+			return err
+		}
+		ds = d
+		cs = reviewdog.NewRDJSONLCommentWriter(w)
 	}
 
 	if isProject {
@@ -933,4 +949,12 @@ func getRunnersList(opt *option, conf *project.Config) []string {
 	}
 
 	return []string{}
+}
+
+func localDiffService(opt *option) (reviewdog.DiffService, error) {
+	if (opt.diffCmd == "" && opt.filterMode == filter.ModeDefault) || opt.filterMode == filter.ModeNoFilter {
+		opt.filterMode = filter.ModeNoFilter
+		return &reviewdog.EmptyDiff{}, nil
+	}
+	return diffService(opt.diffCmd, opt.diffStrip)
 }
