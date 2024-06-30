@@ -64,7 +64,9 @@ type PullRequest struct {
 	logWriter     *githubutils.GitHubActionLogWriter
 	fallbackToLog bool
 
-	postedcs commentutil.PostedComments
+	postedcs           commentutil.PostedComments
+	outdatedComments   map[string]*github.PullRequestComment // fingerprint -> comment
+	prCommentWithReply map[int64]bool                        // review id -> bool
 
 	// wd is working directory relative to root of repository.
 	wd string
@@ -164,7 +166,8 @@ func (g *PullRequest) postAsReviewComment(ctx context.Context) error {
 		}
 		body := buildBody(c, repoBaseHTMLURLForRelatedLoc, rootPath, fprint)
 		if g.postedcs.IsPosted(c, githubCommentLine(c), fprint) {
-			// it's already posted. skip it.
+			// it's already posted. Mark the comment as non-outdated and skip it.
+			delete(g.outdatedComments, fprint)
 			continue
 		}
 
@@ -203,6 +206,17 @@ func (g *PullRequest) postAsReviewComment(ctx context.Context) error {
 				goto FALLBACK
 			}
 			return err
+		}
+	}
+
+	for _, c := range g.outdatedComments {
+		if ok := g.prCommentWithReply[c.GetID()]; ok {
+			// Do not remove comment with replies.
+			continue
+		}
+		fmt.Printf("%#v\n", c)
+		if _, err := g.cli.PullRequests.DeleteComment(ctx, g.owner, g.repo, c.GetID()); err != nil {
+			return fmt.Errorf("failed to delete comment (id=%d): %w", c.GetID(), err)
 		}
 	}
 
@@ -303,11 +317,16 @@ func (g *PullRequest) remainingCommentsSummary(remaining []*reviewdog.Comment) s
 // setPostedComment get posted comments from GitHub.
 func (g *PullRequest) setPostedComment(ctx context.Context) error {
 	g.postedcs = make(commentutil.PostedComments)
+	g.outdatedComments = make(map[string]*github.PullRequestComment)
+	g.prCommentWithReply = make(map[int64]bool)
 	cs, err := g.comment(ctx)
 	if err != nil {
 		return err
 	}
 	for _, c := range cs {
+		if id := c.GetInReplyTo(); id != 0 {
+			g.prCommentWithReply[id] = true
+		}
 		if c.Line == nil || c.Path == nil || c.Body == nil || c.SubjectType == nil {
 			continue
 		}
@@ -317,6 +336,7 @@ func (g *PullRequest) setPostedComment(ctx context.Context) error {
 		}
 		if meta := extractMetaComment(c.GetBody()); meta != nil {
 			g.postedcs.AddPostedComment(c.GetPath(), line, meta.GetFingerprint())
+			g.outdatedComments[meta.GetFingerprint()] = c // Remove non-outdated comment later.
 		}
 	}
 	return nil

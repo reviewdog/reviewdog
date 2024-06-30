@@ -172,7 +172,8 @@ func TestGitHubPullRequest_Post_Flush_review_api(t *testing.T) {
 
 	listCommentsAPICalled := 0
 	postCommentsAPICalled := 0
-	repoCommentsAPICalled := 0
+	repoAPICalled := 0
+	delCommentsAPICalled := 0
 	mux := http.NewServeMux()
 	mux.HandleFunc("/repos/o/r/pulls/14/comments", func(w http.ResponseWriter, r *http.Request) {
 		switch r.Method {
@@ -198,6 +199,13 @@ func TestGitHubPullRequest_Post_Flush_review_api(t *testing.T) {
 						Path:        github.String("reviewdog.go"),
 						Line:        github.Int(15),
 						Body:        github.String(commentutil.BodyPrefix + "already commented 2" + "\n<!-- __reviewdog__:ChAxNDgzY2EyNTY0MjU2NmYx -->\n"),
+						SubjectType: github.String("line"),
+					},
+					{
+						ID:          github.Int64(1414),
+						Path:        github.String("reviewdog.go"),
+						Line:        github.Int(15),
+						Body:        github.String(commentutil.BodyPrefix + "already commented [outdated]" + "\n<!-- __reviewdog__:Cg9jY2FlN2NlYTg0M2M0MDI= -->\n"),
 						SubjectType: github.String("line"),
 					},
 					{
@@ -529,12 +537,15 @@ func TestGitHubPullRequest_Post_Flush_review_api(t *testing.T) {
 		}
 	})
 	mux.HandleFunc("/repos/o/r", func(w http.ResponseWriter, r *http.Request) {
-		repoCommentsAPICalled++
+		repoAPICalled++
 		if err := json.NewEncoder(w).Encode(&github.Repository{
 			HTMLURL: github.String("https://test/repo/path"),
 		}); err != nil {
 			t.Fatal(err)
 		}
+	})
+	mux.HandleFunc("/repos/o/r/pulls/comments/1414", func(w http.ResponseWriter, r *http.Request) {
+		delCommentsAPICalled++
 	})
 	ts := httptest.NewServer(mux)
 	defer ts.Close()
@@ -1276,6 +1287,12 @@ func TestGitHubPullRequest_Post_Flush_review_api(t *testing.T) {
 	}
 	if postCommentsAPICalled != 1 {
 		t.Errorf("GitHub post PullRequest comments API called %v times, want 1 times", postCommentsAPICalled)
+	}
+	if repoAPICalled != 1 {
+		t.Errorf("GitHub Repository API called %v times, want 1 times", repoAPICalled)
+	}
+	if delCommentsAPICalled != 1 {
+		t.Errorf("GitHub Delete PullRequest comments API called %v times, want 1 times", delCommentsAPICalled)
 	}
 }
 
