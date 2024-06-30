@@ -598,23 +598,6 @@ func TestGitHubPullRequest_Post_Flush_review_api(t *testing.T) {
 				InDiffContext: true,
 			},
 		},
-		// {
-		// 	Result: &filter.FilteredDiagnostic{
-		// 		Diagnostic: &rdf.Diagnostic{
-		// 			Location: &rdf.Location{
-		// 				Path: "reviewdog.go",
-		// 				Range: &rdf.Range{
-		// 					Start: &rdf.Position{
-		// 						Line: 15,
-		// 					},
-		// 				},
-		// 			},
-		// 			Message: "already commented [outdated]",
-		// 		},
-		// 		InDiffFile:    true,
-		// 		InDiffContext: true,
-		// 	},
-		// },
 		{
 			Result: &filter.FilteredDiagnostic{
 				Diagnostic: &rdf.Diagnostic{
