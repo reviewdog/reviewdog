@@ -35,6 +35,7 @@ import (
 	gerritservice "github.com/reviewdog/reviewdog/service/gerrit"
 	giteaservice "github.com/reviewdog/reviewdog/service/gitea"
 	githubservice "github.com/reviewdog/reviewdog/service/github"
+	"github.com/reviewdog/reviewdog/service/github/githubutils"
 	gitlabservice "github.com/reviewdog/reviewdog/service/gitlab"
 )
 
@@ -65,7 +66,7 @@ type option struct {
 }
 
 const (
-	diffCmdDoc    = `diff command (e.g. "git diff") for local reporter. Do not use --relative flag for git command.`
+	diffCmdDoc    = `diff command (e.g. "git diff") for local reporters. Do not use --relative flag for git command.`
 	diffStripDoc  = "strip NUM leading components from diff file names (equivalent to 'patch -p') (default is 1 for git diff)"
 	efmsDoc       = `list of supported machine-readable format and errorformat (https://github.com/reviewdog/errorformat)`
 	fDoc          = `format name (run -list to see supported format name) for input. It's also used as tool name in review comment if -name is empty`
@@ -75,7 +76,7 @@ const (
 
 	confDoc             = `config file path`
 	runnersDoc          = `comma separated runners name to run in config file. default: run all runners`
-	levelDoc            = `report level currently used for github-pr-check reporter ("info","warning","error").`
+	levelDoc            = `default report level for supported reporters ("info","warning","error").`
 	guessPullRequestDoc = `guess Pull Request ID by branch name and commit SHA`
 	teeDoc              = `enable "tee"-like mode which outputs tools's output as is while reporting results to -reporter. Useful for debugging as well.`
 	filterModeDoc       = `how to filter checks results. [added, diff_context, file, nofilter].
@@ -89,9 +90,15 @@ const (
 		"nofilter"
 			Do not filter any results.
 `
-	reporterDoc = `reporter of reviewdog results. (local, github-check, github-pr-check, github-pr-review, gitlab-mr-discussion, gitlab-mr-commit, gitea-pr-review)
+	reporterDoc = `reporter of reviewdog results.
 	"local" (default)
 		Report results to stdout.
+
+	"rdjson"
+		Report results to stdout in rdjson format.
+
+	"rdjsonl"
+		Report results to stdout in rdjsonl format.
 
 	"github-check"
 		Report results to GitHub Check. It works both for Pull Requests and commits.
@@ -299,12 +306,32 @@ func run(r io.Reader, w io.Writer, opt *option) error {
 	switch opt.reporter {
 	default:
 		return fmt.Errorf("unknown -reporter: %s", opt.reporter)
-	case "github-check":
-		return runDoghouse(ctx, r, w, opt, isProject, false, false)
-	case "github-pr-check":
-		return runDoghouse(ctx, r, w, opt, isProject, true, false)
+	case "github-check", "github-pr-check":
+		if !skipDoghouseServer() {
+			return runDoghouse(ctx, r, w, opt, isProject)
+		}
+		var err error
+		cs, ds, err = githubCheckService(ctx, opt)
+		if err != nil {
+			return err
+		}
 	case "github-pr-annotations":
-		return runDoghouse(ctx, r, w, opt, isProject, true, true)
+		g, client, err := githubBuildInfoWithClient(ctx)
+		if err != nil {
+			return err
+		}
+		ds = &reviewdog.EmptyDiff{}
+		if g.PullRequest != 0 {
+			ds = &githubservice.PullRequestDiffService{
+				Cli:              client,
+				Owner:            g.Owner,
+				Repo:             g.Repo,
+				PR:               g.PullRequest,
+				SHA:              g.SHA,
+				FallBackToGitCLI: true,
+			}
+		}
+		cs = githubutils.NewGitHubActionLogWriter(opt.level)
 	case "github-pr-review":
 		gs, isPR, err := githubService(ctx, opt)
 		if err != nil {
@@ -406,15 +433,25 @@ func run(r io.Reader, w io.Writer, opt *option) error {
 		cs = reviewdog.MultiCommentService(gs, cs)
 		ds = gs
 	case "local":
-		if opt.diffCmd == "" && opt.filterMode == filter.ModeNoFilter {
-			ds = &reviewdog.EmptyDiff{}
-		} else {
-			d, err := diffService(opt.diffCmd, opt.diffStrip)
-			if err != nil {
-				return err
-			}
-			ds = d
+		d, err := localDiffService(opt)
+		if err != nil {
+			return err
 		}
+		ds = d
+	case "rdjson":
+		d, err := localDiffService(opt)
+		if err != nil {
+			return err
+		}
+		ds = d
+		cs = reviewdog.NewRDJSONCommentWriter(w, toolName(opt))
+	case "rdjsonl":
+		d, err := localDiffService(opt)
+		if err != nil {
+			return err
+		}
+		ds = d
+		cs = reviewdog.NewRDJSONLCommentWriter(w)
 	}
 
 	if isProject {
@@ -589,21 +626,11 @@ func giteaClient(ctx context.Context, url, token string) (*gitea.Client, error) 
 }
 
 func githubService(ctx context.Context, opt *option) (gs *githubservice.PullRequest, isPR bool, err error) {
-	token, err := nonEmptyEnv("REVIEWDOG_GITHUB_API_TOKEN")
+	g, client, err := githubBuildInfoWithClient(ctx)
 	if err != nil {
-		return nil, isPR, err
+		return nil, false, err
 	}
-	g, isPR, err := cienv.GetBuildInfo()
-	if err != nil {
-		return nil, isPR, err
-	}
-
-	client, err := githubClient(ctx, token)
-	if err != nil {
-		return nil, isPR, err
-	}
-
-	if !isPR {
+	if g.PullRequest == 0 {
 		if !opt.guessPullRequest {
 			return nil, false, nil
 		}
@@ -625,6 +652,56 @@ func githubService(ctx context.Context, opt *option) (gs *githubservice.PullRequ
 		return nil, false, err
 	}
 	return gs, true, nil
+}
+
+func githubCheckService(ctx context.Context, opt *option) (reviewdog.CommentService, reviewdog.DiffService, error) {
+	g, client, err := githubBuildInfoWithClient(ctx)
+	if err != nil {
+		return nil, nil, err
+	}
+	var ds reviewdog.DiffService = &reviewdog.EmptyDiff{}
+	if g.PullRequest != 0 {
+		ds = &githubservice.PullRequestDiffService{
+			Cli:              client,
+			Owner:            g.Owner,
+			Repo:             g.Repo,
+			PR:               g.PullRequest,
+			SHA:              g.SHA,
+			FallBackToGitCLI: true,
+		}
+	}
+	return &githubservice.Check{
+		CLI:      client,
+		Owner:    g.Owner,
+		Repo:     g.Repo,
+		PR:       g.PullRequest,
+		SHA:      g.SHA,
+		ToolName: opt.name,
+		Level:    opt.level,
+	}, ds, nil
+}
+
+func githubBuildInfoWithClient(ctx context.Context) (*cienv.BuildInfo, *github.Client, error) {
+	token, err := nonEmptyEnv("REVIEWDOG_GITHUB_API_TOKEN")
+	if err != nil {
+		return nil, nil, err
+	}
+	g, isPR, err := cienv.GetBuildInfo()
+	if err != nil {
+		return nil, nil, err
+	}
+	client, err := githubClient(ctx, token)
+	if err != nil {
+		return nil, nil, err
+	}
+	if !isPR && opt.guessPullRequest {
+		prID, err := getPullRequestIDByBranchOrCommit(ctx, client, g)
+		if err != nil {
+			return nil, nil, err
+		}
+		g.PullRequest = prID
+	}
+	return g, client, nil
 }
 
 func getPullRequestIDByBranchOrCommit(ctx context.Context, client *github.Client, info *cienv.BuildInfo) (int, error) {
@@ -933,4 +1010,12 @@ func getRunnersList(opt *option, conf *project.Config) []string {
 	}
 
 	return []string{}
+}
+
+func localDiffService(opt *option) (reviewdog.DiffService, error) {
+	if (opt.diffCmd == "" && opt.filterMode == filter.ModeDefault) || opt.filterMode == filter.ModeNoFilter {
+		opt.filterMode = filter.ModeNoFilter
+		return &reviewdog.EmptyDiff{}, nil
+	}
+	return diffService(opt.diffCmd, opt.diffStrip)
 }

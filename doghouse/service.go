@@ -57,16 +57,6 @@ type CheckResponse struct {
 	// Optional.
 	ReportURL string `json:"report_url,omitempty"`
 
-	// CheckedResults is checked annotations result.
-	// This field is expected to be filled for GitHub Actions integration and
-	// filled when ReportURL is not available. i.e. reviewdog doesn't have write
-	// permission to Check API.
-	// It's also not expected to be passed over network via JSON.
-	// TODO(haya14busa): Consider to move this type to this package to avoid
-	// (cyclic) import.
-	// Optional.
-	CheckedResults []*filter.FilteredDiagnostic `json:"checked_results"`
-
 	// Conclusion of check result, which is same as GitHub's conclusion of Check
 	// API. https://developer.github.com/v3/checks/runs/#parameters-1
 	Conclusion string `json:"conclusion,omitempty"`

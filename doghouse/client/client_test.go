@@ -25,7 +25,7 @@ func TestDogHouseClient_Check(t *testing.T) {
 	cli.BaseURL, _ = url.Parse(ts.URL)
 
 	req := &doghouse.CheckRequest{}
-	resp, err := cli.Check(context.Background(), req, true)
+	resp, err := cli.Check(context.Background(), req)
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -47,7 +47,7 @@ func TestDogHouseClient_Check_failure(t *testing.T) {
 	cli.BaseURL, _ = url.Parse(ts.URL)
 
 	req := &doghouse.CheckRequest{}
-	_, err := cli.Check(context.Background(), req, true)
+	_, err := cli.Check(context.Background(), req)
 	if err == nil {
 		t.Error("got no error, but want bad request error")
 	}
