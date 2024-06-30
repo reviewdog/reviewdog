@@ -253,6 +253,12 @@ jobs:
           cat ./_testdata/custom_rdjson.json |
             reviewdog -name="custom-rdjson" -f=rdjson -reporter=sarif |
             tee ../results/custom-rdjson.sarif
+      - name: Install linters
+        run: go install golang.org/x/lint/golint@latest
+      - name: Run golint
+        run: |
+          golint ./... | reviewdog -f=golint -reporter=sarif |
+            tee ../results/golint.sarif
       - uses: github/codeql-action/upload-sarif@v3
 
   typos:
