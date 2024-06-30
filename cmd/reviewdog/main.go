@@ -93,10 +93,10 @@ const (
 	"local" (default)
 		Report results to stdout.
 
-	"rjson"
+	"rdjson"
 		Report results to stdout in rdjson format.
 
-	"rjsonl"
+	"rdjsonl"
 		Report results to stdout in rdjsonl format.
 
 	"github-check"
