@@ -83,10 +83,11 @@ func TestRun_local_nofilter(t *testing.T) {
 	)
 
 	opt := &option{
-		diffCmd:   "", // empty
-		efms:      strslice([]string{`%f(%l,%c): %m`}),
-		diffStrip: 0,
-		reporter:  "local",
+		diffCmd:    "", // empty
+		efms:       strslice([]string{`%f(%l,%c): %m`}),
+		diffStrip:  0,
+		reporter:   "local",
+		filterMode: filter.ModeAdded,
 	}
 
 	stdout := new(bytes.Buffer)

@@ -9,7 +9,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ### :sparkles: Release Note <!-- optional -->
 
 ### :rocket: Enhancements
-- ...
+- [#1806](https://github.com/reviewdog/reviewdog/pull/1806) Add -reporter=rdjson/rdjsonl which outputs rdjson/rdjsonl format to stdout. It also changes the default behavior of -diff and -filter-mode for local reporters. If -filter-mode is not provided (-filter-mode=default) and -diff flag is not provided, reviewdog automatically set -filter-mode=nofilter.
 
 ### :bug: Fixes
 - ...
