@@ -13,7 +13,15 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
   outdated comments in github-pr-review reporter. Note that it won't delete
   comments if there is a reply considering there can be a meaningful
   discussion.
-- [#1806](https://github.com/reviewdog/reviewdog/pull/1806) Add -reporter=rdjson/rdjsonl which outputs rdjson/rdjsonl format to stdout. It also changes the default behavior of -diff and -filter-mode for local reporters. If -filter-mode is not provided (-filter-mode=default) and -diff flag is not provided, reviewdog automatically set -filter-mode=nofilter.
+- [#1806](https://github.com/reviewdog/reviewdog/pull/1806) Add
+  -reporter=rdjson/rdjsonl which outputs rdjson/rdjsonl format to stdout. It
+  also changes the default behavior of -diff and -filter-mode for local
+  reporters. If -filter-mode is not provided (-filter-mode=default) and -diff
+  flag is not provided, reviewdog automatically set -filter-mode=nofilter.
+- [#1807](https://github.com/reviewdog/reviewdog/pull/1807) Add -reporter=sarif
+  which outputs SARIF format to stdout. You can upload the output SARIF to
+  GitHub and see code scanning alerts.
+
 
 ### :bug: Fixes
 - ...
