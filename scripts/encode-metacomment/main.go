@@ -13,7 +13,7 @@ var toolName = flag.String("tool-name", "", "tool-name")
 
 func main() {
 	flag.Parse()
-	if fprint == nil || toolName == nil {
+	if *fprint == "" || *toolName == "" {
 		fmt.Println("Set both -fprint and -tool-name flags")
 		os.Exit(1)
 	}
