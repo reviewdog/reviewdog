@@ -233,6 +233,28 @@ jobs:
           cat ./_testdata/custom_rdjson.json | \
             reviewdog -name="custom-rdjson" -f=rdjson -reporter=github-pr-annotations
 
+  reviewdog-sarif:
+    permissions:
+      contents: read
+    name: reviewdog (sarif)
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-go@v5
+        with:
+          go-version-file: "go.mod"
+      - name: Setup reviewdog
+        # uses: reviewdog/action-setup@v1
+        run: |
+          go install ./cmd/reviewdog
+      - name: Custom rdjson test
+        run: |
+          mkdir ../results
+          cat ./_testdata/custom_rdjson.json |
+            reviewdog -name="custom-rdjson" -f=rdjson -reporter=sarif |
+            tee ../results/custom-rdjson.sarif
+      - uses: github/codeql-action/upload-sarif@v3
+
   typos:
     name: runner / typos
     runs-on: ubuntu-latest
