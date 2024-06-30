@@ -47,6 +47,12 @@ type CommentService interface {
 	Post(context.Context, *Comment) error
 }
 
+// FilteredCommentService is an interface which support posting filtered Comment.
+type FilteredCommentService interface {
+	CommentService
+	PostFiltered(context.Context, *Comment) error
+}
+
 // BulkCommentService posts comments all at once when Flush() is called.
 // Flush() will be called at the end of reviewdog run.
 type BulkCommentService interface {
@@ -71,17 +77,24 @@ func (w *Reviewdog) runFromResult(ctx context.Context, results []*rdf.Diagnostic
 	hasViolations := false
 
 	for _, check := range checks {
-		if !check.ShouldReport {
-			continue
-		}
 		comment := &Comment{
 			Result:   check,
 			ToolName: w.toolname,
 		}
-		if err := w.c.Post(ctx, comment); err != nil {
-			return err
+		if !check.ShouldReport {
+			if fc, ok := w.c.(FilteredCommentService); ok {
+				if err := fc.PostFiltered(ctx, comment); err != nil {
+					return err
+				}
+			} else {
+				continue
+			}
+		} else {
+			if err := w.c.Post(ctx, comment); err != nil {
+				return err
+			}
+			hasViolations = true
 		}
-		hasViolations = true
 	}
 
 	if bulk, ok := w.c.(BulkCommentService); ok {

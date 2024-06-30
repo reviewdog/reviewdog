@@ -9,7 +9,6 @@ import (
 	"log"
 	"net/http"
 	"os"
-	"os/exec"
 	"path/filepath"
 	"strings"
 	"sync"
@@ -351,52 +350,14 @@ func DecodeMetaComment(metaBase64 string) (*metacomment.MetaComment, error) {
 
 // Diff returns a diff of PullRequest.
 func (g *PullRequest) Diff(ctx context.Context) ([]byte, error) {
-	opt := github.RawOptions{Type: github.Diff}
-	d, resp, err := g.cli.PullRequests.GetRaw(ctx, g.owner, g.repo, g.pr, opt)
-	if err != nil {
-		if resp != nil && resp.StatusCode == http.StatusNotAcceptable {
-			// git command should exist here. See NewGitHubPullRequest.
-			log.Print("fallback to use git command")
-			return g.diffUsingGitCommand(ctx)
-		}
-
-		return nil, err
-	}
-	return []byte(d), nil
-}
-
-// diffUsingGitCommand returns a diff of PullRequest using git command.
-func (g *PullRequest) diffUsingGitCommand(ctx context.Context) ([]byte, error) {
-	pr, _, err := g.cli.PullRequests.Get(ctx, g.owner, g.repo, g.pr)
-	if err != nil {
-		return nil, err
-	}
-
-	head := pr.GetHead()
-	headSha := head.GetSHA()
-
-	commitsComparison, _, err := g.cli.Repositories.CompareCommits(ctx, g.owner, g.repo, headSha, pr.GetBase().GetSHA(), nil)
-	if err != nil {
-		return nil, err
-	}
-
-	mergeBaseSha := commitsComparison.GetMergeBaseCommit().GetSHA()
-
-	if os.Getenv("REVIEWDOG_SKIP_GIT_FETCH") != "true" {
-		for _, sha := range []string{mergeBaseSha, headSha} {
-			_, err := exec.Command("git", "fetch", "--depth=1", head.GetRepo().GetHTMLURL(), sha).CombinedOutput()
-			if err != nil {
-				return nil, fmt.Errorf("failed to run git fetch: %w", err)
-			}
-		}
-	}
-
-	bytes, err := exec.Command("git", "diff", "--find-renames", mergeBaseSha, headSha).CombinedOutput()
-	if err != nil {
-		return nil, fmt.Errorf("failed to run git diff: %w", err)
-	}
-
-	return bytes, nil
+	return (&PullRequestDiffService{
+		Cli:              g.cli,
+		Owner:            g.owner,
+		Repo:             g.repo,
+		PR:               g.pr,
+		SHA:              g.sha,
+		FallBackToGitCLI: true,
+	}).Diff(ctx)
 }
 
 // Strip returns 1 as a strip of git diff.
