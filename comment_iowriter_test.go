@@ -3,6 +3,7 @@ package reviewdog
 import (
 	"bytes"
 	"context"
+	"regexp"
 	"strings"
 	"testing"
 
@@ -252,7 +253,9 @@ func TestRDJSONCommentWriter_Post(t *testing.T) {
     "name": "tool name [constructor]"
   }
 }`
-	if got := strings.TrimSpace(buf.String()); got != strings.TrimSpace(want) {
+	re := regexp.MustCompile(`:\s+`)
+	got := re.ReplaceAllString(strings.TrimSpace(buf.String()), ":")
+	if got != re.ReplaceAllString(strings.TrimSpace(want), ":") {
 		t.Errorf("got\n%v\nwant:\n%v", got, want)
 	}
 }
