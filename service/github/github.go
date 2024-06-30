@@ -53,11 +53,12 @@ func isPermissionError(err error) bool {
 //	https://docs.github.com/en/rest/pulls/comments?apiVersion=2022-11-28#create-a-review-comment-for-a-pull-request
 //	POST /repos/:owner/:repo/pulls/:number/comments
 type PullRequest struct {
-	cli   *github.Client
-	owner string
-	repo  string
-	pr    int
-	sha   string
+	cli      *github.Client
+	owner    string
+	repo     string
+	pr       int
+	sha      string
+	toolName string
 
 	muComments    sync.Mutex
 	postComments  []*reviewdog.Comment
@@ -82,7 +83,7 @@ type PullRequest struct {
 //
 // [1]: https://docs.github.com/en/actions/security-guides/automatic-token-authentication#permissions-for-the-github_token
 // [2]: https://docs.github.com/en/actions/reference/workflow-commands-for-github-actions
-func NewGitHubPullRequest(cli *github.Client, owner, repo string, pr int, sha, level string) (*PullRequest, error) {
+func NewGitHubPullRequest(cli *github.Client, owner, repo string, pr int, sha, level, toolName string) (*PullRequest, error) {
 	workDir, err := serviceutil.GitRelWorkdir()
 	if err != nil {
 		return nil, fmt.Errorf("PullRequest needs 'git' command: %w", err)
@@ -93,6 +94,7 @@ func NewGitHubPullRequest(cli *github.Client, owner, repo string, pr int, sha, l
 		repo:      repo,
 		pr:        pr,
 		sha:       sha,
+		toolName:  toolName,
 		logWriter: githubutils.NewGitHubActionLogWriter(level),
 		wd:        workDir,
 	}, nil
@@ -164,7 +166,7 @@ func (g *PullRequest) postAsReviewComment(ctx context.Context) error {
 		if err != nil {
 			return err
 		}
-		body := buildBody(c, repoBaseHTMLURLForRelatedLoc, rootPath, fprint)
+		body := buildBody(c, repoBaseHTMLURLForRelatedLoc, rootPath, fprint, g.toolName)
 		if g.postedcs.IsPosted(c, githubCommentLine(c), fprint) {
 			// it's already posted. Mark the comment as non-outdated and skip it.
 			delete(g.outdatedComments, fprint)
@@ -214,7 +216,6 @@ func (g *PullRequest) postAsReviewComment(ctx context.Context) error {
 			// Do not remove comment with replies.
 			continue
 		}
-		fmt.Printf("%#v\n", c)
 		if _, err := g.cli.PullRequests.DeleteComment(ctx, g.owner, g.repo, c.GetID()); err != nil {
 			return fmt.Errorf("failed to delete comment (id=%d): %w", c.GetID(), err)
 		}
@@ -336,7 +337,9 @@ func (g *PullRequest) setPostedComment(ctx context.Context) error {
 		}
 		if meta := extractMetaComment(c.GetBody()); meta != nil {
 			g.postedcs.AddPostedComment(c.GetPath(), line, meta.GetFingerprint())
-			g.outdatedComments[meta.GetFingerprint()] = c // Remove non-outdated comment later.
+			if meta.SourceName == g.toolName {
+				g.outdatedComments[meta.GetFingerprint()] = c // Remove non-outdated comment later.
+			}
 		}
 	}
 	return nil
@@ -462,7 +465,7 @@ func listAllPullRequestsComments(ctx context.Context, cli *github.Client,
 	return append(comments, restComments...), nil
 }
 
-func buildBody(c *reviewdog.Comment, baseRelatedLocURL string, gitRootPath string, fprint string) string {
+func buildBody(c *reviewdog.Comment, baseRelatedLocURL string, gitRootPath string, fprint string, toolName string) string {
 	cbody := commentutil.MarkdownComment(c)
 	if suggestion := buildSuggestions(c); suggestion != "" {
 		cbody += "\n" + suggestion
@@ -479,11 +482,11 @@ func buildBody(c *reviewdog.Comment, baseRelatedLocURL string, gitRootPath strin
 		}
 		cbody += "\n<hr>\n\n" + relatedLoc.GetMessage() + "\n" + relatedURL
 	}
-	cbody += fmt.Sprintf("\n<!-- __reviewdog__:%s -->\n", buildMetaComment(fprint, c.ToolName))
+	cbody += fmt.Sprintf("\n<!-- __reviewdog__:%s -->\n", BuildMetaComment(fprint, toolName))
 	return cbody
 }
 
-func buildMetaComment(fprint string, toolName string) string {
+func BuildMetaComment(fprint string, toolName string) string {
 	b, _ := proto.Marshal(
 		&metacomment.MetaComment{
 			Fingerprint: fprint,

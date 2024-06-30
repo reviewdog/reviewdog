@@ -69,7 +69,7 @@ func TestGitHubPullRequest_Post(t *testing.T) {
 	pr := 2
 	sha := "cce89afa9ac5519a7f5b1734db2e3aa776b138a7"
 
-	g, err := NewGitHubPullRequest(client, owner, repo, pr, sha, "warning")
+	g, err := NewGitHubPullRequest(client, owner, repo, pr, sha, "warning", "tool-name")
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -120,7 +120,7 @@ index aa49124774..781ee2492f 100644
 	owner := "haya14busa"
 	repo := "reviewdog"
 	pr := 73
-	g, err := NewGitHubPullRequest(client, owner, repo, pr, "", "warning")
+	g, err := NewGitHubPullRequest(client, owner, repo, pr, "", "warning", "tool-name")
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -145,7 +145,7 @@ func TestGitHubPullRequest_comment(t *testing.T) {
 	owner := "haya14busa"
 	repo := "reviewdog"
 	pr := 2
-	g, err := NewGitHubPullRequest(client, owner, repo, pr, "", "warning")
+	g, err := NewGitHubPullRequest(client, owner, repo, pr, "", "warning", "tool-name")
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -205,7 +205,14 @@ func TestGitHubPullRequest_Post_Flush_review_api(t *testing.T) {
 						ID:          github.Int64(1414),
 						Path:        github.String("reviewdog.go"),
 						Line:        github.Int(15),
-						Body:        github.String(commentutil.BodyPrefix + "already commented [outdated]" + "\n<!-- __reviewdog__:Cg9jY2FlN2NlYTg0M2M0MDI= -->\n"),
+						Body:        github.String(commentutil.BodyPrefix + "already commented [outdated]" + "\n<!-- __reviewdog__:Cg9jY2FlN2NlYTg0M2M0MDISCXRvb2wtbmFtZQ== -->\n"),
+						SubjectType: github.String("line"),
+					},
+					{
+						ID:          github.Int64(1414),
+						Path:        github.String("reviewdog.go"),
+						Line:        github.Int(15),
+						Body:        github.String(commentutil.BodyPrefix + "already commented [different tool]" + "\n<!-- __reviewdog__:CgZ4eHh4eHgSDmRpZmZlcmVudC10b29s -->\n"),
 						SubjectType: github.String("line"),
 					},
 					{
@@ -552,7 +559,7 @@ func TestGitHubPullRequest_Post_Flush_review_api(t *testing.T) {
 
 	cli := github.NewClient(nil)
 	cli.BaseURL, _ = url.Parse(ts.URL + "/")
-	g, err := NewGitHubPullRequest(cli, "o", "r", 14, "sha", "warning")
+	g, err := NewGitHubPullRequest(cli, "o", "r", 14, "sha", "warning", "tool-name")
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -591,6 +598,23 @@ func TestGitHubPullRequest_Post_Flush_review_api(t *testing.T) {
 				InDiffContext: true,
 			},
 		},
+		// {
+		// 	Result: &filter.FilteredDiagnostic{
+		// 		Diagnostic: &rdf.Diagnostic{
+		// 			Location: &rdf.Location{
+		// 				Path: "reviewdog.go",
+		// 				Range: &rdf.Range{
+		// 					Start: &rdf.Position{
+		// 						Line: 15,
+		// 					},
+		// 				},
+		// 			},
+		// 			Message: "already commented [outdated]",
+		// 		},
+		// 		InDiffFile:    true,
+		// 		InDiffContext: true,
+		// 	},
+		// },
 		{
 			Result: &filter.FilteredDiagnostic{
 				Diagnostic: &rdf.Diagnostic{
@@ -1327,7 +1351,7 @@ func TestGitHubPullRequest_Post_toomany(t *testing.T) {
 
 	cli := github.NewClient(nil)
 	cli.BaseURL, _ = url.Parse(ts.URL + "/")
-	g, err := NewGitHubPullRequest(cli, "o", "r", 14, "sha", "warning")
+	g, err := NewGitHubPullRequest(cli, "o", "r", 14, "sha", "warning", "tool-name")
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -1372,7 +1396,7 @@ func TestGitHubPullRequest_workdir(t *testing.T) {
 	moveToRootDir()
 	defer setupEnvs()()
 
-	g, err := NewGitHubPullRequest(nil, "", "", 0, "", "warning")
+	g, err := NewGitHubPullRequest(nil, "", "", 0, "", "warning", "tool-name")
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -1391,7 +1415,7 @@ func TestGitHubPullRequest_workdir(t *testing.T) {
 	if err := os.Chdir(subDir); err != nil {
 		t.Fatal(err)
 	}
-	g, _ = NewGitHubPullRequest(nil, "", "", 0, "", "warning")
+	g, _ = NewGitHubPullRequest(nil, "", "", 0, "", "warning", "tool-name")
 	if g.wd != subDir {
 		t.Fatalf("gitRelWorkdir() = %q, want %q", g.wd, subDir)
 	}
@@ -1422,7 +1446,7 @@ func TestGitHubPullRequest_Diff_fake(t *testing.T) {
 
 	cli := github.NewClient(nil)
 	cli.BaseURL, _ = url.Parse(ts.URL + "/")
-	g, err := NewGitHubPullRequest(cli, "o", "r", 14, "sha", "warning")
+	g, err := NewGitHubPullRequest(cli, "o", "r", 14, "sha", "warning", "tool-name")
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -1498,7 +1522,7 @@ func TestGitHubPullRequest_Diff_fake_fallback(t *testing.T) {
 
 	cli := github.NewClient(nil)
 	cli.BaseURL, _ = url.Parse(ts.URL + "/")
-	g, err := NewGitHubPullRequest(cli, "o", "r", 14, "sha", "warning")
+	g, err := NewGitHubPullRequest(cli, "o", "r", 14, "sha", "warning", "tool-name")
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -1535,7 +1559,7 @@ func TestGitHubPullRequest_Post_NoPermission(t *testing.T) {
 
 	cli := github.NewClient(nil)
 	cli.BaseURL, _ = url.Parse(ts.URL + "/")
-	g, err := NewGitHubPullRequest(cli, "o", "r", 14, "sha", "warning")
+	g, err := NewGitHubPullRequest(cli, "o", "r", 14, "sha", "warning", "tool-name")
 	if err != nil {
 		t.Fatal(err)
 	}
