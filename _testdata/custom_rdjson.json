@@ -1,28 +1,6 @@
 {
   "diagnostics": [
     {
-      "message": "test comment for deleting outdated comment 1",
-      "location": {
-        "path": "_testdata/custom.txt",
-        "range": {
-          "start": {
-            "line": 1
-          }
-        }
-      }
-    },
-    {
-      "message": "test comment for deleting outdated comment 2",
-      "location": {
-        "path": "_testdata/custom.txt",
-        "range": {
-          "start": {
-            "line": 1
-          }
-        }
-      }
-    },
-    {
       "message": "range test 1 (line only)",
       "location": {
         "path": "_testdata/custom.txt",
