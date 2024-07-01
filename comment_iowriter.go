@@ -167,7 +167,8 @@ func (cw *SARIFCommentWriter) Flush(_ context.Context) error {
 	run := sarif.Run{
 		Tool: sarif.Tool{
 			Driver: sarif.ToolComponent{
-				Name: cw.toolName,
+				Name:  cw.toolName,
+				Rules: make([]sarif.ReportingDescriptor, 0),
 			},
 		},
 	}
@@ -182,10 +183,13 @@ func (cw *SARIFCommentWriter) Flush(_ context.Context) error {
 			result.RuleID = sarif.String(code.GetValue())
 			if seen := seenRules[code.GetValue()]; !seen {
 				seenRules[code.GetValue()] = true
-				run.Tool.Driver.Rules = append(run.Tool.Driver.Rules, sarif.ReportingDescriptor{
-					ID:      code.GetValue(),
-					HelpURI: sarif.String(code.GetUrl()),
-				})
+				rd := sarif.ReportingDescriptor{
+					ID: code.GetValue(),
+				}
+				if code.GetUrl() != "" {
+					rd.HelpURI = sarif.String(code.GetUrl())
+				}
+				run.Tool.Driver.Rules = append(run.Tool.Driver.Rules, rd)
 			}
 		}
 		level := severity2level(c.Result.Diagnostic.GetSeverity())
