@@ -194,7 +194,7 @@ func (g *PullRequest) postAsReviewComment(ctx context.Context) error {
 				remaining = append(remaining, c)
 				continue
 			}
-			comment := buildPullRequestComment(c, buildBody(c, repoBaseHTMLURL, rootPath, fprint, g.toolName))
+			comment := buildPullRequestComment(c, buildBody(c, repoBaseHTMLURL, rootPath, fprint, g.toolName), g.sha)
 			fileComments = append(fileComments, comment)
 		}
 	}
@@ -280,13 +280,14 @@ func buildDraftReviewComment(c *reviewdog.Comment, body string) *github.DraftRev
 	return r
 }
 
-func buildPullRequestComment(c *reviewdog.Comment, body string) *github.PullRequestComment {
+func buildPullRequestComment(c *reviewdog.Comment, body string, sha string) *github.PullRequestComment {
 	loc := c.Result.Diagnostic.GetLocation()
 	startLine, endLine := githubCommentLineRange(c)
 	r := &github.PullRequestComment{
-		Path: github.String(loc.GetPath()),
-		Side: github.String("RIGHT"),
-		Body: github.String(body),
+		Path:     github.String(loc.GetPath()),
+		Side:     github.String("RIGHT"),
+		Body:     github.String(body),
+		CommitID: github.String(sha),
 	}
 	if endLine > 0 {
 		r.SubjectType = github.String("line")
