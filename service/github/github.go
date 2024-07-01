@@ -141,8 +141,11 @@ func (g *PullRequest) postAsReviewComment(ctx context.Context) error {
 	reviewComments := make([]*github.DraftReviewComment, 0, len(postComments))
 	fileComments := make([]*github.PullRequestComment, 0)
 	remaining := make([]*reviewdog.Comment, 0)
-	repoBaseHTMLURL := ""
 	rootPath, err := serviceutil.GetGitRoot()
+	if err != nil {
+		return err
+	}
+	repoBaseHTMLURL, err := g.repoBaseHTMLURL(ctx)
 	if err != nil {
 		return err
 	}
@@ -156,13 +159,6 @@ func (g *PullRequest) postAsReviewComment(ctx context.Context) error {
 				}
 			}
 			continue
-		}
-		if repoBaseHTMLURL == "" && len(c.Result.Diagnostic.GetRelatedLocations()) > 0 {
-			repo, _, err := g.cli.Repositories.Get(ctx, g.owner, g.repo)
-			if err != nil {
-				return err
-			}
-			repoBaseHTMLURL = repo.GetHTMLURL() + "/blob/" + g.sha
 		}
 		fprint, err := fingerprint(c.Result.Diagnostic)
 		if err != nil {
@@ -412,6 +408,14 @@ func (g *PullRequest) Diff(ctx context.Context) ([]byte, error) {
 // Strip returns 1 as a strip of git diff.
 func (g *PullRequest) Strip() int {
 	return 1
+}
+
+func (g *PullRequest) repoBaseHTMLURL(ctx context.Context) (string, error) {
+	repo, _, err := g.cli.Repositories.Get(ctx, g.owner, g.repo)
+	if err != nil {
+		return "", fmt.Errorf("failed to build repo base HTML URL: %w", err)
+	}
+	return repo.GetHTMLURL() + "/blob/" + g.sha, nil
 }
 
 func (g *PullRequest) comment(ctx context.Context) ([]*github.PullRequestComment, error) {
