@@ -31,6 +31,8 @@ var _ reviewdog.DiffService = (*PullRequest)(nil)
 
 const maxCommentsPerRequest = 30
 
+const maxFileComments = 10
+
 const (
 	invalidSuggestionPre  = "<details><summary>reviewdog suggestion error</summary>"
 	invalidSuggestionPost = "</details>"
@@ -137,6 +139,7 @@ func (g *PullRequest) postAsReviewComment(ctx context.Context) error {
 	g.postComments = nil
 	rawComments := make([]*reviewdog.Comment, 0, len(postComments))
 	reviewComments := make([]*github.DraftReviewComment, 0, len(postComments))
+	fileComments := make([]*github.PullRequestComment, 0)
 	remaining := make([]*reviewdog.Comment, 0)
 	repoBaseHTMLURL := ""
 	rootPath, err := serviceutil.GetGitRoot()
@@ -171,26 +174,35 @@ func (g *PullRequest) postAsReviewComment(ctx context.Context) error {
 			continue
 		}
 
-		// Only posts maxCommentsPerRequest comments per 1 request to avoid spammy
-		// review comments. An example GitHub error if we don't limit the # of
-		// review comments.
-		//
-		// > 403 You have triggered an abuse detection mechanism and have been
-		// > temporarily blocked from content creation. Please retry your request
-		// > again later.
-		// https://docs.github.com/en/rest/overview/resources-in-the-rest-api?apiVersion=2022-11-28#rate-limiting
-		if len(reviewComments) >= maxCommentsPerRequest {
-			remaining = append(remaining, c)
-			continue
+		if c.Result.InDiffContext {
+			// Only posts maxCommentsPerRequest comments per 1 request to avoid spammy
+			// review comments. An example GitHub error if we don't limit the # of
+			// review comments.
+			//
+			// > 403 You have triggered an abuse detection mechanism and have been
+			// > temporarily blocked from content creation. Please retry your request
+			// > again later.
+			// https://docs.github.com/en/rest/overview/resources-in-the-rest-api?apiVersion=2022-11-28#rate-limiting
+			if len(reviewComments) >= maxCommentsPerRequest {
+				remaining = append(remaining, c)
+				continue
+			}
+			comment := buildDraftReviewComment(c, buildBody(c, repoBaseHTMLURL, rootPath, fprint, g.toolName))
+			reviewComments = append(reviewComments, comment)
+		} else {
+			if len(fileComments) >= maxFileComments {
+				remaining = append(remaining, c)
+				continue
+			}
+			comment := buildPullRequestComment(c, buildBody(c, repoBaseHTMLURL, rootPath, fprint, g.toolName))
+			fileComments = append(fileComments, comment)
 		}
-		reviewComments = append(reviewComments,
-			buildDraftReviewComment(c, buildBody(c, repoBaseHTMLURL, rootPath, fprint, g.toolName)))
 	}
 	if err := g.logWriter.Flush(ctx); err != nil {
 		return err
 	}
 
-	if len(reviewComments) > 0 {
+	if len(reviewComments) > 0 || len(remaining) > 0 {
 		// send review comments to GitHub.
 		review := &github.PullRequestReviewRequest{
 			CommitID: &g.sha,
@@ -201,6 +213,17 @@ func (g *PullRequest) postAsReviewComment(ctx context.Context) error {
 		_, _, err := g.cli.PullRequests.CreateReview(ctx, g.owner, g.repo, g.pr, review)
 		if err != nil {
 			log.Printf("reviewdog: failed to post a review comment: %v", err)
+			// GitHub returns 403 or 404 if we don't have permission to post a review comment.
+			// fallback to log message in this case.
+			if isPermissionError(err) && cienv.IsInGitHubAction() {
+				goto FALLBACK
+			}
+			return err
+		}
+	}
+	for _, c := range fileComments {
+		if _, _, err := g.cli.PullRequests.CreateComment(ctx, g.owner, g.repo, g.pr, c); err != nil {
+			log.Printf("reviewdog: failed to post a pull request comment: %v", err)
 			// GitHub returns 403 or 404 if we don't have permission to post a review comment.
 			// fallback to log message in this case.
 			if isPermissionError(err) && cienv.IsInGitHubAction() {
@@ -244,6 +267,23 @@ func buildDraftReviewComment(c *reviewdog.Comment, body string) *github.DraftRev
 	loc := c.Result.Diagnostic.GetLocation()
 	startLine, endLine := githubCommentLineRange(c)
 	r := &github.DraftReviewComment{
+		Path: github.String(loc.GetPath()),
+		Side: github.String("RIGHT"),
+		Body: github.String(body),
+		Line: github.Int(endLine),
+	}
+	// GitHub API: Start line must precede the end line.
+	if startLine < endLine {
+		r.StartSide = github.String("RIGHT")
+		r.StartLine = github.Int(startLine)
+	}
+	return r
+}
+
+func buildPullRequestComment(c *reviewdog.Comment, body string) *github.PullRequestComment {
+	loc := c.Result.Diagnostic.GetLocation()
+	startLine, endLine := githubCommentLineRange(c)
+	r := &github.PullRequestComment{
 		Path: github.String(loc.GetPath()),
 		Side: github.String("RIGHT"),
 		Body: github.String(body),
