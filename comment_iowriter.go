@@ -171,7 +171,7 @@ func (cw *SARIFCommentWriter) Flush(_ context.Context) error {
 			},
 		},
 	}
-	rules := make(map[string]sarif.ReportingDescriptor)
+	seenRules := make(map[string]bool)
 	for _, c := range cw.comments {
 		result := sarif.Result{
 			Message: sarif.Message{
@@ -180,9 +180,12 @@ func (cw *SARIFCommentWriter) Flush(_ context.Context) error {
 		}
 		if code := c.Result.Diagnostic.GetCode(); code.GetValue() != "" {
 			result.RuleID = sarif.String(code.GetValue())
-			rules[code.GetValue()] = sarif.ReportingDescriptor{
-				ID:      code.GetValue(),
-				HelpURI: sarif.String(code.GetUrl()),
+			if seen := seenRules[code.GetValue()]; !seen {
+				seenRules[code.GetValue()] = true
+				run.Tool.Driver.Rules = append(run.Tool.Driver.Rules, sarif.ReportingDescriptor{
+					ID:      code.GetValue(),
+					HelpURI: sarif.String(code.GetUrl()),
+				})
 			}
 		}
 		level := severity2level(c.Result.Diagnostic.GetSeverity())
@@ -235,10 +238,6 @@ func (cw *SARIFCommentWriter) Flush(_ context.Context) error {
 		run.Results = append(run.Results, result)
 	}
 	slf := sarif.NewSarif()
-	run.Tool.Driver.Rules = make([]sarif.ReportingDescriptor, 0, len(rules))
-	for _, r := range rules {
-		run.Tool.Driver.Rules = append(run.Tool.Driver.Rules, r)
-	}
 	slf.Runs = []sarif.Run{run}
 	encoder := json.NewEncoder(cw.w)
 	encoder.SetIndent("", "  ")
