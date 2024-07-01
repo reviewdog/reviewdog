@@ -194,7 +194,7 @@ func (g *PullRequest) postAsReviewComment(ctx context.Context) error {
 				remaining = append(remaining, c)
 				continue
 			}
-			comment := buildPullRequestComment(c, buildBody(c, repoBaseHTMLURL, rootPath, fprint, g.toolName), g.sha)
+			comment := buildPullRequestFileComment(c, buildBody(c, repoBaseHTMLURL, rootPath, fprint, g.toolName), g.sha)
 			fileComments = append(fileComments, comment)
 		}
 	}
@@ -280,27 +280,14 @@ func buildDraftReviewComment(c *reviewdog.Comment, body string) *github.DraftRev
 	return r
 }
 
-func buildPullRequestComment(c *reviewdog.Comment, body string, sha string) *github.PullRequestComment {
-	loc := c.Result.Diagnostic.GetLocation()
-	startLine, endLine := githubCommentLineRange(c)
-	r := &github.PullRequestComment{
-		Path:     github.String(loc.GetPath()),
-		Side:     github.String("RIGHT"),
-		Body:     github.String(body),
-		CommitID: github.String(sha),
+func buildPullRequestFileComment(c *reviewdog.Comment, body string, sha string) *github.PullRequestComment {
+	return &github.PullRequestComment{
+		Path:        github.String(c.Result.Diagnostic.GetLocation().GetPath()),
+		Side:        github.String("RIGHT"),
+		Body:        github.String(body),
+		CommitID:    github.String(sha),
+		SubjectType: github.String("file"),
 	}
-	if endLine > 0 {
-		r.SubjectType = github.String("line")
-		r.Line = github.Int(endLine)
-		// GitHub API: Start line must precede the end line.
-		if startLine < endLine {
-			r.StartSide = github.String("RIGHT")
-			r.StartLine = github.Int(startLine)
-		}
-	} else {
-		r.SubjectType = github.String("file")
-	}
-	return r
 }
 
 // line represents end line if it's a multiline comment in GitHub, otherwise
