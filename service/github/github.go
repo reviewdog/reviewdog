@@ -463,7 +463,7 @@ func buildBody(c *reviewdog.Comment, baseURL string, gitRootPath string, fprint 
 	} else {
 		if c.Result.Diagnostic.GetLocation().GetRange().GetStart().GetLine() > 0 {
 			snippetURL := githubCodeSnippetURL(baseURL, gitRootPath, c.Result.Diagnostic.GetLocation())
-			cbody = snippetURL + "\n\n" + cbody
+			cbody += "\n\n" + snippetURL
 		}
 	}
 	for _, relatedLoc := range c.Result.Diagnostic.GetRelatedLocations() {
