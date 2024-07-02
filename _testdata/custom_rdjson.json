@@ -249,6 +249,12 @@
           }
         }
       ]
+    },
+    {
+      "message": "test file comment",
+      "location": {
+        "path": "_testdata/custom.txt"
+      }
     }
   ]
 }

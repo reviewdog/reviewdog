@@ -13,7 +13,7 @@ import (
 	"strings"
 	"sync"
 
-	"github.com/google/go-github/v60/github"
+	"github.com/google/go-github/v62/github"
 	"google.golang.org/protobuf/proto"
 
 	"github.com/reviewdog/reviewdog"
@@ -30,6 +30,8 @@ var _ reviewdog.CommentService = (*PullRequest)(nil)
 var _ reviewdog.DiffService = (*PullRequest)(nil)
 
 const maxCommentsPerRequest = 30
+
+const maxFileComments = 10
 
 const (
 	invalidSuggestionPre  = "<details><summary>reviewdog suggestion error</summary>"
@@ -137,15 +139,19 @@ func (g *PullRequest) postAsReviewComment(ctx context.Context) error {
 	g.postComments = nil
 	rawComments := make([]*reviewdog.Comment, 0, len(postComments))
 	reviewComments := make([]*github.DraftReviewComment, 0, len(postComments))
+	fileComments := make([]*github.PullRequestComment, 0)
 	remaining := make([]*reviewdog.Comment, 0)
-	repoBaseHTMLURLForRelatedLoc := ""
 	rootPath, err := serviceutil.GetGitRoot()
 	if err != nil {
 		return err
 	}
+	repoBaseHTMLURL, err := g.repoBaseHTMLURL(ctx)
+	if err != nil {
+		return err
+	}
 	for _, c := range postComments {
-		if !c.Result.InDiffContext {
-			// GitHub Review API cannot report results outside diff. If it's running
+		if !c.Result.InDiffFile {
+			// GitHub Review API cannot report results outside diff file. If it's running
 			// in GitHub Actions, fallback to GitHub Actions log as report.
 			if cienv.IsInGitHubAction() {
 				if err := g.logWriter.Post(ctx, c); err != nil {
@@ -154,53 +160,66 @@ func (g *PullRequest) postAsReviewComment(ctx context.Context) error {
 			}
 			continue
 		}
-		if repoBaseHTMLURLForRelatedLoc == "" && len(c.Result.Diagnostic.GetRelatedLocations()) > 0 {
-			repo, _, err := g.cli.Repositories.Get(ctx, g.owner, g.repo)
-			if err != nil {
-				return err
-			}
-			repoBaseHTMLURLForRelatedLoc = repo.GetHTMLURL() + "/blob/" + g.sha
-		}
 		fprint, err := fingerprint(c.Result.Diagnostic)
 		if err != nil {
 			return err
 		}
-		body := buildBody(c, repoBaseHTMLURLForRelatedLoc, rootPath, fprint, g.toolName)
 		if g.postedcs.IsPosted(c, githubCommentLine(c), fprint) {
 			// it's already posted. Mark the comment as non-outdated and skip it.
 			delete(g.outdatedComments, fprint)
 			continue
 		}
 
-		// Only posts maxCommentsPerRequest comments per 1 request to avoid spammy
-		// review comments. An example GitHub error if we don't limit the # of
-		// review comments.
-		//
-		// > 403 You have triggered an abuse detection mechanism and have been
-		// > temporarily blocked from content creation. Please retry your request
-		// > again later.
-		// https://docs.github.com/en/rest/overview/resources-in-the-rest-api?apiVersion=2022-11-28#rate-limiting
-		if len(reviewComments) >= maxCommentsPerRequest {
-			remaining = append(remaining, c)
-			continue
+		if c.Result.InDiffContext {
+			// Only posts maxCommentsPerRequest comments per 1 request to avoid spammy
+			// review comments. An example GitHub error if we don't limit the # of
+			// review comments.
+			//
+			// > 403 You have triggered an abuse detection mechanism and have been
+			// > temporarily blocked from content creation. Please retry your request
+			// > again later.
+			// https://docs.github.com/en/rest/overview/resources-in-the-rest-api?apiVersion=2022-11-28#rate-limiting
+			if len(reviewComments) >= maxCommentsPerRequest {
+				remaining = append(remaining, c)
+				continue
+			}
+			comment := buildDraftReviewComment(c, buildBody(c, repoBaseHTMLURL, rootPath, fprint, g.toolName))
+			reviewComments = append(reviewComments, comment)
+		} else {
+			if len(fileComments) >= maxFileComments {
+				remaining = append(remaining, c)
+				continue
+			}
+			comment := buildPullRequestFileComment(c, buildBody(c, repoBaseHTMLURL, rootPath, fprint, g.toolName), g.sha)
+			fileComments = append(fileComments, comment)
 		}
-		reviewComments = append(reviewComments, buildDraftReviewComment(c, body))
 	}
 	if err := g.logWriter.Flush(ctx); err != nil {
 		return err
 	}
 
-	if len(reviewComments) > 0 {
+	if len(reviewComments) > 0 || len(remaining) > 0 {
 		// send review comments to GitHub.
 		review := &github.PullRequestReviewRequest{
 			CommitID: &g.sha,
 			Event:    github.String("COMMENT"),
 			Comments: reviewComments,
-			Body:     github.String(g.remainingCommentsSummary(remaining)),
+			Body:     github.String(g.remainingCommentsSummary(remaining, repoBaseHTMLURL, rootPath)),
 		}
 		_, _, err := g.cli.PullRequests.CreateReview(ctx, g.owner, g.repo, g.pr, review)
 		if err != nil {
 			log.Printf("reviewdog: failed to post a review comment: %v", err)
+			// GitHub returns 403 or 404 if we don't have permission to post a review comment.
+			// fallback to log message in this case.
+			if isPermissionError(err) && cienv.IsInGitHubAction() {
+				goto FALLBACK
+			}
+			return err
+		}
+	}
+	for _, c := range fileComments {
+		if _, _, err := g.cli.PullRequests.CreateComment(ctx, g.owner, g.repo, g.pr, c); err != nil {
+			log.Printf("reviewdog: failed to post a pull request comment: %v", err)
 			// GitHub returns 403 or 404 if we don't have permission to post a review comment.
 			// fallback to log message in this case.
 			if isPermissionError(err) && cienv.IsInGitHubAction() {
@@ -257,12 +276,22 @@ func buildDraftReviewComment(c *reviewdog.Comment, body string) *github.DraftRev
 	return r
 }
 
+func buildPullRequestFileComment(c *reviewdog.Comment, body string, sha string) *github.PullRequestComment {
+	return &github.PullRequestComment{
+		Path:        github.String(c.Result.Diagnostic.GetLocation().GetPath()),
+		Side:        github.String("RIGHT"),
+		Body:        github.String(body),
+		CommitID:    github.String(sha),
+		SubjectType: github.String("file"),
+	}
+}
+
 // line represents end line if it's a multiline comment in GitHub, otherwise
 // it's start line.
 // Document: https://docs.github.com/en/rest/reference/pulls#create-a-review-comment-for-a-pull-request
 func githubCommentLine(c *reviewdog.Comment) int {
 	if !c.Result.InDiffContext {
-		return 0
+		return 1 // GitHub returns line==1 for FILE comment.
 	}
 	_, end := githubCommentLineRange(c)
 	return end
@@ -288,7 +317,7 @@ func githubCommentLineRange(c *reviewdog.Comment) (start int, end int) {
 	return int(startLine), int(endLine)
 }
 
-func (g *PullRequest) remainingCommentsSummary(remaining []*reviewdog.Comment) string {
+func (g *PullRequest) remainingCommentsSummary(remaining []*reviewdog.Comment, baseURL string, gitRootPath string) string {
 	if len(remaining) == 0 {
 		return ""
 	}
@@ -304,7 +333,14 @@ func (g *PullRequest) remainingCommentsSummary(remaining []*reviewdog.Comment) s
 		sb.WriteString(fmt.Sprintf("<summary>%s</summary>\n", tool))
 		sb.WriteString("\n")
 		for _, c := range comments {
-			sb.WriteString(githubutils.LinkedMarkdownDiagnostic(g.owner, g.repo, g.sha, c.Result.Diagnostic))
+			sb.WriteString("<hr>")
+			sb.WriteString("\n")
+			sb.WriteString("\n")
+			sb.WriteString(commentutil.MarkdownComment(c))
+			sb.WriteString("\n")
+			sb.WriteString("\n")
+			sb.WriteString(githubCodeSnippetURL(baseURL, gitRootPath, c.Result.Diagnostic.GetLocation()))
+			sb.WriteString("\n")
 			sb.WriteString("\n")
 		}
 		sb.WriteString("</details>\n")
@@ -325,15 +361,8 @@ func (g *PullRequest) setPostedComment(ctx context.Context) error {
 		if id := c.GetInReplyTo(); id != 0 {
 			g.prCommentWithReply[id] = true
 		}
-		if c.Line == nil || c.Path == nil || c.Body == nil || c.SubjectType == nil {
-			continue
-		}
-		var line int
-		if c.GetSubjectType() == "line" {
-			line = c.GetLine()
-		}
 		if meta := extractMetaComment(c.GetBody()); meta != nil {
-			g.postedcs.AddPostedComment(c.GetPath(), line, meta.GetFingerprint())
+			g.postedcs.AddPostedComment(c.GetPath(), c.GetLine(), meta.GetFingerprint())
 			if meta.SourceName == g.toolName {
 				g.outdatedComments[meta.GetFingerprint()] = c // Remove non-outdated comment later.
 			}
@@ -388,6 +417,14 @@ func (g *PullRequest) Strip() int {
 	return 1
 }
 
+func (g *PullRequest) repoBaseHTMLURL(ctx context.Context) (string, error) {
+	repo, _, err := g.cli.Repositories.Get(ctx, g.owner, g.repo)
+	if err != nil {
+		return "", fmt.Errorf("failed to build repo base HTML URL: %w", err)
+	}
+	return repo.GetHTMLURL() + "/blob/" + g.sha, nil
+}
+
 func (g *PullRequest) comment(ctx context.Context) ([]*github.PullRequestComment, error) {
 	// https://developer.github.com/v3/guides/traversing-with-pagination/
 	opts := &github.PullRequestListCommentsOptions{
@@ -424,25 +461,40 @@ func listAllPullRequestsComments(ctx context.Context, cli *github.Client,
 	return append(comments, restComments...), nil
 }
 
-func buildBody(c *reviewdog.Comment, baseRelatedLocURL string, gitRootPath string, fprint string, toolName string) string {
+func buildBody(c *reviewdog.Comment, baseURL string, gitRootPath string, fprint string, toolName string) string {
 	cbody := commentutil.MarkdownComment(c)
-	if suggestion := buildSuggestions(c); suggestion != "" {
-		cbody += "\n" + suggestion
+	if c.Result.InDiffContext {
+		if suggestion := buildSuggestions(c); suggestion != "" {
+			cbody += "\n" + suggestion
+		}
+	} else {
+		if c.Result.Diagnostic.GetLocation().GetRange().GetStart().GetLine() > 0 {
+			snippetURL := githubCodeSnippetURL(baseURL, gitRootPath, c.Result.Diagnostic.GetLocation())
+			cbody += "\n\n" + snippetURL
+		}
 	}
 	for _, relatedLoc := range c.Result.Diagnostic.GetRelatedLocations() {
 		loc := relatedLoc.GetLocation()
 		if loc.GetPath() == "" || loc.GetRange().GetStart().GetLine() == 0 {
 			continue
 		}
-		relPath := pathutil.NormalizePath(loc.GetPath(), gitRootPath, "")
-		relatedURL := fmt.Sprintf("%s/%s#L%d", baseRelatedLocURL, relPath, loc.GetRange().GetStart().GetLine())
-		if endLine := loc.GetRange().GetEnd().GetLine(); endLine > 0 {
-			relatedURL += fmt.Sprintf("-L%d", endLine)
-		}
-		cbody += "\n<hr>\n\n" + relatedLoc.GetMessage() + "\n" + relatedURL
+		snippetURL := githubCodeSnippetURL(baseURL, gitRootPath, loc)
+		cbody += "\n<hr>\n\n" + relatedLoc.GetMessage() + "\n" + snippetURL
 	}
 	cbody += fmt.Sprintf("\n<!-- __reviewdog__:%s -->\n", BuildMetaComment(fprint, toolName))
 	return cbody
+}
+
+func githubCodeSnippetURL(baseURL, gitRootPath string, loc *rdf.Location) string {
+	relPath := pathutil.NormalizePath(loc.GetPath(), gitRootPath, "")
+	relatedURL := fmt.Sprintf("%s/%s", baseURL, relPath)
+	if startLine := loc.GetRange().GetStart().GetLine(); startLine > 0 {
+		relatedURL += fmt.Sprintf("#L%d", startLine)
+	}
+	if endLine := loc.GetRange().GetEnd().GetLine(); endLine > 0 {
+		relatedURL += fmt.Sprintf("-L%d", endLine)
+	}
+	return relatedURL
 }
 
 func BuildMetaComment(fprint string, toolName string) string {

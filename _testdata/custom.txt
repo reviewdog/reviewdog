@@ -17,3 +17,5 @@ function f()
 }
 
 RelatedLoc
+
+new line

@@ -9,7 +9,7 @@ import (
 	"strings"
 	"testing"
 
-	"github.com/google/go-github/v60/github"
+	"github.com/google/go-github/v62/github"
 )
 
 const sampleDiff = `--- a/sample.old.txt	2016-10-13 05:09:35.820791185 +0900

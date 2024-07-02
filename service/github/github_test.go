@@ -12,10 +12,11 @@ import (
 	"strings"
 	"testing"
 
-	"github.com/google/go-github/v60/github"
+	"github.com/google/go-github/v62/github"
 	"github.com/kylelemons/godebug/pretty"
 	"golang.org/x/oauth2"
 
+	"github.com/google/go-cmp/cmp"
 	"github.com/reviewdog/reviewdog"
 	"github.com/reviewdog/reviewdog/filter"
 	"github.com/reviewdog/reviewdog/proto/rdf"
@@ -132,7 +133,8 @@ func TestGitHubPullRequest_Post_Flush_review_api(t *testing.T) {
 	defer setupEnvs()()
 
 	listCommentsAPICalled := 0
-	postCommentsAPICalled := 0
+	postReviewCommentAPICalled := 0
+	postPullRequestCommentAPICalled := 0
 	repoAPICalled := 0
 	delCommentsAPICalled := 0
 	mux := http.NewServeMux()
@@ -193,13 +195,13 @@ func TestGitHubPullRequest_Post_Flush_review_api(t *testing.T) {
 					{
 						Path:        github.String("reviewdog.go"),
 						Line:        github.Int(1),
-						Body:        github.String(commentutil.BodyPrefix + "existing file comment (no-line)"),
+						Body:        github.String(commentutil.BodyPrefix + "existing file comment (no-line)" + "\n<!-- __reviewdog__:ChA2ZDI2MGNmYjY3NTQ4YTgxEgl0b29sLW5hbWU= -->\n"),
 						SubjectType: github.String("file"),
 					},
 					{
 						Path:        github.String("reviewdog.go"),
 						Line:        github.Int(1),
-						Body:        github.String(commentutil.BodyPrefix + "existing file comment (outside diff-context)"),
+						Body:        github.String(commentutil.BodyPrefix + "existing file comment (outside diff-context)" + "\n<!-- __reviewdog__:ChAyMzFjY2Q1ZWRhMjRkM2ZhEgl0b29sLW5hbWU= -->\n"),
 						SubjectType: github.String("file"),
 					},
 				}
@@ -207,12 +209,43 @@ func TestGitHubPullRequest_Post_Flush_review_api(t *testing.T) {
 					t.Fatal(err)
 				}
 			}
+		case http.MethodPost:
+			postPullRequestCommentAPICalled++
+			var req github.PullRequestComment
+			if err := json.NewDecoder(r.Body).Decode(&req); err != nil {
+				t.Error(err)
+			}
+			expects := []github.PullRequestComment{
+				{
+					Body:        github.String("<sub>reported by [reviewdog](https://github.com/reviewdog/reviewdog) :dog:</sub><br>file comment (no-line)\n<!-- __reviewdog__:ChBkZDlkMDllNmM5MTllODU1Egl0b29sLW5hbWU= -->\n"),
+					Path:        github.String("reviewdog.go"),
+					Side:        github.String("RIGHT"),
+					CommitID:    github.String("sha"),
+					SubjectType: github.String("file"),
+				},
+				{
+					Body: github.String(`<sub>reported by [reviewdog](https://github.com/reviewdog/reviewdog) :dog:</sub><br>file comment (outside diff-context)
+
+https://test/repo/path/blob/sha/reviewdog.go#L18
+<!-- __reviewdog__:ChA5Mzc1OWY5ZTRmMmI5NThhEgl0b29sLW5hbWU= -->
+`),
+					Path:        github.String("reviewdog.go"),
+					Side:        github.String("RIGHT"),
+					CommitID:    github.String("sha"),
+					SubjectType: github.String("file"),
+				},
+				{},
+			}
+			want := expects[postPullRequestCommentAPICalled-1]
+			if diff := cmp.Diff(req, want); diff != "" {
+				t.Errorf("result has diff (API call: %d):\n%s", postPullRequestCommentAPICalled, diff)
+			}
 		default:
 			t.Errorf("unexpected access: %v %v", r.Method, r.URL)
 		}
 	})
 	mux.HandleFunc("/repos/o/r/pulls/14/reviews", func(w http.ResponseWriter, r *http.Request) {
-		postCommentsAPICalled++
+		postReviewCommentAPICalled++
 		if r.Method != http.MethodPost {
 			t.Errorf("unexpected access: %v %v", r.Method, r.URL)
 		}
@@ -1253,8 +1286,11 @@ func TestGitHubPullRequest_Post_Flush_review_api(t *testing.T) {
 	if listCommentsAPICalled != 2 {
 		t.Errorf("GitHub List PullRequest comments API called %v times, want 2 times", listCommentsAPICalled)
 	}
-	if postCommentsAPICalled != 1 {
-		t.Errorf("GitHub post PullRequest comments API called %v times, want 1 times", postCommentsAPICalled)
+	if postReviewCommentAPICalled != 1 {
+		t.Errorf("GitHub post Review comments API called %v times, want 1 times", postReviewCommentAPICalled)
+	}
+	if postPullRequestCommentAPICalled != 2 {
+		t.Errorf("GitHub post PullRequest comments API called %v times, want 2 times", postPullRequestCommentAPICalled)
 	}
 	if repoAPICalled != 1 {
 		t.Errorf("GitHub Repository API called %v times, want 1 times", repoAPICalled)
@@ -1288,6 +1324,13 @@ func TestGitHubPullRequest_Post_toomany(t *testing.T) {
 		}
 		if req.GetBody() == "" {
 			t.Errorf("PullRequestReviewRequest.Body is empty but want some summary text")
+		}
+	})
+	mux.HandleFunc("/repos/o/r", func(w http.ResponseWriter, r *http.Request) {
+		if err := json.NewEncoder(w).Encode(&github.Repository{
+			HTMLURL: github.String("https://test/repo/path"),
+		}); err != nil {
+			t.Fatal(err)
 		}
 	})
 	ts := httptest.NewServer(mux)
@@ -1391,6 +1434,13 @@ func TestGitHubPullRequest_Post_NoPermission(t *testing.T) {
 	mux.HandleFunc("/repos/o/r/pulls/14/reviews", func(w http.ResponseWriter, r *http.Request) {
 		postCommentsAPICalled++
 		w.WriteHeader(http.StatusNotFound)
+	})
+	mux.HandleFunc("/repos/o/r", func(w http.ResponseWriter, r *http.Request) {
+		if err := json.NewEncoder(w).Encode(&github.Repository{
+			HTMLURL: github.String("https://test/repo/path"),
+		}); err != nil {
+			t.Fatal(err)
+		}
 	})
 	ts := httptest.NewServer(mux)
 	defer ts.Close()
