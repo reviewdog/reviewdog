@@ -236,6 +236,7 @@ jobs:
   reviewdog-sarif:
     permissions:
       contents: read
+      actions: read
     name: reviewdog (sarif)
     runs-on: ubuntu-latest
     steps:
