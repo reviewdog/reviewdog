@@ -259,3 +259,126 @@ func TestRDJSONCommentWriter_Post(t *testing.T) {
 		t.Errorf("got\n%v\nwant:\n%v", got, want)
 	}
 }
+
+func TestSARIFCommentWriter_Post(t *testing.T) {
+	comments := []*Comment{
+		{
+			Result: &filter.FilteredDiagnostic{
+				Diagnostic: &rdf.Diagnostic{
+					Location: &rdf.Location{Path: "/path/to/file"},
+					Message:  "message",
+				},
+			},
+			ToolName: "tool name",
+		},
+		{
+			Result: &filter.FilteredDiagnostic{
+				Diagnostic: &rdf.Diagnostic{
+					Location: &rdf.Location{
+						Path: "/path/to/file",
+						Range: &rdf.Range{Start: &rdf.Position{
+							Column: 14,
+						}},
+					},
+					Message: "message",
+				},
+			},
+		},
+		{
+			Result: &filter.FilteredDiagnostic{
+				Diagnostic: &rdf.Diagnostic{
+					Location: &rdf.Location{
+						Path: "/path/to/file",
+						Range: &rdf.Range{Start: &rdf.Position{
+							Column: 14,
+						}},
+					},
+					Message: "message",
+					Source: &rdf.Source{
+						Name: "tool name in Diagnostic",
+						Url:  "tool url",
+					},
+				},
+			},
+		},
+	}
+	buf := new(bytes.Buffer)
+	cw := NewSARIFCommentWriter(buf, "tool name [constructor]")
+	for _, c := range comments {
+		if err := cw.Post(context.Background(), c); err != nil {
+			t.Error(err)
+		}
+	}
+	if err := cw.Flush(context.Background()); err != nil {
+		t.Error(err)
+	}
+	want := `
+{
+  "$schema": "https://docs.oasis-open.org/sarif/sarif/v2.1.0/errata01/os/schemas/sarif-schema-2.1.0.json",
+  "runs": [
+    {
+      "results": [
+        {
+          "locations": [
+            {
+              "physicalLocation": {
+                "artifactLocation": {
+                  "uri": "/path/to/file"
+                },
+                "region": {}
+              }
+            }
+          ],
+          "message": {
+            "text": "message"
+          }
+        },
+        {
+          "locations": [
+            {
+              "physicalLocation": {
+                "artifactLocation": {
+                  "uri": "/path/to/file"
+                },
+                "region": {
+                  "startColumn": 14
+                }
+              }
+            }
+          ],
+          "message": {
+            "text": "message"
+          }
+        },
+        {
+          "locations": [
+            {
+              "physicalLocation": {
+                "artifactLocation": {
+                  "uri": "/path/to/file"
+                },
+                "region": {
+                  "startColumn": 14
+                }
+              }
+            }
+          ],
+          "message": {
+            "text": "message"
+          }
+        }
+      ],
+      "tool": {
+        "driver": {
+          "name": "tool name [constructor]"
+        }
+      }
+    }
+  ],
+  "version": "2.1.0"
+}`
+	got := strings.TrimSpace(buf.String())
+	if got != strings.TrimSpace(want) {
+		t.Errorf("got\n%v\nwant:\n%v", got, want)
+	}
+}

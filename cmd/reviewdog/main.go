@@ -100,6 +100,9 @@ const (
 	"rdjsonl"
 		Report results to stdout in rdjsonl format.
 
+	"sarif"
+		Report results to stdout in SARIF format.
+
 	"github-check"
 		Report results to GitHub Check. It works both for Pull Requests and commits.
 		For Pull Request, you can see report results in GitHub PullRequest Check
@@ -452,6 +455,13 @@ func run(r io.Reader, w io.Writer, opt *option) error {
 		}
 		ds = d
 		cs = reviewdog.NewRDJSONLCommentWriter(w)
+	case "sarif":
+		d, err := localDiffService(opt)
+		if err != nil {
+			return err
+		}
+		ds = d
+		cs = reviewdog.NewSARIFCommentWriter(w, toolName(opt))
 	}
 
 	if isProject {
