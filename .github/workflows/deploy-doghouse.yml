@@ -30,11 +30,13 @@ jobs:
         working-directory: ./doghouse/appengine/
     steps:
       - uses: actions/checkout@v4
+      - id: auth
+        uses: google-github-actions/auth@v2
+        with:
+          credentials_json: ${{ secrets.GCP_SA_KEY }}
       - uses: google-github-actions/setup-gcloud@v2.1.0
         with:
           project_id: review-dog
-          service_account_key: ${{ secrets.GCP_SA_KEY }}
-          export_default_credentials: true
       - name: Decrypt keys
         env:
           GAE_KEYRING_NAME: reviewdog-doghouse-deploy
