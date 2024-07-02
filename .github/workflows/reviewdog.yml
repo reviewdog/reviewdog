@@ -237,6 +237,7 @@ jobs:
     permissions:
       contents: read
       actions: read
+      security-events: write
     name: reviewdog (sarif)
     runs-on: ubuntu-latest
     steps:
