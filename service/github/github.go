@@ -204,7 +204,7 @@ func (g *PullRequest) postAsReviewComment(ctx context.Context) error {
 			CommitID: &g.sha,
 			Event:    github.String("COMMENT"),
 			Comments: reviewComments,
-			Body:     github.String(g.remainingCommentsSummary(remaining)),
+			Body:     github.String(g.remainingCommentsSummary(remaining, repoBaseHTMLURL, rootPath)),
 		}
 		_, _, err := g.cli.PullRequests.CreateReview(ctx, g.owner, g.repo, g.pr, review)
 		if err != nil {
@@ -317,7 +317,7 @@ func githubCommentLineRange(c *reviewdog.Comment) (start int, end int) {
 	return int(startLine), int(endLine)
 }
 
-func (g *PullRequest) remainingCommentsSummary(remaining []*reviewdog.Comment) string {
+func (g *PullRequest) remainingCommentsSummary(remaining []*reviewdog.Comment, baseURL string, gitRootPath string) string {
 	if len(remaining) == 0 {
 		return ""
 	}
@@ -333,7 +333,14 @@ func (g *PullRequest) remainingCommentsSummary(remaining []*reviewdog.Comment) s
 		sb.WriteString(fmt.Sprintf("<summary>%s</summary>\n", tool))
 		sb.WriteString("\n")
 		for _, c := range comments {
-			sb.WriteString(githubutils.LinkedMarkdownDiagnostic(g.owner, g.repo, g.sha, c.Result.Diagnostic))
+			sb.WriteString("<hr>")
+			sb.WriteString("\n")
+			sb.WriteString("\n")
+			sb.WriteString(commentutil.MarkdownComment(c))
+			sb.WriteString("\n")
+			sb.WriteString("\n")
+			sb.WriteString(githubCodeSnippetURL(baseURL, gitRootPath, c.Result.Diagnostic.GetLocation()))
+			sb.WriteString("\n")
 			sb.WriteString("\n")
 		}
 		sb.WriteString("</details>\n")
