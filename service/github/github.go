@@ -291,7 +291,7 @@ func buildPullRequestFileComment(c *reviewdog.Comment, body string, sha string) 
 // Document: https://docs.github.com/en/rest/reference/pulls#create-a-review-comment-for-a-pull-request
 func githubCommentLine(c *reviewdog.Comment) int {
 	if !c.Result.InDiffContext {
-		return 0
+		return 1 // GitHub returns line==1 for FILE comment.
 	}
 	_, end := githubCommentLineRange(c)
 	return end
