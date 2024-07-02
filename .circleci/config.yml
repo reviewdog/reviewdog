@@ -1,10 +1,14 @@
-version: 2
+version: 2.1
+
+executors:
+  golang-executor:
+    docker:
+      - image: circleci/golang:1.17
 
 jobs:
   lint:
     working_directory: ~/reviewdog
-    docker:
-      - image: circleci/golang:1.17
+    executor: golang-executor
     steps:
       - checkout
       - run:
