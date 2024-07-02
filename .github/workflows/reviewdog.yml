@@ -231,7 +231,7 @@ jobs:
           REVIEWDOG_GITHUB_API_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         run: |
           cat ./_testdata/custom_rdjson.json | \
-            reviewdog -name="custom-rdjson" -f=rdjson -reporter=github-pr-annotations -filter-mode=file
+            reviewdog -name="custom-rdjson" -f=rdjson -reporter=github-pr-annotations
 
   reviewdog-sarif:
     permissions:
