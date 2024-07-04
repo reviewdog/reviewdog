@@ -13,7 +13,7 @@ jobs:
       - uses: haya14busa/action-depup/with-pr@v1
         id: depup
         with:
-          file: proto/rdf/Dockerfile
+          file: proto/Dockerfile
           version_name: PROTOC_VERSION
           repo: protocolbuffers/protobuf
 
@@ -24,7 +24,7 @@ jobs:
       - uses: haya14busa/action-depup/with-pr@v1
         id: depup
         with:
-          file: proto/rdf/Dockerfile
+          file: proto/Dockerfile
           version_name: PROTOC_GEN_GO_VERSION
           repo: protocolbuffers/protobuf-go
 
@@ -35,6 +35,6 @@ jobs:
       - uses: haya14busa/action-depup/with-pr@v1
         id: depup
         with:
-          file: proto/rdf/Dockerfile
+          file: proto/Dockerfile
           version_name: PROTOC_GEN_JSONSCHEMA_VERSION
           repo: chrusty/protoc-gen-jsonschema
