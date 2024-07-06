@@ -9,6 +9,17 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ### :sparkles: Release Note <!-- optional -->
 
 ### :rocket: Enhancements
+- ...
+
+### :bug: Fixes
+- ...
+
+### :rotating_light: Breaking changes
+- ...
+
+## [v0.19.0] - 2024-07-07
+
+### :rocket: Enhancements
 - [#1804](https://github.com/reviewdog/reviewdog/pull/1804) Support deleting
   outdated comments in github-pr-review reporter. Note that it won't delete
   comments if there is a reply considering there can be a meaningful
@@ -23,12 +34,6 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
   GitHub and see code scanning alerts.
 - [#1809](https://github.com/reviewdog/reviewdog/pull/1809) Support posting
   comments outside diff context as a file comment in github-pr-review reporter
-
-### :bug: Fixes
-- ...
-
-### :rotating_light: Breaking changes
-- ...
 
 ## [v0.18.1] - 2024-06-22
 
@@ -250,4 +255,5 @@ See https://github.com/reviewdog/reviewdog/releases for older release note.
 [v0.17.5]: https://github.com/reviewdog/reviewdog/compare/v0.17.4...v0.17.5
 [v0.18.0]: https://github.com/reviewdog/reviewdog/compare/v0.17.5...v0.18.0
 [v0.18.1]: https://github.com/reviewdog/reviewdog/compare/v0.18.0...v0.18.1
+[v0.19.0]: https://github.com/reviewdog/reviewdog/compare/v0.18.1...v0.19.0
 [@haya14busa]: https://github.com/haya14busa
