@@ -6,7 +6,7 @@ import (
 	"net/http"
 
 	"github.com/bradleyfalzon/ghinstallation/v2"
-	"github.com/google/go-github/v60/github"
+	"github.com/google/go-github/v62/github"
 )
 
 type NewGitHubClientOption struct {

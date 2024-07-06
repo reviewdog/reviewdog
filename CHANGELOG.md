@@ -21,7 +21,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - [#1807](https://github.com/reviewdog/reviewdog/pull/1807) Add -reporter=sarif
   which outputs SARIF format to stdout. You can upload the output SARIF to
   GitHub and see code scanning alerts.
-
+- [#1809](https://github.com/reviewdog/reviewdog/pull/1809) Support posting
+  comments outside diff context as a file comment in github-pr-review reporter
 
 ### :bug: Fixes
 - ...
