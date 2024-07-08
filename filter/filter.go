@@ -69,6 +69,9 @@ func FilterCheck(results []*rdf.Diagnostic, diff []*diff.FileDiff, strip int,
 			inDiffContext := true
 			start := int(s.GetRange().GetStart().GetLine())
 			end := int(s.GetRange().GetEnd().GetLine())
+			if end == 0 {
+				end = start
+			}
 			for l := start; l <= end; l++ {
 				if diffline := df.DiffLine(loc.GetPath(), l); diffline != nil {
 					check.SourceLines[l] = diffline.Content
