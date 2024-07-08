@@ -8,3 +8,4 @@
 {"message":"suggestion test (remove line)","location":{"path":"_testdata/suggestions.txt","range":{"start":{"line":13}}}, "suggestions": [{"range":{"start":{"line":13}}, "text": ""}]}
 {"message":"suggestion test (insert line)","location":{"path":"_testdata/suggestions.txt","range":{"start":{"line":16,"column":1},"end":{"line":16,"column":1}}}, "suggestions": [{"range":{"start":{"line":16,"column":1},"end":{"line":16,"column":1}}, "text": "inserted line 1\ninserted line 2\n"}]}
 {"message":"suggestion test (invalid)","location":{"path":"_testdata/suggestions.txt","range":{"start":{"line":16}}}, "suggestions": [{"range":{"start":{"line":17}}, "text": "invalid"}]}
+{"message":"suggestion test (insert blank line)","location":{"path":"_testdata/suggestions.txt","range":{"start":{"line":16,"column":1},"end":{"line":16,"column":1}}}, "suggestions": [{"range":{"start":{"line":16,"column":1},"end":{"line":16,"column":1}}, "text": "\n"}]}

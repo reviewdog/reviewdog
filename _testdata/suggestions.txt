@@ -13,4 +13,4 @@ haya14busa (remove)
 remove line
 
 insert line ↓
-insert line ↑
+insert line ↑!
