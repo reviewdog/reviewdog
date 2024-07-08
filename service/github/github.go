@@ -537,7 +537,7 @@ func buildSingleSuggestion(c *reviewdog.Comment, s *rdf.Suggestion) (string, err
 	isBlankLineInsertion := startLine == endLine &&
 		start.GetColumn() == 1 && end.GetColumn() == 1 &&
 		s.GetText() == "\n"
-	if isBlankLineInsertion {
+	if isBlankLineInsertion && false {
 		return buildBlankLineInsertion(c, s)
 	}
 	if start.GetColumn() > 0 || end.GetColumn() > 0 {
