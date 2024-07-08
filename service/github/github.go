@@ -464,7 +464,7 @@ func listAllPullRequestsComments(ctx context.Context, cli *github.Client,
 func buildBody(c *reviewdog.Comment, baseURL string, gitRootPath string, fprint string, toolName string) string {
 	cbody := commentutil.MarkdownComment(c)
 	if c.Result.InDiffContext {
-		if suggestion := buildSuggestions(c); suggestion != "" {
+		if suggestion := buildSuggestions(c); suggestion != "" && c.Result.FirstSuggestionInDiffContext {
 			cbody += "\n" + suggestion
 		}
 	} else {
