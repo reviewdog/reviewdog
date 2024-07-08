@@ -168,6 +168,8 @@ jobs:
           TMPFILE=$(mktemp)
           git diff >"${TMPFILE}"
           git stash -u && git stash drop
+          cat "${TMPFILE}"
+          echo 'Running reviewdog ...'
           reviewdog \
             -name="prettier" \
             -f=diff \
