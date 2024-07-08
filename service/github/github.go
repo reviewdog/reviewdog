@@ -534,6 +534,12 @@ func buildSingleSuggestion(c *reviewdog.Comment, s *rdf.Suggestion) (string, err
 		return "", fmt.Errorf("GitHub comment range and suggestion line range must be same. L%d-L%d v.s. L%d-L%d",
 			gStart, gEnd, startLine, endLine)
 	}
+	isBlankLineInsertion := startLine == endLine &&
+		start.GetColumn() == 1 && end.GetColumn() == 1 &&
+		s.GetText() == "\n"
+	if isBlankLineInsertion {
+		return buildBlankLineInsertion(c, s)
+	}
 	if start.GetColumn() > 0 || end.GetColumn() > 0 {
 		return buildNonLineBasedSuggestion(c, s)
 	}
@@ -549,6 +555,30 @@ func buildSingleSuggestion(c *reviewdog.Comment, s *rdf.Suggestion) (string, err
 		sb.WriteString(txt)
 		sb.WriteString("\n")
 	}
+	commentutil.WriteCodeFence(&sb, backticks)
+	return sb.String(), nil
+}
+
+func buildBlankLineInsertion(c *reviewdog.Comment, s *rdf.Suggestion) (string, error) {
+	sourceLines := c.Result.SourceLines
+	if len(sourceLines) == 0 {
+		return "", errors.New("source lines are not available")
+	}
+	start := s.GetRange().GetStart()
+	startLineContent, err := getSourceLine(sourceLines, int(start.GetLine()))
+	if err != nil {
+		return "", err
+	}
+	txt := s.GetText()
+	backticks := commentutil.GetCodeFenceLength(txt)
+	var sb strings.Builder
+	sb.Grow(backticks + len("suggestion\n") + len(txt) + len(startLineContent) + len("\n") + backticks)
+
+	commentutil.WriteCodeFence(&sb, backticks)
+	sb.WriteString("suggestion\n")
+	sb.WriteString(txt)
+	sb.WriteString(startLineContent)
+	sb.WriteString("\n")
 	commentutil.WriteCodeFence(&sb, backticks)
 	return sb.String(), nil
 }
