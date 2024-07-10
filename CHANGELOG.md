@@ -12,7 +12,9 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - ...
 
 ### :bug: Fixes
-- ...
+- [#1835](https://github.com/reviewdog/reviewdog/pull/1835) Fix -filter-mode
+  didn't work with github-[pr-]check reporter for graceful degradation cases.
+  i.e. GitHub token doesn't have write permission (e.g. PR from forked repo).
 
 ### :rotating_light: Breaking changes
 - ...
