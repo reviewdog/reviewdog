@@ -46,7 +46,7 @@ func run() error {
 	}
 	var wholeErr error
 	for _, repo := range repos {
-		if !strings.HasPrefix(repo.GetName(), "action-") || repo.GetName() == "action-eclint" {
+		if repo.GetArchived() || !strings.HasPrefix(repo.GetName(), "action-") {
 			continue
 		}
 		log.Printf("Dispatch depup to %s/%s...", *targetOrg, repo.GetName())
