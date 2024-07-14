@@ -93,6 +93,9 @@ func (ch *Check) Flush(ctx context.Context) error {
 		if err, ok := err.(*github.ErrorResponse); ok && err.Response.StatusCode == http.StatusForbidden && cienv.IsInGitHubAction() {
 			logWriter := githubutils.NewGitHubActionLogWriter(ch.Level)
 			for _, c := range ch.postComments {
+				if !c.Result.ShouldReport {
+					continue
+				}
 				if err := logWriter.Post(ctx, c); err != nil {
 					return err
 				}
