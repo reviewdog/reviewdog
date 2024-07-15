@@ -41,7 +41,6 @@ func FilterCheck(results []*rdf.Diagnostic, diff []*diff.FileDiff, strip int,
 	for _, result := range results {
 		check := &FilteredDiagnostic{Diagnostic: result, SourceLines: make(map[int]string)}
 		loc := result.GetLocation()
-		loc.Path = pathutil.NormalizePath(loc.GetPath(), cwd, "")
 		startLine := int(loc.GetRange().GetStart().GetLine())
 		endLine := int(loc.GetRange().GetEnd().GetLine())
 		if endLine == 0 {
