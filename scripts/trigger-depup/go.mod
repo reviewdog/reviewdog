@@ -4,7 +4,6 @@ go 1.21
 
 require (
 	github.com/google/go-github/v63 v63.0.0
-	github.com/google/go-github/v63 v63.0.0
 	golang.org/x/oauth2 v0.21.0
 )
 

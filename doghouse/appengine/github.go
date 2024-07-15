@@ -12,7 +12,7 @@ import (
 	"net/url"
 	"strings"
 
-	"github.com/google/go-github/v62/github"
+	"github.com/google/go-github/v63/github"
 	"github.com/justinas/nosurf"
 	"github.com/vvakame/sdlog/aelog"
 	"golang.org/x/oauth2"
