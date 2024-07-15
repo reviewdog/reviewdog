@@ -10,7 +10,7 @@ import (
 // datastoreClient constructs a *datastore.Client using runtime introspection
 // to target the current project's datastore.
 func datastoreClient(ctx context.Context) (*datastore.Client, error) {
-	id, err := metadata.ProjectID()
+	id, err := metadata.ProjectIDWithContext(ctx)
 	if err != nil {
 		return nil, err
 	}
