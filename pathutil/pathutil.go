@@ -3,6 +3,8 @@ package pathutil
 import (
 	"path/filepath"
 	"strings"
+
+	"github.com/reviewdog/reviewdog/proto/rdf"
 )
 
 // NormalizePath return normalized path with workdir and relative path to
@@ -40,6 +42,22 @@ func NormalizeDiffPath(diffpath string, strip int) string {
 		}
 	}
 	return filepath.ToSlash(filepath.Clean(path))
+}
+
+// NormalizePathInResults normalize file path in RDFormat results.
+func NormalizePathInResults(results []*rdf.Diagnostic, cwd string) {
+	for _, result := range results {
+		normalizeLocation(result.GetLocation(), cwd)
+		for _, rel := range result.GetRelatedLocations() {
+			normalizeLocation(rel.GetLocation(), cwd)
+		}
+	}
+}
+
+func normalizeLocation(loc *rdf.Location, cwd string) {
+	if loc != nil {
+		loc.Path = NormalizePath(loc.GetPath(), cwd, "")
+	}
 }
 
 func contains(path, base string) bool {
