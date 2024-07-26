@@ -1037,7 +1037,12 @@ func failLevel(opt *option) reviewdog.FailLevel {
 	if opt.failOnError {
 		slog.Warn("reviewdog: -fail-on-error is deprecated. Use -fail-level=any, or -fail-level=error for github-[pr-]check reporter instead.")
 		if opt.failLevel == reviewdog.FailLevelDefault {
-			return reviewdog.FailLevelAny
+			switch opt.reporter {
+			default:
+				return reviewdog.FailLevelAny
+			case "github-check", "github-pr-check":
+				return reviewdog.FailLevelError
+			}
 		}
 	}
 	return opt.failLevel
