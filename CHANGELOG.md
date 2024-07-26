@@ -12,7 +12,9 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - ...
 
 ### :bug: Fixes
-- ...
+- [#1846](https://github.com/reviewdog/reviewdog/issues/1846) Unexpected error
+  exit code when using `-reporter=github-[pr-]check` with
+  `-fail-on-error=true`. See the below breaking changes section for more details.
 
 ### :rotating_light: (Actually No) Breaking changes
 - [#1854](https://github.com/reviewdog/reviewdog/pull/1854) `-fail-on-error`
