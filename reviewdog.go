@@ -33,7 +33,7 @@ func NewReviewdog(toolname string, p parser.Parser, c CommentService, d DiffServ
 // RunFromResult creates a new Reviewdog and runs it with check results.
 func RunFromResult(ctx context.Context, c CommentService, results []*rdf.Diagnostic,
 	filediffs []*diff.FileDiff, strip int, toolname string, filterMode filter.Mode, failLevel FailLevel) error {
-	return (&Reviewdog{c: c, toolname: toolname, filterMode: filterMode, failLevel: failLevel}).runFromResult(ctx, results, filediffs, strip, failLevel)
+	return (&Reviewdog{c: c, toolname: toolname, filterMode: filterMode, failLevel: failLevel}).runFromResult(ctx, results, filediffs, strip)
 }
 
 // Comment represents a reported result as a comment.
@@ -67,7 +67,7 @@ type DiffService interface {
 }
 
 func (w *Reviewdog) runFromResult(ctx context.Context, results []*rdf.Diagnostic,
-	filediffs []*diff.FileDiff, strip int, failLevel FailLevel) error {
+	filediffs []*diff.FileDiff, strip int) error {
 	wd, err := os.Getwd()
 	if err != nil {
 		return err
@@ -93,7 +93,7 @@ func (w *Reviewdog) runFromResult(ctx context.Context, results []*rdf.Diagnostic
 			if err := w.c.Post(ctx, comment); err != nil {
 				return err
 			}
-			shouldFail = shouldFail || failLevel.ShouldFail(check.Diagnostic.GetSeverity())
+			shouldFail = shouldFail || w.failLevel.ShouldFail(check.Diagnostic.GetSeverity())
 		}
 	}
 
@@ -104,7 +104,7 @@ func (w *Reviewdog) runFromResult(ctx context.Context, results []*rdf.Diagnostic
 	}
 
 	if shouldFail {
-		return fmt.Errorf("found at least one issue with severity greater than or equal to the given level: %s", failLevel.String())
+		return fmt.Errorf("found at least one issue with severity greater than or equal to the given level: %s", w.failLevel.String())
 	}
 
 	return nil
@@ -127,5 +127,5 @@ func (w *Reviewdog) Run(ctx context.Context, r io.Reader) error {
 		return fmt.Errorf("fail to parse diff: %w", err)
 	}
 
-	return w.runFromResult(ctx, results, filediffs, w.d.Strip(), w.failLevel)
+	return w.runFromResult(ctx, results, filediffs, w.d.Strip())
 }
