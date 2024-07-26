@@ -13,10 +13,15 @@ const (
 	// FailLevelDefault represents default mode, which means users doesn't specify
 	// fail-level. Basically, it's same as FailLevelNone.
 	FailLevelDefault FailLevel = iota
+	// FailLevelNone - Do not fail.
 	FailLevelNone
+	// FailLevelAny - Fail with any severity.
 	FailLevelAny
+	// FailLevelInfo - Fail with info or above severity.
 	FailLevelInfo
+	// FailLevelWarning - Fail with warning or above severity.
 	FailLevelWarning
+	// FailLevelError - Fail with error or above severity.
 	FailLevelError
 )
 
