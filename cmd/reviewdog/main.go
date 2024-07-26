@@ -1035,7 +1035,7 @@ func localDiffService(opt *option) (reviewdog.DiffService, error) {
 
 func failLevel(opt *option) reviewdog.FailLevel {
 	if opt.failOnError {
-		slog.Warn("reviewdog: -fail-on-error is deprecated. Use -fail-level=any, or -fail-level=error for github-[pr-]check reporter instead.")
+		slog.Warn("reviewdog: -fail-on-error is deprecated. Use -fail-level=any, or -fail-level=error for github-[pr-]check reporter instead. See also https://github.com/reviewdog/reviewdog/blob/master/CHANGELOG.md")
 		if opt.failLevel == reviewdog.FailLevelDefault {
 			switch opt.reporter {
 			default:
