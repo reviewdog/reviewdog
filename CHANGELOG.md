@@ -14,8 +14,18 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ### :bug: Fixes
 - ...
 
-### :rotating_light: Breaking changes
-- ...
+### :rotating_light: (Actually No) Breaking changes
+- [#1854](https://github.com/reviewdog/reviewdog/pull/1854) `-fail-on-error`
+  flag is deprecated. Use `-fail-level=[none,any,error,warning,info]` flag
+  instead. You can reproduce the same behavior with `-fail-level=any` for most
+  reporters (reviewdog will exit with 1 if it find any severity level).
+  As for `github-[pr-]check` reporter you can reproduce the same behavior with
+  `-fail-level=error` ([#1846](https://github.com/reviewdog/reviewdog/issues/1846)).
+
+  `-fail-on-error` is just deprecated and it's not removed yet. Please update
+  the flag while it's working.
+
+<!-- TODO: update the v0.19.0 release section -->
 
 ## [v0.20.1] - 2024-07-10
 
@@ -46,6 +56,15 @@ We left both versions as-is so that it won't break existing clients who already 
   GitHub and see code scanning alerts.
 - [#1809](https://github.com/reviewdog/reviewdog/pull/1809) Support posting
   comments outside diff context as a file comment in github-pr-review reporter
+
+### :rotating_light: Breaking changes
+- [#1846](https://github.com/reviewdog/reviewdog/issues/1846) the behavior of
+  `-fail-on-error` changed with `-github-[pr-]check`. Previously, reviewdog
+  didn't exit with 1 if it find issues with warning and info level. Now
+  reviewdog will exit with 1 with any level.
+  <!-- TODO: replace upcoming release with next released version -->
+  The previous behavior can be restored with `-fail-level=error` flag with the
+  upcoming release.
 
 ## [v0.18.1] - 2024-06-22
 
