@@ -17,23 +17,23 @@ import (
 // or linter, get diff and filter the results by diff, and report filtered
 // results.
 type Reviewdog struct {
-	toolname    string
-	p           parser.Parser
-	c           CommentService
-	d           DiffService
-	filterMode  filter.Mode
-	failOnError bool
+	toolname   string
+	p          parser.Parser
+	c          CommentService
+	d          DiffService
+	filterMode filter.Mode
+	failLevel  FailLevel
 }
 
 // NewReviewdog returns a new Reviewdog.
-func NewReviewdog(toolname string, p parser.Parser, c CommentService, d DiffService, filterMode filter.Mode, failOnError bool) *Reviewdog {
-	return &Reviewdog{p: p, c: c, d: d, toolname: toolname, filterMode: filterMode, failOnError: failOnError}
+func NewReviewdog(toolname string, p parser.Parser, c CommentService, d DiffService, filterMode filter.Mode, failLevel FailLevel) *Reviewdog {
+	return &Reviewdog{p: p, c: c, d: d, toolname: toolname, filterMode: filterMode, failLevel: failLevel}
 }
 
 // RunFromResult creates a new Reviewdog and runs it with check results.
 func RunFromResult(ctx context.Context, c CommentService, results []*rdf.Diagnostic,
-	filediffs []*diff.FileDiff, strip int, toolname string, filterMode filter.Mode, failOnError bool) error {
-	return (&Reviewdog{c: c, toolname: toolname, filterMode: filterMode, failOnError: failOnError}).runFromResult(ctx, results, filediffs, strip, failOnError)
+	filediffs []*diff.FileDiff, strip int, toolname string, filterMode filter.Mode, failLevel FailLevel) error {
+	return (&Reviewdog{c: c, toolname: toolname, filterMode: filterMode, failLevel: failLevel}).runFromResult(ctx, results, filediffs, strip, failLevel)
 }
 
 // Comment represents a reported result as a comment.
@@ -67,14 +67,14 @@ type DiffService interface {
 }
 
 func (w *Reviewdog) runFromResult(ctx context.Context, results []*rdf.Diagnostic,
-	filediffs []*diff.FileDiff, strip int, failOnError bool) error {
+	filediffs []*diff.FileDiff, strip int, failLevel FailLevel) error {
 	wd, err := os.Getwd()
 	if err != nil {
 		return err
 	}
 
 	checks := filter.FilterCheck(results, filediffs, strip, wd, w.filterMode)
-	hasViolations := false
+	shouldFail := false
 
 	for _, check := range checks {
 		comment := &Comment{
@@ -93,7 +93,7 @@ func (w *Reviewdog) runFromResult(ctx context.Context, results []*rdf.Diagnostic
 			if err := w.c.Post(ctx, comment); err != nil {
 				return err
 			}
-			hasViolations = true
+			shouldFail = shouldFail || failLevel.ShouldFail(check.Diagnostic.GetSeverity())
 		}
 	}
 
@@ -103,8 +103,8 @@ func (w *Reviewdog) runFromResult(ctx context.Context, results []*rdf.Diagnostic
 		}
 	}
 
-	if failOnError && hasViolations {
-		return fmt.Errorf("input data has violations")
+	if shouldFail {
+		return fmt.Errorf("found at least one issue with severity greater than or equal to the given level: %s", failLevel.String())
 	}
 
 	return nil
@@ -127,5 +127,5 @@ func (w *Reviewdog) Run(ctx context.Context, r io.Reader) error {
 		return fmt.Errorf("fail to parse diff: %w", err)
 	}
 
-	return w.runFromResult(ctx, results, filediffs, w.d.Strip(), w.failOnError)
+	return w.runFromResult(ctx, results, filediffs, w.d.Strip(), w.failLevel)
 }
