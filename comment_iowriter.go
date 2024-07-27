@@ -79,6 +79,8 @@ func (cw *RDJSONLCommentWriter) Post(_ context.Context, c *Comment) error {
 			Name: c.ToolName,
 		}
 	}
+	// Remove OriginalOutput. It's used internally and we shouldn't expose it as output.
+	c.Result.Diagnostic.OriginalOutput = ""
 	b, err := protojson.MarshalOptions{
 		UseProtoNames:     true,
 		UseEnumNumbers:    false,
@@ -124,6 +126,8 @@ func (cw *RDJSONCommentWriter) Flush(_ context.Context) error {
 		Diagnostics: make([]*rdf.Diagnostic, 0, len(cw.comments)),
 	}
 	for _, c := range cw.comments {
+		// Remove OriginalOutput. It's used internally and we shouldn't expose it as output.
+		c.Result.Diagnostic.OriginalOutput = ""
 		result.Diagnostics = append(result.Diagnostics, c.Result.Diagnostic)
 	}
 	b, err := protojson.MarshalOptions{
