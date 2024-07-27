@@ -104,8 +104,9 @@ func TestRDJSONLCommentWriter_Post(t *testing.T) {
 			in: &Comment{
 				Result: &filter.FilteredDiagnostic{
 					Diagnostic: &rdf.Diagnostic{
-						Location: &rdf.Location{Path: "/path/to/file"},
-						Message:  "message",
+						Location:       &rdf.Location{Path: "/path/to/file"},
+						Message:        "message",
+						OriginalOutput: "original output",
 					},
 				},
 				ToolName: "tool name",
@@ -167,8 +168,9 @@ func TestRDJSONCommentWriter_Post(t *testing.T) {
 		{
 			Result: &filter.FilteredDiagnostic{
 				Diagnostic: &rdf.Diagnostic{
-					Location: &rdf.Location{Path: "/path/to/file"},
-					Message:  "message",
+					Location:       &rdf.Location{Path: "/path/to/file"},
+					Message:        "message",
+					OriginalOutput: "original output",
 				},
 			},
 			ToolName: "tool name",
