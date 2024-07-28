@@ -15,6 +15,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - ...
 
 ### :rotating_light: Breaking changes
+- [#1858](https://github.com/reviewdog/reviewdog/pull/1858) Remove original_output from rdjson/rdjsonl reporters' output
 - ...
 
 ## [v0.20.1] - 2024-07-10
