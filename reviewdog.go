@@ -61,13 +61,6 @@ type BulkCommentService interface {
 	Flush(context.Context) error
 }
 
-// NamedCommentService can set tool name. Useful for update tool name for each
-// reviewdog run with reviewdog project config.
-type NamedCommentService interface {
-	CommentService
-	SetToolName(toolName string)
-}
-
 // DiffService is an interface which get diff.
 type DiffService interface {
 	Diff(context.Context) ([]byte, error)
@@ -85,10 +78,6 @@ func (w *Reviewdog) runFromResult(ctx context.Context, results []*rdf.Diagnostic
 
 	checks := filter.FilterCheck(results, filediffs, strip, wd, w.filterMode)
 	shouldFail := false
-
-	if ncs, ok := w.c.(NamedCommentService); ok {
-		ncs.SetToolName(w.toolname)
-	}
 
 	for _, check := range checks {
 		comment := &Comment{

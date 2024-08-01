@@ -240,10 +240,11 @@ func TestCheck_setToolNameForEachRun(t *testing.T) {
 		sha         = "1414"
 		reportURL   = "http://example.com/report_url"
 		conclusion  = "neutral"
-		level       = "warning"
 		wantCheckID = 1414
 		toolName1   = "toolName1"
+		level1      = "warning"
 		toolName2   = "toolName2"
+		level2      = ""
 	)
 
 	mux := http.NewServeMux()
@@ -307,7 +308,7 @@ func TestCheck_setToolNameForEachRun(t *testing.T) {
 					Path:            github.String("sample.new.txt"),
 					StartLine:       github.Int(2),
 					EndLine:         github.Int(2),
-					AnnotationLevel: github.String("warning"),
+					AnnotationLevel: github.String("failure"), // default
 					Message:         github.String("comment 2"),
 					Title:           github.String("[toolName2] sample.new.txt#L2"),
 				},
@@ -340,10 +341,10 @@ func TestCheck_setToolNameForEachRun(t *testing.T) {
 		PR:       prNum,
 		SHA:      sha,
 		ToolName: "", // empty
-		Level:    level,
+		Level:    "", // empty
 	}
 
-	check.SetToolName(toolName1)
+	check.SetTool(toolName1, level1)
 	if err := check.Post(context.Background(), &reviewdog.Comment{
 		Result: &filter.FilteredDiagnostic{
 			Diagnostic: &rdf.Diagnostic{
@@ -364,7 +365,7 @@ func TestCheck_setToolNameForEachRun(t *testing.T) {
 		t.Error(err)
 	}
 
-	check.SetToolName(toolName2)
+	check.SetTool(toolName2, level2)
 	if err := check.Post(context.Background(), &reviewdog.Comment{
 		Result: &filter.FilteredDiagnostic{
 			Diagnostic: &rdf.Diagnostic{

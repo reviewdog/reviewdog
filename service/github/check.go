@@ -78,8 +78,9 @@ func (ch *Check) GetResult() *CheckResult {
 	return ch.result
 }
 
-func (ch *Check) SetToolName(toolName string) {
+func (ch *Check) SetTool(toolName string, level string) {
 	ch.ToolName = toolName
+	ch.Level = level
 }
 
 // Flush actually posts comments.
