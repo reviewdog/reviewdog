@@ -69,6 +69,7 @@ func (g *MergeRequestCommitCommenter) Post(_ context.Context, c *reviewdog.Comme
 // Flush posts comments which has not been posted yet.
 func (g *MergeRequestCommitCommenter) Flush(ctx context.Context) error {
 	g.muComments.Lock()
+	defer func() { g.postComments = nil }()
 	defer g.muComments.Unlock()
 
 	if err := g.setPostedComment(ctx); err != nil {

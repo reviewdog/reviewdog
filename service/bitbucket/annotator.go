@@ -99,6 +99,7 @@ func (r *ReportAnnotator) Post(_ context.Context, c *reviewdog.Comment) error {
 // Flush posts comments which has not been posted yet.
 func (r *ReportAnnotator) Flush(ctx context.Context) error {
 	r.muAnnotations.Lock()
+	defer func() { r.comments = nil }()
 	defer r.muAnnotations.Unlock()
 
 	// create/update/annotate report per tool

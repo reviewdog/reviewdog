@@ -165,7 +165,7 @@ const (
 			$ export GERRIT_REVISION_ID=ed318bf9a3c
 			$ export GERRIT_BRANCH=master
 			$ export GERRIT_ADDRESS=http://localhost:8080
-	
+
 	"bitbucket-code-report"
 		Create Bitbucket Code Report via Code Insights
 		(https://confluence.atlassian.com/display/BITBUCKET/Code+insights).
@@ -177,7 +177,7 @@ const (
 		- For Basic Auth you need to set following env variables:
 			  BITBUCKET_USER and BITBUCKET_PASSWORD
 		- For AccessToken Auth you need to set BITBUCKET_ACCESS_TOKEN
-		
+
 		To post results to Bitbucket Server specify BITBUCKET_SERVER_URL.
 
 	"gitea-pr-review"

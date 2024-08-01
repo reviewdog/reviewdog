@@ -115,6 +115,7 @@ func (g *PullRequest) Post(_ context.Context, c *reviewdog.Comment) error {
 // Flush posts comments which has not been posted yet.
 func (g *PullRequest) Flush(ctx context.Context) error {
 	g.muComments.Lock()
+	defer func() { g.postComments = nil }()
 	defer g.muComments.Unlock()
 
 	if err := g.setPostedComment(ctx); err != nil {

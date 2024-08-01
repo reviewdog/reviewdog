@@ -55,10 +55,17 @@ type FilteredCommentService interface {
 }
 
 // BulkCommentService posts comments all at once when Flush() is called.
-// Flush() will be called at the end of reviewdog run.
+// Flush() will be called at the end of each reviewdog run.
 type BulkCommentService interface {
 	CommentService
 	Flush(context.Context) error
+}
+
+// NamedCommentService can set tool name. Useful for update tool name for each
+// reviewdog run with reviewdog project config.
+type NamedCommentService interface {
+	CommentService
+	SetToolName(toolName string)
 }
 
 // DiffService is an interface which get diff.
@@ -78,6 +85,10 @@ func (w *Reviewdog) runFromResult(ctx context.Context, results []*rdf.Diagnostic
 
 	checks := filter.FilterCheck(results, filediffs, strip, wd, w.filterMode)
 	shouldFail := false
+
+	if ncs, ok := w.c.(NamedCommentService); ok {
+		ncs.SetToolName(w.toolname)
+	}
 
 	for _, check := range checks {
 		comment := &Comment{
