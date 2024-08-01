@@ -124,6 +124,11 @@ func (g *PullRequest) Flush(ctx context.Context) error {
 	return g.postAsReviewComment(ctx)
 }
 
+func (g *PullRequest) SetTool(toolName string, level string) {
+	g.toolName = toolName
+	g.logWriter = githubutils.NewGitHubActionLogWriter(level)
+}
+
 func (g *PullRequest) postAsReviewComment(ctx context.Context) error {
 	if g.fallbackToLog {
 		// we don't have permission to post a review comment.
