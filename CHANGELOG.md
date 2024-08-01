@@ -9,15 +9,18 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ### :sparkles: Release Note <!-- optional -->
 
 ### :rocket: Enhancements
-- ...
+- [#1845](https://github.com/reviewdog/reviewdog/pull/1845) Normalize file path in `related_locations` too.
 
 ### :bug: Fixes
 - [#1846](https://github.com/reviewdog/reviewdog/issues/1846) Unexpected error
   exit code when using `-reporter=github-[pr-]check` with
   `-fail-on-error=true`. See the below breaking changes section for more details.
 
-### :rotating_light: (Actually No) Breaking changes
-- [#1854](https://github.com/reviewdog/reviewdog/pull/1854) `-fail-on-error`
+### :rotating_light: Breaking changes
+- [#1858](https://github.com/reviewdog/reviewdog/pull/1858) Remove original_output from rdjson/rdjsonl reporters' output
+
+### :rotating_light: Deprecation Warnings
+- [#1854](https://github.com/reviewdog/reviewdog/pull/1854) (Actually No Breaking changes) `-fail-on-error`
   flag is deprecated. Use `-fail-level=[none,any,error,warning,info]` flag
   instead. You can reproduce the same behavior with `-fail-level=any` for most
   reporters (reviewdog will exit with 1 if it find any severity level).
@@ -26,7 +29,6 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
   `-fail-on-error` is just deprecated and it's not removed yet. Please update
   the flag while it's working.
-
 <!-- TODO: update the v0.19.0 release section -->
 
 ## [v0.20.1] - 2024-07-10

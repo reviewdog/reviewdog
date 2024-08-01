@@ -35,7 +35,7 @@ func (p *PullRequestDiffService) Diff(ctx context.Context) ([]byte, error) {
 	d, resp, err := p.Cli.PullRequests.GetRaw(ctx, p.Owner, p.Repo, p.PR, opt)
 	if err != nil {
 		if resp != nil && p.FallBackToGitCLI && resp.StatusCode == http.StatusNotAcceptable {
-			log.Print("reviwedog: fallback to use git command")
+			log.Print("reviewdog: fallback to use git command")
 			return p.diffUsingGitCommand(ctx)
 		}
 

@@ -10,6 +10,7 @@ import (
 	"github.com/reviewdog/reviewdog/diff"
 	"github.com/reviewdog/reviewdog/filter"
 	"github.com/reviewdog/reviewdog/parser"
+	"github.com/reviewdog/reviewdog/pathutil"
 	"github.com/reviewdog/reviewdog/proto/rdf"
 )
 
@@ -72,6 +73,8 @@ func (w *Reviewdog) runFromResult(ctx context.Context, results []*rdf.Diagnostic
 	if err != nil {
 		return err
 	}
+
+	pathutil.NormalizePathInResults(results, wd)
 
 	checks := filter.FilterCheck(results, filediffs, strip, wd, w.filterMode)
 	shouldFail := false

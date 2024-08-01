@@ -5,7 +5,7 @@ go 1.21.7
 require (
 	cloud.google.com/go/compute/metadata v0.5.0
 	cloud.google.com/go/datastore v1.17.1
-	code.gitea.io/sdk/gitea v0.18.0
+	code.gitea.io/sdk/gitea v0.19.0
 	contrib.go.opencensus.io/exporter/stackdriver v0.13.12
 	github.com/bradleyfalzon/ghinstallation/v2 v2.11.0
 	github.com/google/go-cmp v0.6.0
@@ -22,9 +22,9 @@ require (
 	github.com/reviewdog/go-bitbucket v0.0.0-20201024094602-708c3f6a7de0
 	github.com/stretchr/testify v1.9.0
 	github.com/vvakame/sdlog v1.2.0
-	github.com/xanzy/go-gitlab v0.106.0
+	github.com/xanzy/go-gitlab v0.107.0
 	go.opencensus.io v0.24.0
-	golang.org/x/build v0.0.0-20240712162709-0b82a206aadf
+	golang.org/x/build v0.0.0-20240731015247-ede91cf91ea8
 	golang.org/x/oauth2 v0.21.0
 	golang.org/x/sync v0.7.0
 	google.golang.org/protobuf v1.34.2
