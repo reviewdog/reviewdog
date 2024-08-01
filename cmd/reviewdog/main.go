@@ -317,10 +317,12 @@ func run(r io.Reader, w io.Writer, opt *option) error {
 			return runDoghouse(ctx, r, w, opt, isProject)
 		}
 		var err error
-		cs, ds, err = githubCheckService(ctx, opt)
+		checkService, ghDiffService, err := githubCheckService(ctx, opt)
 		if err != nil {
 			return err
 		}
+		ds = ghDiffService
+		cs = reviewdog.MultiCommentService(checkService, cs)
 	case "github-pr-annotations":
 		g, client, err := githubBuildInfoWithClient(ctx)
 		if err != nil {
