@@ -3,6 +3,7 @@ package project
 import (
 	"bytes"
 	"context"
+	"errors"
 	"fmt"
 	"io"
 	"log"
@@ -109,17 +110,17 @@ func Run(ctx context.Context, conf *Config, runners map[string]bool, c reviewdog
 	if err != nil {
 		return err
 	}
-	var g errgroup.Group
+	var errs []error
 	results.Range(func(toolname string, result *reviewdog.Result) {
-		ds := result.Diagnostics
-		g.Go(func() error {
-			if err := result.CheckUnexpectedFailure(); err != nil {
-				return err
-			}
-			return reviewdog.RunFromResult(ctx, c, ds, filediffs, d.Strip(), toolname, filterMode, failLevel)
-		})
+		if err := result.CheckUnexpectedFailure(); err != nil {
+			errs = append(errs, err)
+		}
+		// Note: CommentService shouldn't be run concurrently with different tool.
+		if err := reviewdog.RunFromResult(ctx, c, result.Diagnostics, filediffs, d.Strip(), toolname, filterMode, failLevel); err != nil {
+			errs = append(errs, err)
+		}
 	})
-	return g.Wait()
+	return errors.Join(errs...)
 }
 
 var secretEnvs = [...]string{
