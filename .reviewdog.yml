@@ -12,3 +12,9 @@ runner:
     cmd: cat ./_testdata/custom_rdjson.json
     name: custom-rdjson-by-project-conf
     format: rdjson
+  test-project-conf:
+    cmd: |
+      echo '.reviewdog.yml:17: test project conf (errorformat)'
+    level: info
+    errorformat:
+      - '%f:%l: %m'
