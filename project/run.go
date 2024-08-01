@@ -19,13 +19,6 @@ import (
 	"github.com/reviewdog/reviewdog/parser"
 )
 
-// NamedCommentService can set tool name and level. Useful for update tool name
-// for each reviewdog run with reviewdog project config.
-type NamedCommentService interface {
-	reviewdog.CommentService
-	SetTool(toolName string, level string)
-}
-
 // RunAndParse runs commands and parse results. Returns map of tool name to check results.
 func RunAndParse(ctx context.Context, conf *Config, runners map[string]bool, defaultLevel string, teeMode bool) (*reviewdog.ResultMap, error) {
 	var results reviewdog.ResultMap
@@ -122,7 +115,7 @@ func Run(ctx context.Context, conf *Config, runners map[string]bool, c reviewdog
 		if err := result.CheckUnexpectedFailure(); err != nil {
 			errs = append(errs, err)
 		}
-		if ncs, ok := c.(NamedCommentService); ok {
+		if ncs, ok := c.(reviewdog.NamedCommentService); ok {
 			ncs.SetTool(toolname, result.Level)
 		}
 		// Note: CommentService shouldn't be run concurrently with different tool.

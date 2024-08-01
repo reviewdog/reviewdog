@@ -61,6 +61,13 @@ type BulkCommentService interface {
 	Flush(context.Context) error
 }
 
+// NamedCommentService can set tool name and level. Useful for update tool name
+// for each reviewdog run with reviewdog project config.
+type NamedCommentService interface {
+	CommentService
+	SetTool(toolName string, level string)
+}
+
 // DiffService is an interface which get diff.
 type DiffService interface {
 	Diff(context.Context) ([]byte, error)
