@@ -40,7 +40,7 @@ func RunAndParse(ctx context.Context, conf *Config, runners map[string]bool, def
 		}
 		usedRunners = append(usedRunners, runnerName)
 		semaphore <- 1
-		log.Printf("reviewdog: [start]\trunner=%s", runnerName)
+		log.Printf("reviewdog: [start] runner=%s", runnerName)
 		fname := runner.Format
 		if fname == "" && len(runner.Errorformat) == 0 {
 			fname = runnerName
@@ -74,7 +74,7 @@ func RunAndParse(ctx context.Context, conf *Config, runners map[string]bool, def
 				Diagnostics: diagnostics,
 				CmdErr:      cmdErr,
 			})
-			msg := fmt.Sprintf("reviewdog: [finish]\trunner=%s", runnerName)
+			msg := fmt.Sprintf("reviewdog: [finish] runner=%s", runnerName)
 			if cmdErr != nil {
 				msg += fmt.Sprintf("\terror=%v", cmdErr)
 			}
