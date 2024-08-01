@@ -62,6 +62,7 @@ type option struct {
 	tee              bool
 	filterMode       filter.Mode
 	failOnError      bool
+	failLevel        reviewdog.FailLevel
 	logLevel         string
 }
 
@@ -202,7 +203,8 @@ const (
 		$ export CI_REPO_OWNER="haya14busa" # repository owner
 		$ export CI_REPO_NAME="reviewdog" # repository name
 `
-	failOnErrorDoc = `Returns 1 as exit code if any errors/warnings found in input`
+	failOnErrorDoc = `[DEPRECATED] use -fail-level instead`
+	failLevelDoc   = `reviewdog will exit with code 1 if it finds at least 1 issue with severity greater than or equal to the given level. [none(default),any,info,warning,error]`
 	logLevelDoc    = `log level for reviewdog itself. (debug, info, warning, error)`
 )
 
@@ -225,6 +227,7 @@ func init() {
 	flag.BoolVar(&opt.tee, "tee", false, teeDoc)
 	flag.Var(&opt.filterMode, "filter-mode", filterModeDoc)
 	flag.BoolVar(&opt.failOnError, "fail-on-error", false, failOnErrorDoc)
+	flag.Var(&opt.failLevel, "fail-level", failLevelDoc)
 	flag.StringVar(&opt.logLevel, "log-level", "info", logLevelDoc)
 }
 
@@ -465,7 +468,7 @@ func run(r io.Reader, w io.Writer, opt *option) error {
 	}
 
 	if isProject {
-		return project.Run(ctx, projectConf, buildRunnersMap(opt.runners), cs, ds, opt.tee, opt.filterMode, opt.failOnError)
+		return project.Run(ctx, projectConf, buildRunnersMap(opt.runners), cs, ds, opt.tee, opt.filterMode, failLevel(opt))
 	}
 
 	p, err := newParserFromOpt(opt)
@@ -473,7 +476,7 @@ func run(r io.Reader, w io.Writer, opt *option) error {
 		return err
 	}
 
-	app := reviewdog.NewReviewdog(toolName(opt), p, cs, ds, opt.filterMode, opt.failOnError)
+	app := reviewdog.NewReviewdog(toolName(opt), p, cs, ds, opt.filterMode, failLevel(opt))
 	return app.Run(ctx, r)
 }
 
@@ -1028,4 +1031,19 @@ func localDiffService(opt *option) (reviewdog.DiffService, error) {
 		return &reviewdog.EmptyDiff{}, nil
 	}
 	return diffService(opt.diffCmd, opt.diffStrip)
+}
+
+func failLevel(opt *option) reviewdog.FailLevel {
+	if opt.failOnError {
+		slog.Warn("reviewdog: -fail-on-error is deprecated. Use -fail-level=any, or -fail-level=error for github-[pr-]check reporter instead. See also https://github.com/reviewdog/reviewdog/blob/master/CHANGELOG.md")
+		if opt.failLevel == reviewdog.FailLevelDefault {
+			switch opt.reporter {
+			default:
+				return reviewdog.FailLevelAny
+			case "github-check", "github-pr-check":
+				return reviewdog.FailLevelError
+			}
+		}
+	}
+	return opt.failLevel
 }

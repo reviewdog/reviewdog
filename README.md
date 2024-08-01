@@ -904,12 +904,11 @@ $ REVIEWDOG_SKIP_DOGHOUSE=true REVIEWDOG_GITHUB_API_TOKEN="<token>" reviewdog -r
 ```
 
 ## Exit codes
-By default reviewdog will return `0` as exit code even if it finds errors.
-If `-fail-on-error` flag is passed, reviewdog exits with `1` when at least one error was found/reported.
+By default (`-fail-level=none`) reviewdog will return `0` as exit code even if it finds errors.
+reviewdog will exit with code 1 with `-fail-level=[any,info,warning,error]` flag if it finds at least 1 issue with severity greater than or equal to the given level.
 This can be helpful when you are using it as a step in your CI pipeline and want to mark the step failed if any error found by linter.
 
-See also `-level` flag for [github-pr-check/github-check](#reporter-github-checks--reportergithub-pr-check) reporters.
-reviewdog will exit with `1` if reported check status is `failure` as well if `-fail-on-error=true`.
+You can also use `-level` flag to configure default report revel.
 
 ## Filter mode
 reviewdog filter results by diff and you can control how reviewdog filter results by `-filter-mode` flag.
