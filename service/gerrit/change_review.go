@@ -60,8 +60,8 @@ func (g *ChangeReviewCommenter) Post(_ context.Context, c *reviewdog.Comment) er
 // Flush posts comments which has not been posted yet.
 func (g *ChangeReviewCommenter) Flush(ctx context.Context) error {
 	g.muComments.Lock()
-	defer func() { g.postComments = nil }()
 	defer g.muComments.Unlock()
+	defer func() { g.postComments = nil }()
 
 	return g.postAllComments(ctx)
 }

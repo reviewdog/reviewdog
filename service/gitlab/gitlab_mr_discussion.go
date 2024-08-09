@@ -71,8 +71,8 @@ func (g *MergeRequestDiscussionCommenter) Post(_ context.Context, c *reviewdog.C
 // Flush posts comments which has not been posted yet.
 func (g *MergeRequestDiscussionCommenter) Flush(ctx context.Context) error {
 	g.muComments.Lock()
-	defer func() { g.postComments = nil }()
 	defer g.muComments.Unlock()
+	defer func() { g.postComments = nil }()
 	postedcs, err := g.createPostedComments()
 	if err != nil {
 		return fmt.Errorf("failed to create posted comments: %w", err)
