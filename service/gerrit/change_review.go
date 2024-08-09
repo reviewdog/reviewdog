@@ -61,6 +61,7 @@ func (g *ChangeReviewCommenter) Post(_ context.Context, c *reviewdog.Comment) er
 func (g *ChangeReviewCommenter) Flush(ctx context.Context) error {
 	g.muComments.Lock()
 	defer g.muComments.Unlock()
+	defer func() { g.postComments = nil }()
 
 	return g.postAllComments(ctx)
 }

@@ -28,6 +28,14 @@ func (m *multiCommentService) Flush(ctx context.Context) error {
 	return nil
 }
 
+func (m *multiCommentService) SetTool(toolName string, level string) {
+	for _, cs := range m.services {
+		if ncs, ok := cs.(NamedCommentService); ok {
+			ncs.SetTool(toolName, level)
+		}
+	}
+}
+
 // MultiCommentService creates a comment service that duplicates its post to
 // all the provided comment services.
 func MultiCommentService(services ...CommentService) CommentService {

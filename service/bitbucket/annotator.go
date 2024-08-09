@@ -100,6 +100,7 @@ func (r *ReportAnnotator) Post(_ context.Context, c *reviewdog.Comment) error {
 func (r *ReportAnnotator) Flush(ctx context.Context) error {
 	r.muAnnotations.Lock()
 	defer r.muAnnotations.Unlock()
+	defer func() { r.comments = nil }()
 
 	// create/update/annotate report per tool
 	for tool, comments := range r.comments {
