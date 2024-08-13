@@ -1,4 +1,6 @@
 # For nightly release. See .goreleaser.yml for normal release.
+version: 2
+
 project_name: reviewdog
 
 before:
