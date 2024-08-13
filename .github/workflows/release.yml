@@ -36,16 +36,9 @@ jobs:
 
       # Setup Go for building reviewdog binary.
       - uses: actions/setup-go@v5
+        if: "steps.tag.outputs.value != ''"
         with:
           go-version-file: "go.mod"
-
-      # Test goreleaser if the tag is empty.
-      - name: Test goreleaser
-        uses: goreleaser/goreleaser-action@v6
-        if: "steps.tag.outputs.value == ''"
-        with:
-          version: latest
-          args: check
 
       # Create release.
       - name: Create release with goreleaser
