@@ -35,7 +35,6 @@ import (
 	gerritservice "github.com/reviewdog/reviewdog/service/gerrit"
 	giteaservice "github.com/reviewdog/reviewdog/service/gitea"
 	githubservice "github.com/reviewdog/reviewdog/service/github"
-	"github.com/reviewdog/reviewdog/service/github/githubutils"
 	gitlabservice "github.com/reviewdog/reviewdog/service/gitlab"
 )
 
@@ -322,22 +321,11 @@ func run(r io.Reader, w io.Writer, opt *option) error {
 			return err
 		}
 	case "github-pr-annotations":
-		g, client, err := githubBuildInfoWithClient(ctx)
+		var err error
+		cs, ds, err = githubActionLogService(ctx, opt)
 		if err != nil {
 			return err
 		}
-		ds = &reviewdog.EmptyDiff{}
-		if g.PullRequest != 0 {
-			ds = &githubservice.PullRequestDiffService{
-				Cli:              client,
-				Owner:            g.Owner,
-				Repo:             g.Repo,
-				PR:               g.PullRequest,
-				SHA:              g.SHA,
-				FallBackToGitCLI: true,
-			}
-		}
-		cs = githubutils.NewGitHubActionLogWriter(opt.level)
 	case "github-pr-review":
 		gs, isPR, err := githubService(ctx, opt)
 		if err != nil {
@@ -684,6 +672,29 @@ func githubCheckService(ctx context.Context, opt *option) (reviewdog.CommentServ
 		}
 	}
 	cs, err := githubservice.NewGitHubCheck(client, g.Owner, g.Repo, g.PullRequest, g.SHA, opt.level, toolName(opt))
+	if err != nil {
+		return nil, nil, err
+	}
+	return cs, ds, nil
+}
+
+func githubActionLogService(ctx context.Context, opt *option) (reviewdog.CommentService, reviewdog.DiffService, error) {
+	g, client, err := githubBuildInfoWithClient(ctx)
+	if err != nil {
+		return nil, nil, err
+	}
+	var ds reviewdog.DiffService = &reviewdog.EmptyDiff{}
+	if g.PullRequest != 0 {
+		ds = &githubservice.PullRequestDiffService{
+			Cli:              client,
+			Owner:            g.Owner,
+			Repo:             g.Repo,
+			PR:               g.PullRequest,
+			SHA:              g.SHA,
+			FallBackToGitCLI: true,
+		}
+	}
+	cs, err := githubservice.NewGitHubActionLog(opt.level)
 	if err != nil {
 		return nil, nil, err
 	}
