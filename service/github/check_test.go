@@ -6,6 +6,7 @@ import (
 	"net/http"
 	"net/http/httptest"
 	"net/url"
+	"os"
 	"strings"
 	"testing"
 
@@ -28,6 +29,16 @@ func TestCheck_OK(t *testing.T) {
 		level       = "warning"
 		wantCheckID = 1414
 	)
+
+	cwd, err := os.Getwd()
+	if err != nil {
+		t.Fatal(err)
+	}
+	defer os.Chdir(cwd)
+	err = os.Chdir("../../diff/testdata")
+	if err != nil {
+		t.Fatal(err)
+	}
 
 	comments := []*reviewdog.Comment{
 		{
@@ -171,71 +182,71 @@ func TestCheck_OK(t *testing.T) {
 
 		wantAnnotations := []*github.CheckRunAnnotation{
 			{
-				Path:            github.String("sample.new.txt"),
+				Path:            github.String("diff/testdata/sample.new.txt"),
 				StartLine:       github.Int(2),
 				EndLine:         github.Int(2),
 				AnnotationLevel: github.String("warning"),
 				Message:         github.String("test message"),
-				Title:           github.String("[haya14busa-linter] sample.new.txt#L2"),
+				Title:           github.String("[haya14busa-linter] diff/testdata/sample.new.txt#L2"),
 				RawDetails:      github.String("raw test message"),
 			},
 			{
-				Path:            github.String("sample.new.txt"),
+				Path:            github.String("diff/testdata/sample.new.txt"),
 				StartLine:       github.Int(2),
 				EndLine:         github.Int(3),
 				AnnotationLevel: github.String("warning"),
 				Message:         github.String("test multiline"),
-				Title:           github.String("[haya14busa-linter] sample.new.txt#L2-L3"),
+				Title:           github.String("[haya14busa-linter] diff/testdata/sample.new.txt#L2-L3"),
 			},
 			{
-				Path:            github.String("sample.new.txt"),
+				Path:            github.String("diff/testdata/sample.new.txt"),
 				StartLine:       github.Int(2),
 				EndLine:         github.Int(3),
 				AnnotationLevel: github.String("warning"),
 				Message:         github.String("test multiline with column"),
-				Title:           github.String("[haya14busa-linter] sample.new.txt#L2-L3"),
+				Title:           github.String("[haya14busa-linter] diff/testdata/sample.new.txt#L2-L3"),
 			},
 			{
-				Path:            github.String("sample.new.txt"),
+				Path:            github.String("diff/testdata/sample.new.txt"),
 				StartLine:       github.Int(2),
 				EndLine:         github.Int(2),
 				StartColumn:     github.Int(1),
 				EndColumn:       github.Int(5),
 				AnnotationLevel: github.String("warning"),
 				Message:         github.String("test range comment"),
-				Title:           github.String("[haya14busa-linter] sample.new.txt#L2"),
+				Title:           github.String("[haya14busa-linter] diff/testdata/sample.new.txt#L2"),
 			},
 			{
-				Path:            github.String("sample.new.txt"),
+				Path:            github.String("diff/testdata/sample.new.txt"),
 				StartLine:       github.Int(2),
 				EndLine:         github.Int(2),
 				AnnotationLevel: github.String("failure"),
 				Message:         github.String("test severity override"),
-				Title:           github.String("[haya14busa-linter] sample.new.txt#L2"),
+				Title:           github.String("[haya14busa-linter] diff/testdata/sample.new.txt#L2"),
 			},
 			{
-				Path:            github.String("sample.new.txt"),
+				Path:            github.String("diff/testdata/sample.new.txt"),
 				StartLine:       github.Int(2),
 				EndLine:         github.Int(2),
 				AnnotationLevel: github.String("warning"),
 				Message:         github.String("source test"),
-				Title:           github.String("[awesome-linter] sample.new.txt#L2"),
+				Title:           github.String("[awesome-linter] diff/testdata/sample.new.txt#L2"),
 			},
 			{
-				Path:            github.String("sample.new.txt"),
+				Path:            github.String("diff/testdata/sample.new.txt"),
 				StartLine:       github.Int(2),
 				EndLine:         github.Int(2),
 				AnnotationLevel: github.String("warning"),
 				Message:         github.String("code test w/o URL"),
-				Title:           github.String("[haya14busa-linter] sample.new.txt#L2 <CODE14>"),
+				Title:           github.String("[haya14busa-linter] diff/testdata/sample.new.txt#L2 <CODE14>"),
 			},
 			{
-				Path:            github.String("sample.new.txt"),
+				Path:            github.String("diff/testdata/sample.new.txt"),
 				StartLine:       github.Int(2),
 				EndLine:         github.Int(2),
 				AnnotationLevel: github.String("warning"),
 				Message:         github.String("code test w/ URL"),
-				Title:           github.String("[haya14busa-linter] sample.new.txt#L2 <CODE14>(https://github.com/reviewdog#CODE14)"),
+				Title:           github.String("[haya14busa-linter] diff/testdata/sample.new.txt#L2 <CODE14>(https://github.com/reviewdog#CODE14)"),
 			},
 		}
 
@@ -250,14 +261,14 @@ func TestCheck_OK(t *testing.T) {
 <details>
 <summary>Findings (8)</summary>
 
-[sample.new.txt|2 col 1|](https://github.com/haya14busa/reviewdog/blob/1414/sample.new.txt#L2) test message
-[sample.new.txt|2|](https://github.com/haya14busa/reviewdog/blob/1414/sample.new.txt#L2) test multiline
-[sample.new.txt|2 col 1|](https://github.com/haya14busa/reviewdog/blob/1414/sample.new.txt#L2) test multiline with column
-[sample.new.txt|2 col 1|](https://github.com/haya14busa/reviewdog/blob/1414/sample.new.txt#L2) test range comment
-[sample.new.txt|2|](https://github.com/haya14busa/reviewdog/blob/1414/sample.new.txt#L2) test severity override
-[sample.new.txt|2|](https://github.com/haya14busa/reviewdog/blob/1414/sample.new.txt#L2) source test
-[sample.new.txt|2|](https://github.com/haya14busa/reviewdog/blob/1414/sample.new.txt#L2) code test w/o URL
-[sample.new.txt|2|](https://github.com/haya14busa/reviewdog/blob/1414/sample.new.txt#L2) code test w/ URL
+[diff/testdata/sample.new.txt|2 col 1|](https://github.com/haya14busa/reviewdog/blob/1414/diff/testdata/sample.new.txt#L2) test message
+[diff/testdata/sample.new.txt|2|](https://github.com/haya14busa/reviewdog/blob/1414/diff/testdata/sample.new.txt#L2) test multiline
+[diff/testdata/sample.new.txt|2 col 1|](https://github.com/haya14busa/reviewdog/blob/1414/diff/testdata/sample.new.txt#L2) test multiline with column
+[diff/testdata/sample.new.txt|2 col 1|](https://github.com/haya14busa/reviewdog/blob/1414/diff/testdata/sample.new.txt#L2) test range comment
+[diff/testdata/sample.new.txt|2|](https://github.com/haya14busa/reviewdog/blob/1414/diff/testdata/sample.new.txt#L2) test severity override
+[diff/testdata/sample.new.txt|2|](https://github.com/haya14busa/reviewdog/blob/1414/diff/testdata/sample.new.txt#L2) source test
+[diff/testdata/sample.new.txt|2|](https://github.com/haya14busa/reviewdog/blob/1414/diff/testdata/sample.new.txt#L2) code test w/o URL
+[diff/testdata/sample.new.txt|2|](https://github.com/haya14busa/reviewdog/blob/1414/diff/testdata/sample.new.txt#L2) code test w/ URL
 </details>
 <details>
 <summary>Filtered Findings (1)</summary>
@@ -279,14 +290,9 @@ func TestCheck_OK(t *testing.T) {
 	cli := github.NewClient(nil)
 	cli.BaseURL, _ = url.Parse(ts.URL + "/")
 
-	check := &Check{
-		CLI:      cli,
-		Owner:    owner,
-		Repo:     repo,
-		PR:       prNum,
-		SHA:      sha,
-		ToolName: name,
-		Level:    level,
+	check, err := NewGitHubCheck(cli, owner, repo, prNum, sha, level, name)
+	if err != nil {
+		t.Fatal(err)
 	}
 
 	for _, c := range comments {
@@ -321,6 +327,16 @@ func TestCheck_OK_multiple_update_runs(t *testing.T) {
 		wantCheckID = 1414
 	)
 
+	cwd, err := os.Getwd()
+	if err != nil {
+		t.Fatal(err)
+	}
+	defer os.Chdir(cwd)
+	err = os.Chdir("../../diff/testdata")
+	if err != nil {
+		t.Fatal(err)
+	}
+
 	mux := http.NewServeMux()
 	mux.HandleFunc("/repos/haya14busa/reviewdog/check-runs", func(w http.ResponseWriter, r *http.Request) {
 		if err := json.NewEncoder(w).Encode(&github.CheckRun{ID: github.Int64(wantCheckID)}); err != nil {
@@ -349,14 +365,9 @@ func TestCheck_OK_multiple_update_runs(t *testing.T) {
 	cli := github.NewClient(nil)
 	cli.BaseURL, _ = url.Parse(ts.URL + "/")
 
-	check := &Check{
-		CLI:      cli,
-		Owner:    owner,
-		Repo:     repo,
-		PR:       prNum,
-		SHA:      sha,
-		ToolName: name,
-		Level:    level,
+	check, err := NewGitHubCheck(cli, owner, repo, prNum, sha, level, name)
+	if err != nil {
+		t.Fatal(err)
 	}
 
 	for i := 0; i < 101; i++ {
@@ -396,6 +407,16 @@ func TestCheck_fail_check_with_403_in_GitHub_Actions(t *testing.T) {
 		level       = "warning"
 		wantCheckID = 1414
 	)
+	cwd, err := os.Getwd()
+	if err != nil {
+		t.Fatal(err)
+	}
+	defer os.Chdir(cwd)
+	err = os.Chdir("../../diff/testdata")
+	if err != nil {
+		t.Fatal(err)
+	}
+
 	mux := http.NewServeMux()
 	mux.HandleFunc("/repos/haya14busa/reviewdog/check-runs", func(w http.ResponseWriter, r *http.Request) {
 		w.WriteHeader(http.StatusForbidden)
@@ -404,14 +425,10 @@ func TestCheck_fail_check_with_403_in_GitHub_Actions(t *testing.T) {
 	defer ts.Close()
 	cli := github.NewClient(nil)
 	cli.BaseURL, _ = url.Parse(ts.URL + "/")
-	check := &Check{
-		CLI:      cli,
-		Owner:    owner,
-		Repo:     repo,
-		PR:       prNum,
-		SHA:      sha,
-		ToolName: name,
-		Level:    level,
+
+	check, err := NewGitHubCheck(cli, owner, repo, prNum, sha, level, name)
+	if err != nil {
+		t.Fatal(err)
 	}
 	if err := check.Flush(context.Background()); err != nil {
 		t.Error(err)

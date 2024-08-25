@@ -683,15 +683,11 @@ func githubCheckService(ctx context.Context, opt *option) (reviewdog.CommentServ
 			FallBackToGitCLI: true,
 		}
 	}
-	return &githubservice.Check{
-		CLI:      client,
-		Owner:    g.Owner,
-		Repo:     g.Repo,
-		PR:       g.PullRequest,
-		SHA:      g.SHA,
-		ToolName: opt.name,
-		Level:    opt.level,
-	}, ds, nil
+	cs, err := githubservice.NewGitHubCheck(client, g.Owner, g.Repo, g.PullRequest, g.SHA, opt.level, toolName(opt))
+	if err != nil {
+		return nil, nil, err
+	}
+	return cs, ds, nil
 }
 
 func githubBuildInfoWithClient(ctx context.Context) (*cienv.BuildInfo, *github.Client, error) {
