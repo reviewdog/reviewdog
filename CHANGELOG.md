@@ -15,6 +15,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - [#1846](https://github.com/reviewdog/reviewdog/issues/1846) Unexpected error
   exit code when using `-reporter=github-[pr-]check` with
   `-fail-on-error=true`. See the below breaking changes section for more details.
+- [#1894](https://github.com/reviewdog/reviewdog/pull/1894) fix 
+error when repository uses multiselect custom-properties [#1881](https://github.com/reviewdog/reviewdog/issues/1881)
 
 ### :rotating_light: Breaking changes
 - [#1858](https://github.com/reviewdog/reviewdog/pull/1858) Remove original_output from rdjson/rdjsonl reporters' output
