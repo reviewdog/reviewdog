@@ -216,6 +216,7 @@ func (g *PullRequest) postAsReviewComment(ctx context.Context) error {
 			}
 			return err
 		}
+
 	}
 	for _, c := range fileComments {
 		if _, _, err := g.cli.PullRequests.CreateComment(ctx, g.owner, g.repo, g.pr, c); err != nil {
