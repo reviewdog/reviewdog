@@ -16,6 +16,7 @@ import (
 	"github.com/reviewdog/reviewdog/diff"
 	"github.com/reviewdog/reviewdog/filter"
 	"github.com/reviewdog/reviewdog/parser"
+	"github.com/reviewdog/reviewdog/proto/rdf"
 )
 
 // RunAndParse runs commands and parse results. Returns map of tool name to check results.
@@ -109,15 +110,23 @@ func Run(ctx context.Context, conf *Config, runners map[string]bool, c reviewdog
 	if err != nil {
 		return err
 	}
-	var g errgroup.Group
+	var allDiagnostics []*rdf.Diagnostic
+
 	results.Range(func(toolname string, result *reviewdog.Result) {
-		ds := result.Diagnostics
-		g.Go(func() error {
-			if err := result.CheckUnexpectedFailure(); err != nil {
-				return err
-			}
-			return reviewdog.RunFromResult(ctx, c, ds, filediffs, d.Strip(), toolname, filterMode, failLevel)
-		})
+		if err := result.CheckUnexpectedFailure(); err != nil {
+			log.Println("Unexpected failure in tool %s: %v", toolname, err)
+			return
+		}
+		allDiagnostics = append(allDiagnostics, result.Diagnostics...)
+	})
+
+	var g errgroup.Group
+	g.Go(func() error {
+		if err := reviewdog.RunFromResult(ctx, c, allDiagnostics, filediffs, d.Strip(), "reviewdog", filterMode, failLevel); err != nil {
+			log.Printf("Failed to run from result: %v", err)
+			return err
+		}
+		return nil
 	})
 	return g.Wait()
 }
