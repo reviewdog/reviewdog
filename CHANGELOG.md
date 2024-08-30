@@ -6,6 +6,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+- [#1912](https://github.com/reviewdog/reviewdog/pull/1912): fix a bug where GitHub review comments were posted concurrently, causing some comments to be deleted when multiple runners are used ([#1911](https://github.com/reviewdog/reviewdog/pull/1911))
+
 ### :sparkles: Release Note <!-- optional -->
 
 ### :rocket: Enhancements
