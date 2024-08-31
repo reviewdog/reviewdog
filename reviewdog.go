@@ -55,10 +55,17 @@ type FilteredCommentService interface {
 }
 
 // BulkCommentService posts comments all at once when Flush() is called.
-// Flush() will be called at the end of reviewdog run.
+// Flush() will be called at the end of each reviewdog run.
 type BulkCommentService interface {
 	CommentService
 	Flush(context.Context) error
+}
+
+// NamedCommentService can set tool name and level. Useful for update tool name
+// for each reviewdog run with reviewdog project config.
+type NamedCommentService interface {
+	CommentService
+	SetTool(toolName string, level string)
 }
 
 // DiffService is an interface which get diff.

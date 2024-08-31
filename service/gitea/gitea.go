@@ -92,6 +92,7 @@ func (g *PullRequest) Post(_ context.Context, c *reviewdog.Comment) error {
 func (g *PullRequest) Flush(_ context.Context) error {
 	g.muComments.Lock()
 	defer g.muComments.Unlock()
+	defer func() { g.postComments = nil }()
 
 	if err := g.setPostedComment(); err != nil {
 		return err
