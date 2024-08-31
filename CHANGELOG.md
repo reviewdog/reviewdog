@@ -17,6 +17,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
   `-fail-on-error=true`. See the below breaking changes section for more details.
 - [#1867](https://github.com/reviewdog/reviewdog/pull/1867) Tool name was incorrect for github-[pr-]check reporters and check API does not work correctly for project config based run
 - [#1867](https://github.com/reviewdog/reviewdog/pull/1867) Deletion of outdated comment didn't work properly with github-pr-review reporter since tool name isn't correctly configured for project config based run
+- [#1894](https://github.com/reviewdog/reviewdog/pull/1894) fix error when repository uses multiselect custom-properties [#1881](https://github.com/reviewdog/reviewdog/issues/1881)
 
 ### :rotating_light: Breaking changes
 - [#1858](https://github.com/reviewdog/reviewdog/pull/1858) Remove original_output from rdjson/rdjsonl reporters' output

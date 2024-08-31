@@ -5,7 +5,7 @@ on:
       - master
       - release-*
     tags:
-      - 'v*.*.*'
+      - "v*.*.*"
   pull_request:
     types:
       - labeled
@@ -36,23 +36,16 @@ jobs:
 
       # Setup Go for building reviewdog binary.
       - uses: actions/setup-go@v5
+        if: "steps.tag.outputs.value != ''"
         with:
           go-version-file: "go.mod"
-
-      # Test goreleaser if the tag is empty.
-      - name: Test goreleaser
-        uses: goreleaser/goreleaser-action@v6
-        if: "steps.tag.outputs.value == ''"
-        with:
-          version: latest
-          args: check
 
       # Create release.
       - name: Create release with goreleaser
         uses: goreleaser/goreleaser-action@v6
         if: "steps.tag.outputs.value != ''"
         with:
-          version: latest
+          version: "~> v2"
           args: release --clean --release-header .github/goreleaser-header.md
         env:
           # Need to use personal access token instead of default token to

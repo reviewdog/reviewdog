@@ -1,4 +1,6 @@
 # For nightly release. See .goreleaser.yml for normal release.
+version: 2
+
 project_name: reviewdog
 
 before:
@@ -47,4 +49,4 @@ checksum:
   name_template: "checksums.txt"
 
 snapshot:
-  name_template: "{{ .Tag }}-next"
+  version_template: "{{ .Tag }}-next"
