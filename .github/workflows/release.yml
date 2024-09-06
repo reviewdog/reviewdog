@@ -5,7 +5,7 @@ on:
       - master
       - release-*
     tags:
-      - 'v*.*.*'
+      - "v*.*.*"
   pull_request:
     types:
       - labeled
@@ -45,7 +45,7 @@ jobs:
         uses: goreleaser/goreleaser-action@v6
         if: "steps.tag.outputs.value != ''"
         with:
-          version: latest
+          version: "~> v2"
           args: release --clean --release-header .github/goreleaser-header.md
         env:
           # Need to use personal access token instead of default token to

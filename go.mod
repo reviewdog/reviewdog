@@ -9,7 +9,7 @@ require (
 	contrib.go.opencensus.io/exporter/stackdriver v0.13.12
 	github.com/bradleyfalzon/ghinstallation/v2 v2.11.0
 	github.com/google/go-cmp v0.6.0
-	github.com/google/go-github/v63 v63.0.0
+	github.com/google/go-github/v64 v64.0.0
 	github.com/haya14busa/go-actions-toolkit v0.0.0-20200105081403-ca0307860f01
 	github.com/haya14busa/go-sarif v0.0.0-20240630170108-a3ba8d79599f
 	github.com/haya14busa/secretbox v0.0.0-20180525171038-07c7ecf409f5
@@ -22,10 +22,10 @@ require (
 	github.com/reviewdog/go-bitbucket v0.0.0-20201024094602-708c3f6a7de0
 	github.com/stretchr/testify v1.9.0
 	github.com/vvakame/sdlog v1.2.0
-	github.com/xanzy/go-gitlab v0.107.0
+	github.com/xanzy/go-gitlab v0.108.0
 	go.opencensus.io v0.24.0
-	golang.org/x/build v0.0.0-20240823210222-7d24b5e8579b
-	golang.org/x/oauth2 v0.22.0
+	golang.org/x/build v0.0.0-20240905150955-050a692553c4
+	golang.org/x/oauth2 v0.23.0
 	golang.org/x/sync v0.8.0
 	google.golang.org/protobuf v1.34.2
 	gopkg.in/yaml.v3 v3.0.1

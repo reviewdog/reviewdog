@@ -9,7 +9,7 @@ import (
 	"sync"
 	"time"
 
-	"github.com/google/go-github/v63/github"
+	"github.com/google/go-github/v64/github"
 	"github.com/reviewdog/reviewdog"
 	"github.com/reviewdog/reviewdog/cienv"
 	"github.com/reviewdog/reviewdog/filter"
@@ -103,9 +103,15 @@ func (ch *Check) GetResult() *CheckResult {
 	return ch.result
 }
 
+func (ch *Check) SetTool(toolName string, level string) {
+	ch.ToolName = toolName
+	ch.Level = level
+}
+
 // Flush actually posts comments.
 func (ch *Check) Flush(ctx context.Context) error {
 	ch.muComments.Lock()
+	defer func() { ch.postComments = nil }()
 	defer ch.muComments.Unlock()
 	check, err := ch.createCheck(ctx)
 	if err != nil {
@@ -144,7 +150,7 @@ func (ch *Check) Flush(ctx context.Context) error {
 
 func (ch *Check) createCheck(ctx context.Context) (*github.CheckRun, error) {
 	opt := github.CreateCheckRunOptions{
-		Name:    ch.ToolName,
+		Name:    ch.checkName(),
 		HeadSHA: ch.SHA,
 		Status:  github.String("in_progress"),
 	}

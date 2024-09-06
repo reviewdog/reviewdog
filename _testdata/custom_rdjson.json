@@ -90,7 +90,7 @@
       "severity": "INFO"
     },
     {
-      "message": "severity test 2 (INFO)",
+      "message": "severity test 2 (INFO enum value should be discarded)",
       "location": {
         "path": "_testdata/custom.txt",
         "range": {

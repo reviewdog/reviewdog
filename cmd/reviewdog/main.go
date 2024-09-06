@@ -20,7 +20,7 @@ import (
 	"golang.org/x/build/gerrit"
 	"golang.org/x/oauth2"
 
-	"github.com/google/go-github/v63/github"
+	"github.com/google/go-github/v64/github"
 	"github.com/mattn/go-shellwords"
 	"github.com/reviewdog/errorformat/fmts"
 	"github.com/xanzy/go-gitlab"
@@ -164,7 +164,7 @@ const (
 			$ export GERRIT_REVISION_ID=ed318bf9a3c
 			$ export GERRIT_BRANCH=master
 			$ export GERRIT_ADDRESS=http://localhost:8080
-	
+
 	"bitbucket-code-report"
 		Create Bitbucket Code Report via Code Insights
 		(https://confluence.atlassian.com/display/BITBUCKET/Code+insights).
@@ -176,7 +176,7 @@ const (
 		- For Basic Auth you need to set following env variables:
 			  BITBUCKET_USER and BITBUCKET_PASSWORD
 		- For AccessToken Auth you need to set BITBUCKET_ACCESS_TOKEN
-		
+
 		To post results to Bitbucket Server specify BITBUCKET_SERVER_URL.
 
 	"gitea-pr-review"
@@ -316,10 +316,12 @@ func run(r io.Reader, w io.Writer, opt *option) error {
 			return runDoghouse(ctx, r, w, opt, isProject)
 		}
 		var err error
-		cs, ds, err = githubCheckService(ctx, opt)
+		checkService, ghDiffService, err := githubCheckService(ctx, opt)
 		if err != nil {
 			return err
 		}
+		ds = ghDiffService
+		cs = reviewdog.MultiCommentService(checkService, cs)
 	case "github-pr-annotations":
 		var err error
 		cs, ds, err = githubActionLogService(ctx, opt)

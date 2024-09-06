@@ -70,6 +70,7 @@ func (g *MergeRequestCommitCommenter) Post(_ context.Context, c *reviewdog.Comme
 func (g *MergeRequestCommitCommenter) Flush(ctx context.Context) error {
 	g.muComments.Lock()
 	defer g.muComments.Unlock()
+	defer func() { g.postComments = nil }()
 
 	if err := g.setPostedComment(ctx); err != nil {
 		return err

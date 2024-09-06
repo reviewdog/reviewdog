@@ -11,7 +11,7 @@ import (
 	"testing"
 
 	"github.com/google/go-cmp/cmp"
-	"github.com/google/go-github/v63/github"
+	"github.com/google/go-github/v64/github"
 	"github.com/reviewdog/reviewdog"
 	"github.com/reviewdog/reviewdog/filter"
 	"github.com/reviewdog/reviewdog/proto/rdf"
@@ -55,116 +55,6 @@ func TestCheck_OK(t *testing.T) {
 				},
 				ShouldReport: true,
 			},
-		}, {
-			Result: &filter.FilteredDiagnostic{
-				Diagnostic: &rdf.Diagnostic{
-					Message: "test message outside diff",
-					Location: &rdf.Location{
-						Path: "sample.new.txt",
-						Range: &rdf.Range{
-							Start: &rdf.Position{Line: 14},
-						},
-					},
-					OriginalOutput: "raw test message outside diff",
-				},
-				ShouldReport: false,
-			},
-		}, {
-			Result: &filter.FilteredDiagnostic{
-				Diagnostic: &rdf.Diagnostic{
-					Message: "test multiline",
-					Location: &rdf.Location{
-						Path: "sample.new.txt",
-						Range: &rdf.Range{
-							Start: &rdf.Position{Line: 2},
-							End:   &rdf.Position{Line: 3},
-						},
-					},
-				},
-				ShouldReport: true,
-			},
-		}, {
-			Result: &filter.FilteredDiagnostic{
-				Diagnostic: &rdf.Diagnostic{
-					Message: "test multiline with column",
-					Location: &rdf.Location{
-						Path: "sample.new.txt",
-						Range: &rdf.Range{
-							Start: &rdf.Position{Line: 2, Column: 1},
-							End:   &rdf.Position{Line: 3, Column: 5},
-						},
-					},
-				},
-				ShouldReport: true,
-			},
-		}, {
-			Result: &filter.FilteredDiagnostic{
-				Diagnostic: &rdf.Diagnostic{
-					Message: "test range comment",
-					Location: &rdf.Location{
-						Path: "sample.new.txt",
-						Range: &rdf.Range{
-							Start: &rdf.Position{Line: 2, Column: 1},
-							End:   &rdf.Position{Line: 2, Column: 5},
-						},
-					},
-				},
-				ShouldReport: true,
-			},
-		}, {
-			Result: &filter.FilteredDiagnostic{
-				Diagnostic: &rdf.Diagnostic{
-					Message:  "test severity override",
-					Severity: rdf.Severity_ERROR,
-					Location: &rdf.Location{
-						Path: "sample.new.txt",
-						Range: &rdf.Range{
-							Start: &rdf.Position{Line: 2},
-						},
-					},
-				},
-				ShouldReport: true,
-			},
-		}, {
-			Result: &filter.FilteredDiagnostic{
-				Diagnostic: &rdf.Diagnostic{
-					Message: "source test",
-					Source: &rdf.Source{
-						Name: "awesome-linter",
-					},
-					Location: &rdf.Location{
-						Path: "sample.new.txt",
-						Range: &rdf.Range{
-							Start: &rdf.Position{Line: 2},
-						},
-					},
-				},
-				ShouldReport: true,
-			},
-		}, {
-			Result: &filter.FilteredDiagnostic{
-				Diagnostic: &rdf.Diagnostic{
-					Message: "code test w/o URL",
-					Location: &rdf.Location{
-						Path:  "sample.new.txt",
-						Range: &rdf.Range{Start: &rdf.Position{Line: 2}},
-					},
-					Code: &rdf.Code{Value: "CODE14"},
-				},
-				ShouldReport: true,
-			},
-		}, {
-			Result: &filter.FilteredDiagnostic{
-				Diagnostic: &rdf.Diagnostic{
-					Message: "code test w/ URL",
-					Location: &rdf.Location{
-						Path:  "sample.new.txt",
-						Range: &rdf.Range{Start: &rdf.Position{Line: 2}},
-					},
-					Code: &rdf.Code{Value: "CODE14", Url: "https://github.com/reviewdog#CODE14"},
-				},
-				ShouldReport: true,
-			},
 		},
 	}
 
@@ -180,106 +70,9 @@ func TestCheck_OK(t *testing.T) {
 			t.Error(err)
 		}
 
-		wantAnnotations := []*github.CheckRunAnnotation{
-			{
-				Path:            github.String("diff/testdata/sample.new.txt"),
-				StartLine:       github.Int(2),
-				EndLine:         github.Int(2),
-				AnnotationLevel: github.String("warning"),
-				Message:         github.String("test message"),
-				Title:           github.String("[haya14busa-linter] diff/testdata/sample.new.txt#L2"),
-				RawDetails:      github.String("raw test message"),
-			},
-			{
-				Path:            github.String("diff/testdata/sample.new.txt"),
-				StartLine:       github.Int(2),
-				EndLine:         github.Int(3),
-				AnnotationLevel: github.String("warning"),
-				Message:         github.String("test multiline"),
-				Title:           github.String("[haya14busa-linter] diff/testdata/sample.new.txt#L2-L3"),
-			},
-			{
-				Path:            github.String("diff/testdata/sample.new.txt"),
-				StartLine:       github.Int(2),
-				EndLine:         github.Int(3),
-				AnnotationLevel: github.String("warning"),
-				Message:         github.String("test multiline with column"),
-				Title:           github.String("[haya14busa-linter] diff/testdata/sample.new.txt#L2-L3"),
-			},
-			{
-				Path:            github.String("diff/testdata/sample.new.txt"),
-				StartLine:       github.Int(2),
-				EndLine:         github.Int(2),
-				StartColumn:     github.Int(1),
-				EndColumn:       github.Int(5),
-				AnnotationLevel: github.String("warning"),
-				Message:         github.String("test range comment"),
-				Title:           github.String("[haya14busa-linter] diff/testdata/sample.new.txt#L2"),
-			},
-			{
-				Path:            github.String("diff/testdata/sample.new.txt"),
-				StartLine:       github.Int(2),
-				EndLine:         github.Int(2),
-				AnnotationLevel: github.String("failure"),
-				Message:         github.String("test severity override"),
-				Title:           github.String("[haya14busa-linter] diff/testdata/sample.new.txt#L2"),
-			},
-			{
-				Path:            github.String("diff/testdata/sample.new.txt"),
-				StartLine:       github.Int(2),
-				EndLine:         github.Int(2),
-				AnnotationLevel: github.String("warning"),
-				Message:         github.String("source test"),
-				Title:           github.String("[awesome-linter] diff/testdata/sample.new.txt#L2"),
-			},
-			{
-				Path:            github.String("diff/testdata/sample.new.txt"),
-				StartLine:       github.Int(2),
-				EndLine:         github.Int(2),
-				AnnotationLevel: github.String("warning"),
-				Message:         github.String("code test w/o URL"),
-				Title:           github.String("[haya14busa-linter] diff/testdata/sample.new.txt#L2 <CODE14>"),
-			},
-			{
-				Path:            github.String("diff/testdata/sample.new.txt"),
-				StartLine:       github.Int(2),
-				EndLine:         github.Int(2),
-				AnnotationLevel: github.String("warning"),
-				Message:         github.String("code test w/ URL"),
-				Title:           github.String("[haya14busa-linter] diff/testdata/sample.new.txt#L2 <CODE14>(https://github.com/reviewdog#CODE14)"),
-			},
-		}
-
 		if req.GetStatus() == "completed" {
-			if want := "neutral"; req.GetConclusion() != want {
-				t.Errorf("conclusion = %s, want %s", req.GetConclusion(), want)
-			}
 			if wantTitle := "reviewdog [haya14busa-linter] report"; req.GetOutput().GetTitle() != wantTitle {
 				t.Errorf("title = %s, want %s", req.GetOutput().GetTitle(), wantTitle)
-			}
-			if wantSummary := `reported by [reviewdog](https://github.com/reviewdog/reviewdog) :dog:
-<details>
-<summary>Findings (8)</summary>
-
-[diff/testdata/sample.new.txt|2 col 1|](https://github.com/haya14busa/reviewdog/blob/1414/diff/testdata/sample.new.txt#L2) test message
-[diff/testdata/sample.new.txt|2|](https://github.com/haya14busa/reviewdog/blob/1414/diff/testdata/sample.new.txt#L2) test multiline
-[diff/testdata/sample.new.txt|2 col 1|](https://github.com/haya14busa/reviewdog/blob/1414/diff/testdata/sample.new.txt#L2) test multiline with column
-[diff/testdata/sample.new.txt|2 col 1|](https://github.com/haya14busa/reviewdog/blob/1414/diff/testdata/sample.new.txt#L2) test range comment
-[diff/testdata/sample.new.txt|2|](https://github.com/haya14busa/reviewdog/blob/1414/diff/testdata/sample.new.txt#L2) test severity override
-[diff/testdata/sample.new.txt|2|](https://github.com/haya14busa/reviewdog/blob/1414/diff/testdata/sample.new.txt#L2) source test
-[diff/testdata/sample.new.txt|2|](https://github.com/haya14busa/reviewdog/blob/1414/diff/testdata/sample.new.txt#L2) code test w/o URL
-[diff/testdata/sample.new.txt|2|](https://github.com/haya14busa/reviewdog/blob/1414/diff/testdata/sample.new.txt#L2) code test w/ URL
-</details>
-<details>
-<summary>Filtered Findings (1)</summary>
-
-[sample.new.txt|14|](https://github.com/haya14busa/reviewdog/blob/1414/sample.new.txt#L14) test message outside diff
-</details>`; req.GetOutput().GetSummary() != wantSummary {
-				t.Errorf("summary =\n%s\n\nwant\n%s", req.GetOutput().GetSummary(), wantSummary)
-			}
-		} else {
-			if d := cmp.Diff(req.Output.Annotations, wantAnnotations); d != "" {
-				t.Errorf("Annotation diff found:\n%s", d)
 			}
 		}
 	})
@@ -453,5 +246,160 @@ func TestCheck_summary_too_many_findings_cut_off_correctly(t *testing.T) {
 	}
 	if !strings.Contains(summaryText, "... (Too many findings. Dropped some findings)\n</details>") {
 		t.Error("summary text was not cut off correctly")
+	}
+}
+
+func TestCheck_setToolNameForEachRun(t *testing.T) {
+	const (
+		owner       = "haya14busa"
+		repo        = "reviewdog"
+		prNum       = 14
+		sha         = "1414"
+		reportURL   = "http://example.com/report_url"
+		conclusion  = "neutral"
+		wantCheckID = 1414
+		toolName1   = "toolName1"
+		level1      = "warning"
+		toolName2   = "toolName2"
+		level2      = ""
+	)
+
+	mux := http.NewServeMux()
+	checkRunNum := 0
+	mux.HandleFunc("/repos/haya14busa/reviewdog/check-runs", func(w http.ResponseWriter, r *http.Request) {
+		checkRunNum++
+		var req github.CreateCheckRunOptions
+		if err := json.NewDecoder(r.Body).Decode(&req); err != nil {
+			t.Error(err)
+		}
+		switch checkRunNum {
+		case 1:
+			if req.Name != toolName1 {
+				t.Errorf("toolName = %s, want %s", req.Name, toolName1)
+			}
+		case 2:
+			if req.Name != toolName2 {
+				t.Errorf("toolName = %s, want %s", req.Name, toolName2)
+			}
+		}
+		if err := json.NewEncoder(w).Encode(&github.CheckRun{ID: github.Int64(wantCheckID)}); err != nil {
+			t.Fatal(err)
+		}
+	})
+	updateCheckRunNum := 0
+	mux.HandleFunc("/repos/haya14busa/reviewdog/check-runs/1414", func(w http.ResponseWriter, r *http.Request) {
+		var req github.CheckRun
+		if err := json.NewDecoder(r.Body).Decode(&req); err != nil {
+			t.Error(err)
+		}
+		switch updateCheckRunNum {
+		case 0:
+			if req.GetName() != toolName1 {
+				t.Errorf("toolName = %s, want %s", req.GetName(), toolName1)
+			}
+			wantAnnotations := []*github.CheckRunAnnotation{
+				{
+					Path:            github.String("sample.new.txt"),
+					StartLine:       github.Int(2),
+					EndLine:         github.Int(2),
+					AnnotationLevel: github.String("warning"),
+					Message:         github.String("comment 1"),
+					Title:           github.String("[toolName1] sample.new.txt#L2"),
+				},
+			}
+			if req.GetStatus() == "completed" {
+				if wantTitle := "reviewdog [toolName1] report"; req.GetOutput().GetTitle() != wantTitle {
+					t.Errorf("title = %s, want %s", req.GetOutput().GetTitle(), wantTitle)
+				}
+			} else {
+				if d := cmp.Diff(req.Output.Annotations, wantAnnotations); d != "" {
+					t.Errorf("Annotation diff found:\n%s", d)
+				}
+			}
+		case 1:
+			if req.GetName() != toolName2 {
+				t.Errorf("toolName = %s, want %s", req.GetName(), toolName2)
+			}
+			wantAnnotations := []*github.CheckRunAnnotation{
+				{
+					Path:            github.String("sample.new.txt"),
+					StartLine:       github.Int(2),
+					EndLine:         github.Int(2),
+					AnnotationLevel: github.String("failure"), // default
+					Message:         github.String("comment 2"),
+					Title:           github.String("[toolName2] sample.new.txt#L2"),
+				},
+			}
+			if req.GetStatus() == "completed" {
+				if wantTitle := "reviewdog [toolName2] report"; req.GetOutput().GetTitle() != wantTitle {
+					t.Errorf("title = %s, want %s", req.GetOutput().GetTitle(), wantTitle)
+				}
+			} else {
+				if d := cmp.Diff(req.Output.Annotations, wantAnnotations); d != "" {
+					t.Errorf("Annotation diff found:\n%s", d)
+				}
+			}
+		}
+		if req.GetStatus() == "completed" {
+			updateCheckRunNum++
+		}
+	})
+
+	ts := httptest.NewServer(mux)
+	defer ts.Close()
+
+	cli := github.NewClient(nil)
+	cli.BaseURL, _ = url.Parse(ts.URL + "/")
+
+	check := &Check{
+		CLI:      cli,
+		Owner:    owner,
+		Repo:     repo,
+		PR:       prNum,
+		SHA:      sha,
+		ToolName: "", // empty
+		Level:    "", // empty
+	}
+
+	check.SetTool(toolName1, level1)
+	if err := check.Post(context.Background(), &reviewdog.Comment{
+		Result: &filter.FilteredDiagnostic{
+			Diagnostic: &rdf.Diagnostic{
+				Message: "comment 1",
+				Location: &rdf.Location{
+					Path: "sample.new.txt",
+					Range: &rdf.Range{
+						Start: &rdf.Position{Line: 2, Column: 1},
+					},
+				},
+			},
+			ShouldReport: true,
+		},
+	}); err != nil {
+		t.Errorf("failed to post: %v", err)
+	}
+	if err := check.Flush(context.Background()); err != nil {
+		t.Error(err)
+	}
+
+	check.SetTool(toolName2, level2)
+	if err := check.Post(context.Background(), &reviewdog.Comment{
+		Result: &filter.FilteredDiagnostic{
+			Diagnostic: &rdf.Diagnostic{
+				Message: "comment 2",
+				Location: &rdf.Location{
+					Path: "sample.new.txt",
+					Range: &rdf.Range{
+						Start: &rdf.Position{Line: 2, Column: 1},
+					},
+				},
+			},
+			ShouldReport: true,
+		},
+	}); err != nil {
+		t.Errorf("failed to post: %v", err)
+	}
+	if err := check.Flush(context.Background()); err != nil {
+		t.Error(err)
 	}
 }

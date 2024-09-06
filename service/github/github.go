@@ -13,7 +13,7 @@ import (
 	"strings"
 	"sync"
 
-	"github.com/google/go-github/v63/github"
+	"github.com/google/go-github/v64/github"
 	"google.golang.org/protobuf/proto"
 
 	"github.com/reviewdog/reviewdog"
@@ -115,11 +115,17 @@ func (g *PullRequest) Post(_ context.Context, c *reviewdog.Comment) error {
 func (g *PullRequest) Flush(ctx context.Context) error {
 	g.muComments.Lock()
 	defer g.muComments.Unlock()
+	defer func() { g.postComments = nil }()
 
 	if err := g.setPostedComment(ctx); err != nil {
 		return err
 	}
 	return g.postAsReviewComment(ctx)
+}
+
+func (g *PullRequest) SetTool(toolName string, level string) {
+	g.toolName = toolName
+	g.logWriter = githubutils.NewGitHubActionLogWriter(level)
 }
 
 func (g *PullRequest) postAsReviewComment(ctx context.Context) error {
