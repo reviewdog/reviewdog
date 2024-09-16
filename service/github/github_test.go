@@ -1377,44 +1377,6 @@ func TestGitHubPullRequest_Post_toomany(t *testing.T) {
 	}
 }
 
-func TestGitHubPullRequest_workdir(t *testing.T) {
-	cwd, _ := os.Getwd()
-	defer os.Chdir(cwd)
-	moveToRootDir()
-	defer setupEnvs()()
-
-	g, err := NewGitHubPullRequest(nil, "", "", 0, "", "warning", "tool-name")
-	if err != nil {
-		t.Fatal(err)
-	}
-	if g.wd != "" {
-		t.Fatalf("g.wd = %q, want empty", g.wd)
-	}
-	ctx := context.Background()
-	want := "a/b/c"
-	g.Post(ctx, &reviewdog.Comment{Result: &filter.FilteredDiagnostic{
-		Diagnostic: &rdf.Diagnostic{Location: &rdf.Location{Path: want}}}})
-	if got := g.postComments[0].Result.Diagnostic.GetLocation().GetPath(); got != want {
-		t.Errorf("wd=%q path=%q, want %q", g.wd, got, want)
-	}
-
-	subDir := "cmd/"
-	if err := os.Chdir(subDir); err != nil {
-		t.Fatal(err)
-	}
-	g, _ = NewGitHubPullRequest(nil, "", "", 0, "", "warning", "tool-name")
-	if g.wd != subDir {
-		t.Fatalf("gitRelWorkdir() = %q, want %q", g.wd, subDir)
-	}
-	path := "a/b/c"
-	wantPath := "cmd/" + path
-	g.Post(ctx, &reviewdog.Comment{Result: &filter.FilteredDiagnostic{
-		Diagnostic: &rdf.Diagnostic{Location: &rdf.Location{Path: want}}}})
-	if got := g.postComments[0].Result.Diagnostic.GetLocation().GetPath(); got != wantPath {
-		t.Errorf("wd=%q path=%q, want %q", g.wd, got, wantPath)
-	}
-}
-
 func TestGitHubPullRequest_Post_NoPermission(t *testing.T) {
 	cwd, _ := os.Getwd()
 	defer os.Chdir(cwd)

@@ -12,9 +12,10 @@ import (
 	"github.com/reviewdog/reviewdog/parser"
 	"github.com/reviewdog/reviewdog/pathutil"
 	"github.com/reviewdog/reviewdog/proto/rdf"
+	"github.com/reviewdog/reviewdog/service/serviceutil"
 )
 
-// Reviewdog represents review dog application which parses result of compiler
+// Reviewdog represents reviewdog application which parses result of compiler
 // or linter, get diff and filter the results by diff, and report filtered
 // results.
 type Reviewdog struct {
@@ -46,6 +47,9 @@ type Comment struct {
 // CommentService is an interface which posts Comment.
 type CommentService interface {
 	Post(context.Context, *Comment) error
+	// If true, prepend Git relative directly to pathes in results.
+	// Useful for integration with code hosting service.
+	ShouldPrependGitRelDir() bool
 }
 
 // FilteredCommentService is an interface which support posting filtered Comment.
@@ -81,7 +85,16 @@ func (w *Reviewdog) runFromResult(ctx context.Context, results []*rdf.Diagnostic
 		return err
 	}
 
-	pathutil.NormalizePathInResults(results, wd)
+	relDir := ""
+	if w.c.ShouldPrependGitRelDir() {
+		gitRelWorkdir, err := serviceutil.GitRelWorkdir()
+		if err != nil {
+			return err
+		}
+		relDir = gitRelWorkdir
+	}
+
+	pathutil.NormalizePathInResults(results, wd, relDir)
 
 	checks := filter.FilterCheck(results, filediffs, strip, wd, w.filterMode)
 	shouldFail := false

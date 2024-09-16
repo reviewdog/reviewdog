@@ -35,6 +35,7 @@ import (
 	gerritservice "github.com/reviewdog/reviewdog/service/gerrit"
 	giteaservice "github.com/reviewdog/reviewdog/service/gitea"
 	githubservice "github.com/reviewdog/reviewdog/service/github"
+	"github.com/reviewdog/reviewdog/service/github/githubutils"
 	gitlabservice "github.com/reviewdog/reviewdog/service/gitlab"
 )
 
@@ -696,10 +697,7 @@ func githubActionLogService(ctx context.Context, opt *option) (reviewdog.Comment
 			FallBackToGitCLI: true,
 		}
 	}
-	cs, err := githubservice.NewGitHubActionLog(opt.level)
-	if err != nil {
-		return nil, nil, err
-	}
+	cs := githubutils.NewGitHubActionLogWriter(opt.level)
 	return cs, ds, nil
 }
 

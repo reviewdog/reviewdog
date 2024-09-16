@@ -9,7 +9,6 @@ import (
 	"log"
 	"net/http"
 	"os"
-	"path/filepath"
 	"strings"
 	"sync"
 
@@ -69,9 +68,6 @@ type PullRequest struct {
 	postedcs           commentutil.PostedComments
 	outdatedComments   map[string]*github.PullRequestComment // fingerprint -> comment
 	prCommentWithReply map[int64]bool                        // review id -> bool
-
-	// wd is working directory relative to root of repository.
-	wd string
 }
 
 // NewGitHubPullRequest returns a new PullRequest service.
@@ -84,10 +80,6 @@ type PullRequest struct {
 // [1]: https://docs.github.com/en/actions/security-guides/automatic-token-authentication#permissions-for-the-github_token
 // [2]: https://docs.github.com/en/actions/reference/workflow-commands-for-github-actions
 func NewGitHubPullRequest(cli *github.Client, owner, repo string, pr int, sha, level, toolName string) (*PullRequest, error) {
-	workDir, err := serviceutil.GitRelWorkdir()
-	if err != nil {
-		return nil, err
-	}
 	return &PullRequest{
 		cli:       cli,
 		owner:     owner,
@@ -96,20 +88,19 @@ func NewGitHubPullRequest(cli *github.Client, owner, repo string, pr int, sha, l
 		sha:       sha,
 		toolName:  toolName,
 		logWriter: githubutils.NewGitHubActionLogWriter(level),
-		wd:        workDir,
 	}, nil
 }
 
 // Post accepts a comment and holds it. Flush method actually posts comments to
 // GitHub in parallel.
 func (g *PullRequest) Post(_ context.Context, c *reviewdog.Comment) error {
-	c.Result.Diagnostic.GetLocation().Path = filepath.ToSlash(filepath.Join(g.wd,
-		c.Result.Diagnostic.GetLocation().GetPath()))
 	g.muComments.Lock()
 	defer g.muComments.Unlock()
 	g.postComments = append(g.postComments, c)
 	return nil
 }
+
+func (*PullRequest) ShouldPrependGitRelDir() bool { return true }
 
 // Flush posts comments which has not been posted yet.
 func (g *PullRequest) Flush(ctx context.Context) error {

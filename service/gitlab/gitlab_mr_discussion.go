@@ -3,7 +3,6 @@ package gitlab
 import (
 	"context"
 	"fmt"
-	"path/filepath"
 	"strconv"
 	"strings"
 	"sync"
@@ -14,7 +13,6 @@ import (
 	"github.com/reviewdog/reviewdog"
 	"github.com/reviewdog/reviewdog/proto/rdf"
 	"github.com/reviewdog/reviewdog/service/commentutil"
-	"github.com/reviewdog/reviewdog/service/serviceutil"
 )
 
 const (
@@ -36,37 +34,29 @@ type MergeRequestDiscussionCommenter struct {
 
 	muComments   sync.Mutex
 	postComments []*reviewdog.Comment
-
-	// wd is working directory relative to root of repository.
-	wd string
 }
 
 // NewGitLabMergeRequestDiscussionCommenter returns a new MergeRequestDiscussionCommenter service.
 // MergeRequestDiscussionCommenter service needs git command in $PATH.
 func NewGitLabMergeRequestDiscussionCommenter(cli *gitlab.Client, owner, repo string, pr int, sha string) (*MergeRequestDiscussionCommenter, error) {
-	workDir, err := serviceutil.GitRelWorkdir()
-	if err != nil {
-		return nil, fmt.Errorf("MergeRequestDiscussionCommenter needs 'git' command: %w", err)
-	}
 	return &MergeRequestDiscussionCommenter{
 		cli:      cli,
 		pr:       pr,
 		sha:      sha,
 		projects: owner + "/" + repo,
-		wd:       workDir,
 	}, nil
 }
 
 // Post accepts a comment and holds it. Flush method actually posts comments to
 // GitLab in parallel.
 func (g *MergeRequestDiscussionCommenter) Post(_ context.Context, c *reviewdog.Comment) error {
-	c.Result.Diagnostic.GetLocation().Path = filepath.ToSlash(
-		filepath.Join(g.wd, c.Result.Diagnostic.GetLocation().GetPath()))
 	g.muComments.Lock()
 	defer g.muComments.Unlock()
 	g.postComments = append(g.postComments, c)
 	return nil
 }
+
+func (*MergeRequestDiscussionCommenter) ShouldPrependGitRelDir() bool { return true }
 
 // Flush posts comments which has not been posted yet.
 func (g *MergeRequestDiscussionCommenter) Flush(ctx context.Context) error {

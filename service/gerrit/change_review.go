@@ -2,14 +2,11 @@ package gerrit
 
 import (
 	"context"
-	"fmt"
-	"path/filepath"
 	"sync"
 
 	"golang.org/x/build/gerrit"
 
 	"github.com/reviewdog/reviewdog"
-	"github.com/reviewdog/reviewdog/service/serviceutil"
 )
 
 var _ reviewdog.CommentService = &ChangeReviewCommenter{}
@@ -26,36 +23,28 @@ type ChangeReviewCommenter struct {
 
 	muComments   sync.Mutex
 	postComments []*reviewdog.Comment
-
-	// wd is working directory relative to root of repository.
-	wd string
 }
 
 // NewChangeReviewCommenter returns a new NewChangeReviewCommenter service.
 // ChangeReviewCommenter service needs git command in $PATH.
 func NewChangeReviewCommenter(cli *gerrit.Client, changeID, revisionID string) (*ChangeReviewCommenter, error) {
-	workDir, err := serviceutil.GitRelWorkdir()
-	if err != nil {
-		return nil, fmt.Errorf("ChangeReviewCommenter needs 'git' command: %w", err)
-	}
-
 	return &ChangeReviewCommenter{
 		cli:          cli,
 		changeID:     changeID,
 		revisionID:   revisionID,
 		postComments: []*reviewdog.Comment{},
-		wd:           workDir,
 	}, nil
 }
 
 // Post accepts a comment and holds it. Flush method actually posts comments to Gerrit
 func (g *ChangeReviewCommenter) Post(_ context.Context, c *reviewdog.Comment) error {
-	c.Result.Diagnostic.GetLocation().Path = filepath.Join(g.wd, c.Result.Diagnostic.GetLocation().GetPath())
 	g.muComments.Lock()
 	defer g.muComments.Unlock()
 	g.postComments = append(g.postComments, c)
 	return nil
 }
+
+func (*ChangeReviewCommenter) ShouldPrependGitRelDir() bool { return true }
 
 // Flush posts comments which has not been posted yet.
 func (g *ChangeReviewCommenter) Flush(ctx context.Context) error {
