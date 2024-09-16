@@ -6,6 +6,7 @@ import (
 	"net/http"
 	"net/http/httptest"
 	"net/url"
+	"os"
 	"strings"
 	"testing"
 
@@ -28,6 +29,16 @@ func TestCheck_OK(t *testing.T) {
 		level       = "warning"
 		wantCheckID = 1414
 	)
+
+	cwd, err := os.Getwd()
+	if err != nil {
+		t.Fatal(err)
+	}
+	defer os.Chdir(cwd)
+	err = os.Chdir("../../diff/testdata")
+	if err != nil {
+		t.Fatal(err)
+	}
 
 	comments := []*reviewdog.Comment{
 		{
@@ -72,14 +83,9 @@ func TestCheck_OK(t *testing.T) {
 	cli := github.NewClient(nil)
 	cli.BaseURL, _ = url.Parse(ts.URL + "/")
 
-	check := &Check{
-		CLI:      cli,
-		Owner:    owner,
-		Repo:     repo,
-		PR:       prNum,
-		SHA:      sha,
-		ToolName: name,
-		Level:    level,
+	check, err := NewGitHubCheck(cli, owner, repo, prNum, sha, level, name)
+	if err != nil {
+		t.Fatal(err)
 	}
 
 	for _, c := range comments {
@@ -114,6 +120,16 @@ func TestCheck_OK_multiple_update_runs(t *testing.T) {
 		wantCheckID = 1414
 	)
 
+	cwd, err := os.Getwd()
+	if err != nil {
+		t.Fatal(err)
+	}
+	defer os.Chdir(cwd)
+	err = os.Chdir("../../diff/testdata")
+	if err != nil {
+		t.Fatal(err)
+	}
+
 	mux := http.NewServeMux()
 	mux.HandleFunc("/repos/haya14busa/reviewdog/check-runs", func(w http.ResponseWriter, r *http.Request) {
 		if err := json.NewEncoder(w).Encode(&github.CheckRun{ID: github.Int64(wantCheckID)}); err != nil {
@@ -142,14 +158,9 @@ func TestCheck_OK_multiple_update_runs(t *testing.T) {
 	cli := github.NewClient(nil)
 	cli.BaseURL, _ = url.Parse(ts.URL + "/")
 
-	check := &Check{
-		CLI:      cli,
-		Owner:    owner,
-		Repo:     repo,
-		PR:       prNum,
-		SHA:      sha,
-		ToolName: name,
-		Level:    level,
+	check, err := NewGitHubCheck(cli, owner, repo, prNum, sha, level, name)
+	if err != nil {
+		t.Fatal(err)
 	}
 
 	for i := 0; i < 101; i++ {
@@ -189,6 +200,16 @@ func TestCheck_fail_check_with_403_in_GitHub_Actions(t *testing.T) {
 		level       = "warning"
 		wantCheckID = 1414
 	)
+	cwd, err := os.Getwd()
+	if err != nil {
+		t.Fatal(err)
+	}
+	defer os.Chdir(cwd)
+	err = os.Chdir("../../diff/testdata")
+	if err != nil {
+		t.Fatal(err)
+	}
+
 	mux := http.NewServeMux()
 	mux.HandleFunc("/repos/haya14busa/reviewdog/check-runs", func(w http.ResponseWriter, r *http.Request) {
 		w.WriteHeader(http.StatusForbidden)
@@ -197,14 +218,10 @@ func TestCheck_fail_check_with_403_in_GitHub_Actions(t *testing.T) {
 	defer ts.Close()
 	cli := github.NewClient(nil)
 	cli.BaseURL, _ = url.Parse(ts.URL + "/")
-	check := &Check{
-		CLI:      cli,
-		Owner:    owner,
-		Repo:     repo,
-		PR:       prNum,
-		SHA:      sha,
-		ToolName: name,
-		Level:    level,
+
+	check, err := NewGitHubCheck(cli, owner, repo, prNum, sha, level, name)
+	if err != nil {
+		t.Fatal(err)
 	}
 	if err := check.Flush(context.Background()); err != nil {
 		t.Error(err)
