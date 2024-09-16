@@ -9,6 +9,17 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ### :sparkles: Release Note <!-- optional -->
 
 ### :rocket: Enhancements
+- ...
+
+### :bug: Fixes
+- ...
+
+### :rotating_light: Breaking changes
+- ...
+
+## [v0.20.2] - 2024-08-31
+
+### :rocket: Enhancements
 - [#1845](https://github.com/reviewdog/reviewdog/pull/1845) Normalize file path in `related_locations` too.
 
 ### :bug: Fixes
@@ -297,4 +308,5 @@ See https://github.com/reviewdog/reviewdog/releases for older release note.
 [v0.19.0]: https://github.com/reviewdog/reviewdog/compare/v0.18.1...v0.19.0
 [v0.20.0]: https://github.com/reviewdog/reviewdog/compare/v0.19.0...v0.20.0
 [v0.20.1]: https://github.com/reviewdog/reviewdog/compare/v0.20.0...v0.20.1
+[v0.20.2]: https://github.com/reviewdog/reviewdog/compare/v0.20.1...v0.20.2
 [@haya14busa]: https://github.com/haya14busa
