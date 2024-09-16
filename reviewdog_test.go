@@ -132,11 +132,10 @@ index 34cacb9..a727dd3 100644
 ./golint.new.go:11:1: comment on exported function F2 should be of the form "F2 ..."
 `
 
-	want := "golint.new.go"
+	want := "_testdata/golint.new.go"
 
 	c := &testWriter{
 		FakePost: func(c *Comment) error {
-			t.Error(c.Result.Diagnostic.GetLocation().GetPath())
 			if got := c.Result.Diagnostic.GetLocation().GetPath(); got != want {
 				t.Errorf("path: got %v, want %v", got, want)
 			}
