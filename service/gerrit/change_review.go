@@ -27,13 +27,13 @@ type ChangeReviewCommenter struct {
 
 // NewChangeReviewCommenter returns a new NewChangeReviewCommenter service.
 // ChangeReviewCommenter service needs git command in $PATH.
-func NewChangeReviewCommenter(cli *gerrit.Client, changeID, revisionID string) (*ChangeReviewCommenter, error) {
+func NewChangeReviewCommenter(cli *gerrit.Client, changeID, revisionID string) *ChangeReviewCommenter {
 	return &ChangeReviewCommenter{
 		cli:          cli,
 		changeID:     changeID,
 		revisionID:   revisionID,
 		postComments: []*reviewdog.Comment{},
-	}, nil
+	}
 }
 
 // Post accepts a comment and holds it. Flush method actually posts comments to Gerrit

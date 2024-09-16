@@ -36,13 +36,13 @@ type MergeRequestCommitCommenter struct {
 
 // NewGitLabMergeRequestCommitCommenter returns a new MergeRequestCommitCommenter service.
 // MergeRequestCommitCommenter service needs git command in $PATH.
-func NewGitLabMergeRequestCommitCommenter(cli *gitlab.Client, owner, repo string, pr int, sha string) (*MergeRequestCommitCommenter, error) {
+func NewGitLabMergeRequestCommitCommenter(cli *gitlab.Client, owner, repo string, pr int, sha string) *MergeRequestCommitCommenter {
 	return &MergeRequestCommitCommenter{
 		cli:      cli,
 		pr:       pr,
 		sha:      sha,
 		projects: owner + "/" + repo,
-	}, nil
+	}
 }
 
 // Post accepts a comment and holds it. Flush method actually posts comments to

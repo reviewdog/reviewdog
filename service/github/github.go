@@ -79,7 +79,7 @@ type PullRequest struct {
 //
 // [1]: https://docs.github.com/en/actions/security-guides/automatic-token-authentication#permissions-for-the-github_token
 // [2]: https://docs.github.com/en/actions/reference/workflow-commands-for-github-actions
-func NewGitHubPullRequest(cli *github.Client, owner, repo string, pr int, sha, level, toolName string) (*PullRequest, error) {
+func NewGitHubPullRequest(cli *github.Client, owner, repo string, pr int, sha, level, toolName string) *PullRequest {
 	return &PullRequest{
 		cli:       cli,
 		owner:     owner,
@@ -88,7 +88,7 @@ func NewGitHubPullRequest(cli *github.Client, owner, repo string, pr int, sha, l
 		sha:       sha,
 		toolName:  toolName,
 		logWriter: githubutils.NewGitHubActionLogWriter(level),
-	}, nil
+	}
 }
 
 // Post accepts a comment and holds it. Flush method actually posts comments to

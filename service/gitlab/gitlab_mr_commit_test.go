@@ -85,10 +85,8 @@ func TestGitLabMergeRequestCommitCommenter_Post_Flush_review_api(t *testing.T) {
 		t.Fatal(err)
 	}
 
-	g, err := NewGitLabMergeRequestCommitCommenter(cli, "o", "r", 14, "sha")
-	if err != nil {
-		t.Fatal(err)
-	}
+	g := NewGitLabMergeRequestCommitCommenter(cli, "o", "r", 14, "sha")
+
 	// Path is set to non existing file path for mock test not to use last commit id of the line.
 	// If setting exists file path, sha is changed by last commit id.
 	comments := []*reviewdog.Comment{

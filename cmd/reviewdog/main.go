@@ -350,16 +350,9 @@ func run(r io.Reader, w io.Writer, opt *option) error {
 			return nil
 		}
 
-		gc, err := gitlabservice.NewGitLabMergeRequestDiscussionCommenter(cli, build.Owner, build.Repo, build.PullRequest, build.SHA)
-		if err != nil {
-			return err
-		}
-
+		gc := gitlabservice.NewGitLabMergeRequestDiscussionCommenter(cli, build.Owner, build.Repo, build.PullRequest, build.SHA)
 		cs = reviewdog.MultiCommentService(gc, cs)
-		ds, err = gitlabservice.NewGitLabMergeRequestDiff(cli, build.Owner, build.Repo, build.PullRequest, build.SHA)
-		if err != nil {
-			return err
-		}
+		ds = gitlabservice.NewGitLabMergeRequestDiff(cli, build.Owner, build.Repo, build.PullRequest, build.SHA)
 	case "gitlab-mr-commit":
 		build, cli, err := gitlabBuildWithClient()
 		if err != nil {
@@ -370,27 +363,15 @@ func run(r io.Reader, w io.Writer, opt *option) error {
 			return nil
 		}
 
-		gc, err := gitlabservice.NewGitLabMergeRequestCommitCommenter(cli, build.Owner, build.Repo, build.PullRequest, build.SHA)
-		if err != nil {
-			return err
-		}
-
+		gc := gitlabservice.NewGitLabMergeRequestCommitCommenter(cli, build.Owner, build.Repo, build.PullRequest, build.SHA)
 		cs = reviewdog.MultiCommentService(gc, cs)
-		ds, err = gitlabservice.NewGitLabMergeRequestDiff(cli, build.Owner, build.Repo, build.PullRequest, build.SHA)
-		if err != nil {
-			return err
-		}
+		ds = gitlabservice.NewGitLabMergeRequestDiff(cli, build.Owner, build.Repo, build.PullRequest, build.SHA)
 	case "gerrit-change-review":
 		b, cli, err := gerritBuildWithClient()
 		if err != nil {
 			return err
 		}
-		gc, err := gerritservice.NewChangeReviewCommenter(cli, b.GerritChangeID, b.GerritRevisionID)
-		if err != nil {
-			return err
-		}
-		cs = gc
-
+		cs = gerritservice.NewChangeReviewCommenter(cli, b.GerritChangeID, b.GerritRevisionID)
 		d, err := gerritservice.NewChangeDiff(cli, b.Branch, b.GerritChangeID)
 		if err != nil {
 			return err
@@ -651,10 +632,7 @@ func githubService(ctx context.Context, opt *option) (gs *githubservice.PullRequ
 		g.PullRequest = prID
 	}
 
-	gs, err = githubservice.NewGitHubPullRequest(client, g.Owner, g.Repo, g.PullRequest, g.SHA, opt.level, toolName(opt))
-	if err != nil {
-		return nil, false, err
-	}
+	gs = githubservice.NewGitHubPullRequest(client, g.Owner, g.Repo, g.PullRequest, g.SHA, opt.level, toolName(opt))
 	return gs, true, nil
 }
 
