@@ -488,7 +488,14 @@ func diffService(s string, strip int) (reviewdog.DiffService, error) {
 	if len(cmds) < 1 {
 		return nil, errors.New("diff command is empty")
 	}
-	cmd := exec.Command(cmds[0], cmds[1:]...)
+	args := cmds[1:]
+	// [Hack] Add `--relative` for git diff command so that it returns relative
+	// path to current directry. git diff returns path relative to the project
+	// root directry by default.
+	if cmds[0] == "git" && cmds[1] == "diff" {
+		args = append([]string{cmds[1], "--relative"}, cmds[2:]...)
+	}
+	cmd := exec.Command(cmds[0], args...)
 	d := reviewdog.NewDiffCmd(cmd, strip)
 	return d, nil
 }
