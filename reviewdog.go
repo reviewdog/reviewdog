@@ -47,7 +47,7 @@ type Comment struct {
 // CommentService is an interface which posts Comment.
 type CommentService interface {
 	Post(context.Context, *Comment) error
-	// If true, prepend Git relative directly to pathes in results.
+	// If true, prepend Git relative directly to paths in results.
 	// Useful for integration with code hosting service.
 	ShouldPrependGitRelDir() bool
 }
