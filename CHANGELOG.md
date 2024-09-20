@@ -17,7 +17,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ### :rotating_light: Breaking changes
 - ...
 
-## [v0.20.2] - 2024-08-31
+## [v0.20.2] - 2024-09-16
 
 ### :rocket: Enhancements
 - [#1845](https://github.com/reviewdog/reviewdog/pull/1845) Normalize file path in `related_locations` too.
@@ -46,7 +46,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
   the flag while it's working.
 <!-- TODO: update the v0.19.0 release section -->
 
-## [v0.20.1] - 2024-07-10
+## [v0.20.1] - 2024-07-14
 
 ### :bug: Fixes
 - [#1835](https://github.com/reviewdog/reviewdog/pull/1835) Fix -filter-mode
