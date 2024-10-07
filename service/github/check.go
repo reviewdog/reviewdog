@@ -4,7 +4,6 @@ import (
 	"context"
 	"fmt"
 	"net/http"
-	"path/filepath"
 	"strings"
 	"sync"
 	"time"
@@ -15,7 +14,6 @@ import (
 	"github.com/reviewdog/reviewdog/filter"
 	"github.com/reviewdog/reviewdog/proto/rdf"
 	"github.com/reviewdog/reviewdog/service/github/githubutils"
-	"github.com/reviewdog/reviewdog/service/serviceutil"
 )
 
 // GitHub check runs API cannot handle too large requests.
@@ -49,9 +47,6 @@ type Check struct {
 
 	muResult sync.Mutex
 	result   *CheckResult
-
-	// wd is working directory relative to root of repository.
-	wd string
 }
 
 // CheckResult represents result of Check.
@@ -62,10 +57,6 @@ type CheckResult struct {
 
 // NewGitHubCheck returns a new Check service.
 func NewGitHubCheck(cli *github.Client, owner, repo string, pr int, sha, level, toolName string) (*Check, error) {
-	workDir, err := serviceutil.GitRelWorkdir()
-	if err != nil {
-		return nil, err
-	}
 	return &Check{
 		CLI:      cli,
 		Owner:    owner,
@@ -74,19 +65,18 @@ func NewGitHubCheck(cli *github.Client, owner, repo string, pr int, sha, level, 
 		SHA:      sha,
 		Level:    level,
 		ToolName: toolName,
-		wd:       workDir,
 	}, nil
 }
 
 // Post posts a reviewdog comment.
 func (ch *Check) Post(_ context.Context, c *reviewdog.Comment) error {
-	c.Result.Diagnostic.GetLocation().Path = filepath.ToSlash(filepath.Join(ch.wd,
-		c.Result.Diagnostic.GetLocation().GetPath()))
 	ch.muComments.Lock()
 	defer ch.muComments.Unlock()
 	ch.postComments = append(ch.postComments, c)
 	return nil
 }
+
+func (*Check) ShouldPrependGitRelDir() bool { return true }
 
 // PostFiltered posts a filtered reviewdog comment.
 func (ch *Check) PostFiltered(_ context.Context, c *reviewdog.Comment) error {

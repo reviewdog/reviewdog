@@ -10,7 +10,6 @@ import (
 	"github.com/xanzy/go-gitlab"
 
 	"github.com/reviewdog/reviewdog"
-	"github.com/reviewdog/reviewdog/service/serviceutil"
 )
 
 var _ reviewdog.DiffService = &MergeRequestDiff{}
@@ -21,25 +20,17 @@ type MergeRequestDiff struct {
 	pr       int
 	sha      string
 	projects string
-
-	// wd is working directory relative to root of repository.
-	wd string
 }
 
 // NewGitLabMergeRequestDiff returns a new MergeRequestDiff service.
 // itLabMergeRequestDiff service needs git command in $PATH.
-func NewGitLabMergeRequestDiff(cli *gitlab.Client, owner, repo string, pr int, sha string) (*MergeRequestDiff, error) {
-	workDir, err := serviceutil.GitRelWorkdir()
-	if err != nil {
-		return nil, fmt.Errorf("MergeRequestCommitCommenter needs 'git' command: %w", err)
-	}
+func NewGitLabMergeRequestDiff(cli *gitlab.Client, owner, repo string, pr int, sha string) *MergeRequestDiff {
 	return &MergeRequestDiff{
 		cli:      cli,
 		pr:       pr,
 		sha:      sha,
 		projects: owner + "/" + repo,
-		wd:       workDir,
-	}, nil
+	}
 }
 
 // Diff returns a diff of MergeRequest. It runs `git diff` locally instead of
