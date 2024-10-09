@@ -1,0 +1,7 @@
+--- addnewline.old.txt	2024-10-08 20:49:24
++++ addnewline.new.txt	2024-10-08 20:50:52
+@@ -1,2 +1,2 @@
+ " vim: nofixeol noendofline
+-this file will have a newline at the end
+\ No newline at end of file
++this file will have a newline at the end
