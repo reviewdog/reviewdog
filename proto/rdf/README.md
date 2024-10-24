@@ -40,7 +40,7 @@ it's widely used and easy to support both from diagnostic tools and development
 tools.
 
 ### **rdjsonl**
-JSON Lines (http://jsonlines.org/) of the [`Diagnostic`](reviewdog.proto) message ([JSON Schema](./jsonschema/Diagnostic.jsonschema)).
+JSON Lines (http://jsonlines.org/) of the [`Diagnostic`](reviewdog.proto) message ([JSON Schema](./jsonschema/Diagnostic.json)).
 
 Example:
 ```json
@@ -50,7 +50,7 @@ Example:
 ```
 
 ### **rdjson**
-JSON format of the [`DiagnosticResult`](reviewdog.proto) message ([JSON Schema](./jsonschema/DiagnosticResult.jsonschema)).
+JSON format of the [`DiagnosticResult`](reviewdog.proto) message ([JSON Schema](./jsonschema/DiagnosticResult.json)).
 
 Example:
 ```json
