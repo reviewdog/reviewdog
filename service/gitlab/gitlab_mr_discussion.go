@@ -173,7 +173,7 @@ func listAllMergeRequestDiscussion(cli *gitlab.Client, projectID string, mergeRe
 func buildSuggestions(c *reviewdog.Comment) string {
 	var sb strings.Builder
 	for _, s := range c.Result.Diagnostic.GetSuggestions() {
-		if s.Range == nil || s.Range.Start == nil || s.Range.End == nil {
+		if s.Range == nil || s.Range.Start == nil {
 			continue
 		}
 
@@ -202,7 +202,14 @@ func buildSingleSuggestion(c *reviewdog.Comment, s *rdf.Suggestion) (string, err
 	txt := s.GetText()
 	backticks := commentutil.GetCodeFenceLength(txt)
 
-	lines := strconv.Itoa(int(s.Range.End.Line - s.Range.Start.Line))
+	// Handle the case where Range.End is nil
+	var lines string
+	if s.Range.End != nil {
+		lines = strconv.Itoa(int(s.Range.End.Line - s.Range.Start.Line))
+	} else {
+		lines = "0" // Default to 0 if End is nil
+	}
+
 	sb.Grow(backticks + len("suggestion:-0+\n") + len(lines) + len(txt) + len("\n") + backticks)
 	commentutil.WriteCodeFence(&sb, backticks)
 	sb.WriteString("suggestion:-0+")
