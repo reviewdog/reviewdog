@@ -1,7 +1,7 @@
 [
   {
-    "PathOld": "addnewline.old.txt",
-    "PathNew": "addnewline.new.txt",
+    "PathOld": "addeofnewline.old.txt",
+    "PathNew": "addeofnewline.new.txt",
     "TimeOld": "2024-10-08 20:49:24",
     "TimeNew": "2024-10-08 20:50:52",
     "Hunks": [
