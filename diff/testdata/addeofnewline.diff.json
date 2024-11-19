@@ -9,7 +9,7 @@
         "StartLineOld": 1,
         "LineLengthOld": 2,
         "StartLineNew": 1,
-        "LineLengthNew": 3,
+        "LineLengthNew": 2,
         "Section": "",
         "Lines": [
           {
@@ -32,15 +32,9 @@
             "LnumDiff": 3,
             "LnumOld": 0,
             "LnumNew": 2
-          },
-          {
-            "Type": 1,
-            "Content": "",
-            "LnumDiff": 4,
-            "LnumOld": 0,
-            "LnumNew": 3
           }
-        ]
+        ],
+        "EofNewline": 0
       }
     ],
     "Extended": null

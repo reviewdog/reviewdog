@@ -68,7 +68,8 @@
             "LnumOld": 6,
             "LnumNew": 7
           }
-        ]
+        ],
+        "EofNewline": 0
       }
     ],
     "Extended": null
