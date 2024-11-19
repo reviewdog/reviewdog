@@ -1,9 +1,9 @@
 [
   {
-    "PathOld": "addeofnewline.old.txt",
-    "PathNew": "addeofnewline.new.txt",
-    "TimeOld": "2024-11-18 09:48:11",
-    "TimeNew": "2024-11-18 09:48:11",
+    "PathOld": "removeeofnewline.old.txt",
+    "PathNew": "removeeofnewline.new.txt",
+    "TimeOld": "2024-11-19 15:49:41",
+    "TimeNew": "2024-11-19 15:49:34",
     "Hunks": [
       {
         "StartLineOld": 1,
@@ -21,20 +21,20 @@
           },
           {
             "Type": 2,
-            "Content": "this file will have a newline at the end",
+            "Content": "this file will no longer have a newline at the end",
             "LnumDiff": 2,
             "LnumOld": 2,
             "LnumNew": 0
           },
           {
             "Type": 1,
-            "Content": "this file will have a newline at the end",
+            "Content": "this file will no longer have a newline at the end",
             "LnumDiff": 3,
             "LnumOld": 0,
             "LnumNew": 2
           }
         ],
-        "EofNewline": 1
+        "EofNewline": 2
       }
     ],
     "Extended": null
