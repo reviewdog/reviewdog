@@ -63,16 +63,16 @@ func (p *PullRequestDiffService) diffUsingGitCommand(ctx context.Context) ([]byt
 
 	if os.Getenv("REVIEWDOG_SKIP_GIT_FETCH") != "true" {
 		for _, sha := range []string{mergeBaseSha, headSha} {
-			_, err := exec.Command("git", "fetch", "--depth=1", head.GetRepo().GetHTMLURL(), sha).CombinedOutput()
+			bytes, err := exec.Command("git", "fetch", "--depth=1", head.GetRepo().GetHTMLURL(), sha).CombinedOutput()
 			if err != nil {
-				return nil, fmt.Errorf("failed to run git fetch: %w", err)
+				return nil, fmt.Errorf("failed to run git fetch: %s\n%w", bytes, err)
 			}
 		}
 	}
 
 	bytes, err := exec.Command("git", "diff", "--find-renames", mergeBaseSha, headSha).CombinedOutput()
 	if err != nil {
-		return nil, fmt.Errorf("failed to run git diff: %w", err)
+		return nil, fmt.Errorf("failed to run git diff: %s\n%w", bytes, err)
 	}
 
 	return bytes, nil
