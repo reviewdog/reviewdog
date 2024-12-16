@@ -27,7 +27,7 @@ require (
 	golang.org/x/build v0.0.0-20240906172953-ad8de1aafeaf
 	golang.org/x/oauth2 v0.24.0
 	golang.org/x/sync v0.10.0
-	google.golang.org/protobuf v1.35.2
+	google.golang.org/protobuf v1.36.0
 	gopkg.in/yaml.v3 v3.0.1
 )
 
