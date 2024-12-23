@@ -85,10 +85,8 @@ func TestGitLabMergeRequestCommitCommenter_Post_Flush_review_api(t *testing.T) {
 		t.Fatal(err)
 	}
 
-	g, err := NewGitLabMergeRequestCommitCommenter(cli, "o", "r", 14, "sha")
-	if err != nil {
-		t.Fatal(err)
-	}
+	g := NewGitLabMergeRequestCommitCommenter(cli, "o", "r", 14, "sha")
+
 	// Path is set to non existing file path for mock test not to use last commit id of the line.
 	// If setting exists file path, sha is changed by last commit id.
 	comments := []*reviewdog.Comment{
@@ -131,42 +129,5 @@ func TestGitLabMergeRequestCommitCommenter_Post_Flush_review_api(t *testing.T) {
 	}
 	if want := 3; apiCalled != want {
 		t.Errorf("GitLab API is called %d times, want %d times", apiCalled, want)
-	}
-}
-
-func TestGitLabPullRequest_workdir(t *testing.T) {
-	cwd, _ := os.Getwd()
-	defer os.Chdir(cwd)
-	os.Chdir("../..")
-
-	g, err := NewGitLabMergeRequestCommitCommenter(nil, "", "", 0, "")
-	if err != nil {
-		t.Fatal(err)
-	}
-	if g.wd != "" {
-		t.Fatalf("g.wd = %q, want empty", g.wd)
-	}
-	ctx := context.Background()
-	want := "a/b/c"
-	g.Post(ctx, &reviewdog.Comment{Result: &filter.FilteredDiagnostic{
-		Diagnostic: &rdf.Diagnostic{Location: &rdf.Location{Path: want}}}})
-	if got := g.postComments[0].Result.Diagnostic.GetLocation().GetPath(); got != want {
-		t.Errorf("wd=%q path=%q, want %q", g.wd, got, want)
-	}
-
-	subDir := "cmd/"
-	if err := os.Chdir(subDir); err != nil {
-		t.Fatal(err)
-	}
-	g, _ = NewGitLabMergeRequestCommitCommenter(nil, "", "", 0, "")
-	if g.wd != subDir {
-		t.Fatalf("gitRelWorkdir() = %q, want %q", g.wd, subDir)
-	}
-	path := "a/b/c"
-	wantPath := "cmd/" + path
-	g.Post(ctx, &reviewdog.Comment{Result: &filter.FilteredDiagnostic{
-		Diagnostic: &rdf.Diagnostic{Location: &rdf.Location{Path: want}}}})
-	if got := g.postComments[0].Result.Diagnostic.GetLocation().GetPath(); got != wantPath {
-		t.Errorf("wd=%q path=%q, want %q", g.wd, got, wantPath)
 	}
 }
