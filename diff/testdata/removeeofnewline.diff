@@ -1,0 +1,7 @@
+--- removeeofnewline.old.txt	2024-11-19 15:49:41
++++ removeeofnewline.new.txt	2024-11-19 15:49:34
+@@ -1,2 +1,2 @@
+ " vim: nofixeol noendofline
+-this file will no longer have a newline at the end
++this file will no longer have a newline at the end
+\ No newline at end of file
