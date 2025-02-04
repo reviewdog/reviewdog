@@ -22,14 +22,14 @@ jobs:
         working-directory: proto/
         run: ./update.sh
       - uses: actions/setup-go@v5
-        if: ${{ success() }}
+        if: ${{ steps.depup.latest != steps.depup.current }}
         with:
           go-version-file: "go.mod"
       - name: Build
-        if: ${{ success() }}
+        if: ${{ steps.depup.latest != steps.depup.current }}
         run: go build ./...
       - name: Create Pull Request
-        if: ${{ success() }}
+        if: ${{ steps.depup.latest != steps.depup.current }}
         uses: peter-evans/create-pull-request@v7
         with:
           title: "chore(deps): update ${{ steps.depup.outputs.repo }} to ${{ steps.depup.outputs.latest }}"
@@ -56,14 +56,14 @@ jobs:
         working-directory: proto/
         run: ./update.sh
       - uses: actions/setup-go@v5
-        if: ${{ success() }}
+        if: ${{ steps.depup.latest != steps.depup.current }}
         with:
           go-version-file: "go.mod"
       - name: Build
-        if: ${{ success() }}
+        if: ${{ steps.depup.latest != steps.depup.current }}
         run: go build ./...
       - name: Create Pull Request
-        if: ${{ success() }}
+        if: ${{ steps.depup.latest != steps.depup.current }}
         uses: peter-evans/create-pull-request@v7
         with:
           title: "chore(deps): update ${{ steps.depup.outputs.repo }} to ${{ steps.depup.outputs.latest }}"
@@ -90,7 +90,7 @@ jobs:
         working-directory: proto/
         run: ./update.sh
       - name: Create Pull Request
-        if: ${{ success() }}
+        if: ${{ steps.depup.latest != steps.depup.current }}
         uses: peter-evans/create-pull-request@v7
         with:
           title: "chore(deps): update ${{ steps.depup.outputs.repo }} to ${{ steps.depup.outputs.latest }}"
