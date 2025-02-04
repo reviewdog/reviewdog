@@ -9,7 +9,7 @@ import (
 	"testing"
 
 	"github.com/kylelemons/godebug/pretty"
-	"github.com/xanzy/go-gitlab"
+	gitlab "gitlab.com/gitlab-org/api/client-go"
 
 	"github.com/reviewdog/reviewdog"
 	"github.com/reviewdog/reviewdog/filter"
@@ -24,7 +24,7 @@ func TestGitLabMergeRequestCommitCommenter_Post_Flush_review_api(t *testing.T) {
 
 	apiCalled := 0
 	mux := http.NewServeMux()
-	mux.HandleFunc("/api/v4/projects/o/r/merge_requests/14/commits", func(w http.ResponseWriter, r *http.Request) {
+	mux.HandleFunc("/api/v4/projects/o%2Fr/merge_requests/14/commits", func(w http.ResponseWriter, r *http.Request) {
 		apiCalled++
 		if r.Method != http.MethodGet {
 			t.Errorf("unexpected access: %v %v", r.Method, r.URL)
@@ -39,7 +39,7 @@ func TestGitLabMergeRequestCommitCommenter_Post_Flush_review_api(t *testing.T) {
 			t.Fatal(err)
 		}
 	})
-	mux.HandleFunc("/api/v4/projects/o/r/repository/commits/0123456789abcdef/comments", func(w http.ResponseWriter, r *http.Request) {
+	mux.HandleFunc("/api/v4/projects/o%2Fr/repository/commits/0123456789abcdef/comments", func(w http.ResponseWriter, r *http.Request) {
 		apiCalled++
 		if r.Method != http.MethodGet {
 			t.Errorf("unexpected access: %v %v", r.Method, r.URL)
@@ -55,7 +55,7 @@ func TestGitLabMergeRequestCommitCommenter_Post_Flush_review_api(t *testing.T) {
 			t.Fatal(err)
 		}
 	})
-	mux.HandleFunc("/api/v4/projects/o/r/repository/commits/sha/comments", func(w http.ResponseWriter, r *http.Request) {
+	mux.HandleFunc("/api/v4/projects/o%2Fr/repository/commits/sha/comments", func(w http.ResponseWriter, r *http.Request) {
 		apiCalled++
 		if r.Method != http.MethodPost {
 			t.Errorf("unexpected access: %v %v", r.Method, r.URL)
@@ -80,7 +80,7 @@ func TestGitLabMergeRequestCommitCommenter_Post_Flush_review_api(t *testing.T) {
 	ts := httptest.NewServer(mux)
 	defer ts.Close()
 
-	cli, err := gitlab.NewClient("", gitlab.WithBaseURL(ts.URL+"/api/v4"))
+	cli, err := gitlab.NewClient("", gitlab.WithBaseURL(ts.URL))
 	if err != nil {
 		t.Fatal(err)
 	}

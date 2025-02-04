@@ -12,10 +12,16 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - ...
 
 ### :bug: Fixes
+- [#1983](https://github.com/reviewdog/reviewdog/pull/1983) Improve error message for diff command failure by including stderr output
 - [#1975](https://github.com/reviewdog/reviewdog/pull/1975) Fix for suggestions not including an inserted EOF newline
 
 ### :rotating_light: Breaking changes
 - ...
+
+## [v0.20.3] - 2024-12-04
+
+### :bug: Fixes
+- [#1977](https://github.com/reviewdog/reviewdog/pull/1977) Include stderr in the error message if we run git command
 
 ## [v0.20.2] - 2024-09-16
 
@@ -284,7 +290,7 @@ $ cd subdir/ && reviewdog -filter-mode=file -fail-on-error -reporter=github-pr-r
 
 See https://github.com/reviewdog/reviewdog/releases for older release note.
 
-[Unreleased]: https://github.com/reviewdog/reviewdog/compare/v0.17.4...HEAD
+[Unreleased]: https://github.com/reviewdog/reviewdog/compare/v0.20.3...HEAD
 [v0.10.0]: https://github.com/reviewdog/reviewdog/compare/v0.9.17...v0.10.0
 [v0.10.1]: https://github.com/reviewdog/reviewdog/compare/v0.10.0...v0.10.1
 [v0.10.2]: https://github.com/reviewdog/reviewdog/compare/v0.10.1...v0.10.2
@@ -309,4 +315,5 @@ See https://github.com/reviewdog/reviewdog/releases for older release note.
 [v0.20.0]: https://github.com/reviewdog/reviewdog/compare/v0.19.0...v0.20.0
 [v0.20.1]: https://github.com/reviewdog/reviewdog/compare/v0.20.0...v0.20.1
 [v0.20.2]: https://github.com/reviewdog/reviewdog/compare/v0.20.1...v0.20.2
+[v0.20.3]: https://github.com/reviewdog/reviewdog/compare/v0.20.2...v0.20.3
 [@haya14busa]: https://github.com/haya14busa
