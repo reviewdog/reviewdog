@@ -1,6 +1,8 @@
 module github.com/reviewdog/reviewdog
 
-go 1.21.7
+go 1.22
+
+toolchain go1.23.5
 
 require (
 	cloud.google.com/go/compute/metadata v0.6.0
@@ -22,7 +24,7 @@ require (
 	github.com/reviewdog/go-bitbucket v0.0.0-20201024094602-708c3f6a7de0
 	github.com/stretchr/testify v1.10.0
 	github.com/vvakame/sdlog v1.2.0
-	github.com/xanzy/go-gitlab v0.115.0
+	gitlab.com/gitlab-org/api/client-go v0.121.0
 	go.opencensus.io v0.24.0
 	golang.org/x/build v0.0.0-20240906172953-ad8de1aafeaf
 	golang.org/x/oauth2 v0.25.0
@@ -70,7 +72,7 @@ require (
 	golang.org/x/net v0.30.0 // indirect
 	golang.org/x/sys v0.28.0 // indirect
 	golang.org/x/text v0.21.0 // indirect
-	golang.org/x/time v0.7.0 // indirect
+	golang.org/x/time v0.8.0 // indirect
 	google.golang.org/api v0.203.0 // indirect
 	google.golang.org/genproto v0.0.0-20241015192408-796eee8c2d53 // indirect
 	google.golang.org/genproto/googleapis/api v0.0.0-20241007155032-5fefd90f89a9 // indirect
