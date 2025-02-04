@@ -61,7 +61,7 @@ type Hunk struct {
 	Lines []*Line
 
 	// the status of the EOF newline, if any
-	EofNewline LineType
+	EOFNewline LineType
 }
 
 // LineType represents the type of diff line.

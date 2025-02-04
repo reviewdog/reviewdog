@@ -251,7 +251,7 @@ func (p *hunkParser) Parse() (*Hunk, error) {
 		StartLineNew:  hr.lnew,
 		LineLengthNew: hr.snew,
 		Section:       hr.section,
-		EofNewline:    LineUnchanged,
+		EOFNewline:    LineUnchanged,
 	}
 	lold := hr.lold
 	lnew := hr.lnew
@@ -294,17 +294,17 @@ endhunk:
 		case tokenNoNewlineAtEOF:
 			switch prevLineType {
 			case LineUnchanged:
-				hunk.EofNewline = LineUnchanged
+				hunk.EOFNewline = LineUnchanged
 			case LineAdded:
 				// special case - if there's no newline in both files,
 				// it will already have been reported as part of the old file
-				if hunk.EofNewline == LineAdded {
-					hunk.EofNewline = LineUnchanged
+				if hunk.EOFNewline == LineAdded {
+					hunk.EOFNewline = LineUnchanged
 				} else {
-					hunk.EofNewline = LineDeleted
+					hunk.EOFNewline = LineDeleted
 				}
 			case LineDeleted:
-				hunk.EofNewline = LineAdded
+				hunk.EOFNewline = LineAdded
 			}
 			// skip the rest of the line
 			readline(p.r)

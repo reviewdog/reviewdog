@@ -104,7 +104,7 @@ func (p *DiffParser) Parse(r io.Reader) ([]*rdf.Diagnostic, error) {
 				}
 				prevState = diffLine.Type
 			}
-			if hunk.EofNewline == diff.LineAdded {
+			if hunk.EOFNewline == diff.LineAdded {
 				state.newLines = append(state.newLines, "")
 				// TODO: also handle the much rarer case of a deleted eof newline
 			}
