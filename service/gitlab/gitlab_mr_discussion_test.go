@@ -163,7 +163,7 @@ func TestGitLabMergeRequestDiscussionCommenter_Post_Flush_review_api(t *testing.
 	const wantPostCalled = 4
 
 	mux := http.NewServeMux()
-	mux.HandleFunc("/api/v4/projects/o/r/merge_requests/14/discussions", func(w http.ResponseWriter, r *http.Request) {
+	mux.HandleFunc("/api/v4/projects/o%2Fr/merge_requests/14/discussions", func(w http.ResponseWriter, r *http.Request) {
 		switch r.Method {
 		case http.MethodGet:
 			switch r.URL.Query().Get("page") {
@@ -293,7 +293,7 @@ func TestGitLabMergeRequestDiscussionCommenter_Post_Flush_review_api(t *testing.
 			t.Errorf("unexpected access: %v %v", r.Method, r.URL)
 		}
 	})
-	mux.HandleFunc("/api/v4/projects/o/r/merge_requests/14", func(w http.ResponseWriter, r *http.Request) {
+	mux.HandleFunc("/api/v4/projects/o%2Fr/merge_requests/14", func(w http.ResponseWriter, r *http.Request) {
 		if r.Method != http.MethodGet {
 			t.Errorf("unexpected access: %v %v", r.Method, r.URL)
 		}
@@ -309,7 +309,7 @@ func TestGitLabMergeRequestDiscussionCommenter_Post_Flush_review_api(t *testing.
 	ts := httptest.NewServer(mux)
 	defer ts.Close()
 
-	cli, err := gitlab.NewClient("", gitlab.WithBaseURL(ts.URL+"/api/v4"))
+	cli, err := gitlab.NewClient("", gitlab.WithBaseURL(ts.URL))
 	if err != nil {
 		t.Fatal(err)
 	}
