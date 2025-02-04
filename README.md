@@ -629,7 +629,7 @@ name: reviewdog (github-check)
 on:
   push:
     branches:
-      - master
+      - $default-branch
   pull_request:
 
 jobs:
