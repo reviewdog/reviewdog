@@ -18,14 +18,18 @@ jobs:
           version_name: PROTOC_VERSION
           repo: protocolbuffers/protobuf
       - name: Update
+        if: {{ steps.depup.latest != steps.depup.current }}
         working-directory: proto/
         run: ./update.sh
       - uses: actions/setup-go@v5
+        if: success()
         with:
           go-version-file: "go.mod"
       - name: Build
+        if: success()
         run: go build ./...
       - name: Create Pull Request
+        if: success()
         uses: peter-evans/create-pull-request@v7
         with:
           title: "chore(deps): update ${{ steps.depup.outputs.repo }} to ${{ steps.depup.outputs.latest }}"
@@ -48,14 +52,18 @@ jobs:
           version_name: PROTOC_GEN_GO_VERSION
           repo: protocolbuffers/protobuf-go
       - name: Update
+        if: {{ steps.depup.latest != steps.depup.current }}
         working-directory: proto/
         run: ./update.sh
       - uses: actions/setup-go@v5
+        if: success()
         with:
           go-version-file: "go.mod"
       - name: Build
+        if: success()
         run: go build ./...
       - name: Create Pull Request
+        if: success()
         uses: peter-evans/create-pull-request@v7
         with:
           title: "chore(deps): update ${{ steps.depup.outputs.repo }} to ${{ steps.depup.outputs.latest }}"
@@ -78,9 +86,11 @@ jobs:
           version_name: PROTOC_GEN_JSONSCHEMA_VERSION
           repo: chrusty/protoc-gen-jsonschema
       - name: Update
+        if: {{ steps.depup.latest != steps.depup.current }}
         working-directory: proto/
         run: ./update.sh
       - name: Create Pull Request
+        if: success()
         uses: peter-evans/create-pull-request@v7
         with:
           title: "chore(deps): update ${{ steps.depup.outputs.repo }} to ${{ steps.depup.outputs.latest }}"
