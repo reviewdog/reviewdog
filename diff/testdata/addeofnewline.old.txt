@@ -1,0 +1,2 @@
+" vim: nofixeol noendofline
+this file will have a newline at the end
