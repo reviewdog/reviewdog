@@ -316,17 +316,25 @@ func run(r io.Reader, w io.Writer, opt *option) error {
 			return runDoghouse(ctx, r, w, opt, isProject)
 		}
 		var err error
-		checkService, ghDiffService, err := githubCheckService(ctx, opt)
+		var isPR bool
+		checkService, ghDiffService, isPR, err := githubCheckService(ctx, opt)
 		if err != nil {
 			return err
+		}
+		if !isPR {
+			opt.filterMode = filter.ModeNoFilter
 		}
 		ds = ghDiffService
 		cs = reviewdog.MultiCommentService(checkService, cs)
 	case "github-pr-annotations":
 		var err error
-		cs, ds, err = githubActionLogService(ctx, opt)
+		var isPR bool
+		cs, ds, isPR, err = githubActionLogService(ctx, opt)
 		if err != nil {
 			return err
+		}
+		if !isPR {
+			opt.filterMode = filter.ModeNoFilter
 		}
 	case "github-pr-review":
 		gs, isPR, err := githubService(ctx, opt)
@@ -657,10 +665,10 @@ func githubService(ctx context.Context, opt *option) (gs *githubservice.PullRequ
 	return gs, true, nil
 }
 
-func githubCheckService(ctx context.Context, opt *option) (reviewdog.CommentService, reviewdog.DiffService, error) {
+func githubCheckService(ctx context.Context, opt *option) (reviewdog.CommentService, reviewdog.DiffService, bool, error) {
 	g, client, err := githubBuildInfoWithClient(ctx)
 	if err != nil {
-		return nil, nil, err
+		return nil, nil, false, err
 	}
 	var ds reviewdog.DiffService = &reviewdog.EmptyDiff{}
 	if g.PullRequest != 0 {
@@ -675,15 +683,15 @@ func githubCheckService(ctx context.Context, opt *option) (reviewdog.CommentServ
 	}
 	cs, err := githubservice.NewGitHubCheck(client, g.Owner, g.Repo, g.PullRequest, g.SHA, opt.level, toolName(opt))
 	if err != nil {
-		return nil, nil, err
+		return nil, nil, false, err
 	}
-	return cs, ds, nil
+	return cs, ds, g.PullRequest != 0, nil
 }
 
-func githubActionLogService(ctx context.Context, opt *option) (reviewdog.CommentService, reviewdog.DiffService, error) {
+func githubActionLogService(ctx context.Context, opt *option) (reviewdog.CommentService, reviewdog.DiffService, bool, error) {
 	g, client, err := githubBuildInfoWithClient(ctx)
 	if err != nil {
-		return nil, nil, err
+		return nil, nil, false, err
 	}
 	var ds reviewdog.DiffService = &reviewdog.EmptyDiff{}
 	if g.PullRequest != 0 {
@@ -698,9 +706,9 @@ func githubActionLogService(ctx context.Context, opt *option) (reviewdog.Comment
 	}
 	cs, err := githubservice.NewGitHubActionLog(opt.level)
 	if err != nil {
-		return nil, nil, err
+		return nil, nil, false, err
 	}
-	return cs, ds, nil
+	return cs, ds, g.PullRequest != 0, nil
 }
 
 func githubBuildInfoWithClient(ctx context.Context) (*cienv.BuildInfo, *github.Client, error) {
