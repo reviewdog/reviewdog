@@ -82,6 +82,7 @@ by diff.
   * [Reporter: GitHub Checks (-reporter=github-pr-check)](#reporter-github-checks--reportergithub-pr-check)
   * [Reporter: GitHub Checks (-reporter=github-check)](#reporter-github-checks--reportergithub-check)
   * [Reporter: GitHub PullRequest review comment (-reporter=github-pr-review)](#reporter-github-pullrequest-review-comment--reportergithub-pr-review)
+  * [Reporter: GitHub Annotations (-reporter=github-pr-annotations)](#reporter-github-pr-annotations--reportergithub-pr-annotations)
   * [Reporter: GitLab MergeRequest discussions (-reporter=gitlab-mr-discussion)](#reporter-gitlab-mergerequest-discussions--reportergitlab-mr-discussion)
   * [Reporter: GitLab MergeRequest commit (-reporter=gitlab-mr-commit)](#reporter-gitlab-mergerequest-commit--reportergitlab-mr-commit)
   * [Reporter: Bitbucket Code Insights Reports (-reporter=bitbucket-code-report)](#reporter-bitbucket-code-insights-reports--reporterbitbucket-code-report)
