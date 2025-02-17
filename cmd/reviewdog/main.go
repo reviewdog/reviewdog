@@ -138,6 +138,12 @@ const (
 		For GitHub Enterprise:
 			$ export GITHUB_API="https://example.githubenterprise.com/api/v3"
 
+	"github-annotations"
+		Report results to stdout in GitHub Actions annotation format.
+
+	"github-pr-annotations"
+		Same as github-annotations reporter but it only supports Pull Requests.
+
 	"gitlab-mr-discussion"
 		Report results to GitLab MergeRequest discussion.
 
@@ -326,7 +332,7 @@ func run(r io.Reader, w io.Writer, opt *option) error {
 		}
 		ds = ghDiffService
 		cs = reviewdog.MultiCommentService(checkService, cs)
-	case "github-pr-annotations":
+	case "github-annotations", "github-pr-annotations":
 		var err error
 		var isPR bool
 		cs, ds, isPR, err = githubActionLogService(ctx, opt)
