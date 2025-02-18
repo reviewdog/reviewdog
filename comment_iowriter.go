@@ -28,6 +28,8 @@ func (s *RawCommentWriter) Post(_ context.Context, c *Comment) error {
 	return err
 }
 
+func (*RawCommentWriter) ShouldPrependGitRelDir() bool { return false }
+
 var _ CommentService = &UnifiedCommentWriter{}
 
 // UnifiedCommentWriter is comment writer which writes results to given writer
@@ -61,6 +63,8 @@ func (mc *UnifiedCommentWriter) Post(_ context.Context, c *Comment) error {
 	_, err := fmt.Fprintln(mc.w, s)
 	return err
 }
+
+func (*UnifiedCommentWriter) ShouldPrependGitRelDir() bool { return false }
 
 var _ CommentService = &RDJSONLCommentWriter{}
 
@@ -100,6 +104,8 @@ func (cw *RDJSONLCommentWriter) Post(_ context.Context, c *Comment) error {
 	return nil
 }
 
+func (*RDJSONLCommentWriter) ShouldPrependGitRelDir() bool { return false }
+
 var _ CommentService = &RDJSONCommentWriter{}
 
 // RDJSONCommentWriter
@@ -117,6 +123,8 @@ func (cw *RDJSONCommentWriter) Post(_ context.Context, c *Comment) error {
 	cw.comments = append(cw.comments, c)
 	return nil
 }
+
+func (*RDJSONCommentWriter) ShouldPrependGitRelDir() bool { return false }
 
 func (cw *RDJSONCommentWriter) Flush(_ context.Context) error {
 	result := &rdf.DiagnosticResult{
@@ -166,6 +174,8 @@ func (cw *SARIFCommentWriter) Post(_ context.Context, c *Comment) error {
 	cw.comments = append(cw.comments, c)
 	return nil
 }
+
+func (*SARIFCommentWriter) ShouldPrependGitRelDir() bool { return false }
 
 func (cw *SARIFCommentWriter) Flush(_ context.Context) error {
 	run := sarif.Run{
