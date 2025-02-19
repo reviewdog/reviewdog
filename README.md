@@ -79,9 +79,11 @@ by diff.
 - [reviewdog config file](#reviewdog-config-file)
 - [Reporters](#reporters)
   * [Reporter: Local (-reporter=local) [default]](#reporter-local--reporterlocal-default)
-  * [Reporter: GitHub Checks (-reporter=github-pr-check)](#reporter-github-checks--reportergithub-pr-check)
+  * [Reporter: GitHub PR Checks (-reporter=github-pr-check)](#reporter-github-pr-checks--reportergithub-pr-check)
   * [Reporter: GitHub Checks (-reporter=github-check)](#reporter-github-checks--reportergithub-check)
   * [Reporter: GitHub PullRequest review comment (-reporter=github-pr-review)](#reporter-github-pullrequest-review-comment--reportergithub-pr-review)
+  * [Reporter: GitHub Annotations (-reporter=github-annotations)](#reporter-github-annotations--reportergithub-annotations)
+  * [Reporter: GitHub PR Annotations (-reporter=github-pr-annotations)](#reporter-github-pr-annotations--reportergithub-pr-annotations)
   * [Reporter: GitLab MergeRequest discussions (-reporter=gitlab-mr-discussion)](#reporter-gitlab-mergerequest-discussions--reportergitlab-mr-discussion)
   * [Reporter: GitLab MergeRequest commit (-reporter=gitlab-mr-commit)](#reporter-gitlab-mergerequest-commit--reportergitlab-mr-commit)
   * [Reporter: Bitbucket Code Insights Reports (-reporter=bitbucket-code-report)](#reporter-bitbucket-code-insights-reports--reporterbitbucket-code-report)
@@ -317,6 +319,8 @@ Note that not all reporters provide support for code suggestions.
 | **`local`**                  | NO [1]  |
 | **`github-check`**           | NO [2]  |
 | **`github-pr-check`**        | NO [2]  |
+| **`github-annotations`**     | NO [2]  |
+| **`github-pr-annotations`**  | NO [2]  |
 | **`github-pr-review`**       | OK      |
 | **`gitlab-mr-discussion`**   | OK      |
 | **`gitlab-mr-commit`**       | NO [2]  |
@@ -393,7 +397,7 @@ using diff. You can pass the diff command as `-diff` arg.
 $ golint ./... | reviewdog -f=golint -diff="git diff FETCH_HEAD"
 ```
 
-### Reporter: GitHub Checks (-reporter=github-pr-check)
+### Reporter: GitHub PR Checks (-reporter=github-pr-check)
 
 [![github-pr-check sample annotation with option 1](https://user-images.githubusercontent.com/3797062/64875597-65016f80-d688-11e9-843f-4679fb666f0d.png)](https://github.com/reviewdog/reviewdog/pull/275/files#annotation_6177941961779419)
 [![github-pr-check sample](https://user-images.githubusercontent.com/3797062/40884858-6efd82a0-6756-11e8-9f1a-c6af4f920fb0.png)](https://github.com/reviewdog/reviewdog/pull/131/checks)
@@ -492,9 +496,9 @@ $ export REVIEWDOG_INSECURE_SKIP_VERIFY=true # set this as you need to skip veri
 See [GitHub Actions](#github-actions) section too if you can use GitHub
 Actions. You can also use public reviewdog GitHub Actions.
 
-### Reporter: GitHub PR Annotations (-reporter=github-pr-annotations)
+### Reporter: GitHub Annotations (-reporter=github-annotations)
 
-github-pr-annotations uses the GitHub Actions annotation format to output errors
+`github-annotations` uses the GitHub Actions annotation format to output errors
 and warnings to `stdout` e.g.
 
 ```
@@ -503,6 +507,10 @@ and warnings to `stdout` e.g.
 
 This reporter requires a valid GitHub API token to generate a diff, but will not
 use the token to report errors.
+
+### Reporter: GitHub PR Annotations (-reporter=github-pr-annotations)
+
+Same as `github-annotations` but only works for Pull Requests.
 
 ### Reporter: GitLab MergeRequest discussions (-reporter=gitlab-mr-discussion)
 
