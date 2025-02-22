@@ -312,8 +312,8 @@ go.opentelemetry.io/otel/sdk v1.29.0/go.mod h1:pM8Dx5WKnvxLCb+8lG1PRNIDxu9g9b9g5
 go.opentelemetry.io/otel/trace v1.29.0 h1:J/8ZNK4XgR7a21DZUAsbF8pZ5Jcw1VhACmnYt39JTi4=
 go.opentelemetry.io/otel/trace v1.29.0/go.mod h1:eHl3w0sp3paPkYstJOmAimxhiFXPg+MMTlEh3nsQgWQ=
 go.opentelemetry.io/proto/otlp v0.7.0/go.mod h1:PqfVotwruBrMGOCsRd/89rSnXhoiJIqeYNgFYFoEGnI=
-golang.org/x/build v0.0.0-20250221224309-70d4214683d1 h1:kMCCeSo51ec9qAkC2oQwfi5escOmbXz6RdTyZc+xTJI=
-golang.org/x/build v0.0.0-20250221224309-70d4214683d1/go.mod h1:6SKtq9ZHr1TS+AyfjqGMsmZSBSy5RvM9phZtYsCO1vE=
+golang.org/x/build v0.0.0-20250222001923-2d51d1ded8b4 h1:sQsmXwEn62VH7Ur5jmFsnRFjeiPTEGvWUkkb8DrUyB8=
+golang.org/x/build v0.0.0-20250222001923-2d51d1ded8b4/go.mod h1:6SKtq9ZHr1TS+AyfjqGMsmZSBSy5RvM9phZtYsCO1vE=
 golang.org/x/crypto v0.0.0-20190308221718-c2843e01d9a2/go.mod h1:djNgcEr1/C05ACkg1iLfiJU5Ep61QUkGW8qpdssI0+w=
 golang.org/x/crypto v0.0.0-20190510104115-cbcb75029529/go.mod h1:yigFU9vqHzYiE8UmvKecakEJjdnWj3jj499lnFckfCI=
 golang.org/x/crypto v0.0.0-20190605123033-f99c8df09eb5/go.mod h1:yigFU9vqHzYiE8UmvKecakEJjdnWj3jj499lnFckfCI=
