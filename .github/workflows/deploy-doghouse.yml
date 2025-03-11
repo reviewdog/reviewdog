@@ -17,7 +17,7 @@ jobs:
       - uses: actions/setup-go@v5
         with:
           # must sync doghouse/appengine/app.yaml
-          go-version: "1.21"
+          go-version: "1.24"
       - run: go test -v -race  ./...
   deploy:
     permissions:
