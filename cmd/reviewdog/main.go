@@ -1004,7 +1004,7 @@ func newParserFromOpt(opt *option) (parser.Parser, error) {
 	if err != nil {
 		return nil, fmt.Errorf("fail to create parser. use either -f or -efm: %w", err)
 	}
-	return p, err
+	return p, nil
 }
 
 func toolName(opt *option) string {
