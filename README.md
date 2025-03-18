@@ -109,13 +109,13 @@ by diff.
 
 ```shell
 # Install the latest version. (Install it into ./bin/ by default).
-$ curl -sfL https://raw.githubusercontent.com/reviewdog/reviewdog/master/install.sh | sh -s
+$ curl -sfL https://raw.githubusercontent.com/reviewdog/reviewdog/fd59714416d6d9a1c0692d872e38e7f8448df4fc/install.sh | sh -s
 
 # Specify installation directory ($(go env GOPATH)/bin/) and version.
-$ curl -sfL https://raw.githubusercontent.com/reviewdog/reviewdog/master/install.sh | sh -s -- -b $(go env GOPATH)/bin [vX.Y.Z]
+$ curl -sfL https://raw.githubusercontent.com/reviewdog/reviewdog/fd59714416d6d9a1c0692d872e38e7f8448df4fc/install.sh | sh -s -- -b $(go env GOPATH)/bin [vX.Y.Z]
 
 # In alpine linux (as it does not come with curl by default)
-$ wget -O - -q https://raw.githubusercontent.com/reviewdog/reviewdog/master/install.sh | sh -s [vX.Y.Z]
+$ wget -O - -q https://raw.githubusercontent.com/reviewdog/reviewdog/fd59714416d6d9a1c0692d872e38e7f8448df4fc/install.sh | sh -s [vX.Y.Z]
 ```
 
 ### Nightly releases
@@ -124,7 +124,7 @@ You can also use [nightly reviewdog release](https://github.com/reviewdog/nightl
 to try the latest reviewdog improvements every day!
 
 ```shell
-$ curl -sfL https://raw.githubusercontent.com/reviewdog/nightly/master/install.sh | sh -s -- -b $(go env GOPATH)/bin
+$ curl -sfL https://raw.githubusercontent.com/reviewdog/nightly/30fccfe9f47f7e6fd8b3c38aa0da11a6c9f04de7/install.sh | sh -s -- -b $(go env GOPATH)/bin
 ```
 
 ### GitHub Action: [reviewdog/action-setup](https://github.com/reviewdog/action-setup)
@@ -771,7 +771,7 @@ Example:
 ```yaml
 install:
   - mkdir -p ~/bin/ && export PATH="~/bin/:$PATH"
-  - curl -sfL https://raw.githubusercontent.com/reviewdog/reviewdog/master/install.sh| sh -s -- -b ~/bin
+  - curl -sfL https://raw.githubusercontent.com/reviewdog/reviewdog/fd59714416d6d9a1c0692d872e38e7f8448df4fc/install.sh| sh -s -- -b ~/bin
 
 script:
   - reviewdog -conf=.reviewdog.yml -reporter=github-pr-check
@@ -794,7 +794,7 @@ env:
 
 install:
   - mkdir -p ~/bin/ && export PATH="~/bin/:$PATH"
-  - curl -sfL https://raw.githubusercontent.com/reviewdog/reviewdog/master/install.sh| sh -s -- -b ~/bin
+  - curl -sfL https://raw.githubusercontent.com/reviewdog/reviewdog/fd59714416d6d9a1c0692d872e38e7f8448df4fc/install.sh| sh -s -- -b ~/bin
 
 script:
   - >-
@@ -819,7 +819,7 @@ jobs:
       - image: golang:latest
     steps:
       - checkout
-      - run: curl -sfL https://raw.githubusercontent.com/reviewdog/reviewdog/master/install.sh| sh -s -- -b ./bin
+      - run: curl -sfL https://raw.githubusercontent.com/reviewdog/reviewdog/fd59714416d6d9a1c0692d872e38e7f8448df4fc/install.sh| sh -s -- -b ./bin
       - run: go vet ./... 2>&1 | ./bin/reviewdog -f=govet -reporter=github-pr-review
 
       # Deprecated: prefer GitHub Actions to use github-pr-check reporter.
@@ -853,7 +853,7 @@ pipelines:
         name: Reviewdog
         image: golangci/golangci-lint:v1.31-alpine
         script:
-          - wget -O - -q https://raw.githubusercontent.com/reviewdog/reviewdog/master/install.sh | 
+          - wget -O - -q https://raw.githubusercontent.com/reviewdog/reviewdog/fd59714416d6d9a1c0692d872e38e7f8448df4fc/install.sh | 
               sh -s -- -b $(go env GOPATH)/bin
           - golangci-lint run --out-format=line-number ./... | reviewdog -f=golangci-lint -reporter=bitbucket-code-report
 ```
