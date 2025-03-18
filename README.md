@@ -131,7 +131,7 @@ $ curl -sfL https://raw.githubusercontent.com/reviewdog/nightly/30fccfe9f47f7e6f
 
 ```yaml
 steps:
-- uses: reviewdog/action-setup@v1
+- uses: reviewdog/action-setup@e04ffabe3898a0af8d0fb1af00c188831c4b5893 # v1.3.2
   with:
     reviewdog_version: latest # Optional. [latest,nightly,v.X.Y.Z]
 ```
@@ -613,7 +613,7 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       # ...
-      - uses: reviewdog/action-setup@v1
+      - uses: reviewdog/action-setup@e04ffabe3898a0af8d0fb1af00c188831c4b5893 # v1.3.2
         with:
           reviewdog_version: latest # Optional. [latest,nightly,v.X.Y.Z]
       - name: Run reviewdog
