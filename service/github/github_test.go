@@ -146,10 +146,10 @@ func TestGitHubPullRequest_Post_Flush_review_api(t *testing.T) {
 			default:
 				cs := []*github.PullRequestComment{
 					{
-						Path:        github.String("reviewdog.go"),
-						Line:        github.Int(2),
-						Body:        github.String(commentutil.BodyPrefix + "already commented" + "\n<!-- __reviewdog__:ChBmMzg0YTRlZDRkYTViOTZl -->\n"),
-						SubjectType: github.String("line"),
+						Path:        github.Ptr("reviewdog.go"),
+						Line:        github.Ptr(2),
+						Body:        github.Ptr(commentutil.BodyPrefix + "already commented" + "\n<!-- __reviewdog__:ChBmMzg0YTRlZDRkYTViOTZl -->\n"),
+						SubjectType: github.Ptr("line"),
 					},
 				}
 				w.Header().Add("Link", `<https://api.github.com/repos/o/r/pulls/14/comments?page=2>; rel="next"`)
@@ -159,50 +159,50 @@ func TestGitHubPullRequest_Post_Flush_review_api(t *testing.T) {
 			case "2":
 				cs := []*github.PullRequestComment{
 					{
-						Path:        github.String("reviewdog.go"),
-						Line:        github.Int(15),
-						Body:        github.String(commentutil.BodyPrefix + "already commented 2" + "\n<!-- __reviewdog__:ChAxNDgzY2EyNTY0MjU2NmYx -->\n"),
-						SubjectType: github.String("line"),
+						Path:        github.Ptr("reviewdog.go"),
+						Line:        github.Ptr(15),
+						Body:        github.Ptr(commentutil.BodyPrefix + "already commented 2" + "\n<!-- __reviewdog__:ChAxNDgzY2EyNTY0MjU2NmYx -->\n"),
+						SubjectType: github.Ptr("line"),
 					},
 					{
-						ID:          github.Int64(1414),
-						Path:        github.String("reviewdog.go"),
-						Line:        github.Int(15),
-						Body:        github.String(commentutil.BodyPrefix + "already commented [outdated]" + "\n<!-- __reviewdog__:Cg9jY2FlN2NlYTg0M2M0MDISCXRvb2wtbmFtZQ== -->\n"),
-						SubjectType: github.String("line"),
+						ID:          github.Ptr(1414),
+						Path:        github.Ptr("reviewdog.go"),
+						Line:        github.Ptr(15),
+						Body:        github.Ptr(commentutil.BodyPrefix + "already commented [outdated]" + "\n<!-- __reviewdog__:Cg9jY2FlN2NlYTg0M2M0MDISCXRvb2wtbmFtZQ== -->\n"),
+						SubjectType: github.Ptr("line"),
 					},
 					{
-						ID:          github.Int64(1414),
-						Path:        github.String("reviewdog.go"),
-						Line:        github.Int(15),
-						Body:        github.String(commentutil.BodyPrefix + "already commented [different tool]" + "\n<!-- __reviewdog__:CgZ4eHh4eHgSDmRpZmZlcmVudC10b29s -->\n"),
-						SubjectType: github.String("line"),
+						ID:          github.Ptr(1414),
+						Path:        github.Ptr("reviewdog.go"),
+						Line:        github.Ptr(15),
+						Body:        github.Ptr(commentutil.BodyPrefix + "already commented [different tool]" + "\n<!-- __reviewdog__:CgZ4eHh4eHgSDmRpZmZlcmVudC10b29s -->\n"),
+						SubjectType: github.Ptr("line"),
 					},
 					{
-						Path:        github.String("reviewdog.go"),
-						StartLine:   github.Int(15),
-						Line:        github.Int(16),
-						Body:        github.String(commentutil.BodyPrefix + "multiline existing comment" + "\n<!-- __reviewdog__:ChBjNGNiNTRjMDc2YjNhMjcx -->\n"),
-						SubjectType: github.String("line"),
+						Path:        github.Ptr("reviewdog.go"),
+						StartLine:   github.Ptr(15),
+						Line:        github.Ptr(16),
+						Body:        github.Ptr(commentutil.BodyPrefix + "multiline existing comment" + "\n<!-- __reviewdog__:ChBjNGNiNTRjMDc2YjNhMjcx -->\n"),
+						SubjectType: github.Ptr("line"),
 					},
 					{
-						Path:        github.String("reviewdog.go"),
-						StartLine:   github.Int(15),
-						Line:        github.Int(17),
-						Body:        github.String(commentutil.BodyPrefix + "multiline existing comment (line-break)" + "\n<!-- __reviewdog__:ChA2NjI1ZDI2MGJmNTdhNjUw -->\n"),
-						SubjectType: github.String("line"),
+						Path:        github.Ptr("reviewdog.go"),
+						StartLine:   github.Ptr(15),
+						Line:        github.Ptr(17),
+						Body:        github.Ptr(commentutil.BodyPrefix + "multiline existing comment (line-break)" + "\n<!-- __reviewdog__:ChA2NjI1ZDI2MGJmNTdhNjUw -->\n"),
+						SubjectType: github.Ptr("line"),
 					},
 					{
-						Path:        github.String("reviewdog.go"),
-						Line:        github.Int(1),
-						Body:        github.String(commentutil.BodyPrefix + "existing file comment (no-line)" + "\n<!-- __reviewdog__:ChA2ZDI2MGNmYjY3NTQ4YTgxEgl0b29sLW5hbWU= -->\n"),
-						SubjectType: github.String("file"),
+						Path:        github.Ptr("reviewdog.go"),
+						Line:        github.Ptr(1),
+						Body:        github.Ptr(commentutil.BodyPrefix + "existing file comment (no-line)" + "\n<!-- __reviewdog__:ChA2ZDI2MGNmYjY3NTQ4YTgxEgl0b29sLW5hbWU= -->\n"),
+						SubjectType: github.Ptr("file"),
 					},
 					{
-						Path:        github.String("reviewdog.go"),
-						Line:        github.Int(1),
-						Body:        github.String(commentutil.BodyPrefix + "existing file comment (outside diff-context)" + "\n<!-- __reviewdog__:ChAyMzFjY2Q1ZWRhMjRkM2ZhEgl0b29sLW5hbWU= -->\n"),
-						SubjectType: github.String("file"),
+						Path:        github.Ptr("reviewdog.go"),
+						Line:        github.Ptr(1),
+						Body:        github.Ptr(commentutil.BodyPrefix + "existing file comment (outside diff-context)" + "\n<!-- __reviewdog__:ChAyMzFjY2Q1ZWRhMjRkM2ZhEgl0b29sLW5hbWU= -->\n"),
+						SubjectType: github.Ptr("file"),
 					},
 				}
 				if err := json.NewEncoder(w).Encode(cs); err != nil {
@@ -217,22 +217,22 @@ func TestGitHubPullRequest_Post_Flush_review_api(t *testing.T) {
 			}
 			expects := []github.PullRequestComment{
 				{
-					Body:        github.String("<sub>reported by [reviewdog](https://github.com/reviewdog/reviewdog) :dog:</sub><br>file comment (no-line)\n<!-- __reviewdog__:ChBkZDlkMDllNmM5MTllODU1Egl0b29sLW5hbWU= -->\n"),
-					Path:        github.String("reviewdog.go"),
-					Side:        github.String("RIGHT"),
-					CommitID:    github.String("sha"),
-					SubjectType: github.String("file"),
+					Body:        github.Ptr("<sub>reported by [reviewdog](https://github.com/reviewdog/reviewdog) :dog:</sub><br>file comment (no-line)\n<!-- __reviewdog__:ChBkZDlkMDllNmM5MTllODU1Egl0b29sLW5hbWU= -->\n"),
+					Path:        github.Ptr("reviewdog.go"),
+					Side:        github.Ptr("RIGHT"),
+					CommitID:    github.Ptr("sha"),
+					SubjectType: github.Ptr("file"),
 				},
 				{
-					Body: github.String(`<sub>reported by [reviewdog](https://github.com/reviewdog/reviewdog) :dog:</sub><br>file comment (outside diff-context)
+					Body: github.Ptr(`<sub>reported by [reviewdog](https://github.com/reviewdog/reviewdog) :dog:</sub><br>file comment (outside diff-context)
 
 https://test/repo/path/blob/sha/reviewdog.go#L18
 <!-- __reviewdog__:ChA5Mzc1OWY5ZTRmMmI5NThhEgl0b29sLW5hbWU= -->
 `),
-					Path:        github.String("reviewdog.go"),
-					Side:        github.String("RIGHT"),
-					CommitID:    github.String("sha"),
-					SubjectType: github.String("file"),
+					Path:        github.Ptr("reviewdog.go"),
+					Side:        github.Ptr("RIGHT"),
+					CommitID:    github.Ptr("sha"),
+					SubjectType: github.Ptr("file"),
 				},
 				{},
 			}
@@ -264,26 +264,26 @@ https://test/repo/path/blob/sha/reviewdog.go#L18
 		}
 		want := []*github.DraftReviewComment{
 			{
-				Path: github.String("reviewdog.go"),
-				Side: github.String("RIGHT"),
-				Line: github.Int(15),
-				Body: github.String(commentutil.BodyPrefix + "new comment" + "\n<!-- __reviewdog__:xxxxxxxxxx -->\n"),
+				Path: github.Ptr("reviewdog.go"),
+				Side: github.Ptr("RIGHT"),
+				Line: github.Ptr(15),
+				Body: github.Ptr(commentutil.BodyPrefix + "new comment" + "\n<!-- __reviewdog__:xxxxxxxxxx -->\n"),
 			},
 			{
-				Path:      github.String("reviewdog.go"),
-				Side:      github.String("RIGHT"),
-				StartSide: github.String("RIGHT"),
-				StartLine: github.Int(15),
-				Line:      github.Int(16),
-				Body:      github.String(commentutil.BodyPrefix + "multiline new comment" + "\n<!-- __reviewdog__:xxxxxxxxxx -->\n"),
+				Path:      github.Ptr("reviewdog.go"),
+				Side:      github.Ptr("RIGHT"),
+				StartSide: github.Ptr("RIGHT"),
+				StartLine: github.Ptr(15),
+				Line:      github.Ptr(16),
+				Body:      github.Ptr(commentutil.BodyPrefix + "multiline new comment" + "\n<!-- __reviewdog__:xxxxxxxxxx -->\n"),
 			},
 			{
-				Path:      github.String("reviewdog.go"),
-				Side:      github.String("RIGHT"),
-				StartSide: github.String("RIGHT"),
-				StartLine: github.Int(15),
-				Line:      github.Int(16),
-				Body: github.String(commentutil.BodyPrefix + strings.Join([]string{
+				Path:      github.Ptr("reviewdog.go"),
+				Side:      github.Ptr("RIGHT"),
+				StartSide: github.Ptr("RIGHT"),
+				StartLine: github.Ptr(15),
+				Line:      github.Ptr(16),
+				Body: github.Ptr(commentutil.BodyPrefix + strings.Join([]string{
 					"multiline suggestion comment",
 					"```suggestion",
 					"line1",
@@ -295,10 +295,10 @@ https://test/repo/path/blob/sha/reviewdog.go#L18
 				}, "\n") + "\n"),
 			},
 			{
-				Path: github.String("reviewdog.go"),
-				Side: github.String("RIGHT"),
-				Line: github.Int(15),
-				Body: github.String(commentutil.BodyPrefix + strings.Join([]string{
+				Path: github.Ptr("reviewdog.go"),
+				Side: github.Ptr("RIGHT"),
+				Line: github.Ptr(15),
+				Body: github.Ptr(commentutil.BodyPrefix + strings.Join([]string{
 					"singleline suggestion comment",
 					"```suggestion",
 					"line1",
@@ -309,12 +309,12 @@ https://test/repo/path/blob/sha/reviewdog.go#L18
 				}, "\n") + "\n"),
 			},
 			{
-				Path:      github.String("reviewdog.go"),
-				Side:      github.String("RIGHT"),
-				StartSide: github.String("RIGHT"),
-				StartLine: github.Int(15),
-				Line:      github.Int(16),
-				Body: github.String(commentutil.BodyPrefix + strings.Join([]string{
+				Path:      github.Ptr("reviewdog.go"),
+				Side:      github.Ptr("RIGHT"),
+				StartSide: github.Ptr("RIGHT"),
+				StartLine: github.Ptr(15),
+				Line:      github.Ptr(16),
+				Body: github.Ptr(commentutil.BodyPrefix + strings.Join([]string{
 					"invalid lines suggestion comment",
 					invalidSuggestionPre + "GitHub comment range and suggestion line range must be same. L15-L16 v.s. L16-L17" + invalidSuggestionPost,
 					"",
@@ -322,12 +322,12 @@ https://test/repo/path/blob/sha/reviewdog.go#L18
 				}, "\n") + "\n"),
 			},
 			{
-				Path:      github.String("reviewdog.go"),
-				Side:      github.String("RIGHT"),
-				StartSide: github.String("RIGHT"),
-				StartLine: github.Int(14),
-				Line:      github.Int(16),
-				Body: github.String(commentutil.BodyPrefix + strings.Join([]string{
+				Path:      github.Ptr("reviewdog.go"),
+				Side:      github.Ptr("RIGHT"),
+				StartSide: github.Ptr("RIGHT"),
+				StartLine: github.Ptr(14),
+				Line:      github.Ptr(16),
+				Body: github.Ptr(commentutil.BodyPrefix + strings.Join([]string{
 					"Use suggestion range as GitHub comment range if the suggestion is in diff context",
 					"```suggestion",
 					"line1",
@@ -339,12 +339,12 @@ https://test/repo/path/blob/sha/reviewdog.go#L18
 				}, "\n") + "\n"),
 			},
 			{
-				Path:      github.String("reviewdog.go"),
-				Side:      github.String("RIGHT"),
-				StartSide: github.String("RIGHT"),
-				StartLine: github.Int(14),
-				Line:      github.Int(16),
-				Body: github.String(commentutil.BodyPrefix + strings.Join([]string{
+				Path:      github.Ptr("reviewdog.go"),
+				Side:      github.Ptr("RIGHT"),
+				StartSide: github.Ptr("RIGHT"),
+				StartLine: github.Ptr(14),
+				Line:      github.Ptr(16),
+				Body: github.Ptr(commentutil.BodyPrefix + strings.Join([]string{
 					"Partially invalid suggestions",
 					"```suggestion",
 					"line1",
@@ -357,12 +357,12 @@ https://test/repo/path/blob/sha/reviewdog.go#L18
 				}, "\n") + "\n"),
 			},
 			{
-				Path:      github.String("reviewdog.go"),
-				Side:      github.String("RIGHT"),
-				StartSide: github.String("RIGHT"),
-				StartLine: github.Int(15),
-				Line:      github.Int(16),
-				Body: github.String(commentutil.BodyPrefix + strings.Join([]string{
+				Path:      github.Ptr("reviewdog.go"),
+				Side:      github.Ptr("RIGHT"),
+				StartSide: github.Ptr("RIGHT"),
+				StartLine: github.Ptr(15),
+				Line:      github.Ptr(16),
+				Body: github.Ptr(commentutil.BodyPrefix + strings.Join([]string{
 					"non-line based suggestion comment (no source lines)",
 					invalidSuggestionPre + "source lines are not available" + invalidSuggestionPost,
 					"",
@@ -370,10 +370,10 @@ https://test/repo/path/blob/sha/reviewdog.go#L18
 				}, "\n") + "\n"),
 			},
 			{
-				Path: github.String("reviewdog.go"),
-				Side: github.String("RIGHT"),
-				Line: github.Int(15),
-				Body: github.String(commentutil.BodyPrefix + strings.Join([]string{
+				Path: github.Ptr("reviewdog.go"),
+				Side: github.Ptr("RIGHT"),
+				Line: github.Ptr(15),
+				Body: github.Ptr(commentutil.BodyPrefix + strings.Join([]string{
 					"range suggestion (single line)",
 					"```suggestion",
 					"haya14busa",
@@ -383,12 +383,12 @@ https://test/repo/path/blob/sha/reviewdog.go#L18
 				}, "\n") + "\n"),
 			},
 			{
-				Path:      github.String("reviewdog.go"),
-				Side:      github.String("RIGHT"),
-				StartSide: github.String("RIGHT"),
-				StartLine: github.Int(15),
-				Line:      github.Int(16),
-				Body: github.String(commentutil.BodyPrefix + strings.Join([]string{
+				Path:      github.Ptr("reviewdog.go"),
+				Side:      github.Ptr("RIGHT"),
+				StartSide: github.Ptr("RIGHT"),
+				StartLine: github.Ptr(15),
+				Line:      github.Ptr(16),
+				Body: github.Ptr(commentutil.BodyPrefix + strings.Join([]string{
 					"range suggestion (multi-line)",
 					"```suggestion",
 					"haya14busa (multi-line)",
@@ -398,12 +398,12 @@ https://test/repo/path/blob/sha/reviewdog.go#L18
 				}, "\n") + "\n"),
 			},
 			{
-				Path:      github.String("reviewdog.go"),
-				Side:      github.String("RIGHT"),
-				StartSide: github.String("RIGHT"),
-				StartLine: github.Int(15),
-				Line:      github.Int(17),
-				Body: github.String(commentutil.BodyPrefix + strings.Join([]string{
+				Path:      github.Ptr("reviewdog.go"),
+				Side:      github.Ptr("RIGHT"),
+				StartSide: github.Ptr("RIGHT"),
+				StartLine: github.Ptr(15),
+				Line:      github.Ptr(17),
+				Body: github.Ptr(commentutil.BodyPrefix + strings.Join([]string{
 					"range suggestion (line-break, remove)",
 					"```suggestion",
 					"line 15 (content at line 15)",
@@ -413,10 +413,10 @@ https://test/repo/path/blob/sha/reviewdog.go#L18
 				}, "\n") + "\n"),
 			},
 			{
-				Path: github.String("reviewdog.go"),
-				Side: github.String("RIGHT"),
-				Line: github.Int(15),
-				Body: github.String(commentutil.BodyPrefix + strings.Join([]string{
+				Path: github.Ptr("reviewdog.go"),
+				Side: github.Ptr("RIGHT"),
+				Line: github.Ptr(15),
+				Body: github.Ptr(commentutil.BodyPrefix + strings.Join([]string{
 					"range suggestion (insert)",
 					"```suggestion",
 					"haya14busa",
@@ -426,10 +426,10 @@ https://test/repo/path/blob/sha/reviewdog.go#L18
 				}, "\n") + "\n"),
 			},
 			{
-				Path: github.String("reviewdog.go"),
-				Side: github.String("RIGHT"),
-				Line: github.Int(15),
-				Body: github.String(commentutil.BodyPrefix + strings.Join([]string{
+				Path: github.Ptr("reviewdog.go"),
+				Side: github.Ptr("RIGHT"),
+				Line: github.Ptr(15),
+				Body: github.Ptr(commentutil.BodyPrefix + strings.Join([]string{
 					"multiple suggestions",
 					"```suggestion",
 					"haya1busa",
@@ -445,10 +445,10 @@ https://test/repo/path/blob/sha/reviewdog.go#L18
 				}, "\n") + "\n"),
 			},
 			{
-				Path: github.String("reviewdog.go"),
-				Side: github.String("RIGHT"),
-				Line: github.Int(15),
-				Body: github.String(commentutil.BodyPrefix + strings.Join([]string{
+				Path: github.Ptr("reviewdog.go"),
+				Side: github.Ptr("RIGHT"),
+				Line: github.Ptr(15),
+				Body: github.Ptr(commentutil.BodyPrefix + strings.Join([]string{
 					"range suggestion with start only location",
 					"```suggestion",
 					"haya14busa",
@@ -458,12 +458,12 @@ https://test/repo/path/blob/sha/reviewdog.go#L18
 				}, "\n") + "\n"),
 			},
 			{
-				Path:      github.String("reviewdog.go"),
-				Side:      github.String("RIGHT"),
-				StartSide: github.String("RIGHT"),
-				StartLine: github.Int(15),
-				Line:      github.Int(16),
-				Body: github.String(commentutil.BodyPrefix + strings.Join([]string{
+				Path:      github.Ptr("reviewdog.go"),
+				Side:      github.Ptr("RIGHT"),
+				StartSide: github.Ptr("RIGHT"),
+				StartLine: github.Ptr(15),
+				Line:      github.Ptr(16),
+				Body: github.Ptr(commentutil.BodyPrefix + strings.Join([]string{
 					"multiline suggestion comment including a code fence block",
 					"````suggestion",
 					"```",
@@ -475,10 +475,10 @@ https://test/repo/path/blob/sha/reviewdog.go#L18
 				}, "\n") + "\n"),
 			},
 			{
-				Path: github.String("reviewdog.go"),
-				Side: github.String("RIGHT"),
-				Line: github.Int(15),
-				Body: github.String(commentutil.BodyPrefix + strings.Join([]string{
+				Path: github.Ptr("reviewdog.go"),
+				Side: github.Ptr("RIGHT"),
+				Line: github.Ptr(15),
+				Body: github.Ptr(commentutil.BodyPrefix + strings.Join([]string{
 					"singleline suggestion comment including a code fence block",
 					"````suggestion",
 					"```",
@@ -490,12 +490,12 @@ https://test/repo/path/blob/sha/reviewdog.go#L18
 				}, "\n") + "\n"),
 			},
 			{
-				Path:      github.String("reviewdog.go"),
-				Side:      github.String("RIGHT"),
-				StartSide: github.String("RIGHT"),
-				StartLine: github.Int(15),
-				Line:      github.Int(16),
-				Body: github.String(commentutil.BodyPrefix + strings.Join([]string{
+				Path:      github.Ptr("reviewdog.go"),
+				Side:      github.Ptr("RIGHT"),
+				StartSide: github.Ptr("RIGHT"),
+				StartLine: github.Ptr(15),
+				Line:      github.Ptr(16),
+				Body: github.Ptr(commentutil.BodyPrefix + strings.Join([]string{
 					"multiline suggestion comment including an empty code fence block",
 					"``````suggestion",
 					"```",
@@ -506,12 +506,12 @@ https://test/repo/path/blob/sha/reviewdog.go#L18
 				}, "\n") + "\n"),
 			},
 			{
-				Path:      github.String("reviewdog.go"),
-				Side:      github.String("RIGHT"),
-				StartSide: github.String("RIGHT"),
-				StartLine: github.Int(15),
-				Line:      github.Int(16),
-				Body: github.String(commentutil.BodyPrefix + strings.Join([]string{
+				Path:      github.Ptr("reviewdog.go"),
+				Side:      github.Ptr("RIGHT"),
+				StartSide: github.Ptr("RIGHT"),
+				StartLine: github.Ptr(15),
+				Line:      github.Ptr(16),
+				Body: github.Ptr(commentutil.BodyPrefix + strings.Join([]string{
 					"related location test",
 					"<hr>",
 					"",
@@ -531,7 +531,7 @@ https://test/repo/path/blob/sha/reviewdog.go#L18
 		// replacing the metacomment string.
 		for i := 0; i < len(req.Comments); i++ {
 			metaCommentRe := regexp.MustCompile(`__reviewdog__:\S+`)
-			req.Comments[i].Body = github.String(metaCommentRe.ReplaceAllString(*req.Comments[i].Body, `__reviewdog__:xxxxxxxxxx`))
+			req.Comments[i].Body = github.Ptr(metaCommentRe.ReplaceAllString(*req.Comments[i].Body, `__reviewdog__:xxxxxxxxxx`))
 		}
 		if diff := pretty.Compare(want, req.Comments); diff != "" {
 			t.Errorf("req.Comments diff: (-got +want)\n%s", diff)
@@ -540,7 +540,7 @@ https://test/repo/path/blob/sha/reviewdog.go#L18
 	mux.HandleFunc("/repos/o/r", func(w http.ResponseWriter, r *http.Request) {
 		repoAPICalled++
 		if err := json.NewEncoder(w).Encode(&github.Repository{
-			HTMLURL: github.String("https://test/repo/path"),
+			HTMLURL: github.Ptr("https://test/repo/path"),
 		}); err != nil {
 			t.Fatal(err)
 		}
@@ -1328,7 +1328,7 @@ func TestGitHubPullRequest_Post_toomany(t *testing.T) {
 	})
 	mux.HandleFunc("/repos/o/r", func(w http.ResponseWriter, r *http.Request) {
 		if err := json.NewEncoder(w).Encode(&github.Repository{
-			HTMLURL: github.String("https://test/repo/path"),
+			HTMLURL: github.Ptr("https://test/repo/path"),
 		}); err != nil {
 			t.Fatal(err)
 		}
@@ -1437,7 +1437,7 @@ func TestGitHubPullRequest_Post_NoPermission(t *testing.T) {
 	})
 	mux.HandleFunc("/repos/o/r", func(w http.ResponseWriter, r *http.Request) {
 		if err := json.NewEncoder(w).Encode(&github.Repository{
-			HTMLURL: github.String("https://test/repo/path"),
+			HTMLURL: github.Ptr("https://test/repo/path"),
 		}); err != nil {
 			t.Fatal(err)
 		}
