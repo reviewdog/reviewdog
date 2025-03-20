@@ -6,7 +6,7 @@ import (
 	"errors"
 	"fmt"
 
-	"github.com/google/go-github/v64/github"
+	"github.com/google/go-github/v70/github"
 
 	"github.com/reviewdog/reviewdog"
 	"github.com/reviewdog/reviewdog/diff"

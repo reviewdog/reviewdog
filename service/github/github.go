@@ -13,7 +13,7 @@ import (
 	"strings"
 	"sync"
 
-	"github.com/google/go-github/v64/github"
+	"github.com/google/go-github/v70/github"
 	"google.golang.org/protobuf/proto"
 
 	"github.com/reviewdog/reviewdog"
