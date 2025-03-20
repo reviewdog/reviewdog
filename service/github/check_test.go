@@ -11,7 +11,7 @@ import (
 	"testing"
 
 	"github.com/google/go-cmp/cmp"
-	"github.com/google/go-github/v64/github"
+	"github.com/google/go-github/v70/github"
 	"github.com/reviewdog/reviewdog"
 	"github.com/reviewdog/reviewdog/filter"
 	"github.com/reviewdog/reviewdog/proto/rdf"
@@ -60,7 +60,7 @@ func TestCheck_OK(t *testing.T) {
 
 	mux := http.NewServeMux()
 	mux.HandleFunc("/repos/haya14busa/reviewdog/check-runs", func(w http.ResponseWriter, r *http.Request) {
-		if err := json.NewEncoder(w).Encode(&github.CheckRun{ID: github.Int64(wantCheckID)}); err != nil {
+		if err := json.NewEncoder(w).Encode(&github.CheckRun{ID: github.Ptr(int64(wantCheckID))}); err != nil {
 			t.Fatal(err)
 		}
 	})
@@ -132,7 +132,7 @@ func TestCheck_OK_multiple_update_runs(t *testing.T) {
 
 	mux := http.NewServeMux()
 	mux.HandleFunc("/repos/haya14busa/reviewdog/check-runs", func(w http.ResponseWriter, r *http.Request) {
-		if err := json.NewEncoder(w).Encode(&github.CheckRun{ID: github.Int64(wantCheckID)}); err != nil {
+		if err := json.NewEncoder(w).Encode(&github.CheckRun{ID: github.Ptr(int64(wantCheckID))}); err != nil {
 			t.Fatal(err)
 		}
 	})
@@ -282,7 +282,7 @@ func TestCheck_setToolNameForEachRun(t *testing.T) {
 				t.Errorf("toolName = %s, want %s", req.Name, toolName2)
 			}
 		}
-		if err := json.NewEncoder(w).Encode(&github.CheckRun{ID: github.Int64(wantCheckID)}); err != nil {
+		if err := json.NewEncoder(w).Encode(&github.CheckRun{ID: github.Ptr(int64(wantCheckID))}); err != nil {
 			t.Fatal(err)
 		}
 	})
@@ -299,12 +299,12 @@ func TestCheck_setToolNameForEachRun(t *testing.T) {
 			}
 			wantAnnotations := []*github.CheckRunAnnotation{
 				{
-					Path:            github.String("sample.new.txt"),
-					StartLine:       github.Int(2),
-					EndLine:         github.Int(2),
-					AnnotationLevel: github.String("warning"),
-					Message:         github.String("comment 1"),
-					Title:           github.String("[toolName1] sample.new.txt#L2"),
+					Path:            github.Ptr("sample.new.txt"),
+					StartLine:       github.Ptr(2),
+					EndLine:         github.Ptr(2),
+					AnnotationLevel: github.Ptr("warning"),
+					Message:         github.Ptr("comment 1"),
+					Title:           github.Ptr("[toolName1] sample.new.txt#L2"),
 				},
 			}
 			if req.GetStatus() == "completed" {
@@ -322,12 +322,12 @@ func TestCheck_setToolNameForEachRun(t *testing.T) {
 			}
 			wantAnnotations := []*github.CheckRunAnnotation{
 				{
-					Path:            github.String("sample.new.txt"),
-					StartLine:       github.Int(2),
-					EndLine:         github.Int(2),
-					AnnotationLevel: github.String("failure"), // default
-					Message:         github.String("comment 2"),
-					Title:           github.String("[toolName2] sample.new.txt#L2"),
+					Path:            github.Ptr("sample.new.txt"),
+					StartLine:       github.Ptr(2),
+					EndLine:         github.Ptr(2),
+					AnnotationLevel: github.Ptr("failure"), // default
+					Message:         github.Ptr("comment 2"),
+					Title:           github.Ptr("[toolName2] sample.new.txt#L2"),
 				},
 			}
 			if req.GetStatus() == "completed" {
