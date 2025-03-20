@@ -165,14 +165,14 @@ func TestGitHubPullRequest_Post_Flush_review_api(t *testing.T) {
 						SubjectType: github.Ptr("line"),
 					},
 					{
-						ID:          github.Ptr(1414),
+						ID:          github.Ptr(int64(1414)),
 						Path:        github.Ptr("reviewdog.go"),
 						Line:        github.Ptr(15),
 						Body:        github.Ptr(commentutil.BodyPrefix + "already commented [outdated]" + "\n<!-- __reviewdog__:Cg9jY2FlN2NlYTg0M2M0MDISCXRvb2wtbmFtZQ== -->\n"),
 						SubjectType: github.Ptr("line"),
 					},
 					{
-						ID:          github.Ptr(1414),
+						ID:          github.Ptr(int64(1414)),
 						Path:        github.Ptr("reviewdog.go"),
 						Line:        github.Ptr(15),
 						Body:        github.Ptr(commentutil.BodyPrefix + "already commented [different tool]" + "\n<!-- __reviewdog__:CgZ4eHh4eHgSDmRpZmZlcmVudC10b29s -->\n"),
