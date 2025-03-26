@@ -2,6 +2,7 @@ package gitlab
 
 import (
 	"context"
+	"errors"
 	"fmt"
 	"path/filepath"
 	"strconv"
@@ -192,6 +193,12 @@ func buildSuggestions(c *reviewdog.Comment) string {
 func buildSingleSuggestion(c *reviewdog.Comment, s *rdf.Suggestion) (string, error) {
 	var sb strings.Builder
 
+	start := s.GetRange().GetStart()
+	end := s.GetRange().GetEnd()
+	if start.GetColumn() > 0 || end.GetColumn() > 0 {
+		return buildNonLineBasedSuggestion(c, s)
+	}
+
 	// we might need to use 4 or more backticks
 	//
 	// https://docs.gitlab.com/ee/user/project/merge_requests/reviews/suggestions.html#code-block-nested-in-suggestions
@@ -215,4 +222,46 @@ func buildSingleSuggestion(c *reviewdog.Comment, s *rdf.Suggestion) (string, err
 	commentutil.WriteCodeFence(&sb, backticks)
 
 	return sb.String(), nil
+}
+
+func buildNonLineBasedSuggestion(c *reviewdog.Comment, s *rdf.Suggestion) (string, error) {
+	sourceLines := c.Result.SourceLines
+	if len(sourceLines) == 0 {
+		return "", errors.New("source lines are not available")
+	}
+	start := s.GetRange().GetStart()
+	end := s.GetRange().GetEnd()
+	startLineContent, err := getSourceLine(sourceLines, int(start.GetLine()))
+	if err != nil {
+		return "", err
+	}
+	endLineContent, err := getSourceLine(sourceLines, int(end.GetLine()))
+	if err != nil {
+		return "", err
+	}
+
+	txt := startLineContent[:max(start.GetColumn()-1, 0)] + s.GetText() + endLineContent[max(end.GetColumn()-1, 0):]
+	backticks := commentutil.GetCodeFenceLength(txt)
+	lines := strconv.Itoa(int(end.GetLine() - start.GetLine()))
+
+	var sb strings.Builder
+	sb.Grow(backticks + len("suggestion:-0+\n") + len(lines) + len(txt) + len("\n") + backticks)
+	commentutil.WriteCodeFence(&sb, backticks)
+	sb.WriteString("suggestion:-0+")
+	sb.WriteString(lines)
+	sb.WriteString("\n")
+	if txt != "" {
+		sb.WriteString(txt)
+		sb.WriteString("\n")
+	}
+	commentutil.WriteCodeFence(&sb, backticks)
+	return sb.String(), nil
+}
+
+func getSourceLine(sourceLines map[int]string, line int) (string, error) {
+	lineContent, ok := sourceLines[line]
+	if !ok {
+		return "", fmt.Errorf("source line (L=%d) is not available for this suggestion", line)
+	}
+	return lineContent, nil
 }
