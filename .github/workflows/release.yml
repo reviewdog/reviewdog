@@ -2,7 +2,7 @@ name: release
 on:
   push:
     branches:
-      - $default-branch
+      - master
       - release-*
     tags:
       - "v*.*.*"
