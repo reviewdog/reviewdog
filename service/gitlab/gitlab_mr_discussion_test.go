@@ -399,6 +399,64 @@ func TestBuildSuggestions(t *testing.T) {
 				"",
 			}, "\n"),
 		},
+		{
+			in: buildTestCommentWithSource(
+				"a suggestion with non-line-based bounds",
+				map[int]string{
+					9:  "line-unaffected",
+					10: "line-broken",
+					11: "line-unaffected",
+				},
+				[]*rdf.Suggestion{
+					buildTestsNonLineSuggestion("", 10, 1, 11, 1),
+				},
+			),
+			// since the end line is 11, it will be included, even though we only delete line 10
+			want: strings.Join([]string{
+				"```suggestion:-0+1",
+				"line-unaffected",
+				"```",
+				"",
+			}, "\n"),
+		},
+		{
+			in: buildTestCommentWithSource(
+				"a suggestion with non-line-based bounds",
+				map[int]string{
+					10: "foo bar",
+				},
+				[]*rdf.Suggestion{
+					buildTestsNonLineSuggestion("baz", 10, 5, 10, 8),
+				},
+			),
+			// since the end line is 11, it will be included, even though we only delete line 10
+			want: strings.Join([]string{
+				"```suggestion:-0+0",
+				"foo baz",
+				"```",
+				"",
+			}, "\n"),
+		},
+		{
+			in: buildTestCommentWithSource(
+				"a suggestion with non-line-based bounds that adds new lines",
+				map[int]string{
+					10: "Foo(bar)",
+				},
+				[]*rdf.Suggestion{
+					buildTestsNonLineSuggestion("if bar == nil:\n    bar = 0\n", 10, 1, 10, 1),
+				},
+			),
+			// since the end line is 11, it will be included, even though we only delete line 10
+			want: strings.Join([]string{
+				"```suggestion:-0+0",
+				"if bar == nil:",
+				"    bar = 0",
+				"Foo(bar)",
+				"```",
+				"",
+			}, "\n"),
+		},
 	}
 	for _, tt := range tests {
 		suggestion := buildSuggestions(tt.in)
@@ -453,6 +511,25 @@ func TestBuildSuggestionsInvalid(t *testing.T) {
 				"",
 			}, "\n"),
 		},
+		{
+			in: buildTestComment(
+				"a suggestion with non-line-based bounds, but without source",
+				[]*rdf.Suggestion{
+					buildTestsNonLineSuggestion("baz", 10, 5, 10, 8),
+				},
+			),
+			want: "<details><summary>reviewdog suggestion error</summary>source lines are not available</details>\n",
+		},
+		{
+			in: buildTestCommentWithSource(
+				"a suggestion with non-line-based bounds, but without the important lines",
+				map[int]string{},
+				[]*rdf.Suggestion{
+					buildTestsNonLineSuggestion("baz", 10, 5, 10, 8),
+				},
+			),
+			want: "<details><summary>reviewdog suggestion error</summary>source lines are not available</details>\n",
+		},
 	}
 	for _, tt := range tests {
 		suggestion := buildSuggestions(tt.in)
@@ -462,15 +539,31 @@ func TestBuildSuggestionsInvalid(t *testing.T) {
 	}
 }
 
-func buildTestsSuggestion(text string, start int32, end int32) *rdf.Suggestion {
+func buildTestsNonLineSuggestion(text string, startLine, startCol, endLine, endCol int32) *rdf.Suggestion {
 	return &rdf.Suggestion{
 		Text: text,
 		Range: &rdf.Range{
 			Start: &rdf.Position{
-				Line: start,
+				Line:   startLine,
+				Column: startCol,
 			},
 			End: &rdf.Position{
-				Line: end,
+				Line:   endLine,
+				Column: endCol,
+			},
+		},
+	}
+}
+
+func buildTestsSuggestion(text string, startLine int32, endLine int32) *rdf.Suggestion {
+	return &rdf.Suggestion{
+		Text: text,
+		Range: &rdf.Range{
+			Start: &rdf.Position{
+				Line: startLine,
+			},
+			End: &rdf.Position{
+				Line: endLine,
 			},
 		},
 	}
@@ -480,6 +573,19 @@ func buildTestComment(message string, suggestions []*rdf.Suggestion) *reviewdog.
 	return &reviewdog.Comment{
 		ToolName: "tool-name",
 		Result: &filter.FilteredDiagnostic{
+			Diagnostic: &rdf.Diagnostic{
+				Message:     message,
+				Suggestions: suggestions,
+			},
+		},
+	}
+}
+
+func buildTestCommentWithSource(message string, source map[int]string, suggestions []*rdf.Suggestion) *reviewdog.Comment {
+	return &reviewdog.Comment{
+		ToolName: "tool-name",
+		Result: &filter.FilteredDiagnostic{
+			SourceLines: source,
 			Diagnostic: &rdf.Diagnostic{
 				Message:     message,
 				Suggestions: suggestions,
