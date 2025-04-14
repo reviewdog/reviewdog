@@ -10,7 +10,7 @@ import (
 	"os"
 	"strings"
 
-	"github.com/google/go-github/v39/github"
+	"github.com/google/go-github/v71/github"
 	"golang.org/x/oauth2"
 )
 
@@ -46,7 +46,7 @@ func run() error {
 	}
 	var wholeErr error
 	for _, repo := range repos {
-		if !strings.HasPrefix(repo.GetName(), "action-") {
+		if repo.GetArchived() || !strings.HasPrefix(repo.GetName(), "action-") {
 			continue
 		}
 		log.Printf("Dispatch depup to %s/%s...", *targetOrg, repo.GetName())

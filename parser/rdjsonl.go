@@ -26,7 +26,7 @@ func (p *RDJSONLParser) Parse(r io.Reader) ([]*rdf.Diagnostic, error) {
 	s := bufio.NewScanner(r)
 	for s.Scan() {
 		d := new(rdf.Diagnostic)
-		if err := protojson.Unmarshal(s.Bytes(), d); err != nil {
+		if err := (protojson.UnmarshalOptions{DiscardUnknown: true}).Unmarshal(s.Bytes(), d); err != nil {
 			return nil, fmt.Errorf("failed to unmarshal rdjsonl (Diagnostic): %w", err)
 		}
 		if d.GetOriginalOutput() == "" {

@@ -17,11 +17,6 @@ import (
 
 const baseEndpoint = "https://reviewdog.app"
 
-// DogHouseClientInterface is interface for doghouse client.
-type DogHouseClientInterface interface {
-	Check(ctx context.Context, req *doghouse.CheckRequest) (*doghouse.CheckResponse, error)
-}
-
 // DogHouseClient is client for doghouse server.
 type DogHouseClient struct {
 	Client *http.Client
@@ -54,11 +49,10 @@ func (c *DogHouseClient) Check(ctx context.Context, req *doghouse.CheckRequest) 
 	if err != nil {
 		return nil, err
 	}
-	httpReq, err := http.NewRequest(http.MethodPost, checkURL, bytes.NewReader(b))
+	httpReq, err := http.NewRequestWithContext(ctx, http.MethodPost, checkURL, bytes.NewReader(b))
 	if err != nil {
 		return nil, err
 	}
-	httpReq = httpReq.WithContext(ctx)
 	httpReq.Header.Set("Content-Type", "application/json")
 	httpReq.Header.Set("User-Agent", fmt.Sprintf("reviewdog/%s", commands.Version))
 

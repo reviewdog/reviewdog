@@ -90,7 +90,7 @@
       "severity": "INFO"
     },
     {
-      "message": "severity test 2 (INFO)",
+      "message": "severity test 2 (INFO enum value should be discarded)",
       "location": {
         "path": "_testdata/custom.txt",
         "range": {
@@ -201,6 +201,60 @@
           }
         }
       ]
+    },
+    {
+      "message": "test related location",
+      "location": {
+        "path": "_testdata/custom.txt",
+        "range": {
+          "start": {
+            "line": 19
+          }
+        }
+      },
+      "suggestions": [
+        {
+          "text": "test suggestion w/ related_locations",
+          "range": {
+            "start": {
+              "line": 19
+            }
+          }
+        }
+      ],
+      "related_locations": [
+        {
+          "message": "related loc 1",
+          "location": {
+            "path": "_testdata/custom.txt",
+            "range": {
+              "start": {
+                "line": 9
+              }
+            }
+          }
+        },
+        {
+          "message": "related loc 2 (different file)",
+          "location": {
+            "path": "_testdata/suggestions.txt",
+            "range": {
+              "start": {
+                "line": 6
+              },
+              "end": {
+                "line": 8
+              }
+            }
+          }
+        }
+      ]
+    },
+    {
+      "message": "test file comment",
+      "location": {
+        "path": "_testdata/custom.txt"
+      }
     }
   ]
 }

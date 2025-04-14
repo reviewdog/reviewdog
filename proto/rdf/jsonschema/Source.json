@@ -1,0 +1,21 @@
+{
+    "$schema": "http://json-schema.org/draft-04/schema#",
+    "$ref": "#/definitions/Source",
+    "definitions": {
+        "Source": {
+            "properties": {
+                "name": {
+                    "type": "string",
+                    "description": "A human-readable string describing the source of diagnostics, e.g. 'typescript' or 'super lint'."
+                },
+                "url": {
+                    "type": "string",
+                    "description": "URL to this source. Optional."
+                }
+            },
+            "additionalProperties": true,
+            "type": "object",
+            "title": "Source"
+        }
+    }
+}

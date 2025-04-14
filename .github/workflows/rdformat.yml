@@ -1,0 +1,17 @@
+name: Proto
+on:
+  push:
+    branches:
+      - master
+  pull_request:
+jobs:
+  build:
+    name: Built
+    runs-on: ubuntu-latest
+    steps:
+    - uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683 # v4.2.2
+    - name: Build
+      working-directory: proto/
+      run: ./update.sh
+    - name: Check diff
+      run: git diff --exit-code

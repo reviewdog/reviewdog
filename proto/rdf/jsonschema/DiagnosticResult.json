@@ -1,0 +1,224 @@
+{
+    "$schema": "http://json-schema.org/draft-04/schema#",
+    "$ref": "#/definitions/DiagnosticResult",
+    "definitions": {
+        "DiagnosticResult": {
+            "properties": {
+                "diagnostics": {
+                    "items": {
+                        "$ref": "#/definitions/reviewdog.rdf.Diagnostic"
+                    },
+                    "type": "array"
+                },
+                "source": {
+                    "$ref": "#/definitions/reviewdog.rdf.Source",
+                    "additionalProperties": true,
+                    "description": "The source of diagnostics, e.g. 'typescript' or 'super lint'. Optional."
+                },
+                "severity": {
+                    "enum": [
+                        "UNKNOWN_SEVERITY",
+                        0,
+                        "ERROR",
+                        1,
+                        "WARNING",
+                        2,
+                        "INFO",
+                        3
+                    ],
+                    "oneOf": [
+                        {
+                            "type": "string"
+                        },
+                        {
+                            "type": "integer"
+                        }
+                    ],
+                    "title": "Severity"
+                }
+            },
+            "additionalProperties": true,
+            "type": "object",
+            "title": "Diagnostic Result",
+            "description": "Result of diagnostic tool such as a compiler or a linter. It's intended to be used as top-level structured format which represents a whole result of a diagnostic tool."
+        },
+        "reviewdog.rdf.Code": {
+            "properties": {
+                "value": {
+                    "type": "string",
+                    "description": "This rule's code/identifier."
+                },
+                "url": {
+                    "type": "string",
+                    "description": "A URL to open with more information about this rule code. Optional."
+                }
+            },
+            "additionalProperties": true,
+            "type": "object",
+            "title": "Code"
+        },
+        "reviewdog.rdf.Diagnostic": {
+            "properties": {
+                "message": {
+                    "type": "string",
+                    "description": "The diagnostic's message."
+                },
+                "location": {
+                    "$ref": "#/definitions/reviewdog.rdf.Location",
+                    "additionalProperties": true,
+                    "description": "Location at which this diagnostic message applies."
+                },
+                "severity": {
+                    "enum": [
+                        "UNKNOWN_SEVERITY",
+                        0,
+                        "ERROR",
+                        1,
+                        "WARNING",
+                        2,
+                        "INFO",
+                        3
+                    ],
+                    "oneOf": [
+                        {
+                            "type": "string"
+                        },
+                        {
+                            "type": "integer"
+                        }
+                    ],
+                    "title": "Severity"
+                },
+                "source": {
+                    "$ref": "#/definitions/reviewdog.rdf.Source",
+                    "additionalProperties": true,
+                    "description": "The source of this diagnostic, e.g. 'typescript' or 'super lint'. Optional."
+                },
+                "code": {
+                    "$ref": "#/definitions/reviewdog.rdf.Code",
+                    "additionalProperties": true,
+                    "description": "This diagnostic's rule code. Optional."
+                },
+                "suggestions": {
+                    "items": {
+                        "$ref": "#/definitions/reviewdog.rdf.Suggestion"
+                    },
+                    "type": "array",
+                    "description": "Suggested fixes to resolve this diagnostic. Optional."
+                },
+                "original_output": {
+                    "type": "string",
+                    "description": "Experimental: If this diagnostic is converted from other formats, original_output represents the original output which corresponds to this diagnostic. Optional."
+                },
+                "related_locations": {
+                    "items": {
+                        "$ref": "#/definitions/reviewdog.rdf.RelatedLocation"
+                    },
+                    "type": "array",
+                    "description": "Related locations for this diagnostic. Optional."
+                }
+            },
+            "additionalProperties": true,
+            "type": "object",
+            "title": "Diagnostic",
+            "description": "Represents a diagnostic, such as a compiler error or warning. It's intended to be used as structured format which represents a diagnostic and can be used as stream of input/output such as jsonl. This message should be self-contained to report a diagnostic."
+        },
+        "reviewdog.rdf.Location": {
+            "properties": {
+                "path": {
+                    "type": "string",
+                    "description": "File path. It could be either absolute path or relative path."
+                },
+                "range": {
+                    "$ref": "#/definitions/reviewdog.rdf.Range",
+                    "additionalProperties": true,
+                    "description": "Range in the file path. Optional."
+                }
+            },
+            "additionalProperties": true,
+            "type": "object",
+            "title": "Location"
+        },
+        "reviewdog.rdf.Position": {
+            "properties": {
+                "line": {
+                    "type": "integer",
+                    "description": "Line number, starting at 1. Optional."
+                },
+                "column": {
+                    "type": "integer",
+                    "description": "Column number, starting at 1 (byte count in UTF-8). Example: 'a𐐀b'  The column of a: 1  The column of 𐐀: 2  The column of b: 6 since 𐐀 is represented with 4 bytes in UTF-8. Optional."
+                }
+            },
+            "additionalProperties": true,
+            "type": "object",
+            "title": "Position"
+        },
+        "reviewdog.rdf.Range": {
+            "properties": {
+                "start": {
+                    "$ref": "#/definitions/reviewdog.rdf.Position",
+                    "additionalProperties": true,
+                    "description": "Required."
+                },
+                "end": {
+                    "$ref": "#/definitions/reviewdog.rdf.Position",
+                    "additionalProperties": true,
+                    "description": "end can be omitted. Then the range is handled as zero-length (start == end). Optional."
+                }
+            },
+            "additionalProperties": true,
+            "type": "object",
+            "title": "The end position is *exclusive*. It might be a bit unnatural for you or for\n some diagnostic tools to use exclusive range, but it's necessary to represent\n zero-width range especially when using it in Suggestion context to support\n code insertion.\n Example: \"14\" in \"haya14busa\"\n   start: { line: 1, column: 5 }\n   end:   { line: 1, column: 7 } # \u003c= Exclusive\n\n |h|a|y|a|1|4|b|u|s|a|\n 1 2 3 4 5 6 7 8 9 0 1\n         ^---^\n haya14busa\n     ^^\n\n If you want to specify a range that\n contains a line including the line ending character(s), then use an end\n position denoting the start of the next line.\n Example:\n   start: { line: 5, column: 23 }\n   end:   { line: 6, column: 1 }\n\n If both start and end position omit column value, it's\n handled as linewise and the range includes end position (line) as well.\n Example:\n   start: { line: 5 }\n   end:   { line: 6 }\n The above example represents range start from line 5 to the end of line 6\n including EOL.\n\n Examples for line range:\n  Text example. \u003cline\u003e|\u003cline content\u003e(line breaking)\n  1|abc\\r\\n\n  2|def\\r\\n\n  3|ghi\\r\\n\n\n start: { line: 2 }\n   =\u003e \"abc\"\n\n start: { line: 2 }\n end:   { line: 2 }\n   =\u003e \"abc\"\n\n start: { line: 2 }\n end:   { line: 3 }\n   =\u003e \"abc\\r\\ndef\"\n\n start: { line: 2 }\n end:   { line: 3, column: 1 }\n   =\u003e \"abc\\r\\n\"",
+            "description": "A range in a text document expressed as start and end positions.  The end position is *exclusive*. It might be a bit unnatural for you or for some diagnostic tools to use exclusive range, but it's necessary to represent zero-width range especially when using it in Suggestion context to support code insertion. Example: \"14\" in \"haya14busa\"   start: { line: 1, column: 5 }   end:   { line: 1, column: 7 } # \u003c= Exclusive |h|a|y|a|1|4|b|u|s|a| 1 2 3 4 5 6 7 8 9 0 1         ^---^ haya14busa     ^^ If you want to specify a range that contains a line including the line ending character(s), then use an end position denoting the start of the next line. Example:   start: { line: 5, column: 23 }   end:   { line: 6, column: 1 } If both start and end position omit column value, it's handled as linewise and the range includes end position (line) as well. Example:   start: { line: 5 }   end:   { line: 6 } The above example represents range start from line 5 to the end of line 6 including EOL. Examples for line range:  Text example. \u003cline\u003e|\u003cline content\u003e(line breaking)  1|abc\\r\\n  2|def\\r\\n  3|ghi\\r\\n start: { line: 2 }   =\u003e \"abc\" start: { line: 2 } end:   { line: 2 }   =\u003e \"abc\" start: { line: 2 } end:   { line: 3 }   =\u003e \"abc\\r\\ndef\" start: { line: 2 } end:   { line: 3, column: 1 }   =\u003e \"abc\\r\\n\"  start: { line: 2, column: 1 } end:   { line: 2, column: 4 }   =\u003e \"abc\" (without line-break)"
+        },
+        "reviewdog.rdf.RelatedLocation": {
+            "properties": {
+                "message": {
+                    "type": "string",
+                    "description": "Explanation of this related location. Optional."
+                },
+                "location": {
+                    "$ref": "#/definitions/reviewdog.rdf.Location",
+                    "additionalProperties": true,
+                    "description": "Required."
+                }
+            },
+            "additionalProperties": true,
+            "type": "object",
+            "title": "Related Location"
+        },
+        "reviewdog.rdf.Source": {
+            "properties": {
+                "name": {
+                    "type": "string",
+                    "description": "A human-readable string describing the source of diagnostics, e.g. 'typescript' or 'super lint'."
+                },
+                "url": {
+                    "type": "string",
+                    "description": "URL to this source. Optional."
+                }
+            },
+            "additionalProperties": true,
+            "type": "object",
+            "title": "Source"
+        },
+        "reviewdog.rdf.Suggestion": {
+            "properties": {
+                "range": {
+                    "$ref": "#/definitions/reviewdog.rdf.Range",
+                    "additionalProperties": true,
+                    "description": "Range at which this suggestion applies. To insert text into a document create a range where start == end."
+                },
+                "text": {
+                    "type": "string",
+                    "description": "A suggested text which replace the range. For delete operations use an empty string."
+                }
+            },
+            "additionalProperties": true,
+            "type": "object",
+            "title": "Suggestion",
+            "description": "Suggestion represents a suggested text manipulation to resolve a diagnostic problem. Insert example ('hayabusa' -\u003e 'haya15busa'):   range {     start {       line: 1       column: 5     }     end {       line: 1       column: 5     }   }   text: 15 |h|a|y|a|b|u|s|a| 1 2 3 4 5 6 7 8 9         ^--- insert '15' Update example ('haya15busa' -\u003e 'haya14busa'):   range {     start {       line: 1       column: 5     }     end {       line: 1       column: 7     }   }   text: 14 |h|a|y|a|1|5|b|u|s|a| 1 2 3 4 5 6 7 8 9 0 1         ^---^ replace with '14'"
+        }
+    }
+}

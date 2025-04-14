@@ -3,6 +3,7 @@ package project
 import (
 	"bytes"
 	"context"
+	"errors"
 	"fmt"
 	"io"
 	"log"
@@ -39,7 +40,7 @@ func RunAndParse(ctx context.Context, conf *Config, runners map[string]bool, def
 		}
 		usedRunners = append(usedRunners, runnerName)
 		semaphore <- 1
-		log.Printf("reviewdog: [start]\trunner=%s", runnerName)
+		log.Printf("reviewdog: [start] runner=%s", runnerName)
 		fname := runner.Format
 		if fname == "" && len(runner.Errorformat) == 0 {
 			fname = runnerName
@@ -73,7 +74,7 @@ func RunAndParse(ctx context.Context, conf *Config, runners map[string]bool, def
 				Diagnostics: diagnostics,
 				CmdErr:      cmdErr,
 			})
-			msg := fmt.Sprintf("reviewdog: [finish]\trunner=%s", runnerName)
+			msg := fmt.Sprintf("reviewdog: [finish] runner=%s", runnerName)
 			if cmdErr != nil {
 				msg += fmt.Sprintf("\terror=%v", cmdErr)
 			}
@@ -91,7 +92,8 @@ func RunAndParse(ctx context.Context, conf *Config, runners map[string]bool, def
 }
 
 // Run runs reviewdog tasks based on Config.
-func Run(ctx context.Context, conf *Config, runners map[string]bool, c reviewdog.CommentService, d reviewdog.DiffService, teeMode bool, filterMode filter.Mode, failOnError bool) error {
+func Run(ctx context.Context, conf *Config, runners map[string]bool, c reviewdog.CommentService, d reviewdog.DiffService,
+	teeMode bool, filterMode filter.Mode, failLevel reviewdog.FailLevel) error {
 	results, err := RunAndParse(ctx, conf, runners, "", teeMode) // Level is not used.
 	if err != nil {
 		return err
@@ -108,17 +110,20 @@ func Run(ctx context.Context, conf *Config, runners map[string]bool, c reviewdog
 	if err != nil {
 		return err
 	}
-	var g errgroup.Group
+	var errs []error
 	results.Range(func(toolname string, result *reviewdog.Result) {
-		ds := result.Diagnostics
-		g.Go(func() error {
-			if err := result.CheckUnexpectedFailure(); err != nil {
-				return err
-			}
-			return reviewdog.RunFromResult(ctx, c, ds, filediffs, d.Strip(), toolname, filterMode, failOnError)
-		})
+		if err := result.CheckUnexpectedFailure(); err != nil {
+			errs = append(errs, err)
+		}
+		if ncs, ok := c.(reviewdog.NamedCommentService); ok {
+			ncs.SetTool(toolname, result.Level)
+		}
+		// Note: CommentService shouldn't be run concurrently with different tool.
+		if err := reviewdog.RunFromResult(ctx, c, result.Diagnostics, filediffs, d.Strip(), toolname, filterMode, failLevel); err != nil {
+			errs = append(errs, err)
+		}
 	})
-	return g.Wait()
+	return errors.Join(errs...)
 }
 
 var secretEnvs = [...]string{

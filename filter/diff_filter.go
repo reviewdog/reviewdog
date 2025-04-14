@@ -2,10 +2,9 @@ package filter
 
 import (
 	"fmt"
-	"path/filepath"
-	"strings"
 
 	"github.com/reviewdog/reviewdog/diff"
+	"github.com/reviewdog/reviewdog/pathutil"
 	"github.com/reviewdog/reviewdog/service/serviceutil"
 )
 
@@ -168,21 +167,7 @@ func (df *DiffFilter) isSignificantLine(line *diff.Line) bool {
 type normalizedPath struct{ p string }
 
 func (df *DiffFilter) normalizePath(path string) normalizedPath {
-	return normalizedPath{p: NormalizePath(path, df.cwd, df.projectRelPath)}
-}
-
-func contains(path, base string) bool {
-	ps := splitPathList(path)
-	bs := splitPathList(base)
-	if len(ps) < len(bs) {
-		return false
-	}
-	for i := range bs {
-		if bs[i] != ps[i] {
-			return false
-		}
-	}
-	return true
+	return normalizedPath{p: pathutil.NormalizePath(path, df.cwd, df.projectRelPath)}
 }
 
 // Assuming diff path should be relative path to the project root dir by
@@ -191,25 +176,5 @@ func contains(path, base string) bool {
 // `git diff --relative` can returns relative path to current workdir, so we
 // ask users not to use it for reviewdog command.
 func (df *DiffFilter) normalizeDiffPath(filediff *diff.FileDiff) normalizedPath {
-	return normalizedPath{p: NormalizeDiffPath(filediff.PathNew, df.strip)}
-}
-
-// NormalizeDiffPath return path normalized path from given path in diff with
-// strip.
-func NormalizeDiffPath(diffpath string, strip int) string {
-	if diffpath == "/dev/null" {
-		return ""
-	}
-	path := diffpath
-	if strip > 0 && !filepath.IsAbs(path) {
-		ps := splitPathList(path)
-		if len(ps) > strip {
-			path = filepath.Join(ps[strip:]...)
-		}
-	}
-	return filepath.ToSlash(filepath.Clean(path))
-}
-
-func splitPathList(path string) []string {
-	return strings.Split(filepath.ToSlash(path), "/")
+	return normalizedPath{p: pathutil.NormalizeDiffPath(filediff.PathNew, df.strip)}
 }

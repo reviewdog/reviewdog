@@ -1,7 +1,7 @@
 # reviewdog app config: https://github.com/settings/apps/reviewdog
 
 # https://cloud.google.com/appengine/docs/standard/go/config/appref
-runtime: go115
+runtime: go121
 
 # https://cloud.google.com/appengine/docs/standard/go/warmup-requests/configuring
 inbound_services:

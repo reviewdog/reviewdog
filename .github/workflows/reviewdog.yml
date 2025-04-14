@@ -14,12 +14,11 @@ jobs:
     name: reviewdog (github-check)
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v3
+      - uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683 # v4.2.2
 
-      - uses: actions/setup-go@v3
+      - uses: actions/setup-go@0aaccfd150d50ccaeb58ebd88d36e91967a5f35b # v5.4.0
         with:
-          go-version: '1.x'
-          cache: true
+          go-version-file: "go.mod"
 
       - name: Install linters
         run: go install golang.org/x/lint/golint@latest
@@ -48,6 +47,12 @@ jobs:
           cat ./_testdata/custom_rdjson.json | \
             reviewdog -name="custom-rdjson" -f=rdjson -reporter=github-check -level=info
 
+      - name: reviewdog project run
+        env:
+          REVIEWDOG_GITHUB_API_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+            reviewdog -reporter=github-check
+
   reviewdog-pr:
     permissions:
       checks: write
@@ -57,12 +62,11 @@ jobs:
     name: reviewdog on Pull Request
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v3
+      - uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683 # v4.2.2
 
-      - uses: actions/setup-go@v3
+      - uses: actions/setup-go@0aaccfd150d50ccaeb58ebd88d36e91967a5f35b # v5.4.0
         with:
-          go-version: '1.x'
-          cache: true
+          go-version-file: "go.mod"
 
       - name: Install linters
         run: go install golang.org/x/lint/golint@latest
@@ -153,7 +157,7 @@ jobs:
           REVIEWDOG_GITHUB_API_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         run: |
           cat ./_testdata/custom_rdjson.json | \
-            reviewdog -name="custom-rdjson" -f=rdjson -reporter=github-pr-review
+            reviewdog -name="custom-rdjson" -f=rdjson -reporter=github-pr-review -filter-mode=file
 
       - name: gofmt -s with reviewdog
         env:
@@ -161,6 +165,12 @@ jobs:
         run: |
           gofmt -s -d . | \
             reviewdog -name="gofmt" -f=diff -f.diff.strip=0 -reporter=github-pr-review
+
+      - name: reviewdog project run
+        env:
+          REVIEWDOG_GITHUB_API_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+            reviewdog -reporter=github-pr-review
 
   golangci-lint:
     permissions:
@@ -171,11 +181,11 @@ jobs:
     name: runner / golangci-lint
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v3
-      - uses: reviewdog/action-golangci-lint@v2
+      - uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683 # v4.2.2
+      - uses: reviewdog/action-golangci-lint@f9bba13753278f6a73b27a56a3ffb1bfda90ed71 # v2.8.0
         with:
           github_token: ${{ secrets.github_token }}
-          golangci_lint_flags: "--enable-all --exclude-use-default=false -D wsl -D testpackage"
+          golangci_lint_flags: "--timeout 2m"
           level: "warning"
           reporter: github-pr-check
 
@@ -188,36 +198,96 @@ jobs:
     name: runner / staticcheck
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v3
-      - uses: actions/setup-go@v3
+      - uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683 # v4.2.2
+      - uses: actions/setup-go@0aaccfd150d50ccaeb58ebd88d36e91967a5f35b # v5.4.0
         with:
-          go-version: '1.x'
-          cache: true
-      - uses: reviewdog/action-staticcheck@v1
+          go-version-file: "go.mod"
+      - uses: reviewdog/action-staticcheck@73cfd0daa6fdbba9a858dcb0f62844012fa8317d # v1.27.0
         with:
           github_token: ${{ secrets.github_token }}
           reporter: github-pr-review
           filter_mode: nofilter
-          fail_on_error: true
+          fail_level: any
           # workdir: ./_testdata/
 
   misspell:
     name: runner / misspell
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v3
-      - uses: reviewdog/action-misspell@v1
+      - uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683 # v4.2.2
+      - uses: reviewdog/action-misspell@9daa94af4357dddb6fd3775de806bc0a8e98d3e4 # v1.26.3
         with:
           github_token: ${{ secrets.github_token }}
           locale: "US"
           reporter: github-check
 
+  reviewdog-github-annotations:
+    permissions:
+      contents: read
+    name: reviewdog (github-pr-annotations)
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683 # v4.2.2
+
+      - uses: actions/setup-go@0aaccfd150d50ccaeb58ebd88d36e91967a5f35b # v5.4.0
+        with:
+          go-version-file: "go.mod"
+
+      - name: Setup reviewdog
+        # uses: reviewdog/action-setup@v1
+        run: |
+          go install ./cmd/reviewdog
+
+      - name: Custom rdjson test
+        env:
+          REVIEWDOG_GITHUB_API_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          cat ./_testdata/custom_rdjson.json | \
+            reviewdog -name="custom-rdjson" -f=rdjson -reporter=github-pr-annotations
+
+  reviewdog-sarif:
+    permissions:
+      contents: read
+      actions: read
+      security-events: write
+    name: reviewdog (sarif)
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683 # v4.2.2
+      - uses: actions/setup-go@0aaccfd150d50ccaeb58ebd88d36e91967a5f35b # v5.4.0
+        with:
+          go-version-file: "go.mod"
+      - name: Setup reviewdog
+        # uses: reviewdog/action-setup@v1
+        run: |
+          go install ./cmd/reviewdog
+      - name: Custom rdjson test
+        run: |
+          mkdir ../results
+          cat ./_testdata/custom_rdjson.json |
+            reviewdog -name="custom-rdjson" -f=rdjson -reporter=sarif |
+            tee ../results/custom-rdjson.sarif
+      - name: Install linters
+        run: go install golang.org/x/lint/golint@latest
+      - name: Run golint
+        run: |
+          golint ./... | reviewdog -f=golint -reporter=sarif |
+            tee ../results/golint.sarif
+      - uses: github/codeql-action/upload-sarif@45775bd8235c68ba998cffa5171334d58593da47 # v3.28.15
+
+  typos:
+    name: runner / typos
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683 # v4.2.2
+      - uses: reviewdog/action-typos@e50daf62ea7a1c24960365c0f70f05296f25e1dc # v1.17.3
+
   languagetool:
     name: runner / languagetool
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v3
-      - uses: reviewdog/action-languagetool@v1
+      - uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683 # v4.2.2
+      - uses: reviewdog/action-languagetool@ea19c757470ce0dbfcbc34aec090317cef1ff0b5 # v1.22.0
         with:
           github_token: ${{ secrets.github_token }}
           reporter: github-check
@@ -231,8 +301,8 @@ jobs:
     name: runner / shellcheck
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v3
-      - uses: reviewdog/action-shellcheck@v1
+      - uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683 # v4.2.2
+      - uses: reviewdog/action-shellcheck@5ebd09ddbe2ebb471646ce234c6c8dd18663ca7c # v1.30.0
         with:
           github_token: ${{ secrets.github_token }}
           reporter: github-pr-review
@@ -241,8 +311,8 @@ jobs:
     name: runner / alex
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v3
-      - uses: reviewdog/action-alex@v1
+      - uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683 # v4.2.2
+      - uses: reviewdog/action-alex@6083b8ca333981fa617c6828c5d8fb21b13d916b # v1.16.0
         with:
           github_token: ${{ secrets.github_token }}
           reporter: github-check
@@ -252,12 +322,26 @@ jobs:
     name: runner / textlint
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v3
-      - uses: reviewdog/action-setup@v1
+      - uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683 # v4.2.2
+      - uses: reviewdog/action-setup@e04ffabe3898a0af8d0fb1af00c188831c4b5893 # v1.3.2
       - run: npm install
       - name: textlint
         env:
           REVIEWDOG_GITHUB_API_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         run: |
-          $(npm bin)/textlint -f checkstyle README.md | \
+          npx textlint -f checkstyle README.md | \
             reviewdog -f=checkstyle -name="textlint" -reporter=github-check -level=info
+
+  sarif:
+    name: runner / textlint sarif
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683 # v4.2.2
+      - uses: reviewdog/action-setup@e04ffabe3898a0af8d0fb1af00c188831c4b5893 # v1.3.2
+      - run: npm install
+      - name: textlint sarif
+        env:
+          REVIEWDOG_GITHUB_API_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          npx textlint -f @microsoft/eslint-formatter-sarif README.md | \
+            reviewdog -f=sarif -name="textlint" -reporter=github-check -level=info

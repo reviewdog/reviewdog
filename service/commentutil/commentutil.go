@@ -9,13 +9,13 @@ import (
 	"github.com/reviewdog/reviewdog/proto/rdf"
 )
 
-// `path` to `position`(Lnum for new file) to comment `body`s
+// `path` to `position`(Lnum for new file) to comment `body` or `finterprint`
 type PostedComments map[string]map[int][]string
 
 // IsPosted returns true if a given comment has been posted in code review service already,
 // otherwise returns false. It sees comments with same path, same position,
 // and same body as same comments.
-func (p PostedComments) IsPosted(c *reviewdog.Comment, lineNum int, body string) bool {
+func (p PostedComments) IsPosted(c *reviewdog.Comment, lineNum int, bodyOrFingerprint string) bool {
 	path := c.Result.Diagnostic.GetLocation().GetPath()
 	if _, ok := p[path]; !ok {
 		return false
@@ -25,7 +25,7 @@ func (p PostedComments) IsPosted(c *reviewdog.Comment, lineNum int, body string)
 		return false
 	}
 	for _, b := range bodies {
-		if b == body {
+		if b == bodyOrFingerprint {
 			return true
 		}
 	}
@@ -33,14 +33,14 @@ func (p PostedComments) IsPosted(c *reviewdog.Comment, lineNum int, body string)
 }
 
 // AddPostedComment adds a posted comment.
-func (p PostedComments) AddPostedComment(path string, lineNum int, body string) {
+func (p PostedComments) AddPostedComment(path string, lineNum int, bodyOrFingerprint string) {
 	if _, ok := p[path]; !ok {
 		p[path] = make(map[int][]string)
 	}
 	if _, ok := p[path][lineNum]; !ok {
 		p[path][lineNum] = make([]string, 0)
 	}
-	p[path][lineNum] = append(p[path][lineNum], body)
+	p[path][lineNum] = append(p[path][lineNum], bodyOrFingerprint)
 }
 
 // DebugLog outputs posted comments as log for debugging.

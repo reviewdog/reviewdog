@@ -8,7 +8,7 @@ import (
 	"strings"
 	"sync"
 
-	"github.com/xanzy/go-gitlab"
+	gitlab "gitlab.com/gitlab-org/api/client-go"
 	"golang.org/x/sync/errgroup"
 
 	"github.com/reviewdog/reviewdog"
@@ -25,8 +25,9 @@ const (
 // MergeRequestDiscussionCommenter is a comment and diff service for GitLab MergeRequest.
 //
 // API:
-//  https://docs.gitlab.com/ee/api/discussions.html#create-new-merge-request-discussion
-//  POST /projects/:id/merge_requests/:merge_request_iid/discussions
+//
+//	https://docs.gitlab.com/ee/api/discussions.html#create-new-merge-request-discussion
+//	POST /projects/:id/merge_requests/:merge_request_iid/discussions
 type MergeRequestDiscussionCommenter struct {
 	cli      *gitlab.Client
 	pr       int
@@ -71,6 +72,7 @@ func (g *MergeRequestDiscussionCommenter) Post(_ context.Context, c *reviewdog.C
 func (g *MergeRequestDiscussionCommenter) Flush(ctx context.Context) error {
 	g.muComments.Lock()
 	defer g.muComments.Unlock()
+	defer func() { g.postComments = nil }()
 	postedcs, err := g.createPostedComments()
 	if err != nil {
 		return fmt.Errorf("failed to create posted comments: %w", err)
@@ -121,20 +123,20 @@ func (g *MergeRequestDiscussionCommenter) postCommentsForEach(ctx context.Contex
 			continue
 		}
 		eg.Go(func() error {
-			pos := &gitlab.NotePosition{
-				StartSHA:     targetBranch.Commit.ID,
-				HeadSHA:      g.sha,
-				BaseSHA:      targetBranch.Commit.ID,
-				PositionType: "text",
-				NewPath:      loc.GetPath(),
-				NewLine:      lnum,
+			pos := &gitlab.PositionOptions{
+				StartSHA:     gitlab.Ptr(targetBranch.Commit.ID),
+				HeadSHA:      gitlab.Ptr(g.sha),
+				BaseSHA:      gitlab.Ptr(targetBranch.Commit.ID),
+				PositionType: gitlab.Ptr("text"),
+				NewPath:      gitlab.Ptr(loc.GetPath()),
+				NewLine:      gitlab.Ptr(lnum),
 			}
 			if c.Result.OldPath != "" && c.Result.OldLine != 0 {
-				pos.OldPath = c.Result.OldPath
-				pos.OldLine = c.Result.OldLine
+				pos.OldPath = gitlab.Ptr(c.Result.OldPath)
+				pos.OldLine = gitlab.Ptr(c.Result.OldLine)
 			}
 			discussion := &gitlab.CreateMergeRequestDiscussionOptions{
-				Body:     gitlab.String(body),
+				Body:     gitlab.Ptr(body),
 				Position: pos,
 			}
 			_, _, err := g.cli.Discussions.CreateMergeRequestDiscussion(g.projects, g.pr, discussion)

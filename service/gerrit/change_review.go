@@ -16,8 +16,9 @@ var _ reviewdog.CommentService = &ChangeReviewCommenter{}
 
 // ChangeReviewCommenter is a comment service for Gerrit Change Review
 // API:
-// 	https://gerrit-review.googlesource.com/Documentation/rest-api-changes.html#set-review
-// 	POST /changes/{change-id}/revisions/{revision-id}/review
+//
+//	https://gerrit-review.googlesource.com/Documentation/rest-api-changes.html#set-review
+//	POST /changes/{change-id}/revisions/{revision-id}/review
 type ChangeReviewCommenter struct {
 	cli        *gerrit.Client
 	changeID   string
@@ -60,6 +61,7 @@ func (g *ChangeReviewCommenter) Post(_ context.Context, c *reviewdog.Comment) er
 func (g *ChangeReviewCommenter) Flush(ctx context.Context) error {
 	g.muComments.Lock()
 	defer g.muComments.Unlock()
+	defer func() { g.postComments = nil }()
 
 	return g.postAllComments(ctx)
 }

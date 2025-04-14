@@ -26,7 +26,7 @@ func (p *RDJSONParser) Parse(r io.Reader) ([]*rdf.Diagnostic, error) {
 		return nil, err
 	}
 	var dr rdf.DiagnosticResult
-	if err := protojson.Unmarshal(b, &dr); err != nil {
+	if err := (protojson.UnmarshalOptions{DiscardUnknown: true}).Unmarshal(b, &dr); err != nil {
 		return nil, fmt.Errorf("failed to unmarshal rdjson (DiagnosticResult): %w", err)
 	}
 	for _, d := range dr.Diagnostics {

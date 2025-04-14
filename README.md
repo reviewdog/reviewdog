@@ -33,9 +33,9 @@
   <a href="https://github.com/reviewdog/reviewdog/actions?query=workflow%3Arelease">
     <img alt="release" src="https://github.com/reviewdog/reviewdog/workflows/release/badge.svg">
   </a>
-  <a href="https://travis-ci.org/reviewdog/reviewdog"><img alt="Travis Status" src="https://img.shields.io/travis/reviewdog/reviewdog/master.svg?label=Travis&logo=travis"></a>
   <a href="https://circleci.com/gh/reviewdog/reviewdog"><img alt="CircleCI Status" src="http://img.shields.io/circleci/build/github/reviewdog/reviewdog/master.svg?label=CircleCI&logo=circleci"></a>
   <a href="https://codecov.io/github/reviewdog/reviewdog"><img alt="Coverage Status" src="https://img.shields.io/codecov/c/github/reviewdog/reviewdog/master.svg?logo=codecov"></a>
+  <a href="https://github.com/haya14busa/github-used-by/tree/main/repo/reviewdog#reviewdog-"><img src="https://img.shields.io/endpoint?url=https://haya14busa.github.io/github-used-by/data/reviewdog/shieldsio.json"></a>
 </div>
 
 <div align="center">
@@ -48,19 +48,19 @@
   <a href="https://github.com/reviewdog/.github/blob/master/CODE_OF_CONDUCT.md">
     <img alt="Contributor Covenant" src="https://img.shields.io/badge/Contributor%20Covenant-v2.0%20adopted-ff69b4.svg">
   </a>
-  <a href="https://somsubhra.github.io/github-release-stats/?username=reviewdog&repository=reviewdog&per_page=30">
-    <img alt="Github Releases Stats" src="https://img.shields.io/github/downloads/reviewdog/reviewdog/total.svg?logo=github">
+  <a href="https://haya14busa.github.io/github-release-stats/#reviewdog/reviewdog">
+    <img alt="GitHub Releases Stats" src="https://img.shields.io/github/downloads/reviewdog/reviewdog/total.svg?logo=github">
   </a>
   <a href="https://starchart.cc/reviewdog/reviewdog"><img alt="Stars" src="https://img.shields.io/github/stars/reviewdog/reviewdog.svg?style=social"></a>
 </div>
 <br />
 
-reviewdog provides a way to post review comments to code hosting service,
+reviewdog provides a way to post review comments to code hosting services,
 such as GitHub, automatically by integrating with any linter tools with ease.
 It uses an output of lint tools and posts them as a comment if findings are in
-diff of patches to review.
+the diff of patches to review.
 
-reviewdog also supports run in the local environment to filter an output of lint tools
+reviewdog also supports running in the local environment to filter the output of lint tools
 by diff.
 
 [design doc](https://docs.google.com/document/d/1mGOX19SSqRowWGbXieBfGPtLnM0BdTkIc9JelTiu6wA/edit?usp=sharing)
@@ -74,13 +74,16 @@ by diff.
   * [Reviewdog Diagnostic Format (RDFormat)](#reviewdog-diagnostic-format-rdformat)
   * [Diff](#diff)
   * [checkstyle format](#checkstyle-format)
+  * [SARIF format](#sarif-format)
 - [Code Suggestions](#code-suggestions)
 - [reviewdog config file](#reviewdog-config-file)
 - [Reporters](#reporters)
   * [Reporter: Local (-reporter=local) [default]](#reporter-local--reporterlocal-default)
-  * [Reporter: GitHub Checks (-reporter=github-pr-check)](#reporter-github-checks--reportergithub-pr-check)
+  * [Reporter: GitHub PR Checks (-reporter=github-pr-check)](#reporter-github-pr-checks--reportergithub-pr-check)
   * [Reporter: GitHub Checks (-reporter=github-check)](#reporter-github-checks--reportergithub-check)
   * [Reporter: GitHub PullRequest review comment (-reporter=github-pr-review)](#reporter-github-pullrequest-review-comment--reportergithub-pr-review)
+  * [Reporter: GitHub Annotations (-reporter=github-annotations)](#reporter-github-annotations--reportergithub-annotations)
+  * [Reporter: GitHub PR Annotations (-reporter=github-pr-annotations)](#reporter-github-pr-annotations--reportergithub-pr-annotations)
   * [Reporter: GitLab MergeRequest discussions (-reporter=gitlab-mr-discussion)](#reporter-gitlab-mergerequest-discussions--reportergitlab-mr-discussion)
   * [Reporter: GitLab MergeRequest commit (-reporter=gitlab-mr-commit)](#reporter-gitlab-mergerequest-commit--reportergitlab-mr-commit)
   * [Reporter: Bitbucket Code Insights Reports (-reporter=bitbucket-code-report)](#reporter-bitbucket-code-insights-reports--reporterbitbucket-code-report)
@@ -91,7 +94,7 @@ by diff.
   * [GitLab CI](#gitlab-ci)
   * [Bitbucket Pipelines](#bitbucket-pipelines)
   * [Common (Jenkins, local, etc...)](#common-jenkins-local-etc)
-    + [Jenkins with Github pull request builder plugin](#jenkins-with-github-pull-request-builder-plugin)
+    + [Jenkins with GitHub pull request builder plugin](#jenkins-with-github-pull-request-builder-plugin)
 - [Exit codes](#exit-codes)
 - [Filter mode](#filter-mode)
 - [Articles](#articles)
@@ -106,13 +109,13 @@ by diff.
 
 ```shell
 # Install the latest version. (Install it into ./bin/ by default).
-$ curl -sfL https://raw.githubusercontent.com/reviewdog/reviewdog/master/install.sh | sh -s
+$ curl -sfL https://raw.githubusercontent.com/reviewdog/reviewdog/fd59714416d6d9a1c0692d872e38e7f8448df4fc/install.sh | sh -s
 
 # Specify installation directory ($(go env GOPATH)/bin/) and version.
-$ curl -sfL https://raw.githubusercontent.com/reviewdog/reviewdog/master/install.sh | sh -s -- -b $(go env GOPATH)/bin [vX.Y.Z]
+$ curl -sfL https://raw.githubusercontent.com/reviewdog/reviewdog/fd59714416d6d9a1c0692d872e38e7f8448df4fc/install.sh | sh -s -- -b $(go env GOPATH)/bin [vX.Y.Z]
 
 # In alpine linux (as it does not come with curl by default)
-$ wget -O - -q https://raw.githubusercontent.com/reviewdog/reviewdog/master/install.sh | sh -s [vX.Y.Z]
+$ wget -O - -q https://raw.githubusercontent.com/reviewdog/reviewdog/fd59714416d6d9a1c0692d872e38e7f8448df4fc/install.sh | sh -s [vX.Y.Z]
 ```
 
 ### Nightly releases
@@ -121,14 +124,14 @@ You can also use [nightly reviewdog release](https://github.com/reviewdog/nightl
 to try the latest reviewdog improvements every day!
 
 ```shell
-$ curl -sfL https://raw.githubusercontent.com/reviewdog/nightly/master/install.sh | sh -s -- -b $(go env GOPATH)/bin
+$ curl -sfL https://raw.githubusercontent.com/reviewdog/nightly/30fccfe9f47f7e6fd8b3c38aa0da11a6c9f04de7/install.sh | sh -s -- -b $(go env GOPATH)/bin
 ```
 
 ### GitHub Action: [reviewdog/action-setup](https://github.com/reviewdog/action-setup)
 
 ```yaml
 steps:
-- uses: reviewdog/action-setup@v1
+- uses: reviewdog/action-setup@e04ffabe3898a0af8d0fb1af00c188831c4b5893 # v1.3.2
   with:
     reviewdog_version: latest # Optional. [latest,nightly,v.X.Y.Z]
 ```
@@ -187,7 +190,7 @@ complex output like a multi-line error message.
 
 You can also try errorformat on [the Playground](https://reviewdog.github.io/errorformat-playground/)!
 
-By this 'errorformat' feature, reviewdog can support any tools output with ease.
+With this 'errorformat' feature, reviewdog can support any tool output with ease.
 
 ### Available pre-defined 'errorformat'
 
@@ -217,7 +220,7 @@ reviewdog supports [Reviewdog Diagnostic Format (RDFormat)](./proto/rdf/) as a
 generic diagnostic format and it supports both [rdjson](./proto/rdf/#rdjson) and
 [rdjsonl](./proto/rdf/#rdjsonl) formats.
 
-This rdformat supports rich feature like multiline ranged comments, severity,
+This rdformat supports rich features like multiline ranged comments, severity,
 rule code with URL, and [code suggestions](#code-suggestions).
 
 ```shell
@@ -287,6 +290,16 @@ Also, if you want to pass other Json/XML/etc... format to reviewdog, you can wri
 $ <linter> | <convert-to-checkstyle> | reviewdog -f=checkstyle -name="<linter>" -reporter=github-pr-check
 ```
 
+### SARIF format
+
+reviewdog supports [SARIF 2.1.0 JSON format](https://sarifweb.azurewebsites.net/).
+You can use reviewdog with -f=sarif option.
+
+```shell
+# Local
+$ eslint -f @microsoft/eslint-formatter-sarif . | reviewdog -f=sarif -diff="git diff"
+````
+
 ## Code Suggestions
 
 ![eslint reviewdog suggestion demo](https://user-images.githubusercontent.com/3797062/97085944-87233a80-165b-11eb-94a8-0a47d5e24905.png)
@@ -295,31 +308,34 @@ $ <linter> | <convert-to-checkstyle> | reviewdog -f=checkstyle -name="<linter>" 
 reviewdog supports *code suggestions* feature with [rdformat](#reviewdog-diagnostic-format-rdformat) or [diff](#diff) input.
 You can also use [reviewdog/action-suggester](https://github.com/reviewdog/action-suggester) for GitHub Actions.
 
-reviewdog can suggest code changes along with diagnostic results if a diagnostic tools supports code suggestions data.
+reviewdog can suggest code changes along with diagnostic results if a diagnostic tool supports code suggestions data.
 You can integrate reviewdog with any code fixing tools and any code formatter with [diff](#diff) input as well.
 
 ### Code Suggestions Support Table
-Note that not all reporters provide support of code suggestion.
+Note that not all reporters provide support for code suggestions.
 
 | `-reporter`     | Suggestion support |
 | ---------------------------- | ------- |
 | **`local`**                  | NO [1]  |
 | **`github-check`**           | NO [2]  |
 | **`github-pr-check`**        | NO [2]  |
+| **`github-annotations`**     | NO [2]  |
+| **`github-pr-annotations`**  | NO [2]  |
 | **`github-pr-review`**       | OK      |
-| **`gitlab-mr-discussion`**   | NO [1]  |
+| **`gitlab-mr-discussion`**   | OK      |
 | **`gitlab-mr-commit`**       | NO [2]  |
 | **`gerrit-change-review`**   | NO [1]  |
 | **`bitbucket-code-report`**  | NO [2]  |
+| **`gitea-pr-review`**        | NO [2]  |
 
-- [1] The reporter service support code suggestion feature, but reviewdog does not support it yet. See [#678](https://github.com/reviewdog/reviewdog/issues/678) for the status.
-- [2] The reporter service itself doesn't support code suggestion feature.
+- [1] The reporter service supports the code suggestion feature, but reviewdog does not support it yet. See [#678](https://github.com/reviewdog/reviewdog/issues/678) for the status.
+- [2] The reporter service itself doesn't support the code suggestion feature.
 
 ## reviewdog config file
 
 reviewdog can also be controlled via the .reviewdog.yml configuration file instead of "-f" or "-efm" arguments.
 
-With .reviewdog.yml, you can run the same commands both CI service and local
+With .reviewdog.yml, you can run the same commands for both CI service and local
 environment including editor integration with ease.
 
 #### .reviewdog.yml
@@ -369,28 +385,28 @@ Output format for project config based run is one of the following formats.
 
 ## Reporters
 
-reviewdog can report results both in local environment and review services as
+reviewdog can report results both in the local environment and review services as
 continuous integration.
 
 ### Reporter: Local (-reporter=local) [default]
 
 reviewdog can find newly introduced findings by filtering linter results
-using diff. You can pass diff command as `-diff` arg.
+using diff. You can pass the diff command as `-diff` arg.
 
 ```shell
 $ golint ./... | reviewdog -f=golint -diff="git diff FETCH_HEAD"
 ```
 
-### Reporter: GitHub Checks (-reporter=github-pr-check)
+### Reporter: GitHub PR Checks (-reporter=github-pr-check)
 
 [![github-pr-check sample annotation with option 1](https://user-images.githubusercontent.com/3797062/64875597-65016f80-d688-11e9-843f-4679fb666f0d.png)](https://github.com/reviewdog/reviewdog/pull/275/files#annotation_6177941961779419)
 [![github-pr-check sample](https://user-images.githubusercontent.com/3797062/40884858-6efd82a0-6756-11e8-9f1a-c6af4f920fb0.png)](https://github.com/reviewdog/reviewdog/pull/131/checks)
 
-github-pr-check reporter reports results to [GitHub Checks](https://help.github.com/articles/about-status-checks/).
+github-pr-check reporter reports results to [GitHub Checks](https://docs.github.com/en/pull-requests/collaborating-with-pull-requests/collaborating-on-repositories-with-code-quality-features/about-status-checks).
 
-You can change report level for this reporter by `level` field in [config
+You can change the report level for this reporter by `level` field in [config
 file](#reviewdog-config-file) or `-level` flag. You can control GitHub status
-check result with this feature. (default: error)
+check results with this feature. (default: error)
 
 | Level     | GitHub Status |
 | --------- | ------------- |
@@ -416,8 +432,8 @@ See [GitHub Actions](#github-actions) section too. You can also use public
 reviewdog GitHub Actions.
 
 #### Option 2) Install reviewdog GitHub Apps
-reviewdog CLI send a request to reviewdog GitHub App server and the server post
-results as GitHub Checks, because Check API only supported for GitHub App and
+reviewdog CLI sends a request to reviewdog GitHub App server and the server post
+results as GitHub Checks, because Check API is only supported for GitHub App and
 GitHub Actions.
 
 1. Install reviewdog Apps. https://github.com/apps/reviewdog
@@ -447,7 +463,7 @@ if you don't want to depend on reviewdog server.
 
 ### Reporter: GitHub Checks (-reporter=github-check)
 
-It's basically same as `-reporter=github-pr-check` except it works not only for
+It's basically the same as `-reporter=github-pr-check` except it works not only for
 Pull Request but also for commit.
 
 [![sample comment outside diff](https://user-images.githubusercontent.com/3797062/69917921-e0680580-14ae-11ea-9a56-de9e3cbac005.png)](https://github.com/reviewdog/reviewdog/pull/364/files)
@@ -460,9 +476,9 @@ You can create [reviewdog badge](#reviewdog-badge-) for this reporter.
 
 github-pr-review reporter reports results to GitHub PullRequest review comments
 using GitHub Personal API Access Token.
-[GitHub Enterprise](https://enterprise.github.com/home) is supported too.
+[GitHub Enterprise](https://github.com/enterprise) is supported too.
 
-- Go to https://github.com/settings/tokens and generate new API token.
+- Go to https://github.com/settings/tokens and generate a new API token.
 - Check `repo` for private repositories or `public_repo` for public repositories.
 
 ```shell
@@ -470,7 +486,7 @@ $ export REVIEWDOG_GITHUB_API_TOKEN="<token>"
 $ reviewdog -reporter=github-pr-review
 ```
 
-For GitHub Enterprise, set API endpoint by environment variable.
+For GitHub Enterprise, set the API endpoint by an environment variable.
 
 ```shell
 $ export GITHUB_API="https://example.githubenterprise.com/api/v3/"
@@ -480,9 +496,25 @@ $ export REVIEWDOG_INSECURE_SKIP_VERIFY=true # set this as you need to skip veri
 See [GitHub Actions](#github-actions) section too if you can use GitHub
 Actions. You can also use public reviewdog GitHub Actions.
 
+### Reporter: GitHub Annotations (-reporter=github-annotations)
+
+`github-annotations` uses the GitHub Actions annotation format to output errors
+and warnings to `stdout` e.g.
+
+```
+::error line=11,col=41,file=app/index.md::[vale] reported by reviewdog 🐶%0A[demo.Spelling] Did you really mean 'boobarbaz'?%0A%0ARaw Output:%0A{"message": "[demo.Spelling] Did you really mean 'boobarbaz'?", "location": {"path": "app/index.md", "range": {"start": {"line": 11, "column": 41}}}, "severity": "ERROR"}
+```
+
+This reporter requires a valid GitHub API token to generate a diff, but will not
+use the token to report errors.
+
+### Reporter: GitHub PR Annotations (-reporter=github-pr-annotations)
+
+Same as `github-annotations` but only works for Pull Requests.
+
 ### Reporter: GitLab MergeRequest discussions (-reporter=gitlab-mr-discussion)
 
-[![gitlab-mr-discussion sample](https://user-images.githubusercontent.com/3797062/41810718-f91bc540-773d-11e8-8598-fbc09ce9b1c7.png)](https://gitlab.com/haya14busa/reviewdog/merge_requests/113#note_83411103)
+[![gitlab-mr-discussion sample](https://user-images.githubusercontent.com/3797062/41810718-f91bc540-773d-11e8-8598-fbc09ce9b1c7.png)](https://gitlab.com/reviewdog/reviewdog/-/merge_requests/113#note_83411103)
 
 Required GitLab version: >= v10.8.0
 
@@ -518,11 +550,11 @@ $ reviewdog -reporter=gitlab-mr-commit
 
 ### Reporter: Gerrit Change review (-reporter=gerrit-change-review)
 
-gerrit-change-review reporter reports result to Gerrit Change using Gerrit Rest APIs.
+gerrit-change-review reporter reports results to Gerrit Change using Gerrit Rest APIs.
 
 The reporter supports Basic Authentication and Git-cookie based authentication for reporting results.
 
-Set `GERRIT_USERNAME` and `GERRIT_PASSWORD` environment variables for basic authentication, and put `GIT_GITCOOKIE_PATH` for git cookie based authentication.
+Set `GERRIT_USERNAME` and `GERRIT_PASSWORD` environment variables for basic authentication, and put `GIT_GITCOOKIE_PATH` for git cookie-based authentication.
 
 ```shell
 $ export GERRIT_CHANGE_ID=changeID
@@ -540,7 +572,7 @@ $ reviewdog -reporter=gerrit-change-review
 bitbucket-code-report generates the annotated
 [Bitbucket Code Insights](https://support.atlassian.com/bitbucket-cloud/docs/code-insights/) report.
 
-For now, only the `no-filter` mode supported, so the whole project is scanned on every run.
+For now, only the `no-filter` mode is supported, so the whole project is scanned on every run.
 Reports are stored per commit and can be viewed per commit from Bitbucket Pipelines UI or
 in Pull Request. In the Pull Request UI affected code lines will be annotated in the diff,
 as well as you will be able to filter the annotations by **This pull request** or **All**.
@@ -548,7 +580,7 @@ as well as you will be able to filter the annotations by **This pull request** o
 If running from [Bitbucket Pipelines](#bitbucket-pipelines), no additional configuration is needed (even credentials).
 If running locally or from some other CI system you would need to provide Bitbucket API credentials:
 
-- For Basic Auth you need to set following env variables:
+- For Basic Auth you need to set the following env variables:
     `BITBUCKET_USER` and `BITBUCKET_PASSWORD`
 - For AccessToken Auth you need to set `BITBUCKET_ACCESS_TOKEN`
 
@@ -558,7 +590,7 @@ $ export BITBUCKET_PASSWORD="my_password"
 $ reviewdog -reporter=bitbucket-code-report
 ```
 
-To post report to Bitbucket Server use `BITBUCKET_SERVER_URL` variable:
+To post a report to the Bitbucket Server use `BITBUCKET_SERVER_URL` variable:
 ```shell
 $ export BITBUCKET_USER="my_user"
 $ export BITBUCKET_PASSWORD="my_password"
@@ -581,7 +613,7 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       # ...
-      - uses: reviewdog/action-setup@v1
+      - uses: reviewdog/action-setup@e04ffabe3898a0af8d0fb1af00c188831c4b5893 # v1.3.2
         with:
           reviewdog_version: latest # Optional. [latest,nightly,v.X.Y.Z]
       - name: Run reviewdog
@@ -598,7 +630,7 @@ jobs:
 
 [.github/workflows/reviewdog](.github/workflows/reviewdog.yml)
 
-Only `github-check` reporter can run on push event too.
+Only `github-check` reporter can run on the push event too.
 
 ```yaml
 name: reviewdog (github-check)
@@ -648,31 +680,34 @@ You can use public GitHub Actions to start using reviewdog with ease! :tada: :ar
   - [reviewdog/action-golangci-lint](https://github.com/reviewdog/action-golangci-lint) - Run [golangci-lint](https://github.com/golangci/golangci-lint) and supported linters individually by golangci-lint.
 - JavaScript
   - [reviewdog/action-eslint](https://github.com/reviewdog/action-eslint) - Run [eslint](https://github.com/eslint/eslint).
+  - [mongolyy/reviewdog-action-biome](https://github.com/mongolyy/reviewdog-action-biome) - Run [Biome](https://biomejs.dev/).
 - TypeScript
   - [EPMatt/reviewdog-action-tsc](https://github.com/EPMatt/reviewdog-action-tsc) - Run [tsc](https://www.typescriptlang.org/docs/handbook/compiler-options.html).
 - CSS
   - [reviewdog/action-stylelint](https://github.com/reviewdog/action-stylelint) - Run [stylelint](https://github.com/stylelint/stylelint).
 - Vim script
-  - [reviewdog/action-vint](https://github.com/reviewdog/action-vint) - Run [vint](https://github.com/Kuniwak/vint).
+  - [reviewdog/action-vint](https://github.com/reviewdog/action-vint) - Run [vint](https://github.com/Vimjas/vint).
   - [tsuyoshicho/action-vimlint](https://github.com/tsuyoshicho/action-vimlint) - Run [vim-vimlint](https://github.com/syngan/vim-vimlint)
 - Terraform
-  - [reviewdog/action-tflint](https://github.com/reviewdog/action-tflint) - Run [tflint](https://github.com/wata727/tflint).
+  - [reviewdog/action-tflint](https://github.com/reviewdog/action-tflint) - Run [tflint](https://github.com/terraform-linters/tflint).
+  - [reviewdog/action-terraform-validate](https://github.com/reviewdog/action-terraform-validate) - Run [terraform validate](https://developer.hashicorp.com/terraform/cli/commands/validate).
 - YAML
   - [reviewdog/action-yamllint](https://github.com/reviewdog/action-yamllint) - Run [yamllint](https://github.com/adrienverge/yamllint).
 - Ruby
   - [reviewdog/action-brakeman](https://github.com/reviewdog/action-brakeman) - Run [brakeman](https://github.com/presidentbeef/brakeman).
   - [reviewdog/action-reek](https://github.com/reviewdog/action-reek) - Run [reek](https://github.com/troessner/reek).
-  - [reviewdog/action-rubocop](https://github.com/reviewdog/action-rubocop) - Run [rubocop](https://github.com/rubocop-hq/rubocop).
+  - [reviewdog/action-rubocop](https://github.com/reviewdog/action-rubocop) - Run [rubocop](https://github.com/rubocop/rubocop).
   - [vk26/action-fasterer](https://github.com/vk26/action-fasterer) - Run [fasterer](https://github.com/DamirSvrtan/fasterer).
-  - [SennaLabs/action-standardrb](https://github.com/SennaLabs/action-standardrb) - Run [standardrb](https://github.com/testdouble/standard).
+  - [PrintReleaf/action-standardrb](https://github.com/PrintReleaf/action-standardrb) - Run [standardrb](https://github.com/standardrb/standard).
   - [tk0miya/action-erblint](https://github.com/tk0miya/action-erblint) - Run [erb-lint](https://github.com/Shopify/erb-lint)
+  - [tk0miya/action-steep](https://github.com/tk0miya/action-steep) - Run [steep](https://github.com/soutaro/steep)
   - [blooper05/action-rails_best_practices](https://github.com/blooper05/action-rails_best_practices) - Run [rails_best_practices](https://github.com/flyerhzm/rails_best_practices)
   - [tomferreira/action-bundler-audit](https://github.com/tomferreira/action-bundler-audit) - Run [bundler-audit](https://github.com/rubysec/bundler-audit)
 - Python
   - [wemake-python-styleguide](https://github.com/wemake-services/wemake-python-styleguide) - Run wemake-python-styleguide
   - [tsuyoshicho/action-mypy](https://github.com/tsuyoshicho/action-mypy) - Run [mypy](https://pypi.org/project/mypy/)
   - [jordemort/action-pyright](https://github.com/jordemort/action-pyright) - Run [pyright](https://github.com/Microsoft/pyright)
-  - [dciborow/action-pylint](https://github.com/dciborow/action-pylint) - Run [pylint](https://github.com/PyCQA/pylint)
+  - [dciborow/action-pylint](https://github.com/dciborow/action-pylint) - Run [pylint](https://github.com/pylint-dev/pylint)
   - [reviewdog/action-black](https://github.com/reviewdog/action-black) - Run [black](https://github.com/psf/black)
 - Kotlin
   - [ScaCap/action-ktlint](https://github.com/ScaCap/action-ktlint) - Run [ktlint](https://ktlint.github.io/).
@@ -684,7 +719,9 @@ You can use public GitHub Actions to start using reviewdog with ease! :tada: :ar
   - [reviewdog/action-actionlint](https://github.com/reviewdog/action-actionlint) - Run [actionlint](https://github.com/rhysd/actionlint)
 - Protocol Buffers
   - [yoheimuta/action-protolint](https://github.com/yoheimuta/action-protolint) - Run [protolint](https://github.com/yoheimuta/protolint)
-  
+- Rego
+  - [reviewdog/action-regal](https://github.com/reviewdog/action-regal) - Run [Regal](https://github.com/StyraInc/regal)
+
 ... and more on [GitHub Marketplace](https://github.com/marketplace?utf8=✓&type=actions&query=reviewdog).
 
 Missing actions? Check out [reviewdog/action-template](https://github.com/reviewdog/action-template) and create a new reviewdog action!
@@ -697,14 +734,14 @@ Example: [action-tflint](https://github.com/reviewdog/reviewdog/issues/322).
 
 ![Graceful Degradation example](https://user-images.githubusercontent.com/3797062/71781334-e2266b00-3010-11ea-8a38-dee6e30c8162.png)
 
-`GITHUB_TOKEN` for Pull Requests from forked repository doesn't have write
+`GITHUB_TOKEN` for Pull Requests from a forked repository doesn't have write
 access to Check API nor Review API due to [GitHub Actions
-restriction](https://docs.github.com/en/actions/configuring-and-managing-workflows/authenticating-with-the-github_token#permissions-for-the-github_token).
+restriction](https://docs.github.com/en/actions/security-guides/automatic-token-authentication#permissions-for-the-github_token).
 
 Instead, reviewdog uses [Logging commands of GitHub
-Actions](https://help.github.com/en/actions/automating-your-workflow-with-github-actions/development-tools-for-github-actions#set-an-error-message-error)
+Actions](https://docs.github.com/en/actions/using-workflows/workflow-commands-for-github-actions#set-an-error-message-error)
 to post results as
-[annotations](https://developer.github.com/v3/checks/runs/#annotations-object)
+[annotations](https://docs.github.com/en/rest/checks/runs#annotations-object)
 similar to `github-pr-check` reporter.
 
 Note that there is a limitation for annotations created by logging commands,
@@ -714,7 +751,7 @@ You can check GitHub Actions log to see full results in such cases.
 #### reviewdog badge [![reviewdog](https://github.com/reviewdog/reviewdog/workflows/reviewdog/badge.svg?branch=master&event=push)](https://github.com/reviewdog/reviewdog/actions?query=workflow%3Areviewdog+event%3Apush+branch%3Amaster)
 
 As [`github-check` reporter](#reporter-github-checks--reportergithub-pr-check) support running on commit, we can create reviewdog
-[GitHub Action badge](https://help.github.com/en/actions/automating-your-workflow-with-github-actions/configuring-a-workflow#adding-a-workflow-status-badge-to-your-repository)
+[GitHub Action badge](https://docs.github.com/en/actions/using-workflows#adding-a-workflow-status-badge-to-your-repository)
 to check the result against master commit for example. :tada:
 
 Example:
@@ -734,7 +771,7 @@ Example:
 ```yaml
 install:
   - mkdir -p ~/bin/ && export PATH="~/bin/:$PATH"
-  - curl -sfL https://raw.githubusercontent.com/reviewdog/reviewdog/master/install.sh| sh -s -- -b ~/bin
+  - curl -sfL https://raw.githubusercontent.com/reviewdog/reviewdog/fd59714416d6d9a1c0692d872e38e7f8448df4fc/install.sh| sh -s -- -b ~/bin
 
 script:
   - reviewdog -conf=.reviewdog.yml -reporter=github-pr-check
@@ -757,7 +794,7 @@ env:
 
 install:
   - mkdir -p ~/bin/ && export PATH="~/bin/:$PATH"
-  - curl -sfL https://raw.githubusercontent.com/reviewdog/reviewdog/master/install.sh| sh -s -- -b ~/bin
+  - curl -sfL https://raw.githubusercontent.com/reviewdog/reviewdog/fd59714416d6d9a1c0692d872e38e7f8448df4fc/install.sh| sh -s -- -b ~/bin
 
 script:
   - >-
@@ -782,7 +819,7 @@ jobs:
       - image: golang:latest
     steps:
       - checkout
-      - run: curl -sfL https://raw.githubusercontent.com/reviewdog/reviewdog/master/install.sh| sh -s -- -b ./bin
+      - run: curl -sfL https://raw.githubusercontent.com/reviewdog/reviewdog/fd59714416d6d9a1c0692d872e38e7f8448df4fc/install.sh| sh -s -- -b ./bin
       - run: go vet ./... 2>&1 | ./bin/reviewdog -f=govet -reporter=github-pr-review
 
       # Deprecated: prefer GitHub Actions to use github-pr-check reporter.
@@ -816,7 +853,7 @@ pipelines:
         name: Reviewdog
         image: golangci/golangci-lint:v1.31-alpine
         script:
-          - wget -O - -q https://raw.githubusercontent.com/reviewdog/reviewdog/master/install.sh | 
+          - wget -O - -q https://raw.githubusercontent.com/reviewdog/reviewdog/fd59714416d6d9a1c0692d872e38e7f8448df4fc/install.sh | 
               sh -s -- -b $(go env GOPATH)/bin
           - golangci-lint run --out-format=line-number ./... | reviewdog -f=golangci-lint -reporter=bitbucket-code-report
 ```
@@ -830,8 +867,8 @@ environment variables.
 | ---- | ----------- |
 | `CI_PULL_REQUEST` | Pull Request number (e.g. 14) |
 | `CI_COMMIT`       | SHA1 for the current build |
-| `CI_REPO_OWNER`   | repository owner (e.g. "haya14busa" for https://github.com/haya14busa/reviewdog) |
-| `CI_REPO_NAME`    | repository name (e.g. "reviewdog" for https://github.com/haya14busa/reviewdog) |
+| `CI_REPO_OWNER`   | repository owner (e.g. "reviewdog" for https://github.com/reviewdog/errorformat) |
+| `CI_REPO_NAME`    | repository name (e.g. "errorformat" for https://github.com/reviewdog/errorformat) |
 | `CI_BRANCH`       | [optional] branch of the commit |
 
 ```shell
@@ -848,14 +885,14 @@ $ REVIEWDOG_GITHUB_API_TOKEN="<token>"
 $ REVIEWDOG_GITLAB_API_TOKEN="<token>"
 ```
 
-If a CI service doesn't provide information such as Pull Request ID - reviewdog can guess it by branch name and commit SHA.
+If a CI service doesn't provide information such as Pull Request ID - reviewdog can guess it by a branch name and commit SHA.
 Just pass the flag `guess`:
 
 ```shell
 $ reviewdog -conf=.reviewdog.yml -reporter=github-pr-check -guess
 ```
 
-#### Jenkins with Github pull request builder plugin
+#### Jenkins with GitHub pull request builder plugin
 - [GitHub pull request builder plugin - Jenkins - Jenkins Wiki](https://wiki.jenkins-ci.org/display/JENKINS/GitHub+pull+request+builder+plugin)
 - [Configuring a GitHub app account - Jenkins - CloudBees](https://docs.cloudbees.com/docs/cloudbees-ci/latest/cloud-admin-guide/github-app-auth) - required to use github-pr-check formatter without reviewdog server or GitHub actions.
 
@@ -875,12 +912,11 @@ $ REVIEWDOG_SKIP_DOGHOUSE=true REVIEWDOG_GITHUB_API_TOKEN="<token>" reviewdog -r
 ```
 
 ## Exit codes
-By default reviewdog will return `0` as exit code even if it finds errors.
-If `-fail-on-error` flag is passed, reviewdog exits with `1` when at least one error was found/reported.
+By default (`-fail-level=none`) reviewdog will return `0` as exit code even if it finds errors.
+reviewdog will exit with code 1 with `-fail-level=[any,info,warning,error]` flag if it finds at least 1 issue with severity greater than or equal to the given level.
 This can be helpful when you are using it as a step in your CI pipeline and want to mark the step failed if any error found by linter.
 
-See also `-level` flag for [github-pr-check/github-check](#reporter-github-checks--reportergithub-pr-check) reporters.
-reviewdog will exit with `1` if reported check status is `failure` as well if `-fail-on-error=true`.
+You can also use `-level` flag to configure default report revel.
 
 ## Filter mode
 reviewdog filter results by diff and you can control how reviewdog filter results by `-filter-mode` flag.
@@ -903,10 +939,10 @@ $ reviewdog -reporter=github-pr-review -filter-mode=nofilter -fail-on-error
 ```
 
 ### Filter Mode Support Table
-Note that not all reporters provide full support of filter mode due to API limitation.
+Note that not all reporters provide full support for filter mode due to API limitation.
 e.g. `github-pr-review` reporter uses [GitHub Review
-API](https://developer.github.com/v3/pulls/reviews/) but it doesn't support posting comment outside diff (`diff_context`),
-so reviewdog will use [Check annotation](https://developer.github.com/v3/checks/runs/) as fallback to post those comments [1]. 
+API](https://docs.github.com/en/rest/pulls/reviews) but this API don't support posting comments outside diff context,
+so reviewdog will use [Check annotation](https://docs.github.com/en/rest/checks/runs) as fallback to post those comments [1]. 
 
 | `-reporter` \ `-filter-mode` | `added` | `diff_context` | `file`                  | `nofilter` |
 | ---------------------------- | ------- | -------------- | ----------------------- | ---------- |
@@ -914,14 +950,16 @@ so reviewdog will use [Check annotation](https://developer.github.com/v3/checks/
 | **`github-check`**           | OK      | OK             | OK                      | OK |
 | **`github-pr-check`**        | OK      | OK             | OK                      | OK |
 | **`github-pr-review`**       | OK      | OK             | Partially Supported [1] | Partially Supported [1] |
+| **`github-pr-annotations`**  | OK      | OK             | OK                      | OK |
 | **`gitlab-mr-discussion`**   | OK      | OK             | OK                      | Partially Supported [2] |
 | **`gitlab-mr-commit`**       | OK      | Partially Supported [2] | Partially Supported [2] | Partially Supported [2] |
 | **`gerrit-change-review`**   | OK      | OK? [3]        | OK? [3]                 | Partially Supported? [2][3] |
 | **`bitbucket-code-report`**  | NO [4]  | NO [4]         | NO [4]                  | OK |
+| **`gitea-pr-review`**        | OK      | OK             | Partially Supported [2] | Partially Supported [2] |
 
-- [1] Report results which is outside diff context with Check annotation as fallback if it's running in GitHub actions instead of Review API (comments). All results will be reported to console as well.
-- [2] Report results which is outside diff file to console.
-- [3] It should work, but not verified yet.
+- [1] Report results that are outside the diff file with Check annotation as fallback if it's running in GitHub actions instead of Review API (comments). All results will be reported to console as well.
+- [2] Report results that are outside the diff file to console.
+- [3] It should work, but not been verified yet.
 - [4] Not implemented at the moment
 
 ## Debugging
@@ -936,7 +974,7 @@ reviewdog -filter-mode=nofilter -tee
 - [reviewdog — A code review dog who keeps your codebase healthy ](https://medium.com/@haya14busa/reviewdog-a-code-review-dog-who-keeps-your-codebase-healthy-d957c471938b)
 - [reviewdog ♡ GitHub Check — improved automated review experience](https://medium.com/@haya14busa/reviewdog-github-check-improved-automated-review-experience-58f89e0c95f3)
 - [Automated Code Review on GitHub Actions with reviewdog for any languages/tools](https://medium.com/@haya14busa/automated-code-review-on-github-actions-with-reviewdog-for-any-languages-tools-20285e04448e)
-- [GitHub Actions to guard your workflow](https://evrone.com/github-actions)
+- [GitHub Actions to guard your workflow](https://evrone.com/blog/github-actions)
 
 ## :bird: Author
 haya14busa [![GitHub followers](https://img.shields.io/github/followers/haya14busa.svg?style=social&label=Follow)](https://github.com/haya14busa)

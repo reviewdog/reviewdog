@@ -8,7 +8,7 @@ import (
 	"strings"
 	"sync"
 
-	"github.com/xanzy/go-gitlab"
+	gitlab "gitlab.com/gitlab-org/api/client-go"
 	"golang.org/x/sync/errgroup"
 
 	"github.com/reviewdog/reviewdog"
@@ -21,8 +21,9 @@ var _ reviewdog.CommentService = &MergeRequestCommitCommenter{}
 // MergeRequestCommitCommenter is a comment service for GitLab MergeRequest.
 //
 // API:
-//  https://docs.gitlab.com/ce/api/commits.html#post-comment-to-commit
-//  POST /projects/:id/repository/commits/:sha/comments
+//
+//	https://docs.gitlab.com/ce/api/commits.html#post-comment-to-commit
+//	POST /projects/:id/repository/commits/:sha/comments
 type MergeRequestCommitCommenter struct {
 	cli      *gitlab.Client
 	pr       int
@@ -69,6 +70,7 @@ func (g *MergeRequestCommitCommenter) Post(_ context.Context, c *reviewdog.Comme
 func (g *MergeRequestCommitCommenter) Flush(ctx context.Context) error {
 	g.muComments.Lock()
 	defer g.muComments.Unlock()
+	defer func() { g.postComments = nil }()
 
 	if err := g.setPostedComment(ctx); err != nil {
 		return err
@@ -93,10 +95,10 @@ func (g *MergeRequestCommitCommenter) postCommentsForEach(ctx context.Context) e
 				commitID = g.sha
 			}
 			prcomment := &gitlab.PostCommitCommentOptions{
-				Note:     gitlab.String(body),
-				Path:     gitlab.String(loc.GetPath()),
-				Line:     gitlab.Int(lnum),
-				LineType: gitlab.String("new"),
+				Note:     gitlab.Ptr(body),
+				Path:     gitlab.Ptr(loc.GetPath()),
+				Line:     gitlab.Ptr(lnum),
+				LineType: gitlab.Ptr("new"),
 			}
 			_, _, err = g.cli.Commits.PostCommitComment(g.projects, commitID, prcomment, gitlab.WithContext(ctx))
 			return err

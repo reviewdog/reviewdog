@@ -9,9 +9,9 @@ import "io"
 // Code fenced blocks are supported by GitHub Flavor Markdown.
 // A code fence is typically three backticks.
 //
-//     ```
-//     code
-//     ```
+//	```
+//	code
+//	```
 //
 // However, we sometimes need more backticks.
 // https://docs.github.com/en/github/writing-on-github/working-with-advanced-formatting/creating-and-highlighting-code-blocks#fenced-code-blocks

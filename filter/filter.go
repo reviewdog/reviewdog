@@ -1,9 +1,8 @@
 package filter
 
 import (
-	"path/filepath"
-
 	"github.com/reviewdog/reviewdog/diff"
+	"github.com/reviewdog/reviewdog/pathutil"
 	"github.com/reviewdog/reviewdog/proto/rdf"
 )
 
@@ -42,7 +41,6 @@ func FilterCheck(results []*rdf.Diagnostic, diff []*diff.FileDiff, strip int,
 	for _, result := range results {
 		check := &FilteredDiagnostic{Diagnostic: result, SourceLines: make(map[int]string)}
 		loc := result.GetLocation()
-		loc.Path = NormalizePath(loc.GetPath(), cwd, "")
 		startLine := int(loc.GetRange().GetStart().GetLine())
 		endLine := int(loc.GetRange().GetEnd().GetLine())
 		if endLine == 0 {
@@ -86,35 +84,14 @@ func FilterCheck(results []*rdf.Diagnostic, diff []*diff.FileDiff, strip int,
 	return checks
 }
 
-// NormalizePath return normalized path with workdir and relative path to
-// project.
-func NormalizePath(path, workdir, projectRelPath string) string {
-	path = filepath.Clean(path)
-	if path == "." {
-		return ""
-	}
-	// Convert absolute path to relative path only if the path is in current
-	// directory.
-	if filepath.IsAbs(path) && workdir != "" && contains(path, workdir) {
-		relPath, err := filepath.Rel(workdir, path)
-		if err == nil {
-			path = relPath
-		}
-	}
-	if !filepath.IsAbs(path) && projectRelPath != "" {
-		path = filepath.Join(projectRelPath, path)
-	}
-	return filepath.ToSlash(path)
-}
-
 func getOldPosition(filediff *diff.FileDiff, strip int, newPath string, newLine int) (oldPath string, oldLine int) {
 	if filediff == nil {
 		return "", 0
 	}
-	if NormalizeDiffPath(filediff.PathNew, strip) != newPath {
+	if pathutil.NormalizeDiffPath(filediff.PathNew, strip) != newPath {
 		return "", 0
 	}
-	oldPath = NormalizeDiffPath(filediff.PathOld, strip)
+	oldPath = pathutil.NormalizeDiffPath(filediff.PathOld, strip)
 	delta := 0
 	for _, hunk := range filediff.Hunks {
 		if newLine < hunk.StartLineNew {

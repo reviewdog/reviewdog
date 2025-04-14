@@ -42,7 +42,7 @@ func (h *ServerAPIHelper) buildAnnotation(comment *reviewdog.Comment) insights.A
 
 	data := insights.NewAnnotation(
 		comment.Result.Diagnostic.GetLocation().GetPath(),
-		comment.Result.Diagnostic.GetLocation().GetRange().GetStart().GetLine()-1,
+		comment.Result.Diagnostic.GetLocation().GetRange().GetStart().GetLine(),
 		fmt.Sprintf(`[%s] %s`, comment.ToolName, comment.Result.Diagnostic.GetMessage()),
 		severity,
 	)

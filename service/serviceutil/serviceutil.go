@@ -3,6 +3,7 @@ package serviceutil
 import (
 	"fmt"
 	"os"
+	"os/exec"
 	"path/filepath"
 	"strings"
 )
@@ -31,6 +32,20 @@ func GitRelWorkdir() (string, error) {
 		path += separator
 	}
 	return path, nil
+}
+
+func GetGitRoot() (string, error) {
+	cwd, err := os.Getwd()
+	if err != nil {
+		return "", err
+	}
+	return findGitRoot(cwd)
+}
+
+// GitCommandExists checks if git command is installed.
+func GitCommandExists() bool {
+	_, err := exec.Command("git", "-v").CombinedOutput()
+	return err == nil
 }
 
 func findGitRoot(path string) (string, error) {
