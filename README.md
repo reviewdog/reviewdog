@@ -79,9 +79,11 @@ by diff.
 - [reviewdog config file](#reviewdog-config-file)
 - [Reporters](#reporters)
   * [Reporter: Local (-reporter=local) [default]](#reporter-local--reporterlocal-default)
-  * [Reporter: GitHub Checks (-reporter=github-pr-check)](#reporter-github-checks--reportergithub-pr-check)
+  * [Reporter: GitHub PR Checks (-reporter=github-pr-check)](#reporter-github-pr-checks--reportergithub-pr-check)
   * [Reporter: GitHub Checks (-reporter=github-check)](#reporter-github-checks--reportergithub-check)
   * [Reporter: GitHub PullRequest review comment (-reporter=github-pr-review)](#reporter-github-pullrequest-review-comment--reportergithub-pr-review)
+  * [Reporter: GitHub Annotations (-reporter=github-annotations)](#reporter-github-annotations--reportergithub-annotations)
+  * [Reporter: GitHub PR Annotations (-reporter=github-pr-annotations)](#reporter-github-pr-annotations--reportergithub-pr-annotations)
   * [Reporter: GitLab MergeRequest discussions (-reporter=gitlab-mr-discussion)](#reporter-gitlab-mergerequest-discussions--reportergitlab-mr-discussion)
   * [Reporter: GitLab MergeRequest commit (-reporter=gitlab-mr-commit)](#reporter-gitlab-mergerequest-commit--reportergitlab-mr-commit)
   * [Reporter: Bitbucket Code Insights Reports (-reporter=bitbucket-code-report)](#reporter-bitbucket-code-insights-reports--reporterbitbucket-code-report)
@@ -107,13 +109,13 @@ by diff.
 
 ```shell
 # Install the latest version. (Install it into ./bin/ by default).
-$ curl -sfL https://raw.githubusercontent.com/reviewdog/reviewdog/master/install.sh | sh -s
+$ curl -sfL https://raw.githubusercontent.com/reviewdog/reviewdog/fd59714416d6d9a1c0692d872e38e7f8448df4fc/install.sh | sh -s
 
 # Specify installation directory ($(go env GOPATH)/bin/) and version.
-$ curl -sfL https://raw.githubusercontent.com/reviewdog/reviewdog/master/install.sh | sh -s -- -b $(go env GOPATH)/bin [vX.Y.Z]
+$ curl -sfL https://raw.githubusercontent.com/reviewdog/reviewdog/fd59714416d6d9a1c0692d872e38e7f8448df4fc/install.sh | sh -s -- -b $(go env GOPATH)/bin [vX.Y.Z]
 
 # In alpine linux (as it does not come with curl by default)
-$ wget -O - -q https://raw.githubusercontent.com/reviewdog/reviewdog/master/install.sh | sh -s [vX.Y.Z]
+$ wget -O - -q https://raw.githubusercontent.com/reviewdog/reviewdog/fd59714416d6d9a1c0692d872e38e7f8448df4fc/install.sh | sh -s [vX.Y.Z]
 ```
 
 ### Nightly releases
@@ -122,14 +124,14 @@ You can also use [nightly reviewdog release](https://github.com/reviewdog/nightl
 to try the latest reviewdog improvements every day!
 
 ```shell
-$ curl -sfL https://raw.githubusercontent.com/reviewdog/nightly/master/install.sh | sh -s -- -b $(go env GOPATH)/bin
+$ curl -sfL https://raw.githubusercontent.com/reviewdog/nightly/30fccfe9f47f7e6fd8b3c38aa0da11a6c9f04de7/install.sh | sh -s -- -b $(go env GOPATH)/bin
 ```
 
 ### GitHub Action: [reviewdog/action-setup](https://github.com/reviewdog/action-setup)
 
 ```yaml
 steps:
-- uses: reviewdog/action-setup@v1
+- uses: reviewdog/action-setup@e04ffabe3898a0af8d0fb1af00c188831c4b5893 # v1.3.2
   with:
     reviewdog_version: latest # Optional. [latest,nightly,v.X.Y.Z]
 ```
@@ -317,6 +319,8 @@ Note that not all reporters provide support for code suggestions.
 | **`local`**                  | NO [1]  |
 | **`github-check`**           | NO [2]  |
 | **`github-pr-check`**        | NO [2]  |
+| **`github-annotations`**     | NO [2]  |
+| **`github-pr-annotations`**  | NO [2]  |
 | **`github-pr-review`**       | OK      |
 | **`gitlab-mr-discussion`**   | OK      |
 | **`gitlab-mr-commit`**       | NO [2]  |
@@ -393,7 +397,7 @@ using diff. You can pass the diff command as `-diff` arg.
 $ golint ./... | reviewdog -f=golint -diff="git diff FETCH_HEAD"
 ```
 
-### Reporter: GitHub Checks (-reporter=github-pr-check)
+### Reporter: GitHub PR Checks (-reporter=github-pr-check)
 
 [![github-pr-check sample annotation with option 1](https://user-images.githubusercontent.com/3797062/64875597-65016f80-d688-11e9-843f-4679fb666f0d.png)](https://github.com/reviewdog/reviewdog/pull/275/files#annotation_6177941961779419)
 [![github-pr-check sample](https://user-images.githubusercontent.com/3797062/40884858-6efd82a0-6756-11e8-9f1a-c6af4f920fb0.png)](https://github.com/reviewdog/reviewdog/pull/131/checks)
@@ -492,9 +496,9 @@ $ export REVIEWDOG_INSECURE_SKIP_VERIFY=true # set this as you need to skip veri
 See [GitHub Actions](#github-actions) section too if you can use GitHub
 Actions. You can also use public reviewdog GitHub Actions.
 
-### Reporter: GitHub PR Annotations (-reporter=github-pr-annotations)
+### Reporter: GitHub Annotations (-reporter=github-annotations)
 
-github-pr-annotations uses the GitHub Actions annotation format to output errors
+`github-annotations` uses the GitHub Actions annotation format to output errors
 and warnings to `stdout` e.g.
 
 ```
@@ -503,6 +507,10 @@ and warnings to `stdout` e.g.
 
 This reporter requires a valid GitHub API token to generate a diff, but will not
 use the token to report errors.
+
+### Reporter: GitHub PR Annotations (-reporter=github-pr-annotations)
+
+Same as `github-annotations` but only works for Pull Requests.
 
 ### Reporter: GitLab MergeRequest discussions (-reporter=gitlab-mr-discussion)
 
@@ -605,7 +613,7 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       # ...
-      - uses: reviewdog/action-setup@v1
+      - uses: reviewdog/action-setup@e04ffabe3898a0af8d0fb1af00c188831c4b5893 # v1.3.2
         with:
           reviewdog_version: latest # Optional. [latest,nightly,v.X.Y.Z]
       - name: Run reviewdog
@@ -763,7 +771,7 @@ Example:
 ```yaml
 install:
   - mkdir -p ~/bin/ && export PATH="~/bin/:$PATH"
-  - curl -sfL https://raw.githubusercontent.com/reviewdog/reviewdog/master/install.sh| sh -s -- -b ~/bin
+  - curl -sfL https://raw.githubusercontent.com/reviewdog/reviewdog/fd59714416d6d9a1c0692d872e38e7f8448df4fc/install.sh| sh -s -- -b ~/bin
 
 script:
   - reviewdog -conf=.reviewdog.yml -reporter=github-pr-check
@@ -786,7 +794,7 @@ env:
 
 install:
   - mkdir -p ~/bin/ && export PATH="~/bin/:$PATH"
-  - curl -sfL https://raw.githubusercontent.com/reviewdog/reviewdog/master/install.sh| sh -s -- -b ~/bin
+  - curl -sfL https://raw.githubusercontent.com/reviewdog/reviewdog/fd59714416d6d9a1c0692d872e38e7f8448df4fc/install.sh| sh -s -- -b ~/bin
 
 script:
   - >-
@@ -811,7 +819,7 @@ jobs:
       - image: golang:latest
     steps:
       - checkout
-      - run: curl -sfL https://raw.githubusercontent.com/reviewdog/reviewdog/master/install.sh| sh -s -- -b ./bin
+      - run: curl -sfL https://raw.githubusercontent.com/reviewdog/reviewdog/fd59714416d6d9a1c0692d872e38e7f8448df4fc/install.sh| sh -s -- -b ./bin
       - run: go vet ./... 2>&1 | ./bin/reviewdog -f=govet -reporter=github-pr-review
 
       # Deprecated: prefer GitHub Actions to use github-pr-check reporter.
@@ -845,7 +853,7 @@ pipelines:
         name: Reviewdog
         image: golangci/golangci-lint:v1.31-alpine
         script:
-          - wget -O - -q https://raw.githubusercontent.com/reviewdog/reviewdog/master/install.sh | 
+          - wget -O - -q https://raw.githubusercontent.com/reviewdog/reviewdog/fd59714416d6d9a1c0692d872e38e7f8448df4fc/install.sh | 
               sh -s -- -b $(go env GOPATH)/bin
           - golangci-lint run --out-format=line-number ./... | reviewdog -f=golangci-lint -reporter=bitbucket-code-report
 ```

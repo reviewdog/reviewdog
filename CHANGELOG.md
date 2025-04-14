@@ -9,15 +9,24 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ### :sparkles: Release Note <!-- optional -->
 
 ### :rocket: Enhancements
-- ...
+- [#2026](https://github.com/reviewdog/reviewdog/pull/2026) Add reporter for GitHub annotations `github-annotations`. Same as `github-pr-annotations` but not restricted to pull requests.
 
 ### :bug: Fixes
-- ...
+- [#967](https://github.com/reviewdog/reviewdog/pull/967) Fix parsing long lines in diffs #967
+- [#1344](https://github.com/reviewdog/reviewdog/pull/1344) Bitbucket Cloud Fixes
+- [#1983](https://github.com/reviewdog/reviewdog/pull/1983) Improve error message for diff command failure by including stderr output
+- [#1975](https://github.com/reviewdog/reviewdog/pull/1975) Fix for suggestions not including an inserted EOF newline
+- [#2026](https://github.com/reviewdog/reviewdog/pull/2026) Never filter diffs when running `github-[pr-][check|annotate]` on non-PRs
 
 ### :rotating_light: Breaking changes
 - ...
 
-## [v0.20.2] - 2024-08-31
+## [v0.20.3] - 2024-12-04
+
+### :bug: Fixes
+- [#1977](https://github.com/reviewdog/reviewdog/pull/1977) Include stderr in the error message if we run git command
+
+## [v0.20.2] - 2024-09-16
 
 ### :rocket: Enhancements
 - [#1845](https://github.com/reviewdog/reviewdog/pull/1845) Normalize file path in `related_locations` too.
@@ -46,7 +55,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
   the flag while it's working.
 <!-- TODO: update the v0.19.0 release section -->
 
-## [v0.20.1] - 2024-07-10
+## [v0.20.1] - 2024-07-14
 
 ### :bug: Fixes
 - [#1835](https://github.com/reviewdog/reviewdog/pull/1835) Fix -filter-mode
@@ -284,7 +293,7 @@ $ cd subdir/ && reviewdog -filter-mode=file -fail-on-error -reporter=github-pr-r
 
 See https://github.com/reviewdog/reviewdog/releases for older release note.
 
-[Unreleased]: https://github.com/reviewdog/reviewdog/compare/v0.17.4...HEAD
+[Unreleased]: https://github.com/reviewdog/reviewdog/compare/v0.20.3...HEAD
 [v0.10.0]: https://github.com/reviewdog/reviewdog/compare/v0.9.17...v0.10.0
 [v0.10.1]: https://github.com/reviewdog/reviewdog/compare/v0.10.0...v0.10.1
 [v0.10.2]: https://github.com/reviewdog/reviewdog/compare/v0.10.1...v0.10.2
@@ -309,4 +318,5 @@ See https://github.com/reviewdog/reviewdog/releases for older release note.
 [v0.20.0]: https://github.com/reviewdog/reviewdog/compare/v0.19.0...v0.20.0
 [v0.20.1]: https://github.com/reviewdog/reviewdog/compare/v0.20.0...v0.20.1
 [v0.20.2]: https://github.com/reviewdog/reviewdog/compare/v0.20.1...v0.20.2
+[v0.20.3]: https://github.com/reviewdog/reviewdog/compare/v0.20.2...v0.20.3
 [@haya14busa]: https://github.com/haya14busa

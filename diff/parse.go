@@ -251,9 +251,11 @@ func (p *hunkParser) Parse() (*Hunk, error) {
 		StartLineNew:  hr.lnew,
 		LineLengthNew: hr.snew,
 		Section:       hr.section,
+		EOFNewline:    LineUnchanged,
 	}
 	lold := hr.lold
 	lnew := hr.lnew
+	prevLineType := LineUnchanged
 endhunk:
 	for !p.done(lold, lnew, hr) {
 		b, err := p.r.Peek(1)
@@ -274,20 +276,37 @@ endhunk:
 				line.LnumNew = lnew
 				lold++
 				lnew++
+				prevLineType = LineUnchanged
 			case tokenAddedLine:
 				line.Type = LineAdded
 				line.LnumDiff = p.lnumdiff
 				line.LnumNew = lnew
 				lnew++
+				prevLineType = LineAdded
 			case tokenDeletedLine:
 				line.Type = LineDeleted
 				line.LnumDiff = p.lnumdiff
 				line.LnumOld = lold
 				lold++
+				prevLineType = LineDeleted
 			}
 			hunk.Lines = append(hunk.Lines, line)
 		case tokenNoNewlineAtEOF:
-			// skip \ No newline at end of file. just consume line
+			switch prevLineType {
+			case LineUnchanged:
+				hunk.EOFNewline = LineUnchanged
+			case LineAdded:
+				// special case - if there's no newline in both files,
+				// it will already have been reported as part of the old file
+				if hunk.EOFNewline == LineAdded {
+					hunk.EOFNewline = LineUnchanged
+				} else {
+					hunk.EOFNewline = LineDeleted
+				}
+			case LineDeleted:
+				hunk.EOFNewline = LineAdded
+			}
+			// skip the rest of the line
 			readline(p.r)
 		default:
 			break endhunk

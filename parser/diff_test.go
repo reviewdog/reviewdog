@@ -5,6 +5,7 @@ import (
 	"encoding/json"
 	"fmt"
 	"strings"
+	"testing"
 
 	"google.golang.org/protobuf/encoding/protojson"
 )
@@ -162,4 +163,35 @@ func ExampleDiffParser() {
 	//   ],
 	//   "originalOutput": "gofmt.go:19:-type s struct { A int }"
 	// }
+}
+
+func TestSuggestionContainsEofNewline(t *testing.T) {
+	const sample = `diff --git a/addeofnewline.old.txt b/addeofnewline.new.txt
+--- a/addeofnewline.old.txt
++++ b/addeofnewline.new.txt
+@@ -1,2 +1,2 @@
+ " vim: nofixeol noendofline
+-this file will have a newline at the end
+\ No newline at end of file
++this file will have a newline at the end
+`
+
+	const strip = 1
+	p := NewDiffParser(strip)
+	diagnostics, err := p.Parse(strings.NewReader(sample))
+	if err != nil {
+		panic(err)
+	}
+
+	if len(diagnostics) != 1 {
+		t.Errorf("expected 1 diagnostic, got %d", len(diagnostics))
+	}
+	if len(diagnostics[0].Suggestions) != 1 {
+		t.Errorf("expected 1 suggestion, got %d", len(diagnostics[0].Suggestions))
+	}
+	suggestion := diagnostics[0].Suggestions[0]
+	want := "this file will have a newline at the end\n"
+	if suggestion.Text != want {
+		t.Errorf("suggestion.Text = %q, want %q", suggestion.Text, want)
+	}
 }

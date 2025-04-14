@@ -20,10 +20,10 @@ import (
 	"golang.org/x/build/gerrit"
 	"golang.org/x/oauth2"
 
-	"github.com/google/go-github/v64/github"
+	"github.com/google/go-github/v71/github"
 	"github.com/mattn/go-shellwords"
 	"github.com/reviewdog/errorformat/fmts"
-	"github.com/xanzy/go-gitlab"
+	gitlab "gitlab.com/gitlab-org/api/client-go"
 
 	"github.com/reviewdog/reviewdog"
 	"github.com/reviewdog/reviewdog/cienv"
@@ -138,6 +138,12 @@ const (
 
 		For GitHub Enterprise:
 			$ export GITHUB_API="https://example.githubenterprise.com/api/v3"
+
+	"github-annotations"
+		Report results to stdout in GitHub Actions annotation format.
+
+	"github-pr-annotations"
+		Same as github-annotations reporter but it only supports Pull Requests.
 
 	"gitlab-mr-discussion"
 		Report results to GitLab MergeRequest discussion.
@@ -317,17 +323,25 @@ func run(r io.Reader, w io.Writer, opt *option) error {
 			return runDoghouse(ctx, r, w, opt, isProject)
 		}
 		var err error
-		checkService, ghDiffService, err := githubCheckService(ctx, opt)
+		var isPR bool
+		checkService, ghDiffService, isPR, err := githubCheckService(ctx, opt)
 		if err != nil {
 			return err
 		}
+		if !isPR {
+			opt.filterMode = filter.ModeNoFilter
+		}
 		ds = ghDiffService
 		cs = reviewdog.MultiCommentService(checkService, cs)
-	case "github-pr-annotations":
+	case "github-annotations", "github-pr-annotations":
 		var err error
-		cs, ds, err = githubActionLogService(ctx, opt)
+		var isPR bool
+		cs, ds, isPR, err = githubActionLogService(ctx, opt)
 		if err != nil {
 			return err
+		}
+		if !isPR {
+			opt.filterMode = filter.ModeNoFilter
 		}
 	case "github-pr-review":
 		gs, isPR, err := githubService(ctx, opt)
@@ -643,10 +657,10 @@ func githubService(ctx context.Context, opt *option) (gs *githubservice.PullRequ
 	return gs, true, nil
 }
 
-func githubCheckService(ctx context.Context, opt *option) (reviewdog.CommentService, reviewdog.DiffService, error) {
+func githubCheckService(ctx context.Context, opt *option) (reviewdog.CommentService, reviewdog.DiffService, bool, error) {
 	g, client, err := githubBuildInfoWithClient(ctx)
 	if err != nil {
-		return nil, nil, err
+		return nil, nil, false, err
 	}
 	var ds reviewdog.DiffService = &reviewdog.EmptyDiff{}
 	if g.PullRequest != 0 {
@@ -661,15 +675,15 @@ func githubCheckService(ctx context.Context, opt *option) (reviewdog.CommentServ
 	}
 	cs, err := githubservice.NewGitHubCheck(client, g.Owner, g.Repo, g.PullRequest, g.SHA, opt.level, toolName(opt))
 	if err != nil {
-		return nil, nil, err
+		return nil, nil, false, err
 	}
-	return cs, ds, nil
+	return cs, ds, g.PullRequest != 0, nil
 }
 
-func githubActionLogService(ctx context.Context, opt *option) (reviewdog.CommentService, reviewdog.DiffService, error) {
+func githubActionLogService(ctx context.Context, opt *option) (reviewdog.CommentService, reviewdog.DiffService, bool, error) {
 	g, client, err := githubBuildInfoWithClient(ctx)
 	if err != nil {
-		return nil, nil, err
+		return nil, nil, false, err
 	}
 	var ds reviewdog.DiffService = &reviewdog.EmptyDiff{}
 	if g.PullRequest != 0 {
@@ -683,7 +697,7 @@ func githubActionLogService(ctx context.Context, opt *option) (reviewdog.Comment
 		}
 	}
 	cs := githubutils.NewGitHubActionLogWriter(opt.level)
-	return cs, ds, nil
+	return cs, ds, g.PullRequest != 0, nil
 }
 
 func githubBuildInfoWithClient(ctx context.Context) (*cienv.BuildInfo, *github.Client, error) {
@@ -973,7 +987,7 @@ func newParserFromOpt(opt *option) (parser.Parser, error) {
 	if err != nil {
 		return nil, fmt.Errorf("fail to create parser. use either -f or -efm: %w", err)
 	}
-	return p, err
+	return p, nil
 }
 
 func toolName(opt *option) string {

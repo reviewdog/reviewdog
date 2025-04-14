@@ -6,7 +6,7 @@ import (
 	"fmt"
 	"net/http"
 
-	"github.com/google/go-github/v64/github"
+	"github.com/google/go-github/v71/github"
 
 	"github.com/reviewdog/reviewdog/doghouse/server/storage"
 )

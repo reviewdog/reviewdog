@@ -9,7 +9,7 @@ import (
 	"testing"
 
 	"github.com/google/go-cmp/cmp"
-	"github.com/google/go-github/v64/github"
+	"github.com/google/go-github/v71/github"
 	"github.com/reviewdog/reviewdog/doghouse"
 	"github.com/reviewdog/reviewdog/proto/rdf"
 )
@@ -99,7 +99,7 @@ func TestCheck_OK(t *testing.T) {
 	// 	if opt.HeadSHA != sha {
 	// 		t.Errorf("CreateCheckRunOptions.HeadSHA = %q, want %q", opt.HeadSHA, sha)
 	// 	}
-	// 	return &github.CheckRun{ID: github.Int64(wantCheckID)}, nil
+	// 	return &github.CheckRun{ID: github.Ptr(wantCheckID)}, nil
 	// }
 	// cli.FakeUpdateCheckRun = func(ctx context.Context, owner, repo string, checkID int64, opt github.UpdateCheckRunOptions) (*github.CheckRun, error) {
 	// 	if checkID != wantCheckID {
@@ -116,94 +116,94 @@ func TestCheck_OK(t *testing.T) {
 	// 	} else {
 	// 		wantAnnotations := []*github.CheckRunAnnotation{
 	// 			{
-	// 				Path:            github.String("sample.new.txt"),
-	// 				StartLine:       github.Int(2),
-	// 				EndLine:         github.Int(2),
-	// 				AnnotationLevel: github.String("warning"),
-	// 				Message:         github.String("test message"),
-	// 				Title:           github.String("[haya14busa-linter] sample.new.txt#L2"),
-	// 				RawDetails:      github.String("raw test message"),
+	// 				Path:            github.Ptr("sample.new.txt"),
+	// 				StartLine:       github.Ptr(2),
+	// 				EndLine:         github.Ptr(2),
+	// 				AnnotationLevel: github.Ptr("warning"),
+	// 				Message:         github.Ptr("test message"),
+	// 				Title:           github.Ptr("[haya14busa-linter] sample.new.txt#L2"),
+	// 				RawDetails:      github.Ptr("raw test message"),
 	// 			},
 	// 			{
-	// 				Path:            github.String("sample.new.txt"),
-	// 				StartLine:       github.Int(2),
-	// 				EndLine:         github.Int(3),
-	// 				AnnotationLevel: github.String("warning"),
-	// 				Message:         github.String("test multiline"),
-	// 				Title:           github.String("[haya14busa-linter] sample.new.txt#L2-L3"),
+	// 				Path:            github.Ptr("sample.new.txt"),
+	// 				StartLine:       github.Ptr(2),
+	// 				EndLine:         github.Ptr(3),
+	// 				AnnotationLevel: github.Ptr("warning"),
+	// 				Message:         github.Ptr("test multiline"),
+	// 				Title:           github.Ptr("[haya14busa-linter] sample.new.txt#L2-L3"),
 	// 			},
 	// 			{
-	// 				Path:            github.String("sample.new.txt"),
-	// 				StartLine:       github.Int(2),
-	// 				EndLine:         github.Int(3),
-	// 				AnnotationLevel: github.String("warning"),
-	// 				Message:         github.String("test multiline with column"),
-	// 				Title:           github.String("[haya14busa-linter] sample.new.txt#L2-L3"),
+	// 				Path:            github.Ptr("sample.new.txt"),
+	// 				StartLine:       github.Ptr(2),
+	// 				EndLine:         github.Ptr(3),
+	// 				AnnotationLevel: github.Ptr("warning"),
+	// 				Message:         github.Ptr("test multiline with column"),
+	// 				Title:           github.Ptr("[haya14busa-linter] sample.new.txt#L2-L3"),
 	// 			},
 	// 			{
-	// 				Path:            github.String("sample.new.txt"),
-	// 				StartLine:       github.Int(2),
-	// 				EndLine:         github.Int(2),
-	// 				StartColumn:     github.Int(1),
-	// 				EndColumn:       github.Int(5),
-	// 				AnnotationLevel: github.String("warning"),
-	// 				Message:         github.String("test range comment"),
-	// 				Title:           github.String("[haya14busa-linter] sample.new.txt#L2"),
+	// 				Path:            github.Ptr("sample.new.txt"),
+	// 				StartLine:       github.Ptr(2),
+	// 				EndLine:         github.Ptr(2),
+	// 				StartColumn:     github.Ptr(1),
+	// 				EndColumn:       github.Ptr(5),
+	// 				AnnotationLevel: github.Ptr("warning"),
+	// 				Message:         github.Ptr("test range comment"),
+	// 				Title:           github.Ptr("[haya14busa-linter] sample.new.txt#L2"),
 	// 			},
 	// 			{
-	// 				Path:            github.String("sample.new.txt"),
-	// 				StartLine:       github.Int(2),
-	// 				EndLine:         github.Int(2),
-	// 				AnnotationLevel: github.String("failure"),
-	// 				Message:         github.String("test severity override"),
-	// 				Title:           github.String("[haya14busa-linter] sample.new.txt#L2"),
+	// 				Path:            github.Ptr("sample.new.txt"),
+	// 				StartLine:       github.Ptr(2),
+	// 				EndLine:         github.Ptr(2),
+	// 				AnnotationLevel: github.Ptr("failure"),
+	// 				Message:         github.Ptr("test severity override"),
+	// 				Title:           github.Ptr("[haya14busa-linter] sample.new.txt#L2"),
 	// 			},
 	// 			{
-	// 				Path:            github.String("sample.new.txt"),
-	// 				StartLine:       github.Int(2),
-	// 				EndLine:         github.Int(2),
-	// 				AnnotationLevel: github.String("warning"),
-	// 				Message:         github.String("source test"),
-	// 				Title:           github.String("[awesome-linter] sample.new.txt#L2"),
+	// 				Path:            github.Ptr("sample.new.txt"),
+	// 				StartLine:       github.Ptr(2),
+	// 				EndLine:         github.Ptr(2),
+	// 				AnnotationLevel: github.Ptr("warning"),
+	// 				Message:         github.Ptr("source test"),
+	// 				Title:           github.Ptr("[awesome-linter] sample.new.txt#L2"),
 	// 			},
 	// 			{
-	// 				Path:            github.String("sample.new.txt"),
-	// 				StartLine:       github.Int(2),
-	// 				EndLine:         github.Int(2),
-	// 				AnnotationLevel: github.String("warning"),
-	// 				Message:         github.String("code test w/o URL"),
-	// 				Title:           github.String("[haya14busa-linter] sample.new.txt#L2 <CODE14>"),
+	// 				Path:            github.Ptr("sample.new.txt"),
+	// 				StartLine:       github.Ptr(2),
+	// 				EndLine:         github.Ptr(2),
+	// 				AnnotationLevel: github.Ptr("warning"),
+	// 				Message:         github.Ptr("code test w/o URL"),
+	// 				Title:           github.Ptr("[haya14busa-linter] sample.new.txt#L2 <CODE14>"),
 	// 			},
 	// 			{
-	// 				Path:            github.String("sample.new.txt"),
-	// 				StartLine:       github.Int(2),
-	// 				EndLine:         github.Int(2),
-	// 				AnnotationLevel: github.String("warning"),
-	// 				Message:         github.String("code test w/ URL"),
-	// 				Title:           github.String("[haya14busa-linter] sample.new.txt#L2 <CODE14>(https://github.com/reviewdog#CODE14)"),
+	// 				Path:            github.Ptr("sample.new.txt"),
+	// 				StartLine:       github.Ptr(2),
+	// 				EndLine:         github.Ptr(2),
+	// 				AnnotationLevel: github.Ptr("warning"),
+	// 				Message:         github.Ptr("code test w/ URL"),
+	// 				Title:           github.Ptr("[haya14busa-linter] sample.new.txt#L2 <CODE14>(https://github.com/reviewdog#CODE14)"),
 	// 			},
 	// 			{
-	// 				Path:            github.String("sample.new.txt"),
-	// 				StartLine:       github.Int(2),
-	// 				EndLine:         github.Int(2),
-	// 				AnnotationLevel: github.String("warning"),
-	// 				Message:         github.String("request from old clients"),
-	// 				Title:           github.String("[haya14busa-linter] sample.new.txt#L2"),
-	// 				RawDetails:      github.String("raw message from old clients"),
+	// 				Path:            github.Ptr("sample.new.txt"),
+	// 				StartLine:       github.Ptr(2),
+	// 				EndLine:         github.Ptr(2),
+	// 				AnnotationLevel: github.Ptr("warning"),
+	// 				Message:         github.Ptr("request from old clients"),
+	// 				Title:           github.Ptr("[haya14busa-linter] sample.new.txt#L2"),
+	// 				RawDetails:      github.Ptr("raw message from old clients"),
 	// 			},
 	// 		}
 	// 		if d := cmp.Diff(annotations, wantAnnotations); d != "" {
 	// 			t.Errorf("Annotation diff found:\n%s", d)
 	// 		}
 	// 	}
-	// 	return &github.CheckRun{HTMLURL: github.String(reportURL)}, nil
+	// 	return &github.CheckRun{HTMLURL: github.Ptr(reportURL)}, nil
 	// }
 	mux := http.NewServeMux()
 	mux.HandleFunc("/repos/haya14busa/reviewdog/pulls/14", func(w http.ResponseWriter, r *http.Request) {
 		w.Write([]byte(sampleDiff))
 	})
 	mux.HandleFunc("/repos/haya14busa/reviewdog/check-runs", func(w http.ResponseWriter, r *http.Request) {
-		if err := json.NewEncoder(w).Encode(&github.CheckRun{ID: github.Int64(wantCheckID)}); err != nil {
+		if err := json.NewEncoder(w).Encode(&github.CheckRun{ID: github.Ptr(int64(wantCheckID))}); err != nil {
 			t.Fatal(err)
 		}
 	})
@@ -214,22 +214,22 @@ func TestCheck_OK(t *testing.T) {
 		}
 		wantAnnotations := []*github.CheckRunAnnotation{
 			{
-				Path:            github.String("sample.new.txt"),
-				StartLine:       github.Int(2),
-				EndLine:         github.Int(2),
-				AnnotationLevel: github.String("warning"),
-				Message:         github.String("test message"),
-				Title:           github.String("[haya14busa-linter] sample.new.txt#L2"),
-				RawDetails:      github.String("raw test message"),
+				Path:            github.Ptr("sample.new.txt"),
+				StartLine:       github.Ptr(2),
+				EndLine:         github.Ptr(2),
+				AnnotationLevel: github.Ptr("warning"),
+				Message:         github.Ptr("test message"),
+				Title:           github.Ptr("[haya14busa-linter] sample.new.txt#L2"),
+				RawDetails:      github.Ptr("raw test message"),
 			},
 			{
-				Path:            github.String("sample.new.txt"),
-				StartLine:       github.Int(2),
-				EndLine:         github.Int(2),
-				AnnotationLevel: github.String("warning"),
-				Message:         github.String("request from old clients"),
-				Title:           github.String("[haya14busa-linter] sample.new.txt#L2"),
-				RawDetails:      github.String("raw message from old clients"),
+				Path:            github.Ptr("sample.new.txt"),
+				StartLine:       github.Ptr(2),
+				EndLine:         github.Ptr(2),
+				AnnotationLevel: github.Ptr("warning"),
+				Message:         github.Ptr("request from old clients"),
+				Title:           github.Ptr("[haya14busa-linter] sample.new.txt#L2"),
+				RawDetails:      github.Ptr("raw message from old clients"),
 			},
 		}
 		if req.GetStatus() != "completed" {
@@ -237,7 +237,7 @@ func TestCheck_OK(t *testing.T) {
 				t.Errorf("Annotation diff found:\n%s", d)
 			}
 		}
-		if err := json.NewEncoder(w).Encode(&github.CheckRun{HTMLURL: github.String(reportURL)}); err != nil {
+		if err := json.NewEncoder(w).Encode(&github.CheckRun{HTMLURL: github.Ptr(reportURL)}); err != nil {
 			t.Fatal(err)
 		}
 	})

@@ -1,7 +1,9 @@
 package reviewdog
 
 import (
+	"bytes"
 	"context"
+	"fmt"
 	"os/exec"
 	"sync"
 )
@@ -46,10 +48,15 @@ func (d *DiffCmd) Diff(_ context.Context) ([]byte, error) {
 	if d.done {
 		return d.out, nil
 	}
+	stderr := &bytes.Buffer{}
+	d.cmd.Stderr = stderr
 	out, err := d.cmd.Output()
 	// Exit status of `git diff` is 1 if diff exists, so ignore the error if diff
 	// presents.
 	if err != nil && len(out) == 0 {
+		if stderr.Len() > 0 {
+			return nil, fmt.Errorf("%w: %s", err, stderr.String())
+		}
 		return nil, err
 	}
 	d.out = out

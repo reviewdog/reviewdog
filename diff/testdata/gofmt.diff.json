@@ -61,7 +61,8 @@
             "LnumOld": 6,
             "LnumNew": 6
           }
-        ]
+        ],
+        "EofNewline": 0
       },
       {
         "StartLineOld": 10,
@@ -175,7 +176,8 @@
             "LnumOld": 20,
             "LnumNew": 20
           }
-        ]
+        ],
+        "EofNewline": 0
       }
     ],
     "Extended": [

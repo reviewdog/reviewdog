@@ -12,7 +12,7 @@ import (
 	"strings"
 	"sync"
 
-	"github.com/google/go-github/v64/github"
+	"github.com/google/go-github/v71/github"
 	"google.golang.org/protobuf/proto"
 
 	"github.com/reviewdog/reviewdog"
@@ -198,9 +198,9 @@ func (g *PullRequest) postAsReviewComment(ctx context.Context) error {
 		// send review comments to GitHub.
 		review := &github.PullRequestReviewRequest{
 			CommitID: &g.sha,
-			Event:    github.String("COMMENT"),
+			Event:    github.Ptr("COMMENT"),
 			Comments: reviewComments,
-			Body:     github.String(g.remainingCommentsSummary(remaining, repoBaseHTMLURL, rootPath)),
+			Body:     github.Ptr(g.remainingCommentsSummary(remaining, repoBaseHTMLURL, rootPath)),
 		}
 		_, _, err := g.cli.PullRequests.CreateReview(ctx, g.owner, g.repo, g.pr, review)
 		if err != nil {
@@ -259,26 +259,26 @@ func buildDraftReviewComment(c *reviewdog.Comment, body string) *github.DraftRev
 	loc := c.Result.Diagnostic.GetLocation()
 	startLine, endLine := githubCommentLineRange(c)
 	r := &github.DraftReviewComment{
-		Path: github.String(loc.GetPath()),
-		Side: github.String("RIGHT"),
-		Body: github.String(body),
-		Line: github.Int(endLine),
+		Path: github.Ptr(loc.GetPath()),
+		Side: github.Ptr("RIGHT"),
+		Body: github.Ptr(body),
+		Line: github.Ptr(endLine),
 	}
 	// GitHub API: Start line must precede the end line.
 	if startLine < endLine {
-		r.StartSide = github.String("RIGHT")
-		r.StartLine = github.Int(startLine)
+		r.StartSide = github.Ptr("RIGHT")
+		r.StartLine = github.Ptr(startLine)
 	}
 	return r
 }
 
 func buildPullRequestFileComment(c *reviewdog.Comment, body string, sha string) *github.PullRequestComment {
 	return &github.PullRequestComment{
-		Path:        github.String(c.Result.Diagnostic.GetLocation().GetPath()),
-		Side:        github.String("RIGHT"),
-		Body:        github.String(body),
-		CommitID:    github.String(sha),
-		SubjectType: github.String("file"),
+		Path:        github.Ptr(c.Result.Diagnostic.GetLocation().GetPath()),
+		Side:        github.Ptr("RIGHT"),
+		Body:        github.Ptr(body),
+		CommitID:    github.Ptr(sha),
+		SubjectType: github.Ptr("file"),
 	}
 }
 

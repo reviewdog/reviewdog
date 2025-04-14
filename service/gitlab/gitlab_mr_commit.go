@@ -7,7 +7,7 @@ import (
 	"strings"
 	"sync"
 
-	"github.com/xanzy/go-gitlab"
+	gitlab "gitlab.com/gitlab-org/api/client-go"
 	"golang.org/x/sync/errgroup"
 
 	"github.com/reviewdog/reviewdog"

@@ -104,6 +104,16 @@ func (p *DiffParser) Parse(r io.Reader) ([]*rdf.Diagnostic, error) {
 				}
 				prevState = diffLine.Type
 			}
+			if hunk.EOFNewline == diff.LineAdded {
+				// Adding a blank line here should prompt an EOF newline
+				// to be inserted (rather than a complete blank line).
+				// This is known to work with GitHub review suggestions, at least.
+				// See https://github.com/reviewdog/reviewdog/pull/1975#issuecomment-2634826110
+				// It hasn't yet been tested with other reporters.
+				state.newLines = append(state.newLines, "")
+				// NOTE: this doesn't handle the case of a deleted eof newline
+				// because it's much rarer in practice.
+			}
 			if state.startLine > 0 {
 				emit() // Output a diagnostic at the end of hunk.
 			}
