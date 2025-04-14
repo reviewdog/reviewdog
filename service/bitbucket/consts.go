@@ -3,7 +3,8 @@ package bitbucket
 import "time"
 
 const (
-	httpTimeout = time.Second * 10
+	httpTimeout      = time.Second * 10
+	maxSummaryLength = 450
 
 	reportTypeBug = "BUG"
 	// reportTypeSecurity = "SECURITY"

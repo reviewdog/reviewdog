@@ -12,6 +12,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - [#2026](https://github.com/reviewdog/reviewdog/pull/2026) Add reporter for GitHub annotations `github-annotations`. Same as `github-pr-annotations` but not restricted to pull requests.
 
 ### :bug: Fixes
+- [#967](https://github.com/reviewdog/reviewdog/pull/967) Fix parsing long lines in diffs #967
+- [#1344](https://github.com/reviewdog/reviewdog/pull/1344) Bitbucket Cloud Fixes
 - [#1983](https://github.com/reviewdog/reviewdog/pull/1983) Improve error message for diff command failure by including stderr output
 - [#1975](https://github.com/reviewdog/reviewdog/pull/1975) Fix for suggestions not including an inserted EOF newline
 - [#2026](https://github.com/reviewdog/reviewdog/pull/2026) Never filter diffs when running `github-[pr-][check|annotate]` on non-PRs
