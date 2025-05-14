@@ -5,7 +5,7 @@ go 1.23.0
 toolchain go1.24.3
 
 require (
-	cloud.google.com/go/compute/metadata v0.6.0
+	cloud.google.com/go/compute/metadata v0.7.0
 	cloud.google.com/go/datastore v1.20.0
 	code.gitea.io/sdk/gitea v0.21.0
 	contrib.go.opencensus.io/exporter/stackdriver v0.13.12
