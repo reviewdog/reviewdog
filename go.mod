@@ -9,7 +9,7 @@ require (
 	cloud.google.com/go/datastore v1.20.0
 	code.gitea.io/sdk/gitea v0.21.0
 	contrib.go.opencensus.io/exporter/stackdriver v0.13.12
-	github.com/bradleyfalzon/ghinstallation/v2 v2.15.0
+	github.com/bradleyfalzon/ghinstallation/v2 v2.16.0
 	github.com/google/go-cmp v0.7.0
 	github.com/google/go-github/v71 v71.0.0
 	github.com/haya14busa/go-actions-toolkit v0.0.0-20200105081403-ca0307860f01
@@ -51,6 +51,7 @@ require (
 	github.com/golang-jwt/jwt/v4 v4.5.2 // indirect
 	github.com/golang/groupcache v0.0.0-20210331224755-41bb18bfe9da // indirect
 	github.com/golang/protobuf v1.5.4 // indirect
+	github.com/google/go-github/v72 v72.0.0 // indirect
 	github.com/google/go-querystring v1.1.0 // indirect
 	github.com/google/s2a-go v0.1.8 // indirect
 	github.com/googleapis/enterprise-certificate-proxy v0.3.4 // indirect
