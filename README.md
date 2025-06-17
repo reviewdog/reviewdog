@@ -709,6 +709,7 @@ You can use public GitHub Actions to start using reviewdog with ease! :tada: :ar
   - [jordemort/action-pyright](https://github.com/jordemort/action-pyright) - Run [pyright](https://github.com/Microsoft/pyright)
   - [dciborow/action-pylint](https://github.com/dciborow/action-pylint) - Run [pylint](https://github.com/pylint-dev/pylint)
   - [reviewdog/action-black](https://github.com/reviewdog/action-black) - Run [black](https://github.com/psf/black)
+  - [brunohaf/action-bandit](https://github.com/brunohaf/action-bandit) - Run [bandit](https://github.com/PyCQA/bandit)
 - Kotlin
   - [ScaCap/action-ktlint](https://github.com/ScaCap/action-ktlint) - Run [ktlint](https://ktlint.github.io/).
 - Android Lint
