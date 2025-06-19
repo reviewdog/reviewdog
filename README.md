@@ -911,10 +911,28 @@ $ REVIEWDOG_GITHUB_API_TOKEN="<token>" reviewdog -reporter=github-pr-review
 $ REVIEWDOG_SKIP_DOGHOUSE=true REVIEWDOG_GITHUB_API_TOKEN="<token>" reviewdog -reporter=github-pr-check
 ```
 
-## Exit codes
-By default (`-fail-level=none`) reviewdog will return `0` as exit code even if it finds errors.
-reviewdog will exit with code 1 with `-fail-level=[any,info,warning,error]` flag if it finds at least 1 issue with severity greater than or equal to the given level.
-This can be helpful when you are using it as a step in your CI pipeline and want to mark the step failed if any error found by linter.
+✅ Exit Codes in Reviewdog
+By default, when using -fail-level=none, Reviewdog will always return exit code 0, even if it detects issues.
+This means the CI step will pass regardless of the linter results.
+
+However, you can change this behavior using the -fail-level flag:
+
+bash
+Copy
+Edit
+-fail-level=[any, info, warning, error]
+If Reviewdog finds at least one issue with a severity greater than or equal to the specified level, it will exit with code 1 — causing the CI step to fail.
+
+This is especially useful in CI/CD pipelines when you want to automatically block builds or pull requests if certain types of issues are found by linters.
+
+Example:
+-fail-level=warning → Fails if any warning or error is found.
+
+-fail-level=error → Fails only on error-level issues.
+
+-fail-level=any → Fails on any issue (info, warning, or error).
+
+-fail-level=none (default) → Always exits with code 0, CI step never fails.
 
 You can also use `-level` flag to configure default report revel.
 
