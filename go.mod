@@ -24,7 +24,7 @@ require (
 	github.com/reviewdog/go-bitbucket v0.0.0-20201024094602-708c3f6a7de0
 	github.com/stretchr/testify v1.10.0
 	github.com/vvakame/sdlog v1.2.0
-	gitlab.com/gitlab-org/api/client-go v0.130.1
+	gitlab.com/gitlab-org/api/client-go v0.131.0
 	go.opencensus.io v0.24.0
 	golang.org/x/build v0.0.0-20250512204353-bd68c458b160
 	golang.org/x/oauth2 v0.30.0
@@ -56,7 +56,7 @@ require (
 	github.com/googleapis/enterprise-certificate-proxy v0.3.4 // indirect
 	github.com/googleapis/gax-go/v2 v2.13.0 // indirect
 	github.com/hashicorp/go-cleanhttp v0.5.2 // indirect
-	github.com/hashicorp/go-retryablehttp v0.7.7 // indirect
+	github.com/hashicorp/go-retryablehttp v0.7.8 // indirect
 	github.com/hashicorp/go-version v1.7.0 // indirect
 	github.com/jmespath/go-jmespath v0.4.0 // indirect
 	github.com/pmezard/go-difflib v1.0.0 // indirect
