@@ -3,7 +3,7 @@ version: 2.1
 executors:
   golang-executor:
     docker:
-      - image: cimg/go:1.24.6
+      - image: cimg/go:1.25.0
 
 jobs:
   lint:
