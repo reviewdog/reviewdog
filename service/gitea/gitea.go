@@ -2,13 +2,10 @@ package gitea
 
 import (
 	"context"
-	"fmt"
-	"path/filepath"
 	"sync"
 
 	"github.com/reviewdog/reviewdog"
 	"github.com/reviewdog/reviewdog/service/commentutil"
-	"github.com/reviewdog/reviewdog/service/serviceutil"
 
 	"code.gitea.io/sdk/gitea"
 )
@@ -35,25 +32,17 @@ type PullRequest struct {
 	postComments []*reviewdog.Comment
 
 	postedcs commentutil.PostedComments
-
-	// wd is working directory relative to root of repository.
-	wd string
 }
 
 // NewGiteaPullRequest returns a new PullRequest service.
 // PullRequest service needs git command in $PATH.
 func NewGiteaPullRequest(cli *gitea.Client, owner, repo string, pr int64, sha string) (*PullRequest, error) {
-	workDir, err := serviceutil.GitRelWorkdir()
-	if err != nil {
-		return nil, fmt.Errorf("pull request needs 'git' command: %w", err)
-	}
 	return &PullRequest{
 		cli:   cli,
 		owner: owner,
 		repo:  repo,
 		pr:    pr,
 		sha:   sha,
-		wd:    workDir,
 	}, nil
 }
 
@@ -77,9 +66,6 @@ func (g *PullRequest) Strip() int {
 // Post accepts a comment and holds it. Flush method actually posts comments to
 // Gitea in parallel.
 func (g *PullRequest) Post(_ context.Context, c *reviewdog.Comment) error {
-	c.Result.Diagnostic.GetLocation().Path = filepath.ToSlash(filepath.Join(g.wd,
-		c.Result.Diagnostic.GetLocation().GetPath()))
-
 	g.muComments.Lock()
 	defer g.muComments.Unlock()
 
@@ -87,6 +73,8 @@ func (g *PullRequest) Post(_ context.Context, c *reviewdog.Comment) error {
 
 	return nil
 }
+
+func (*PullRequest) ShouldPrependGitRelDir() bool { return true }
 
 // Flush posts comments which has not been posted yet.
 func (g *PullRequest) Flush(_ context.Context) error {

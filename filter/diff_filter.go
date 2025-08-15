@@ -79,11 +79,11 @@ type DiffFilter struct {
 	difffiles difffiles
 }
 
-// difflines is a hash table of normalizedPath to line number to *diff.Line.
-type difflines map[normalizedPath]map[int]*diff.Line
+// difflines is a hash table of normalized path to line number to *diff.Line.
+type difflines map[string]map[int]*diff.Line
 
-// difffiles is a hash table of normalizedPath to *diff.FileDiff.
-type difffiles map[normalizedPath]*diff.FileDiff
+// difffiles is a hash table of normalized path to *diff.FileDiff.
+type difffiles map[string]*diff.FileDiff
 
 // NewDiffFilter creates a new DiffFilter.
 func NewDiffFilter(diff []*diff.FileDiff, strip int, cwd string, mode Mode) *DiffFilter {
@@ -104,7 +104,7 @@ func NewDiffFilter(diff []*diff.FileDiff, strip int, cwd string, mode Mode) *Dif
 
 func (df *DiffFilter) addDiff(filediffs []*diff.FileDiff) {
 	for _, filediff := range filediffs {
-		path := df.normalizeDiffPath(filediff)
+		path := pathutil.NormalizeDiffPath(filediff.PathNew, df.strip)
 		df.difffiles[path] = filediff
 		lines, ok := df.difflines[path]
 		if !ok {
@@ -123,10 +123,11 @@ func (df *DiffFilter) addDiff(filediffs []*diff.FileDiff) {
 
 // ShouldReport returns true, if the given path should be reported depending on
 // the filter Mode. It also optionally return diff file/line.
+//
+// Path should be normalized before calling this function.
 func (df *DiffFilter) ShouldReport(path string, lnum int) (bool, *diff.FileDiff, *diff.Line) {
-	npath := df.normalizePath(path)
-	file := df.difffiles[npath]
-	lines, ok := df.difflines[npath]
+	file := df.difffiles[path]
+	lines, ok := df.difflines[path]
 	if !ok {
 		return df.mode == ModeNoFilter, file, nil
 	}
@@ -139,9 +140,10 @@ func (df *DiffFilter) ShouldReport(path string, lnum int) (bool, *diff.FileDiff,
 
 // DiffLine returns diff data from given new path and lnum. Returns nil if not
 // found.
+//
+// Path should be normalized before calling this function.
 func (df *DiffFilter) DiffLine(path string, lnum int) *diff.Line {
-	npath := df.normalizePath(path)
-	lines, ok := df.difflines[npath]
+	lines, ok := df.difflines[path]
 	if !ok {
 		return nil
 	}
@@ -160,21 +162,4 @@ func (df *DiffFilter) isSignificantLine(line *diff.Line) bool {
 		return line.Type == diff.LineAdded
 	}
 	return false
-}
-
-// normalizedPath is file path which is relative to **project root dir** or
-// to current dir if project root not found.
-type normalizedPath struct{ p string }
-
-func (df *DiffFilter) normalizePath(path string) normalizedPath {
-	return normalizedPath{p: pathutil.NormalizePath(path, df.cwd, df.projectRelPath)}
-}
-
-// Assuming diff path should be relative path to the project root dir by
-// default (e.g. git diff).
-//
-// `git diff --relative` can returns relative path to current workdir, so we
-// ask users not to use it for reviewdog command.
-func (df *DiffFilter) normalizeDiffPath(filediff *diff.FileDiff) normalizedPath {
-	return normalizedPath{p: pathutil.NormalizeDiffPath(filediff.PathNew, df.strip)}
 }

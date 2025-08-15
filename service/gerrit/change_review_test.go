@@ -118,11 +118,7 @@ func TestChangeReviewCommenter_Post_Flush(t *testing.T) {
 
 	cli := gerrit.NewClient(ts.URL, gerrit.NoAuth)
 
-	g, err := NewChangeReviewCommenter(cli, "testChangeID", "testRevisionID")
-	if err != nil {
-		t.Fatal(err)
-	}
-
+	g := NewChangeReviewCommenter(cli, "testChangeID", "testRevisionID")
 	for _, c := range comments {
 		if err := g.Post(ctx, c); err != nil {
 			t.Error(err)

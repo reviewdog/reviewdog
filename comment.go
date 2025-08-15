@@ -8,6 +8,15 @@ type multiCommentService struct {
 	services []CommentService
 }
 
+func (m *multiCommentService) ShouldPrependGitRelDir() bool {
+	for _, cs := range m.services {
+		if cs.ShouldPrependGitRelDir() {
+			return true
+		}
+	}
+	return false
+}
+
 func (m *multiCommentService) Post(ctx context.Context, c *Comment) error {
 	for _, cs := range m.services {
 		if err := cs.Post(ctx, c); err != nil {

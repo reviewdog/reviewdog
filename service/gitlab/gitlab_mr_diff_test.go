@@ -36,10 +36,7 @@ func TestGitLabMergeRequestDiff_Diff(t *testing.T) {
 		t.Fatal(err)
 	}
 
-	g, err := NewGitLabMergeRequestDiff(cli, "o", "r", 14, "HEAD")
-	if err != nil {
-		t.Fatal(err)
-	}
+	g := NewGitLabMergeRequestDiff(cli, "o", "r", 14, "HEAD")
 	if _, err := g.Diff(context.Background()); err != nil {
 		t.Fatal(err)
 	}
