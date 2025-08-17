@@ -13,6 +13,7 @@ import (
 	"os"
 	"os/exec"
 	"sort"
+	"strconv"
 	"strings"
 	"text/tabwriter"
 
@@ -575,9 +576,14 @@ func giteaService(ctx context.Context, opt *option) (gs *giteaservice.PullReques
 		g.PullRequest = int(prID)
 	}
 
-	gs, err = giteaservice.NewGiteaPullRequest(client, g.Owner, g.Repo, int64(g.PullRequest), g.SHA)
+	gs, err = giteaservice.NewGiteaPullRequest(client, g.Owner, g.Repo, int64(g.PullRequest), g.SHA, toolName(opt))
 	if err != nil {
 		return nil, false, err
+	}
+	if s := os.Getenv("GITEA_MAX_COMMENTS_PER_REVIEW"); s != "" {
+		if i, err := strconv.Atoi(s); err == nil {
+			gs.SetMaxCommentsPerReview(i)
+		}
 	}
 	return gs, true, nil
 }
