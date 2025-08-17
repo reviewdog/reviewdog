@@ -10,6 +10,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### :rocket: Enhancements
 - [#2026](https://github.com/reviewdog/reviewdog/pull/2026) Add reporter for GitHub annotations `github-annotations`. Same as `github-pr-annotations` but not restricted to pull requests.
+- [#2210](https://github.com/reviewdog/reviewdog/pull/2210) Update Gitea PR reporter to detect comments for already reported issues and report suggestions.
 
 ### :bug: Fixes
 - [#967](https://github.com/reviewdog/reviewdog/pull/967) Fix parsing long lines in diffs #967
