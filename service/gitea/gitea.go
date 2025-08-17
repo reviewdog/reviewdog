@@ -99,10 +99,12 @@ func (g *PullRequest) Flush(_ context.Context) error {
 	return g.postAsReviewComment()
 }
 
-func (g *PullRequest) SetTool(toolName string) {
+// SetTool sets tool name to use in comments.
+func (g *PullRequest) SetTool(toolName string, _ string) {
 	g.toolName = toolName
 }
 
+// SetMaxCommentsPerReview sets the maximum number of comments to post per review.
 func (g *PullRequest) SetMaxCommentsPerReview(max int) {
 	g.maxCommentsPerReview = max
 }
@@ -295,6 +297,7 @@ func extractMetaComment(body string) *metacomment.MetaComment {
 	return nil
 }
 
+// DecodeMetaComment decodes a base64 encoded meta comment.
 func DecodeMetaComment(metaBase64 string) (*metacomment.MetaComment, error) {
 	b, err := base64.StdEncoding.DecodeString(metaBase64)
 	if err != nil {
@@ -419,6 +422,7 @@ func giteaCodeSnippetURL(baseURL, gitRootPath string, loc *rdf.Location) string 
 	return relatedURL
 }
 
+// BuildMetaComment builds a base64 encoded meta comment with the given fingerprint and tool name.
 func BuildMetaComment(fprint string, toolName string) string {
 	b, _ := proto.Marshal(
 		&metacomment.MetaComment{
