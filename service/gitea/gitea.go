@@ -457,6 +457,7 @@ func buildSingleSuggestion(c *reviewdog.Comment, s *rdf.Suggestion) (string, err
 	}
 	gStart, gEnd := giteaCommentLineRange(c)
 	if startLine != gStart || endLine != gEnd {
+		//lint:ignore ST1005 Gitea is product name
 		return "", fmt.Errorf("Gitea comment range and suggestion line range must be same. L%d-L%d v.s. L%d-L%d",
 			gStart, gEnd, startLine, endLine)
 	}
