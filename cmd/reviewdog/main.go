@@ -36,6 +36,7 @@ import (
 	gerritservice "github.com/reviewdog/reviewdog/service/gerrit"
 	giteaservice "github.com/reviewdog/reviewdog/service/gitea"
 	githubservice "github.com/reviewdog/reviewdog/service/github"
+	"github.com/reviewdog/reviewdog/service/github/githubutils"
 	gitlabservice "github.com/reviewdog/reviewdog/service/gitlab"
 )
 
@@ -364,16 +365,9 @@ func run(r io.Reader, w io.Writer, opt *option) error {
 			return nil
 		}
 
-		gc, err := gitlabservice.NewGitLabMergeRequestDiscussionCommenter(cli, build.Owner, build.Repo, build.PullRequest, build.SHA)
-		if err != nil {
-			return err
-		}
-
+		gc := gitlabservice.NewGitLabMergeRequestDiscussionCommenter(cli, build.Owner, build.Repo, build.PullRequest, build.SHA)
 		cs = reviewdog.MultiCommentService(gc, cs)
-		ds, err = gitlabservice.NewGitLabMergeRequestDiff(cli, build.Owner, build.Repo, build.PullRequest, build.SHA)
-		if err != nil {
-			return err
-		}
+		ds = gitlabservice.NewGitLabMergeRequestDiff(cli, build.Owner, build.Repo, build.PullRequest, build.SHA)
 	case "gitlab-mr-commit":
 		build, cli, err := gitlabBuildWithClient()
 		if err != nil {
@@ -384,27 +378,15 @@ func run(r io.Reader, w io.Writer, opt *option) error {
 			return nil
 		}
 
-		gc, err := gitlabservice.NewGitLabMergeRequestCommitCommenter(cli, build.Owner, build.Repo, build.PullRequest, build.SHA)
-		if err != nil {
-			return err
-		}
-
+		gc := gitlabservice.NewGitLabMergeRequestCommitCommenter(cli, build.Owner, build.Repo, build.PullRequest, build.SHA)
 		cs = reviewdog.MultiCommentService(gc, cs)
-		ds, err = gitlabservice.NewGitLabMergeRequestDiff(cli, build.Owner, build.Repo, build.PullRequest, build.SHA)
-		if err != nil {
-			return err
-		}
+		ds = gitlabservice.NewGitLabMergeRequestDiff(cli, build.Owner, build.Repo, build.PullRequest, build.SHA)
 	case "gerrit-change-review":
 		b, cli, err := gerritBuildWithClient()
 		if err != nil {
 			return err
 		}
-		gc, err := gerritservice.NewChangeReviewCommenter(cli, b.GerritChangeID, b.GerritRevisionID)
-		if err != nil {
-			return err
-		}
-		cs = gc
-
+		cs = gerritservice.NewChangeReviewCommenter(cli, b.GerritChangeID, b.GerritRevisionID)
 		d, err := gerritservice.NewChangeDiff(cli, b.Branch, b.GerritChangeID)
 		if err != nil {
 			return err
@@ -521,7 +503,14 @@ func diffService(s string, strip int) (reviewdog.DiffService, error) {
 	if len(cmds) < 1 {
 		return nil, errors.New("diff command is empty")
 	}
-	cmd := exec.Command(cmds[0], cmds[1:]...)
+	args := cmds[1:]
+	// [Hack] Add `--relative` for git diff command so that it returns relative
+	// path to current directory. git diff returns path relative to the project
+	// root directory by default.
+	if cmds[0] == "git" && cmds[1] == "diff" {
+		args = append([]string{cmds[1], "--relative"}, cmds[2:]...)
+	}
+	cmd := exec.Command(cmds[0], args...)
 	d := reviewdog.NewDiffCmd(cmd, strip)
 	return d, nil
 }
@@ -670,10 +659,7 @@ func githubService(ctx context.Context, opt *option) (gs *githubservice.PullRequ
 		g.PullRequest = prID
 	}
 
-	gs, err = githubservice.NewGitHubPullRequest(client, g.Owner, g.Repo, g.PullRequest, g.SHA, opt.level, toolName(opt))
-	if err != nil {
-		return nil, false, err
-	}
+	gs = githubservice.NewGitHubPullRequest(client, g.Owner, g.Repo, g.PullRequest, g.SHA, opt.level, toolName(opt))
 	return gs, true, nil
 }
 
@@ -716,10 +702,7 @@ func githubActionLogService(ctx context.Context, opt *option) (reviewdog.Comment
 			FallBackToGitCLI: true,
 		}
 	}
-	cs, err := githubservice.NewGitHubActionLog(opt.level)
-	if err != nil {
-		return nil, nil, false, err
-	}
+	cs := githubutils.NewGitHubActionLogWriter(opt.level)
 	return cs, ds, g.PullRequest != 0, nil
 }
 

@@ -37,6 +37,8 @@ func (lw *GitHubActionLogWriter) Post(_ context.Context, c *reviewdog.Comment) e
 	return nil
 }
 
+func (*GitHubActionLogWriter) ShouldPrependGitRelDir() bool { return true }
+
 // Flush checks overall error at last.
 func (lw *GitHubActionLogWriter) Flush(_ context.Context) error {
 	if lw.reportNum > 9 {

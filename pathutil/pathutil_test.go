@@ -9,6 +9,7 @@ import (
 
 func TestNormalizePathInResults(t *testing.T) {
 	cwd := "/path/to/cwd"
+	gitRelDir := "cwd"
 	results := []*rdf.Diagnostic{
 		{
 			Location: &rdf.Location{
@@ -35,14 +36,22 @@ func TestNormalizePathInResults(t *testing.T) {
 			},
 		},
 	}
-	NormalizePathInResults(results, cwd)
+	NormalizePathInResults(results, cwd, gitRelDir)
 	for _, result := range results {
-		if strings.HasPrefix(result.GetLocation().GetPath(), cwd) {
-			t.Errorf("path unexpectedly contain prefix: %s", result.GetLocation().GetPath())
+		locPath := result.GetLocation().GetPath()
+		if strings.HasPrefix(locPath, cwd) {
+			t.Errorf("path unexpectedly contain prefix: %s", locPath)
+		}
+		if locPath != "" && !strings.HasPrefix(locPath, gitRelDir) {
+			t.Errorf("path unexpectedly does not contain git rel dir prefix: %s", locPath)
 		}
 		for _, rel := range result.GetRelatedLocations() {
-			if strings.HasPrefix(rel.GetLocation().GetPath(), cwd) {
-				t.Errorf("related locations path unexpectedly contain prefix: %s", rel.GetLocation().GetPath())
+			relPath := rel.GetLocation().GetPath()
+			if strings.HasPrefix(relPath, cwd) {
+				t.Errorf("related locations path unexpectedly contain prefix: %s", relPath)
+			}
+			if relPath != "" && !strings.HasPrefix(relPath, gitRelDir) {
+				t.Errorf("path unexpectedly does not contain git rel dir prefix: %s", relPath)
 			}
 		}
 	}
