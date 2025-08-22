@@ -12,6 +12,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - [#2026](https://github.com/reviewdog/reviewdog/pull/2026) Add reporter for GitHub annotations `github-annotations`. Same as `github-pr-annotations` but not restricted to pull requests.
 - [#2131](https://github.com/reviewdog/reviewdog/pull/2131) Fetch GitHub git based diffs using the base pull request repo to allow fetching from private forks in GitHub Actions.
 - [#2210](https://github.com/reviewdog/reviewdog/pull/2210) Update Gitea PR reporter to detect comments for already reported issues and report suggestions.
+- [#1931](https://github.com/reviewdog/reviewdog/pull/1931) Refactor handling of Git relative path - Centralized path normalization logic and added automatic `--relative` flag to git diff commands for consistent relative path handling.
 
 ### :bug: Fixes
 - [#967](https://github.com/reviewdog/reviewdog/pull/967) Fix parsing long lines in diffs #967
