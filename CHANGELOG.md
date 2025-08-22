@@ -10,6 +10,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### :rocket: Enhancements
 - [#2026](https://github.com/reviewdog/reviewdog/pull/2026) Add reporter for GitHub annotations `github-annotations`. Same as `github-pr-annotations` but not restricted to pull requests.
+- [#2131](https://github.com/reviewdog/reviewdog/pull/2131) Fetch GitHub git based diffs using the base pull request repo to allow fetching from private forks in GitHub Actions.
 
 ### :bug: Fixes
 - [#967](https://github.com/reviewdog/reviewdog/pull/967) Fix parsing long lines in diffs #967

@@ -63,7 +63,11 @@ func (p *PullRequestDiffService) diffUsingGitCommand(ctx context.Context) ([]byt
 
 	if os.Getenv("REVIEWDOG_SKIP_GIT_FETCH") != "true" {
 		for _, sha := range []string{mergeBaseSha, headSha} {
-			bytes, err := exec.Command("git", "fetch", "--depth=1", head.GetRepo().GetHTMLURL(), sha).CombinedOutput()
+			// GitHub stores data in the same fork network together - i.e. you can reference
+			// commits from forks using the base repo (this is how refs/pull/* works).
+			// By fetching using the base repo, we can use GitHub Actions ${GITHUB_TOKEN} to authenticate
+			// and fetch PR content from private forks even though the token is only scoped to the base repo.
+			bytes, err := exec.Command("git", "fetch", "--depth=1", pr.GetBase().GetRepo().GetHTMLURL(), sha).CombinedOutput()
 			if err != nil {
 				return nil, fmt.Errorf("failed to run git fetch: %s\n%w", bytes, err)
 			}
