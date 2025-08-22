@@ -5,14 +5,14 @@ import (
 	"log"
 	"os"
 
-	"github.com/reviewdog/reviewdog/service/github"
+	"github.com/reviewdog/reviewdog/service/serviceutil"
 )
 
 func main() {
 	if len(os.Args) == 1 {
 		log.Fatal("require one argument")
 	}
-	meta, err := github.DecodeMetaComment(os.Args[1])
+	meta, err := serviceutil.DecodeMetaComment(os.Args[1])
 	if err != nil {
 		log.Fatalf("failed to decode meta comment: %v", err)
 	}
