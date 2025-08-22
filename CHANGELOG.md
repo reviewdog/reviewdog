@@ -17,6 +17,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - [#1983](https://github.com/reviewdog/reviewdog/pull/1983) Improve error message for diff command failure by including stderr output
 - [#1975](https://github.com/reviewdog/reviewdog/pull/1975) Fix for suggestions not including an inserted EOF newline
 - [#2026](https://github.com/reviewdog/reviewdog/pull/2026) Never filter diffs when running `github-[pr-][check|annotate]` on non-PRs
+- [#2214](https://github.com/reviewdog/reviewdog/pull/2214) Migrate install.sh from godownloader to [binstaller](https://github.com/binary-install/binstaller) to prevent future failures when .sbom.json files are added to release artifacts. While reviewdog releases don't currently include SBOM files, this preemptively fixes the grep pattern bug that would cause installation failures when they are added in the near future.
 
 ### :rotating_light: Breaking changes
 - ...
