@@ -2,10 +2,8 @@ package gitea
 
 import (
 	"context"
-	"encoding/base64"
 	"errors"
 	"fmt"
-	"hash/fnv"
 	"log"
 	"net/url"
 	"path/filepath"
@@ -13,11 +11,9 @@ import (
 	"sync"
 
 	"code.gitea.io/sdk/gitea"
-	"google.golang.org/protobuf/proto"
 
 	"github.com/reviewdog/reviewdog"
 	"github.com/reviewdog/reviewdog/pathutil"
-	"github.com/reviewdog/reviewdog/proto/metacomment"
 	"github.com/reviewdog/reviewdog/proto/rdf"
 	"github.com/reviewdog/reviewdog/service/commentutil"
 	"github.com/reviewdog/reviewdog/service/serviceutil"
@@ -126,7 +122,7 @@ func (g *PullRequest) postAsReviewComment() error {
 		if !c.Result.InDiffFile {
 			continue
 		}
-		fprint, err := fingerprint(c.Result.Diagnostic)
+		fprint, err := serviceutil.Fingerprint(c.Result.Diagnostic)
 		if err != nil {
 			return err
 		}
@@ -270,7 +266,7 @@ func (g *PullRequest) setPostedComment() error {
 			g.prCommentWithReply[replyID] = true
 		}
 
-		if meta := extractMetaComment(c.Body); meta != nil {
+		if meta := serviceutil.ExtractMetaComment(c.Body); meta != nil {
 			g.postedcs.AddPostedComment(c.Path, int(c.LineNum), meta.GetFingerprint())
 			if meta.SourceName == g.toolName {
 				g.outdatedComments[meta.GetFingerprint()] = c // Remove non-outdated comment later.
@@ -278,36 +274,6 @@ func (g *PullRequest) setPostedComment() error {
 		}
 	}
 	return nil
-}
-
-func extractMetaComment(body string) *metacomment.MetaComment {
-	prefix := "<!-- __reviewdog__:"
-	for _, line := range strings.Split(body, "\n") {
-		if after, found := strings.CutPrefix(line, prefix); found {
-			if metastring, foundSuffix := strings.CutSuffix(after, " -->"); foundSuffix {
-				meta, err := DecodeMetaComment(metastring)
-				if err != nil {
-					log.Printf("failed to decode MetaComment: %v", err)
-					continue
-				}
-				return meta
-			}
-		}
-	}
-	return nil
-}
-
-// DecodeMetaComment decodes a base64 encoded meta comment.
-func DecodeMetaComment(metaBase64 string) (*metacomment.MetaComment, error) {
-	b, err := base64.StdEncoding.DecodeString(metaBase64)
-	if err != nil {
-		return nil, err
-	}
-	meta := &metacomment.MetaComment{}
-	if err := proto.Unmarshal(b, meta); err != nil {
-		return nil, err
-	}
-	return meta, nil
 }
 
 // Diff returns a diff of PullRequest.
@@ -406,7 +372,7 @@ func buildBody(c *reviewdog.Comment, baseURL string, gitRootPath string, fprint 
 		snippetURL := giteaCodeSnippetURL(baseURL, gitRootPath, loc)
 		cbody += "\n<hr>\n\n" + relatedLoc.GetMessage() + "\n" + snippetURL
 	}
-	cbody += fmt.Sprintf("\n<!-- __reviewdog__:%s -->\n", BuildMetaComment(fprint, toolName))
+	cbody += fmt.Sprintf("\n%s\n", serviceutil.BuildMetaComment(fprint, toolName))
 	return cbody
 }
 
@@ -420,17 +386,6 @@ func giteaCodeSnippetURL(baseURL, gitRootPath string, loc *rdf.Location) string 
 		relatedURL += fmt.Sprintf("-L%d", endLine)
 	}
 	return relatedURL
-}
-
-// BuildMetaComment builds a base64 encoded meta comment with the given fingerprint and tool name.
-func BuildMetaComment(fprint string, toolName string) string {
-	b, _ := proto.Marshal(
-		&metacomment.MetaComment{
-			Fingerprint: fprint,
-			SourceName:  toolName,
-		},
-	)
-	return base64.StdEncoding.EncodeToString(b)
 }
 
 func buildSuggestions(c *reviewdog.Comment) string {
@@ -516,22 +471,4 @@ func getSourceLine(sourceLines map[int]string, line int) (string, error) {
 		return "", fmt.Errorf("source line (L=%d) is not available for this suggestion", line)
 	}
 	return lineContent, nil
-}
-
-func fingerprint(d *rdf.Diagnostic) (string, error) {
-	h := fnv.New64a()
-	// Ideally, we should not use proto.Marshal since Proto Serialization Is Not
-	// Canonical.
-	// https://protobuf.dev/programming-guides/serialization-not-canonical/
-	//
-	// However, I left it as-is for now considering the same reviewdog binary
-	// should re-calculate and compare fingerprint for almost all cases.
-	data, err := proto.Marshal(d)
-	if err != nil {
-		return "", err
-	}
-	if _, err := h.Write(data); err != nil {
-		return "", err
-	}
-	return fmt.Sprintf("%x", h.Sum64()), nil
 }
