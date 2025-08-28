@@ -7,7 +7,7 @@ toolchain go1.24.6
 require (
 	cloud.google.com/go/compute/metadata v0.8.0
 	cloud.google.com/go/datastore v1.20.0
-	code.gitea.io/sdk/gitea v0.21.0
+	code.gitea.io/sdk/gitea v0.22.0
 	contrib.go.opencensus.io/exporter/stackdriver v0.13.12
 	github.com/bradleyfalzon/ghinstallation/v2 v2.16.0
 	github.com/google/go-cmp v0.7.0
@@ -39,7 +39,7 @@ require (
 	cloud.google.com/go/auth/oauth2adapt v0.2.4 // indirect
 	cloud.google.com/go/monitoring v1.21.1 // indirect
 	cloud.google.com/go/trace v1.11.1 // indirect
-	github.com/42wim/httpsig v1.2.2 // indirect
+	github.com/42wim/httpsig v1.2.3 // indirect
 	github.com/aws/aws-sdk-go v1.43.31 // indirect
 	github.com/census-instrumentation/opencensus-proto v0.4.1 // indirect
 	github.com/davecgh/go-spew v1.1.1 // indirect
@@ -67,7 +67,7 @@ require (
 	go.opentelemetry.io/otel v1.29.0 // indirect
 	go.opentelemetry.io/otel/metric v1.29.0 // indirect
 	go.opentelemetry.io/otel/trace v1.29.0 // indirect
-	golang.org/x/crypto v0.38.0 // indirect
+	golang.org/x/crypto v0.39.0 // indirect
 	golang.org/x/net v0.40.0 // indirect
 	golang.org/x/sys v0.34.0 // indirect
 	golang.org/x/text v0.27.0 // indirect
