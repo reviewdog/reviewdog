@@ -16,8 +16,9 @@ jobs:
           fetch-depth: 50 # Need git history for testing.
       - uses: actions/setup-go@d35c59abb061a4a6fb18e82ac0862c26744d6ab5 # v5.5.0
         with:
-          # must sync doghouse/appengine/app.yaml
-          go-version: "1.24"
+          # Ideally, it should be synced with doghouse/appengine/app.yaml,
+          # but it's ok to use different one because it's only for testing.
+          go-version: "go.mod"
       - run: go test -v -race  ./...
   deploy:
     permissions:
