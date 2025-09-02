@@ -218,16 +218,6 @@ untar() {
   esac
 }
 
-extract_hash() {
-  TARGET=$1
-  checksums=$2
-  if [ -z "$checksums" ]; then
-    log_err "extract_hash checksum file not specified in arg2"
-    return 1
-  fi
-  BASENAME=${TARGET##*/}
-  grep -E "([[:space:]]|/|\*)${BASENAME}$" "${checksums}" 2>/dev/null | tr '\t' ' ' | cut -d ' ' -f 1
-}
 
 
 hash_verify() {
@@ -242,16 +232,60 @@ hash_verify() {
     log_err "failed to calculate hash: ${TARGET_PATH}"
     return 1
   fi
-  # 1) “hash-only” line?
-  if grep -i -E "^${got}[[:space:]]*$" "$SUMFILE" >/dev/null 2>&1; then
-    return 0
-  fi
-  # 2) Check hash & file name match
-  want=$(extract_hash "${TARGET_PATH}" "${SUMFILE}")
-  if [ "$want" != "$got" ]; then
-    log_err "hash_verify checksum for '$TARGET_PATH' did not verify ${want} vs ${got}"
-    return 1
-  fi
+
+  BASENAME=${TARGET_PATH##*/}
+
+  # Check for line matches in checksum file
+  # Format: "<hash>  <filename>" or "<hash> *<filename>"
+  # Filename may include path prefix (e.g., "deployment/m2/file.tar.gz")
+  while IFS= read -r line || [ -n "$line" ]; do
+    # Normalize tabs to spaces
+    line=$(echo "$line" | tr '\t' ' ')
+
+    # Remove trailing spaces for hash-only line check
+    line_trimmed=$(echo "$line" | sed 's/[[:space:]]*$//')
+
+    # Check for hash-only line (no filename) - early return
+    if [ "$line_trimmed" = "$got" ]; then
+      return 0
+    fi
+
+    # Extract hash and filename parts
+    # First field is the hash, rest is filename (which may contain spaces)
+    line_hash=$(echo "$line" | cut -d' ' -f1)
+
+    # Skip if hash doesn't match
+    if [ "$line_hash" != "$got" ]; then
+      continue
+    fi
+
+    # Hash matches, now check filename
+    # Remove the hash part from the beginning of the line
+    line_rest="${line#"$got"}"
+    # Remove leading spaces
+    while [ "${line_rest#[ ]}" != "$line_rest" ]; do
+      line_rest="${line_rest#[ ]}"
+    done
+
+    # Remove leading asterisk if present (binary mode indicator)
+    if [ "${line_rest#\*}" != "$line_rest" ]; then
+      line_rest="${line_rest#\*}"
+    fi
+
+    # Extract just the filename without any path
+    line_filename="${line_rest##*/}"
+
+    # Check if the filename matches
+    if [ "$line_filename" = "$BASENAME" ]; then
+      return 0
+    fi
+  done < "$SUMFILE"
+
+  log_err "hash_verify checksum for '$TARGET_PATH' did not verify"
+  log_err "  Expected hash: ${got}"
+  log_err "  Checksum file content:"
+  cat "$SUMFILE" >&2
+  return 1
 }
 
 # GitHub HTTP download functions with GITHUB_TOKEN support
@@ -379,6 +413,7 @@ capitalize() {
 }
 
 resolve_asset_filename() {
+
   OS="$(capitalize "${OS}")"
   # --- Apply Rules ---
   ASSET_FILENAME=""
