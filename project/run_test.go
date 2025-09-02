@@ -35,6 +35,8 @@ func (f *fakeCommentService) Post(_ context.Context, c *reviewdog.Comment) error
 	return f.FakePost(c)
 }
 
+func (*fakeCommentService) ShouldPrependGitRelDir() bool { return false }
+
 func TestRun(t *testing.T) {
 	ctx := context.Background()
 

@@ -34,6 +34,8 @@ type FilteredDiagnostic struct {
 
 // FilterCheck filters check results by diff. It doesn't drop check which
 // is not in diff but set FilteredDiagnostic.ShouldReport field false.
+//
+// Paths in results should be normalized before calling this function.
 func FilterCheck(results []*rdf.Diagnostic, diff []*diff.FileDiff, strip int,
 	cwd string, mode Mode) []*FilteredDiagnostic {
 	checks := make([]*FilteredDiagnostic, 0, len(results))

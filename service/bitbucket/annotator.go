@@ -3,7 +3,6 @@ package bitbucket
 import (
 	"context"
 	"fmt"
-	"path/filepath"
 	"sync"
 
 	"github.com/reviewdog/reviewdog"
@@ -40,8 +39,6 @@ type ReportAnnotator struct {
 	// so we can create report per tool
 	comments map[string][]*reviewdog.Comment
 
-	// wd is working directory relative to root of repository.
-	wd         string
 	duplicates map[string]struct{}
 }
 
@@ -78,9 +75,6 @@ func NewReportAnnotator(cli APIClient, owner, repo, sha string, runners []string
 // Post accepts a comment and holds it. Flush method actually posts comments to
 // Bitbucket in batch.
 func (r *ReportAnnotator) Post(_ context.Context, c *reviewdog.Comment) error {
-	c.Result.Diagnostic.GetLocation().Path = filepath.ToSlash(
-		filepath.Join(r.wd, c.Result.Diagnostic.GetLocation().GetPath()))
-
 	r.muAnnotations.Lock()
 	defer r.muAnnotations.Unlock()
 
@@ -95,6 +89,8 @@ func (r *ReportAnnotator) Post(_ context.Context, c *reviewdog.Comment) error {
 
 	return nil
 }
+
+func (*ReportAnnotator) ShouldPrependGitRelDir() bool { return true }
 
 // Flush posts comments which has not been posted yet.
 func (r *ReportAnnotator) Flush(ctx context.Context) error {

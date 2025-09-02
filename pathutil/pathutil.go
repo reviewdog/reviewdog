@@ -45,18 +45,18 @@ func NormalizeDiffPath(diffpath string, strip int) string {
 }
 
 // NormalizePathInResults normalize file path in RDFormat results.
-func NormalizePathInResults(results []*rdf.Diagnostic, cwd string) {
+func NormalizePathInResults(results []*rdf.Diagnostic, cwd, gitRelWorkdir string) {
 	for _, result := range results {
-		normalizeLocation(result.GetLocation(), cwd)
+		normalizeLocation(result.GetLocation(), cwd, gitRelWorkdir)
 		for _, rel := range result.GetRelatedLocations() {
-			normalizeLocation(rel.GetLocation(), cwd)
+			normalizeLocation(rel.GetLocation(), cwd, gitRelWorkdir)
 		}
 	}
 }
 
-func normalizeLocation(loc *rdf.Location, cwd string) {
+func normalizeLocation(loc *rdf.Location, cwd, gitRelWorkdir string) {
 	if loc != nil {
-		loc.Path = NormalizePath(loc.GetPath(), cwd, "")
+		loc.Path = NormalizePath(loc.GetPath(), cwd, gitRelWorkdir)
 	}
 }
 
