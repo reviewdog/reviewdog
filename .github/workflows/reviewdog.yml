@@ -202,12 +202,13 @@ jobs:
       - uses: actions/setup-go@d35c59abb061a4a6fb18e82ac0862c26744d6ab5 # v5.5.0
         with:
           go-version-file: "go.mod"
-      - uses: reviewdog/action-staticcheck@73cfd0daa6fdbba9a858dcb0f62844012fa8317d # v1.27.0
+      - uses: reviewdog/action-staticcheck@50f9bfcf3738839ddc95deac241b904d77469096 # v1.28.0
         with:
           github_token: ${{ secrets.github_token }}
           reporter: github-pr-review
           filter_mode: nofilter
           fail_level: any
+          use_go_install: true
           # workdir: ./_testdata/
 
   misspell:
