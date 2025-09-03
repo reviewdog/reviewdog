@@ -9,6 +9,23 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ### :sparkles: Release Note <!-- optional -->
 
 ### :rocket: Enhancements
+
+### :bug: Fixes
+
+### :rotating_light: Breaking changes
+
+## [v0.21.0] - 2025-09-03
+
+### :sparkles: Release Note
+
+Starting from this release, reviewdog enables [immutable releases](https://github.blog/changelog/2025-08-26-releases-now-support-immutability-in-public-preview/) to ensure the integrity of released assets. Released assets and the release itself are now immutable and can be verified using:
+
+```bash
+gh release verify <tag>
+gh release verify-asset <tag> <asset>
+```
+
+### :rocket: Enhancements
 - [#2026](https://github.com/reviewdog/reviewdog/pull/2026) Add reporter for GitHub annotations `github-annotations`. Same as `github-pr-annotations` but not restricted to pull requests.
 - [#2131](https://github.com/reviewdog/reviewdog/pull/2131) Fetch GitHub git based diffs using the base pull request repo to allow fetching from private forks in GitHub Actions.
 - [#2210](https://github.com/reviewdog/reviewdog/pull/2210) Update Gitea PR reporter to detect comments for already reported issues and report suggestions.
@@ -21,9 +38,6 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - [#1975](https://github.com/reviewdog/reviewdog/pull/1975) Fix for suggestions not including an inserted EOF newline
 - [#2026](https://github.com/reviewdog/reviewdog/pull/2026) Never filter diffs when running `github-[pr-][check|annotate]` on non-PRs
 - [#2214](https://github.com/reviewdog/reviewdog/pull/2214) [#2231](https://github.com/reviewdog/reviewdog/pull/2231) Migrate install.sh from godownloader to [binstaller](https://github.com/binary-install/binstaller) to prevent future failures when .sbom.json files are added to release artifacts. While reviewdog releases don't currently include SBOM files, this preemptively fixes the grep pattern bug that would cause installation failures when they are added in the near future.
-
-### :rotating_light: Breaking changes
-- ...
 
 ## [v0.20.3] - 2024-12-04
 
@@ -297,7 +311,8 @@ $ cd subdir/ && reviewdog -filter-mode=file -fail-on-error -reporter=github-pr-r
 
 See https://github.com/reviewdog/reviewdog/releases for older release note.
 
-[Unreleased]: https://github.com/reviewdog/reviewdog/compare/v0.20.3...HEAD
+[Unreleased]: https://github.com/reviewdog/reviewdog/compare/v0.21.0...HEAD
+[v0.21.0]: https://github.com/reviewdog/reviewdog/compare/v0.20.3...v0.21.0
 [v0.10.0]: https://github.com/reviewdog/reviewdog/compare/v0.9.17...v0.10.0
 [v0.10.1]: https://github.com/reviewdog/reviewdog/compare/v0.10.0...v0.10.1
 [v0.10.2]: https://github.com/reviewdog/reviewdog/compare/v0.10.1...v0.10.2
