@@ -18,7 +18,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### :sparkles: Release Note
 
-This release enables [immutable releases](https://github.blog/changelog/2025-08-26-releases-now-support-immutability-in-public-preview/) to ensure the integrity of released assets. Released assets and the release itself are now immutable and can be verified using:
+Starting from this release, reviewdog enables [immutable releases](https://github.blog/changelog/2025-08-26-releases-now-support-immutability-in-public-preview/) to ensure the integrity of released assets. Released assets and the release itself are now immutable and can be verified using:
 
 ```bash
 gh release verify <tag>
