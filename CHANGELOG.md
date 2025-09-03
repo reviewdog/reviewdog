@@ -39,9 +39,6 @@ gh release verify-asset <tag> <asset>
 - [#2026](https://github.com/reviewdog/reviewdog/pull/2026) Never filter diffs when running `github-[pr-][check|annotate]` on non-PRs
 - [#2214](https://github.com/reviewdog/reviewdog/pull/2214) [#2231](https://github.com/reviewdog/reviewdog/pull/2231) Migrate install.sh from godownloader to [binstaller](https://github.com/binary-install/binstaller) to prevent future failures when .sbom.json files are added to release artifacts. While reviewdog releases don't currently include SBOM files, this preemptively fixes the grep pattern bug that would cause installation failures when they are added in the near future.
 
-### :rotating_light: Breaking changes
-- ...
-
 ## [v0.20.3] - 2024-12-04
 
 ### :bug: Fixes
