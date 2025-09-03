@@ -16,7 +16,14 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [v0.21.0] - 2025-09-03
 
-### :sparkles: Release Note <!-- optional -->
+### :sparkles: Release Note
+
+This release enables [immutable releases](https://github.blog/changelog/2025-08-26-releases-now-support-immutability-in-public-preview/) to ensure the integrity of released assets. Released assets and the release itself are now immutable and can be verified using:
+
+```bash
+gh release verify <tag>
+gh release verify-asset <tag> <asset>
+```
 
 ### :rocket: Enhancements
 - [#2026](https://github.com/reviewdog/reviewdog/pull/2026) Add reporter for GitHub annotations `github-annotations`. Same as `github-pr-annotations` but not restricted to pull requests.
