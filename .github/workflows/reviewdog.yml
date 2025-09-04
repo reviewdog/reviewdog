@@ -288,7 +288,7 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@08c6903cd8c0fde910a37f88322edcfb5dd907a8 # v5.0.0
-      - uses: reviewdog/action-languagetool@ea19c757470ce0dbfcbc34aec090317cef1ff0b5 # v1.22.0
+      - uses: reviewdog/action-languagetool@afd06e9b0f782c9562c92efffb66a49c09b2b4f4 # v1.23.0
         with:
           github_token: ${{ secrets.github_token }}
           reporter: github-check
