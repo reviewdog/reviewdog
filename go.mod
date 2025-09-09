@@ -22,12 +22,12 @@ require (
 	github.com/reviewdog/go-bitbucket v0.0.0-20201024094602-708c3f6a7de0
 	github.com/stretchr/testify v1.11.1
 	github.com/vvakame/sdlog v1.2.0
-	gitlab.com/gitlab-org/api/client-go v0.143.1
+	gitlab.com/gitlab-org/api/client-go v0.143.2
 	go.opencensus.io v0.24.0
 	golang.org/x/build v0.0.0-20250902193327-e6a76329f415
 	golang.org/x/oauth2 v0.31.0
 	golang.org/x/sync v0.17.0
-	google.golang.org/protobuf v1.36.8
+	google.golang.org/protobuf v1.36.9
 	gopkg.in/yaml.v3 v3.0.1
 )
 
