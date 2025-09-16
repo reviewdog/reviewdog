@@ -9,6 +9,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ### :sparkles: Release Note <!-- optional -->
 
 ### :rocket: Enhancements
+- [#2257](https://github.com/reviewdog/reviewdog/pull/2257) Use -trimpath flag for reproducible build
 
 ### :bug: Fixes
 
