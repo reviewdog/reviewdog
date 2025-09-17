@@ -239,12 +239,13 @@ jobs:
         run: |
           go install ./cmd/reviewdog
 
-      - name: Custom rdjson test
+      - name: Custom rdjsonl test
         env:
           REVIEWDOG_GITHUB_API_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         run: |
           cat ./_testdata/custom_rdjson.json | \
-            reviewdog -name="custom-rdjson" -f=rdjson -reporter=github-pr-annotations
+            jq -c -r '.diagnostics[:3].[]' | \
+            reviewdog -name="custom-rdjsonl" -f=rdjsonl -reporter=github-pr-annotations
 
   reviewdog-sarif:
     permissions:
