@@ -8,10 +8,10 @@ runner:
     cmd: go vet
     format: govet
     level: error
-  custom-rdjson:
-    cmd: cat ./_testdata/custom_rdjson.json
-    name: custom-rdjson-by-project-conf
-    format: rdjson
+  custom-rdjsonl:
+    cmd: jq -c -r '.diagnostics[:3].[]' ./_testdata/custom_rdjson.json
+    name: custom-rdjsonl-by-project-conf
+    format: rdjsonl
   test-project-conf:
     cmd: |
       echo '.reviewdog.yml:17: test project conf (errorformat)'

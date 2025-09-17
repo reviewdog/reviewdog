@@ -243,8 +243,7 @@ jobs:
         env:
           REVIEWDOG_GITHUB_API_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         run: |
-          cat ./_testdata/custom_rdjson.json | \
-            jq -c -r '.diagnostics[:3].[]' | \
+          jq -c -r '.diagnostics[:3].[]' ./_testdata/custom_rdjson.json | \
             reviewdog -name="custom-rdjsonl" -f=rdjsonl -reporter=github-pr-annotations
 
   reviewdog-sarif:
