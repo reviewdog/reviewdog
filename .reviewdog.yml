@@ -9,7 +9,7 @@ runner:
     format: govet
     level: error
   custom-rdjson:
-    cmd: cat ./_testdata/custom_rdjson.json
+    cmd: jq -c -r '.diagnostics[:3].[]' ./_testdata/custom_rdjson.json
     name: custom-rdjson-by-project-conf
     format: rdjson
   test-project-conf:
