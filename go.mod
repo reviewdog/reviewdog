@@ -3,7 +3,7 @@ module github.com/reviewdog/reviewdog
 go 1.25.0
 
 require (
-	cloud.google.com/go/compute/metadata v0.8.0
+	cloud.google.com/go/compute/metadata v0.8.1
 	cloud.google.com/go/datastore v1.20.0
 	code.gitea.io/sdk/gitea v0.22.0
 	contrib.go.opencensus.io/exporter/stackdriver v0.13.12
