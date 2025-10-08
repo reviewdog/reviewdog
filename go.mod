@@ -25,7 +25,7 @@ require (
 	gitlab.com/gitlab-org/api/client-go v0.154.0
 	go.opencensus.io v0.24.0
 	golang.org/x/build v0.0.0-20251007194244-0bced2e98e20
-	golang.org/x/oauth2 v0.31.0
+	golang.org/x/oauth2 v0.32.0
 	golang.org/x/sync v0.17.0
 	google.golang.org/protobuf v1.36.10
 	gopkg.in/yaml.v3 v3.0.1
