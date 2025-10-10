@@ -281,7 +281,7 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@08c6903cd8c0fde910a37f88322edcfb5dd907a8 # v5.0.0
-      - uses: reviewdog/action-typos@fe961cdbe416990b23bc1597325891575ef2dd7c # v1.18.0
+      - uses: reviewdog/action-typos@d5eb1bbcd1b3bfde596f6eeb470322727862fe98 # v1.19.0
 
   languagetool:
     name: runner / languagetool
