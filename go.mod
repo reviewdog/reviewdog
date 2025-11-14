@@ -24,7 +24,7 @@ require (
 	github.com/vvakame/sdlog v1.2.0
 	gitlab.com/gitlab-org/api/client-go v0.160.0
 	go.opencensus.io v0.24.0
-	golang.org/x/build v0.0.0-20251113170125-345529002169
+	golang.org/x/build v0.0.0-20251113190923-84cea64f80dd
 	golang.org/x/oauth2 v0.33.0
 	golang.org/x/sync v0.18.0
 	google.golang.org/protobuf v1.36.10
@@ -67,11 +67,11 @@ require (
 	go.opentelemetry.io/otel v1.36.0 // indirect
 	go.opentelemetry.io/otel/metric v1.36.0 // indirect
 	go.opentelemetry.io/otel/trace v1.36.0 // indirect
-	golang.org/x/crypto v0.43.0 // indirect
-	golang.org/x/exp v0.0.0-20251002181428-27f1f14c8bb9 // indirect
-	golang.org/x/net v0.46.0 // indirect
-	golang.org/x/sys v0.37.0 // indirect
-	golang.org/x/text v0.30.0 // indirect
+	golang.org/x/crypto v0.44.0 // indirect
+	golang.org/x/exp v0.0.0-20251023183803-a4bb9ffd2546 // indirect
+	golang.org/x/net v0.47.0 // indirect
+	golang.org/x/sys v0.38.0 // indirect
+	golang.org/x/text v0.31.0 // indirect
 	golang.org/x/time v0.14.0 // indirect
 	google.golang.org/api v0.247.0 // indirect
 	google.golang.org/genproto v0.0.0-20250603155806-513f23925822 // indirect
