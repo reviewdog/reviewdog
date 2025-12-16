@@ -35,7 +35,7 @@ jobs:
           if_false: ${{ steps.bumpr.outputs.next_version }}
 
       # Setup Go for building reviewdog binary.
-      - uses: actions/setup-go@40f1582b2485089dde7abd97c1529aa768e1baff # v5.6.0
+      - uses: actions/setup-go@4dc6199c7b1a012772edbd06daecab0f50c9053c # v6.1.0
         if: "steps.tag.outputs.value != ''"
         with:
           go-version-file: "go.mod"
