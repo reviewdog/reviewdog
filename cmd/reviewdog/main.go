@@ -892,7 +892,7 @@ func fetchMergeRequestIDFromCommit(cli *gitlab.Client, projectID, sha string) (i
 	}
 	for _, mr := range mrs {
 		if mr.SHA == sha {
-			return mr.IID, nil
+			return int(mr.IID), nil
 		}
 	}
 	return 0, nil
