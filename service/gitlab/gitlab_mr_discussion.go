@@ -72,7 +72,11 @@ func (g *MergeRequestDiscussionCommenter) Flush(ctx context.Context) error {
 
 func (g *MergeRequestDiscussionCommenter) createPostedComments() (commentutil.PostedComments, error) {
 	postedcs := make(commentutil.PostedComments)
-	discussions, err := listAllMergeRequestDiscussion(g.cli, g.projects, g.pr, &gitlab.ListMergeRequestDiscussionsOptions{PerPage: 100})
+	discussions, err := listAllMergeRequestDiscussion(g.cli, g.projects, g.pr, &gitlab.ListMergeRequestDiscussionsOptions{
+		ListOptions: gitlab.ListOptions{
+			PerPage: 100,
+		},
+	})
 	if err != nil {
 		return nil, fmt.Errorf("failed to list all merge request discussions: %w", err)
 	}
@@ -82,14 +86,14 @@ func (g *MergeRequestDiscussionCommenter) createPostedComments() (commentutil.Po
 			if pos == nil || pos.NewPath == "" || pos.NewLine == 0 || note.Body == "" {
 				continue
 			}
-			postedcs.AddPostedComment(pos.NewPath, pos.NewLine, note.Body)
+			postedcs.AddPostedComment(pos.NewPath, int(pos.NewLine), note.Body)
 		}
 	}
 	return postedcs, nil
 }
 
 func (g *MergeRequestDiscussionCommenter) postCommentsForEach(ctx context.Context, postedcs commentutil.PostedComments) error {
-	mr, _, err := g.cli.MergeRequests.GetMergeRequest(g.projects, g.pr, nil, gitlab.WithContext(ctx))
+	mr, _, err := g.cli.MergeRequests.GetMergeRequest(g.projects, int64(g.pr), nil, gitlab.WithContext(ctx))
 	if err != nil {
 		return fmt.Errorf("failed to get merge request: %w", err)
 	}
@@ -119,17 +123,17 @@ func (g *MergeRequestDiscussionCommenter) postCommentsForEach(ctx context.Contex
 				BaseSHA:      gitlab.Ptr(targetBranch.Commit.ID),
 				PositionType: gitlab.Ptr("text"),
 				NewPath:      gitlab.Ptr(loc.GetPath()),
-				NewLine:      gitlab.Ptr(lnum),
+				NewLine:      gitlab.Ptr(int64(lnum)),
 			}
 			if c.Result.OldPath != "" && c.Result.OldLine != 0 {
 				pos.OldPath = gitlab.Ptr(c.Result.OldPath)
-				pos.OldLine = gitlab.Ptr(c.Result.OldLine)
+				pos.OldLine = gitlab.Ptr(int64(c.Result.OldLine))
 			}
 			discussion := &gitlab.CreateMergeRequestDiscussionOptions{
 				Body:     gitlab.Ptr(body),
 				Position: pos,
 			}
-			_, _, err := g.cli.Discussions.CreateMergeRequestDiscussion(g.projects, g.pr, discussion)
+			_, _, err := g.cli.Discussions.CreateMergeRequestDiscussion(g.projects, int64(g.pr), discussion)
 			if err != nil {
 				return fmt.Errorf("failed to create merge request discussion: %w", err)
 			}
@@ -140,7 +144,7 @@ func (g *MergeRequestDiscussionCommenter) postCommentsForEach(ctx context.Contex
 }
 
 func listAllMergeRequestDiscussion(cli *gitlab.Client, projectID string, mergeRequest int, opts *gitlab.ListMergeRequestDiscussionsOptions) ([]*gitlab.Discussion, error) {
-	discussions, resp, err := cli.Discussions.ListMergeRequestDiscussions(projectID, mergeRequest, opts)
+	discussions, resp, err := cli.Discussions.ListMergeRequestDiscussions(projectID, int64(mergeRequest), opts)
 	if err != nil {
 		return nil, err
 	}
@@ -148,8 +152,10 @@ func listAllMergeRequestDiscussion(cli *gitlab.Client, projectID string, mergeRe
 		return discussions, nil
 	}
 	newOpts := &gitlab.ListMergeRequestDiscussionsOptions{
-		Page:    resp.NextPage,
-		PerPage: opts.PerPage,
+		ListOptions: gitlab.ListOptions{
+			Page:    resp.NextPage,
+			PerPage: opts.PerPage,
+		},
 	}
 	restDiscussions, err := listAllMergeRequestDiscussion(cli, projectID, mergeRequest, newOpts)
 	if err != nil {

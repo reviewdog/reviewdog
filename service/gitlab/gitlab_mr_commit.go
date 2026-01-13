@@ -87,7 +87,7 @@ func (g *MergeRequestCommitCommenter) postCommentsForEach(ctx context.Context) e
 			prcomment := &gitlab.PostCommitCommentOptions{
 				Note:     gitlab.Ptr(body),
 				Path:     gitlab.Ptr(loc.GetPath()),
-				Line:     gitlab.Ptr(lnum),
+				Line:     gitlab.Ptr(int64(lnum)),
 				LineType: gitlab.Ptr("new"),
 			}
 			_, _, err = g.cli.Commits.PostCommitComment(g.projects, commitID, prcomment, gitlab.WithContext(ctx))
@@ -119,14 +119,14 @@ func (g *MergeRequestCommitCommenter) setPostedComment(ctx context.Context) erro
 			// "body".
 			continue
 		}
-		g.postedcs.AddPostedComment(c.Path, c.Line, c.Note)
+		g.postedcs.AddPostedComment(c.Path, int(c.Line), c.Note)
 	}
 	return nil
 }
 
 func (g *MergeRequestCommitCommenter) comment(ctx context.Context) ([]*gitlab.CommitComment, error) {
 	commits, _, err := g.cli.MergeRequests.GetMergeRequestCommits(
-		g.projects, g.pr, nil, gitlab.WithContext(ctx))
+		g.projects, int64(g.pr), nil, gitlab.WithContext(ctx))
 	if err != nil {
 		return nil, err
 	}

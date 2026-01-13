@@ -39,7 +39,7 @@ func NewGitLabMergeRequestDiff(cli *gitlab.Client, owner, repo string, pr int, s
 // `git diff --no-renames`, we want diff which is equivalent to
 // `git diff --find-renames`.
 func (g *MergeRequestDiff) Diff(ctx context.Context) ([]byte, error) {
-	mr, _, err := g.cli.MergeRequests.GetMergeRequest(g.projects, g.pr, nil)
+	mr, _, err := g.cli.MergeRequests.GetMergeRequest(g.projects, int64(g.pr), nil)
 	if err != nil {
 		return nil, err
 	}
