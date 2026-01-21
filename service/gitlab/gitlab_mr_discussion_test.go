@@ -175,7 +175,7 @@ func TestGitLabMergeRequestDiscussionCommenter_Post_Flush_review_api(t *testing.
 								Body: commentutil.MarkdownComment(alreadyCommented1),
 								Position: &gitlab.NotePosition{
 									NewPath: alreadyCommented1.Result.Diagnostic.GetLocation().GetPath(),
-									NewLine: int(alreadyCommented1.Result.Diagnostic.GetLocation().GetRange().GetStart().GetLine()),
+									NewLine: int64(alreadyCommented1.Result.Diagnostic.GetLocation().GetRange().GetStart().GetLine()),
 								},
 							},
 							{
@@ -200,7 +200,7 @@ func TestGitLabMergeRequestDiscussionCommenter_Post_Flush_review_api(t *testing.
 								Body: commentutil.MarkdownComment(alreadyCommented2),
 								Position: &gitlab.NotePosition{
 									NewPath: alreadyCommented2.Result.Diagnostic.GetLocation().GetPath(),
-									NewLine: int(alreadyCommented2.Result.Diagnostic.GetLocation().GetRange().GetStart().GetLine()),
+									NewLine: int64(alreadyCommented2.Result.Diagnostic.GetLocation().GetRange().GetStart().GetLine()),
 								},
 							},
 						},
@@ -227,7 +227,7 @@ func TestGitLabMergeRequestDiscussionCommenter_Post_Flush_review_api(t *testing.
 						HeadSHA:      gitlab.Ptr("sha"),
 						PositionType: gitlab.Ptr("text"),
 						NewPath:      gitlab.Ptr("file.go"),
-						NewLine:      gitlab.Ptr(14),
+						NewLine:      gitlab.Ptr(int64(14)),
 					},
 				}
 				if diff := cmp.Diff(got, want); diff != "" {
@@ -242,7 +242,7 @@ func TestGitLabMergeRequestDiscussionCommenter_Post_Flush_review_api(t *testing.
 						HeadSHA:      gitlab.Ptr("sha"),
 						PositionType: gitlab.Ptr("text"),
 						NewPath:      gitlab.Ptr("file2.go"),
-						NewLine:      gitlab.Ptr(15),
+						NewLine:      gitlab.Ptr(int64(15)),
 					},
 				}
 				if diff := cmp.Diff(got, want); diff != "" {
@@ -257,9 +257,9 @@ func TestGitLabMergeRequestDiscussionCommenter_Post_Flush_review_api(t *testing.
 						HeadSHA:      gitlab.Ptr("sha"),
 						PositionType: gitlab.Ptr("text"),
 						NewPath:      gitlab.Ptr("new_file.go"),
-						NewLine:      gitlab.Ptr(14),
+						NewLine:      gitlab.Ptr(int64(14)),
 						OldPath:      gitlab.Ptr("old_file.go"),
-						OldLine:      gitlab.Ptr(7),
+						OldLine:      gitlab.Ptr(int64(7)),
 					},
 				}
 				if diff := cmp.Diff(got, want); diff != "" {
@@ -277,7 +277,7 @@ func TestGitLabMergeRequestDiscussionCommenter_Post_Flush_review_api(t *testing.
 						HeadSHA:      gitlab.Ptr("sha"),
 						PositionType: gitlab.Ptr("text"),
 						NewPath:      gitlab.Ptr("file3.go"),
-						NewLine:      gitlab.Ptr(14),
+						NewLine:      gitlab.Ptr(int64(14)),
 					},
 				}
 				if diff := cmp.Diff(got, want); diff != "" {
