@@ -320,8 +320,8 @@ go.opentelemetry.io/otel/sdk/metric v1.36.0/go.mod h1:qTNOhFDfKRwX0yXOqJYegL5WRa
 go.opentelemetry.io/otel/trace v1.36.0 h1:ahxWNuqZjpdiFAyrIoQ4GIiAIhxAunQR6MUoKrsNd4w=
 go.opentelemetry.io/otel/trace v1.36.0/go.mod h1:gQ+OnDZzrybY4k4seLzPAWNwVBBVlF2szhehOBB/tGA=
 go.opentelemetry.io/proto/otlp v0.7.0/go.mod h1:PqfVotwruBrMGOCsRd/89rSnXhoiJIqeYNgFYFoEGnI=
-golang.org/x/build v0.0.0-20260122154649-7f4da5c273cf h1:BG9K1THZgU8EDDA4IDNfveCA/wyg72OrKQdoQhY6JBw=
-golang.org/x/build v0.0.0-20260122154649-7f4da5c273cf/go.mod h1:3QmSbNil8ZWqC94m80Glej1v8b92gYzPIQPTtSa0c+4=
+golang.org/x/build v0.0.0-20260122183339-3ba88df37c64 h1:BNhBATNmH/VtzGolB+ksQPPvn6ZyffiR8TmKenqNo+A=
+golang.org/x/build v0.0.0-20260122183339-3ba88df37c64/go.mod h1:3QmSbNil8ZWqC94m80Glej1v8b92gYzPIQPTtSa0c+4=
 golang.org/x/crypto v0.0.0-20190308221718-c2843e01d9a2/go.mod h1:djNgcEr1/C05ACkg1iLfiJU5Ep61QUkGW8qpdssI0+w=
 golang.org/x/crypto v0.0.0-20190510104115-cbcb75029529/go.mod h1:yigFU9vqHzYiE8UmvKecakEJjdnWj3jj499lnFckfCI=
 golang.org/x/crypto v0.0.0-20190605123033-f99c8df09eb5/go.mod h1:yigFU9vqHzYiE8UmvKecakEJjdnWj3jj499lnFckfCI=
