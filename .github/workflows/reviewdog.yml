@@ -274,7 +274,7 @@ jobs:
         run: |
           golint ./... | reviewdog -f=golint -reporter=sarif |
             tee ../results/golint.sarif
-      - uses: github/codeql-action/upload-sarif@38e701f46e33fb233075bf4238cb1e5d68e429e4 # v3.31.11
+      - uses: github/codeql-action/upload-sarif@439137e1b50c27ba9e2f9befc93e43091b449c34 # v3.32.0
 
   typos:
     name: runner / typos
