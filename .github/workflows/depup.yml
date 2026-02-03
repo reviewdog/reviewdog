@@ -21,7 +21,7 @@ jobs:
         if: ${{ steps.depup.latest != steps.depup.current }}
         working-directory: proto/
         run: ./update.sh
-      - uses: actions/setup-go@40f1582b2485089dde7abd97c1529aa768e1baff # v5.6.0
+      - uses: actions/setup-go@7a3fe6cf4cb3a834922a1244abfce67bcef6a0c5 # v6.2.0
         if: ${{ steps.depup.latest != steps.depup.current }}
         with:
           go-version-file: "go.mod"
@@ -55,7 +55,7 @@ jobs:
         if: ${{ steps.depup.latest != steps.depup.current }}
         working-directory: proto/
         run: ./update.sh
-      - uses: actions/setup-go@40f1582b2485089dde7abd97c1529aa768e1baff # v5.6.0
+      - uses: actions/setup-go@7a3fe6cf4cb3a834922a1244abfce67bcef6a0c5 # v6.2.0
         if: ${{ steps.depup.latest != steps.depup.current }}
         with:
           go-version-file: "go.mod"
