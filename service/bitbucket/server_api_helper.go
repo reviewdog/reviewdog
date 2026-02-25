@@ -2,6 +2,7 @@ package bitbucket
 
 import (
 	"fmt"
+
 	insights "github.com/reva2/bitbucket-insights-api"
 	"github.com/reviewdog/reviewdog"
 )
