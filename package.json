@@ -2,7 +2,7 @@
   "name": "reviewdog",
   "devDependencies": {
     "@microsoft/eslint-formatter-sarif": "^3.0.0",
-    "textlint": "^14.0.0",
+    "textlint": "^15.0.0",
     "textlint-rule-common-misspellings": "^1.0.1",
     "textlint-rule-no-dead-link": "^6.0.0",
     "textlint-rule-write-good": "^2.0.0"
