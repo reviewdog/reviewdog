@@ -1,6 +1,7 @@
 package project
 
 import (
+	"bufio"
 	"bytes"
 	"context"
 	"errors"
@@ -10,6 +11,7 @@ import (
 	"os"
 	"runtime"
 	"strings"
+	"sync"
 
 	"golang.org/x/sync/errgroup"
 
@@ -59,7 +61,7 @@ func RunAndParse(ctx context.Context, conf *Config, runners map[string]bool, def
 		}
 		g.Go(func() error {
 			defer func() { <-semaphore }()
-			diagnostics, err := p.Parse(io.MultiReader(stdout, stderr))
+			diagnostics, err := p.Parse(concurrentMultiReader(stdout, stderr))
 			if err != nil {
 				return err
 			}
@@ -166,4 +168,56 @@ func getRunnerName(key string, runner *Runner) string {
 		return runner.Name
 	}
 	return key
+}
+
+type lockedWriter struct {
+	w  *bufio.Writer
+	mu *sync.Mutex
+}
+
+func (lw *lockedWriter) Write(p []byte) (int, error) {
+	lw.mu.Lock()
+	defer lw.mu.Unlock()
+	return lw.w.Write(p)
+}
+
+// We need concurrent Reader to prevent deadlock.
+// If we read stdout and stderr sequentially,
+// 1. huge stderr can block the process
+// 2. stdout doesn't close until the process finishes
+// 3. we can't read stderr until stdout is closed <- deadlock
+func concurrentMultiReader(readers ...io.Reader) io.Reader {
+	pr, pw := io.Pipe()
+
+	var mu sync.Mutex
+	w := &lockedWriter{w: bufio.NewWriter(pw), mu: &mu}
+
+	var g errgroup.Group
+	for _, r := range readers {
+		g.Go(func() error {
+			s := bufio.NewScanner(r)
+			for s.Scan() {
+				line := s.Bytes()
+				if _, err := w.Write(append(line, '\n')); err != nil {
+					return err
+				}
+			}
+			return s.Err()
+		})
+	}
+
+	go func() {
+		err := g.Wait()
+		if err != nil {
+			_ = pw.CloseWithError(err)
+			return
+		}
+		if err :=w.w.Flush(); err != nil {
+			_ = pw.CloseWithError(err)
+			return
+		}
+		_ = pw.Close()
+	}()
+
+	return pr
 }
