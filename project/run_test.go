@@ -296,9 +296,8 @@ func TestRun(t *testing.T) {
 		}
 	})
 
-
 	// #1934
-	t.Run("big stderr",  func(t *testing.T) {
+	t.Run("big stderr", func(t *testing.T) {
 		if runtime.GOOS == "windows" {
 			t.Skip("requires POSIX shell utilities")
 		}
