@@ -15,7 +15,7 @@ import (
 	"github.com/reviewdog/reviewdog/filter"
 	"github.com/reviewdog/reviewdog/proto/rdf"
 	"github.com/reviewdog/reviewdog/service/commentutil"
-	gitlab "gitlab.com/gitlab-org/api/client-go"
+	gitlab "gitlab.com/gitlab-org/api/client-go/v2"
 )
 
 func TestGitLabMergeRequestDiscussionCommenter_Post_Flush_review_api(t *testing.T) {
