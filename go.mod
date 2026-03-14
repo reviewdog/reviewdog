@@ -23,6 +23,7 @@ require (
 	github.com/stretchr/testify v1.11.1
 	github.com/vvakame/sdlog v1.2.0
 	gitlab.com/gitlab-org/api/client-go v1.46.0
+	gitlab.com/gitlab-org/api/client-go/v2 v2.5.0
 	go.opencensus.io v0.24.0
 	golang.org/x/build v0.0.0-20260312215754-167df5a42d66
 	golang.org/x/oauth2 v0.36.0
