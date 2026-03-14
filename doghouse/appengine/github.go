@@ -327,7 +327,7 @@ func (g *GitHubHandler) handleRepo(ctx context.Context, ghcli *github.Client, w 
 		return
 	}
 
-	if !repo.GetPermissions()["push"] {
+	if !*repo.GetPermissions().Push {
 		w.WriteHeader(http.StatusUnauthorized)
 		fmt.Fprintf(w, "You don't have write permission for %s.", repo.GetHTMLURL())
 		return
