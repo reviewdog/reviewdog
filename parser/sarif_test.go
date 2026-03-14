@@ -6,8 +6,9 @@ import (
 	"strings"
 	"testing"
 
+	"os"
+
 	"github.com/google/go-cmp/cmp"
-	"github.com/reviewdog/reviewdog/service/serviceutil"
 	"google.golang.org/protobuf/encoding/protojson"
 )
 
@@ -43,11 +44,11 @@ func TestExampleSarifParser(t *testing.T) {
 }
 
 func basedir() string {
-	root, err := serviceutil.GetGitRoot()
+	wd, err := os.Getwd()
 	if err != nil {
 		panic(err)
 	}
-	return root
+	return wd
 }
 
 var fixtures = [][]string{{
