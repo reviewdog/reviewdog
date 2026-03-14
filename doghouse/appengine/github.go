@@ -12,7 +12,7 @@ import (
 	"net/url"
 	"strings"
 
-	"github.com/google/go-github/v74/github"
+	"github.com/google/go-github/v84/github"
 	"github.com/justinas/nosurf"
 	"github.com/vvakame/sdlog/aelog"
 	"golang.org/x/oauth2"
@@ -327,7 +327,7 @@ func (g *GitHubHandler) handleRepo(ctx context.Context, ghcli *github.Client, w 
 		return
 	}
 
-	if !repo.GetPermissions()["push"] {
+	if !*repo.GetPermissions().Push {
 		w.WriteHeader(http.StatusUnauthorized)
 		fmt.Fprintf(w, "You don't have write permission for %s.", repo.GetHTMLURL())
 		return
