@@ -6,7 +6,7 @@ import (
 	"net/http/httptest"
 	"testing"
 
-	gitlab "gitlab.com/gitlab-org/api/client-go"
+	gitlab "gitlab.com/gitlab-org/api/client-go/v2"
 )
 
 func TestGitLabMergeRequestDiff_Diff(t *testing.T) {
