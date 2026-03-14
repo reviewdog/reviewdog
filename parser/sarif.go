@@ -9,7 +9,6 @@ import (
 
 	"github.com/haya14busa/go-sarif/sarif"
 	"github.com/reviewdog/reviewdog/proto/rdf"
-	"github.com/reviewdog/reviewdog/service/serviceutil"
 )
 
 var _ Parser = &SarifParser{}
@@ -31,9 +30,6 @@ func (p *SarifParser) Parse(r io.Reader) ([]*rdf.Diagnostic, error) {
 	basedir, err := os.Getwd()
 	if err != nil {
 		return nil, err
-	}
-	if root, err := serviceutil.GetGitRoot(); err == nil {
-		basedir = root
 	}
 	for _, run := range slf.Runs {
 		tool := run.Tool
