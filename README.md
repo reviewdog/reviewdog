@@ -1,6 +1,10 @@
 <div align="center">
   <a href="https://github.com/reviewdog/reviewdog">
-    <img alt="reviewdog" src="https://raw.githubusercontent.com/haya14busa/i/d598ed7dc49fefb0018e422e4c43e5ab8f207a6b/reviewdog/reviewdog.logo.png">
+    <picture>
+      <source media="(prefers-color-scheme: dark)" srcset="./assets/reviewdog.logo.dark.png">
+      <source media="(prefers-color-scheme: light)" srcset="./assets/reviewdog.logo.png">
+      <img alt="reviewdog" src="./assets/reviewdog.logo.png">
+    </picture>
   </a>
 </div>
 
