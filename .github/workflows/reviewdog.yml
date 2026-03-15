@@ -182,7 +182,7 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6.0.2
-      - uses: reviewdog/action-golangci-lint@4c4340f3ef9498ffe9a0dd3e589bc00e12e2d77c # v2.9.0
+      - uses: reviewdog/action-golangci-lint@c76cceaaab89abe74e649d2e34c6c9adc26662d2 # v2.10.0
         with:
           github_token: ${{ secrets.github_token }}
           golangci_lint_flags: "--timeout 2m"
