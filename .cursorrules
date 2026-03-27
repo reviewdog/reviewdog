@@ -1,0 +1,118 @@
+# Cursor Rules for reviewdog
+
+## Project Context
+
+reviewdog is a Go CLI tool that posts automated code review comments from linter output. It reads diagnostic output from stdin, parses it into a universal format (Reviewdog Diagnostic Format), filters results by diff, and reports them as inline review comments on GitHub, GitLab, Bitbucket, Gerrit, or Gitea.
+
+## Language and Build
+
+- Go (version specified in go.mod, currently 1.26)
+- Build: `go install ./cmd/reviewdog`
+- Test: `go test -v -race ./...`
+- No Makefile -- use standard Go tooling
+- CLI uses standard library `flag` package, not cobra or urfave/cli
+
+## Architecture
+
+The core is a four-stage pipeline: Parse -> Diff -> Filter -> Report.
+
+Three interfaces define the plugin points:
+
+1. `CommentService` (reviewdog.go) -- platform reporters implement this to post comments
+2. `DiffService` (reviewdog.go) -- provides diff data from git commands or platform APIs
+3. `Parser` (parser/parser.go) -- format parsers convert linter output to `[]*rdf.Diagnostic`
+
+All diagnostic data flows through protobuf-generated `rdf.Diagnostic` structs (proto/rdf/reviewdog.proto).
+
+## Package Map
+
+```
+cmd/reviewdog/     CLI entry point, flag registration, reporter wiring
+parser/            Format parsers: errorformat, checkstyle, rdjson, rdjsonl, sarif, diff
+filter/            Diff-based filtering: added, diff_context, file, nofilter modes
+diff/              Unified diff parser -> []FileDiff
+proto/rdf/         Reviewdog Diagnostic Format protobuf + JSON schemas
+proto/metacomment/ Comment deduplication metadata
+service/github/    GitHub: PR review comments, Check Runs, Actions log annotations
+service/gitlab/    GitLab: MR discussions, commit comments
+service/bitbucket/ Bitbucket: Code Insights reports
+service/gerrit/    Gerrit: change review comments
+service/gitea/     Gitea: PR review comments
+service/commentutil/ Shared markdown formatting, code fence helpers
+service/serviceutil/ Fingerprinting, metacomment encoding, git root detection
+doghouse/          Server component proxying GitHub Checks API (App Engine)
+cienv/             CI environment auto-detection
+project/           .reviewdog.yml config and multi-runner orchestration
+pathutil/          Path normalization (relative paths, git workdir offsets)
+_testdata/         Test fixtures
+```
+
+## Code Style Rules
+
+- Follow standard Go conventions. Run `gofmt`.
+- Wrap errors with context: `fmt.Errorf("failed to post comment: %w", err)`
+- No `panic()` for recoverable errors.
+- Interface naming: use role names (`CommentService`, `Parser`), not `ICommentService`.
+- Package names: single lowercase word.
+- Verify interface compliance in source files: `var _ CommentService = (*PullRequest)(nil)`
+
+## Testing Rules
+
+- Test files live alongside source: `foo.go` -> `foo_test.go`
+- Use `github.com/google/go-cmp/cmp` with `protocmp.Transform()` for protobuf struct comparison
+- Use `github.com/stretchr/testify` for assertions and mocking
+- Prefer inline test data (diff strings, lint output) over external fixture files
+- External fixtures go in `_testdata/`
+- All code must be race-safe: CI runs with `-race` flag
+- Write Example tests for user-facing behavior documentation
+
+## Concurrency Patterns
+
+- `sync.Map` wraps `ResultMap` and `FilteredResultMap` for concurrent linter results
+- `errgroup.Group` for parallel linter execution and parallel API requests
+- `sync.Mutex` protects comment batching in service implementations
+- Buffered channels as semaphores to bound parallelism (see `project/run.go`)
+
+## Common Tasks
+
+### Adding a new input format parser
+1. Create `parser/yourformat.go` implementing `Parser` interface
+2. Add case to switch in `parser.New()` (parser/parser.go)
+3. Write `parser/yourformat_test.go`
+
+### Adding a new platform reporter
+1. Create `service/yourplatform/` package
+2. Implement `CommentService` (and `BulkCommentService` if batching)
+3. Implement `DiffService` for platform-specific PR/MR diff fetching
+4. Wire into CLI in `cmd/reviewdog/main.go`
+5. Add to `reporterDoc` constant documentation
+6. Add CI env var detection in `cienv/` if needed
+
+### Adding a new CI environment
+1. Add env var detection to `cienv/cienv.go`
+2. Add specific file if complex (like `cienv/github_actions.go`)
+3. Test in `cienv/cienv_test.go`
+
+## Important Details
+
+- Path normalization is critical: always use `pathutil.NormalizePath()`. Getting this wrong causes missed or misplaced review comments.
+- `ShouldPrependGitRelDir()` must return true for reporters that need full repo-relative paths (e.g. GitHub API).
+- GitHub review comments cap at 30 per request to avoid rate limiting (403 abuse detection).
+- GitHub Check annotations cap at 50 per API call.
+- Comment deduplication relies on `serviceutil.Fingerprint()` + `serviceutil.BuildMetaComment()`. New reporters should use these.
+- Secret environment variables are stripped from runner subprocesses in project mode for security.
+- When GitHub token lacks write permission (fork PRs), the GitHub service falls back to Actions workflow log annotations.
+
+## Protobuf
+
+- RDF schema: `proto/rdf/reviewdog.proto`
+- MetaComment schema: `proto/metacomment/metacomment.proto`
+- Regenerate Go code: `proto/update.sh`
+- JSON schemas derived from proto: `proto/rdf/jsonschema/`
+
+## Release Process
+
+- PR labels (`bump:patch`, `bump:minor`, `bump:major`) trigger version bumps
+- `haya14busa/action-bumpr` handles tagging on merge
+- GoReleaser creates cross-platform binaries
+- Update `CHANGELOG.md` before release PRs
