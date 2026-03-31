@@ -1,0 +1,249 @@
+# AI-Ready Configuration for reviewdog/reviewdog
+# This file provides structured metadata for AI coding assistants
+# to understand this project's architecture, conventions, and patterns.
+
+project:
+  name: reviewdog
+  description: >
+    Automated code review tool that integrates with any linter and posts
+    review comments to code hosting services (GitHub, GitLab, Bitbucket,
+    Gerrit, Gitea). It reads diagnostic output from stdin, parses it into
+    a universal format (Reviewdog Diagnostic Format / RDF), filters results
+    by diff, and reports them as inline review comments.
+  language: Go
+  go_version_source: go.mod
+  license: MIT
+  repository: https://github.com/reviewdog/reviewdog
+
+architecture:
+  overview: >
+    reviewdog is a pipeline tool: linter output -> parser -> diff filter -> reporter.
+    The CLI reads linter output from stdin (or runs linters via project config),
+    parses it into rdf.Diagnostic structs, fetches the relevant diff, filters
+    diagnostics to only those in changed lines, and posts them as review comments
+    via platform-specific CommentService implementations.
+
+  core_pipeline:
+    - step: Parse
+      package: parser
+      description: >
+        Converts raw linter output into []*rdf.Diagnostic. Supports multiple
+        input formats: errorformat (vim-style format strings), checkstyle XML,
+        rdjson, rdjsonl, sarif, and unified diff.
+    - step: Diff
+      package: diff
+      description: >
+        Parses unified diff format into []FileDiff structs. Used to determine
+        which lines were added/modified.
+    - step: Filter
+      package: filter
+      description: >
+        Filters diagnostics by diff context. Four modes: "added" (only new lines),
+        "diff_context" (changed lines +/- context), "file" (any changed file),
+        "nofilter" (all results). Produces FilteredDiagnostic with ShouldReport,
+        InDiffFile, InDiffContext fields.
+    - step: Report
+      packages:
+        - service/github
+        - service/gitlab
+        - service/bitbucket
+        - service/gerrit
+        - service/gitea
+      description: >
+        Posts filtered diagnostics as review comments. Each platform has its own
+        CommentService implementation. GitHub has three variants: PullRequest
+        (review comments), Check (Check Runs API), and GitHub Actions log
+        annotations as fallback.
+
+  key_interfaces:
+    - name: CommentService
+      file: reviewdog.go
+      methods: [Post, ShouldPrependGitRelDir]
+      description: >
+        The central interface for posting review comments. All platform reporters
+        implement this. BulkCommentService extends it with Flush() for batched
+        posting. FilteredCommentService adds PostFiltered() for filtered-out results.
+
+    - name: DiffService
+      file: reviewdog.go
+      methods: [Diff, Strip]
+      description: >
+        Provides diff data. Implementations include DiffCmd (runs a shell command
+        like "git diff"), DiffString (in-memory), and platform-specific PR diff
+        fetchers (e.g. GitHub PR diff via API).
+
+    - name: Parser
+      file: parser/parser.go
+      methods: [Parse]
+      description: >
+        Parses linter output from io.Reader into []*rdf.Diagnostic. Factory
+        function parser.New() routes by format name or errorformat strings.
+
+  protocol:
+    name: Reviewdog Diagnostic Format (RDF)
+    proto_file: proto/rdf/reviewdog.proto
+    wire_formats:
+      - rdjsonl (JSON Lines of Diagnostic messages)
+      - rdjson (JSON of DiagnosticResult message)
+    key_messages:
+      - Diagnostic (message, location, severity, source, code, suggestions)
+      - Location (path, range)
+      - Range (start Position, end Position - end is exclusive)
+      - Suggestion (range, replacement text)
+      - Severity (UNKNOWN_SEVERITY, ERROR, WARNING, INFO)
+    json_schema: proto/rdf/jsonschema/
+
+  metacomment_protocol:
+    proto_file: proto/metacomment/metacomment.proto
+    description: >
+      Base64-encoded metadata embedded in review comments to enable deduplication.
+      Contains a fingerprint (hash of diagnostic content) and source_name (tool name).
+      This allows reviewdog to skip already-posted comments and clean up outdated ones.
+
+  doghouse:
+    description: >
+      The "doghouse" is the reviewdog server component deployed on App Engine.
+      It acts as a proxy for the GitHub Checks API using GitHub App installation
+      tokens. The CLI can either talk directly to GitHub (with a personal token
+      or GITHUB_TOKEN) or route through doghouse (with REVIEWDOG_TOKEN).
+    server: doghouse/server/
+    client: doghouse/client/
+    appengine: doghouse/appengine/
+
+  project_config:
+    file: .reviewdog.yml
+    package: project
+    description: >
+      YAML config that defines multiple linter runners. Each runner specifies
+      a command, format (or errorformat), and report level. reviewdog can run
+      all configured linters in parallel via "reviewdog -reporter=..." without
+      piping individual linter output.
+
+  ci_environment:
+    package: cienv
+    description: >
+      Auto-detects CI environment (GitHub Actions, Travis, Circle, Drone,
+      GitLab CI, Bitbucket Pipelines, Woodpecker) from environment variables.
+      Extracts owner, repo, SHA, PR number, and branch automatically.
+
+directory_structure:
+  cmd/reviewdog/: CLI entry point. Uses standard library flag package.
+  parser/: Input format parsers (errorformat, checkstyle, rdjson, rdjsonl, sarif, diff).
+  filter/: Diff-based filtering logic. DiffFilter and FilterCheck.
+  diff/: Unified diff parser. Produces FileDiff/Hunk/Line structs.
+  proto/rdf/: Reviewdog Diagnostic Format protobuf definitions and JSON schemas.
+  proto/metacomment/: Comment deduplication metadata protobuf.
+  service/github/: GitHub reporter (PR review comments, Check Runs, Actions annotations).
+  service/gitlab/: GitLab MR discussion and commit comment reporters.
+  service/bitbucket/: Bitbucket Code Insights reporter.
+  service/gerrit/: Gerrit change review reporter.
+  service/gitea/: Gitea PR review reporter.
+  service/commentutil/: Shared comment formatting (markdown, code fences).
+  service/serviceutil/: Shared service utilities (fingerprinting, git root detection).
+  doghouse/: Server component for GitHub Checks API proxy (App Engine).
+  cienv/: CI environment auto-detection.
+  project/: Project config (.reviewdog.yml) parsing and multi-runner execution.
+  pathutil/: Path normalization utilities.
+  commands/: Version command.
+  _testdata/: Test fixtures (lint output samples, reviewdog configs).
+  scripts/: Release and proto generation scripts.
+
+conventions:
+  testing:
+    framework: "Standard testing package + github.com/stretchr/testify"
+    comparison: "github.com/google/go-cmp with protocmp for protobuf messages"
+    pattern: >
+      Tests live alongside source files (*_test.go). Test fixtures go in _testdata/.
+      Interface compliance is verified with var _ Interface = (*Impl)(nil).
+      Example tests (ExampleXxx) are used for documentation. Tests use inline
+      diff/lint data strings rather than external fixture files where practical.
+    run_command: "go test -v -race -coverpkg=./... -coverprofile=coverage.txt ./..."
+
+  error_handling: >
+    Errors are wrapped with fmt.Errorf("context: %w", err). Functions return
+    (result, error) pairs. The project does not use panic for recoverable errors.
+
+  concurrency: >
+    sync.Map is used for ResultMap (concurrent linter result storage).
+    errgroup.Group is used for parallel linter execution and parallel API calls.
+    Mutex-protected slices for comment batching in service implementations.
+
+  cli_flags: >
+    Uses standard library flag package (not cobra/urfave). Flags are registered
+    in init() with flag.XxxVar(). The option struct holds all flag values.
+
+  code_generation:
+    protobuf: "protoc with proto/update.sh script"
+    static_assets: "rakyll/statik for embedding static files in doghouse"
+
+  naming: >
+    Go standard naming conventions. Package names are lowercase single words.
+    Interfaces are named by their primary method (CommentService, DiffService, Parser).
+    Test helpers use unexported types (testWriter).
+
+ci:
+  workflows:
+    - name: Go (go.yml)
+      triggers: [push to master, pull_request]
+      jobs: [test with race detector and coverage]
+    - name: reviewdog (reviewdog.yml)
+      triggers: [push to master, pull_request]
+      jobs: >
+        Self-testing: runs reviewdog on itself using multiple reporters
+        (github-check, github-pr-review, github-pr-check) and formats
+        (golint, golangci-lint, staticcheck, misspell, typos, shellcheck, etc.)
+    - name: release (release.yml)
+      description: >
+        Uses haya14busa/action-bumpr for semver bumping via PR labels
+        (bump:patch, bump:minor, bump:major). GoReleaser for cross-platform binaries.
+    - name: rdformat (rdformat.yml)
+      description: Validates RDF JSON schema consistency.
+
+  linters_used_on_self:
+    - golint
+    - golangci-lint
+    - staticcheck
+    - misspell
+    - typos
+    - languagetool
+    - shellcheck
+    - alex
+    - textlint
+
+environment_variables:
+  REVIEWDOG_GITHUB_API_TOKEN: GitHub API token for posting review comments.
+  REVIEWDOG_GITLAB_API_TOKEN: GitLab API token for MR comments.
+  REVIEWDOG_TOKEN: Token for doghouse server authentication.
+  REVIEWDOG_SKIP_DOGHOUSE: "true" to bypass doghouse server.
+  REVIEWDOG_INSECURE_SKIP_VERIFY: "true" to skip TLS verification.
+  GITHUB_API: Custom GitHub Enterprise API endpoint.
+  GITLAB_API: Custom GitLab API endpoint.
+  GITEA_ADDRESS: Gitea server base URL.
+  GERRIT_CHANGE_ID: Gerrit change identifier.
+  GERRIT_REVISION_ID: Gerrit revision identifier.
+  GERRIT_BRANCH: Gerrit branch name.
+  GERRIT_ADDRESS: Gerrit server URL.
+  BITBUCKET_USER: Bitbucket basic auth username.
+  BITBUCKET_PASSWORD: Bitbucket basic auth password.
+  BITBUCKET_ACCESS_TOKEN: Bitbucket access token.
+  BITBUCKET_SERVER_URL: Bitbucket Server URL (for on-premise).
+
+key_dependencies:
+  - name: github.com/reviewdog/errorformat
+    purpose: Vim-style errorformat parsing for linter output.
+  - name: github.com/google/go-github
+    purpose: GitHub REST API client.
+  - name: gitlab.com/gitlab-org/api/client-go
+    purpose: GitLab REST API client.
+  - name: code.gitea.io/sdk/gitea
+    purpose: Gitea REST API client.
+  - name: golang.org/x/build/gerrit
+    purpose: Gerrit REST API client.
+  - name: github.com/haya14busa/go-sarif
+    purpose: SARIF format parsing.
+  - name: google.golang.org/protobuf
+    purpose: Protocol buffer runtime for RDF and metacomment.
+  - name: golang.org/x/sync/errgroup
+    purpose: Parallel execution of linter runners and API calls.
+  - name: github.com/bradleyfalzon/ghinstallation
+    purpose: GitHub App installation token generation (for doghouse).
