@@ -2,6 +2,7 @@ package gitlab
 
 import (
 	"context"
+	"errors"
 	"fmt"
 	"strconv"
 	"strings"
@@ -13,6 +14,7 @@ import (
 	"github.com/reviewdog/reviewdog"
 	"github.com/reviewdog/reviewdog/proto/rdf"
 	"github.com/reviewdog/reviewdog/service/commentutil"
+	"github.com/reviewdog/reviewdog/service/serviceutil"
 )
 
 const (
@@ -31,9 +33,17 @@ type MergeRequestDiscussionCommenter struct {
 	pr       int
 	sha      string
 	projects string
+	toolName string
 
 	muComments   sync.Mutex
 	postComments []*reviewdog.Comment
+
+	postedcs commentutil.PostedComments
+	// outdatedDiscussions holds resolvable discussions previously posted by
+	// reviewdog that are candidates for auto-resolve if no longer reported.
+	// Keyed by fingerprint; value is a slice so fingerprint collisions across
+	// discussions do not silently drop entries.
+	outdatedDiscussions map[string][]string // fingerprint -> []discussionID
 }
 
 // NewGitLabMergeRequestDiscussionCommenter returns a new MergeRequestDiscussionCommenter service.
@@ -45,6 +55,12 @@ func NewGitLabMergeRequestDiscussionCommenter(cli *gitlab.Client, owner, repo st
 		sha:      sha,
 		projects: owner + "/" + repo,
 	}
+}
+
+// SetTool sets the tool name used to author meta comments and gate
+// auto-resolve to discussions previously posted by this tool.
+func (g *MergeRequestDiscussionCommenter) SetTool(toolName string, _ string) {
+	g.toolName = toolName
 }
 
 // Post accepts a comment and holds it. Flush method actually posts comments to
@@ -63,22 +79,31 @@ func (g *MergeRequestDiscussionCommenter) Flush(ctx context.Context) error {
 	g.muComments.Lock()
 	defer g.muComments.Unlock()
 	defer func() { g.postComments = nil }()
-	postedcs, err := g.createPostedComments()
-	if err != nil {
+	if err := g.setPostedComments(); err != nil {
 		return fmt.Errorf("failed to create posted comments: %w", err)
 	}
-	return g.postCommentsForEach(ctx, postedcs)
+	if err := g.postCommentsForEach(ctx); err != nil {
+		return err
+	}
+	return g.resolveOutdatedDiscussions(ctx)
 }
 
-func (g *MergeRequestDiscussionCommenter) createPostedComments() (commentutil.PostedComments, error) {
-	postedcs := make(commentutil.PostedComments)
+// setPostedComments lists existing merge request discussions and records the
+// ones previously posted by reviewdog (identified by the embedded meta
+// comment). Resolvable, unresolved discussions authored by this tool are
+// tracked as potentially outdated and will be resolved by
+// resolveOutdatedDiscussions unless the diagnostic is reported again in this
+// run.
+func (g *MergeRequestDiscussionCommenter) setPostedComments() error {
+	g.postedcs = make(commentutil.PostedComments)
+	g.outdatedDiscussions = make(map[string][]string)
 	discussions, err := listAllMergeRequestDiscussion(g.cli, g.projects, g.pr, &gitlab.ListMergeRequestDiscussionsOptions{
 		ListOptions: gitlab.ListOptions{
 			PerPage: 100,
 		},
 	})
 	if err != nil {
-		return nil, fmt.Errorf("failed to list all merge request discussions: %w", err)
+		return fmt.Errorf("failed to list all merge request discussions: %w", err)
 	}
 	for _, d := range discussions {
 		for _, note := range d.Notes {
@@ -86,13 +111,21 @@ func (g *MergeRequestDiscussionCommenter) createPostedComments() (commentutil.Po
 			if pos == nil || pos.NewPath == "" || pos.NewLine == 0 || note.Body == "" {
 				continue
 			}
-			postedcs.AddPostedComment(pos.NewPath, int(pos.NewLine), note.Body)
+			meta := serviceutil.ExtractMetaComment(note.Body)
+			if meta == nil {
+				continue
+			}
+			g.postedcs.AddPostedComment(pos.NewPath, int(pos.NewLine), meta.GetFingerprint())
+			if g.toolName != "" && meta.GetSourceName() == g.toolName && note.Resolvable && !note.Resolved {
+				fp := meta.GetFingerprint()
+				g.outdatedDiscussions[fp] = append(g.outdatedDiscussions[fp], d.ID)
+			}
 		}
 	}
-	return postedcs, nil
+	return nil
 }
 
-func (g *MergeRequestDiscussionCommenter) postCommentsForEach(ctx context.Context, postedcs commentutil.PostedComments) error {
+func (g *MergeRequestDiscussionCommenter) postCommentsForEach(ctx context.Context) error {
 	mr, _, err := g.cli.MergeRequests.GetMergeRequest(g.projects, int64(g.pr), nil, gitlab.WithContext(ctx))
 	if err != nil {
 		return fmt.Errorf("failed to get merge request: %w", err)
@@ -107,15 +140,22 @@ func (g *MergeRequestDiscussionCommenter) postCommentsForEach(ctx context.Contex
 		c := c
 		loc := c.Result.Diagnostic.GetLocation()
 		lnum := int(loc.GetRange().GetStart().GetLine())
+		if !c.Result.InDiffFile || lnum == 0 {
+			continue
+		}
+		fprint, err := serviceutil.Fingerprint(c.Result.Diagnostic)
+		if err != nil {
+			return err
+		}
+		if g.postedcs.IsPosted(c, lnum, fprint) {
+			delete(g.outdatedDiscussions, fprint)
+			continue
+		}
 		body := commentutil.MarkdownComment(c)
-
 		if suggestion := buildSuggestions(c); suggestion != "" {
 			body = body + "\n\n" + suggestion
 		}
-
-		if !c.Result.InDiffFile || lnum == 0 || postedcs.IsPosted(c, lnum, body) {
-			continue
-		}
+		body += fmt.Sprintf("\n%s\n", serviceutil.BuildMetaComment(fprint, g.toolName))
 		eg.Go(func() error {
 			pos := &gitlab.PositionOptions{
 				StartSHA:     gitlab.Ptr(targetBranch.Commit.ID),
@@ -141,6 +181,44 @@ func (g *MergeRequestDiscussionCommenter) postCommentsForEach(ctx context.Contex
 		})
 	}
 	return eg.Wait()
+}
+
+// resolveOutdatedDiscussions marks previously-posted reviewdog discussions as
+// resolved when the corresponding diagnostic is no longer reported in the
+// current run. This keeps a MR review clean as fixes land.
+//
+// All resolve attempts run concurrently; every failure is surfaced via
+// errors.Join so operators see the full picture instead of only the first
+// error.
+func (g *MergeRequestDiscussionCommenter) resolveOutdatedDiscussions(ctx context.Context) error {
+	if g.toolName == "" || len(g.outdatedDiscussions) == 0 {
+		return nil
+	}
+	var (
+		mu   sync.Mutex
+		errs []error
+		wg   sync.WaitGroup
+	)
+	for _, ids := range g.outdatedDiscussions {
+		for _, id := range ids {
+			wg.Add(1)
+			go func(discussionID string) {
+				defer wg.Done()
+				_, _, err := g.cli.Discussions.ResolveMergeRequestDiscussion(
+					g.projects, int64(g.pr), discussionID,
+					&gitlab.ResolveMergeRequestDiscussionOptions{Resolved: gitlab.Ptr(true)},
+					gitlab.WithContext(ctx),
+				)
+				if err != nil {
+					mu.Lock()
+					errs = append(errs, fmt.Errorf("failed to resolve merge request discussion (id=%s): %w", discussionID, err))
+					mu.Unlock()
+				}
+			}(id)
+		}
+	}
+	wg.Wait()
+	return errors.Join(errs...)
 }
 
 func listAllMergeRequestDiscussion(cli *gitlab.Client, projectID string, mergeRequest int, opts *gitlab.ListMergeRequestDiscussionsOptions) ([]*gitlab.Discussion, error) {
