@@ -198,20 +198,11 @@ func resolvePath(path, basedir string) string {
 		return path
 	}
 
-	cwdPath := filepath.Join(basedir, path)
-	if _, err := os.Stat(cwdPath); err == nil {
-		return cwdPath
-	}
-
 	gitRoot, err := serviceutil.GetGitRoot()
-	if err != nil {
-		return path
+	if err == nil {
+		return filepath.Join(gitRoot, path)
 	}
-	gitRootPath := filepath.Join(gitRoot, path)
-	if _, err := os.Stat(gitRootPath); err == nil {
-		return gitRootPath
-	}
-	return path
+	return filepath.Join(basedir, path)
 }
 
 func getText(msg sarif.Message) string {

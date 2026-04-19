@@ -179,7 +179,7 @@ var fixtures = [][]string{{
 }`, `{
 	"message": "message",
 	"location": {
-		"path": "src/MyClass.kt",
+		"path": "../src/MyClass.kt",
 		"range": {
 			"start": {
 				"line": 10
@@ -250,7 +250,7 @@ var fixtures = [][]string{{
 }`, `{
 	"message": "message",
 	"location": {
-		"path": "src/MyClass.kt",
+		"path": "../src/MyClass.kt",
 		"range": {
 			"start": {
 				"line": 10
@@ -410,7 +410,7 @@ var fixtures = [][]string{{
 `, basedir()), `{
 	"message": "Use of tainted variable 'expr' in the insecure function 'eval'.",
 	"location": {
-		"path": "3-Beyond-basics/bad-eval.py",
+		"path": "../3-Beyond-basics/bad-eval.py",
     "range": {
       "start": {
         "line": 4
@@ -427,7 +427,7 @@ var fixtures = [][]string{{
     {
       "message": "The tainted data entered the system here.",
 			"location": {
-				"path": "3-Beyond-basics/bad-eval.py",
+				"path": "../3-Beyond-basics/bad-eval.py",
 				"range": {
 					"start": {
 						"line": 3
