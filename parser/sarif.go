@@ -9,6 +9,7 @@ import (
 
 	"github.com/haya14busa/go-sarif/sarif"
 	"github.com/reviewdog/reviewdog/proto/rdf"
+	"github.com/reviewdog/reviewdog/service/serviceutil"
 )
 
 var _ Parser = &SarifParser{}
@@ -185,11 +186,32 @@ func getPath(
 	if err != nil {
 		return "", err
 	}
-	path := parse.Path
+	path := resolvePath(parse.Path, basedir)
 	if relpath, err := filepath.Rel(basedir, path); err == nil {
 		path = relpath
 	}
 	return path, nil
+}
+
+func resolvePath(path, basedir string) string {
+	if filepath.IsAbs(path) || basedir == "" {
+		return path
+	}
+
+	cwdPath := filepath.Join(basedir, path)
+	if _, err := os.Stat(cwdPath); err == nil {
+		return cwdPath
+	}
+
+	gitRoot, err := serviceutil.GetGitRoot()
+	if err != nil {
+		return path
+	}
+	gitRootPath := filepath.Join(gitRoot, path)
+	if _, err := os.Stat(gitRootPath); err == nil {
+		return gitRootPath
+	}
+	return path
 }
 
 func getText(msg sarif.Message) string {
