@@ -365,7 +365,7 @@ func run(r io.Reader, w io.Writer, opt *option) error {
 			return nil
 		}
 
-		gc := gitlabservice.NewGitLabMergeRequestDiscussionCommenter(cli, build.Owner, build.Repo, build.PullRequest, build.SHA)
+		gc := gitlabservice.NewGitLabMergeRequestDiscussionCommenter(cli, build.Owner, build.Repo, build.PullRequest, build.SHA, toolName(opt))
 		cs = reviewdog.MultiCommentService(gc, cs)
 		ds = gitlabservice.NewGitLabMergeRequestDiff(cli, build.Owner, build.Repo, build.PullRequest, build.SHA)
 	case "gitlab-mr-commit":
