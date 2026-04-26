@@ -42,7 +42,7 @@ jobs:
 
       # Create release.
       - name: Create release with goreleaser
-        uses: goreleaser/goreleaser-action@e24998b8b67b290c2fa8b7c14fcfa7de2c5c9b8c # v7.1.0
+        uses: goreleaser/goreleaser-action@4c6ab561adb47e50c45ef534e2155934e91c40c1 # v7.2.0
         if: "steps.tag.outputs.value != ''"
         with:
           version: "~> v2"
