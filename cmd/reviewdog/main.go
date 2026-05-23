@@ -122,11 +122,9 @@ const (
 
 		Option 2) Install reviewdog GitHub Apps
 			1. Install reviewdog Apps. https://github.com/apps/reviewdog
-			2. Set REVIEWDOG_TOKEN or run reviewdog CLI in trusted CI providers.
+			2. Set REVIEWDOG_TOKEN.
 			You can get token from https://reviewdog.app/gh/<owner>/<repo-name>.
 			$ export REVIEWDOG_TOKEN="xxxxx"
-
-			Note: Token is not required if you run reviewdog in Travis CI.
 
 	"github-pr-check"
 		Same as github-check reporter but it only supports Pull Requests.

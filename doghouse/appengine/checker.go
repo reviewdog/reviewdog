@@ -12,7 +12,6 @@ import (
 
 	"github.com/reviewdog/reviewdog/doghouse"
 	"github.com/reviewdog/reviewdog/doghouse/server"
-	"github.com/reviewdog/reviewdog/doghouse/server/ciutil"
 	"github.com/reviewdog/reviewdog/doghouse/server/storage"
 )
 
@@ -74,18 +73,6 @@ func (gc *githubChecker) handleCheck(w http.ResponseWriter, r *http.Request) {
 }
 
 func (gc *githubChecker) validateCheckRequest(ctx context.Context, w http.ResponseWriter, r *http.Request, owner, repo string) bool {
-	if extractBearerToken(r) == "" {
-		// Update Travis IP Address before checking IP to reduce the # of
-		// flaky errors when token is not present.
-		if err := ciutil.UpdateTravisCIIPAddrs(&http.Client{}); err != nil {
-			aelog.Errorf(ctx, "failed to update travis CI IP addresses: %v", err)
-		}
-	}
-	aelog.Infof(ctx, "Remote Addr: %s", ciutil.IPFromReq(r))
-	if ciutil.IsFromCI(r) {
-		// Skip token validation if it's from trusted CI providers.
-		return true
-	}
 	return gc.validateCheckToken(ctx, w, r, owner, repo)
 }
 

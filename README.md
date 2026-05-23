@@ -437,15 +437,13 @@ results as GitHub Checks, because Check API is only supported for GitHub App and
 GitHub Actions.
 
 1. Install reviewdog Apps. https://github.com/apps/reviewdog
-2. Set `REVIEWDOG_TOKEN` or run reviewdog CLI in trusted CI providers.
+2. Set `REVIEWDOG_TOKEN`.
   - Get token from `https://reviewdog.app/gh/{owner}/{repo-name}`.
 
 ```shell
 $ export REVIEWDOG_TOKEN="<token>"
 $ reviewdog -reporter=github-pr-check
 ```
-
-Note: Token is not required if you run reviewdog in Travis or AppVeyor.
 
 *Caution*
 
@@ -762,21 +760,6 @@ Example:
 ```
 
 ### Travis CI
-
-#### Travis CI (-reporter=github-pr-check)
-
-If you use -reporter=github-pr-check in Travis CI, you don't need to set `REVIEWDOG_TOKEN`.
-
-Example:
-
-```yaml
-install:
-  - mkdir -p ~/bin/ && export PATH="~/bin/:$PATH"
-  - curl -sfL https://raw.githubusercontent.com/reviewdog/reviewdog/fd59714416d6d9a1c0692d872e38e7f8448df4fc/install.sh| sh -s -- -b ~/bin
-
-script:
-  - reviewdog -conf=.reviewdog.yml -reporter=github-pr-check
-```
 
 #### Travis CI (-reporter=github-pr-review)
 

@@ -17,6 +17,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - [#2481](https://github.com/reviewdog/reviewdog/pull/2481) Use CWD instead of git root in SARIF parser to prevent path doubling
 
 ### :rotating_light: Breaking changes
+- doghouse: the `/check` endpoint (used by `-reporter=github-pr-check` via reviewdog.app) now always requires `REVIEWDOG_TOKEN`. The previous shortcut that accepted requests from certain CI providers without a token has been removed. Users who relied on the token-less path (e.g. AppVeyor) must now set `REVIEWDOG_TOKEN` explicitly. Tokens can be obtained from `https://reviewdog.app/gh/<owner>/<repo-name>`.
 
 ## [v0.21.0] - 2025-09-03
 
