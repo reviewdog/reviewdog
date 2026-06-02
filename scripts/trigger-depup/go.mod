@@ -2,7 +2,7 @@ module github.com/reviewdog/reviewdog/scripts/trigger-depup
 
 go 1.25.0
 
-toolchain go1.26.3
+toolchain go1.26.4
 
 require (
 	github.com/google/go-github/v86 v86.0.0
