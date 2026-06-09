@@ -18,7 +18,7 @@ jobs:
         with:
           # Ideally, it should be synced with doghouse/appengine/app.yaml,
           # but it's ok to use different one because it's only for testing.
-          go-version: "go.mod"
+          go-version-file: "go.mod"
       - run: go test -v -race  ./...
   deploy:
     permissions:
