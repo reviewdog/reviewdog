@@ -30,6 +30,9 @@ builds:
       - amd64
       - arm
       - arm64
+    ignore:
+      - goos: windows
+        goarch: arm
 
 archives:
   - id: main
