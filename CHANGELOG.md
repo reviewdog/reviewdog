@@ -11,6 +11,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ### :rocket: Enhancements
 - [#2257](https://github.com/reviewdog/reviewdog/pull/2257) Use -trimpath flag for reproducible build
 - [#2513](https://github.com/reviewdog/reviewdog/pull/2513) Drop support of windows/arm
+- [#2543](https://github.com/reviewdog/reviewdog/pull/2543) Update `gitlab-mr-discussion` reporter to embed a fingerprint meta-comment in each posted note and automatically resolve previously-posted discussions whose diagnostic is no longer reported (fixes [#1150](https://github.com/reviewdog/reviewdog/issues/1150)).
 
 ### :bug: Fixes
 
