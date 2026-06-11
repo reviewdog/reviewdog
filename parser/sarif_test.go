@@ -43,6 +43,97 @@ func TestExampleSarifParser(t *testing.T) {
 	}
 }
 
+func TestSarifParser_Suppressions(t *testing.T) {
+	// SARIF 2.1.0 §3.27.23 + §3.35: a result with an "accepted" suppression
+	// (Status absent or explicitly "accepted") should be skipped. Status
+	// "rejected" or "underReview" must still emit diagnostics.
+	sarifWithSuppression := func(suppressionsJSON string) string {
+		return `{
+			"version": "2.1.0",
+			"runs": [
+				{
+					"results": [
+						{
+							"level": "warning",
+							"locations": [
+								{
+									"physicalLocation": {
+										"artifactLocation": {"uri": "main.tf"},
+										"region": {"startLine": 1}
+									}
+								}
+							],
+							"message": {"text": "msg"},
+							"ruleId": "CKV_AWS_338"` + suppressionsJSON + `
+						}
+					],
+					"tool": {"driver": {"name": "checkov"}}
+				}
+			]
+		}`
+	}
+
+	cases := []struct {
+		name      string
+		input     string
+		wantCount int
+	}{
+		{
+			name:      "suppressed: kind inSource, status absent (defaults to accepted)",
+			input:     sarifWithSuppression(`, "suppressions": [{"kind": "inSource", "justification": "rationale"}]`),
+			wantCount: 0,
+		},
+		{
+			name:      "suppressed: kind inSource, status accepted",
+			input:     sarifWithSuppression(`, "suppressions": [{"kind": "inSource", "status": "accepted", "justification": "rationale"}]`),
+			wantCount: 0,
+		},
+		{
+			name:      "suppressed: kind external, status absent",
+			input:     sarifWithSuppression(`, "suppressions": [{"kind": "external"}]`),
+			wantCount: 0,
+		},
+		{
+			name:      "not suppressed: status rejected",
+			input:     sarifWithSuppression(`, "suppressions": [{"kind": "inSource", "status": "rejected"}]`),
+			wantCount: 1,
+		},
+		{
+			name:      "not suppressed: status underReview",
+			input:     sarifWithSuppression(`, "suppressions": [{"kind": "inSource", "status": "underReview"}]`),
+			wantCount: 1,
+		},
+		{
+			name:      "not suppressed: empty suppressions array",
+			input:     sarifWithSuppression(`, "suppressions": []`),
+			wantCount: 1,
+		},
+		{
+			name:      "not suppressed: suppressions field absent",
+			input:     sarifWithSuppression(``),
+			wantCount: 1,
+		},
+		{
+			name:      "suppressed: at least one accepted suppression among mixed",
+			input:     sarifWithSuppression(`, "suppressions": [{"kind": "inSource", "status": "rejected"}, {"kind": "inSource", "status": "accepted"}]`),
+			wantCount: 0,
+		},
+	}
+
+	p := NewSarifParser()
+	for _, tc := range cases {
+		t.Run(tc.name, func(t *testing.T) {
+			diagnostics, err := p.Parse(strings.NewReader(tc.input))
+			if err != nil {
+				t.Fatalf("Parse error: %v", err)
+			}
+			if got := len(diagnostics); got != tc.wantCount {
+				t.Errorf("len(diagnostics) = %d, want %d", got, tc.wantCount)
+			}
+		})
+	}
+}
+
 func basedir() string {
 	wd, err := os.Getwd()
 	if err != nil {

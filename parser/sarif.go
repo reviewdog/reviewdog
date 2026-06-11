@@ -45,6 +45,9 @@ func (p *SarifParser) Parse(r io.Reader) ([]*rdf.Diagnostic, error) {
 			rules[rule.ID] = rule
 		}
 		for _, result := range run.Results {
+			if isSuppressed(result.Suppressions) {
+				continue
+			}
 			original, err := json.Marshal(result)
 			if err != nil {
 				return nil, err
@@ -190,6 +193,19 @@ func getPath(
 		path = relpath
 	}
 	return path, nil
+}
+
+// isSuppressed reports whether a SARIF result should be skipped because the
+// tool already accepted a suppression for it. Per SARIF 2.1.0 §3.35.3, a
+// Suppression's status defaults to "accepted" when the property is absent;
+// only "rejected" and "underReview" indicate the suppression is not honored.
+func isSuppressed(suppressions []sarif.Suppression) bool {
+	for _, s := range suppressions {
+		if s.Status == nil || *s.Status == sarif.Accepted {
+			return true
+		}
+	}
+	return false
 }
 
 func getText(msg sarif.Message) string {

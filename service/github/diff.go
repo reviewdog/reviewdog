@@ -8,7 +8,7 @@ import (
 	"os"
 	"os/exec"
 
-	"github.com/google/go-github/v84/github"
+	"github.com/google/go-github/v86/github"
 	"github.com/reviewdog/reviewdog"
 )
 

@@ -8,12 +8,16 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### :rocket: Enhancements
 - [#2257](https://github.com/reviewdog/reviewdog/pull/2257) Use -trimpath flag for reproducible build
+- [#2513](https://github.com/reviewdog/reviewdog/pull/2513) Drop support of windows/arm
+- [#2543](https://github.com/reviewdog/reviewdog/pull/2543) Update `gitlab-mr-discussion` reporter to embed a fingerprint meta-comment in each posted note and automatically resolve previously-posted discussions whose diagnostic is no longer reported (fixes [#1150](https://github.com/reviewdog/reviewdog/issues/1150)).
 
 ### :bug: Fixes
 
+- [#2586](https://github.com/reviewdog/reviewdog/pull/2586) Honor SARIF `result.suppressions` in SARIF parser — suppressed results (per SARIF 2.1.0 §3.27.23 / §3.35) no longer emit diagnostics
 - [#2481](https://github.com/reviewdog/reviewdog/pull/2481) Use CWD instead of git root in SARIF parser to prevent path doubling
 
 ### :rotating_light: Breaking changes
+- doghouse: the `/check` endpoint (used by `-reporter=github-pr-check` via reviewdog.app) now always requires `REVIEWDOG_TOKEN`. The previous shortcut that accepted requests from certain CI providers without a token has been removed. Users who relied on the token-less path (e.g. AppVeyor) must now set `REVIEWDOG_TOKEN` explicitly. Tokens can be obtained from `https://reviewdog.app/gh/<owner>/<repo-name>`.
 
 ## [v0.21.0] - 2025-09-03
 
