@@ -14,7 +14,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### :rotating_light: Breaking changes
 
-## [v0.21.1] - 2026-03-17
+## [v0.21.1] - 2026-06-12
 
 ### :rocket: Enhancements
 - [#2257](https://github.com/reviewdog/reviewdog/pull/2257) Use -trimpath flag for reproducible build
