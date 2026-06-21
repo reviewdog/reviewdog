@@ -11,7 +11,7 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@9c091bb21b7c1c1d1991bb908d89e4e9dddfe3e0 # v7.0.0
-      - uses: haya14busa/action-depup@94a1aaf4e4923064019214b48a43276218af7ad5 # v1.6.4
+      - uses: haya14busa/action-depup@99f7aecf3e4d06d5a3faf190dae5dc79ac530b5a # v1.6.5
         id: depup
         with:
           file: proto/Dockerfile
@@ -45,7 +45,7 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@9c091bb21b7c1c1d1991bb908d89e4e9dddfe3e0 # v7.0.0
-      - uses: haya14busa/action-depup@94a1aaf4e4923064019214b48a43276218af7ad5 # v1.6.4
+      - uses: haya14busa/action-depup@99f7aecf3e4d06d5a3faf190dae5dc79ac530b5a # v1.6.5
         id: depup
         with:
           file: proto/Dockerfile
@@ -79,7 +79,7 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@9c091bb21b7c1c1d1991bb908d89e4e9dddfe3e0 # v7.0.0
-      - uses: haya14busa/action-depup@94a1aaf4e4923064019214b48a43276218af7ad5 # v1.6.4
+      - uses: haya14busa/action-depup@99f7aecf3e4d06d5a3faf190dae5dc79ac530b5a # v1.6.5
         id: depup
         with:
           file: proto/Dockerfile
