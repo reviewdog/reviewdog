@@ -230,7 +230,13 @@ func (g *GitHubHandler) HandleGitHubTop(w http.ResponseWriter, r *http.Request) 
 	ts := oauth2.StaticTokenSource(
 		&oauth2.Token{AccessToken: token},
 	)
-	ghcli := github.NewClient(NewAuthClient(ctx, http.DefaultTransport, ts))
+	authClient := NewAuthClient(ctx, http.DefaultTransport, ts)
+	ghcli, err := github.NewClient(github.WithHTTPClient(authClient))
+	if err != nil {
+		w.WriteHeader(http.StatusInternalServerError)
+		fmt.Fprintln(w, err)
+		return
+	}
 
 	// /gh/{owner}/{repo}
 	paths := strings.Split(strings.Trim(r.URL.Path, "/"), "/")
