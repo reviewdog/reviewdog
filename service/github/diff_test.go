@@ -5,7 +5,6 @@ import (
 	"encoding/json"
 	"net/http"
 	"net/http/httptest"
-	"net/url"
 	"strings"
 	"testing"
 
@@ -42,8 +41,7 @@ func TestDiff_success(t *testing.T) {
 	ts := httptest.NewServer(mux)
 	defer ts.Close()
 
-	cli := github.NewClient(nil)
-	cli.BaseURL, _ = url.Parse(ts.URL + "/")
+	cli := newGitHubClient(t, ts.URL)
 
 	diffService := &PullRequestDiffService{
 		Cli:              cli,
@@ -122,8 +120,7 @@ func TestDiff_fallbackToGitCli(t *testing.T) {
 	ts := httptest.NewServer(mux)
 	defer ts.Close()
 
-	cli := github.NewClient(nil)
-	cli.BaseURL, _ = url.Parse(ts.URL + "/")
+	cli := newGitHubClient(t, ts.URL)
 
 	diffService := &PullRequestDiffService{
 		Cli:              cli,

@@ -34,7 +34,7 @@ func NewGitHubClient(ctx context.Context, opt *NewGitHubClientOption) (*github.C
 	}
 
 	client.Transport = itr
-	return github.NewClient(client), nil
+	return github.NewClient(github.WithHTTPClient(client))
 }
 
 func githubAppTransport(ctx context.Context, client *http.Client, opt *NewGitHubClientOption) (http.RoundTripper, error) {

@@ -5,7 +5,6 @@ import (
 	"encoding/json"
 	"net/http"
 	"net/http/httptest"
-	"net/url"
 	"os"
 	"path/filepath"
 	"regexp"
@@ -34,7 +33,11 @@ func setupGitHubClient() *github.Client {
 		&oauth2.Token{AccessToken: token},
 	)
 	tc := oauth2.NewClient(context.TODO(), ts)
-	return github.NewClient(tc)
+	client, err := github.NewClient(github.WithHTTPClient(tc))
+	if err != nil {
+		return nil
+	}
+	return client
 }
 
 func setupEnvs() (cleanup func()) {
@@ -545,8 +548,7 @@ https://test/repo/path/blob/sha/reviewdog.go#L18
 	ts := httptest.NewServer(mux)
 	defer ts.Close()
 
-	cli := github.NewClient(nil)
-	cli.BaseURL, _ = url.Parse(ts.URL + "/")
+	cli := newGitHubClient(t, ts.URL)
 	g := NewGitHubPullRequest(cli, "o", "r", 14, "sha", "warning", "tool-name")
 	comments := []*reviewdog.Comment{
 		{
@@ -1327,8 +1329,7 @@ func TestGitHubPullRequest_Post_toomany(t *testing.T) {
 	ts := httptest.NewServer(mux)
 	defer ts.Close()
 
-	cli := github.NewClient(nil)
-	cli.BaseURL, _ = url.Parse(ts.URL + "/")
+	cli := newGitHubClient(t, ts.URL)
 	g := NewGitHubPullRequest(cli, "o", "r", 14, "sha", "warning", "tool-name")
 	var comments []*reviewdog.Comment
 	for i := 0; i < 100; i++ {
@@ -1395,8 +1396,7 @@ func TestGitHubPullRequest_Post_NoPermission(t *testing.T) {
 	ts := httptest.NewServer(mux)
 	defer ts.Close()
 
-	cli := github.NewClient(nil)
-	cli.BaseURL, _ = url.Parse(ts.URL + "/")
+	cli := newGitHubClient(t, ts.URL)
 	g := NewGitHubPullRequest(cli, "o", "r", 14, "sha", "warning", "tool-name")
 	comments := []*reviewdog.Comment{
 		{

@@ -17,6 +17,20 @@ import (
 	"github.com/reviewdog/reviewdog/proto/rdf"
 )
 
+// newGitHubClient creates a GitHub client for testing purposes.
+func newGitHubClient(t *testing.T, serverURL string) *github.Client {
+	t.Helper()
+	baseURL, err := url.Parse(serverURL + "/")
+	if err != nil {
+		t.Fatal(err)
+	}
+	cli, err := github.NewClient(github.WithURLs(github.Ptr(baseURL.String()), nil))
+	if err != nil {
+		t.Fatal(err)
+	}
+	return cli
+}
+
 func TestCheck_OK(t *testing.T) {
 	const (
 		name        = "haya14busa-linter"
@@ -80,8 +94,7 @@ func TestCheck_OK(t *testing.T) {
 	ts := httptest.NewServer(mux)
 	defer ts.Close()
 
-	cli := github.NewClient(nil)
-	cli.BaseURL, _ = url.Parse(ts.URL + "/")
+	cli := newGitHubClient(t, ts.URL)
 
 	check, err := NewGitHubCheck(cli, owner, repo, prNum, sha, level, name)
 	if err != nil {
@@ -155,8 +168,7 @@ func TestCheck_OK_multiple_update_runs(t *testing.T) {
 	ts := httptest.NewServer(mux)
 	defer ts.Close()
 
-	cli := github.NewClient(nil)
-	cli.BaseURL, _ = url.Parse(ts.URL + "/")
+	cli := newGitHubClient(t, ts.URL)
 
 	check, err := NewGitHubCheck(cli, owner, repo, prNum, sha, level, name)
 	if err != nil {
@@ -216,8 +228,7 @@ func TestCheck_fail_check_with_403_in_GitHub_Actions(t *testing.T) {
 	})
 	ts := httptest.NewServer(mux)
 	defer ts.Close()
-	cli := github.NewClient(nil)
-	cli.BaseURL, _ = url.Parse(ts.URL + "/")
+	cli := newGitHubClient(t, ts.URL)
 
 	check, err := NewGitHubCheck(cli, owner, repo, prNum, sha, level, name)
 	if err != nil {
@@ -348,8 +359,7 @@ func TestCheck_setToolNameForEachRun(t *testing.T) {
 	ts := httptest.NewServer(mux)
 	defer ts.Close()
 
-	cli := github.NewClient(nil)
-	cli.BaseURL, _ = url.Parse(ts.URL + "/")
+	cli := newGitHubClient(t, ts.URL)
 
 	check := &Check{
 		CLI:      cli,
