@@ -65,7 +65,7 @@ func findInstallationID(ctx context.Context, opt *NewGitHubClientOption) (int64,
 	if err != nil {
 		return 0, err
 	}
-	inst, _, err := appCli.Apps.FindUserInstallation(ctx, opt.RepoOwner)
+	inst, _, err := appCli.Apps.GetUserInstallation(ctx, opt.RepoOwner)
 	if err != nil {
 		return 0, err
 	}
