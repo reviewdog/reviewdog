@@ -21,7 +21,7 @@ import (
 	"golang.org/x/build/gerrit"
 	"golang.org/x/oauth2"
 
-	"github.com/google/go-github/v86/github"
+	"github.com/google/go-github/v89/github"
 	"github.com/mattn/go-shellwords"
 	"github.com/reviewdog/errorformat/fmts"
 	gitlab "gitlab.com/gitlab-org/api/client-go/v2"
@@ -764,10 +764,18 @@ func githubClient(ctx context.Context, token string) (*github.Client, error) {
 		&oauth2.Token{AccessToken: token},
 	)
 	tc := oauth2.NewClient(ctx, ts)
-	client := github.NewClient(tc)
-	var err error
-	client.BaseURL, err = githubBaseURL()
-	return client, err
+	baseURL, err := githubBaseURL()
+	if err != nil {
+		return nil, err
+	}
+	client, err := github.NewClient(
+		github.WithHTTPClient(tc),
+		github.WithURLs(github.Ptr(baseURL.String()), nil),
+	)
+	if err != nil {
+		return nil, err
+	}
+	return client, nil
 }
 
 const defaultGitHubAPI = "https://api.github.com/"

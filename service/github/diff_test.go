@@ -5,11 +5,10 @@ import (
 	"encoding/json"
 	"net/http"
 	"net/http/httptest"
-	"net/url"
 	"strings"
 	"testing"
 
-	"github.com/google/go-github/v86/github"
+	"github.com/google/go-github/v89/github"
 )
 
 const sampleDiff = `--- a/sample.old.txt	2016-10-13 05:09:35.820791185 +0900
@@ -42,8 +41,7 @@ func TestDiff_success(t *testing.T) {
 	ts := httptest.NewServer(mux)
 	defer ts.Close()
 
-	cli := github.NewClient(nil)
-	cli.BaseURL, _ = url.Parse(ts.URL + "/")
+	cli := newGitHubClient(t, ts.URL)
 
 	diffService := &PullRequestDiffService{
 		Cli:              cli,
@@ -122,8 +120,7 @@ func TestDiff_fallbackToGitCli(t *testing.T) {
 	ts := httptest.NewServer(mux)
 	defer ts.Close()
 
-	cli := github.NewClient(nil)
-	cli.BaseURL, _ = url.Parse(ts.URL + "/")
+	cli := newGitHubClient(t, ts.URL)
 
 	diffService := &PullRequestDiffService{
 		Cli:              cli,

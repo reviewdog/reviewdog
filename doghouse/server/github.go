@@ -6,7 +6,7 @@ import (
 	"net/http"
 
 	"github.com/bradleyfalzon/ghinstallation/v2"
-	"github.com/google/go-github/v86/github"
+	"github.com/google/go-github/v89/github"
 )
 
 type NewGitHubClientOption struct {
@@ -34,7 +34,7 @@ func NewGitHubClient(ctx context.Context, opt *NewGitHubClientOption) (*github.C
 	}
 
 	client.Transport = itr
-	return github.NewClient(client), nil
+	return github.NewClient(github.WithHTTPClient(client))
 }
 
 func githubAppTransport(ctx context.Context, client *http.Client, opt *NewGitHubClientOption) (http.RoundTripper, error) {
@@ -65,7 +65,7 @@ func findInstallationID(ctx context.Context, opt *NewGitHubClientOption) (int64,
 	if err != nil {
 		return 0, err
 	}
-	inst, _, err := appCli.Apps.FindUserInstallation(ctx, opt.RepoOwner)
+	inst, _, err := appCli.Apps.GetUserInstallation(ctx, opt.RepoOwner)
 	if err != nil {
 		return 0, err
 	}

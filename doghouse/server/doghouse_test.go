@@ -9,7 +9,7 @@ import (
 	"testing"
 
 	"github.com/google/go-cmp/cmp"
-	"github.com/google/go-github/v86/github"
+	"github.com/google/go-github/v89/github"
 	"github.com/reviewdog/reviewdog/doghouse"
 	"github.com/reviewdog/reviewdog/proto/rdf"
 )
@@ -245,8 +245,14 @@ func TestCheck_OK(t *testing.T) {
 	ts := httptest.NewServer(mux)
 	defer ts.Close()
 
-	cli := github.NewClient(nil)
-	cli.BaseURL, _ = url.Parse(ts.URL + "/")
+	baseURL, err := url.Parse(ts.URL + "/")
+	if err != nil {
+		t.Fatal(err)
+	}
+	cli, err := github.NewClient(github.WithURLs(github.Ptr(baseURL.String()), nil))
+	if err != nil {
+		t.Fatal(err)
+	}
 	checker := NewChecker(req, cli, true /* inDogHouseServer */)
 	res, err := checker.Check(context.Background())
 	if err != nil {
