@@ -41,6 +41,7 @@ tools.
 
 ### **rdjsonl**
 JSON Lines (http://jsonlines.org/) of the [`Diagnostic`](reviewdog.proto) message ([JSON Schema](./jsonschema/Diagnostic.json)).
+Each line must be less than 64 KiB in length, including the line terminator.
 
 Example:
 ```json
