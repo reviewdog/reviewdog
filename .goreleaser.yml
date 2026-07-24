@@ -42,15 +42,16 @@ archives:
       - LICENSE
       - README.md
 
-brews:
+homebrew_casks:
   - repository:
       owner: reviewdog
       name: homebrew-tap
-    directory: Formula
+    directory: Casks
     homepage: https://github.com/reviewdog/reviewdog
     description: Automated code review tool integrated with any code analysis tools regardless of programming language.
-    test: |
-      system "#{bin}/reviewdog -version"
+    license: MIT
+    url:
+      verified: github.com/reviewdog/reviewdog/releases/download
 
 checksum:
   name_template: "checksums.txt"
