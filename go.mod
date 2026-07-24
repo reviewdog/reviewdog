@@ -4,7 +4,7 @@ go 1.26
 
 require (
 	cloud.google.com/go/compute/metadata v0.9.0
-	cloud.google.com/go/datastore v1.25.0
+	cloud.google.com/go/datastore v1.26.0
 	code.gitea.io/sdk/gitea v0.25.1
 	contrib.go.opencensus.io/exporter/stackdriver v0.13.12
 	github.com/bradleyfalzon/ghinstallation/v2 v2.19.0
