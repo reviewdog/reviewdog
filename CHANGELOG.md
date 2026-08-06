@@ -17,6 +17,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 - [#2586](https://github.com/reviewdog/reviewdog/pull/2586) Honor SARIF `result.suppressions` in SARIF parser — suppressed results (per SARIF 2.1.0 §3.27.23 / §3.35) no longer emit diagnostics
 - [#2481](https://github.com/reviewdog/reviewdog/pull/2481) Use CWD instead of git root in SARIF parser to prevent path doubling
+- [#2663](https://github.com/reviewdog/reviewdog/pull/2663) Fix deadlock when parsing too-long RDJSONL lines.
 
 ### :rotating_light: Breaking changes
 - doghouse: the `/check` endpoint (used by `-reporter=github-pr-check` via reviewdog.app) now always requires `REVIEWDOG_TOKEN`. The previous shortcut that accepted requests from certain CI providers without a token has been removed. Users who relied on the token-less path (e.g. AppVeyor) must now set `REVIEWDOG_TOKEN` explicitly. Tokens can be obtained from `https://reviewdog.app/gh/<owner>/<repo-name>`.
