@@ -6,12 +6,10 @@ import (
 	"flag"
 	"fmt"
 	"log"
-	"net/http"
 	"os"
 	"strings"
 
-	"github.com/google/go-github/v89/github"
-	"golang.org/x/oauth2"
+	"github.com/google/go-github/v90/github"
 )
 
 var (
@@ -32,7 +30,10 @@ func run() error {
 	if token == "" {
 		return errors.New("DEPUP_GITHUB_API_TOKEN is empty")
 	}
-	cli := githubClient(ctx, token)
+	cli, err := githubClient(token)
+	if err != nil {
+		return err
+	}
 	// TODO(haya14busa): Support pagination once the # of repo become more than 100.
 	repos, _, err := cli.Repositories.ListByOrg(ctx, *targetOrg, &github.RepositoryListByOrgOptions{
 		Sort:      "updated",
@@ -60,11 +61,6 @@ func run() error {
 	return wholeErr
 }
 
-func githubClient(ctx context.Context, token string) *github.Client {
-	ctx = context.WithValue(ctx, oauth2.HTTPClient, &http.Client{})
-	ts := oauth2.StaticTokenSource(
-		&oauth2.Token{AccessToken: token},
-	)
-	tc := oauth2.NewClient(ctx, ts)
-	return github.NewClient(tc)
+func githubClient(token string) (*github.Client, error) {
+	return github.NewClient(github.WithAuthToken(token))
 }
