@@ -14,6 +14,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - [#2543](https://github.com/reviewdog/reviewdog/pull/2543) Update `gitlab-mr-discussion` reporter to embed a fingerprint meta-comment in each posted note and automatically resolve previously-posted discussions whose diagnostic is no longer reported (fixes [#1150](https://github.com/reviewdog/reviewdog/issues/1150)).
 
 ### :bug: Fixes
+- [#2477](https://github.com/reviewdog/reviewdog/pull/2477) Prevent deadlock when a runner outputs large `stderr`.
 
 - [#2586](https://github.com/reviewdog/reviewdog/pull/2586) Honor SARIF `result.suppressions` in SARIF parser — suppressed results (per SARIF 2.1.0 §3.27.23 / §3.35) no longer emit diagnostics
 - [#2481](https://github.com/reviewdog/reviewdog/pull/2481) Use CWD instead of git root in SARIF parser to prevent path doubling
