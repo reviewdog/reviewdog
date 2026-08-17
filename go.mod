@@ -20,7 +20,7 @@ require (
 	github.com/reva2/bitbucket-insights-api v1.0.0
 	github.com/reviewdog/errorformat v0.0.0-20260721110140-13bff69235f3
 	github.com/reviewdog/go-bitbucket v0.0.0-20201024094602-708c3f6a7de0
-	github.com/stretchr/testify v1.11.1
+	github.com/stretchr/testify v1.12.0
 	github.com/vvakame/sdlog v1.2.0
 	gitlab.com/gitlab-org/api/client-go/v2 v2.58.0
 	go.opencensus.io v0.24.0
@@ -41,7 +41,6 @@ require (
 	github.com/aws/aws-sdk-go v1.43.31 // indirect
 	github.com/census-instrumentation/opencensus-proto v0.4.1 // indirect
 	github.com/cespare/xxhash/v2 v2.3.0 // indirect
-	github.com/davecgh/go-spew v1.1.2-0.20180830191138-d8f796af33cc // indirect
 	github.com/davidmz/go-pageant v1.0.2 // indirect
 	github.com/felixge/httpsnoop v1.0.4 // indirect
 	github.com/go-fed/httpsig v1.1.0 // indirect
@@ -59,9 +58,8 @@ require (
 	github.com/hashicorp/go-retryablehttp v0.7.8 // indirect
 	github.com/hashicorp/go-version v1.9.0 // indirect
 	github.com/jmespath/go-jmespath v0.4.0 // indirect
-	github.com/pmezard/go-difflib v1.0.1-0.20181226105442-5d4384ee4fb2 // indirect
 	github.com/prometheus/prometheus v2.5.0+incompatible // indirect
-	github.com/stretchr/objx v0.5.2 // indirect
+	github.com/stretchr/objx v0.5.3 // indirect
 	go.opentelemetry.io/auto/sdk v1.2.1 // indirect
 	go.opentelemetry.io/contrib/instrumentation/google.golang.org/grpc/otelgrpc v0.67.0 // indirect
 	go.opentelemetry.io/contrib/instrumentation/net/http/otelhttp v0.67.0 // indirect
