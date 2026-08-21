@@ -202,7 +202,7 @@ jobs:
       - uses: actions/setup-go@b7ad1dad31e06c5925ef5d2fc7ad053ef454303e # v7.0.0
         with:
           go-version-file: "go.mod"
-      - uses: reviewdog/action-staticcheck@564f18c6297af36f7b10b6c7a72e814341bd813a # v1.29.0
+      - uses: reviewdog/action-staticcheck@d56bb1c67a1d68a29d5d4227a0b8ff4faceba310 # v1.30.0
         with:
           github_token: ${{ secrets.github_token }}
           reporter: github-pr-review
