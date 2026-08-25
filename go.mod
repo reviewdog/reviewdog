@@ -5,8 +5,8 @@ go 1.26.0
 require (
 	cloud.google.com/go/compute/metadata v0.9.0
 	cloud.google.com/go/datastore v1.26.0
-	code.gitea.io/sdk/gitea v0.25.1
 	contrib.go.opencensus.io/exporter/stackdriver v0.13.12
+	gitea.dev/sdk v1.2.0
 	github.com/bradleyfalzon/ghinstallation/v2 v2.19.0
 	github.com/google/go-cmp v0.7.0
 	github.com/google/go-github/v90 v90.0.0
@@ -43,7 +43,6 @@ require (
 	github.com/cespare/xxhash/v2 v2.3.0 // indirect
 	github.com/davidmz/go-pageant v1.0.2 // indirect
 	github.com/felixge/httpsnoop v1.0.4 // indirect
-	github.com/go-fed/httpsig v1.1.0 // indirect
 	github.com/go-logr/logr v1.4.4 // indirect
 	github.com/go-logr/stdr v1.2.2 // indirect
 	github.com/golang-jwt/jwt/v4 v4.5.2 // indirect

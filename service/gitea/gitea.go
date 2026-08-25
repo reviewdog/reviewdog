@@ -9,7 +9,7 @@ import (
 	"strings"
 	"sync"
 
-	"code.gitea.io/sdk/gitea"
+	gitea "gitea.dev/sdk"
 	"github.com/reviewdog/reviewdog"
 	"github.com/reviewdog/reviewdog/pathutil"
 	"github.com/reviewdog/reviewdog/proto/rdf"
@@ -74,15 +74,15 @@ func (g *PullRequest) Post(_ context.Context, c *reviewdog.Comment) error {
 func (*PullRequest) ShouldPrependGitRelDir() bool { return true }
 
 // Flush posts comments which has not been posted yet.
-func (g *PullRequest) Flush(_ context.Context) error {
+func (g *PullRequest) Flush(ctx context.Context) error {
 	g.muComments.Lock()
 	defer g.muComments.Unlock()
 	defer func() { g.postComments = nil }()
 
-	if err := g.setPostedComment(); err != nil {
+	if err := g.setPostedComment(ctx); err != nil {
 		return err
 	}
-	return g.postAsReviewComment()
+	return g.postAsReviewComment(ctx)
 }
 
 // SetTool sets tool name to use in comments.
@@ -95,7 +95,7 @@ func (g *PullRequest) SetMaxCommentsPerReview(max int) {
 	g.maxCommentsPerReview = max
 }
 
-func (g *PullRequest) postAsReviewComment() error {
+func (g *PullRequest) postAsReviewComment(ctx context.Context) error {
 	postComments := g.postComments
 	g.postComments = nil
 	reviewComments := make([]gitea.CreatePullReviewComment, 0, len(postComments))
@@ -104,7 +104,7 @@ func (g *PullRequest) postAsReviewComment() error {
 	if err != nil {
 		return err
 	}
-	repoBaseHTMLURL, err := g.repoBaseHTMLURL()
+	repoBaseHTMLURL, err := g.repoBaseHTMLURL(ctx)
 	if err != nil {
 		return err
 	}
@@ -144,7 +144,7 @@ func (g *PullRequest) postAsReviewComment() error {
 			Comments: reviewComments,
 			Body:     g.remainingCommentsSummary(remaining, repoBaseHTMLURL, rootPath),
 		}
-		_, _, err := g.cli.CreatePullReview(g.owner, g.repo, g.pr, review)
+		_, _, err := g.cli.PullRequests.CreatePullReview(ctx, g.owner, g.repo, g.pr, review)
 		if err != nil {
 			log.Printf("reviewdog: failed to post a review comment: %v", err)
 			return err
@@ -156,7 +156,7 @@ func (g *PullRequest) postAsReviewComment() error {
 			// Do not remove comment with replies.
 			continue
 		}
-		if _, err := g.cli.DeleteIssueComment(g.owner, g.repo, c.ID); err != nil {
+		if _, err := g.cli.Issues.DeleteIssueComment(ctx, g.owner, g.repo, c.ID); err != nil {
 			return fmt.Errorf("failed to delete comment (id=%d): %w", c.ID, err)
 		}
 	}
@@ -237,11 +237,11 @@ func (g *PullRequest) remainingCommentsSummary(remaining []*reviewdog.Comment, b
 }
 
 // setPostedComment get posted comments from Gitea.
-func (g *PullRequest) setPostedComment() error {
+func (g *PullRequest) setPostedComment(ctx context.Context) error {
 	g.postedcs = make(commentutil.PostedComments)
 	g.outdatedComments = make(map[string]*gitea.PullReviewComment)
 	g.prCommentWithReply = make(map[int64]bool)
-	cs, err := g.comment()
+	cs, err := g.comment(ctx)
 	if err != nil {
 		return err
 	}
@@ -283,16 +283,16 @@ func (g *PullRequest) Strip() int {
 	return 1
 }
 
-func (g *PullRequest) repoBaseHTMLURL() (string, error) {
-	repo, _, err := g.cli.GetRepo(g.owner, g.repo)
+func (g *PullRequest) repoBaseHTMLURL(ctx context.Context) (string, error) {
+	repo, _, err := g.cli.Repositories.GetRepo(ctx, g.owner, g.repo)
 	if err != nil {
 		return "", fmt.Errorf("failed to build repo base HTML URL: %w", err)
 	}
 	return url.JoinPath(repo.HTMLURL, "src", "commit", g.sha)
 }
 
-func (g *PullRequest) comment() ([]*gitea.PullReviewComment, error) {
-	prs, err := listAllPullRequestReviews(g.cli, g.owner, g.repo, g.pr, gitea.ListPullReviewsOptions{
+func (g *PullRequest) comment(ctx context.Context) ([]*gitea.PullReviewComment, error) {
+	prs, err := listAllPullRequestReviews(ctx, g.cli, g.owner, g.repo, g.pr, gitea.ListPullReviewsOptions{
 		ListOptions: gitea.ListOptions{
 			Page:     1,
 			PageSize: 100,
@@ -304,7 +304,7 @@ func (g *PullRequest) comment() ([]*gitea.PullReviewComment, error) {
 
 	comments := make([]*gitea.PullReviewComment, 0, len(prs))
 	for _, pr := range prs {
-		c, _, err := g.cli.ListPullReviewComments(g.owner, g.repo, g.pr, pr.ID)
+		c, _, err := g.cli.PullRequests.ListPullReviewComments(ctx, g.owner, g.repo, g.pr, pr.ID)
 		if err != nil {
 			return nil, err
 		}
@@ -315,10 +315,10 @@ func (g *PullRequest) comment() ([]*gitea.PullReviewComment, error) {
 	return comments, nil
 }
 
-func listAllPullRequestReviews(cli *gitea.Client,
+func listAllPullRequestReviews(ctx context.Context, cli *gitea.Client,
 	owner, repo string, pr int64, opts gitea.ListPullReviewsOptions,
 ) ([]*gitea.PullReview, error) {
-	reviews, resp, err := cli.ListPullReviews(owner, repo, pr, opts)
+	reviews, resp, err := cli.PullRequests.ListPullReviews(ctx, owner, repo, pr, opts)
 	if err != nil {
 		return nil, err
 	}
@@ -334,7 +334,7 @@ func listAllPullRequestReviews(cli *gitea.Client,
 		},
 	}
 
-	restReviews, err := listAllPullRequestReviews(cli, owner, repo, pr, newOpts)
+	restReviews, err := listAllPullRequestReviews(ctx, cli, owner, repo, pr, newOpts)
 	if err != nil {
 		return nil, err
 	}
