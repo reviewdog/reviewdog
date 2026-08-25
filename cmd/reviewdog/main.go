@@ -563,7 +563,7 @@ func giteaService(ctx context.Context, opt *option) (gs *giteaservice.PullReques
 		g.PullRequest = int(prID)
 	}
 
-	gs, err = giteaservice.NewGiteaPullRequest(client, g.Owner, g.Repo, int64(g.PullRequest), g.SHA, toolName(opt))
+	gs, err = giteaservice.NewGiteaPullRequest(client, g.Owner, g.Repo, int64(g.PullRequest), g.SHA, opt.level, toolName(opt))
 	if err != nil {
 		return nil, false, err
 	}
