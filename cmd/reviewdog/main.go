@@ -17,7 +17,7 @@ import (
 	"strings"
 	"text/tabwriter"
 
-	"code.gitea.io/sdk/gitea"
+	gitea "gitea.dev/sdk"
 	"golang.org/x/build/gerrit"
 	"golang.org/x/oauth2"
 
@@ -555,7 +555,7 @@ func giteaService(ctx context.Context, opt *option) (gs *giteaservice.PullReques
 			return nil, false, nil
 		}
 
-		prID, err := getGiteaPullRequestIDByBranchOrCommit(client, g)
+		prID, err := getGiteaPullRequestIDByBranchOrCommit(ctx, client, g)
 		if err != nil {
 			fmt.Fprintln(os.Stderr, err)
 			return nil, false, nil
@@ -563,7 +563,7 @@ func giteaService(ctx context.Context, opt *option) (gs *giteaservice.PullReques
 		g.PullRequest = int(prID)
 	}
 
-	gs, err = giteaservice.NewGiteaPullRequest(client, g.Owner, g.Repo, int64(g.PullRequest), g.SHA, toolName(opt))
+	gs, err = giteaservice.NewGiteaPullRequest(client, g.Owner, g.Repo, int64(g.PullRequest), g.SHA, opt.level, toolName(opt))
 	if err != nil {
 		return nil, false, err
 	}
@@ -575,7 +575,7 @@ func giteaService(ctx context.Context, opt *option) (gs *giteaservice.PullReques
 	return gs, true, nil
 }
 
-func getGiteaPullRequestIDByBranchOrCommit(client *gitea.Client, info *cienv.BuildInfo) (int64, error) {
+func getGiteaPullRequestIDByBranchOrCommit(ctx context.Context, client *gitea.Client, info *cienv.BuildInfo) (int64, error) {
 	options := gitea.ListPullRequestsOptions{
 		Sort:  "updated",
 		State: gitea.StateOpen,
@@ -586,7 +586,7 @@ func getGiteaPullRequestIDByBranchOrCommit(client *gitea.Client, info *cienv.Bui
 	}
 
 	for {
-		pullRequests, resp, err := client.ListRepoPullRequests(info.Owner, info.Repo, options)
+		pullRequests, resp, err := client.PullRequests.ListRepoPullRequests(ctx, info.Owner, info.Repo, options)
 		if err != nil {
 			return 0, err
 		}
@@ -624,7 +624,6 @@ func getGiteaPullRequestIDByBranchOrCommit(client *gitea.Client, info *cienv.Bui
 
 func giteaClient(ctx context.Context, url, token string) (*gitea.Client, error) {
 	client, err := gitea.NewClient(url,
-		gitea.SetContext(ctx),
 		gitea.SetToken(token),
 		gitea.SetHTTPClient(newHTTPClient()),
 	)
@@ -632,7 +631,7 @@ func giteaClient(ctx context.Context, url, token string) (*gitea.Client, error) 
 		return nil, err
 	}
 
-	return client, client.CheckServerVersionConstraint(">=1.17.0")
+	return client, client.CheckServerVersionConstraint(ctx, ">=1.17.0")
 }
 
 func githubService(ctx context.Context, opt *option) (gs *githubservice.PullRequest, isPR bool, err error) {

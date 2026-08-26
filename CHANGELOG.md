@@ -12,6 +12,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - [#2257](https://github.com/reviewdog/reviewdog/pull/2257) Use -trimpath flag for reproducible build
 - [#2513](https://github.com/reviewdog/reviewdog/pull/2513) Drop support of windows/arm
 - [#2543](https://github.com/reviewdog/reviewdog/pull/2543) Update `gitlab-mr-discussion` reporter to embed a fingerprint meta-comment in each posted note and automatically resolve previously-posted discussions whose diagnostic is no longer reported (fixes [#1150](https://github.com/reviewdog/reviewdog/issues/1150)).
+- [#2747](https://github.com/reviewdog/reviewdog/pull/2747) Update `gitea-pr-review` reporter to be on par with `github-pr-review`: report results outside the diff context as pull request comments, fallback to Actions logging commands for results outside the diff file and honor the `-level` flag.
 
 ### :bug: Fixes
 

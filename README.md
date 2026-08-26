@@ -943,12 +943,13 @@ so reviewdog will use [Check annotation](https://docs.github.com/en/rest/checks/
 | **`gitlab-mr-commit`**       | OK      | Partially Supported [2] | Partially Supported [2] | Partially Supported [2] |
 | **`gerrit-change-review`**   | OK      | OK? [3]        | OK? [3]                 | Partially Supported? [2][3] |
 | **`bitbucket-code-report`**  | NO [4]  | NO [4]         | NO [4]                  | OK |
-| **`gitea-pr-review`**        | OK      | OK             | Partially Supported [2] | Partially Supported [2] |
+| **`gitea-pr-review`**        | OK      | OK             | Partially Supported [5] | Partially Supported [5] |
 
 - [1] Report results that are outside the diff file with Check annotation as fallback if it's running in GitHub actions instead of Review API (comments). All results will be reported to console as well.
 - [2] Report results that are outside the diff file to console.
 - [3] It should work, but not been verified yet.
 - [4] Not implemented at the moment
+- [5] Report results that are outside the diff context as pull request comments and results that are outside the diff file with Actions logging commands as fallback if it's running in Gitea Actions. All results will be reported to console as well.
 
 ## Debugging
 
