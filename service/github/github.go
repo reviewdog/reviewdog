@@ -10,7 +10,7 @@ import (
 	"strings"
 	"sync"
 
-	"github.com/google/go-github/v90/github"
+	"github.com/google/go-github/v91/github"
 
 	"github.com/reviewdog/reviewdog"
 	"github.com/reviewdog/reviewdog/cienv"
@@ -131,7 +131,7 @@ func (g *PullRequest) postAsReviewComment(ctx context.Context) error {
 	g.postComments = nil
 	rawComments := make([]*reviewdog.Comment, 0, len(postComments))
 	reviewComments := make([]*github.DraftReviewComment, 0, len(postComments))
-	fileComments := make([]*github.PullRequestComment, 0)
+	fileComments := make([]github.CreatePullRequestCommentRequest, 0)
 	remaining := make([]*reviewdog.Comment, 0)
 	rootPath, err := serviceutil.GetGitRoot()
 	if err != nil {
@@ -268,12 +268,12 @@ func buildDraftReviewComment(c *reviewdog.Comment, body string) *github.DraftRev
 	return r
 }
 
-func buildPullRequestFileComment(c *reviewdog.Comment, body string, sha string) *github.PullRequestComment {
-	return &github.PullRequestComment{
-		Path:        github.Ptr(c.Result.Diagnostic.GetLocation().GetPath()),
+func buildPullRequestFileComment(c *reviewdog.Comment, body string, sha string) github.CreatePullRequestCommentRequest {
+	return github.CreatePullRequestCommentRequest{
+		Path:        c.Result.Diagnostic.GetLocation().GetPath(),
 		Side:        github.Ptr("RIGHT"),
-		Body:        github.Ptr(body),
-		CommitID:    github.Ptr(sha),
+		Body:        body,
+		CommitID:    sha,
 		SubjectType: github.Ptr("file"),
 	}
 }

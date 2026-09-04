@@ -9,7 +9,7 @@ import (
 	"testing"
 
 	"github.com/google/go-cmp/cmp"
-	"github.com/google/go-github/v90/github"
+	"github.com/google/go-github/v91/github"
 	"github.com/reviewdog/reviewdog/doghouse"
 	"github.com/reviewdog/reviewdog/proto/rdf"
 )

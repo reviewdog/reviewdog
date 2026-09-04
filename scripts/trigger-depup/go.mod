@@ -5,7 +5,6 @@ go 1.26.0
 toolchain go1.27.1
 
 require (
-	github.com/google/go-github/v90 v90.0.0
 	github.com/google/go-github/v91 v91.0.0
 )
 
