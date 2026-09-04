@@ -9,7 +9,7 @@ import (
 	"testing"
 
 	"github.com/google/go-cmp/cmp"
-	"github.com/google/go-github/v90/github"
+	"github.com/google/go-github/v91/github"
 	"github.com/reviewdog/reviewdog/doghouse"
 	"github.com/reviewdog/reviewdog/proto/rdf"
 )
@@ -203,7 +203,7 @@ func TestCheck_OK(t *testing.T) {
 		w.Write([]byte(sampleDiff))
 	})
 	mux.HandleFunc("/repos/haya14busa/reviewdog/check-runs", func(w http.ResponseWriter, r *http.Request) {
-		if err := json.NewEncoder(w).Encode(&github.CheckRun{ID: github.Ptr(int64(wantCheckID))}); err != nil {
+		if err := json.NewEncoder(w).Encode(&github.CheckRun{ID: new(int64(wantCheckID))}); err != nil {
 			t.Fatal(err)
 		}
 	})
@@ -214,22 +214,22 @@ func TestCheck_OK(t *testing.T) {
 		}
 		wantAnnotations := []*github.CheckRunAnnotation{
 			{
-				Path:            github.Ptr("sample.new.txt"),
-				StartLine:       github.Ptr(2),
-				EndLine:         github.Ptr(2),
-				AnnotationLevel: github.Ptr("warning"),
-				Message:         github.Ptr("test message"),
-				Title:           github.Ptr("[haya14busa-linter] sample.new.txt#L2"),
-				RawDetails:      github.Ptr("raw test message"),
+				Path:            new("sample.new.txt"),
+				StartLine:       new(2),
+				EndLine:         new(2),
+				AnnotationLevel: new("warning"),
+				Message:         new("test message"),
+				Title:           new("[haya14busa-linter] sample.new.txt#L2"),
+				RawDetails:      new("raw test message"),
 			},
 			{
-				Path:            github.Ptr("sample.new.txt"),
-				StartLine:       github.Ptr(2),
-				EndLine:         github.Ptr(2),
-				AnnotationLevel: github.Ptr("warning"),
-				Message:         github.Ptr("request from old clients"),
-				Title:           github.Ptr("[haya14busa-linter] sample.new.txt#L2"),
-				RawDetails:      github.Ptr("raw message from old clients"),
+				Path:            new("sample.new.txt"),
+				StartLine:       new(2),
+				EndLine:         new(2),
+				AnnotationLevel: new("warning"),
+				Message:         new("request from old clients"),
+				Title:           new("[haya14busa-linter] sample.new.txt#L2"),
+				RawDetails:      new("raw message from old clients"),
 			},
 		}
 		if req.GetStatus() != "completed" {
@@ -237,7 +237,7 @@ func TestCheck_OK(t *testing.T) {
 				t.Errorf("Annotation diff found:\n%s", d)
 			}
 		}
-		if err := json.NewEncoder(w).Encode(&github.CheckRun{HTMLURL: github.Ptr(reportURL)}); err != nil {
+		if err := json.NewEncoder(w).Encode(&github.CheckRun{HTMLURL: new(reportURL)}); err != nil {
 			t.Fatal(err)
 		}
 	})
@@ -249,7 +249,7 @@ func TestCheck_OK(t *testing.T) {
 	if err != nil {
 		t.Fatal(err)
 	}
-	cli, err := github.NewClient(github.WithURLs(github.Ptr(baseURL.String()), nil))
+	cli, err := github.NewClient(github.WithURLs(new(baseURL.String()), nil))
 	if err != nil {
 		t.Fatal(err)
 	}

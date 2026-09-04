@@ -10,7 +10,7 @@ import (
 	"strings"
 	"sync"
 
-	"github.com/google/go-github/v90/github"
+	"github.com/google/go-github/v91/github"
 
 	"github.com/reviewdog/reviewdog"
 	"github.com/reviewdog/reviewdog/cienv"
@@ -131,7 +131,7 @@ func (g *PullRequest) postAsReviewComment(ctx context.Context) error {
 	g.postComments = nil
 	rawComments := make([]*reviewdog.Comment, 0, len(postComments))
 	reviewComments := make([]*github.DraftReviewComment, 0, len(postComments))
-	fileComments := make([]*github.PullRequestComment, 0)
+	fileComments := make([]github.CreatePullRequestCommentRequest, 0)
 	remaining := make([]*reviewdog.Comment, 0)
 	rootPath, err := serviceutil.GetGitRoot()
 	if err != nil {
@@ -194,9 +194,9 @@ func (g *PullRequest) postAsReviewComment(ctx context.Context) error {
 		// send review comments to GitHub.
 		review := &github.PullRequestReviewRequest{
 			CommitID: &g.sha,
-			Event:    github.Ptr("COMMENT"),
+			Event:    new("COMMENT"),
 			Comments: reviewComments,
-			Body:     github.Ptr(g.remainingCommentsSummary(remaining, repoBaseHTMLURL, rootPath)),
+			Body:     new(g.remainingCommentsSummary(remaining, repoBaseHTMLURL, rootPath)),
 		}
 		_, _, err := g.cli.PullRequests.CreateReview(ctx, g.owner, g.repo, g.pr, review)
 		if err != nil {
@@ -255,26 +255,26 @@ func buildDraftReviewComment(c *reviewdog.Comment, body string) *github.DraftRev
 	loc := c.Result.Diagnostic.GetLocation()
 	startLine, endLine := githubCommentLineRange(c)
 	r := &github.DraftReviewComment{
-		Path: github.Ptr(loc.GetPath()),
-		Side: github.Ptr("RIGHT"),
-		Body: github.Ptr(body),
-		Line: github.Ptr(endLine),
+		Path: new(loc.GetPath()),
+		Side: new("RIGHT"),
+		Body: new(body),
+		Line: new(endLine),
 	}
 	// GitHub API: Start line must precede the end line.
 	if startLine < endLine {
-		r.StartSide = github.Ptr("RIGHT")
-		r.StartLine = github.Ptr(startLine)
+		r.StartSide = new("RIGHT")
+		r.StartLine = new(startLine)
 	}
 	return r
 }
 
-func buildPullRequestFileComment(c *reviewdog.Comment, body string, sha string) *github.PullRequestComment {
-	return &github.PullRequestComment{
-		Path:        github.Ptr(c.Result.Diagnostic.GetLocation().GetPath()),
-		Side:        github.Ptr("RIGHT"),
-		Body:        github.Ptr(body),
-		CommitID:    github.Ptr(sha),
-		SubjectType: github.Ptr("file"),
+func buildPullRequestFileComment(c *reviewdog.Comment, body string, sha string) github.CreatePullRequestCommentRequest {
+	return github.CreatePullRequestCommentRequest{
+		Path:        c.Result.Diagnostic.GetLocation().GetPath(),
+		Side:        new("RIGHT"),
+		Body:        body,
+		CommitID:    sha,
+		SubjectType: new("file"),
 	}
 }
 
