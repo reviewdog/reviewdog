@@ -769,7 +769,7 @@ func githubClient(ctx context.Context, token string) (*github.Client, error) {
 	}
 	client, err := github.NewClient(
 		github.WithHTTPClient(tc),
-		github.WithURLs(github.Ptr(baseURL.String()), nil),
+		github.WithURLs(new(baseURL.String()), nil),
 	)
 	if err != nil {
 		return nil, err

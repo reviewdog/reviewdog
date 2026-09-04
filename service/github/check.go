@@ -142,7 +142,7 @@ func (ch *Check) createCheck(ctx context.Context) (*github.CheckRun, error) {
 	opt := github.CreateCheckRunOptions{
 		Name:    ch.checkName(),
 		HeadSHA: ch.SHA,
-		Status:  github.Ptr("in_progress"),
+		Status:  new("in_progress"),
 	}
 	checkRun, _, err := ch.CLI.Checks.CreateCheckRun(ctx, ch.Owner, ch.Repo, opt)
 	return checkRun, err
@@ -165,12 +165,12 @@ func (ch *Check) postCheck(ctx context.Context, checkID int64) (*github.CheckRun
 	conclusion := ch.conclusion(annotations)
 	opt := github.UpdateCheckRunOptions{
 		Name:        ch.checkName(),
-		Status:      github.Ptr("completed"),
-		Conclusion:  github.Ptr(conclusion),
+		Status:      new("completed"),
+		Conclusion:  new(conclusion),
 		CompletedAt: &github.Timestamp{Time: time.Now()},
 		Output: &github.CheckRunOutput{
-			Title:   github.Ptr(ch.checkTitle()),
-			Summary: github.Ptr(ch.summary(ch.postComments)),
+			Title:   new(ch.checkTitle()),
+			Summary: new(ch.summary(ch.postComments)),
 		},
 	}
 	checkRun, _, err := ch.CLI.Checks.UpdateCheckRun(ctx, ch.Owner, ch.Repo, checkID, opt)
@@ -188,22 +188,22 @@ func (ch *Check) toCheckRunAnnotation(c *filter.FilteredDiagnostic) *github.Chec
 		endLine = startLine
 	}
 	a := &github.CheckRunAnnotation{
-		Path:            github.Ptr(loc.GetPath()),
-		StartLine:       github.Ptr(startLine),
-		EndLine:         github.Ptr(endLine),
-		AnnotationLevel: github.Ptr(ch.annotationLevel(c.Diagnostic.Severity)),
-		Message:         github.Ptr(c.Diagnostic.GetMessage()),
-		Title:           github.Ptr(ch.buildTitle(c)),
+		Path:            new(loc.GetPath()),
+		StartLine:       new(startLine),
+		EndLine:         new(endLine),
+		AnnotationLevel: new(ch.annotationLevel(c.Diagnostic.Severity)),
+		Message:         new(c.Diagnostic.GetMessage()),
+		Title:           new(ch.buildTitle(c)),
 	}
 	// Annotations only support start_column and end_column on the same line.
 	if startLine == endLine {
 		if s, e := loc.GetRange().GetStart().GetColumn(), loc.GetRange().GetEnd().GetColumn(); s != 0 && e != 0 {
-			a.StartColumn = github.Ptr(int(s))
-			a.EndColumn = github.Ptr(int(e))
+			a.StartColumn = new(int(s))
+			a.EndColumn = new(int(e))
 		}
 	}
 	if s := c.Diagnostic.GetOriginalOutput(); s != "" {
-		a.RawDetails = github.Ptr(s)
+		a.RawDetails = new(s)
 	}
 	return a
 }
@@ -239,8 +239,8 @@ func (ch *Check) postAnnotations(ctx context.Context, checkID int64, annotations
 	opt := github.UpdateCheckRunOptions{
 		Name: ch.checkName(),
 		Output: &github.CheckRunOutput{
-			Title:       github.Ptr(ch.checkTitle()),
-			Summary:     github.Ptr(""), // Post summary with the last request.
+			Title:       new(ch.checkTitle()),
+			Summary:     new(""), // Post summary with the last request.
 			Annotations: annotations[:min(maxAnnotationsPerRequest, len(annotations))],
 		},
 	}
