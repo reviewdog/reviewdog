@@ -40,6 +40,27 @@ func setupGitHubClient() *github.Client {
 	return client
 }
 
+func TestBuildSingleSuggestionPreservesBlankLine(t *testing.T) {
+	c := &reviewdog.Comment{
+		Result: &filter.FilteredDiagnostic{
+			Diagnostic: &rdf.Diagnostic{
+				Location: &rdf.Location{Range: &rdf.Range{Start: &rdf.Position{Line: 15}}},
+			},
+			SourceLines: map[int]string{15: ""},
+		},
+	}
+	s := &rdf.Suggestion{Range: &rdf.Range{Start: &rdf.Position{Line: 15}}}
+
+	got, err := buildSingleSuggestion(c, s)
+	if err != nil {
+		t.Fatalf("buildSingleSuggestion() error = %v", err)
+	}
+	const want = "```suggestion\n\n```"
+	if got != want {
+		t.Errorf("buildSingleSuggestion() = %q, want %q", got, want)
+	}
+}
+
 func setupEnvs() (cleanup func()) {
 	var cleanEnvs = []string{
 		"GITHUB_ACTIONS",
