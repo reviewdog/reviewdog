@@ -1,6 +1,7 @@
 package parser
 
 import (
+	"bufio"
 	"strings"
 	"testing"
 )
@@ -23,5 +24,14 @@ func TestRDJSONLParser(t *testing.T) {
 		if got, want := d.GetOriginalOutput(), sampleLines[i]; got != want {
 			t.Errorf("%d: got %v, want %v", i, got, want)
 		}
+	}
+}
+
+func TestRDJSONLParserLineTooLong(t *testing.T) {
+	longLine := strings.Repeat("a", bufio.MaxScanTokenSize)
+	p := NewRDJSONLParser()
+	_, err := p.Parse(strings.NewReader(longLine))
+	if err != bufio.ErrTooLong {
+		t.Errorf("expected bufio.ErrTooLong, got %s", err)
 	}
 }
