@@ -8,7 +8,7 @@ import (
 	"strings"
 	"sync"
 
-	gitlab "gitlab.com/gitlab-org/api/client-go/v2"
+	gitlab "gitlab.com/gitlab-org/api/client-go/v3"
 	"golang.org/x/sync/errgroup"
 
 	"github.com/reviewdog/reviewdog"
@@ -158,19 +158,19 @@ func (g *MergeRequestDiscussionCommenter) postCommentsForEach(ctx context.Contex
 		body += fmt.Sprintf("\n%s\n", serviceutil.BuildMetaComment(fprint, g.toolName))
 		eg.Go(func() error {
 			pos := &gitlab.PositionOptions{
-				StartSHA:     gitlab.Ptr(targetBranch.Commit.ID),
-				HeadSHA:      gitlab.Ptr(g.sha),
-				BaseSHA:      gitlab.Ptr(targetBranch.Commit.ID),
-				PositionType: gitlab.Ptr("text"),
-				NewPath:      gitlab.Ptr(loc.GetPath()),
-				NewLine:      gitlab.Ptr(int64(lnum)),
+				StartSHA:     new(targetBranch.Commit.ID),
+				HeadSHA:      new(g.sha),
+				BaseSHA:      new(targetBranch.Commit.ID),
+				PositionType: new("text"),
+				NewPath:      new(loc.GetPath()),
+				NewLine:      new(int64(lnum)),
 			}
 			if c.Result.OldPath != "" && c.Result.OldLine != 0 {
-				pos.OldPath = gitlab.Ptr(c.Result.OldPath)
-				pos.OldLine = gitlab.Ptr(int64(c.Result.OldLine))
+				pos.OldPath = new(c.Result.OldPath)
+				pos.OldLine = new(int64(c.Result.OldLine))
 			}
 			discussion := &gitlab.CreateMergeRequestDiscussionOptions{
-				Body:     gitlab.Ptr(body),
+				Body:     new(body),
 				Position: pos,
 			}
 			_, _, err := g.cli.Discussions.CreateMergeRequestDiscussion(g.projects, int64(g.pr), discussion)
@@ -206,7 +206,7 @@ func (g *MergeRequestDiscussionCommenter) resolveOutdatedDiscussions(ctx context
 				defer wg.Done()
 				_, _, err := g.cli.Discussions.ResolveMergeRequestDiscussion(
 					g.projects, int64(g.pr), discussionID,
-					&gitlab.ResolveMergeRequestDiscussionOptions{Resolved: gitlab.Ptr(true)},
+					&gitlab.ResolveMergeRequestDiscussionOptions{Resolved: new(true)},
 					gitlab.WithContext(ctx),
 				)
 				if err != nil {

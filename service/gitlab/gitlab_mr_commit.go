@@ -7,7 +7,7 @@ import (
 	"strings"
 	"sync"
 
-	gitlab "gitlab.com/gitlab-org/api/client-go/v2"
+	gitlab "gitlab.com/gitlab-org/api/client-go/v3"
 	"golang.org/x/sync/errgroup"
 
 	"github.com/reviewdog/reviewdog"
@@ -85,10 +85,10 @@ func (g *MergeRequestCommitCommenter) postCommentsForEach(ctx context.Context) e
 				commitID = g.sha
 			}
 			prcomment := &gitlab.PostCommitCommentOptions{
-				Note:     gitlab.Ptr(body),
-				Path:     gitlab.Ptr(loc.GetPath()),
-				Line:     gitlab.Ptr(int64(lnum)),
-				LineType: gitlab.Ptr("new"),
+				Note:     new(body),
+				Path:     new(loc.GetPath()),
+				Line:     new(int64(lnum)),
+				LineType: new("new"),
 			}
 			_, _, err = g.cli.Commits.PostCommitComment(g.projects, commitID, prcomment, gitlab.WithContext(ctx))
 			return err
