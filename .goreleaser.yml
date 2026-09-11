@@ -50,8 +50,6 @@ homebrew_casks:
     homepage: https://github.com/reviewdog/reviewdog
     description: Automated code review tool integrated with any code analysis tools regardless of programming language.
     license: MIT
-    url:
-      verified: github.com/reviewdog/reviewdog/releases/download
     hooks:
       post:
         # The released binaries are not notarized; strip the quarantine bit so
