@@ -25,3 +25,15 @@ func TestRDJSONLParser(t *testing.T) {
 		}
 	}
 }
+
+func TestRDJSONLParser_PreservesSuggestionDescription(t *testing.T) {
+	const sample = `{"message":"message","location":{"path":"main.go"},"suggestions":[{"range":{"start":{"line":1}},"text":"replacement","description":"use the replacement"}]}`
+
+	diagnostics, err := NewRDJSONLParser().Parse(strings.NewReader(sample))
+	if err != nil {
+		t.Fatal(err)
+	}
+	if got, want := diagnostics[0].GetSuggestions()[0].GetDescription(), "use the replacement"; got != want {
+		t.Errorf("suggestion description = %q, want %q", got, want)
+	}
+}

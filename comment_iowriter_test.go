@@ -149,6 +149,21 @@ func TestRDJSONLCommentWriter_Post(t *testing.T) {
 			},
 			want: `{"message":"message","location":{"path":"/path/to/file","range":{"start":{"column":14}}},"source":{"name":"tool name in Diagnostic","url":"tool url"}}`,
 		},
+		{
+			in: &Comment{
+				Result: &filter.FilteredDiagnostic{
+					Diagnostic: &rdf.Diagnostic{
+						Location: &rdf.Location{Path: "/path/to/file"},
+						Message:  "message",
+						Suggestions: []*rdf.Suggestion{{
+							Text:        "replacement",
+							Description: "use the replacement",
+						}},
+					},
+				},
+			},
+			want: `{"message":"message","location":{"path":"/path/to/file"},"suggestions":[{"text":"replacement","description":"use the replacement"}]}`,
+		},
 	}
 	for _, tt := range tests {
 		buf := new(bytes.Buffer)
