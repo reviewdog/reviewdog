@@ -8,6 +8,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### :sparkles: Release Note <!-- optional -->
 
+The Homebrew package has migrated from a formula to a cask. Install it with `brew install --cask reviewdog/tap/reviewdog`.
+
 ### :rocket: Enhancements
 - [#2257](https://github.com/reviewdog/reviewdog/pull/2257) Use -trimpath flag for reproducible build
 - [#2513](https://github.com/reviewdog/reviewdog/pull/2513) Drop support of windows/arm
