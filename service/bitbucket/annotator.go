@@ -35,6 +35,7 @@ type ReportAnnotator struct {
 	owner, repo string
 
 	muAnnotations sync.Mutex
+	activeTool    string
 	// store annotations in map per tool name
 	// so we can create report per tool
 	comments map[string][]*reviewdog.Comment
@@ -92,50 +93,72 @@ func (r *ReportAnnotator) Post(_ context.Context, c *reviewdog.Comment) error {
 
 func (*ReportAnnotator) ShouldPrependGitRelDir() bool { return true }
 
+// SetTool selects the project runner whose results the next Flush call publishes.
+func (r *ReportAnnotator) SetTool(toolName, _ string) {
+	r.muAnnotations.Lock()
+	defer r.muAnnotations.Unlock()
+	r.activeTool = toolName
+}
+
 // Flush posts comments which has not been posted yet.
 func (r *ReportAnnotator) Flush(ctx context.Context) error {
 	r.muAnnotations.Lock()
 	defer r.muAnnotations.Unlock()
-	defer func() { r.comments = nil }()
+	defer func() {
+		r.comments = make(map[string][]*reviewdog.Comment)
+		r.activeTool = ""
+	}()
+
+	if r.activeTool != "" {
+		return r.flushTool(ctx, r.activeTool, r.comments[r.activeTool])
+	}
 
 	// create/update/annotate report per tool
 	for tool, comments := range r.comments {
-		reportID := reportID(tool, reporter)
-		title := reportTitle(tool, reporter)
-		if len(comments) == 0 {
-			// if no annotation, create Passed report
-			if err := r.createOrUpdateReport(ctx, reportID, title, reportResultPassed); err != nil {
-				return err
-			}
-			// and move one
-			continue
-		}
-
-		// create report or update report first, with the failed status
-		if err := r.createOrUpdateReport(ctx, reportID, title, reportResultFailed); err != nil {
+		if err := r.flushTool(ctx, tool, comments); err != nil {
 			return err
 		}
+	}
 
-		// send comments in batches, because of the api max payload size limit
-		for start, annCount := 0, len(comments); start < annCount; start += annotationsBatchSize {
-			end := start + annotationsBatchSize
+	return nil
+}
 
-			if end > annCount {
-				end = annCount
-			}
+func (r *ReportAnnotator) flushTool(
+	ctx context.Context,
+	tool string,
+	comments []*reviewdog.Comment,
+) error {
+	reportID := reportID(tool, reporter)
+	title := reportTitle(tool, reporter)
+	if len(comments) == 0 {
+		// if no annotation, create Passed report
+		return r.createOrUpdateReport(ctx, reportID, title, reportResultPassed)
+	}
 
-			req := &AnnotationsRequest{
-				Owner:      r.owner,
-				Repository: r.repo,
-				Commit:     r.sha,
-				ReportID:   reportID,
-				Comments:   comments[start:end],
-			}
+	// create report or update report first, with the failed status
+	if err := r.createOrUpdateReport(ctx, reportID, title, reportResultFailed); err != nil {
+		return err
+	}
 
-			err := r.cli.CreateOrUpdateAnnotations(ctx, req)
-			if err != nil {
-				return fmt.Errorf("failed to post annotations: %w", err)
-			}
+	// send comments in batches, because of the api max payload size limit
+	for start, annCount := 0, len(comments); start < annCount; start += annotationsBatchSize {
+		end := start + annotationsBatchSize
+
+		if end > annCount {
+			end = annCount
+		}
+
+		req := &AnnotationsRequest{
+			Owner:      r.owner,
+			Repository: r.repo,
+			Commit:     r.sha,
+			ReportID:   reportID,
+			Comments:   comments[start:end],
+		}
+
+		err := r.cli.CreateOrUpdateAnnotations(ctx, req)
+		if err != nil {
+			return fmt.Errorf("failed to post annotations: %w", err)
 		}
 	}
 
