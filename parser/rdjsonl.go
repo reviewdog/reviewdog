@@ -35,5 +35,5 @@ func (p *RDJSONLParser) Parse(r io.Reader) ([]*rdf.Diagnostic, error) {
 		}
 		results = append(results, d)
 	}
-	return results, nil
+	return results, s.Err()
 }
