@@ -501,6 +501,10 @@ func buildSingleSuggestion(c *reviewdog.Comment, s *rdf.Suggestion) (string, err
 	if txt != "" {
 		sb.WriteString(txt)
 		sb.WriteString("\n")
+	} else if sourceLine, ok := c.Result.SourceLines[startLine]; ok && sourceLine == "" {
+		// A blank line in the pull request must remain a blank replacement.
+		// Without this line GitHub treats the suggestion as a deletion.
+		sb.WriteString("\n")
 	}
 	commentutil.WriteCodeFence(&sb, backticks)
 	return sb.String(), nil
