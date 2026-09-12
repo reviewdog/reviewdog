@@ -17,6 +17,7 @@ The Homebrew package has migrated from a formula to a cask. Install it with `bre
 - [#2747](https://github.com/reviewdog/reviewdog/pull/2747) Update `gitea-pr-review` reporter to be on par with `github-pr-review`: report results outside the diff context as pull request comments, fallback to Actions logging commands for results outside the diff file and honor the `-level` flag.
 
 ### :bug: Fixes
+- [#2477](https://github.com/reviewdog/reviewdog/pull/2477) Prevent deadlock when a runner outputs large `stderr`.
 
 - [#2586](https://github.com/reviewdog/reviewdog/pull/2586) Honor SARIF `result.suppressions` in SARIF parser — suppressed results (per SARIF 2.1.0 §3.27.23 / §3.35) no longer emit diagnostics
 - [#2481](https://github.com/reviewdog/reviewdog/pull/2481) Use CWD instead of git root in SARIF parser to prevent path doubling
