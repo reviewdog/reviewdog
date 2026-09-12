@@ -2,6 +2,7 @@ package reviewdog
 
 import (
 	"context"
+	"errors"
 	"os"
 	"strings"
 	"testing"
@@ -24,6 +25,50 @@ func (s *testWriter) Post(_ context.Context, c *Comment) error {
 }
 
 func (s *testWriter) ShouldPrependGitRelDir() bool { return s.shouldPrependGitRelDir }
+
+type errorDiffService struct {
+	called bool
+}
+
+func (s *errorDiffService) Diff(context.Context) ([]byte, error) {
+	s.called = true
+	return nil, errors.New("unexpected diff request")
+}
+
+func (*errorDiffService) Strip() int { return 0 }
+
+type testBulkWriter struct {
+	testWriter
+	flushed bool
+}
+
+func (s *testBulkWriter) Flush(context.Context) error {
+	s.flushed = true
+	return nil
+}
+
+func TestReviewdog_Run_skips_remote_work_without_diagnostics(t *testing.T) {
+	efm, err := errorformat.NewErrorformat([]string{`%f:%l:%c: %m`})
+	if err != nil {
+		t.Fatal(err)
+	}
+
+	diffService := &errorDiffService{}
+	comments := &testBulkWriter{
+		testWriter: testWriter{FakePost: func(*Comment) error { return nil }},
+	}
+	app := NewReviewdog("tool name", parser.NewErrorformatParser(efm), comments, diffService, filter.ModeAdded, FailLevelDefault)
+
+	if err := app.Run(context.Background(), strings.NewReader("")); err != nil {
+		t.Fatalf("Run() error = %v, want nil", err)
+	}
+	if diffService.called {
+		t.Error("Run() requested a diff without diagnostics")
+	}
+	if comments.flushed {
+		t.Error("Run() flushed comments without diagnostics")
+	}
+}
 
 func ExampleReviewdog() {
 	difftext := `diff --git a/golint.old.go b/golint.new.go
