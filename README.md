@@ -144,8 +144,8 @@ steps:
 You can also install reviewdog using brew:
 
 ```shell
-$ brew install reviewdog/tap/reviewdog
-$ brew upgrade reviewdog/tap/reviewdog
+$ brew install --cask reviewdog/tap/reviewdog
+$ brew upgrade --cask reviewdog/tap/reviewdog
 ```
 
 ### [Scoop](https://scoop.sh/) on Windows
