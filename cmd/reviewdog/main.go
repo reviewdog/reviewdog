@@ -21,10 +21,10 @@ import (
 	"golang.org/x/build/gerrit"
 	"golang.org/x/oauth2"
 
-	"github.com/google/go-github/v90/github"
+	"github.com/google/go-github/v91/github"
 	"github.com/mattn/go-shellwords"
 	"github.com/reviewdog/errorformat/fmts"
-	gitlab "gitlab.com/gitlab-org/api/client-go/v2"
+	gitlab "gitlab.com/gitlab-org/api/client-go/v3"
 
 	"github.com/reviewdog/reviewdog"
 	"github.com/reviewdog/reviewdog/cienv"
@@ -769,7 +769,7 @@ func githubClient(ctx context.Context, token string) (*github.Client, error) {
 	}
 	client, err := github.NewClient(
 		github.WithHTTPClient(tc),
-		github.WithURLs(github.Ptr(baseURL.String()), nil),
+		github.WithURLs(new(baseURL.String()), nil),
 	)
 	if err != nil {
 		return nil, err
@@ -888,8 +888,8 @@ func bitbucketBuildWithClient(ctx context.Context) (*cienv.BuildInfo, bbservice.
 func fetchMergeRequestIDFromCommit(cli *gitlab.Client, projectID, sha string) (id int, err error) {
 	// https://docs.gitlab.com/ce/api/merge_requests.html#list-project-merge-requests
 	opt := &gitlab.ListProjectMergeRequestsOptions{
-		State:   gitlab.Ptr("opened"),
-		OrderBy: gitlab.Ptr("updated_at"),
+		State:   new("opened"),
+		OrderBy: new("updated_at"),
 	}
 	mrs, _, err := cli.MergeRequests.ListProjectMergeRequests(projectID, opt)
 	if err != nil {

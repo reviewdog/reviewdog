@@ -42,15 +42,22 @@ archives:
       - LICENSE
       - README.md
 
-brews:
+homebrew_casks:
   - repository:
       owner: reviewdog
       name: homebrew-tap
-    directory: Formula
+    directory: Casks
     homepage: https://github.com/reviewdog/reviewdog
     description: Automated code review tool integrated with any code analysis tools regardless of programming language.
-    test: |
-      system "#{bin}/reviewdog -version"
+    license: MIT
+    hooks:
+      post:
+        # The released binaries are not notarized; strip the quarantine bit so
+        # macOS Gatekeeper does not refuse to run them.
+        install: |
+          if system_command("/usr/bin/xattr", args: ["-h"]).exit_status == 0
+            system_command "/usr/bin/xattr", args: ["-dr", "com.apple.quarantine", "#{staged_path}/reviewdog"]
+          end
 
 checksum:
   name_template: "checksums.txt"

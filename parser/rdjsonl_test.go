@@ -1,6 +1,7 @@
 package parser
 
 import (
+	"bufio"
 	"strings"
 	"testing"
 )
@@ -35,5 +36,14 @@ func TestRDJSONLParser_PreservesSuggestionDescription(t *testing.T) {
 	}
 	if got, want := diagnostics[0].GetSuggestions()[0].GetDescription(), "use the replacement"; got != want {
 		t.Errorf("suggestion description = %q, want %q", got, want)
+	}
+}
+
+func TestRDJSONLParserLineTooLong(t *testing.T) {
+	longLine := strings.Repeat("a", bufio.MaxScanTokenSize)
+	p := NewRDJSONLParser()
+	_, err := p.Parse(strings.NewReader(longLine))
+	if err != bufio.ErrTooLong {
+		t.Errorf("expected bufio.ErrTooLong, got %s", err)
 	}
 }

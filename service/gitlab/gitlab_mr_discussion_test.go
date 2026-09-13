@@ -17,7 +17,7 @@ import (
 	"github.com/reviewdog/reviewdog/proto/rdf"
 	"github.com/reviewdog/reviewdog/service/commentutil"
 	"github.com/reviewdog/reviewdog/service/serviceutil"
-	gitlab "gitlab.com/gitlab-org/api/client-go/v2"
+	gitlab "gitlab.com/gitlab-org/api/client-go/v3"
 )
 
 // metaBody returns the body that reviewdog would post for the given comment.
@@ -251,14 +251,14 @@ func TestGitLabMergeRequestDiscussionCommenter_Post_Flush_review_api(t *testing.
 			switch *got.Position.NewPath {
 			case "file.go":
 				want := &gitlab.CreateMergeRequestDiscussionOptions{
-					Body: gitlab.Ptr(metaBody(t, newComment1, "tool-name")),
+					Body: new(metaBody(t, newComment1, "tool-name")),
 					Position: &gitlab.PositionOptions{
-						BaseSHA:      gitlab.Ptr("xxx"),
-						StartSHA:     gitlab.Ptr("xxx"),
-						HeadSHA:      gitlab.Ptr("sha"),
-						PositionType: gitlab.Ptr("text"),
-						NewPath:      gitlab.Ptr("file.go"),
-						NewLine:      gitlab.Ptr(int64(14)),
+						BaseSHA:      new("xxx"),
+						StartSHA:     new("xxx"),
+						HeadSHA:      new("sha"),
+						PositionType: new("text"),
+						NewPath:      new("file.go"),
+						NewLine:      new(int64(14)),
 					},
 				}
 				if diff := cmp.Diff(got, want); diff != "" {
@@ -266,14 +266,14 @@ func TestGitLabMergeRequestDiscussionCommenter_Post_Flush_review_api(t *testing.
 				}
 			case "file2.go":
 				want := &gitlab.CreateMergeRequestDiscussionOptions{
-					Body: gitlab.Ptr(metaBody(t, newComment2, "tool-name")),
+					Body: new(metaBody(t, newComment2, "tool-name")),
 					Position: &gitlab.PositionOptions{
-						BaseSHA:      gitlab.Ptr("xxx"),
-						StartSHA:     gitlab.Ptr("xxx"),
-						HeadSHA:      gitlab.Ptr("sha"),
-						PositionType: gitlab.Ptr("text"),
-						NewPath:      gitlab.Ptr("file2.go"),
-						NewLine:      gitlab.Ptr(int64(15)),
+						BaseSHA:      new("xxx"),
+						StartSHA:     new("xxx"),
+						HeadSHA:      new("sha"),
+						PositionType: new("text"),
+						NewPath:      new("file2.go"),
+						NewLine:      new(int64(15)),
 					},
 				}
 				if diff := cmp.Diff(got, want); diff != "" {
@@ -281,16 +281,16 @@ func TestGitLabMergeRequestDiscussionCommenter_Post_Flush_review_api(t *testing.
 				}
 			case "new_file.go":
 				want := &gitlab.CreateMergeRequestDiscussionOptions{
-					Body: gitlab.Ptr(metaBody(t, newComment3, "tool-name")),
+					Body: new(metaBody(t, newComment3, "tool-name")),
 					Position: &gitlab.PositionOptions{
-						BaseSHA:      gitlab.Ptr("xxx"),
-						StartSHA:     gitlab.Ptr("xxx"),
-						HeadSHA:      gitlab.Ptr("sha"),
-						PositionType: gitlab.Ptr("text"),
-						NewPath:      gitlab.Ptr("new_file.go"),
-						NewLine:      gitlab.Ptr(int64(14)),
-						OldPath:      gitlab.Ptr("old_file.go"),
-						OldLine:      gitlab.Ptr(int64(7)),
+						BaseSHA:      new("xxx"),
+						StartSHA:     new("xxx"),
+						HeadSHA:      new("sha"),
+						PositionType: new("text"),
+						NewPath:      new("new_file.go"),
+						NewLine:      new(int64(14)),
+						OldPath:      new("old_file.go"),
+						OldLine:      new(int64(7)),
 					},
 				}
 				if diff := cmp.Diff(got, want); diff != "" {
@@ -298,14 +298,14 @@ func TestGitLabMergeRequestDiscussionCommenter_Post_Flush_review_api(t *testing.
 				}
 			case "file3.go":
 				want := &gitlab.CreateMergeRequestDiscussionOptions{
-					Body: gitlab.Ptr(metaBody(t, newCommentWithSuggestion, "tool-name")),
+					Body: new(metaBody(t, newCommentWithSuggestion, "tool-name")),
 					Position: &gitlab.PositionOptions{
-						BaseSHA:      gitlab.Ptr("xxx"),
-						StartSHA:     gitlab.Ptr("xxx"),
-						HeadSHA:      gitlab.Ptr("sha"),
-						PositionType: gitlab.Ptr("text"),
-						NewPath:      gitlab.Ptr("file3.go"),
-						NewLine:      gitlab.Ptr(int64(14)),
+						BaseSHA:      new("xxx"),
+						StartSHA:     new("xxx"),
+						HeadSHA:      new("sha"),
+						PositionType: new("text"),
+						NewPath:      new("file3.go"),
+						NewLine:      new(int64(14)),
 					},
 				}
 				if diff := cmp.Diff(got, want); diff != "" {
