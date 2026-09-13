@@ -313,7 +313,7 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
-      - uses: reviewdog/action-alex@347481655add010a2ae302df34b57c9bcfa0d6e4 # v1.17.0
+      - uses: reviewdog/action-alex@8ea6934ac252503fe358596c681d9899f0d85485 # v1.18.0
         with:
           github_token: ${{ secrets.github_token }}
           reporter: github-check
