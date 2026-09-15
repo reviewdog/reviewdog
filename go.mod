@@ -9,22 +9,22 @@ require (
 	gitea.dev/sdk v1.2.0
 	github.com/bradleyfalzon/ghinstallation/v2 v2.19.0
 	github.com/google/go-cmp v0.7.0
-	github.com/google/go-github/v91 v91.0.0
+	github.com/google/go-github/v92 v92.0.0
 	github.com/haya14busa/go-actions-toolkit v0.0.0-20200105081403-ca0307860f01
 	github.com/haya14busa/go-sarif v0.0.0-20240630170108-a3ba8d79599f
 	github.com/haya14busa/secretbox v0.0.0-20180525171038-07c7ecf409f5
 	github.com/justinas/nosurf v1.2.0
 	github.com/kylelemons/godebug v1.1.0
-	github.com/mattn/go-shellwords v1.0.14
+	github.com/mattn/go-shellwords v1.0.15
 	github.com/rakyll/statik v0.1.8
 	github.com/reva2/bitbucket-insights-api v1.0.0
 	github.com/reviewdog/errorformat v0.0.0-20260721110140-13bff69235f3
 	github.com/reviewdog/go-bitbucket v0.0.0-20201024094602-708c3f6a7de0
 	github.com/stretchr/testify v1.12.1
 	github.com/vvakame/sdlog v1.2.0
-	gitlab.com/gitlab-org/api/client-go/v3 v3.2.0
+	gitlab.com/gitlab-org/api/client-go/v3 v3.10.0
 	go.opencensus.io v0.24.0
-	golang.org/x/build v0.0.0-20260908213332-de1269920847
+	golang.org/x/build v0.0.0-20260910152040-879c7d24fd59
 	golang.org/x/oauth2 v0.37.0
 	golang.org/x/sync v0.23.0
 	google.golang.org/protobuf v1.36.12
@@ -75,5 +75,5 @@ require (
 	google.golang.org/genproto v0.0.0-20260319201613-d00831a3d3e7 // indirect
 	google.golang.org/genproto/googleapis/api v0.0.0-20260630182238-925bb5da69e7 // indirect
 	google.golang.org/genproto/googleapis/rpc v0.0.0-20260727163830-6c54dddc4772 // indirect
-	google.golang.org/grpc v1.82.1 // indirect
+	google.golang.org/grpc v1.83.2 // indirect
 )

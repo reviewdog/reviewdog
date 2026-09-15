@@ -59,7 +59,7 @@ func RunAndParse(ctx context.Context, conf *Config, runners map[string]bool, def
 		}
 		g.Go(func() error {
 			defer func() { <-semaphore }()
-			diagnostics, err := p.Parse(io.MultiReader(stdout, stderr))
+			diagnostics, err := p.Parse(concurrentMultiReader(stdout, stderr))
 			if err != nil {
 				return err
 			}
@@ -166,4 +166,44 @@ func getRunnerName(key string, runner *Runner) string {
 		return runner.Name
 	}
 	return key
+}
+
+// We need concurrent Reader to prevent deadlock.
+// If we read stdout and stderr sequentially,
+// 1. huge stderr can block the process
+// 2. stdout doesn't close until the process finishes
+// 3. we can't read stderr until stdout is closed <- deadlock
+func concurrentMultiReader(readers ...io.Reader) io.Reader {
+	pr, pw := io.Pipe()
+	var bufs []*bytes.Buffer
+
+	var g errgroup.Group
+	for _, r := range readers {
+		b := &bytes.Buffer{}
+		bufs = append(bufs, b)
+		g.Go(func() error {
+			_, err := io.Copy(b, r)
+			if err != nil {
+				return err
+			}
+			return nil
+		})
+	}
+
+	go func() {
+		err := g.Wait()
+		if err != nil {
+			_ = pw.CloseWithError(err)
+			return
+		}
+		for _, b := range bufs {
+			if _, err := io.Copy(pw, b); err != nil {
+				_ = pw.CloseWithError(err)
+				return
+			}
+		}
+		_ = pw.Close()
+	}()
+
+	return pr
 }

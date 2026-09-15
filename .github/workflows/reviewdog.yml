@@ -202,7 +202,7 @@ jobs:
       - uses: actions/setup-go@b7ad1dad31e06c5925ef5d2fc7ad053ef454303e # v7.0.0
         with:
           go-version-file: "go.mod"
-      - uses: reviewdog/action-staticcheck@53efac7da6eead83fb445fc490fef0b7ea57eeb1 # v1.31.0
+      - uses: reviewdog/action-staticcheck@8a5a935620ac73e5d4db95c8dc952108a885a748 # v1.32.0
         with:
           github_token: ${{ secrets.github_token }}
           reporter: github-pr-review
@@ -216,7 +216,7 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
-      - uses: reviewdog/action-misspell@ba7ac4030fa6812f8c8b2d4e516af8bc99553c32 # v1.28.0
+      - uses: reviewdog/action-misspell@da40ce414be6ce320a9322aa2bae10bd3b9e6ef3 # v1.29.0
         with:
           github_token: ${{ secrets.github_token }}
           locale: "US"
@@ -303,7 +303,7 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
-      - uses: reviewdog/action-shellcheck@0722bbdb0d47f04c1b53b8734d2422ac63a45ec6 # v1.32.1
+      - uses: reviewdog/action-shellcheck@a94d585085f1f5215ae65f4de34e7bbd0523d550 # v1.33.0
         with:
           github_token: ${{ secrets.github_token }}
           reporter: github-pr-review
@@ -313,7 +313,7 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
-      - uses: reviewdog/action-alex@347481655add010a2ae302df34b57c9bcfa0d6e4 # v1.17.0
+      - uses: reviewdog/action-alex@8ea6934ac252503fe358596c681d9899f0d85485 # v1.18.0
         with:
           github_token: ${{ secrets.github_token }}
           reporter: github-check

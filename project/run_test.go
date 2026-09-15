@@ -8,6 +8,7 @@ import (
 	"runtime"
 	"strings"
 	"testing"
+	"time"
 
 	"github.com/reviewdog/reviewdog"
 	"github.com/reviewdog/reviewdog/filter"
@@ -292,6 +293,41 @@ func TestRun(t *testing.T) {
 		}
 		if err := Run(ctx, conf, map[string]bool{"hoge": true}, cs, ds, false, filter.ModeAdded, reviewdog.FailLevelNone); err == nil {
 			t.Error("got no error but want runner not found error")
+		}
+	})
+
+	// #1934
+	t.Run("big stderr", func(t *testing.T) {
+		if runtime.GOOS == "windows" {
+			t.Skip("requires POSIX shell utilities")
+		}
+
+		ctx, cancel := context.WithTimeout(ctx, 5*time.Second)
+		defer cancel()
+
+		conf := &Config{
+			Runner: map[string]*Runner{
+				"test": {
+					Cmd:         "yes x | head -c 131072 >&2; echo 'file:1:1:message'",
+					Errorformat: []string{`%f:%l:%c:%m`},
+				},
+			},
+		}
+
+		results, err := RunAndParse(ctx, conf, nil, "", false)
+		if err != nil {
+			t.Fatalf("RunAndParse failed: %v", err)
+		}
+
+		result, err := results.Load("test")
+		if err != nil {
+			t.Fatalf("failed to load result: %v", err)
+		}
+		if result.CmdErr != nil {
+			t.Fatalf("unexpected command error: %v", result.CmdErr)
+		}
+		if len(result.Diagnostics) != 1 {
+			t.Fatalf("got %d diagnostics, want 1", len(result.Diagnostics))
 		}
 	})
 }
