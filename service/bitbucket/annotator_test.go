@@ -72,6 +72,26 @@ func (s *AnnotatorTestSuite) TestOneComment() {
 	s.cli.AssertExpectations(s.T())
 }
 
+// Project mode flushes once for every runner. A completed runner must not
+// discard the annotation buffer needed by the runner that follows it.
+func (s *AnnotatorTestSuite) TestFlushesProjectRunnersIndependently() {
+	runners := []string{"runner1", "runner2"}
+	ctx, annotator := s.createAnnotator(runners)
+
+	annotator.SetTool(runners[0], "")
+	s.assumeReportCreated(ctx, runners[0], reportResultPassed)
+	s.Require().NoError(annotator.Flush(ctx))
+
+	comment := s.buildComment(runners[1], 1)
+	annotator.SetTool(runners[1], "")
+	s.assumeReportCreated(ctx, runners[1], reportResultFailed)
+	s.assumeAnnotationsCreated(ctx, runners[1], []*reviewdog.Comment{comment})
+	s.Require().NoError(annotator.Post(ctx, comment))
+	s.Require().NoError(annotator.Flush(ctx))
+
+	s.cli.AssertExpectations(s.T())
+}
+
 // Predefined runners list, and duplicated comment
 func (s *AnnotatorTestSuite) TestDuplicateComments() {
 	runners := []string{"runner1", "runner2"}
