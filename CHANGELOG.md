@@ -11,6 +11,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ### :rocket: Enhancements
 
 ### :bug: Fixes
+- [#2477](https://github.com/reviewdog/reviewdog/pull/2477) Prevent deadlock when a runner outputs large `stderr`.
 
 ### :rotating_light: Breaking changes
 
