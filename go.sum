@@ -298,6 +298,7 @@ github.com/stretchr/testify v1.12.1 h1:EuwCh5fleGS7H32xRwO3wRGT7DxrDhLAT6FF8MpWD
 github.com/stretchr/testify v1.12.1/go.mod h1:MDEgiDPPsNp5cuIrHPPCyornHKgEVbtFUmoNlxoYthg=
 github.com/vvakame/sdlog v1.2.0 h1:gwZRXZ0EmhJQJN/Do/+PTQigcmFiSqZ07aDjxqGOLT8=
 github.com/vvakame/sdlog v1.2.0/go.mod h1:gFYv2g/iR3pJSxkJz0YnkNmhNbXT5R3PzWsfZKGQADY=
+github.com/vvakame/sdlog/v2 v2.0.1/go.mod h1:WfTZ81VqaN0goFzwKX0TXA9ZTfKHG0jkjmV5VJGSXeM=
 github.com/yuin/goldmark v1.1.25/go.mod h1:3hX8gzYuyVAZsxl0MRgGTJEmQBFcNTphYh9decYSb74=
 github.com/yuin/goldmark v1.1.27/go.mod h1:3hX8gzYuyVAZsxl0MRgGTJEmQBFcNTphYh9decYSb74=
 github.com/yuin/goldmark v1.1.32/go.mod h1:3hX8gzYuyVAZsxl0MRgGTJEmQBFcNTphYh9decYSb74=
