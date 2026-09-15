@@ -5,6 +5,7 @@ import (
 	"context"
 	"fmt"
 	"io"
+	"log/slog"
 	"os"
 
 	"github.com/reviewdog/reviewdog/diff"
@@ -97,6 +98,19 @@ func (w *Reviewdog) runFromResult(ctx context.Context, results []*rdf.Diagnostic
 	pathutil.NormalizePathInResults(results, wd, relDir)
 
 	checks := filter.FilterCheck(results, filediffs, strip, wd, w.filterMode)
+	reportable := 0
+	for _, check := range checks {
+		if check.ShouldReport {
+			reportable++
+		}
+	}
+	slog.DebugContext(ctx, "reviewdog: filter summary",
+		"tool", w.toolname,
+		"filter-mode", w.filterMode.String(),
+		"diagnostics", len(checks),
+		"reportable", reportable,
+		"filtered", len(checks)-reportable,
+	)
 	shouldFail := false
 
 	for _, check := range checks {
