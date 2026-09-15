@@ -49,7 +49,7 @@ func (s *testBulkWriter) Flush(context.Context) error {
 	return nil
 }
 
-func TestReviewdog_Run_skips_remote_work_without_diagnostics(t *testing.T) {
+func TestReviewdog_Run_skips_diff_but_flushes_without_diagnostics(t *testing.T) {
 	efm, err := errorformat.NewErrorformat([]string{`%f:%l:%c: %m`})
 	if err != nil {
 		t.Fatal(err)
@@ -67,8 +67,10 @@ func TestReviewdog_Run_skips_remote_work_without_diagnostics(t *testing.T) {
 	if diffService.called {
 		t.Error("Run() requested a diff without diagnostics")
 	}
-	if comments.flushed {
-		t.Error("Run() flushed comments without diagnostics")
+	// Reporters that rely on Flush (e.g. GitHub Checks) must still be flushed so
+	// that they can finalize their report even when there are no findings.
+	if !comments.flushed {
+		t.Error("Run() did not flush comments without diagnostics")
 	}
 }
 
