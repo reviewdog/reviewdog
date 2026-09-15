@@ -307,7 +307,8 @@ golint.new.go:11:1: comment on exported function F2 should be of the form "F2 ..
 	app := NewReviewdog("tool name", p, c, d, filter.ModeAdded, FailLevelAny)
 	err := app.Run(context.Background(), strings.NewReader(lintresult))
 
-	if err != nil && err.Error() != "input data has violations" {
-		t.Errorf("'input data has violations' expected, but got %v", err)
+	want := "found at least one issue with severity greater than or equal to the given level: any"
+	if err == nil || err.Error() != want {
+		t.Errorf("%q expected, but got %v", want, err)
 	}
 }

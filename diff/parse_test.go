@@ -505,3 +505,90 @@ func TestUnquoteCStyle(t *testing.T) {
 		}
 	}
 }
+
+func TestParseMultiFile_strippedEmptyContextLine(t *testing.T) {
+	// The blank lines below are context lines that lost their leading space,
+	// which is what happens when a diff passes through trailing-whitespace
+	// stripping.
+	content := `--- a/sample.go
++++ b/sample.go
+@@ -1,4 +1,5 @@
+ package sample
+
+ var V int
++var W int
+
+`
+	got, err := ParseMultiFile(strings.NewReader(content))
+	if err != nil {
+		t.Fatal(err)
+	}
+	if len(got) != 1 {
+		t.Fatalf("got %d file diffs, want 1", len(got))
+	}
+	if len(got[0].Hunks) != 1 {
+		t.Fatalf("got %d hunks, want 1", len(got[0].Hunks))
+	}
+	lines := got[0].Hunks[0].Lines
+	if len(lines) != 5 {
+		t.Fatalf("got %d lines, want 5", len(lines))
+	}
+	added := lines[3]
+	if added.Type != LineAdded || added.Content != "var W int" || added.LnumNew != 4 {
+		t.Errorf("got %#v, want the added line at new line 4", added)
+	}
+}
+
+func TestParseMultiFile_returnsParseError(t *testing.T) {
+	const good = `--- a/a.txt
++++ b/a.txt
+@@ -1,2 +1,2 @@
+ context
+-old
++new
+`
+	tests := map[string]string{
+		"invalid hunk range": good + "--- a/b.txt\n+++ b/b.txt\n@@ -x,y +1,2 @@\n context\n",
+		"missing new file":   good + "--- a/b.txt\n@@ -1,2 +1,2 @@\n context\n",
+		"no hunks":           good + "--- a/b.txt\n+++ b/b.txt\nnot a hunk\n",
+	}
+	for name, content := range tests {
+		t.Run(name, func(t *testing.T) {
+			got, err := ParseMultiFile(strings.NewReader(content))
+			if err == nil {
+				t.Fatalf("no error, and %d of the 2 file diffs came back", len(got))
+			}
+		})
+	}
+}
+
+func TestParseMultiFile_blankLinesAroundDiff(t *testing.T) {
+	// Reported in #951: a leading blank line made the whole diff parse as empty.
+	content := `
+diff --git a/z b/z
+new file mode 100644
+index 0000000..7898192
+--- /dev/null
++++ b/z
+@@ -0,0 +1 @@
++z
+
+
+`
+	got, err := ParseMultiFile(strings.NewReader(content))
+	if err != nil {
+		t.Fatal(err)
+	}
+	if len(got) != 1 {
+		t.Fatalf("got %d file diffs, want 1", len(got))
+	}
+	if got[0].PathNew != "b/z" {
+		t.Errorf("got path %q, want b/z", got[0].PathNew)
+	}
+	if len(got[0].Hunks) != 1 || len(got[0].Hunks[0].Lines) != 1 {
+		t.Fatalf("got %d hunks, want 1 hunk holding 1 line", len(got[0].Hunks))
+	}
+	if line := got[0].Hunks[0].Lines[0]; line.Type != LineAdded || line.Content != "z" {
+		t.Errorf("got %#v, want the added line z", line)
+	}
+}
