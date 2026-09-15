@@ -139,8 +139,13 @@ func (w *Reviewdog) Run(ctx context.Context, r io.Reader) error {
 	if err != nil {
 		return fmt.Errorf("parse error: %w", err)
 	}
+
+	// Skip fetching the diff when there are no diagnostics: there is nothing to
+	// filter against it. We still call runFromResult so that reporters relying on
+	// Flush (e.g. GitHub Checks) can finalize their report (e.g. mark the check
+	// run as successful) even when there are no findings.
 	if len(results) == 0 {
-		return nil
+		return w.runFromResult(ctx, results, nil, 0)
 	}
 
 	d, err := w.d.Diff(ctx)

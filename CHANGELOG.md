@@ -11,6 +11,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ### :rocket: Enhancements
 
 ### :bug: Fixes
+- [#2801](https://github.com/reviewdog/reviewdog/pull/2801) Report GitHub Checks even when there are no findings (regression since v0.21.1).
 
 ### :rotating_light: Breaking changes
 
