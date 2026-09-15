@@ -10,8 +10,8 @@ jobs:
   protoc:
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@93cb6efe18208431cddfb8368fd83d5badbf9bfd # v5.0.1
-      - uses: haya14busa/action-depup@94a1aaf4e4923064019214b48a43276218af7ad5 # v1.6.4
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+      - uses: haya14busa/action-depup@99f7aecf3e4d06d5a3faf190dae5dc79ac530b5a # v1.6.5
         id: depup
         with:
           file: proto/Dockerfile
@@ -21,7 +21,7 @@ jobs:
         if: ${{ steps.depup.latest != steps.depup.current }}
         working-directory: proto/
         run: ./update.sh
-      - uses: actions/setup-go@40f1582b2485089dde7abd97c1529aa768e1baff # v5.6.0
+      - uses: actions/setup-go@b7ad1dad31e06c5925ef5d2fc7ad053ef454303e # v7.0.0
         if: ${{ steps.depup.latest != steps.depup.current }}
         with:
           go-version-file: "go.mod"
@@ -30,7 +30,7 @@ jobs:
         run: go build ./...
       - name: Create Pull Request
         if: ${{ steps.depup.latest != steps.depup.current }}
-        uses: peter-evans/create-pull-request@22a9089034f40e5a961c8808d113e2c98fb63676 # v7.0.11
+        uses: peter-evans/create-pull-request@5f6978faf089d4d20b00c7766989d076bb2fc7f1 # v8.1.1
         with:
           title: "chore(deps): update ${{ steps.depup.outputs.repo }} to ${{ steps.depup.outputs.latest }}"
           commit-message: "chore(deps): update ${{ steps.depup.outputs.repo }} to ${{ steps.depup.outputs.latest }}"
@@ -44,8 +44,8 @@ jobs:
   protoc-gen-go:
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@93cb6efe18208431cddfb8368fd83d5badbf9bfd # v5.0.1
-      - uses: haya14busa/action-depup@94a1aaf4e4923064019214b48a43276218af7ad5 # v1.6.4
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+      - uses: haya14busa/action-depup@99f7aecf3e4d06d5a3faf190dae5dc79ac530b5a # v1.6.5
         id: depup
         with:
           file: proto/Dockerfile
@@ -55,7 +55,7 @@ jobs:
         if: ${{ steps.depup.latest != steps.depup.current }}
         working-directory: proto/
         run: ./update.sh
-      - uses: actions/setup-go@40f1582b2485089dde7abd97c1529aa768e1baff # v5.6.0
+      - uses: actions/setup-go@b7ad1dad31e06c5925ef5d2fc7ad053ef454303e # v7.0.0
         if: ${{ steps.depup.latest != steps.depup.current }}
         with:
           go-version-file: "go.mod"
@@ -64,7 +64,7 @@ jobs:
         run: go build ./...
       - name: Create Pull Request
         if: ${{ steps.depup.latest != steps.depup.current }}
-        uses: peter-evans/create-pull-request@22a9089034f40e5a961c8808d113e2c98fb63676 # v7.0.11
+        uses: peter-evans/create-pull-request@5f6978faf089d4d20b00c7766989d076bb2fc7f1 # v8.1.1
         with:
           title: "chore(deps): update ${{ steps.depup.outputs.repo }} to ${{ steps.depup.outputs.latest }}"
           commit-message: "chore(deps): update ${{ steps.depup.outputs.repo }} to ${{ steps.depup.outputs.latest }}"
@@ -78,8 +78,8 @@ jobs:
   protoc-gen-jsonschema:
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@93cb6efe18208431cddfb8368fd83d5badbf9bfd # v5.0.1
-      - uses: haya14busa/action-depup@94a1aaf4e4923064019214b48a43276218af7ad5 # v1.6.4
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+      - uses: haya14busa/action-depup@99f7aecf3e4d06d5a3faf190dae5dc79ac530b5a # v1.6.5
         id: depup
         with:
           file: proto/Dockerfile
@@ -91,7 +91,7 @@ jobs:
         run: ./update.sh
       - name: Create Pull Request
         if: ${{ steps.depup.latest != steps.depup.current }}
-        uses: peter-evans/create-pull-request@22a9089034f40e5a961c8808d113e2c98fb63676 # v7.0.11
+        uses: peter-evans/create-pull-request@5f6978faf089d4d20b00c7766989d076bb2fc7f1 # v8.1.1
         with:
           title: "chore(deps): update ${{ steps.depup.outputs.repo }} to ${{ steps.depup.outputs.latest }}"
           commit-message: "chore(deps): update ${{ steps.depup.outputs.repo }} to ${{ steps.depup.outputs.latest }}"

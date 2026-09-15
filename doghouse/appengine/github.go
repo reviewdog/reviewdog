@@ -12,7 +12,7 @@ import (
 	"net/url"
 	"strings"
 
-	"github.com/google/go-github/v74/github"
+	"github.com/google/go-github/v92/github"
 	"github.com/justinas/nosurf"
 	"github.com/vvakame/sdlog/aelog"
 	"golang.org/x/oauth2"
@@ -230,7 +230,13 @@ func (g *GitHubHandler) HandleGitHubTop(w http.ResponseWriter, r *http.Request) 
 	ts := oauth2.StaticTokenSource(
 		&oauth2.Token{AccessToken: token},
 	)
-	ghcli := github.NewClient(NewAuthClient(ctx, http.DefaultTransport, ts))
+	authClient := NewAuthClient(ctx, http.DefaultTransport, ts)
+	ghcli, err := github.NewClient(github.WithHTTPClient(authClient))
+	if err != nil {
+		w.WriteHeader(http.StatusInternalServerError)
+		fmt.Fprintln(w, err)
+		return
+	}
 
 	// /gh/{owner}/{repo}
 	paths := strings.Split(strings.Trim(r.URL.Path, "/"), "/")
@@ -327,7 +333,7 @@ func (g *GitHubHandler) handleRepo(ctx context.Context, ghcli *github.Client, w 
 		return
 	}
 
-	if !repo.GetPermissions()["push"] {
+	if !*repo.GetPermissions().Push {
 		w.WriteHeader(http.StatusUnauthorized)
 		fmt.Fprintf(w, "You don't have write permission for %s.", repo.GetHTMLURL())
 		return

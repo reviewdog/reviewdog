@@ -5,25 +5,38 @@ import (
 	"errors"
 	"fmt"
 	"log"
+	"net/http"
 	"net/url"
+	"os"
 	"strings"
 	"sync"
 
-	"code.gitea.io/sdk/gitea"
+	gitea "gitea.dev/sdk"
 	"github.com/reviewdog/reviewdog"
+	"github.com/reviewdog/reviewdog/cienv"
 	"github.com/reviewdog/reviewdog/pathutil"
 	"github.com/reviewdog/reviewdog/proto/rdf"
 	"github.com/reviewdog/reviewdog/service/commentutil"
+	"github.com/reviewdog/reviewdog/service/github/githubutils"
 	"github.com/reviewdog/reviewdog/service/serviceutil"
 )
 
 var _ reviewdog.CommentService = (*PullRequest)(nil)
 var _ reviewdog.DiffService = (*PullRequest)(nil)
 
+const maxFileComments = 10
+
 const (
 	invalidSuggestionPre  = "<details><summary>reviewdog suggestion error</summary>"
 	invalidSuggestionPost = "</details>"
 )
+
+func isPermissionError(resp *gitea.Response) bool {
+	if resp == nil || resp.Response == nil {
+		return false
+	}
+	return resp.StatusCode == http.StatusForbidden || resp.StatusCode == http.StatusNotFound
+}
 
 // PullRequest is a comment and diff service for Gitea PullRequest.
 //
@@ -42,23 +55,35 @@ type PullRequest struct {
 	muComments           sync.Mutex
 	maxCommentsPerReview int
 	postComments         []*reviewdog.Comment
+	logWriter            *githubutils.GitHubActionLogWriter
+	fallbackToLog        bool
 
-	postedcs           commentutil.PostedComments
-	outdatedComments   map[string]*gitea.PullReviewComment // fingerprint -> comment
-	prCommentWithReply map[int64]bool                      // review id -> bool
+	postedcs              commentutil.PostedComments
+	outdatedComments      map[string]*gitea.PullReviewComment // fingerprint -> comment
+	prCommentWithReply    map[int64]bool                      // review id -> bool
+	postedIssueComments   map[string]bool                     // fingerprint -> posted
+	outdatedIssueComments map[string]*gitea.Comment           // fingerprint -> comment
 }
 
 // NewGiteaPullRequest returns a new PullRequest service.
 //
 // PullRequest service needs git command in $PATH.
-func NewGiteaPullRequest(cli *gitea.Client, owner, repo string, pr int64, sha, toolName string) (*PullRequest, error) {
+//
+// The Gitea Token may not have the necessary permissions.
+// For example, in the case of a PR from a forked repository.
+//
+// In such a case, the service will fallback to Gitea Actions workflow commands [1].
+//
+// [1]: https://docs.gitea.com/usage/actions/comparison
+func NewGiteaPullRequest(cli *gitea.Client, owner, repo string, pr int64, sha, level, toolName string) (*PullRequest, error) {
 	return &PullRequest{
-		cli:      cli,
-		owner:    owner,
-		repo:     repo,
-		pr:       pr,
-		sha:      sha,
-		toolName: toolName,
+		cli:       cli,
+		owner:     owner,
+		repo:      repo,
+		pr:        pr,
+		sha:       sha,
+		toolName:  toolName,
+		logWriter: githubutils.NewGitHubActionLogWriter(level),
 	}, nil
 }
 
@@ -74,20 +99,21 @@ func (g *PullRequest) Post(_ context.Context, c *reviewdog.Comment) error {
 func (*PullRequest) ShouldPrependGitRelDir() bool { return true }
 
 // Flush posts comments which has not been posted yet.
-func (g *PullRequest) Flush(_ context.Context) error {
+func (g *PullRequest) Flush(ctx context.Context) error {
 	g.muComments.Lock()
 	defer g.muComments.Unlock()
 	defer func() { g.postComments = nil }()
 
-	if err := g.setPostedComment(); err != nil {
+	if err := g.setPostedComment(ctx); err != nil {
 		return err
 	}
-	return g.postAsReviewComment()
+	return g.postAsReviewComment(ctx)
 }
 
-// SetTool sets tool name to use in comments.
-func (g *PullRequest) SetTool(toolName string, _ string) {
+// SetTool sets tool name and level to use in comments.
+func (g *PullRequest) SetTool(toolName string, level string) {
 	g.toolName = toolName
+	g.logWriter = githubutils.NewGitHubActionLogWriter(level)
 }
 
 // SetMaxCommentsPerReview sets the maximum number of comments to post per review.
@@ -95,45 +121,74 @@ func (g *PullRequest) SetMaxCommentsPerReview(max int) {
 	g.maxCommentsPerReview = max
 }
 
-func (g *PullRequest) postAsReviewComment() error {
+func (g *PullRequest) postAsReviewComment(ctx context.Context) error {
+	if g.fallbackToLog {
+		// we don't have permission to post a review comment.
+		// Fallback to Gitea Actions log as report.
+		for _, c := range g.postComments {
+			if err := g.logWriter.Post(ctx, c); err != nil {
+				return err
+			}
+		}
+		return g.logWriter.Flush(ctx)
+	}
+
 	postComments := g.postComments
 	g.postComments = nil
+	rawComments := make([]*reviewdog.Comment, 0, len(postComments))
 	reviewComments := make([]gitea.CreatePullReviewComment, 0, len(postComments))
+	fileComments := make([]gitea.CreateIssueCommentOption, 0)
 	remaining := make([]*reviewdog.Comment, 0)
 	rootPath, err := serviceutil.GetGitRoot()
 	if err != nil {
 		return err
 	}
-	repoBaseHTMLURL, err := g.repoBaseHTMLURL()
+	repoBaseHTMLURL, err := g.repoBaseHTMLURL(ctx)
 	if err != nil {
 		return err
 	}
 	for _, c := range postComments {
 		if !c.Result.InDiffFile {
+			// Gitea Review API cannot report results outside diff file. If it's running
+			// in Gitea Actions, fallback to Gitea Actions log as report.
+			if cienv.IsInGitHubAction() {
+				if err := g.logWriter.Post(ctx, c); err != nil {
+					return err
+				}
+			}
 			continue
 		}
 		fprint, err := serviceutil.Fingerprint(c.Result.Diagnostic)
 		if err != nil {
 			return err
 		}
-		if g.postedcs.IsPosted(c, giteaCommentLine(c), fprint) {
+		if g.postedcs.IsPosted(c, giteaCommentLine(c), fprint) || g.postedIssueComments[fprint] {
 			// it's already posted. Mark the comment as non-outdated and skip it.
 			delete(g.outdatedComments, fprint)
+			delete(g.outdatedIssueComments, fprint)
 			continue
 		}
+		rawComments = append(rawComments, c)
 
-		if !c.Result.InDiffContext {
-			// If the result is outside of diff context, skip it.
-			continue
+		if c.Result.InDiffContext {
+			// Only posts maxCommentsPerReview comments per review if option is set.
+			if g.maxCommentsPerReview != 0 && len(reviewComments) >= g.maxCommentsPerReview {
+				remaining = append(remaining, c)
+				continue
+			}
+			comment := buildReviewComment(c, buildBody(c, repoBaseHTMLURL, rootPath, fprint, g.toolName))
+			reviewComments = append(reviewComments, comment)
+		} else {
+			if len(fileComments) >= maxFileComments {
+				remaining = append(remaining, c)
+				continue
+			}
+			comment := gitea.CreateIssueCommentOption{Body: buildBody(c, repoBaseHTMLURL, rootPath, fprint, g.toolName)}
+			fileComments = append(fileComments, comment)
 		}
-
-		// Only posts maxCommentsPerReview comments per review if option is set.
-		if g.maxCommentsPerReview != 0 && len(reviewComments) >= g.maxCommentsPerReview {
-			remaining = append(remaining, c)
-			continue
-		}
-		comment := buildReviewComment(c, buildBody(c, repoBaseHTMLURL, rootPath, fprint, g.toolName))
-		reviewComments = append(reviewComments, comment)
+	}
+	if err := g.logWriter.Flush(ctx); err != nil {
+		return err
 	}
 
 	if len(reviewComments) > 0 || len(remaining) > 0 {
@@ -144,9 +199,25 @@ func (g *PullRequest) postAsReviewComment() error {
 			Comments: reviewComments,
 			Body:     g.remainingCommentsSummary(remaining, repoBaseHTMLURL, rootPath),
 		}
-		_, _, err := g.cli.CreatePullReview(g.owner, g.repo, g.pr, review)
+		_, resp, err := g.cli.PullRequests.CreatePullReview(ctx, g.owner, g.repo, g.pr, review)
 		if err != nil {
 			log.Printf("reviewdog: failed to post a review comment: %v", err)
+			// Gitea returns 403 or 404 if we don't have permission to post a review comment.
+			// fallback to log message in this case.
+			if isPermissionError(resp) && cienv.IsInGitHubAction() {
+				goto FALLBACK
+			}
+			return err
+		}
+	}
+	for _, c := range fileComments {
+		if _, resp, err := g.cli.Issues.CreateIssueComment(ctx, g.owner, g.repo, g.pr, c); err != nil {
+			log.Printf("reviewdog: failed to post a pull request comment: %v", err)
+			// Gitea returns 403 or 404 if we don't have permission to post a review comment.
+			// fallback to log message in this case.
+			if isPermissionError(resp) && cienv.IsInGitHubAction() {
+				goto FALLBACK
+			}
 			return err
 		}
 	}
@@ -156,12 +227,31 @@ func (g *PullRequest) postAsReviewComment() error {
 			// Do not remove comment with replies.
 			continue
 		}
-		if _, err := g.cli.DeleteIssueComment(g.owner, g.repo, c.ID); err != nil {
+		if _, err := g.cli.Issues.DeleteIssueComment(ctx, g.owner, g.repo, c.ID); err != nil {
+			return fmt.Errorf("failed to delete comment (id=%d): %w", c.ID, err)
+		}
+	}
+	for _, c := range g.outdatedIssueComments {
+		if _, err := g.cli.Issues.DeleteIssueComment(ctx, g.owner, g.repo, c.ID); err != nil {
 			return fmt.Errorf("failed to delete comment (id=%d): %w", c.ID, err)
 		}
 	}
 
 	return nil
+
+FALLBACK:
+	// fallback to Gitea Actions log as report.
+	fmt.Fprintln(os.Stderr, `reviewdog: This Gitea Token doesn't have write permission of Review API,
+so reviewdog will report results via logging command [1] and create annotations as a fallback.
+[1]: https://docs.gitea.com/usage/actions/comparison`)
+	g.fallbackToLog = true
+
+	for _, c := range rawComments {
+		if err := g.logWriter.Post(ctx, c); err != nil {
+			return err
+		}
+	}
+	return g.logWriter.Flush(ctx)
 }
 
 func buildReviewComment(c *reviewdog.Comment, body string) gitea.CreatePullReviewComment {
@@ -237,11 +327,13 @@ func (g *PullRequest) remainingCommentsSummary(remaining []*reviewdog.Comment, b
 }
 
 // setPostedComment get posted comments from Gitea.
-func (g *PullRequest) setPostedComment() error {
+func (g *PullRequest) setPostedComment(ctx context.Context) error {
 	g.postedcs = make(commentutil.PostedComments)
 	g.outdatedComments = make(map[string]*gitea.PullReviewComment)
 	g.prCommentWithReply = make(map[int64]bool)
-	cs, err := g.comment()
+	g.postedIssueComments = make(map[string]bool)
+	g.outdatedIssueComments = make(map[string]*gitea.Comment)
+	cs, err := g.comment(ctx)
 	if err != nil {
 		return err
 	}
@@ -260,6 +352,25 @@ func (g *PullRequest) setPostedComment() error {
 			g.postedcs.AddPostedComment(c.Path, int(c.LineNum), meta.GetFingerprint())
 			if meta.SourceName == g.toolName {
 				g.outdatedComments[meta.GetFingerprint()] = c // Remove non-outdated comment later.
+			}
+		}
+	}
+
+	issueComments, err := listAllIssueComments(ctx, g.cli, g.owner, g.repo, g.pr,
+		gitea.ListIssueCommentOptions{
+			ListOptions: gitea.ListOptions{
+				Page:     1,
+				PageSize: 100,
+			},
+		})
+	if err != nil {
+		return err
+	}
+	for _, c := range issueComments {
+		if meta := serviceutil.ExtractMetaComment(c.Body); meta != nil {
+			g.postedIssueComments[meta.GetFingerprint()] = true
+			if meta.SourceName == g.toolName {
+				g.outdatedIssueComments[meta.GetFingerprint()] = c // Remove non-outdated comment later.
 			}
 		}
 	}
@@ -283,16 +394,16 @@ func (g *PullRequest) Strip() int {
 	return 1
 }
 
-func (g *PullRequest) repoBaseHTMLURL() (string, error) {
-	repo, _, err := g.cli.GetRepo(g.owner, g.repo)
+func (g *PullRequest) repoBaseHTMLURL(ctx context.Context) (string, error) {
+	repo, _, err := g.cli.Repositories.GetRepo(ctx, g.owner, g.repo)
 	if err != nil {
 		return "", fmt.Errorf("failed to build repo base HTML URL: %w", err)
 	}
 	return url.JoinPath(repo.HTMLURL, "src", "commit", g.sha)
 }
 
-func (g *PullRequest) comment() ([]*gitea.PullReviewComment, error) {
-	prs, err := listAllPullRequestReviews(g.cli, g.owner, g.repo, g.pr, gitea.ListPullReviewsOptions{
+func (g *PullRequest) comment(ctx context.Context) ([]*gitea.PullReviewComment, error) {
+	prs, err := listAllPullRequestReviews(ctx, g.cli, g.owner, g.repo, g.pr, gitea.ListPullReviewsOptions{
 		ListOptions: gitea.ListOptions{
 			Page:     1,
 			PageSize: 100,
@@ -304,7 +415,7 @@ func (g *PullRequest) comment() ([]*gitea.PullReviewComment, error) {
 
 	comments := make([]*gitea.PullReviewComment, 0, len(prs))
 	for _, pr := range prs {
-		c, _, err := g.cli.ListPullReviewComments(g.owner, g.repo, g.pr, pr.ID)
+		c, _, err := g.cli.PullRequests.ListPullReviewComments(ctx, g.owner, g.repo, g.pr, pr.ID)
 		if err != nil {
 			return nil, err
 		}
@@ -315,10 +426,10 @@ func (g *PullRequest) comment() ([]*gitea.PullReviewComment, error) {
 	return comments, nil
 }
 
-func listAllPullRequestReviews(cli *gitea.Client,
+func listAllPullRequestReviews(ctx context.Context, cli *gitea.Client,
 	owner, repo string, pr int64, opts gitea.ListPullReviewsOptions,
 ) ([]*gitea.PullReview, error) {
-	reviews, resp, err := cli.ListPullReviews(owner, repo, pr, opts)
+	reviews, resp, err := cli.PullRequests.ListPullReviews(ctx, owner, repo, pr, opts)
 	if err != nil {
 		return nil, err
 	}
@@ -334,12 +445,33 @@ func listAllPullRequestReviews(cli *gitea.Client,
 		},
 	}
 
-	restReviews, err := listAllPullRequestReviews(cli, owner, repo, pr, newOpts)
+	restReviews, err := listAllPullRequestReviews(ctx, cli, owner, repo, pr, newOpts)
 	if err != nil {
 		return nil, err
 	}
 
 	return append(reviews, restReviews...), nil
+}
+
+func listAllIssueComments(ctx context.Context, cli *gitea.Client,
+	owner, repo string, pr int64, opts gitea.ListIssueCommentOptions,
+) ([]*gitea.Comment, error) {
+	comments, resp, err := cli.Issues.ListIssueComments(ctx, owner, repo, pr, opts)
+	if err != nil {
+		return nil, err
+	}
+
+	if resp.NextPage == 0 {
+		return comments, nil
+	}
+
+	opts.Page = resp.NextPage
+	restComments, err := listAllIssueComments(ctx, cli, owner, repo, pr, opts)
+	if err != nil {
+		return nil, err
+	}
+
+	return append(comments, restComments...), nil
 }
 
 func buildBody(c *reviewdog.Comment, baseURL string, gitRootPath string, fprint string, toolName string) string {

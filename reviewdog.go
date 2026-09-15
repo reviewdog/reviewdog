@@ -139,6 +139,9 @@ func (w *Reviewdog) Run(ctx context.Context, r io.Reader) error {
 	if err != nil {
 		return fmt.Errorf("parse error: %w", err)
 	}
+	if len(results) == 0 {
+		return nil
+	}
 
 	d, err := w.d.Diff(ctx)
 	if err != nil {

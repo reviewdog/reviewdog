@@ -11,11 +11,25 @@ import (
 	"testing"
 
 	"github.com/google/go-cmp/cmp"
-	"github.com/google/go-github/v74/github"
+	"github.com/google/go-github/v92/github"
 	"github.com/reviewdog/reviewdog"
 	"github.com/reviewdog/reviewdog/filter"
 	"github.com/reviewdog/reviewdog/proto/rdf"
 )
+
+// newGitHubClient creates a GitHub client for testing purposes.
+func newGitHubClient(t *testing.T, serverURL string) *github.Client {
+	t.Helper()
+	baseURL, err := url.Parse(serverURL + "/")
+	if err != nil {
+		t.Fatal(err)
+	}
+	cli, err := github.NewClient(github.WithURLs(new(baseURL.String()), nil))
+	if err != nil {
+		t.Fatal(err)
+	}
+	return cli
+}
 
 func TestCheck_OK(t *testing.T) {
 	const (
@@ -60,7 +74,7 @@ func TestCheck_OK(t *testing.T) {
 
 	mux := http.NewServeMux()
 	mux.HandleFunc("/repos/haya14busa/reviewdog/check-runs", func(w http.ResponseWriter, r *http.Request) {
-		if err := json.NewEncoder(w).Encode(&github.CheckRun{ID: github.Ptr(int64(wantCheckID))}); err != nil {
+		if err := json.NewEncoder(w).Encode(&github.CheckRun{ID: new(int64(wantCheckID))}); err != nil {
 			t.Fatal(err)
 		}
 	})
@@ -80,8 +94,7 @@ func TestCheck_OK(t *testing.T) {
 	ts := httptest.NewServer(mux)
 	defer ts.Close()
 
-	cli := github.NewClient(nil)
-	cli.BaseURL, _ = url.Parse(ts.URL + "/")
+	cli := newGitHubClient(t, ts.URL)
 
 	check, err := NewGitHubCheck(cli, owner, repo, prNum, sha, level, name)
 	if err != nil {
@@ -132,7 +145,7 @@ func TestCheck_OK_multiple_update_runs(t *testing.T) {
 
 	mux := http.NewServeMux()
 	mux.HandleFunc("/repos/haya14busa/reviewdog/check-runs", func(w http.ResponseWriter, r *http.Request) {
-		if err := json.NewEncoder(w).Encode(&github.CheckRun{ID: github.Ptr(int64(wantCheckID))}); err != nil {
+		if err := json.NewEncoder(w).Encode(&github.CheckRun{ID: new(int64(wantCheckID))}); err != nil {
 			t.Fatal(err)
 		}
 	})
@@ -155,8 +168,7 @@ func TestCheck_OK_multiple_update_runs(t *testing.T) {
 	ts := httptest.NewServer(mux)
 	defer ts.Close()
 
-	cli := github.NewClient(nil)
-	cli.BaseURL, _ = url.Parse(ts.URL + "/")
+	cli := newGitHubClient(t, ts.URL)
 
 	check, err := NewGitHubCheck(cli, owner, repo, prNum, sha, level, name)
 	if err != nil {
@@ -216,8 +228,7 @@ func TestCheck_fail_check_with_403_in_GitHub_Actions(t *testing.T) {
 	})
 	ts := httptest.NewServer(mux)
 	defer ts.Close()
-	cli := github.NewClient(nil)
-	cli.BaseURL, _ = url.Parse(ts.URL + "/")
+	cli := newGitHubClient(t, ts.URL)
 
 	check, err := NewGitHubCheck(cli, owner, repo, prNum, sha, level, name)
 	if err != nil {
@@ -282,7 +293,7 @@ func TestCheck_setToolNameForEachRun(t *testing.T) {
 				t.Errorf("toolName = %s, want %s", req.Name, toolName2)
 			}
 		}
-		if err := json.NewEncoder(w).Encode(&github.CheckRun{ID: github.Ptr(int64(wantCheckID))}); err != nil {
+		if err := json.NewEncoder(w).Encode(&github.CheckRun{ID: new(int64(wantCheckID))}); err != nil {
 			t.Fatal(err)
 		}
 	})
@@ -299,12 +310,12 @@ func TestCheck_setToolNameForEachRun(t *testing.T) {
 			}
 			wantAnnotations := []*github.CheckRunAnnotation{
 				{
-					Path:            github.Ptr("sample.new.txt"),
-					StartLine:       github.Ptr(2),
-					EndLine:         github.Ptr(2),
-					AnnotationLevel: github.Ptr("warning"),
-					Message:         github.Ptr("comment 1"),
-					Title:           github.Ptr("[toolName1] sample.new.txt#L2"),
+					Path:            new("sample.new.txt"),
+					StartLine:       new(2),
+					EndLine:         new(2),
+					AnnotationLevel: new("warning"),
+					Message:         new("comment 1"),
+					Title:           new("[toolName1] sample.new.txt#L2"),
 				},
 			}
 			if req.GetStatus() == "completed" {
@@ -322,12 +333,12 @@ func TestCheck_setToolNameForEachRun(t *testing.T) {
 			}
 			wantAnnotations := []*github.CheckRunAnnotation{
 				{
-					Path:            github.Ptr("sample.new.txt"),
-					StartLine:       github.Ptr(2),
-					EndLine:         github.Ptr(2),
-					AnnotationLevel: github.Ptr("failure"), // default
-					Message:         github.Ptr("comment 2"),
-					Title:           github.Ptr("[toolName2] sample.new.txt#L2"),
+					Path:            new("sample.new.txt"),
+					StartLine:       new(2),
+					EndLine:         new(2),
+					AnnotationLevel: new("failure"), // default
+					Message:         new("comment 2"),
+					Title:           new("[toolName2] sample.new.txt#L2"),
 				},
 			}
 			if req.GetStatus() == "completed" {
@@ -348,8 +359,7 @@ func TestCheck_setToolNameForEachRun(t *testing.T) {
 	ts := httptest.NewServer(mux)
 	defer ts.Close()
 
-	cli := github.NewClient(nil)
-	cli.BaseURL, _ = url.Parse(ts.URL + "/")
+	cli := newGitHubClient(t, ts.URL)
 
 	check := &Check{
 		CLI:      cli,

@@ -8,7 +8,7 @@ import (
 	"os"
 	"os/exec"
 
-	"code.gitea.io/sdk/gitea"
+	gitea "gitea.dev/sdk"
 	"github.com/reviewdog/reviewdog"
 )
 
@@ -31,7 +31,7 @@ func (p *PullRequestDiffService) Strip() int {
 
 // Diff returns a diff of PullRequest.
 func (p *PullRequestDiffService) Diff(ctx context.Context) ([]byte, error) {
-	d, resp, err := p.Cli.GetPullRequestDiff(p.Owner, p.Repo, p.PR, gitea.PullRequestDiffOptions{
+	d, resp, err := p.Cli.PullRequests.GetPullRequestDiff(ctx, p.Owner, p.Repo, p.PR, gitea.PullRequestDiffOptions{
 		Binary: false,
 	})
 	if err != nil {
@@ -47,7 +47,7 @@ func (p *PullRequestDiffService) Diff(ctx context.Context) ([]byte, error) {
 
 // diffUsingGitCommand returns a diff of PullRequest using git command.
 func (p *PullRequestDiffService) diffUsingGitCommand(ctx context.Context) ([]byte, error) {
-	pr, _, err := p.Cli.GetPullRequest(p.Owner, p.Repo, p.PR)
+	pr, _, err := p.Cli.PullRequests.GetPullRequest(ctx, p.Owner, p.Repo, p.PR)
 	if err != nil {
 		return nil, err
 	}
