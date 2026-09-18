@@ -510,7 +510,7 @@ func TestParseMultiFile_strippedEmptyContextLine(t *testing.T) {
 	// The blank lines below are context lines that lost their leading space,
 	// which is what happens when a diff passes through trailing-whitespace
 	// stripping.
-	content := `--- a/sample.go
+	const content = `--- a/sample.go
 +++ b/sample.go
 @@ -1,4 +1,5 @@
  package sample
@@ -519,23 +519,31 @@ func TestParseMultiFile_strippedEmptyContextLine(t *testing.T) {
 +var W int
 
 `
-	got, err := ParseMultiFile(strings.NewReader(content))
-	if err != nil {
-		t.Fatal(err)
+	tests := map[string]string{
+		"LF":   content,
+		"CRLF": strings.ReplaceAll(content, "\n", "\r\n"),
 	}
-	if len(got) != 1 {
-		t.Fatalf("got %d file diffs, want 1", len(got))
-	}
-	if len(got[0].Hunks) != 1 {
-		t.Fatalf("got %d hunks, want 1", len(got[0].Hunks))
-	}
-	lines := got[0].Hunks[0].Lines
-	if len(lines) != 5 {
-		t.Fatalf("got %d lines, want 5", len(lines))
-	}
-	added := lines[3]
-	if added.Type != LineAdded || added.Content != "var W int" || added.LnumNew != 4 {
-		t.Errorf("got %#v, want the added line at new line 4", added)
+	for name, content := range tests {
+		t.Run(name, func(t *testing.T) {
+			got, err := ParseMultiFile(strings.NewReader(content))
+			if err != nil {
+				t.Fatal(err)
+			}
+			if len(got) != 1 {
+				t.Fatalf("got %d file diffs, want 1", len(got))
+			}
+			if len(got[0].Hunks) != 1 {
+				t.Fatalf("got %d hunks, want 1", len(got[0].Hunks))
+			}
+			lines := got[0].Hunks[0].Lines
+			if len(lines) != 5 {
+				t.Fatalf("got %d lines, want 5", len(lines))
+			}
+			added := lines[3]
+			if added.Type != LineAdded || added.Content != "var W int" || added.LnumNew != 4 {
+				t.Errorf("got %#v, want the added line at new line 4", added)
+			}
+		})
 	}
 }
 
