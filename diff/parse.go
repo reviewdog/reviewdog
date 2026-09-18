@@ -281,7 +281,7 @@ endhunk:
 			break
 		}
 		token := string(b)
-		if token == "\n" {
+		if token == "\n" || token == "\r" && hasPrefix(p.r, "\r\n") {
 			// Stripping trailing whitespace turns an empty context line into an
 			// empty line. Treat it as context so the rest of the hunk survives.
 			token = tokenUnchangedLine
@@ -337,6 +337,11 @@ endhunk:
 	}
 	p.lnumdiff++ // count up by an additional hunk
 	return hunk, nil
+}
+
+func hasPrefix(r *bufio.Reader, prefix string) bool {
+	b, err := r.Peek(len(prefix))
+	return err == nil && bytes.Equal(b, []byte(prefix))
 }
 
 func (p *hunkParser) done(lold, lnew int, hr *hunkrange) bool {
