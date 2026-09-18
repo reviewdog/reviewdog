@@ -9,6 +9,14 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ### :sparkles: Release Note <!-- optional -->
 
 ### :rocket: Enhancements
+
+### :bug: Fixes
+
+### :rotating_light: Breaking changes
+
+## [v0.21.2] - 2026-09-19
+
+### :rocket: Enhancements
 - [#2153](https://github.com/reviewdog/reviewdog/issues/2153) Log diagnostic filtering counts at debug level so fully filtered input is visible
 
 ### :bug: Fixes
@@ -17,8 +25,6 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - [#2809](https://github.com/reviewdog/reviewdog/pull/2809) Prevent crash when SARIF replacement inserted content is `mil` (fixes [#2808](https://github.com/reviewdog/reviewdog/issues/2808)).
 - [#950](https://github.com/reviewdog/reviewdog/issues/950) Report diff parse errors instead of silently returning the file diffs parsed so far.
 - [#951](https://github.com/reviewdog/reviewdog/issues/951) Parse a diff that carries blank lines around it, and a context line that lost its leading space to trailing-whitespace stripping.
-
-### :rotating_light: Breaking changes
 
 ## [v0.21.1] - 2026-06-12
 
@@ -338,7 +344,8 @@ $ cd subdir/ && reviewdog -filter-mode=file -fail-on-error -reporter=github-pr-r
 
 See https://github.com/reviewdog/reviewdog/releases for older release note.
 
-[Unreleased]: https://github.com/reviewdog/reviewdog/compare/v0.21.1...HEAD
+[Unreleased]: https://github.com/reviewdog/reviewdog/compare/v0.21.2...HEAD
+[v0.21.2]: https://github.com/reviewdog/reviewdog/compare/v0.21.1...v0.21.2
 [v0.21.1]: https://github.com/reviewdog/reviewdog/compare/v0.21.0...v0.21.1
 [v0.21.0]: https://github.com/reviewdog/reviewdog/compare/v0.20.3...v0.21.0
 [v0.10.0]: https://github.com/reviewdog/reviewdog/compare/v0.9.17...v0.10.0
