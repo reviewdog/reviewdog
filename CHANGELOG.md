@@ -13,6 +13,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### :bug: Fixes
 - [#2477](https://github.com/reviewdog/reviewdog/pull/2477) Prevent deadlock when a runner outputs large `stderr`.
+- [#2809](https://github.com/reviewdog/reviewdog/pull/2809) Prevent crash when SARIF replacement inserted content is `mil` (fixes [#2808](https://github.com/reviewdog/reviewdog/issues/2808)).
 
 ### :rotating_light: Breaking changes
 
