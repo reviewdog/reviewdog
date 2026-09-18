@@ -50,13 +50,31 @@ func (p *multiFileParser) Parse() ([]*FileDiff, error) {
 	var fds []*FileDiff
 	fp := &fileParser{r: p.r}
 	for {
+		skipBlankLines(p.r)
 		fd, err := fp.Parse()
-		if err != nil || fd == nil {
+		if err != nil {
+			return nil, err
+		}
+		if fd == nil {
 			break
 		}
 		fds = append(fds, fd)
 	}
 	return fds, nil
+}
+
+// skipBlankLines consumes blank lines that sit between file diffs. They carry no
+// diff content and show up whenever diffs are concatenated or pasted.
+func skipBlankLines(r *bufio.Reader) {
+	for {
+		b, err := r.Peek(1)
+		if err != nil || (b[0] != '\n' && b[0] != '\r') {
+			return
+		}
+		if _, err := readline(r); err != nil {
+			return
+		}
+	}
 }
 
 // ParseFile parses a file unified diff.
@@ -263,11 +281,16 @@ endhunk:
 			break
 		}
 		token := string(b)
+		if token == "\n" || token == "\r" && hasPrefix(p.r, "\r\n") {
+			// Stripping trailing whitespace turns an empty context line into an
+			// empty line. Treat it as context so the rest of the hunk survives.
+			token = tokenUnchangedLine
+		}
 		switch token {
 		case tokenUnchangedLine, tokenAddedLine, tokenDeletedLine:
 			p.lnumdiff++
 			l, _ := readline(p.r)
-			line := &Line{Content: l[len(token):]} // trim first token
+			line := &Line{Content: strings.TrimPrefix(l, token)}
 			switch token {
 			case tokenUnchangedLine:
 				line.Type = LineUnchanged
@@ -314,6 +337,11 @@ endhunk:
 	}
 	p.lnumdiff++ // count up by an additional hunk
 	return hunk, nil
+}
+
+func hasPrefix(r *bufio.Reader, prefix string) bool {
+	b, err := r.Peek(len(prefix))
+	return err == nil && bytes.Equal(b, []byte(prefix))
 }
 
 func (p *hunkParser) done(lold, lnew int, hr *hunkrange) bool {
