@@ -12,6 +12,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - [#2153](https://github.com/reviewdog/reviewdog/issues/2153) Log diagnostic filtering counts at debug level so fully filtered input is visible
 
 ### :bug: Fixes
+- [#2801](https://github.com/reviewdog/reviewdog/pull/2801) Report GitHub Checks even when there are no findings (regression since v0.21.1).
 - [#2477](https://github.com/reviewdog/reviewdog/pull/2477) Prevent deadlock when a runner outputs large `stderr`.
 - [#2809](https://github.com/reviewdog/reviewdog/pull/2809) Prevent crash when SARIF replacement inserted content is `mil` (fixes [#2808](https://github.com/reviewdog/reviewdog/issues/2808)).
 
