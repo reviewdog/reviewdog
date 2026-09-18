@@ -77,7 +77,7 @@ func (p *SarifParser) Parse(r io.Reader) ([]*rdf.Diagnostic, error) {
 					for _, replacement := range artifactChange.Replacements {
 						deletedRegion := replacement.DeletedRegion
 						rng := getRdfRange(deletedRegion)
-						if rng == nil || replacement.InsertedContent.Text == nil {
+						if rng == nil || replacement.InsertedContent == nil || replacement.InsertedContent.Text == nil {
 							// No line information in fix
 							continue
 						}

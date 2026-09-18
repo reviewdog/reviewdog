@@ -9,7 +9,9 @@ import (
 	"os"
 
 	"github.com/google/go-cmp/cmp"
+	"github.com/reviewdog/reviewdog/proto/rdf"
 	"google.golang.org/protobuf/encoding/protojson"
+	"google.golang.org/protobuf/testing/protocmp"
 )
 
 func TestExampleSarifParser(t *testing.T) {
@@ -129,6 +131,68 @@ func TestSarifParser_Suppressions(t *testing.T) {
 			}
 			if got := len(diagnostics); got != tc.wantCount {
 				t.Errorf("len(diagnostics) = %d, want %d", got, tc.wantCount)
+			}
+		})
+	}
+}
+
+func TestSarifParser_ReplacementInsertedContent(t *testing.T) {
+	// Regression test for https://github.com/reviewdog/reviewdog/issues/2808:
+	// ruff can emit a replacement without the optional insertedContent field.
+	for _, tc := range []struct {
+		name            string
+		insertedContent string
+		wantSuggestion  bool
+		wantText        string
+	}{
+		{name: "absent"},
+		{name: "null", insertedContent: `, "insertedContent": null`},
+		{name: "text absent", insertedContent: `, "insertedContent": {}`},
+		{name: "empty text", insertedContent: `, "insertedContent": {"text": ""}`, wantSuggestion: true},
+		{name: "nonempty text", insertedContent: `, "insertedContent": {"text": "import sys"}`, wantSuggestion: true, wantText: "import sys"},
+	} {
+		t.Run(tc.name, func(t *testing.T) {
+			input := `{
+				"version": "2.1.0",
+				"runs": [{
+					"tool": {"driver": {"name": "ruff"}},
+					"results": [{
+						"ruleId": "F401",
+						"level": "error",
+						"message": {"text": "unused import"},
+						"locations": [{"physicalLocation": {
+							"artifactLocation": {"uri": "src/main.py"},
+							"region": {"startLine": 1, "startColumn": 1, "endLine": 1, "endColumn": 10}
+						}}],
+						"fixes": [{"artifactChanges": [{
+							"artifactLocation": {"uri": "src/main.py"},
+							"replacements": [{
+								"deletedRegion": {"startLine": 1, "startColumn": 1, "endLine": 1, "endColumn": 10}` + tc.insertedContent + `
+							}]
+						}]}]
+					}]
+				}]
+			}`
+			got, err := NewSarifParser().Parse(strings.NewReader(input))
+			if err != nil {
+				t.Fatal(err)
+			}
+			rng := &rdf.Range{
+				Start: &rdf.Position{Line: 1},
+				End:   &rdf.Position{Line: 1, Column: 10},
+			}
+			want := &rdf.Diagnostic{
+				Message:  "unused import",
+				Location: &rdf.Location{Path: "src/main.py", Range: rng},
+				Severity: rdf.Severity_ERROR,
+				Source:   &rdf.Source{Name: "ruff"},
+				Code:     &rdf.Code{Value: "F401"},
+			}
+			if tc.wantSuggestion {
+				want.Suggestions = []*rdf.Suggestion{{Range: rng, Text: tc.wantText}}
+			}
+			if diff := cmp.Diff([]*rdf.Diagnostic{want}, got, protocmp.Transform(), protocmp.IgnoreFields(&rdf.Diagnostic{}, "original_output")); diff != "" {
+				t.Errorf("Parse() mismatch (-want +got):\n%s", diff)
 			}
 		})
 	}
