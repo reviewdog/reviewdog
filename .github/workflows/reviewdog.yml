@@ -216,7 +216,7 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
-      - uses: reviewdog/action-misspell@da40ce414be6ce320a9322aa2bae10bd3b9e6ef3 # v1.29.0
+      - uses: reviewdog/action-misspell@5f62a0ac088400bd1a3283bbb109efc5a22e8171 # v1.30.0
         with:
           github_token: ${{ secrets.github_token }}
           locale: "US"
