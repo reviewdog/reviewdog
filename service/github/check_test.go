@@ -14,6 +14,7 @@ import (
 	"github.com/google/go-github/v92/github"
 	"github.com/reviewdog/reviewdog"
 	"github.com/reviewdog/reviewdog/filter"
+	"github.com/reviewdog/reviewdog/parser"
 	"github.com/reviewdog/reviewdog/proto/rdf"
 )
 
@@ -117,6 +118,82 @@ func TestCheck_OK(t *testing.T) {
 	}
 	if check.GetResult().Conclusion != conclusion {
 		t.Errorf("conclusion = %s, want %s", check.GetResult().Conclusion, conclusion)
+	}
+}
+
+// TestCheck_DiffParserAnnotationMessageNotEmpty is a regression test for
+// https://github.com/reviewdog/reviewdog/issues/924: diagnostics produced by
+// the "diff" input format (parser.DiffParser, used e.g. for `gofmt -d` or
+// `clang-format-diff` output) never set rdf.Diagnostic.Message, so the
+// GitHub Check Runs annotation built from them ends up with an empty
+// "message" field. GitHub's Check Runs API documents "message" as required
+// (https://docs.github.com/en/rest/checks/runs#update-a-check-run --
+// "message string Required. A short description of the feedback for these
+// lines of code.") and rejects such a request with 422, "field: annotations,
+// code: invalid", exactly as reported in the issue. This test reproduces the
+// defect locally (without depending on GitHub's live validation) by asserting
+// that every annotation posted from diff-parsed diagnostics has a non-empty
+// Message.
+func TestCheck_DiffParserAnnotationMessageNotEmpty(t *testing.T) {
+	const sample = `diff --git a/gofmt.go b/gofmt.go
+--- a/gofmt.go	2020-07-26 08:01:09.260800318 +0000
++++ b/gofmt.go	2020-07-26 08:01:09.260800318 +0000
+@@ -1,3 +1,3 @@
+ package testdata
+
+-func    fmt     () {
++func fmt() {
+`
+	diagnostics, err := parser.NewDiffParser(1).Parse(strings.NewReader(sample))
+	if err != nil {
+		t.Fatal(err)
+	}
+	if len(diagnostics) == 0 {
+		t.Fatal("expected at least one diagnostic from the sample diff")
+	}
+
+	var gotMessages []string
+	mux := http.NewServeMux()
+	mux.HandleFunc("/repos/haya14busa/reviewdog/check-runs", func(w http.ResponseWriter, r *http.Request) {
+		if err := json.NewEncoder(w).Encode(&github.CheckRun{ID: new(int64(1414))}); err != nil {
+			t.Fatal(err)
+		}
+	})
+	mux.HandleFunc("/repos/haya14busa/reviewdog/check-runs/1414", func(w http.ResponseWriter, r *http.Request) {
+		var req github.CheckRun
+		if err := json.NewDecoder(r.Body).Decode(&req); err != nil {
+			t.Error(err)
+		}
+		for _, a := range req.GetOutput().Annotations {
+			gotMessages = append(gotMessages, a.GetMessage())
+		}
+	})
+	ts := httptest.NewServer(mux)
+	defer ts.Close()
+
+	cli := newGitHubClient(t, ts.URL)
+	check, err := NewGitHubCheck(cli, "haya14busa", "reviewdog", 14, "1414", "warning", "diff-linter")
+	if err != nil {
+		t.Fatal(err)
+	}
+	for _, d := range diagnostics {
+		if err := check.Post(context.Background(), &reviewdog.Comment{
+			Result: &filter.FilteredDiagnostic{Diagnostic: d, ShouldReport: true},
+		}); err != nil {
+			t.Fatal(err)
+		}
+	}
+	if err := check.Flush(context.Background()); err != nil {
+		t.Fatal(err)
+	}
+
+	if len(gotMessages) == 0 {
+		t.Fatal("no annotations were posted")
+	}
+	for i, m := range gotMessages {
+		if m == "" {
+			t.Errorf("annotation[%d].Message is empty; GitHub's Check Runs API requires a non-empty message and rejects the request with 422 (see issue #924)", i)
+		}
 	}
 }
 
