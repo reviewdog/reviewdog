@@ -160,27 +160,27 @@ func TestDiff_fallbackToFilesAPI(t *testing.T) {
 	mux.HandleFunc("/repos/o/r/pulls/14/files", func(w http.ResponseWriter, r *http.Request) {
 		files := []*github.CommitFile{
 			{
-				Filename: github.Ptr("added.txt"),
-				Status:   github.Ptr("added"),
-				Patch:    github.Ptr("@@ -0,0 +1,2 @@\n+line one\n+line two"),
+				Filename: new("added.txt"),
+				Status:   new("added"),
+				Patch:    new("@@ -0,0 +1,2 @@\n+line one\n+line two"),
 			},
 			{
-				Filename: github.Ptr("removed.txt"),
-				Status:   github.Ptr("removed"),
-				Patch:    github.Ptr("@@ -1,2 +0,0 @@\n-old one\n-old two"),
+				Filename: new("removed.txt"),
+				Status:   new("removed"),
+				Patch:    new("@@ -1,2 +0,0 @@\n-old one\n-old two"),
 			},
 			{
-				Filename:         github.Ptr("renamed_new.txt"),
-				PreviousFilename: github.Ptr("renamed_old.txt"),
-				Status:           github.Ptr("renamed"),
-				Patch:            github.Ptr("@@ -1 +1 @@\n-old content\n+new content"),
+				Filename:         new("renamed_new.txt"),
+				PreviousFilename: new("renamed_old.txt"),
+				Status:           new("renamed"),
+				Patch:            new("@@ -1 +1 @@\n-old content\n+new content"),
 			},
 			{
 				// Binary files (or per-file diffs too large on their own)
 				// come back with no Patch at all; they must be skipped
 				// rather than emitted as a bogus empty hunk.
-				Filename: github.Ptr("image.png"),
-				Status:   github.Ptr("modified"),
+				Filename: new("image.png"),
+				Status:   new("modified"),
 			},
 		}
 		w.Header().Set("Content-Type", "application/json")
