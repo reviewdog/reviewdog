@@ -431,6 +431,20 @@ func TestBuildSuggestionsInvalid(t *testing.T) {
 				"",
 			}, "\n"),
 		},
+	}
+	for _, tt := range tests {
+		suggestion := buildSuggestions(tt.in)
+		if suggestion != tt.want {
+			t.Errorf("got unexpected suggestion.\ngot:\n%s\nwant:\n%s", suggestion, tt.want)
+		}
+	}
+}
+
+func TestBuildSuggestionsRangeEndOmitted(t *testing.T) {
+	tests := []struct {
+		in   *reviewdog.Comment
+		want string
+	}{
 		{
 			in: buildTestComment(
 				"two suggestions, one without range end",
@@ -446,6 +460,10 @@ func TestBuildSuggestionsInvalid(t *testing.T) {
 					buildTestsSuggestion("line1-fixed\nline2-fixed", 10, 11),
 				}),
 			want: strings.Join([]string{
+				"```suggestion:-0+0",
+				"line3-fixed",
+				"line4-fixed",
+				"```",
 				"```suggestion:-0+1",
 				"line1-fixed",
 				"line2-fixed",
