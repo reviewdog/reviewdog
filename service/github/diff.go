@@ -64,15 +64,15 @@ func (p *PullRequestDiffService) Diff(ctx context.Context) ([]byte, error) {
 			// equivalent diff from the paginated "list pull request files"
 			// API instead, which has no such limit of its own (though see
 			// gitHubListFilesCap above).
-			if fd, ferr := p.diffUsingFilesAPI(ctx); ferr == nil {
+			fd, ferr := p.diffUsingFilesAPI(ctx)
+			if ferr == nil {
 				return fd, nil
-			} else {
-				// Don't let this failure hide behind the original 406: on
-				// doghouse in particular there's no other fallback left, so
-				// whatever caused it (rate limit, a token missing a scope,
-				// etc.) is otherwise invisible.
-				log.Printf("reviewdog: pull request files API fallback also failed: %v", ferr)
 			}
+			// Don't let this failure hide behind the original 406: on
+			// doghouse in particular there's no other fallback left, so
+			// whatever caused it (rate limit, a token missing a scope,
+			// etc.) is otherwise invisible.
+			log.Printf("reviewdog: pull request files API fallback also failed: %v", ferr)
 		}
 
 		return nil, err
