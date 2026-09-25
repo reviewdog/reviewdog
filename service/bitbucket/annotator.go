@@ -40,7 +40,9 @@ type ReportAnnotator struct {
 	// so we can create report per tool
 	comments map[string][]*reviewdog.Comment
 
-	duplicates map[string]struct{}
+	// external IDs already queued, per tool name. Each tool has a report of
+	// its own, so the same diagnostic from two tools is two annotations.
+	duplicates map[string]map[string]struct{}
 }
 
 // NewReportAnnotator creates new Bitbucket ReportRequest Annotator
@@ -51,7 +53,7 @@ func NewReportAnnotator(cli APIClient, owner, repo, sha string, runners []string
 		owner:      owner,
 		repo:       repo,
 		comments:   make(map[string][]*reviewdog.Comment, len(runners)),
-		duplicates: map[string]struct{}{},
+		duplicates: map[string]map[string]struct{}{},
 	}
 
 	// pre populate map of annotations, so we still create passed (green) report
@@ -81,11 +83,17 @@ func (r *ReportAnnotator) Post(_ context.Context, c *reviewdog.Comment) error {
 
 	// deduplicate event, because some reporters might report
 	// it twice, and bitbucket api will complain on duplicated
-	// external id of annotation
+	// external id of annotation. The check is per tool: another tool reporting
+	// the same diagnostic posts to its own report.
+	seen, ok := r.duplicates[c.ToolName]
+	if !ok {
+		seen = map[string]struct{}{}
+		r.duplicates[c.ToolName] = seen
+	}
 	commentID := externalIDFromDiagnostic(c.Result.Diagnostic)
-	if _, exist := r.duplicates[commentID]; !exist {
+	if _, exist := seen[commentID]; !exist {
 		r.comments[c.ToolName] = append(r.comments[c.ToolName], c)
-		r.duplicates[commentID] = struct{}{}
+		seen[commentID] = struct{}{}
 	}
 
 	return nil
