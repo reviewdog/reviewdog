@@ -305,22 +305,13 @@ func buildSingleSuggestion(c *reviewdog.Comment, s *rdf.Suggestion) (string, err
 }
 
 func buildNonLineBasedSuggestion(c *reviewdog.Comment, s *rdf.Suggestion) (string, error) {
-	sourceLines := c.Result.SourceLines
-	if len(sourceLines) == 0 {
-		return "", errors.New("source lines are not available")
-	}
 	start := s.GetRange().GetStart()
 	end := s.GetRange().GetEnd()
-	startLineContent, err := getSourceLine(sourceLines, int(start.GetLine()))
-	if err != nil {
-		return "", err
-	}
-	endLineContent, err := getSourceLine(sourceLines, int(end.GetLine()))
+	txt, err := commentutil.BuildSuggestionText(c.Result.SourceLines, s)
 	if err != nil {
 		return "", err
 	}
 
-	txt := startLineContent[:max(start.GetColumn()-1, 0)] + s.GetText() + endLineContent[max(end.GetColumn()-1, 0):]
 	backticks := commentutil.GetCodeFenceLength(txt)
 	lines := strconv.Itoa(int(end.GetLine() - start.GetLine()))
 
@@ -336,12 +327,4 @@ func buildNonLineBasedSuggestion(c *reviewdog.Comment, s *rdf.Suggestion) (strin
 	}
 	commentutil.WriteCodeFence(&sb, backticks)
 	return sb.String(), nil
-}
-
-func getSourceLine(sourceLines map[int]string, line int) (string, error) {
-	lineContent, ok := sourceLines[line]
-	if !ok {
-		return "", fmt.Errorf("source line (L=%d) is not available for this suggestion", line)
-	}
-	return lineContent, nil
 }
