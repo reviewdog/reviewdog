@@ -266,6 +266,12 @@ func buildSuggestions(c *reviewdog.Comment) string {
 func buildSingleSuggestion(c *reviewdog.Comment, s *rdf.Suggestion) (string, error) {
 	var sb strings.Builder
 
+	start := s.GetRange().GetStart()
+	end := s.GetRange().GetEnd()
+	if start.GetColumn() > 0 || end.GetColumn() > 0 {
+		return buildNonLineBasedSuggestion(c, s)
+	}
+
 	// we might need to use 4 or more backticks
 	//
 	// https://docs.gitlab.com/ee/user/project/merge_requests/reviews/suggestions.html#code-block-nested-in-suggestions
@@ -295,5 +301,30 @@ func buildSingleSuggestion(c *reviewdog.Comment, s *rdf.Suggestion) (string, err
 	}
 	commentutil.WriteCodeFence(&sb, backticks)
 
+	return sb.String(), nil
+}
+
+func buildNonLineBasedSuggestion(c *reviewdog.Comment, s *rdf.Suggestion) (string, error) {
+	start := s.GetRange().GetStart()
+	end := s.GetRange().GetEnd()
+	txt, err := commentutil.BuildSuggestionText(c.Result.SourceLines, s)
+	if err != nil {
+		return "", err
+	}
+
+	backticks := commentutil.GetCodeFenceLength(txt)
+	lines := strconv.Itoa(int(end.GetLine() - start.GetLine()))
+
+	var sb strings.Builder
+	sb.Grow(backticks + len("suggestion:-0+\n") + len(lines) + len(txt) + len("\n") + backticks)
+	commentutil.WriteCodeFence(&sb, backticks)
+	sb.WriteString("suggestion:-0+")
+	sb.WriteString(lines)
+	sb.WriteString("\n")
+	if txt != "" {
+		sb.WriteString(txt)
+		sb.WriteString("\n")
+	}
+	commentutil.WriteCodeFence(&sb, backticks)
 	return sb.String(), nil
 }
