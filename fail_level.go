@@ -65,7 +65,13 @@ func (failLevel *FailLevel) Set(value string) error {
 
 // ShouldFail returns true if reviewdog should exit with 1 with given rdf.Severity.
 func (failLevel FailLevel) ShouldFail(severity rdf.Severity) bool {
-	if failLevel == FailLevelDefault || failLevel == FailLevelNone {
+	switch failLevel {
+	case FailLevelDefault, FailLevelNone:
+		return false
+	case FailLevelAny:
+		return true
+	}
+	if severity == rdf.Severity_UNKNOWN_SEVERITY {
 		return false
 	}
 	minSeverity := failLevel.minSeverity()

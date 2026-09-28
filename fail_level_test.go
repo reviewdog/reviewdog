@@ -28,6 +28,9 @@ func TestShouldFail(t *testing.T) {
 			failLevel: FailLevelNone, severity: rdf.Severity_ERROR, want: false,
 		},
 		{
+			failLevel: FailLevelAny, severity: rdf.Severity_UNKNOWN_SEVERITY, want: true,
+		},
+		{
 			failLevel: FailLevelError, severity: rdf.Severity_ERROR, want: true,
 		},
 		{
@@ -37,7 +40,7 @@ func TestShouldFail(t *testing.T) {
 			failLevel: FailLevelError, severity: rdf.Severity_INFO, want: false,
 		},
 		{
-			failLevel: FailLevelError, severity: rdf.Severity_UNKNOWN_SEVERITY, want: true,
+			failLevel: FailLevelError, severity: rdf.Severity_UNKNOWN_SEVERITY, want: false,
 		},
 		{
 			failLevel: FailLevelWarning, severity: rdf.Severity_ERROR, want: true,
@@ -49,7 +52,7 @@ func TestShouldFail(t *testing.T) {
 			failLevel: FailLevelWarning, severity: rdf.Severity_INFO, want: false,
 		},
 		{
-			failLevel: FailLevelWarning, severity: rdf.Severity_UNKNOWN_SEVERITY, want: true,
+			failLevel: FailLevelWarning, severity: rdf.Severity_UNKNOWN_SEVERITY, want: false,
 		},
 		{
 			failLevel: FailLevelInfo, severity: rdf.Severity_ERROR, want: true,
@@ -61,7 +64,7 @@ func TestShouldFail(t *testing.T) {
 			failLevel: FailLevelInfo, severity: rdf.Severity_INFO, want: true,
 		},
 		{
-			failLevel: FailLevelInfo, severity: rdf.Severity_UNKNOWN_SEVERITY, want: true,
+			failLevel: FailLevelInfo, severity: rdf.Severity_UNKNOWN_SEVERITY, want: false,
 		},
 	}
 	for _, tt := range tests {
