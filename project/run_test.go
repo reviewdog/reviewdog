@@ -4,6 +4,7 @@ import (
 	"bytes"
 	"context"
 	"errors"
+	"io"
 	"os"
 	"runtime"
 	"strings"
@@ -12,6 +13,7 @@ import (
 
 	"github.com/reviewdog/reviewdog"
 	"github.com/reviewdog/reviewdog/filter"
+	"github.com/reviewdog/reviewdog/parser"
 )
 
 type fakeDiffService struct {
@@ -37,6 +39,88 @@ func (f *fakeCommentService) Post(_ context.Context, c *reviewdog.Comment) error
 }
 
 func (*fakeCommentService) ShouldPrependGitRelDir() bool { return false }
+
+type readFunc func([]byte) (int, error)
+
+func (f readFunc) Read(p []byte) (int, error) {
+	return f(p)
+}
+
+func TestConcurrentMultiReaderPreservesInterleavedMultilineDiagnostics(t *testing.T) {
+	stdoutFirstRead := make(chan struct{})
+	stderrFirstChunkWritten := make(chan struct{})
+	stdoutSecondChunkWritten := make(chan struct{})
+	stdoutReads := 0
+	stderrReads := 0
+
+	stdout := readFunc(func(p []byte) (int, error) {
+		stdoutReads++
+		switch stdoutReads {
+		case 1:
+			n := copy(p, "a.go:1: error A\n")
+			close(stdoutFirstRead)
+			return n, nil
+		case 2:
+			<-stderrFirstChunkWritten
+			n := copy(p, "b.go:2: error B\n")
+			return n, nil
+		default:
+			close(stdoutSecondChunkWritten)
+			return 0, io.EOF
+		}
+	})
+	stderr := readFunc(func(p []byte) (int, error) {
+		stderrReads++
+		switch stderrReads {
+		case 1:
+			<-stdoutFirstRead
+			n := copy(p, "  detail A\nEND\n")
+			return n, nil
+		case 2:
+			close(stderrFirstChunkWritten)
+			<-stdoutSecondChunkWritten
+			n := copy(p, "  detail B\nEND\n")
+			return n, nil
+		default:
+			return 0, io.EOF
+		}
+	})
+
+	p, err := parser.New(&parser.Option{
+		Errorformat: []string{"%E%f:%l: %m", "%C  %m", "%ZEND"},
+	})
+	if err != nil {
+		t.Fatal(err)
+	}
+	diagnostics, err := p.Parse(concurrentMultiReader(stdout, stderr))
+	if err != nil {
+		t.Fatal(err)
+	}
+
+	want := []struct {
+		path    string
+		line    int32
+		message string
+	}{
+		{path: "a.go", line: 1, message: "error A\ndetail A"},
+		{path: "b.go", line: 2, message: "error B\ndetail B"},
+	}
+	if len(diagnostics) != len(want) {
+		t.Fatalf("got %d diagnostics, want %d: %#v", len(diagnostics), len(want), diagnostics)
+	}
+	for i, want := range want {
+		got := diagnostics[i]
+		if got.Location.Path != want.path {
+			t.Errorf("diagnostic %d path = %q, want %q", i, got.Location.Path, want.path)
+		}
+		if got.Location.Range.Start.Line != want.line {
+			t.Errorf("diagnostic %d line = %d, want %d", i, got.Location.Range.Start.Line, want.line)
+		}
+		if got.Message != want.message {
+			t.Errorf("diagnostic %d message = %q, want %q", i, got.Message, want.message)
+		}
+	}
+}
 
 func TestRun(t *testing.T) {
 	ctx := context.Background()

@@ -175,32 +175,20 @@ func getRunnerName(key string, runner *Runner) string {
 // 3. we can't read stderr until stdout is closed <- deadlock
 func concurrentMultiReader(readers ...io.Reader) io.Reader {
 	pr, pw := io.Pipe()
-	var bufs []*bytes.Buffer
 
 	var g errgroup.Group
 	for _, r := range readers {
-		b := &bytes.Buffer{}
-		bufs = append(bufs, b)
+		r := r
 		g.Go(func() error {
-			_, err := io.Copy(b, r)
-			if err != nil {
-				return err
-			}
-			return nil
+			_, err := io.Copy(pw, r)
+			return err
 		})
 	}
 
 	go func() {
-		err := g.Wait()
-		if err != nil {
+		if err := g.Wait(); err != nil {
 			_ = pw.CloseWithError(err)
 			return
-		}
-		for _, b := range bufs {
-			if _, err := io.Copy(pw, b); err != nil {
-				_ = pw.CloseWithError(err)
-				return
-			}
 		}
 		_ = pw.Close()
 	}()
