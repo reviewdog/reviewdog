@@ -311,6 +311,38 @@ func TestFilterCheckSuggestionWithOmittedEnd(t *testing.T) {
 	}
 }
 
+func TestFilterCheckSuggestionWithOmittedEndOutsideDiffContext(t *testing.T) {
+	results := []*rdf.Diagnostic{
+		{
+			Location: &rdf.Location{
+				Path:  "sample.new.txt",
+				Range: &rdf.Range{Start: &rdf.Position{Line: 1}},
+			},
+			Suggestions: []*rdf.Suggestion{
+				{
+					Range: &rdf.Range{Start: &rdf.Position{Line: 5, Column: 1}},
+					Text:  "inserted",
+				},
+			},
+		},
+	}
+	filediffs, err := diff.ParseMultiFile(strings.NewReader(diffContent))
+	if err != nil {
+		t.Fatal(err)
+	}
+
+	checks := FilterCheck(results, filediffs, 0, "", ModeDiffContext)
+	if len(checks) != 1 {
+		t.Fatalf("len(checks) = %d, want 1", len(checks))
+	}
+	if checks[0].FirstSuggestionInDiffContext {
+		t.Fatal("FirstSuggestionInDiffContext = true, want false")
+	}
+	if _, ok := checks[0].SourceLines[5]; ok {
+		t.Fatal("SourceLines contains line 5, want it to be absent")
+	}
+}
+
 func TestFilterCheckByFile(t *testing.T) {
 	results := []*rdf.Diagnostic{
 		{
