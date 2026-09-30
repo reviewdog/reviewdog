@@ -565,6 +565,9 @@ func buildNonLineBasedSuggestion(c *reviewdog.Comment, s *rdf.Suggestion) (strin
 	}
 	start := s.GetRange().GetStart()
 	end := s.GetRange().GetEnd()
+	if end == nil {
+		end = start
+	}
 	startLineContent, err := getSourceLine(sourceLines, int(start.GetLine()))
 	if err != nil {
 		return "", err

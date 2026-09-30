@@ -60,6 +60,27 @@ func moveToRootDir() {
 	os.Chdir("../..")
 }
 
+func TestBuildNonLineBasedSuggestionRangeEndOmitted(t *testing.T) {
+	c := &reviewdog.Comment{Result: &filter.FilteredDiagnostic{
+		SourceLines: map[int]string{1: "abc"},
+	}}
+	s := &rdf.Suggestion{
+		Range: &rdf.Range{
+			Start: &rdf.Position{Line: 1, Column: 3},
+		},
+		Text: "X",
+	}
+
+	got, err := buildNonLineBasedSuggestion(c, s)
+	if err != nil {
+		t.Fatalf("buildNonLineBasedSuggestion() error = %v", err)
+	}
+	want := "```suggestion\nabXc\n```"
+	if got != want {
+		t.Fatalf("buildNonLineBasedSuggestion() = %q, want %q", got, want)
+	}
+}
+
 func TestGitHubPullRequest_Post(t *testing.T) {
 	t.Skip("skipping test which post comments actually")
 	client := setupGitHubClient()
