@@ -6,7 +6,7 @@ require (
 	cloud.google.com/go/compute/metadata v0.10.0
 	cloud.google.com/go/datastore v1.27.0
 	contrib.go.opencensus.io/exporter/stackdriver v0.13.12
-	gitea.dev/sdk v1.2.0
+	gitea.dev/sdk v1.3.0
 	github.com/bradleyfalzon/ghinstallation/v2 v2.19.0
 	github.com/google/go-cmp v0.7.0
 	github.com/google/go-github/v92 v92.0.0
