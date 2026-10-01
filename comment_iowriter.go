@@ -289,6 +289,8 @@ func severity2level(s rdf.Severity) sarif.Level {
 		return sarif.Error
 	case rdf.Severity_WARNING:
 		return sarif.Warning
+	case rdf.Severity_INFO:
+		return sarif.Note
 	default:
 		return sarif.None
 	}
