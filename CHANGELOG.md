@@ -11,6 +11,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ### :rocket: Enhancements
 
 ### :bug: Fixes
+- Send an encoded absolute OAuth `redirect_uri` targeting the registered Doghouse callback route.
 - [#2823](https://github.com/reviewdog/reviewdog/pull/2823) Fall back to the paginated "list pull request files" API when GitHub's diff API rejects pull requests with more than 300 changed files (fixes [#2150](https://github.com/reviewdog/reviewdog/issues/2150)).
 
 ### :rotating_light: Breaking changes
