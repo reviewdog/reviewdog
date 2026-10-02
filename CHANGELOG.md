@@ -11,7 +11,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ### :rocket: Enhancements
 
 ### :bug: Fixes
-- Preserve informational diagnostic severity as `note` when emitting SARIF.
+- [#2849](https://github.com/reviewdog/reviewdog/pull/2849) Preserve informational diagnostic severity as `note` when emitting SARIF.
 - [#2850](https://github.com/reviewdog/reviewdog/pull/2850) Send an encoded absolute OAuth `redirect_uri` targeting the registered Doghouse callback route.
 - [#2851](https://github.com/reviewdog/reviewdog/pull/2851) Allow the installation-store transaction to insert an account's first installation record.
 - [#2848](https://github.com/reviewdog/reviewdog/pull/2848) Preserve diagnostic annotations when GitHub review publication falls back to Actions logging after a permission error.
