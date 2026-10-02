@@ -198,6 +198,56 @@ func TestSarifParser_ReplacementInsertedContent(t *testing.T) {
 	}
 }
 
+func TestSarifParser_ArtifactLocationIndex(t *testing.T) {
+	input := `{
+		"version": "2.1.0",
+		"runs": [{
+			"tool": {"driver": {"name": "fixture"}},
+			"artifacts": [{"location": {"uri": "src/index-fixture.go"}}],
+			"results": [{
+				"message": {"text": "fixture finding"},
+				"locations": [{"physicalLocation": {
+					"artifactLocation": {"index": 0},
+					"region": {"startLine": 7}
+				}}]
+			}]
+		}]
+	}`
+
+	diagnostics, err := NewSarifParser().Parse(strings.NewReader(input))
+	if err != nil {
+		t.Fatalf("Parse error: %v", err)
+	}
+	if got, want := len(diagnostics), 1; got != want {
+		t.Fatalf("len(diagnostics) = %d, want %d", got, want)
+	}
+	if got, want := diagnostics[0].GetLocation().GetPath(), "src/index-fixture.go"; got != want {
+		t.Errorf("location path = %q, want %q", got, want)
+	}
+}
+
+func TestSarifParser_ArtifactLocationIndexOutOfRange(t *testing.T) {
+	input := `{
+		"version": "2.1.0",
+		"runs": [{
+			"tool": {"driver": {"name": "fixture"}},
+			"artifacts": [],
+			"results": [{
+				"message": {"text": "fixture finding"},
+				"locations": [{"physicalLocation": {
+					"artifactLocation": {"index": 0},
+					"region": {"startLine": 7}
+				}}]
+			}]
+		}]
+	}`
+
+	_, err := NewSarifParser().Parse(strings.NewReader(input))
+	if err == nil || !strings.Contains(err.Error(), "artifactLocation index 0 out of range") {
+		t.Fatalf("Parse error = %v, want clear out-of-range artifact index error", err)
+	}
+}
+
 func basedir() string {
 	wd, err := os.Getwd()
 	if err != nil {
