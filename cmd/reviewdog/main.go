@@ -505,7 +505,7 @@ func diffService(s string, strip int) (reviewdog.DiffService, error) {
 	// [Hack] Add `--relative` for git diff command so that it returns relative
 	// path to current directory. git diff returns path relative to the project
 	// root directory by default.
-	if cmds[0] == "git" && cmds[1] == "diff" {
+	if len(cmds) > 1 && cmds[0] == "git" && cmds[1] == "diff" {
 		args = append([]string{cmds[1], "--relative"}, cmds[2:]...)
 	}
 	cmd := exec.Command(cmds[0], args...)
