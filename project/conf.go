@@ -2,7 +2,11 @@
 // config.
 package project
 
-import "gopkg.in/yaml.v3"
+import (
+	"fmt"
+
+	"gopkg.in/yaml.v3"
+)
 
 // Config represents reviewdog config.
 type Config struct {
@@ -31,6 +35,9 @@ func Parse(yml []byte) (*Config, error) {
 	}
 	// Insert `Name` field if it's empty.
 	for name, runner := range out.Runner {
+		if runner == nil {
+			return nil, fmt.Errorf("runner %q must be a mapping, not null", name)
+		}
 		if runner.Name == "" {
 			runner.Name = name
 		}

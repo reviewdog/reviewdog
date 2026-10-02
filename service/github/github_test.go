@@ -3,6 +3,7 @@ package github
 import (
 	"context"
 	"encoding/json"
+	"io"
 	"net/http"
 	"net/http/httptest"
 	"os"
@@ -1411,6 +1412,17 @@ func TestGitHubPullRequest_Post_toomany(t *testing.T) {
 }
 
 func TestGitHubPullRequest_Post_NoPermission(t *testing.T) {
+	stdout := os.Stdout
+	r, w, err := os.Pipe()
+	if err != nil {
+		t.Fatal(err)
+	}
+	os.Stdout = w
+	t.Cleanup(func() {
+		os.Stdout = stdout
+		r.Close()
+		w.Close()
+	})
 	cwd, _ := os.Getwd()
 	defer os.Chdir(cwd)
 	moveToRootDir()
@@ -1473,5 +1485,14 @@ func TestGitHubPullRequest_Post_NoPermission(t *testing.T) {
 	}
 	if want := 1; postCommentsAPICalled != want {
 		t.Errorf("GitHub post PullRequest comments API called %v times, want %d times", postCommentsAPICalled, want)
+	}
+	w.Close()
+	os.Stdout = stdout
+	output, err := io.ReadAll(r)
+	if err != nil {
+		t.Fatal(err)
+	}
+	if !strings.Contains(string(output), "test message for TestGitHubPullRequest_Post_NoPermission") {
+		t.Fatalf("fallback omitted diagnostic: %s", output)
 	}
 }

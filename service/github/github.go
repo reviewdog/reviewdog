@@ -161,6 +161,7 @@ func (g *PullRequest) postAsReviewComment(ctx context.Context) error {
 			delete(g.outdatedComments, fprint)
 			continue
 		}
+		rawComments = append(rawComments, c)
 
 		if c.Result.InDiffContext {
 			// Only posts maxCommentsPerRequest comments per 1 request to avoid spammy

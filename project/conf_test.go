@@ -1,10 +1,22 @@
 package project
 
 import (
+	"strings"
 	"testing"
 
 	"github.com/kylelemons/godebug/pretty"
 )
+
+func TestParseNullRunner(t *testing.T) {
+	for _, value := range []string{"", "null", "~"} {
+		t.Run(value, func(t *testing.T) {
+			_, err := Parse([]byte("runner:\n  lint: " + value + "\n"))
+			if err == nil || !strings.Contains(err.Error(), `runner "lint"`) {
+				t.Fatalf("Parse() error = %v, want named runner error", err)
+			}
+		})
+	}
+}
 
 func TestParse(t *testing.T) {
 	const yml = `

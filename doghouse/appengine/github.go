@@ -89,14 +89,16 @@ type tmplRepo struct {
 }
 
 func (g *GitHubHandler) buildGithubAuthURL(r *http.Request, state string) string {
-	redirURL := *r.URL
-	redirURL.Path = "/gh/_auth/callback"
+	redirURL := doghouseBaseURL(r.Context(), r)
+	redirURL.Path = "/gh_/auth/callback"
 	redirURL.RawQuery = ""
 	redirURL.Fragment = ""
 	const baseURL = "https://github.com/login/oauth/authorize"
-	authURL := fmt.Sprintf("%s?client_id=%s&redirect_url=%s&state=%s",
-		baseURL, g.clientID, redirURL.RequestURI(), state)
-	return authURL
+	query := url.Values{}
+	query.Set("client_id", g.clientID)
+	query.Set("redirect_uri", redirURL.String())
+	query.Set("state", state)
+	return baseURL + "?" + query.Encode()
 }
 
 func (g *GitHubHandler) HandleAuthCallback(w http.ResponseWriter, r *http.Request) {
