@@ -1,6 +1,8 @@
 package pathutil
 
 import (
+	"path/filepath"
+	"runtime"
 	"strings"
 	"testing"
 
@@ -54,5 +56,17 @@ func TestNormalizePathInResults(t *testing.T) {
 				t.Errorf("path unexpectedly does not contain git rel dir prefix: %s", relPath)
 			}
 		}
+	}
+}
+
+func TestNormalizePathCaseInsensitiveWindows(t *testing.T) {
+	if runtime.GOOS != "windows" {
+		t.Skip("Windows path comparison")
+	}
+
+	workdir := filepath.Join(`C:\Reviewdog`, "Repo")
+	path := strings.ToLower(filepath.Join(workdir, "src", "main.go"))
+	if got, want := NormalizePath(path, workdir, ""), "src/main.go"; got != want {
+		t.Fatalf("NormalizePath() = %q, want %q", got, want)
 	}
 }
