@@ -14,11 +14,12 @@ func NormalizePath(path, workdir, projectRelPath string) string {
 	if path == "." {
 		return ""
 	}
-	// Convert absolute path to relative path only if the path is in current
-	// directory.
-	if filepath.IsAbs(path) && workdir != "" && contains(path, workdir) {
-		relPath, err := filepath.Rel(workdir, path)
-		if err == nil {
+	// Convert absolute path to relative path only if the path is in the
+	// current directory. filepath.Rel handles Windows' case-insensitive
+	// path comparison, which is important when a tool uses a different case
+	// for the drive letter or one of the directory components.
+	if filepath.IsAbs(path) && workdir != "" {
+		if relPath, err := filepath.Rel(workdir, path); err == nil && !isOutsideWorkdir(relPath) {
 			path = relPath
 		}
 	}
@@ -60,18 +61,9 @@ func normalizeLocation(loc *rdf.Location, cwd, gitRelWorkdir string) {
 	}
 }
 
-func contains(path, base string) bool {
-	ps := splitPathList(path)
-	bs := splitPathList(base)
-	if len(ps) < len(bs) {
-		return false
-	}
-	for i := range bs {
-		if bs[i] != ps[i] {
-			return false
-		}
-	}
-	return true
+func isOutsideWorkdir(relPath string) bool {
+	parent := ".." + string(filepath.Separator)
+	return relPath == ".." || strings.HasPrefix(relPath, parent)
 }
 
 func splitPathList(path string) []string {
