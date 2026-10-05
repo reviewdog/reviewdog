@@ -69,8 +69,8 @@ func (p *DiffParser) Parse(r io.Reader) ([]*rdf.Diagnostic, error) {
 			for i, diffLine := range hunk.Lines {
 				switch diffLine.Type {
 				case diff.LineAdded:
-					if i == 0 {
-						lnum++ // Increment line number only when it's at head.
+					if i == 0 && hunk.LineLengthOld == 0 {
+						lnum++ // An empty old range (-l,0) starts at the line before the insertion.
 					}
 					state.newLines = append(state.newLines, diffLine.Content)
 					state.originalLines = append(state.originalLines, buildOriginalLine(path, diffLine))
