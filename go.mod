@@ -24,7 +24,7 @@ require (
 	github.com/vvakame/sdlog v1.2.0
 	gitlab.com/gitlab-org/api/client-go/v3 v3.15.0
 	go.opencensus.io v0.24.0
-	golang.org/x/build v0.0.0-20260929210929-278803aede3f
+	golang.org/x/build v0.0.0-20261005163518-175c4682640a
 	golang.org/x/oauth2 v0.37.0
 	golang.org/x/sync v0.23.0
 	google.golang.org/protobuf v1.36.12
