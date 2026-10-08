@@ -2,7 +2,6 @@ package parser
 
 import (
 	"encoding/json"
-	"fmt"
 	"io"
 	"net/url"
 	"os"
@@ -173,15 +172,14 @@ func getPath(
 	artifacts []sarif.Artifact,
 	basedir string,
 ) (string, error) {
-	if l.URI == nil && l.Index != nil {
-		index := *l.Index
-		if index < 0 || index >= int64(len(artifacts)) {
-			return "", fmt.Errorf("artifactLocation index %d out of range (artifacts: %d)", index, len(artifacts))
+	// SARIF 2.1.0 §3.4.5: an index of -1 (the default) means "not set". An
+	// index that does not lead to an artifact location stays unresolved, the
+	// same as a location with neither uri nor index, so one malformed
+	// location does not fail the whole report.
+	if l.URI == nil && l.Index != nil && *l.Index >= 0 && *l.Index < int64(len(artifacts)) {
+		if loc := artifacts[*l.Index].Location; loc != nil {
+			l = *loc
 		}
-		if artifacts[index].Location == nil {
-			return "", fmt.Errorf("artifactLocation index %d has no artifact location", index)
-		}
-		l = *artifacts[index].Location
 	}
 	uri := ""
 	if l.URI != nil {
