@@ -161,6 +161,7 @@ func (g *PullRequest) postAsReviewComment(ctx context.Context) error {
 			delete(g.outdatedComments, fprint)
 			continue
 		}
+		rawComments = append(rawComments, c)
 
 		if c.Result.InDiffContext {
 			// Only posts maxCommentsPerRequest comments per 1 request to avoid spammy
@@ -513,6 +514,11 @@ func buildNonLineBasedSuggestion(c *reviewdog.Comment, s *rdf.Suggestion) (strin
 	}
 	start := s.GetRange().GetStart()
 	end := s.GetRange().GetEnd()
+	if end == nil {
+		end = start
+	} else if end.GetLine() == 0 {
+		end = &rdf.Position{Line: start.GetLine(), Column: end.GetColumn()}
+	}
 	startLineContent, err := getSourceLine(sourceLines, int(start.GetLine()))
 	if err != nil {
 		return "", err

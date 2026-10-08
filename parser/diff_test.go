@@ -195,3 +195,26 @@ func TestSuggestionContainsEofNewline(t *testing.T) {
 		t.Errorf("suggestion.Text = %q, want %q", suggestion.Text, want)
 	}
 }
+
+func TestInsertionAtTopOfFile(t *testing.T) {
+	tests := map[string]struct {
+		hunk string
+		want string
+	}{
+		"with context": {"@@ -1,2 +1,3 @@\n+# header\n a\n-b\n+B\n", "[1 2]"},
+		"no context":   {"@@ -0,0 +1 @@\n+# header\n", "[1]"},
+	}
+	for name, tt := range tests {
+		diagnostics, err := NewDiffParser(1).Parse(strings.NewReader("--- a/a.txt\n+++ b/a.txt\n" + tt.hunk))
+		if err != nil {
+			t.Fatal(err)
+		}
+		var lines []int32
+		for _, d := range diagnostics {
+			lines = append(lines, d.GetLocation().GetRange().GetStart().GetLine())
+		}
+		if got := fmt.Sprint(lines); got != tt.want {
+			t.Errorf("%s: start lines = %s, want %s", name, got, tt.want)
+		}
+	}
+}

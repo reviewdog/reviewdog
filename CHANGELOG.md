@@ -11,8 +11,17 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ### :rocket: Enhancements
 
 ### :bug: Fixes
+- [#2865](https://github.com/reviewdog/reviewdog/pull/2865) Retry a GitHub Checks update that gets 404 right after the check run is created, instead of leaving it in_progress.
+- [#2857](https://github.com/reviewdog/reviewdog/pull/2857) Place `-f=diff` suggestions that insert lines at the top of a file on line 1, instead of shifting that hunk's suggestions one line down.
+- [#2856](https://github.com/reviewdog/reviewdog/pull/2856) Normalize Windows diagnostic paths when the tool reports a different path casing.
+- [#2849](https://github.com/reviewdog/reviewdog/pull/2849) Preserve informational diagnostic severity as `note` when emitting SARIF.
+- [#2850](https://github.com/reviewdog/reviewdog/pull/2850) Send an encoded absolute OAuth `redirect_uri` targeting the registered Doghouse callback route.
+- [#2851](https://github.com/reviewdog/reviewdog/pull/2851) Allow the installation-store transaction to insert an account's first installation record.
+- [#2848](https://github.com/reviewdog/reviewdog/pull/2848) Preserve diagnostic annotations when GitHub review publication falls back to Actions logging after a permission error.
+- [#2847](https://github.com/reviewdog/reviewdog/pull/2847) Reject null runner definitions with a configuration error and avoid a panic for a single-word `git` diff command.
 - [#2823](https://github.com/reviewdog/reviewdog/pull/2823) Fall back to the paginated "list pull request files" API when GitHub's diff API rejects pull requests with more than 300 changed files (fixes [#2150](https://github.com/reviewdog/reviewdog/issues/2150)).
 - [#2826](https://github.com/reviewdog/reviewdog/issues/2826) Bitbucket: keep an annotation that another runner already reported for the same diagnostic, instead of leaving that runner's report without it.
+- [#2833](https://github.com/reviewdog/reviewdog/issues/2833) Resolve SARIF artifact locations that refer to entries in `run.artifacts` by index.
 
 ### :rotating_light: Breaking changes
 

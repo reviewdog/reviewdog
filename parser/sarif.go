@@ -69,7 +69,7 @@ func (p *SarifParser) Parse(r io.Reader) ([]*rdf.Diagnostic, error) {
 			for _, fix := range result.Fixes {
 				for _, artifactChange := range fix.ArtifactChanges {
 					suggestions := []*rdf.Suggestion{}
-					path, err := getPath(artifactChange.ArtifactLocation, baseURIs, basedir)
+					path, err := getPath(artifactChange.ArtifactLocation, baseURIs, run.Artifacts, basedir)
 					if err != nil {
 						// invalid path
 						return nil, err
@@ -93,7 +93,7 @@ func (p *SarifParser) Parse(r io.Reader) ([]*rdf.Diagnostic, error) {
 
 			relatedLocs := []*rdf.RelatedLocation{}
 			for _, relLoc := range result.RelatedLocations {
-				loc, err := toRDFormatLocation(relLoc, baseURIs, basedir)
+				loc, err := toRDFormatLocation(relLoc, baseURIs, run.Artifacts, basedir)
 				if err != nil {
 					return nil, err
 				}
@@ -116,7 +116,7 @@ func (p *SarifParser) Parse(r io.Reader) ([]*rdf.Diagnostic, error) {
 						code.Url = *rule.HelpURI
 					}
 				}
-				loc, err := toRDFormatLocation(location, baseURIs, basedir)
+				loc, err := toRDFormatLocation(location, baseURIs, run.Artifacts, basedir)
 				if err != nil {
 					return nil, err
 				}
@@ -142,6 +142,7 @@ func (p *SarifParser) Parse(r io.Reader) ([]*rdf.Diagnostic, error) {
 
 func toRDFormatLocation(location sarif.Location,
 	baseURIs map[string]sarif.ArtifactLocation,
+	artifacts []sarif.Artifact,
 	basedir string,
 ) (*rdf.Location, error) {
 	physicalLocation := location.PhysicalLocation
@@ -150,7 +151,7 @@ func toRDFormatLocation(location sarif.Location,
 	if artifactLocation != nil {
 		loc = *artifactLocation
 	}
-	path, err := getPath(loc, baseURIs, basedir)
+	path, err := getPath(loc, baseURIs, artifacts, basedir)
 	if err != nil {
 		// invalid path
 		return nil, err
@@ -168,8 +169,18 @@ func toRDFormatLocation(location sarif.Location,
 func getPath(
 	l sarif.ArtifactLocation,
 	baseURIs map[string]sarif.ArtifactLocation,
+	artifacts []sarif.Artifact,
 	basedir string,
 ) (string, error) {
+	// SARIF 2.1.0 §3.4.5: an index of -1 (the default) means "not set". An
+	// index that does not lead to an artifact location stays unresolved, the
+	// same as a location with neither uri nor index, so one malformed
+	// location does not fail the whole report.
+	if l.URI == nil && l.Index != nil && *l.Index >= 0 && *l.Index < int64(len(artifacts)) {
+		if loc := artifacts[*l.Index].Location; loc != nil {
+			l = *loc
+		}
+	}
 	uri := ""
 	if l.URI != nil {
 		uri = *l.URI

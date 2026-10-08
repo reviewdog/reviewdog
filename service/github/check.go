@@ -3,6 +3,7 @@ package github
 import (
 	"context"
 	"fmt"
+	"log"
 	"net/http"
 	"strings"
 	"sync"
@@ -29,6 +30,13 @@ const maxAllowedSize = 65535
 // > request.
 // https://developer.github.com/v3/checks/runs/#output-object
 const maxAnnotationsPerRequest = 50
+
+// GitHub can answer an update with 404 for a moment after the check run was
+// created. Without a retry the check run is left in_progress, since nothing
+// else will complete it. Six attempts wait 31 seconds in total.
+const checkRunUpdateAttempts = 6
+
+var checkRunRetryDelay = time.Second
 
 var _ reviewdog.CommentService = (*Check)(nil)
 
@@ -173,11 +181,30 @@ func (ch *Check) postCheck(ctx context.Context, checkID int64) (*github.CheckRun
 			Summary: new(ch.summary(ch.postComments)),
 		},
 	}
-	checkRun, _, err := ch.CLI.Checks.UpdateCheckRun(ctx, ch.Owner, ch.Repo, checkID, opt)
+	checkRun, err := ch.updateCheckRun(ctx, checkID, opt)
 	if err != nil {
 		return nil, "", err
 	}
 	return checkRun, conclusion, nil
+}
+
+// updateCheckRun is UpdateCheckRun, retried while GitHub answers 404 for a
+// check run it has just created. See checkRunUpdateAttempts.
+func (ch *Check) updateCheckRun(ctx context.Context, checkID int64, opt github.UpdateCheckRunOptions) (*github.CheckRun, error) {
+	delay := checkRunRetryDelay
+	for attempt := 1; ; attempt++ {
+		checkRun, resp, err := ch.CLI.Checks.UpdateCheckRun(ctx, ch.Owner, ch.Repo, checkID, opt)
+		if err == nil || resp == nil || resp.StatusCode != http.StatusNotFound || attempt == checkRunUpdateAttempts {
+			return checkRun, err
+		}
+		log.Printf("reviewdog: check run %d not found yet, retrying in %s", checkID, delay)
+		select {
+		case <-ctx.Done():
+			return nil, ctx.Err()
+		case <-time.After(delay):
+		}
+		delay *= 2
+	}
 }
 
 func (ch *Check) toCheckRunAnnotation(c *filter.FilteredDiagnostic) *github.CheckRunAnnotation {
@@ -244,7 +271,7 @@ func (ch *Check) postAnnotations(ctx context.Context, checkID int64, annotations
 			Annotations: annotations[:min(maxAnnotationsPerRequest, len(annotations))],
 		},
 	}
-	if _, _, err := ch.CLI.Checks.UpdateCheckRun(ctx, ch.Owner, ch.Repo, checkID, opt); err != nil {
+	if _, err := ch.updateCheckRun(ctx, checkID, opt); err != nil {
 		return err
 	}
 	if len(annotations) > maxAnnotationsPerRequest {

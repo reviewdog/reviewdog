@@ -49,7 +49,7 @@ func (g *GitHubInstallationDatastore) Put(ctx context.Context, inst *GitHubInsta
 		if err != datastore.ErrNoSuchEntity {
 			ok = true
 		}
-		if err != nil {
+		if err != nil && err != datastore.ErrNoSuchEntity {
 			return err
 		}
 		// Insert if not found or installation ID is different.
