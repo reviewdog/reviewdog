@@ -198,6 +198,88 @@ func TestSarifParser_ReplacementInsertedContent(t *testing.T) {
 	}
 }
 
+func TestSarifParser_ArtifactLocationIndex(t *testing.T) {
+	input := `{
+		"version": "2.1.0",
+		"runs": [{
+			"tool": {"driver": {"name": "fixture"}},
+			"artifacts": [{"location": {"uri": "src/index-fixture.go"}}],
+			"results": [{
+				"message": {"text": "fixture finding"},
+				"locations": [{"physicalLocation": {
+					"artifactLocation": {"index": 0},
+					"region": {"startLine": 7}
+				}}]
+			}]
+		}]
+	}`
+
+	diagnostics, err := NewSarifParser().Parse(strings.NewReader(input))
+	if err != nil {
+		t.Fatalf("Parse error: %v", err)
+	}
+	if got, want := len(diagnostics), 1; got != want {
+		t.Fatalf("len(diagnostics) = %d, want %d", got, want)
+	}
+	if got, want := diagnostics[0].GetLocation().GetPath(), "src/index-fixture.go"; got != want {
+		t.Errorf("location path = %q, want %q", got, want)
+	}
+}
+
+func TestSarifParser_ArtifactLocationIndexUnresolved(t *testing.T) {
+	tests := []struct {
+		name             string
+		artifactLocation string
+		artifacts        string
+	}{
+		{name: "not set (-1)", artifactLocation: `{"index": -1}`, artifacts: `[{"location": {"uri": "src/a.go"}}]`},
+		{name: "out of range", artifactLocation: `{"index": 1}`, artifacts: `[{"location": {"uri": "src/a.go"}}]`},
+		{name: "no artifacts", artifactLocation: `{"index": 0}`, artifacts: `[]`},
+		{name: "artifact without location", artifactLocation: `{"index": 0}`, artifacts: `[{"length": 10}]`},
+	}
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			input := `{
+				"version": "2.1.0",
+				"runs": [{
+					"tool": {"driver": {"name": "fixture"}},
+					"artifacts": ` + tt.artifacts + `,
+					"results": [
+						{
+							"message": {"text": "unresolved"},
+							"locations": [{"physicalLocation": {
+								"artifactLocation": ` + tt.artifactLocation + `,
+								"region": {"startLine": 7}
+							}}]
+						},
+						{
+							"message": {"text": "resolved"},
+							"locations": [{"physicalLocation": {
+								"artifactLocation": {"uri": "src/b.go"},
+								"region": {"startLine": 3}
+							}}]
+						}
+					]
+				}]
+			}`
+
+			diagnostics, err := NewSarifParser().Parse(strings.NewReader(input))
+			if err != nil {
+				t.Fatalf("Parse error: %v", err)
+			}
+			if got, want := len(diagnostics), 2; got != want {
+				t.Fatalf("len(diagnostics) = %d, want %d", got, want)
+			}
+			if got := diagnostics[0].GetLocation().GetPath(); got != "" {
+				t.Errorf("unresolved location path = %q, want empty", got)
+			}
+			if got, want := diagnostics[1].GetLocation().GetPath(), "src/b.go"; got != want {
+				t.Errorf("resolved location path = %q, want %q", got, want)
+			}
+		})
+	}
+}
+
 func basedir() string {
 	wd, err := os.Getwd()
 	if err != nil {
