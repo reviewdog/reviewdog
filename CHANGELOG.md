@@ -11,6 +11,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ### :rocket: Enhancements
 
 ### :bug: Fixes
+- [#2865](https://github.com/reviewdog/reviewdog/pull/2865) Retry a GitHub Checks update that gets 404 right after the check run is created, instead of leaving it in_progress.
 - [#2857](https://github.com/reviewdog/reviewdog/pull/2857) Place `-f=diff` suggestions that insert lines at the top of a file on line 1, instead of shifting that hunk's suggestions one line down.
 - [#2856](https://github.com/reviewdog/reviewdog/pull/2856) Normalize Windows diagnostic paths when the tool reports a different path casing.
 - [#2849](https://github.com/reviewdog/reviewdog/pull/2849) Preserve informational diagnostic severity as `note` when emitting SARIF.

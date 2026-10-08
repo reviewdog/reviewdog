@@ -9,6 +9,7 @@ import (
 	"os"
 	"strings"
 	"testing"
+	"time"
 
 	"github.com/google/go-cmp/cmp"
 	"github.com/google/go-github/v92/github"
@@ -411,5 +412,53 @@ func TestCheck_setToolNameForEachRun(t *testing.T) {
 	}
 	if err := check.Flush(context.Background()); err != nil {
 		t.Error(err)
+	}
+}
+
+func TestCheck_update_retried_after_404(t *testing.T) {
+	defer func(d time.Duration) { checkRunRetryDelay = d }(checkRunRetryDelay)
+	checkRunRetryDelay = time.Millisecond
+
+	for _, tc := range []struct {
+		name     string
+		notFound int
+		wantErr  bool
+	}{
+		{"recovers", 2, false},
+		{"gives up", checkRunUpdateAttempts, true},
+	} {
+		t.Run(tc.name, func(t *testing.T) {
+			var patches int
+			mux := http.NewServeMux()
+			mux.HandleFunc("/repos/o/r/check-runs", func(w http.ResponseWriter, r *http.Request) {
+				if err := json.NewEncoder(w).Encode(&github.CheckRun{ID: new(int64(1414))}); err != nil {
+					t.Error(err)
+				}
+			})
+			mux.HandleFunc("/repos/o/r/check-runs/1414", func(w http.ResponseWriter, r *http.Request) {
+				patches++
+				if patches <= tc.notFound {
+					http.Error(w, `{"message":"Not Found"}`, http.StatusNotFound)
+					return
+				}
+				if err := json.NewEncoder(w).Encode(&github.CheckRun{ID: new(int64(1414))}); err != nil {
+					t.Error(err)
+				}
+			})
+			ts := httptest.NewServer(mux)
+			defer ts.Close()
+
+			check, err := NewGitHubCheck(newGitHubClient(t, ts.URL), "o", "r", 1, "sha", "", "tool")
+			if err != nil {
+				t.Fatal(err)
+			}
+			err = check.Flush(context.Background())
+			if gotErr := err != nil; gotErr != tc.wantErr {
+				t.Fatalf("Flush() error = %v, want error %v", err, tc.wantErr)
+			}
+			if want := min(tc.notFound+1, checkRunUpdateAttempts); patches != want {
+				t.Errorf("PATCH requests = %d, want %d", patches, want)
+			}
+		})
 	}
 }
