@@ -310,11 +310,13 @@ To check the parsed diagnostics before configuring a remote reporter, print them
 $ reviewdog -f=sarif -reporter=rdjson -filter-mode=nofilter < report.sarif
 ```
 
-- `physicalLocation.artifactLocation.uri` must point at a file in your workspace. Keep analysis or
-  report links in the message (or in the rule's `helpUri`) instead of using them as source locations.
-- A finding inside a changed file whose display anchor is on an unchanged line needs
-  `-filter-mode=file`: the default `added` filter drops it. `-filter-mode=nofilter` disables
-  geolocation filtering, but it does not repair a path that resolves to nothing.
+- `physicalLocation.artifactLocation.uri` must point at a file in your workspace. A URL there
+  becomes a `../../…` path instead of an error; keep analysis or report links in the message (or in
+  the rule's `helpUri`) instead of using them as source locations.
+- A finding inside a changed file whose `region.startLine` is on an unchanged line needs
+  `-filter-mode=file` (see [Filter Mode Support Table](#filter-mode-support-table) for reporter
+  support); the default `added` filter drops it. `-filter-mode=nofilter` disables diff-based filtering,
+  but it does not repair a path that resolves to nothing.
 
 ## Code Suggestions
 
