@@ -304,6 +304,18 @@ You can use reviewdog with -f=sarif option.
 $ eslint -f @microsoft/eslint-formatter-sarif . | reviewdog -f=sarif -diff="git diff"
 ````
 
+To check the parsed diagnostics before configuring a remote reporter, print them locally:
+
+```shell
+$ reviewdog -f=sarif -reporter=rdjson -filter-mode=nofilter < report.sarif
+```
+
+- `physicalLocation.artifactLocation.uri` must point at a file in your workspace. Keep analysis or
+  report links in the message (or in the rule's `helpUri`) instead of using them as source locations.
+- A finding inside a changed file whose display anchor is on an unchanged line needs
+  `-filter-mode=file`: the default `added` filter drops it. `-filter-mode=nofilter` disables
+  geolocation filtering, but it does not repair a path that resolves to nothing.
+
 ## Code Suggestions
 
 ![eslint reviewdog suggestion demo](https://user-images.githubusercontent.com/3797062/97085944-87233a80-165b-11eb-94a8-0a47d5e24905.png)
