@@ -114,6 +114,26 @@ func (s *AnnotatorTestSuite) TestDuplicateComments() {
 	s.cli.AssertExpectations(s.T())
 }
 
+// Two runners reporting the same diagnostic each get it in their own report.
+// See #2826.
+func (s *AnnotatorTestSuite) TestSameDiagnosticFromTwoRunners() {
+	runners := []string{"runner1", "runner2"}
+	comments := []*reviewdog.Comment{
+		s.buildComment(runners[0], 1),
+		s.buildComment(runners[1], 1),
+	}
+
+	ctx, annotator := s.createAnnotator(runners)
+	s.setupExpectedAPICalls(ctx, runners, comments)
+
+	for _, comment := range comments {
+		s.Require().NoError(annotator.Post(ctx, comment))
+	}
+
+	s.Require().NoError(annotator.Flush(ctx))
+	s.cli.AssertExpectations(s.T())
+}
+
 // Predefined runners list, and duplicated comment
 func (s *AnnotatorTestSuite) TestManyComments() {
 	runners := []string{"runner1", "runner2"}
@@ -244,10 +264,10 @@ func (s *AnnotatorTestSuite) splitComments(comments []*reviewdog.Comment) map[st
 	duplicates := make(map[string]struct{})
 
 	for _, comment := range comments {
-		externalID := externalIDFromDiagnostic(comment.Result.Diagnostic)
-		if _, exist := duplicates[externalID]; !exist {
+		key := comment.ToolName + "\x00" + externalIDFromDiagnostic(comment.Result.Diagnostic)
+		if _, exist := duplicates[key]; !exist {
 			commentsMap[comment.ToolName] = append(commentsMap[comment.ToolName], comment)
-			duplicates[externalID] = struct{}{}
+			duplicates[key] = struct{}{}
 		}
 	}
 

@@ -20,6 +20,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - [#2848](https://github.com/reviewdog/reviewdog/pull/2848) Preserve diagnostic annotations when GitHub review publication falls back to Actions logging after a permission error.
 - [#2847](https://github.com/reviewdog/reviewdog/pull/2847) Reject null runner definitions with a configuration error and avoid a panic for a single-word `git` diff command.
 - [#2823](https://github.com/reviewdog/reviewdog/pull/2823) Fall back to the paginated "list pull request files" API when GitHub's diff API rejects pull requests with more than 300 changed files (fixes [#2150](https://github.com/reviewdog/reviewdog/issues/2150)).
+- [#2826](https://github.com/reviewdog/reviewdog/issues/2826) Bitbucket: keep an annotation that another runner already reported for the same diagnostic, instead of leaving that runner's report without it.
 - [#2833](https://github.com/reviewdog/reviewdog/issues/2833) Resolve SARIF artifact locations that refer to entries in `run.artifacts` by index.
 
 ### :rotating_light: Breaking changes
