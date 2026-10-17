@@ -215,6 +215,10 @@ message Suggestion {
   // A suggested text which replace the range.
   // For delete operations use an empty string.
   string text = 2;
+
+  // A human-readable explanation of this suggestion.
+  // Optional.
+  string description = 3;
 }
 
 message Source {
