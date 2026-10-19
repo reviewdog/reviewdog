@@ -136,6 +136,62 @@ func TestSarifParser_Suppressions(t *testing.T) {
 	}
 }
 
+func TestSarifParser_ResultKind(t *testing.T) {
+	// SARIF 2.1.0 §3.27.9: "pass" and "notApplicable" results record that a
+	// rule passed or did not apply, so they must not become diagnostics.
+	sarifWithKind := func(kindJSON string) string {
+		return `{
+			"version": "2.1.0",
+			"runs": [
+				{
+					"results": [
+						{` + kindJSON + `
+							"locations": [
+								{
+									"physicalLocation": {
+										"artifactLocation": {"uri": "main.go"},
+										"region": {"startLine": 1}
+									}
+								}
+							],
+							"message": {"text": "msg"},
+							"ruleId": "R1"
+						}
+					],
+					"tool": {"driver": {"name": "fixture"}}
+				}
+			]
+		}`
+	}
+
+	cases := []struct {
+		name      string
+		input     string
+		wantCount int
+	}{
+		{name: "kind absent (defaults to fail)", input: sarifWithKind(``), wantCount: 1},
+		{name: "kind fail", input: sarifWithKind(`"kind": "fail", "level": "error",`), wantCount: 1},
+		{name: "kind pass", input: sarifWithKind(`"kind": "pass", "level": "none",`), wantCount: 0},
+		{name: "kind notApplicable", input: sarifWithKind(`"kind": "notApplicable", "level": "none",`), wantCount: 0},
+		{name: "kind review", input: sarifWithKind(`"kind": "review",`), wantCount: 1},
+		{name: "kind open", input: sarifWithKind(`"kind": "open",`), wantCount: 1},
+		{name: "kind informational", input: sarifWithKind(`"kind": "informational",`), wantCount: 1},
+	}
+
+	p := NewSarifParser()
+	for _, tc := range cases {
+		t.Run(tc.name, func(t *testing.T) {
+			diagnostics, err := p.Parse(strings.NewReader(tc.input))
+			if err != nil {
+				t.Fatalf("Parse error: %v", err)
+			}
+			if got := len(diagnostics); got != tc.wantCount {
+				t.Errorf("len(diagnostics) = %d, want %d", got, tc.wantCount)
+			}
+		})
+	}
+}
+
 func TestSarifParser_ReplacementInsertedContent(t *testing.T) {
 	// Regression test for https://github.com/reviewdog/reviewdog/issues/2808:
 	// ruff can emit a replacement without the optional insertedContent field.
