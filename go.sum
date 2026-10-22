@@ -61,10 +61,10 @@ cloud.google.com/go/trace v1.16.0/go.mod h1:r+bdAn16dKLSV1G2D5v3e58IlQlizfxWrUfj
 contrib.go.opencensus.io/exporter/stackdriver v0.13.12 h1:bjBKzIf7/TAkxd7L2utGaLM78bmUWlCval5K9UeElbY=
 contrib.go.opencensus.io/exporter/stackdriver v0.13.12/go.mod h1:mmxnWlrvrFdpiOHOhxBaVi1rkc0WOqhgfknj4Yg0SeQ=
 dmitri.shuralyov.com/gpu/mtl v0.0.0-20190408044501-666a987793e9/go.mod h1:H6x//7gZCb22OMCxBHrMx7a5I7Hp++hsVxbQ4BYO7hU=
-gitea.dev/sdk v1.3.0 h1:4U95+Ou6WHCQiRPDEyAzvl1Q7cxg5RUTWkqmOXr5w4I=
-gitea.dev/sdk v1.3.0/go.mod h1:85EBqSAqUn1KlFCk40y3sTjWjBsB/KouL3slGXMA/2o=
-github.com/42wim/httpsig v1.2.4 h1:mI5bH0nm4xn7K18fo1K3okNDRq8CCJ0KbBYWyA6r8lU=
-github.com/42wim/httpsig v1.2.4/go.mod h1:yKsYfSyTBEohkPik224QPFylmzEBtda/kjyIAJjh3ps=
+gitea.dev/sdk v1.4.0 h1:JKlVUAIzPL7trzpIP6NVw+T3lohiadpz/92yRRedi9A=
+gitea.dev/sdk v1.4.0/go.mod h1:ChBTMjMnDU2LdsPdVcL+UGlclMmIkx+2SfEkqNCNkjk=
+github.com/42wim/httpsig v1.3.0 h1:HK2bieeZ99X9IvOoc1ST6yrhLek0f4MqlEGES2JCP3g=
+github.com/42wim/httpsig v1.3.0/go.mod h1:lgC3Yrvp4lxi1odEF1ge3kQBu/VM+SRcZQu5YwiR3dU=
 github.com/BurntSushi/toml v0.3.1/go.mod h1:xHWCNGjB5oqiDr8zfno3MHue2Ht5sIBksp03qcyfWMU=
 github.com/BurntSushi/xgb v0.0.0-20160522181843-27f122750802/go.mod h1:IVnqGOEym/WlBOVXweHU+Q+/VP0lqqI8lqeDx9IjBqo=
 github.com/OneOfOne/xxhash v1.2.2/go.mod h1:HSdplMjZKSmBqAxg5vPj2TmRDmfkzw+cTzAElWljhcU=
