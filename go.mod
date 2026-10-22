@@ -6,7 +6,7 @@ require (
 	cloud.google.com/go/compute/metadata v0.10.0
 	cloud.google.com/go/datastore v1.27.1
 	contrib.go.opencensus.io/exporter/stackdriver v0.13.12
-	gitea.dev/sdk v1.3.0
+	gitea.dev/sdk v1.4.0
 	github.com/bradleyfalzon/ghinstallation/v2 v2.19.0
 	github.com/google/go-cmp v0.7.0
 	github.com/google/go-github/v93 v93.0.0
@@ -37,7 +37,7 @@ require (
 	cloud.google.com/go/auth/oauth2adapt v0.2.8 // indirect
 	cloud.google.com/go/monitoring v1.30.0 // indirect
 	cloud.google.com/go/trace v1.16.0 // indirect
-	github.com/42wim/httpsig v1.2.4 // indirect
+	github.com/42wim/httpsig v1.3.0 // indirect
 	github.com/aws/aws-sdk-go v1.43.31 // indirect
 	github.com/census-instrumentation/opencensus-proto v0.4.1 // indirect
 	github.com/cespare/xxhash/v2 v2.3.0 // indirect
