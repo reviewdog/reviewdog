@@ -41,8 +41,8 @@ cloud.google.com/go/compute/metadata v0.10.0 h1:pyKMUQSwchgkIBBJGdILqQbs/BNJXqwS
 cloud.google.com/go/compute/metadata v0.10.0/go.mod h1:rGFHRrIif570kSibjFTMbt6/4/tzgJWFGI/HVol4GIk=
 cloud.google.com/go/datastore v1.0.0/go.mod h1:LXYbyblFSglQ5pkeyhO+Qmw7ukd3C+pD7TKLgZqpHYE=
 cloud.google.com/go/datastore v1.1.0/go.mod h1:umbIZjpQpHh4hmRpGhH4tLFup+FVzqBi1b3c64qFpCk=
-cloud.google.com/go/datastore v1.27.1 h1:X3FBRuO0CzJfbUi7LOTiqVgCinSC0GjFWUcHzI2PvjU=
-cloud.google.com/go/datastore v1.27.1/go.mod h1:0h1rDMllJDV4I2GvYH/VRhu8WNcyLAqNFzeusP0ABnw=
+cloud.google.com/go/datastore v1.28.0 h1:izs0Nx55hXXopvf/zzXFc449U979XeYOGh95RjlOxKE=
+cloud.google.com/go/datastore v1.28.0/go.mod h1:0h1rDMllJDV4I2GvYH/VRhu8WNcyLAqNFzeusP0ABnw=
 cloud.google.com/go/monitoring v1.1.0/go.mod h1:L81pzz7HKn14QCMaCs6NTQkdBnE87TElyanS95vIcl4=
 cloud.google.com/go/monitoring v1.30.0 h1:r/d+JUbyKmJ8b07iznuKfzVzrIXTWxHQ3lBRm3x2LlY=
 cloud.google.com/go/monitoring v1.30.0/go.mod h1:htlUR0QWVMrjFzZmN4LGnMAve9xB/eduwjmINxVZ8RM=
