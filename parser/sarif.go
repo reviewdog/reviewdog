@@ -45,7 +45,7 @@ func (p *SarifParser) Parse(r io.Reader) ([]*rdf.Diagnostic, error) {
 			rules[rule.ID] = rule
 		}
 		for _, result := range run.Results {
-			if isSuppressed(result.Suppressions) {
+			if isSuppressed(result.Suppressions) || isNotAProblem(result.Kind) {
 				continue
 			}
 			original, err := json.Marshal(result)
@@ -217,6 +217,14 @@ func isSuppressed(suppressions []sarif.Suppression) bool {
 		}
 	}
 	return false
+}
+
+// isNotAProblem reports whether a SARIF result only records that a rule
+// passed or did not apply to the analysis target. Per SARIF 2.1.0 §3.27.9,
+// such results ("pass" and "notApplicable") do not describe a problem, so
+// there is nothing to report for them.
+func isNotAProblem(kind *sarif.ResultKind) bool {
+	return kind != nil && (*kind == sarif.Pass || *kind == sarif.NotApplicable)
 }
 
 func getText(msg sarif.Message) string {
