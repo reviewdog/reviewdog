@@ -196,6 +196,33 @@ func TestSuggestionContainsEofNewline(t *testing.T) {
 	}
 }
 
+func TestInsertionInLaterHunkUsesNewLineNumber(t *testing.T) {
+	const sample = `--- a/a.txt
++++ b/a.txt
+@@ -1,2 +1,3 @@
+-a
++A
++NEW
+ b
+@@ -3,2 +4,3 @@
+ c
+ d
++X
+`
+	diagnostics, err := NewDiffParser(1).Parse(strings.NewReader(sample))
+	if err != nil {
+		t.Fatal(err)
+	}
+
+	var got []int32
+	for _, diagnostic := range diagnostics {
+		got = append(got, diagnostic.GetLocation().GetRange().GetStart().GetLine())
+	}
+	if want := "[1 6]"; fmt.Sprint(got) != want {
+		t.Errorf("start lines = %v, want %s", got, want)
+	}
+}
+
 func TestInsertionAtTopOfFile(t *testing.T) {
 	tests := map[string]struct {
 		hunk string

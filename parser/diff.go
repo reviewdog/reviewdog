@@ -77,7 +77,7 @@ func (p *DiffParser) Parse(r io.Reader) ([]*rdf.Diagnostic, error) {
 					switch prevState {
 					case diff.LineUnchanged:
 						// Insert.
-						state.startLine = lnum + 1
+						state.startLine = diffLine.LnumNew
 						state.isInsert = true
 					case diff.LineDeleted, diff.LineAdded:
 						// Do nothing in particular.
