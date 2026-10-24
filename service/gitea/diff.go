@@ -1,6 +1,7 @@
 package gitea
 
 import (
+	"bytes"
 	"context"
 	"fmt"
 	"log"
@@ -64,10 +65,15 @@ func (p *PullRequestDiffService) diffUsingGitCommand(ctx context.Context) ([]byt
 		}
 	}
 
-	bytes, err := exec.Command("git", "diff", "--find-renames", pr.Base.Sha, headSha).CombinedOutput()
+	// Keep stderr out of the diff: git prints warnings there even on success
+	// (e.g. when diff.renameLimit is exceeded), and they would break parsing.
+	var stderr bytes.Buffer
+	cmd := exec.Command("git", "diff", "--find-renames", pr.Base.Sha, headSha)
+	cmd.Stderr = &stderr
+	out, err := cmd.Output()
 	if err != nil {
-		return nil, fmt.Errorf("failed to run git diff: %s\n%w", bytes, err)
+		return nil, fmt.Errorf("failed to run git diff: %s\n%w", stderr.Bytes(), err)
 	}
 
-	return bytes, nil
+	return out, nil
 }

@@ -7,6 +7,8 @@ import (
 	"fmt"
 	"net/http"
 	"net/http/httptest"
+	"os"
+	"os/exec"
 	"strings"
 	"testing"
 
@@ -140,6 +142,104 @@ func TestDiff_fallbackToGitCli(t *testing.T) {
 	}
 	if apiCalled != 2 {
 		t.Errorf("GitHub API should be called twice; called %v times", apiCalled)
+	}
+}
+
+// newGitCLIFallbackService returns a PullRequestDiffService whose diff API
+// responds with 406, so that Diff runs `git diff mergeBase head` in the
+// current directory.
+func newGitCLIFallbackService(t *testing.T, mergeBase, head string) *PullRequestDiffService {
+	t.Helper()
+	t.Setenv("REVIEWDOG_SKIP_GIT_FETCH", "true")
+	mux := http.NewServeMux()
+	mux.HandleFunc("/repos/o/r/pulls/14", func(w http.ResponseWriter, r *http.Request) {
+		if strings.Contains(r.Header.Get("Accept"), "diff") {
+			w.WriteHeader(http.StatusNotAcceptable)
+			return
+		}
+		pr := github.PullRequest{
+			Head: &github.PullRequestBranch{SHA: new(head)},
+			Base: &github.PullRequestBranch{SHA: new("base")},
+		}
+		if err := json.NewEncoder(w).Encode(pr); err != nil {
+			t.Error(err)
+		}
+	})
+	mux.HandleFunc("/repos/o/r/compare/"+head+"...base", func(w http.ResponseWriter, r *http.Request) {
+		comparison := github.CommitsComparison{
+			MergeBaseCommit: &github.RepositoryCommit{SHA: new(mergeBase)},
+		}
+		if err := json.NewEncoder(w).Encode(comparison); err != nil {
+			t.Error(err)
+		}
+	})
+	ts := httptest.NewServer(mux)
+	t.Cleanup(ts.Close)
+
+	return &PullRequestDiffService{
+		Cli:              newGitHubClient(t, ts.URL),
+		Owner:            "o",
+		Repo:             "r",
+		PR:               14,
+		SHA:              "sha",
+		FallBackToGitCLI: true,
+	}
+}
+
+// git writes warnings to stderr even when `git diff` succeeds. They must not
+// end up in the diff, or it no longer parses.
+func TestDiff_fallbackToGitCli_ignoresGitWarnings(t *testing.T) {
+	t.Chdir(t.TempDir())
+	t.Setenv("GIT_CONFIG_GLOBAL", os.DevNull)
+	t.Setenv("GIT_CONFIG_NOSYSTEM", "1")
+	git := func(args ...string) {
+		t.Helper()
+		if out, err := exec.Command("git", args...).CombinedOutput(); err != nil {
+			t.Fatalf("git %s: %v\n%s", strings.Join(args, " "), err, out)
+		}
+	}
+	writeFile := func(name, content string) {
+		t.Helper()
+		if err := os.WriteFile(name, []byte(content), 0o600); err != nil {
+			t.Fatal(err)
+		}
+	}
+
+	git("init", "-q")
+	git("config", "user.name", "reviewdog")
+	git("config", "user.email", "reviewdog@example.com")
+	// Too low for two renamed files, so git skips rename detection and
+	// prints a warning about diff.renameLimit.
+	git("config", "diff.renameLimit", "1")
+	writeFile("a.txt", "1\n2\n3\n4\na\n")
+	writeFile("b.txt", "1\n2\n3\n4\nb\n")
+	git("add", ".")
+	git("commit", "-q", "-m", "base")
+	for _, name := range []string{"a", "b"} {
+		git("mv", name+".txt", name+"_renamed.txt")
+		writeFile(name+"_renamed.txt", "1\n2\n3\n4\n"+name+"\n5\n")
+	}
+	git("commit", "-q", "-a", "-m", "head")
+
+	got, err := newGitCLIFallbackService(t, "HEAD^", "HEAD").Diff(context.Background())
+	if err != nil {
+		t.Fatal(err)
+	}
+	if bytes.Contains(got, []byte("warning:")) {
+		t.Errorf("diff contains git warnings:\n%s", got)
+	}
+	if _, err := diff.ParseMultiFile(bytes.NewReader(got)); err != nil {
+		t.Errorf("failed to parse diff: %v\n---\n%s\n---", err, got)
+	}
+}
+
+func TestDiff_fallbackToGitCli_reportsGitError(t *testing.T) {
+	_, err := newGitCLIFallbackService(t, "no-such-revision", "HEAD").Diff(context.Background())
+	if err == nil {
+		t.Fatal("expected an error for an unknown revision")
+	}
+	if !strings.Contains(err.Error(), "fatal:") {
+		t.Errorf("error should include git's stderr, got: %v", err)
 	}
 }
 

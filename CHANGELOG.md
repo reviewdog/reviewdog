@@ -11,6 +11,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ### :rocket: Enhancements
 
 ### :bug: Fixes
+- [#2910](https://github.com/reviewdog/reviewdog/pull/2910) Keep `git diff` warnings on stderr out of the diff when GitHub and Gitea fall back to the git command, so the diff still parses.
 - [#2891](https://github.com/reviewdog/reviewdog/pull/2891) Skip SARIF results whose `kind` is `pass` or `notApplicable` instead of reporting them as diagnostics.
 - [#2865](https://github.com/reviewdog/reviewdog/pull/2865) Retry a GitHub Checks update that gets 404 right after the check run is created, instead of leaving it in_progress.
 - [#2857](https://github.com/reviewdog/reviewdog/pull/2857) Place `-f=diff` suggestions that insert lines at the top of a file on line 1, instead of shifting that hunk's suggestions one line down.
