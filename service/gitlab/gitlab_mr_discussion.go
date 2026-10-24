@@ -264,6 +264,12 @@ func buildSuggestions(c *reviewdog.Comment) string {
 }
 
 func buildSingleSuggestion(c *reviewdog.Comment, s *rdf.Suggestion) (string, error) {
+	start := s.GetRange().GetStart()
+	end := s.GetRange().GetEnd()
+	if start.GetColumn() > 0 || end.GetColumn() > 0 {
+		return buildNonLineBasedSuggestion(c, s)
+	}
+
 	var sb strings.Builder
 
 	// we might need to use 4 or more backticks
@@ -295,5 +301,27 @@ func buildSingleSuggestion(c *reviewdog.Comment, s *rdf.Suggestion) (string, err
 	}
 	commentutil.WriteCodeFence(&sb, backticks)
 
+	return sb.String(), nil
+}
+
+func buildNonLineBasedSuggestion(c *reviewdog.Comment, s *rdf.Suggestion) (string, error) {
+	txt, err := commentutil.BuildSuggestionText(c.Result.SourceLines, s)
+	if err != nil {
+		return "", err
+	}
+
+	backticks := commentutil.GetCodeFenceLength(txt)
+	// End may be omitted or have no line; the suggestion then stays on the start line.
+	lines := strconv.Itoa(max(int(s.GetRange().GetEnd().GetLine()-s.GetRange().GetStart().GetLine()), 0))
+
+	var sb strings.Builder
+	sb.Grow(backticks + len("suggestion:-0+\n") + len(lines) + len(txt) + len("\n") + backticks)
+	commentutil.WriteCodeFence(&sb, backticks)
+	sb.WriteString("suggestion:-0+")
+	sb.WriteString(lines)
+	sb.WriteString("\n")
+	sb.WriteString(txt)
+	sb.WriteString("\n")
+	commentutil.WriteCodeFence(&sb, backticks)
 	return sb.String(), nil
 }
