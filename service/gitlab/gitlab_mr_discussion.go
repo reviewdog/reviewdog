@@ -305,15 +305,14 @@ func buildSingleSuggestion(c *reviewdog.Comment, s *rdf.Suggestion) (string, err
 }
 
 func buildNonLineBasedSuggestion(c *reviewdog.Comment, s *rdf.Suggestion) (string, error) {
-	start := s.GetRange().GetStart()
-	end := s.GetRange().GetEnd()
 	txt, err := commentutil.BuildSuggestionText(c.Result.SourceLines, s)
 	if err != nil {
 		return "", err
 	}
 
 	backticks := commentutil.GetCodeFenceLength(txt)
-	lines := strconv.Itoa(int(end.GetLine() - start.GetLine()))
+	// End may be omitted or have no line; the suggestion then stays on the start line.
+	lines := strconv.Itoa(max(int(s.GetRange().GetEnd().GetLine()-s.GetRange().GetStart().GetLine()), 0))
 
 	var sb strings.Builder
 	sb.Grow(backticks + len("suggestion:-0+\n") + len(lines) + len(txt) + len("\n") + backticks)

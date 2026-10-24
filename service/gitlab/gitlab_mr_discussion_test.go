@@ -979,6 +979,26 @@ func TestBuildSuggestionsRangeEndOmitted(t *testing.T) {
 			}, "\n"),
 		},
 		{
+			in: buildTestCommentWithSource(
+				"an insertion with non-line-based start and no range end",
+				map[int]string{10: "foo bar"},
+				[]*rdf.Suggestion{
+					{
+						Text: "baz ",
+						Range: &rdf.Range{
+							Start: &rdf.Position{Line: 10, Column: 5},
+						},
+					},
+				},
+			),
+			want: strings.Join([]string{
+				"```suggestion:-0+0",
+				"foo baz bar",
+				"```",
+				"",
+			}, "\n"),
+		},
+		{
 			in: buildTestComment(
 				"a suggestion with non-line-based bounds, but without source",
 				[]*rdf.Suggestion{
