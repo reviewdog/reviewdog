@@ -321,10 +321,8 @@ func buildNonLineBasedSuggestion(c *reviewdog.Comment, s *rdf.Suggestion) (strin
 	sb.WriteString("suggestion:-0+")
 	sb.WriteString(lines)
 	sb.WriteString("\n")
-	if txt != "" {
-		sb.WriteString(txt)
-		sb.WriteString("\n")
-	}
+	sb.WriteString(txt)
+	sb.WriteString("\n")
 	commentutil.WriteCodeFence(&sb, backticks)
 	return sb.String(), nil
 }

@@ -859,6 +859,36 @@ func TestBuildSuggestions(t *testing.T) {
 		},
 		{
 			in: buildTestCommentWithSource(
+				"empty column-based suggestion",
+				map[int]string{10: "foo"},
+				[]*rdf.Suggestion{
+					buildTestsNonLineSuggestion("", 10, 1, 10, 4),
+				},
+			),
+			want: strings.Join([]string{
+				"```suggestion:-0+0",
+				"",
+				"```",
+				"",
+			}, "\n"),
+		},
+		{
+			in: buildTestCommentWithSource(
+				"empty column-based multi-line suggestion",
+				map[int]string{10: "foo", 11: ""},
+				[]*rdf.Suggestion{
+					buildTestsNonLineSuggestion("", 10, 1, 11, 1),
+				},
+			),
+			want: strings.Join([]string{
+				"```suggestion:-0+1",
+				"",
+				"```",
+				"",
+			}, "\n"),
+		},
+		{
+			in: buildTestCommentWithSource(
 				"a suggestion with non-line-based bounds that adds new lines",
 				map[int]string{
 					10: "Foo(bar)",
