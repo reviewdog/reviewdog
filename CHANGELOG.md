@@ -9,6 +9,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ### :sparkles: Release Note <!-- optional -->
 
 ### :rocket: Enhancements
+- [#2059](https://github.com/reviewdog/reviewdog/pull/2059) Add support for range suggestions to `gitlab-mr-discussion` reporter
 
 ### :bug: Fixes
 - [#2891](https://github.com/reviewdog/reviewdog/pull/2891) Skip SARIF results whose `kind` is `pass` or `notApplicable` instead of reporting them as diagnostics.
