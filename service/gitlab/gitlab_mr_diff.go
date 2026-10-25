@@ -1,6 +1,7 @@
 package gitlab
 
 import (
+	"bytes"
 	"context"
 	"fmt"
 	"os"
@@ -53,17 +54,23 @@ func (g *MergeRequestDiff) Diff(ctx context.Context) ([]byte, error) {
 func (g *MergeRequestDiff) gitDiff(_ context.Context, baseSha, targetSha string) ([]byte, error) {
 	mergeBase := os.Getenv("CI_MERGE_REQUEST_DIFF_BASE_SHA")
 	if mergeBase == "" {
-		b, err := exec.Command("git", "merge-base", targetSha, baseSha).Output()
+		var stderr bytes.Buffer
+		cmd := exec.Command("git", "merge-base", targetSha, baseSha)
+		cmd.Stderr = &stderr
+		b, err := cmd.Output()
 		if err != nil {
-			return nil, fmt.Errorf("failed to get merge-base commit: %w", err)
+			return nil, fmt.Errorf("failed to get merge-base commit: %s\n%w", stderr.Bytes(), err)
 		}
 		mergeBase = strings.Trim(string(b), "\n")
 	}
-	bytes, err := exec.Command("git", "diff", "--find-renames", mergeBase, baseSha).Output()
+	var stderr bytes.Buffer
+	cmd := exec.Command("git", "diff", "--find-renames", mergeBase, baseSha)
+	cmd.Stderr = &stderr
+	out, err := cmd.Output()
 	if err != nil {
-		return nil, fmt.Errorf("failed to run git diff: %w", err)
+		return nil, fmt.Errorf("failed to run git diff: %s\n%w", stderr.Bytes(), err)
 	}
-	return bytes, nil
+	return out, nil
 }
 
 // Strip returns 1 as a strip of git diff.
