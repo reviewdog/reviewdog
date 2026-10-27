@@ -60,15 +60,15 @@ func (g *ChangeDiff) Diff(ctx context.Context) ([]byte, error) {
 }
 
 func (g *ChangeDiff) gitDiff(_ context.Context, baseSha, targetSha string) ([]byte, error) {
-	var stderr bytes.Buffer
+	var mergeBaseStderr bytes.Buffer
 	cmd := exec.Command("git", "merge-base", targetSha, baseSha) // #nosec
-	cmd.Stderr = &stderr
+	cmd.Stderr = &mergeBaseStderr
 	b, err := cmd.Output()
 	if err != nil {
-		return nil, fmt.Errorf("failed to get merge-base commit: %s\n%w", stderr.Bytes(), err)
+		return nil, fmt.Errorf("failed to get merge-base commit: %s\n%w", mergeBaseStderr.Bytes(), err)
 	}
 	mergeBase := strings.Trim(string(b), "\n")
-	stderr.Reset()
+	var stderr bytes.Buffer
 	cmd = exec.Command("git", "diff", "--find-renames", mergeBase, baseSha)
 	cmd.Stderr = &stderr
 	out, err := cmd.Output()

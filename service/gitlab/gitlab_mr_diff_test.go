@@ -79,7 +79,7 @@ func TestGitLabMergeRequestDiff_gitDiff_reportsGitError(t *testing.T) {
 			if !strings.HasPrefix(err.Error(), tt.wantErrPrefix) {
 				t.Errorf("unexpected error: %v", err)
 			}
-			if !strings.Contains(err.Error(), "fatal:") {
+			if !strings.Contains(err.Error(), "no-such-revision") {
 				t.Errorf("error should include git's stderr, got: %v", err)
 			}
 		})

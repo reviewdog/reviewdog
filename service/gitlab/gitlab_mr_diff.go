@@ -54,12 +54,12 @@ func (g *MergeRequestDiff) Diff(ctx context.Context) ([]byte, error) {
 func (g *MergeRequestDiff) gitDiff(_ context.Context, baseSha, targetSha string) ([]byte, error) {
 	mergeBase := os.Getenv("CI_MERGE_REQUEST_DIFF_BASE_SHA")
 	if mergeBase == "" {
-		var stderr bytes.Buffer
+		var mergeBaseStderr bytes.Buffer
 		cmd := exec.Command("git", "merge-base", targetSha, baseSha)
-		cmd.Stderr = &stderr
+		cmd.Stderr = &mergeBaseStderr
 		b, err := cmd.Output()
 		if err != nil {
-			return nil, fmt.Errorf("failed to get merge-base commit: %s\n%w", stderr.Bytes(), err)
+			return nil, fmt.Errorf("failed to get merge-base commit: %s\n%w", mergeBaseStderr.Bytes(), err)
 		}
 		mergeBase = strings.Trim(string(b), "\n")
 	}

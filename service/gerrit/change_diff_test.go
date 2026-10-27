@@ -47,7 +47,7 @@ func TestChangeDiff_gitDiff_reportsGitError(t *testing.T) {
 	if err == nil {
 		t.Fatal("expected an error for an unknown revision")
 	}
-	if !strings.Contains(err.Error(), "fatal:") {
+	if !strings.Contains(err.Error(), "no-such-revision") {
 		t.Errorf("error should include git's stderr, got: %v", err)
 	}
 }
