@@ -173,6 +173,10 @@
                 "text": {
                     "type": "string",
                     "description": "A suggested text which replace the range. For delete operations use an empty string."
+                },
+                "description": {
+                    "type": "string",
+                    "description": "A human-readable explanation of this suggestion. Optional."
                 }
             },
             "additionalProperties": true,
