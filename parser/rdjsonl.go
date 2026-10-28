@@ -4,6 +4,7 @@ import (
 	"bufio"
 	"fmt"
 	"io"
+	"strings"
 
 	"google.golang.org/protobuf/encoding/protojson"
 
@@ -25,6 +26,9 @@ func (p *RDJSONLParser) Parse(r io.Reader) ([]*rdf.Diagnostic, error) {
 	var results []*rdf.Diagnostic
 	s := bufio.NewScanner(r)
 	for s.Scan() {
+		if strings.TrimSpace(s.Text()) == "" {
+			continue
+		}
 		d := new(rdf.Diagnostic)
 		if err := (protojson.UnmarshalOptions{DiscardUnknown: true}).Unmarshal(s.Bytes(), d); err != nil {
 			return nil, fmt.Errorf("failed to unmarshal rdjsonl (Diagnostic): %w", err)

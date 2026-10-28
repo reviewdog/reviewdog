@@ -35,3 +35,30 @@ func TestRDJSONLParserLineTooLong(t *testing.T) {
 		t.Errorf("expected bufio.ErrTooLong, got %s", err)
 	}
 }
+
+func TestRDJSONLParserBlankLines(t *testing.T) {
+	const line = `{"message":"a","location":{"path":"main.go"}}`
+	tests := []struct {
+		name string
+		in   string
+		want int
+	}{
+		{"empty input", "", 0},
+		{"only newline", "\n", 0},
+		{"whitespace only line", "  \t\n", 0},
+		{"trailing blank line", line + "\n\n", 1},
+		{"blank line between", line + "\n\n" + line + "\n", 2},
+		{"CRLF with blank line", line + "\r\n\r\n" + line + "\r\n", 2},
+	}
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			diagnostics, err := NewRDJSONLParser().Parse(strings.NewReader(tt.in))
+			if err != nil {
+				t.Fatal(err)
+			}
+			if got := len(diagnostics); got != tt.want {
+				t.Errorf("got %d diagnostics, want %d", got, tt.want)
+			}
+		})
+	}
+}
