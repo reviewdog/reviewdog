@@ -5,6 +5,7 @@ import (
 	"fmt"
 	"net/http"
 	"net/http/httptest"
+	"strings"
 	"testing"
 
 	"golang.org/x/build/gerrit"
@@ -37,5 +38,16 @@ func TestChangeDiff_Diff(t *testing.T) {
 	}
 	if getChangeDetailAPICall != 1 {
 		t.Errorf("Get GitLab MergeRequest API called %v times, want once", getChangeDetailAPICall)
+	}
+}
+
+func TestChangeDiff_gitDiff_reportsGitError(t *testing.T) {
+	g := &ChangeDiff{}
+	_, err := g.gitDiff(context.Background(), "HEAD", "no-such-revision")
+	if err == nil {
+		t.Fatal("expected an error for an unknown revision")
+	}
+	if !strings.Contains(err.Error(), "no-such-revision") {
+		t.Errorf("error should include git's stderr, got: %v", err)
 	}
 }
