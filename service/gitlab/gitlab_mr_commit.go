@@ -4,6 +4,7 @@ import (
 	"context"
 	"fmt"
 	"os/exec"
+	"strconv"
 	"strings"
 	"sync"
 
@@ -76,35 +77,56 @@ func (g *MergeRequestCommitCommenter) postCommentsForEach(ctx context.Context) e
 		loc := c.Result.Diagnostic.GetLocation()
 		lnum := int(loc.GetRange().GetStart().GetLine())
 		body := commentutil.MarkdownComment(c)
-		if !c.Result.InDiffFile || lnum == 0 || g.postedcs.IsPosted(c, lnum, body) {
+		if !c.Result.InDiffFile || lnum == 0 {
 			continue
 		}
 		eg.Go(func() error {
-			commitID, err := g.getLastCommitsID(loc.GetPath(), lnum)
-			if err != nil {
-				commitID = g.sha
+			commitID, line := g.sha, lnum
+			if id, l, err := g.getLastCommitsID(loc.GetPath(), lnum); err == nil {
+				commitID, line = id, l
+			}
+			if g.postedcs.IsPosted(c, line, body) {
+				return nil
 			}
 			prcomment := &gitlab.PostCommitCommentOptions{
 				Note:     new(body),
 				Path:     new(loc.GetPath()),
-				Line:     new(int64(lnum)),
+				Line:     new(int64(line)),
 				LineType: new("new"),
 			}
-			_, _, err = g.cli.Commits.PostCommitComment(g.projects, commitID, prcomment, gitlab.WithContext(ctx))
+			_, _, err := g.cli.Commits.PostCommitComment(g.projects, commitID, prcomment, gitlab.WithContext(ctx))
 			return err
 		})
 	}
 	return eg.Wait()
 }
 
-func (g *MergeRequestCommitCommenter) getLastCommitsID(path string, line int) (string, error) {
+// getLastCommitsID returns the commit that last changed the given line and the
+// line number in that commit, which differs from line when a later commit
+// added or removed lines above it.
+func (g *MergeRequestCommitCommenter) getLastCommitsID(path string, line int) (string, int, error) {
 	lineFormat := fmt.Sprintf("%d,%d", line, line)
-	s, err := exec.Command("git", "blame", "-l", "-L", lineFormat, path).Output()
+	s, err := exec.Command("git", "blame", "--porcelain", "-L", lineFormat, path).Output()
 	if err != nil {
-		return "", fmt.Errorf("failed to get commitID: %w", err)
+		return "", 0, fmt.Errorf("failed to get commitID: %w", err)
 	}
-	commitID := strings.Split(string(s), " ")[0]
-	return commitID, nil
+	// The first line is "<commit> <original line> <final line> <lines>". Unlike
+	// the default format, the commit is never prefixed with "^" for boundary
+	// commits (e.g. the oldest commit of a shallow clone).
+	header, _, _ := strings.Cut(string(s), "\n")
+	fields := strings.Fields(header)
+	if len(fields) < 3 {
+		return "", 0, fmt.Errorf("unexpected git blame output: %q", header)
+	}
+	commitID := fields[0]
+	if strings.Trim(commitID, "0") == "" {
+		return "", 0, fmt.Errorf("line %d of %s is not committed yet", line, path)
+	}
+	origLine, err := strconv.Atoi(fields[1])
+	if err != nil {
+		return "", 0, fmt.Errorf("unexpected git blame output: %q", header)
+	}
+	return commitID, origLine, nil
 }
 
 func (g *MergeRequestCommitCommenter) setPostedComment(ctx context.Context) error {

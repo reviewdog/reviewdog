@@ -12,6 +12,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - [#2059](https://github.com/reviewdog/reviewdog/pull/2059) Add support for range suggestions to `gitlab-mr-discussion` reporter
 
 ### :bug: Fixes
+- [#XXXX](https://github.com/reviewdog/reviewdog/pull/XXXX) Post `gitlab-mr-commit` comments on the line's position in the commit that last changed it, and stop failing with 404 for lines from the oldest commit of a shallow clone or lines that aren't committed.
 - [#2917](https://github.com/reviewdog/reviewdog/pull/2917) Include git's stderr in the error when `git merge-base` or `git diff` fails for GitLab and Gerrit, instead of only reporting `exit status 128`.
 - [#2910](https://github.com/reviewdog/reviewdog/pull/2910) Keep `git diff` warnings on stderr out of the diff when GitHub and Gitea fall back to the git command, so the diff still parses.
 - [#2891](https://github.com/reviewdog/reviewdog/pull/2891) Skip SARIF results whose `kind` is `pass` or `notApplicable` instead of reporting them as diagnostics.
