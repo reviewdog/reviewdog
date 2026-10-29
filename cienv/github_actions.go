@@ -85,6 +85,16 @@ func getBuildInfoFromGitHubActionEventPath(eventPath string) (*BuildInfo, bool, 
 		Branch:      event.PullRequest.Head.Ref,
 		SHA:         event.PullRequest.Head.Sha,
 	}
+	// Use Actions metadata when the event payload omits repository details.
+	if info.Owner == "" || info.Repo == "" {
+		owner, repo := getOwnerAndRepoFromSlug([]string{"GITHUB_REPOSITORY"})
+		if info.Owner == "" {
+			info.Owner = owner
+		}
+		if info.Repo == "" {
+			info.Repo = repo
+		}
+	}
 	// For re-run check_suite event.
 	if info.PullRequest == 0 && len(event.CheckSuite.PullRequests) > 0 {
 		pr := event.CheckSuite.PullRequests[0]
