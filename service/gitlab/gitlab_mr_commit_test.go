@@ -235,7 +235,6 @@ func TestGitLabMergeRequestCommitCommenter_Flush_lastCommitOfLine(t *testing.T) 
 			dir:  shallow,
 			path: "a.txt",
 			line: 7,
-			want: &position{head, "a.txt", 7},
 		},
 		{
 			name:     "already posted on the blamed line",

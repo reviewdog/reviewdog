@@ -2,6 +2,7 @@ package gitlab
 
 import (
 	"context"
+	"errors"
 	"fmt"
 	"os/exec"
 	"slices"
@@ -47,6 +48,10 @@ type postedComment struct {
 	line   int
 	body   string
 }
+
+// errNotCommitted is returned by getLastCommitsID for lines that only exist in
+// the working tree.
+var errNotCommitted = errors.New("line is not committed yet")
 
 // NewGitLabMergeRequestCommitCommenter returns a new MergeRequestCommitCommenter service.
 // MergeRequestCommitCommenter service needs git command in $PATH.
@@ -94,11 +99,17 @@ func (g *MergeRequestCommitCommenter) postCommentsForEach(ctx context.Context) e
 			continue
 		}
 		eg.Go(func() error {
+			id, p, l, err := g.getLastCommitsID(ctx, loc.GetPath(), lnum)
+			if errors.Is(err, errNotCommitted) {
+				// No commit has the line, and the same line number in the head
+				// commit may be another line or past the end of the file.
+				return nil
+			}
 			commitID, path, line := g.sha, loc.GetPath(), lnum
 			// Comment on the head commit when the line comes from a commit outside
 			// the merge request, e.g. on the target branch, since only comments on
 			// the merge request's commits are checked for duplicates.
-			if id, p, l, err := g.getLastCommitsID(ctx, loc.GetPath(), lnum); err == nil && g.commits[id] {
+			if err == nil && g.commits[id] {
 				commitID, path, line = id, p, l
 			}
 			if g.postedcs[postedComment{commit: commitID, path: path, line: line, body: body}] {
@@ -110,7 +121,7 @@ func (g *MergeRequestCommitCommenter) postCommentsForEach(ctx context.Context) e
 				Line:     new(int64(line)),
 				LineType: new("new"),
 			}
-			_, _, err := g.cli.Commits.PostCommitComment(g.projects, commitID, prcomment, gitlab.WithContext(ctx))
+			_, _, err = g.cli.Commits.PostCommitComment(g.projects, commitID, prcomment, gitlab.WithContext(ctx))
 			return err
 		})
 	}
@@ -137,7 +148,7 @@ func (g *MergeRequestCommitCommenter) getLastCommitsID(ctx context.Context, path
 	}
 	commitID = fields[0]
 	if strings.Trim(commitID, "0") == "" {
-		return "", "", 0, fmt.Errorf("line %d of %s is not committed yet", line, path)
+		return "", "", 0, errNotCommitted
 	}
 	origLine, err = strconv.Atoi(fields[1])
 	if err != nil {
