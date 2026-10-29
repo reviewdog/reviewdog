@@ -174,7 +174,6 @@ func TestGitLabMergeRequestCommitCommenter_Flush_lastCommitOfLine(t *testing.T) 
 	write(src, "a.txt", "x\ny\na\nb\nc\nd\n")
 	git(src, "mv", "旧.txt", "new.txt")
 	commit(src, "third")
-	first := git(src, "rev-parse", "HEAD~2")
 	second := git(src, "rev-parse", "HEAD^")
 	head := git(src, "rev-parse", "HEAD")
 
@@ -195,6 +194,9 @@ func TestGitLabMergeRequestCommitCommenter_Flush_lastCommitOfLine(t *testing.T) 
 		dir  string
 		path string
 		line int32
+		// mrCommits are the merge request's commits. Defaults to second and
+		// head, as if first were on the target branch.
+		mrCommits []string
 		// existing is where the same comment has already been posted.
 		existing *position
 		// want is where the comment is posted, or nil if it isn't.
@@ -219,7 +221,7 @@ func TestGitLabMergeRequestCommitCommenter_Flush_lastCommitOfLine(t *testing.T) 
 			dir:  src,
 			path: "a.txt",
 			line: 3,
-			want: &position{first, "a.txt", 1},
+			want: &position{head, "a.txt", 3},
 		},
 		{
 			name: "boundary commit of a shallow clone",
@@ -257,6 +259,23 @@ func TestGitLabMergeRequestCommitCommenter_Flush_lastCommitOfLine(t *testing.T) 
 			existing: &position{head, "a.txt", 4},
 			want:     &position{second, "a.txt", 4},
 		},
+		{
+			name:     "already posted on the head commit",
+			dir:      src,
+			path:     "a.txt",
+			line:     3,
+			existing: &position{head, "a.txt", 3},
+		},
+		{
+			// In merged results pipelines, the head commit is a merge commit
+			// that isn't part of the merge request.
+			name:      "already posted on a head commit outside the merge request",
+			dir:       src,
+			path:      "a.txt",
+			line:      3,
+			mrCommits: []string{second},
+			existing:  &position{head, "a.txt", 3},
+		},
 	}
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
@@ -279,7 +298,14 @@ func TestGitLabMergeRequestCommitCommenter_Flush_lastCommitOfLine(t *testing.T) 
 			var posted []position
 			mux := http.NewServeMux()
 			mux.HandleFunc("GET /api/v4/projects/o%2Fr/merge_requests/14/commits", func(w http.ResponseWriter, _ *http.Request) {
-				cs := []*gitlab.Commit{{ID: head}, {ID: second}}
+				mrCommits := tt.mrCommits
+				if mrCommits == nil {
+					mrCommits = []string{head, second}
+				}
+				var cs []*gitlab.Commit
+				for _, id := range mrCommits {
+					cs = append(cs, &gitlab.Commit{ID: id})
+				}
 				if err := json.NewEncoder(w).Encode(cs); err != nil {
 					t.Error(err)
 					return

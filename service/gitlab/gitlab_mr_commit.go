@@ -4,6 +4,7 @@ import (
 	"context"
 	"fmt"
 	"os/exec"
+	"slices"
 	"strconv"
 	"strings"
 	"sync"
@@ -33,6 +34,9 @@ type MergeRequestCommitCommenter struct {
 	postComments []*reviewdog.Comment
 
 	postedcs map[postedComment]bool
+	// commits are the merge request's commits and the head commit, which are
+	// the ones comments are posted on.
+	commits map[string]bool
 }
 
 // postedComment identifies a comment by the commit, path and line it's posted
@@ -91,7 +95,10 @@ func (g *MergeRequestCommitCommenter) postCommentsForEach(ctx context.Context) e
 		}
 		eg.Go(func() error {
 			commitID, path, line := g.sha, loc.GetPath(), lnum
-			if id, p, l, err := g.getLastCommitsID(ctx, loc.GetPath(), lnum); err == nil {
+			// Comment on the head commit when the line comes from a commit outside
+			// the merge request, e.g. on the target branch, since only comments on
+			// the merge request's commits are checked for duplicates.
+			if id, p, l, err := g.getLastCommitsID(ctx, loc.GetPath(), lnum); err == nil && g.commits[id] {
 				commitID, path, line = id, p, l
 			}
 			if g.postedcs[postedComment{commit: commitID, path: path, line: line, body: body}] {
@@ -160,14 +167,25 @@ func (g *MergeRequestCommitCommenter) getLastCommitsID(ctx context.Context, path
 
 func (g *MergeRequestCommitCommenter) setPostedComment(ctx context.Context) error {
 	g.postedcs = make(map[postedComment]bool)
+	g.commits = make(map[string]bool)
 	commits, _, err := g.cli.MergeRequests.GetMergeRequestCommits(
 		g.projects, int64(g.pr), nil, gitlab.WithContext(ctx))
 	if err != nil {
 		return err
 	}
+	ids := make([]string, 0, len(commits)+1)
 	for _, commit := range commits {
+		ids = append(ids, commit.ID)
+	}
+	// In merged results pipelines, the head commit is a merge commit that
+	// isn't one of the merge request's commits.
+	if !slices.Contains(ids, g.sha) {
+		ids = append(ids, g.sha)
+	}
+	for _, id := range ids {
+		g.commits[id] = true
 		cs, _, err := g.cli.Commits.GetCommitComments(
-			g.projects, commit.ID, nil, gitlab.WithContext(ctx))
+			g.projects, id, nil, gitlab.WithContext(ctx))
 		if err != nil {
 			continue
 		}
@@ -177,7 +195,7 @@ func (g *MergeRequestCommitCommenter) setPostedComment(ctx context.Context) erro
 				// "body".
 				continue
 			}
-			g.postedcs[postedComment{commit: commit.ID, path: c.Path, line: int(c.Line), body: c.Note}] = true
+			g.postedcs[postedComment{commit: id, path: c.Path, line: int(c.Line), body: c.Note}] = true
 		}
 	}
 	return nil
