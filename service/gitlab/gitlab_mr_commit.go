@@ -32,7 +32,16 @@ type MergeRequestCommitCommenter struct {
 	muComments   sync.Mutex
 	postComments []*reviewdog.Comment
 
-	postedcs commentutil.PostedComments
+	postedcs map[postedComment]bool
+}
+
+// postedComment identifies a comment by the commit, path and line it's posted
+// on, and its body.
+type postedComment struct {
+	commit string
+	path   string
+	line   int
+	body   string
 }
 
 // NewGitLabMergeRequestCommitCommenter returns a new MergeRequestCommitCommenter service.
@@ -81,16 +90,16 @@ func (g *MergeRequestCommitCommenter) postCommentsForEach(ctx context.Context) e
 			continue
 		}
 		eg.Go(func() error {
-			commitID, line := g.sha, lnum
-			if id, l, err := g.getLastCommitsID(loc.GetPath(), lnum); err == nil {
-				commitID, line = id, l
+			commitID, path, line := g.sha, loc.GetPath(), lnum
+			if id, p, l, err := g.getLastCommitsID(ctx, loc.GetPath(), lnum); err == nil {
+				commitID, path, line = id, p, l
 			}
-			if g.postedcs.IsPosted(c, line, body) {
+			if g.postedcs[postedComment{commit: commitID, path: path, line: line, body: body}] {
 				return nil
 			}
 			prcomment := &gitlab.PostCommitCommentOptions{
 				Note:     new(body),
-				Path:     new(loc.GetPath()),
+				Path:     new(path),
 				Line:     new(int64(line)),
 				LineType: new("new"),
 			}
@@ -101,65 +110,75 @@ func (g *MergeRequestCommitCommenter) postCommentsForEach(ctx context.Context) e
 	return eg.Wait()
 }
 
-// getLastCommitsID returns the commit that last changed the given line and the
-// line number in that commit, which differs from line when a later commit
-// added or removed lines above it.
-func (g *MergeRequestCommitCommenter) getLastCommitsID(path string, line int) (string, int, error) {
+// getLastCommitsID returns the commit that last changed the given line, and
+// the file's path and the line number in that commit. They differ from path
+// and line when a later commit renamed the file or added or removed lines
+// above it.
+func (g *MergeRequestCommitCommenter) getLastCommitsID(ctx context.Context, path string, line int) (commitID, origPath string, origLine int, err error) {
 	lineFormat := fmt.Sprintf("%d,%d", line, line)
-	s, err := exec.Command("git", "blame", "--porcelain", "-L", lineFormat, path).Output()
+	s, err := exec.CommandContext(ctx, "git", "blame", "--porcelain", "-L", lineFormat, path).Output()
 	if err != nil {
-		return "", 0, fmt.Errorf("failed to get commitID: %w", err)
+		return "", "", 0, fmt.Errorf("failed to get commitID: %w", err)
 	}
 	// The first line is "<commit> <original line> <final line> <lines>". Unlike
 	// the default format, the commit is never prefixed with "^" for boundary
 	// commits (e.g. the oldest commit of a shallow clone).
-	header, _, _ := strings.Cut(string(s), "\n")
-	fields := strings.Fields(header)
+	lines := strings.Split(string(s), "\n")
+	fields := strings.Fields(lines[0])
 	if len(fields) < 3 {
-		return "", 0, fmt.Errorf("unexpected git blame output: %q", header)
+		return "", "", 0, fmt.Errorf("unexpected git blame output: %q", lines[0])
 	}
-	commitID := fields[0]
+	commitID = fields[0]
 	if strings.Trim(commitID, "0") == "" {
-		return "", 0, fmt.Errorf("line %d of %s is not committed yet", line, path)
+		return "", "", 0, fmt.Errorf("line %d of %s is not committed yet", line, path)
 	}
-	origLine, err := strconv.Atoi(fields[1])
+	origLine, err = strconv.Atoi(fields[1])
 	if err != nil {
-		return "", 0, fmt.Errorf("unexpected git blame output: %q", header)
+		return "", "", 0, fmt.Errorf("unexpected git blame output: %q", lines[0])
 	}
-	return commitID, origLine, nil
+	// The header is followed by "<key> <value>" lines and then by the content
+	// of the line, which starts with a tab. "filename" is the file's path in
+	// the commit.
+	origPath = path
+	for _, l := range lines[1:] {
+		if strings.HasPrefix(l, "\t") {
+			break
+		}
+		if name, ok := strings.CutPrefix(l, "filename "); ok {
+			// Paths with unusual characters are quoted, like in other git output.
+			if strings.HasPrefix(name, `"`) {
+				if unquoted, err := strconv.Unquote(name); err == nil {
+					name = unquoted
+				}
+			}
+			origPath = name
+			break
+		}
+	}
+	return commitID, origPath, origLine, nil
 }
 
 func (g *MergeRequestCommitCommenter) setPostedComment(ctx context.Context) error {
-	g.postedcs = make(commentutil.PostedComments)
-	cs, err := g.comment(ctx)
-	if err != nil {
-		return err
-	}
-	for _, c := range cs {
-		if c.Line == 0 || c.Path == "" || c.Note == "" {
-			// skip resolved comments. Or comments which do not have "path" nor
-			// "body".
-			continue
-		}
-		g.postedcs.AddPostedComment(c.Path, int(c.Line), c.Note)
-	}
-	return nil
-}
-
-func (g *MergeRequestCommitCommenter) comment(ctx context.Context) ([]*gitlab.CommitComment, error) {
+	g.postedcs = make(map[postedComment]bool)
 	commits, _, err := g.cli.MergeRequests.GetMergeRequestCommits(
 		g.projects, int64(g.pr), nil, gitlab.WithContext(ctx))
 	if err != nil {
-		return nil, err
+		return err
 	}
-	comments := make([]*gitlab.CommitComment, 0)
-	for _, c := range commits {
-		tmpComments, _, err := g.cli.Commits.GetCommitComments(
-			g.projects, c.ID, nil, gitlab.WithContext(ctx))
+	for _, commit := range commits {
+		cs, _, err := g.cli.Commits.GetCommitComments(
+			g.projects, commit.ID, nil, gitlab.WithContext(ctx))
 		if err != nil {
 			continue
 		}
-		comments = append(comments, tmpComments...)
+		for _, c := range cs {
+			if c.Line == 0 || c.Path == "" || c.Note == "" {
+				// skip resolved comments. Or comments which do not have "path" nor
+				// "body".
+				continue
+			}
+			g.postedcs[postedComment{commit: commit.ID, path: c.Path, line: int(c.Line), body: c.Note}] = true
+		}
 	}
-	return comments, nil
+	return nil
 }

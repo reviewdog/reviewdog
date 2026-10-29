@@ -7,6 +7,8 @@ import (
 	"net/http/httptest"
 	"os"
 	"os/exec"
+	"path/filepath"
+	"slices"
 	"strings"
 	"testing"
 
@@ -33,15 +35,15 @@ func TestGitLabMergeRequestCommitCommenter_Post_Flush_review_api(t *testing.T) {
 		}
 		cs := []*gitlab.Commit{
 			{
-				ID:      "0123456789abcdef",
-				ShortID: "012345678",
+				ID:      "sha",
+				ShortID: "sha",
 			},
 		}
 		if err := json.NewEncoder(w).Encode(cs); err != nil {
 			t.Fatal(err)
 		}
 	})
-	mux.HandleFunc("/api/v4/projects/o%2Fr/repository/commits/0123456789abcdef/comments", func(w http.ResponseWriter, r *http.Request) {
+	mux.HandleFunc("GET /api/v4/projects/o%2Fr/repository/commits/sha/comments", func(w http.ResponseWriter, r *http.Request) {
 		apiCalled++
 		if r.Method != http.MethodGet {
 			t.Errorf("unexpected access: %v %v", r.Method, r.URL)
@@ -57,7 +59,7 @@ func TestGitLabMergeRequestCommitCommenter_Post_Flush_review_api(t *testing.T) {
 			t.Fatal(err)
 		}
 	})
-	mux.HandleFunc("/api/v4/projects/o%2Fr/repository/commits/sha/comments", func(w http.ResponseWriter, r *http.Request) {
+	mux.HandleFunc("POST /api/v4/projects/o%2Fr/repository/commits/sha/comments", func(w http.ResponseWriter, r *http.Request) {
 		apiCalled++
 		if r.Method != http.MethodPost {
 			t.Errorf("unexpected access: %v %v", r.Method, r.URL)
@@ -147,12 +149,15 @@ func TestGitLabMergeRequestCommitCommenter_Flush_lastCommitOfLine(t *testing.T) 
 		}
 		return strings.TrimSpace(string(out))
 	}
-	commit := func(dir, content, msg string) {
+	write := func(dir, name, content string) {
 		t.Helper()
-		if err := os.WriteFile(dir+"/a.txt", []byte(content), 0o600); err != nil {
+		if err := os.WriteFile(filepath.Join(dir, name), []byte(content), 0o600); err != nil {
 			t.Fatal(err)
 		}
-		git(dir, "add", "a.txt")
+	}
+	commit := func(dir, msg string) {
+		t.Helper()
+		git(dir, "add", "-A")
 		git(dir, "commit", "-q", "-m", msg)
 	}
 
@@ -160,72 +165,146 @@ func TestGitLabMergeRequestCommitCommenter_Flush_lastCommitOfLine(t *testing.T) 
 	git(src, "init", "-q")
 	git(src, "config", "user.name", "reviewdog")
 	git(src, "config", "user.email", "reviewdog@example.com")
-	commit(src, "a\nb\nc\n", "first")
-	commit(src, "a\nb\nc\nd\n", "second")
-	commit(src, "x\ny\na\nb\nc\nd\n", "third")
+	write(src, "a.txt", "a\nb\nc\n")
+	commit(src, "first")
+	write(src, "a.txt", "a\nb\nc\nd\n")
+	// git quotes non-ASCII paths in its output.
+	write(src, "旧.txt", "1\n2\n")
+	commit(src, "second")
+	write(src, "a.txt", "x\ny\na\nb\nc\nd\n")
+	git(src, "mv", "旧.txt", "new.txt")
+	commit(src, "third")
+	first := git(src, "rev-parse", "HEAD~2")
 	second := git(src, "rev-parse", "HEAD^")
 	head := git(src, "rev-parse", "HEAD")
 
-	// In a shallow clone, git blame marks lines from before the clone's
-	// oldest commit with a "^" in front of the commit ID.
+	// In a shallow clone, git blame stops at the clone's oldest commit, and
+	// marks it with a "^" in front of the commit ID in its default format.
 	shallow := t.TempDir()
-	git(shallow, "clone", "-q", "--depth", "1", "file://"+src, ".")
+	git(shallow, "clone", "-q", "--depth", "2", "file://"+src, ".")
 	// Lines that aren't committed have no commit to comment on.
-	if err := os.WriteFile(shallow+"/a.txt", []byte("x\ny\na\nb\nc\nd\nz\n"), 0o600); err != nil {
-		t.Fatal(err)
-	}
+	write(shallow, "a.txt", "x\ny\na\nb\nc\nd\nz\n")
 
+	type position struct {
+		commit string
+		path   string
+		line   int64
+	}
 	tests := []struct {
-		name       string
-		dir        string
-		line       int32
-		wantCommit string
-		wantLine   int64
+		name string
+		dir  string
+		path string
+		line int32
+		// existing is where the same comment has already been posted.
+		existing *position
+		// want is where the comment is posted, or nil if it isn't.
+		want *position
 	}{
 		{
-			name:       "line moved by a later commit",
-			dir:        src,
-			line:       6,
-			wantCommit: second,
-			wantLine:   4,
+			name: "line moved by a later commit",
+			dir:  src,
+			path: "a.txt",
+			line: 6,
+			want: &position{second, "a.txt", 4},
 		},
 		{
-			name:       "boundary commit of a shallow clone",
-			dir:        shallow,
-			line:       3,
-			wantCommit: head,
-			wantLine:   3,
+			name: "file renamed by a later commit",
+			dir:  src,
+			path: "new.txt",
+			line: 2,
+			want: &position{second, "旧.txt", 2},
 		},
 		{
-			name:       "line not committed yet",
-			dir:        shallow,
-			line:       7,
-			wantCommit: head,
-			wantLine:   7,
+			name: "line from a commit outside the merge request",
+			dir:  src,
+			path: "a.txt",
+			line: 3,
+			want: &position{first, "a.txt", 1},
+		},
+		{
+			name: "boundary commit of a shallow clone",
+			dir:  shallow,
+			path: "a.txt",
+			line: 3,
+			want: &position{second, "a.txt", 1},
+		},
+		{
+			name: "line not committed yet",
+			dir:  shallow,
+			path: "a.txt",
+			line: 7,
+			want: &position{head, "a.txt", 7},
+		},
+		{
+			name:     "already posted on the blamed line",
+			dir:      src,
+			path:     "a.txt",
+			line:     6,
+			existing: &position{second, "a.txt", 4},
+		},
+		{
+			name:     "already posted on the blamed path",
+			dir:      src,
+			path:     "new.txt",
+			line:     2,
+			existing: &position{second, "旧.txt", 2},
+		},
+		{
+			name:     "same line posted on another commit",
+			dir:      src,
+			path:     "a.txt",
+			line:     6,
+			existing: &position{head, "a.txt", 4},
+			want:     &position{second, "a.txt", 4},
 		},
 	}
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
 			t.Chdir(tt.dir)
 
-			posted := 0
+			c := &reviewdog.Comment{
+				Result: &filter.FilteredDiagnostic{
+					Diagnostic: &rdf.Diagnostic{
+						Location: &rdf.Location{
+							Path:  tt.path,
+							Range: &rdf.Range{Start: &rdf.Position{Line: tt.line}},
+						},
+						Message: "comment",
+					},
+					InDiffFile: true,
+				},
+			}
+			body := commentutil.MarkdownComment(c)
+
+			var posted []position
 			mux := http.NewServeMux()
-			mux.HandleFunc("/api/v4/projects/o%2Fr/merge_requests/14/commits", func(w http.ResponseWriter, _ *http.Request) {
-				if err := json.NewEncoder(w).Encode([]*gitlab.Commit{}); err != nil {
-					t.Fatal(err)
+			mux.HandleFunc("GET /api/v4/projects/o%2Fr/merge_requests/14/commits", func(w http.ResponseWriter, _ *http.Request) {
+				cs := []*gitlab.Commit{{ID: head}, {ID: second}}
+				if err := json.NewEncoder(w).Encode(cs); err != nil {
+					t.Error(err)
+					return
 				}
 			})
-			mux.HandleFunc("/api/v4/projects/o%2Fr/repository/commits/"+tt.wantCommit+"/comments", func(w http.ResponseWriter, r *http.Request) {
-				posted++
+			mux.HandleFunc("GET /api/v4/projects/o%2Fr/repository/commits/{sha}/comments", func(w http.ResponseWriter, r *http.Request) {
+				cs := []*gitlab.CommitComment{}
+				if e := tt.existing; e != nil && e.commit == r.PathValue("sha") {
+					cs = append(cs, &gitlab.CommitComment{Path: e.path, Line: e.line, Note: body})
+				}
+				if err := json.NewEncoder(w).Encode(cs); err != nil {
+					t.Error(err)
+					return
+				}
+			})
+			mux.HandleFunc("POST /api/v4/projects/o%2Fr/repository/commits/{sha}/comments", func(w http.ResponseWriter, r *http.Request) {
 				var req gitlab.CommitComment
 				if err := json.NewDecoder(r.Body).Decode(&req); err != nil {
 					t.Error(err)
+					return
 				}
-				if req.Path != "a.txt" || req.Line != tt.wantLine {
-					t.Errorf("comment posted at %s:%d, want a.txt:%d", req.Path, req.Line, tt.wantLine)
-				}
+				posted = append(posted, position{r.PathValue("sha"), req.Path, req.Line})
 				if err := json.NewEncoder(w).Encode(req); err != nil {
-					t.Fatal(err)
+					t.Error(err)
+					return
 				}
 			})
 			ts := httptest.NewServer(mux)
@@ -236,26 +315,18 @@ func TestGitLabMergeRequestCommitCommenter_Flush_lastCommitOfLine(t *testing.T) 
 				t.Fatal(err)
 			}
 			g := NewGitLabMergeRequestCommitCommenter(cli, "o", "r", 14, head)
-			c := &reviewdog.Comment{
-				Result: &filter.FilteredDiagnostic{
-					Diagnostic: &rdf.Diagnostic{
-						Location: &rdf.Location{
-							Path:  "a.txt",
-							Range: &rdf.Range{Start: &rdf.Position{Line: tt.line}},
-						},
-						Message: "comment",
-					},
-					InDiffFile: true,
-				},
-			}
 			if err := g.Post(context.Background(), c); err != nil {
 				t.Fatal(err)
 			}
 			if err := g.Flush(context.Background()); err != nil {
 				t.Fatal(err)
 			}
-			if posted != 1 {
-				t.Errorf("comment posted to commit %s %d times, want 1", tt.wantCommit, posted)
+			var want []position
+			if tt.want != nil {
+				want = append(want, *tt.want)
+			}
+			if !slices.Equal(posted, want) {
+				t.Errorf("comments posted at %v, want %v", posted, want)
 			}
 		})
 	}
