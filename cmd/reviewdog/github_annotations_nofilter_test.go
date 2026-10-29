@@ -15,6 +15,72 @@ import (
 	"github.com/reviewdog/reviewdog/service/serviceutil"
 )
 
+// captureStdout drains the pipe concurrently so large outputs cannot block the writer.
+// It must not be used from parallel tests because it replaces the process stdout.
+func captureStdout(t *testing.T, fn func() error) (output string, runErr error) {
+	t.Helper()
+	read, write, err := os.Pipe()
+	if err != nil {
+		t.Fatal(err)
+	}
+	type readResult struct {
+		data []byte
+		err  error
+	}
+	done := make(chan readResult, 1)
+	go func() {
+		data, err := io.ReadAll(read)
+		done <- readResult{data: data, err: err}
+	}()
+	old := os.Stdout
+	os.Stdout = write
+	defer func() {
+		os.Stdout = old
+		if err := write.Close(); err != nil {
+			t.Errorf("close stdout pipe writer: %v", err)
+		}
+		result := <-done
+		if err := read.Close(); err != nil {
+			t.Errorf("close stdout pipe reader: %v", err)
+		}
+		if result.err != nil {
+			t.Errorf("read stdout pipe: %v", result.err)
+		}
+		output = string(result.data)
+	}()
+	runErr = fn()
+	return
+}
+
+func TestCaptureStdoutLargeOutput(t *testing.T) {
+	want := strings.Repeat("x", 256*1024)
+	got, err := captureStdout(t, func() error {
+		_, err := io.WriteString(os.Stdout, want)
+		return err
+	})
+	if err != nil {
+		t.Fatal(err)
+	}
+	if got != want {
+		t.Fatalf("captured %d bytes, want %d", len(got), len(want))
+	}
+}
+
+func TestCaptureStdoutRestoresOnPanic(t *testing.T) {
+	old := os.Stdout
+	func() {
+		defer func() {
+			if got := recover(); got != "test panic" {
+				t.Errorf("panic = %v, want test panic", got)
+			}
+		}()
+		_, _ = captureStdout(t, func() error { panic("test panic") })
+	}()
+	if os.Stdout != old {
+		t.Error("stdout was not restored after panic")
+	}
+}
+
 func TestGitHubAnnotationsWithoutToken(t *testing.T) {
 	t.Setenv("REVIEWDOG_GITHUB_API_TOKEN", "")
 	for _, reporter := range []string{"github-annotations", "github-pr-annotations"} {
@@ -24,24 +90,13 @@ func TestGitHubAnnotationsWithoutToken(t *testing.T) {
 				efms:       strslice([]string{"%f:%l: %m"}),
 				filterMode: filter.ModeNoFilter,
 			}
-			read, write, err := os.Pipe()
-			if err != nil {
-				t.Fatal(err)
-			}
-			old := os.Stdout
-			os.Stdout = write
-			err = run(strings.NewReader("file.go:1: example issue\n"), new(bytes.Buffer), opt)
-			os.Stdout = old
-			write.Close()
-			output, readErr := io.ReadAll(read)
-			read.Close()
+			output, err := captureStdout(t, func() error {
+				return run(strings.NewReader("file.go:1: example issue\n"), new(bytes.Buffer), opt)
+			})
 			if err != nil {
 				t.Fatalf("run: %v", err)
 			}
-			if readErr != nil {
-				t.Fatal(readErr)
-			}
-			if !strings.Contains(string(output), "example issue") || !strings.Contains(string(output), "::error") {
+			if !strings.Contains(output, "example issue") || !strings.Contains(output, "::error") {
 				t.Fatalf("missing annotation: %q", output)
 			}
 		})
@@ -91,24 +146,13 @@ func TestGitHubAnnotationsPRFiltering(t *testing.T) {
 		for _, mode := range []filter.Mode{filter.ModeDefault, filter.ModeAdded, filter.ModeNoFilter} {
 			requests.Store(0)
 			options := &option{reporter: reporter, efms: strslice([]string{"%f:%l: %m"}), filterMode: mode, logLevel: "error"}
-			read, write, err := os.Pipe()
-			if err != nil {
-				t.Fatal(err)
-			}
-			old := os.Stdout
-			os.Stdout = write
-			err = run(strings.NewReader("example.go:1: added-result\nexample.go:2: context-result\n"), new(bytes.Buffer), options)
-			os.Stdout = old
-			write.Close()
-			output, readErr := io.ReadAll(read)
-			read.Close()
+			output, err := captureStdout(t, func() error {
+				return run(strings.NewReader("example.go:1: added-result\nexample.go:2: context-result\n"), new(bytes.Buffer), options)
+			})
 			if err != nil {
 				t.Fatalf("%s %v: %v", reporter, mode, err)
 			}
-			if readErr != nil {
-				t.Fatal(readErr)
-			}
-			text := string(output)
+			text := output
 			if !strings.Contains(text, "added-result") {
 				t.Errorf("%s %v: missing added-result: %q", reporter, mode, text)
 			}
@@ -136,26 +180,14 @@ func TestGitHubAnnotationsPRFiltering(t *testing.T) {
 	for _, reporter := range []string{"github-annotations", "github-pr-annotations"} {
 		requests.Store(0)
 		options := &option{reporter: reporter, efms: strslice([]string{"%f:%l: %m"}), filterMode: filter.ModeNoFilter, guessPullRequest: true, logLevel: "error"}
-		read, write, err := os.Pipe()
-		if err != nil {
-			t.Fatal(err)
-		}
-		old := os.Stdout
-		os.Stdout = write
-		err = run(strings.NewReader("example.go:1: guessed finding\n"), new(bytes.Buffer), options)
-		os.Stdout = old
-		write.Close()
-		output, readErr := io.ReadAll(read)
-		read.Close()
+		output, err := captureStdout(t, func() error {
+			return run(strings.NewReader("example.go:1: guessed finding\n"), new(bytes.Buffer), options)
+		})
 		if err != nil {
 			t.Fatalf("%s with guess: %v", reporter, err)
 		}
-		if readErr != nil {
-			t.Fatal(readErr)
-		}
-		if !strings.Contains(string(output), "guessed finding") || requests.Load() != 0 {
+		if !strings.Contains(output, "guessed finding") || requests.Load() != 0 {
 			t.Errorf("%s with guess: output=%q requests=%d", reporter, output, requests.Load())
 		}
 	}
-
 }

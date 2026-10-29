@@ -523,11 +523,11 @@ and warnings to `stdout` e.g.
 
 This reporter requires a valid GitHub API token to generate a diff, but will not
 use the token to report errors. With `-filter-mode=nofilter`, no diff is fetched,
-so neither a token nor GitHub repository and commit environment variables are needed.
+so token and CI metadata checks are skipped and `-guess` has no effect.
 
 ### Reporter: GitHub PR Annotations (-reporter=github-pr-annotations)
 
-Same as `github-annotations`, including for builds that are not Pull Requests.
+Same as `github-annotations`.
 
 ### Reporter: GitLab MergeRequest discussions (-reporter=gitlab-mr-discussion)
 
