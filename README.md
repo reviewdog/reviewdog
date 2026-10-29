@@ -192,6 +192,25 @@ and [:h errorformat](https://vim-jp.org/vimdoc-en/quickfix.html#error-file-forma
 if you want to deal with a more complex output. 'errorformat' can handle more
 complex output like a multi-line error message.
 
+Pass each pattern as a separate `-efm` argument. `-efm` does not split
+comma-separated patterns; commas are part of the pattern. For example, given this `warnings.log`:
+
+```text
+[WARNING] example.java:[12,3] example warning
+  more details
+```
+
+Use one `-efm` for the warning and another for its continuation lines:
+
+```shell
+$ reviewdog -efm='%W[WARNING] %f:[%l,%c] %m' -efm='%+C %.%#' \
+    -name=demo -reporter=local -filter-mode=nofilter < warnings.log
+```
+
+This reports one warning at `example.java:12:3`, including `more details` in its
+message. The example uses the local reporter and disables diff filtering so the
+matching warning is visible regardless of changed lines.
+
 You can also try errorformat on [the Playground](https://reviewdog.github.io/errorformat-playground/)!
 
 With this 'errorformat' feature, reviewdog can support any tool output with ease.
