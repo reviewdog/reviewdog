@@ -2,9 +2,9 @@ package parser
 
 import (
 	"bufio"
+	"bytes"
 	"fmt"
 	"io"
-	"strings"
 
 	"google.golang.org/protobuf/encoding/protojson"
 
@@ -26,7 +26,7 @@ func (p *RDJSONLParser) Parse(r io.Reader) ([]*rdf.Diagnostic, error) {
 	var results []*rdf.Diagnostic
 	s := bufio.NewScanner(r)
 	for s.Scan() {
-		if strings.TrimSpace(s.Text()) == "" {
+		if len(bytes.TrimSpace(s.Bytes())) == 0 {
 			continue
 		}
 		d := new(rdf.Diagnostic)
