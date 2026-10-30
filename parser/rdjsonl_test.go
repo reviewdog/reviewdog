@@ -59,6 +59,11 @@ func TestRDJSONLParserBlankLines(t *testing.T) {
 			if got := len(diagnostics); got != tt.want {
 				t.Errorf("got %d diagnostics, want %d", got, tt.want)
 			}
+			for _, d := range diagnostics {
+				if got := d.GetOriginalOutput(); got != line {
+					t.Errorf("got original output %q, want %q", got, line)
+				}
+			}
 		})
 	}
 }
