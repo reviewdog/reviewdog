@@ -128,11 +128,14 @@ func TestGitHubAnnotationsPRFiltering(t *testing.T) {
 	diff := "diff --git a/" + path + " b/" + path + "\n--- a/" + path + "\n+++ b/" + path + "\n@@ -1,2 +1,2 @@\n-old\n+changed\n unchanged\n"
 	server := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		requests.Add(1)
-		if r.URL.Path != "/repos/example/repo/pulls/123" {
+		switch r.URL.Path {
+		case "/repos/example/repo/pulls/123":
+			_, _ = io.WriteString(w, diff)
+		case "/search/issues":
+			_, _ = io.WriteString(w, `{"total_count": 1, "items": [{"number": 123}]}`)
+		default:
 			http.Error(w, "unexpected path", http.StatusNotFound)
-			return
 		}
-		_, _ = io.WriteString(w, diff)
 	}))
 	defer server.Close()
 	for name, value := range map[string]string{
@@ -174,9 +177,6 @@ func TestGitHubAnnotationsPRFiltering(t *testing.T) {
 	for _, name := range []string{"TRAVIS_PULL_REQUEST", "CIRCLE_PULL_REQUEST", "CIRCLE_PR_NUMBER", "DRONE_PULL_REQUEST", "CI_MERGE_REQUEST_IID", "BITBUCKET_PR_ID", "CI_COMMIT_PULL_REQUEST"} {
 		t.Setenv(name, "")
 	}
-	oldGuess := opt.guessPullRequest
-	opt.guessPullRequest = true
-	defer func() { opt.guessPullRequest = oldGuess }()
 	for _, reporter := range []string{"github-annotations", "github-pr-annotations"} {
 		requests.Store(0)
 		options := &option{reporter: reporter, efms: strslice([]string{"%f:%l: %m"}), filterMode: filter.ModeNoFilter, guessPullRequest: true, logLevel: "error"}
@@ -188,6 +188,24 @@ func TestGitHubAnnotationsPRFiltering(t *testing.T) {
 		}
 		if !strings.Contains(output, "guessed finding") || requests.Load() != 0 {
 			t.Errorf("%s with guess: output=%q requests=%d", reporter, output, requests.Load())
+		}
+	}
+	// In filtered mode, -guess given by the option passed to run must find the
+	// PR and apply its diff.
+	for _, reporter := range []string{"github-annotations", "github-pr-annotations"} {
+		requests.Store(0)
+		options := &option{reporter: reporter, efms: strslice([]string{"%f:%l: %m"}), filterMode: filter.ModeAdded, guessPullRequest: true, logLevel: "error"}
+		output, err := captureStdout(t, func() error {
+			return run(strings.NewReader("example.go:1: added-result\nexample.go:2: context-result\n"), new(bytes.Buffer), options)
+		})
+		if err != nil {
+			t.Fatalf("%s with guess: %v", reporter, err)
+		}
+		if !strings.Contains(output, "added-result") || strings.Contains(output, "context-result") {
+			t.Errorf("%s with guess: unexpected output: %q", reporter, output)
+		}
+		if got := requests.Load(); got != 2 {
+			t.Errorf("%s with guess: requests=%d want=2", reporter, got)
 		}
 	}
 }
