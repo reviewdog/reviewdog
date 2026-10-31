@@ -54,9 +54,9 @@ homebrew_casks:
       post:
         # The released binaries are not notarized; strip the quarantine bit so
         # macOS Gatekeeper does not refuse to run them.
-        install: |
-          if system_command("/usr/bin/xattr", args: ["-h"]).exit_status == 0
-            system_command "/usr/bin/xattr", args: ["-dr", "com.apple.quarantine", "#{staged_path}/reviewdog"]
+        install_steps: |
+          on_macos do
+            run "/usr/bin/xattr", args: ["-dr", "com.apple.quarantine", "{{ .StagedPath }}/reviewdog"]
           end
 
 checksum:
