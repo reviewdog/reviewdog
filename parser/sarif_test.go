@@ -7,8 +7,10 @@ import (
 	"testing"
 
 	"os"
+	"path/filepath"
 
 	"github.com/google/go-cmp/cmp"
+	"github.com/haya14busa/go-sarif/sarif"
 	"github.com/reviewdog/reviewdog/proto/rdf"
 	"google.golang.org/protobuf/encoding/protojson"
 	"google.golang.org/protobuf/testing/protocmp"
@@ -730,4 +732,31 @@ var fixtures = [][]string{{
     }
   ]
 }`},
+}
+
+func TestSarifParser_FileURIBaseWithDriveLetter(t *testing.T) {
+	tests := []struct {
+		name    string
+		baseURI string
+		basedir string
+		want    string
+	}{
+		{name: "drive letter", baseURI: "file:///C:/work/repo/", basedir: "C:/work/repo", want: "src/main.go"},
+		{name: "lowercase drive letter", baseURI: "file:///c:/work/repo/", basedir: "c:/work/repo", want: "src/main.go"},
+		{name: "posix absolute path", baseURI: "file:///home/user/repo/", basedir: "/home/user/repo", want: "src/main.go"},
+	}
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			uri, baseID := "src/main.go", "SRCROOT"
+			baseURIs := map[string]sarif.ArtifactLocation{"SRCROOT": {URI: &tt.baseURI}}
+			loc := sarif.ArtifactLocation{URI: &uri, URIBaseID: &baseID}
+			got, err := getPath(loc, baseURIs, nil, filepath.FromSlash(tt.basedir))
+			if err != nil {
+				t.Fatalf("getPath error: %v", err)
+			}
+			if want := filepath.FromSlash(tt.want); got != want {
+				t.Errorf("getPath = %q, want %q", got, want)
+			}
+		})
+	}
 }
