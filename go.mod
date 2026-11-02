@@ -22,7 +22,7 @@ require (
 	github.com/reviewdog/go-bitbucket v0.0.0-20201024094602-708c3f6a7de0
 	github.com/stretchr/testify v1.12.1
 	github.com/vvakame/sdlog v1.2.0
-	gitlab.com/gitlab-org/api/client-go/v3 v3.40.2
+	gitlab.com/gitlab-org/api/client-go/v3 v3.40.3
 	go.opencensus.io v0.24.0
 	golang.org/x/build v0.0.0-20261029215802-12368c1bd69a
 	golang.org/x/oauth2 v0.37.0
@@ -66,7 +66,7 @@ require (
 	go.opentelemetry.io/otel/log v1.47.0 // indirect
 	go.opentelemetry.io/otel/metric v1.47.0 // indirect
 	go.opentelemetry.io/otel/trace v1.47.0 // indirect
-	go.yaml.in/yaml/v3 v3.0.5 // indirect
+	go.yaml.in/yaml/v3 v3.0.6 // indirect
 	golang.org/x/crypto v0.58.0 // indirect
 	golang.org/x/net v0.61.0 // indirect
 	golang.org/x/sys v0.49.0 // indirect
