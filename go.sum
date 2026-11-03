@@ -229,8 +229,8 @@ github.com/vvakame/sdlog v1.2.0/go.mod h1:gFYv2g/iR3pJSxkJz0YnkNmhNbXT5R3PzWsfZK
 github.com/yuin/goldmark v1.1.25/go.mod h1:3hX8gzYuyVAZsxl0MRgGTJEmQBFcNTphYh9decYSb74=
 github.com/yuin/goldmark v1.1.27/go.mod h1:3hX8gzYuyVAZsxl0MRgGTJEmQBFcNTphYh9decYSb74=
 github.com/yuin/goldmark v1.1.32/go.mod h1:3hX8gzYuyVAZsxl0MRgGTJEmQBFcNTphYh9decYSb74=
-gitlab.com/gitlab-org/api/client-go/v3 v3.40.2 h1:Eu9GmOXoBBWJbGS4ceYDZNwqlpr/i/Nm997yaAmsuME=
-gitlab.com/gitlab-org/api/client-go/v3 v3.40.2/go.mod h1:jBFhGkTHLKkgeHEdS/A8yA0tQ6UHq96QVsS5muu6flM=
+gitlab.com/gitlab-org/api/client-go/v3 v3.42.0 h1:IZKLUsHJSs7eLVjgrW4PSNoWhADdg9myDW8fB9R8DHA=
+gitlab.com/gitlab-org/api/client-go/v3 v3.42.0/go.mod h1:8cuzgeUJzkVvaRvw57iZ8foGmL5q8GZXi4lHTiF5edY=
 go.opencensus.io v0.21.0/go.mod h1:mSImk1erAIZhrmZN+AvHh14ztQfjbGwt4TtuofqLduU=
 go.opencensus.io v0.22.0/go.mod h1:+kGneAE2xo2IficOXnaByMWTGM9T73dGwxeWcUqIpI8=
 go.opencensus.io v0.22.2/go.mod h1:yxeiOL68Rb0Xd1ddK5vPZ/oVn4vY4Ynel7k9FzqtOIw=
@@ -264,8 +264,8 @@ go.opentelemetry.io/proto/otlp v1.11.0 h1:5rrYs0Ykyj50sdU/JU0x8etU+LubXWb+gED6Tb
 go.opentelemetry.io/proto/otlp v1.11.0/go.mod h1:SmVizdCOAm3XBtG1g1NnOdhW6jtddT72hLMhv8VwA8E=
 go.uber.org/goleak v1.3.0 h1:2K3zAYmnTNqV73imy9J1T3WC+gmCePx2hEGkimedGto=
 go.uber.org/goleak v1.3.0/go.mod h1:CoHD4mav9JJNrW/WLlf7HGZPjdw8EucARQHekz1X6bE=
-go.yaml.in/yaml/v3 v3.0.5 h1:N6y/pJk8buWs9NY5ERU2HSMfm+IuD/OtfdAnq6kESPw=
-go.yaml.in/yaml/v3 v3.0.5/go.mod h1:HVTZu1O7/Vkt2N+BFy8Zza+lnLsABggaTM2ZpNIGuKg=
+go.yaml.in/yaml/v3 v3.0.6 h1:zcDfvjXEqTQmpjniUBLc91xYJMB2c4QOFxEF/LCEckM=
+go.yaml.in/yaml/v3 v3.0.6/go.mod h1:HVTZu1O7/Vkt2N+BFy8Zza+lnLsABggaTM2ZpNIGuKg=
 golang.org/x/build v0.0.0-20261029215802-12368c1bd69a h1:gmVjV1Twqq3IumhTDGsoJTe8AJeb6YHqa9hdtDteSKo=
 golang.org/x/build v0.0.0-20261029215802-12368c1bd69a/go.mod h1:1GbkEIUxx+jaN8iJXEonxQSuLk1oc9MABWJNGud8wfk=
 golang.org/x/crypto v0.0.0-20190308221718-c2843e01d9a2/go.mod h1:djNgcEr1/C05ACkg1iLfiJU5Ep61QUkGW8qpdssI0+w=
