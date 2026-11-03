@@ -21,7 +21,7 @@ require (
 	github.com/reviewdog/go-bitbucket v0.0.0-20201024094602-708c3f6a7de0
 	github.com/stretchr/testify v1.12.1
 	github.com/vvakame/sdlog v1.2.0
-	gitlab.com/gitlab-org/api/client-go/v3 v3.42.0
+	gitlab.com/gitlab-org/api/client-go/v3 v3.43.0
 	go.opentelemetry.io/contrib/instrumentation/net/http/otelhttp v0.72.0
 	go.opentelemetry.io/otel v1.47.0
 	go.opentelemetry.io/otel/exporters/otlp/otlptrace/otlptracegrpc v1.47.0
