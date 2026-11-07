@@ -6,7 +6,7 @@ workflows:
     '.github/workflows/codeql-analysis.yml':
         - 'actions/checkout@v7.0.1'
         - 'actions/setup-go@v7.0.0'
-        - 'github/codeql-action@v4.39.1'
+        - 'github/codeql-action@v4.39.3'
     '.github/workflows/deploy-doghouse.yml':
         - 'actions/checkout@v7.0.1'
         - 'actions/setup-go@v7.0.0'
@@ -36,12 +36,12 @@ workflows:
     '.github/workflows/reviewdog.yml':
         - 'actions/checkout@v7.0.1'
         - 'actions/setup-go@v7.0.0'
-        - 'github/codeql-action@v4.39.1'
+        - 'github/codeql-action@v4.39.3'
         - 'reviewdog/action-alex@v1.19.0'
         - 'reviewdog/action-golangci-lint@v2.10.2'
         - 'reviewdog/action-languagetool@v1.23.0'
-        - 'reviewdog/action-misspell@v1.30.4'
-        - 'reviewdog/action-setup@d8a7baabd7f3e8544ee4dbde3ee41d0011c3a93f'
+        - 'reviewdog/action-misspell@v1.30.5'
+        - 'reviewdog/action-setup@v1.5.0'
         - 'reviewdog/action-shellcheck@v1.34.1'
         - 'reviewdog/action-staticcheck@v1.33.0'
         - 'reviewdog/action-typos@v1.19.0'
@@ -68,9 +68,9 @@ dependencies:
         repo_id: 200299178
         uses:
             - 'actions/github-script@ed597411d8f924073f98dfc5c65a23a2325f34cd'
-    'github/codeql-action@v4.39.1':
-        ref: 'v4.39.1'
-        commit: 'sha1-9b3254085494b55a0f7c4c2b3d2d52cc712ce370'
+    'github/codeql-action@v4.39.3':
+        ref: 'v4.39.3'
+        commit: 'sha1-33d7b85da1a04171e211befe2c739303b9a4c066'
         owner_id: 9919
         repo_id: 259445878
     'google-github-actions/auth@v3.0.0':
@@ -123,9 +123,9 @@ dependencies:
         commit: 'sha1-afd06e9b0f782c9562c92efffb66a49c09b2b4f4'
         owner_id: 48765237
         repo_id: 239077280
-    'reviewdog/action-misspell@v1.30.4':
-        ref: 'v1.30.4'
-        commit: 'sha1-840bfbe9f804da9afb0bd739dc4689012f3fdd2d'
+    'reviewdog/action-misspell@v1.30.5':
+        ref: 'v1.30.5'
+        commit: 'sha1-f424fed50ff8c448c1100c2d35d5d72a8ad08e49'
         owner_id: 48765237
         repo_id: 208637003
     'reviewdog/action-setup@d8a7baabd7f3e8544ee4dbde3ee41d0011c3a93f':
@@ -136,6 +136,11 @@ dependencies:
     'reviewdog/action-setup@e04ffabe3898a0af8d0fb1af00c188831c4b5893':
         ref: 'v1.3.2'
         commit: 'sha1-e04ffabe3898a0af8d0fb1af00c188831c4b5893'
+        owner_id: 48765237
+        repo_id: 286005511
+    'reviewdog/action-setup@v1.5.0':
+        ref: 'v1.5.0'
+        commit: 'sha1-d8a7baabd7f3e8544ee4dbde3ee41d0011c3a93f'
         owner_id: 48765237
         repo_id: 286005511
     'reviewdog/action-shellcheck@v1.34.1':

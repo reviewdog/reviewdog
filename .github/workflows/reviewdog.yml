@@ -51,7 +51,7 @@ jobs:
         env:
           REVIEWDOG_GITHUB_API_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         run: |
-            reviewdog -reporter=github-check
+          reviewdog -reporter=github-check
 
   reviewdog-pr:
     permissions:
@@ -170,7 +170,7 @@ jobs:
         env:
           REVIEWDOG_GITHUB_API_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         run: |
-            reviewdog -reporter=github-pr-review
+          reviewdog -reporter=github-pr-review
 
   golangci-lint:
     permissions:
@@ -216,7 +216,7 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v7.0.1
-      - uses: reviewdog/action-misspell@v1.30.4
+      - uses: reviewdog/action-misspell@v1.30.5
         with:
           github_token: ${{ secrets.github_token }}
           locale: "US"
@@ -274,7 +274,7 @@ jobs:
         run: |
           golint ./... | reviewdog -f=golint -reporter=sarif |
             tee ../results/golint.sarif
-      - uses: github/codeql-action/upload-sarif@v4.39.1
+      - uses: github/codeql-action/upload-sarif@v4.39.3
 
   typos:
     name: runner / typos
@@ -324,7 +324,7 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v7.0.1
-      - uses: reviewdog/action-setup@d8a7baabd7f3e8544ee4dbde3ee41d0011c3a93f # v1.5.0
+      - uses: reviewdog/action-setup@v1.5.0
       - run: npm install
       - name: textlint
         env:
@@ -338,7 +338,7 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v7.0.1
-      - uses: reviewdog/action-setup@d8a7baabd7f3e8544ee4dbde3ee41d0011c3a93f # v1.5.0
+      - uses: reviewdog/action-setup@v1.5.0
       - run: npm install
       - name: textlint sarif
         env:
