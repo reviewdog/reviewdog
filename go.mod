@@ -2,6 +2,8 @@ module github.com/reviewdog/reviewdog
 
 go 1.26.0
 
+toolchain go1.27.3
+
 require (
 	cloud.google.com/go/compute/metadata v0.10.0
 	cloud.google.com/go/datastore v1.28.0
