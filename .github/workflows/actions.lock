@@ -40,7 +40,7 @@ workflows:
         - 'reviewdog/action-alex@v1.20.0'
         - 'reviewdog/action-golangci-lint@v2.10.2'
         - 'reviewdog/action-languagetool@v1.23.0'
-        - 'reviewdog/action-misspell@v1.30.5'
+        - 'reviewdog/action-misspell@v1.31.0'
         - 'reviewdog/action-setup@v1.5.0'
         - 'reviewdog/action-shellcheck@v1.34.1'
         - 'reviewdog/action-staticcheck@v1.33.0'
@@ -123,9 +123,9 @@ dependencies:
         commit: 'sha1-afd06e9b0f782c9562c92efffb66a49c09b2b4f4'
         owner_id: 48765237
         repo_id: 239077280
-    'reviewdog/action-misspell@v1.30.5':
-        ref: 'v1.30.5'
-        commit: 'sha1-f424fed50ff8c448c1100c2d35d5d72a8ad08e49'
+    'reviewdog/action-misspell@v1.31.0':
+        ref: 'v1.31.0'
+        commit: 'sha1-c846b6b0996029d2d39540c8ffebebbd957072db'
         owner_id: 48765237
         repo_id: 208637003
     'reviewdog/action-setup@d8a7baabd7f3e8544ee4dbde3ee41d0011c3a93f':
