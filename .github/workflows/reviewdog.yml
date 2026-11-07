@@ -14,9 +14,9 @@ jobs:
     name: reviewdog (github-check)
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+      - uses: actions/checkout@v7.0.1
 
-      - uses: actions/setup-go@b7ad1dad31e06c5925ef5d2fc7ad053ef454303e # v7.0.0
+      - uses: actions/setup-go@v7.0.0
         with:
           go-version-file: "go.mod"
 
@@ -51,7 +51,7 @@ jobs:
         env:
           REVIEWDOG_GITHUB_API_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         run: |
-            reviewdog -reporter=github-check
+          reviewdog -reporter=github-check
 
   reviewdog-pr:
     permissions:
@@ -62,9 +62,9 @@ jobs:
     name: reviewdog on Pull Request
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+      - uses: actions/checkout@v7.0.1
 
-      - uses: actions/setup-go@b7ad1dad31e06c5925ef5d2fc7ad053ef454303e # v7.0.0
+      - uses: actions/setup-go@v7.0.0
         with:
           go-version-file: "go.mod"
 
@@ -170,7 +170,7 @@ jobs:
         env:
           REVIEWDOG_GITHUB_API_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         run: |
-            reviewdog -reporter=github-pr-review
+          reviewdog -reporter=github-pr-review
 
   golangci-lint:
     permissions:
@@ -181,8 +181,8 @@ jobs:
     name: runner / golangci-lint
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
-      - uses: reviewdog/action-golangci-lint@284129a3ac23bc5d8ac1522e0b6511df74a8836d # v2.10.2
+      - uses: actions/checkout@v7.0.1
+      - uses: reviewdog/action-golangci-lint@v2.10.2
         with:
           github_token: ${{ secrets.github_token }}
           golangci_lint_flags: "--timeout 2m"
@@ -198,11 +198,11 @@ jobs:
     name: runner / staticcheck
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
-      - uses: actions/setup-go@b7ad1dad31e06c5925ef5d2fc7ad053ef454303e # v7.0.0
+      - uses: actions/checkout@v7.0.1
+      - uses: actions/setup-go@v7.0.0
         with:
           go-version-file: "go.mod"
-      - uses: reviewdog/action-staticcheck@c89a7974f4e093793ddc32bba79de7ac9345060f # v1.33.0
+      - uses: reviewdog/action-staticcheck@v1.33.0
         with:
           github_token: ${{ secrets.github_token }}
           reporter: github-pr-review
@@ -215,8 +215,8 @@ jobs:
     name: runner / misspell
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
-      - uses: reviewdog/action-misspell@f424fed50ff8c448c1100c2d35d5d72a8ad08e49 # v1.30.5
+      - uses: actions/checkout@v7.0.1
+      - uses: reviewdog/action-misspell@v1.30.5
         with:
           github_token: ${{ secrets.github_token }}
           locale: "US"
@@ -228,9 +228,9 @@ jobs:
     name: reviewdog (github-pr-annotations)
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+      - uses: actions/checkout@v7.0.1
 
-      - uses: actions/setup-go@b7ad1dad31e06c5925ef5d2fc7ad053ef454303e # v7.0.0
+      - uses: actions/setup-go@v7.0.0
         with:
           go-version-file: "go.mod"
 
@@ -254,8 +254,8 @@ jobs:
     name: reviewdog (sarif)
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
-      - uses: actions/setup-go@b7ad1dad31e06c5925ef5d2fc7ad053ef454303e # v7.0.0
+      - uses: actions/checkout@v7.0.1
+      - uses: actions/setup-go@v7.0.0
         with:
           go-version-file: "go.mod"
       - name: Setup reviewdog
@@ -274,21 +274,21 @@ jobs:
         run: |
           golint ./... | reviewdog -f=golint -reporter=sarif |
             tee ../results/golint.sarif
-      - uses: github/codeql-action/upload-sarif@33d7b85da1a04171e211befe2c739303b9a4c066 # v4.39.3
+      - uses: github/codeql-action/upload-sarif@v4.39.3
 
   typos:
     name: runner / typos
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
-      - uses: reviewdog/action-typos@d5eb1bbcd1b3bfde596f6eeb470322727862fe98 # v1.19.0
+      - uses: actions/checkout@v7.0.1
+      - uses: reviewdog/action-typos@v1.19.0
 
   languagetool:
     name: runner / languagetool
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
-      - uses: reviewdog/action-languagetool@afd06e9b0f782c9562c92efffb66a49c09b2b4f4 # v1.23.0
+      - uses: actions/checkout@v7.0.1
+      - uses: reviewdog/action-languagetool@v1.23.0
         with:
           github_token: ${{ secrets.github_token }}
           reporter: github-check
@@ -302,8 +302,8 @@ jobs:
     name: runner / shellcheck
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
-      - uses: reviewdog/action-shellcheck@d0b8d5fd7fad6afdb6e1b6ce1778892be4d1f427 # v1.34.1
+      - uses: actions/checkout@v7.0.1
+      - uses: reviewdog/action-shellcheck@v1.34.1
         with:
           github_token: ${{ secrets.github_token }}
           reporter: github-pr-review
@@ -312,8 +312,8 @@ jobs:
     name: runner / alex
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
-      - uses: reviewdog/action-alex@a86fdb2da29e06d659cd3bd528095479a2c5c01e # v1.19.0
+      - uses: actions/checkout@v7.0.1
+      - uses: reviewdog/action-alex@v1.19.0
         with:
           github_token: ${{ secrets.github_token }}
           reporter: github-check
@@ -323,8 +323,8 @@ jobs:
     name: runner / textlint
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
-      - uses: reviewdog/action-setup@d8a7baabd7f3e8544ee4dbde3ee41d0011c3a93f # v1.5.0
+      - uses: actions/checkout@v7.0.1
+      - uses: reviewdog/action-setup@v1.5.0
       - run: npm install
       - name: textlint
         env:
@@ -337,8 +337,8 @@ jobs:
     name: runner / textlint sarif
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
-      - uses: reviewdog/action-setup@d8a7baabd7f3e8544ee4dbde3ee41d0011c3a93f # v1.5.0
+      - uses: actions/checkout@v7.0.1
+      - uses: reviewdog/action-setup@v1.5.0
       - run: npm install
       - name: textlint sarif
         env:
