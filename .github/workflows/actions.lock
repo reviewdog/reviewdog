@@ -43,7 +43,7 @@ workflows:
         - 'reviewdog/action-misspell@v1.31.0'
         - 'reviewdog/action-setup@v1.5.0'
         - 'reviewdog/action-shellcheck@v1.34.1'
-        - 'reviewdog/action-staticcheck@v1.33.0'
+        - 'reviewdog/action-staticcheck@v1.34.0'
         - 'reviewdog/action-typos@v1.19.0'
 dependencies:
     'actions/checkout@v7.0.1':
@@ -150,13 +150,11 @@ dependencies:
         repo_id: 211116201
         uses:
             - 'reviewdog/action-setup@d8a7baabd7f3e8544ee4dbde3ee41d0011c3a93f'
-    'reviewdog/action-staticcheck@v1.33.0':
-        ref: 'v1.33.0'
-        commit: 'sha1-c89a7974f4e093793ddc32bba79de7ac9345060f'
+    'reviewdog/action-staticcheck@v1.34.0':
+        ref: 'v1.34.0'
+        commit: 'sha1-a6155dfbaefb5d8b29f2eda8e6addf2103bb234c'
         owner_id: 48765237
         repo_id: 262723301
-        uses:
-            - 'reviewdog/action-setup@d8a7baabd7f3e8544ee4dbde3ee41d0011c3a93f'
     'reviewdog/action-typos@v1.19.0':
         ref: 'v1.19.0'
         commit: 'sha1-d5eb1bbcd1b3bfde596f6eeb470322727862fe98'
