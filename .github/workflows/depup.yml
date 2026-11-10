@@ -11,7 +11,7 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v7.0.1
-      - uses: reviewdog/action-depup@v1.6.5
+      - uses: reviewdog/action-depup@v1.6.7
         id: depup
         with:
           file: proto/Dockerfile
@@ -45,7 +45,7 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v7.0.1
-      - uses: reviewdog/action-depup@v1.6.5
+      - uses: reviewdog/action-depup@v1.6.7
         id: depup
         with:
           file: proto/Dockerfile
@@ -79,7 +79,7 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v7.0.1
-      - uses: reviewdog/action-depup@v1.6.5
+      - uses: reviewdog/action-depup@v1.6.7
         id: depup
         with:
           file: proto/Dockerfile
