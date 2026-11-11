@@ -19,16 +19,16 @@ require (
 	github.com/mattn/go-shellwords v1.0.16
 	github.com/rakyll/statik v0.1.8
 	github.com/reva2/bitbucket-insights-api v1.0.0
-	github.com/reviewdog/errorformat v0.0.0-20260918023459-3785ec08195e
+	github.com/reviewdog/errorformat v0.0.0-20261111071206-96826ccdd0bd
 	github.com/reviewdog/go-bitbucket v0.0.0-20201024094602-708c3f6a7de0
 	github.com/stretchr/testify v1.12.1
 	github.com/vvakame/sdlog v1.2.0
-	gitlab.com/gitlab-org/api/client-go/v3 v3.46.1
+	gitlab.com/gitlab-org/api/client-go/v3 v3.48.0
 	go.opentelemetry.io/contrib/instrumentation/net/http/otelhttp v0.72.0
 	go.opentelemetry.io/otel v1.47.0
 	go.opentelemetry.io/otel/exporters/otlp/otlptrace/otlptracegrpc v1.47.0
 	go.opentelemetry.io/otel/sdk v1.47.0
-	golang.org/x/build v0.0.0-20261110195846-a0346074b992
+	golang.org/x/build v0.0.0-20261111024049-8b7fbba04bbc
 	golang.org/x/oauth2 v0.38.0
 	golang.org/x/sync v0.25.0
 	google.golang.org/grpc v1.84.0
