@@ -2,7 +2,7 @@ module github.com/reviewdog/reviewdog
 
 go 1.26.0
 
-toolchain go1.27.3
+toolchain go1.27.4
 
 require (
 	cloud.google.com/go/compute/metadata v0.10.0
@@ -28,7 +28,7 @@ require (
 	go.opentelemetry.io/otel v1.47.0
 	go.opentelemetry.io/otel/exporters/otlp/otlptrace/otlptracegrpc v1.47.0
 	go.opentelemetry.io/otel/sdk v1.47.0
-	golang.org/x/build v0.0.0-20261105210655-c89ba67b77d4
+	golang.org/x/build v0.0.0-20261110195846-a0346074b992
 	golang.org/x/oauth2 v0.38.0
 	golang.org/x/sync v0.25.0
 	google.golang.org/grpc v1.84.0
