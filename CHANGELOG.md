@@ -11,6 +11,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ### :rocket: Enhancements
 
 ### :bug: Fixes
+- Resolve chained SARIF URI base IDs for diagnostic paths, related locations, and suggestions.
 
 ### :rotating_light: Breaking changes
 

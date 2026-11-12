@@ -189,11 +189,18 @@ func getPath(
 	if l.URIBaseID != nil {
 		urlBaseID = *l.URIBaseID
 	}
-	baseURI := baseURIs[urlBaseID].URI
-	if baseURI != nil && *baseURI != "" {
-		if u, err := url.JoinPath(*baseURI, uri); err == nil {
-			uri = u
+	// SARIF 2.1.0 §3.14.14 allows a base URI to refer to another base ID.
+	for i := 0; i < len(baseURIs); i++ {
+		base := baseURIs[urlBaseID]
+		if base.URI != nil && *base.URI != "" {
+			if u, err := url.JoinPath(*base.URI, uri); err == nil {
+				uri = u
+			}
 		}
+		if base.URIBaseID == nil {
+			break
+		}
+		urlBaseID = *base.URIBaseID
 	}
 	parse, err := url.Parse(uri)
 	if err != nil {

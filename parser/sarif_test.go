@@ -3,6 +3,7 @@ package parser
 import (
 	"encoding/json"
 	"fmt"
+	"net/url"
 	"strings"
 	"testing"
 
@@ -758,5 +759,89 @@ func TestSarifParser_FileURIBaseWithDriveLetter(t *testing.T) {
 				t.Errorf("getPath = %q, want %q", got, want)
 			}
 		})
+	}
+}
+
+func TestSarifParser_ChainedURIBaseIDs(t *testing.T) {
+	root := t.TempDir()
+	t.Chdir(root)
+	rootURI := (&url.URL{Scheme: "file", Path: filepath.ToSlash(root) + "/"}).String()
+	for _, tc := range []struct {
+		name  string
+		bases string
+	}{
+		{name: "two levels", bases: `"REPOROOT": {"uri": ` + fmt.Sprintf("%q", rootURI) + `}, "SRCROOT": {"uri": "packages/app/src/", "uriBaseId": "REPOROOT"}`},
+		{name: "three levels", bases: `"REPOROOT": {"uri": ` + fmt.Sprintf("%q", rootURI) + `}, "PKGROOT": {"uri": "packages/app/", "uriBaseId": "REPOROOT"}, "SRCROOT": {"uri": "src/", "uriBaseId": "PKGROOT"}`},
+		{name: "direct base", bases: `"SRCROOT": {"uri": ` + fmt.Sprintf("%q", rootURI+"packages/app/src/") + `}`},
+	} {
+		for _, caller := range []string{"primary", "related", "fix"} {
+			t.Run(tc.name+"/"+caller, func(t *testing.T) {
+				primary := `{"uri": "packages/app/src/widget.go"}`
+				related := `{"uri": "packages/app/src/other.go"}`
+				fix := primary
+				switch caller {
+				case "primary":
+					primary = `{"uri": "widget.go", "uriBaseId": "SRCROOT"}`
+				case "related":
+					related = `{"uri": "other.go", "uriBaseId": "SRCROOT"}`
+				case "fix":
+					fix = `{"uri": "widget.go", "uriBaseId": "SRCROOT"}`
+				}
+				input := fmt.Sprintf(`{
+					"version": "2.1.0",
+					"runs": [{
+						"tool": {"driver": {"name": "ordinary-go-style-lint"}},
+						"originalUriBaseIds": {%s},
+						"results": [{
+							"message": {"text": "exported declaration Widget should have a comment"},
+							"level": "warning",
+							"locations": [{"physicalLocation": {
+								"artifactLocation": %s,
+								"region": {"startLine": 3}
+							}}],
+							"relatedLocations": [{"message": {"text": "ordinary style context"}, "physicalLocation": {
+								"artifactLocation": %s,
+								"region": {"startLine": 3}
+							}}],
+							"fixes": [{"artifactChanges": [{
+								"artifactLocation": %s,
+								"replacements": [{
+									"deletedRegion": {"startLine": 3, "startColumn": 1, "endLine": 3, "endColumn": 1},
+									"insertedContent": {"text": "// Widget is a style example.\n"}
+								}]
+							}]}]
+						}]
+					}]
+				}`, tc.bases, primary, related, fix)
+				got, err := NewSarifParser().Parse(strings.NewReader(input))
+				if err != nil {
+					t.Fatal(err)
+				}
+				for _, d := range got {
+					d.Location.Path = filepath.ToSlash(d.Location.Path)
+					for _, related := range d.RelatedLocations {
+						related.Location.Path = filepath.ToSlash(related.Location.Path)
+					}
+				}
+				rng := &rdf.Range{Start: &rdf.Position{Line: 3}}
+				want := []*rdf.Diagnostic{{
+					Message:  "exported declaration Widget should have a comment",
+					Location: &rdf.Location{Path: "packages/app/src/widget.go", Range: rng},
+					Severity: rdf.Severity_WARNING,
+					Source:   &rdf.Source{Name: "ordinary-go-style-lint"},
+					RelatedLocations: []*rdf.RelatedLocation{{
+						Message:  "ordinary style context",
+						Location: &rdf.Location{Path: "packages/app/src/other.go", Range: rng},
+					}},
+					Suggestions: []*rdf.Suggestion{{
+						Range: &rdf.Range{Start: &rdf.Position{Line: 3, Column: 1}, End: &rdf.Position{Line: 3, Column: 1}},
+						Text:  "// Widget is a style example.\n",
+					}},
+				}}
+				if diff := cmp.Diff(want, got, protocmp.Transform(), protocmp.IgnoreFields(&rdf.Diagnostic{}, "original_output")); diff != "" {
+					t.Errorf("Parse() mismatch (-want +got):\n%s", diff)
+				}
+			})
+		}
 	}
 }
