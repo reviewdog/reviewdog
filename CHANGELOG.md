@@ -9,9 +9,18 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ### :sparkles: Release Note <!-- optional -->
 
 ### :rocket: Enhancements
+
+### :bug: Fixes
+
+### :rotating_light: Breaking changes
+
+## [v0.21.3] - 2026-11-07
+
+### :rocket: Enhancements
 - [#2059](https://github.com/reviewdog/reviewdog/pull/2059) Add support for range suggestions to `gitlab-mr-discussion` reporter
 
 ### :bug: Fixes
+- [#2944](https://github.com/reviewdog/reviewdog/pull/2944) Make SARIF `file://` paths with a Windows drive letter relative, instead of leaving a leading slash in front of `C:`.
 - [#2931](https://github.com/reviewdog/reviewdog/pull/2931) Allow GitHub annotation reporters to run with `-filter-mode=nofilter` without a GitHub token or repository metadata.
 - [#2927](https://github.com/reviewdog/reviewdog/pull/2927) Skip blank and whitespace-only lines in `-f=rdjsonl` input instead of failing to parse.
 - [#2917](https://github.com/reviewdog/reviewdog/pull/2917) Include git's stderr in the error when `git merge-base` or `git diff` fails for GitLab and Gerrit, instead of only reporting `exit status 128`.
@@ -28,8 +37,6 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - [#2823](https://github.com/reviewdog/reviewdog/pull/2823) Fall back to the paginated "list pull request files" API when GitHub's diff API rejects pull requests with more than 300 changed files (fixes [#2150](https://github.com/reviewdog/reviewdog/issues/2150)).
 - [#2826](https://github.com/reviewdog/reviewdog/issues/2826) Bitbucket: keep an annotation that another runner already reported for the same diagnostic, instead of leaving that runner's report without it.
 - [#2833](https://github.com/reviewdog/reviewdog/issues/2833) Resolve SARIF artifact locations that refer to entries in `run.artifacts` by index.
-
-### :rotating_light: Breaking changes
 
 ## [v0.21.2] - 2026-09-19
 
@@ -361,7 +368,8 @@ $ cd subdir/ && reviewdog -filter-mode=file -fail-on-error -reporter=github-pr-r
 
 See https://github.com/reviewdog/reviewdog/releases for older release note.
 
-[Unreleased]: https://github.com/reviewdog/reviewdog/compare/v0.21.2...HEAD
+[Unreleased]: https://github.com/reviewdog/reviewdog/compare/v0.21.3...HEAD
+[v0.21.3]: https://github.com/reviewdog/reviewdog/compare/v0.21.2...v0.21.3
 [v0.21.2]: https://github.com/reviewdog/reviewdog/compare/v0.21.1...v0.21.2
 [v0.21.1]: https://github.com/reviewdog/reviewdog/compare/v0.21.0...v0.21.1
 [v0.21.0]: https://github.com/reviewdog/reviewdog/compare/v0.20.3...v0.21.0
