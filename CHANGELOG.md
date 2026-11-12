@@ -11,6 +11,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ### :rocket: Enhancements
 
 ### :bug: Fixes
+- [#2927](https://github.com/reviewdog/reviewdog/pull/2927) Skip blank and whitespace-only lines in `-f=rdjsonl` input instead of failing to parse.
 
 ### :rotating_light: Breaking changes
 
