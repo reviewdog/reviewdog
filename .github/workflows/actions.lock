@@ -42,7 +42,7 @@ workflows:
         - 'reviewdog/action-languagetool@v1.23.0'
         - 'reviewdog/action-misspell@v1.31.0'
         - 'reviewdog/action-setup@v1.5.0'
-        - 'reviewdog/action-shellcheck@v1.35.0'
+        - 'reviewdog/action-shellcheck@v1.35.1'
         - 'reviewdog/action-staticcheck@v1.34.0'
         - 'reviewdog/action-typos@v1.20.0'
     '.github/workflows/verify-lockfile.yml':
@@ -140,9 +140,9 @@ dependencies:
         commit: 'sha1-d8a7baabd7f3e8544ee4dbde3ee41d0011c3a93f'
         owner_id: 48765237
         repo_id: 286005511
-    'reviewdog/action-shellcheck@v1.35.0':
-        ref: 'v1.35.0'
-        commit: 'sha1-b4ffc0b2a69f857f82b74d1310cd3e62e932f9f7'
+    'reviewdog/action-shellcheck@v1.35.1':
+        ref: 'v1.35.1'
+        commit: 'sha1-950c9d71535c8c49e5c029c33a438ade63b9009c'
         owner_id: 48765237
         repo_id: 211116201
         uses:
