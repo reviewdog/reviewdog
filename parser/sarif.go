@@ -87,7 +87,7 @@ func (p *SarifParser) Parse(r io.Reader) ([]*rdf.Diagnostic, error) {
 						}
 						suggestions = append(suggestions, s)
 					}
-					suggestionsMap[path] = suggestions
+					suggestionsMap[filepath.ToSlash(path)] = suggestions
 				}
 			}
 
@@ -129,7 +129,7 @@ func (p *SarifParser) Parse(r io.Reader) ([]*rdf.Diagnostic, error) {
 						Url:  informationURI,
 					},
 					Code:             code,
-					Suggestions:      suggestionsMap[loc.GetPath()],
+					Suggestions:      suggestionsMap[filepath.ToSlash(loc.GetPath())],
 					RelatedLocations: relatedLocs,
 					OriginalOutput:   string(original),
 				}
@@ -189,11 +189,22 @@ func getPath(
 	if l.URIBaseID != nil {
 		urlBaseID = *l.URIBaseID
 	}
-	baseURI := baseURIs[urlBaseID].URI
-	if baseURI != nil && *baseURI != "" {
-		if u, err := url.JoinPath(*baseURI, uri); err == nil {
-			uri = u
+	// SARIF 2.1.0 §3.14.14 allows a base URI to refer to another base ID.
+	// Invalid cycles yield a partially resolved path after at most len(baseURIs) joins.
+	for i := 0; i < len(baseURIs); i++ {
+		if u, err := url.Parse(uri); err == nil && u.IsAbs() {
+			break
 		}
+		base := baseURIs[urlBaseID]
+		if base.URI != nil && *base.URI != "" {
+			if u, err := url.JoinPath(*base.URI, uri); err == nil {
+				uri = u
+			}
+		}
+		if base.URIBaseID == nil {
+			break
+		}
+		urlBaseID = *base.URIBaseID
 	}
 	parse, err := url.Parse(uri)
 	if err != nil {

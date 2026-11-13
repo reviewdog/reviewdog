@@ -3,6 +3,7 @@ package parser
 import (
 	"encoding/json"
 	"fmt"
+	"net/url"
 	"strings"
 	"testing"
 
@@ -756,6 +757,211 @@ func TestSarifParser_FileURIBaseWithDriveLetter(t *testing.T) {
 			}
 			if want := filepath.FromSlash(tt.want); got != want {
 				t.Errorf("getPath = %q, want %q", got, want)
+			}
+		})
+	}
+}
+
+func TestSarifParser_ChainedURIBaseIDs(t *testing.T) {
+	root := t.TempDir()
+	t.Chdir(root)
+	rootURI := (&url.URL{Scheme: "file", Path: "/" + strings.TrimPrefix(filepath.ToSlash(root), "/") + "/"}).String()
+	for _, tc := range []struct {
+		name  string
+		bases string
+	}{
+		{name: "two levels", bases: `"REPOROOT": {"uri": ` + fmt.Sprintf("%q", rootURI) + `}, "SRCROOT": {"uri": "packages/app/src/", "uriBaseId": "REPOROOT"}`},
+		{name: "three levels", bases: `"REPOROOT": {"uri": ` + fmt.Sprintf("%q", rootURI) + `}, "PKGROOT": {"uri": "packages/app/", "uriBaseId": "REPOROOT"}, "SRCROOT": {"uri": "src/", "uriBaseId": "PKGROOT"}`},
+		{name: "direct base", bases: `"SRCROOT": {"uri": ` + fmt.Sprintf("%q", rootURI+"packages/app/src/") + `}`},
+	} {
+		for _, caller := range []string{"primary", "related", "fix"} {
+			t.Run(tc.name+"/"+caller, func(t *testing.T) {
+				primary := `{"uri": "packages/app/src/widget.go"}`
+				related := `{"uri": "packages/app/src/other.go"}`
+				fix := primary
+				switch caller {
+				case "primary":
+					primary = `{"uri": "widget.go", "uriBaseId": "SRCROOT"}`
+				case "related":
+					related = `{"uri": "other.go", "uriBaseId": "SRCROOT"}`
+				case "fix":
+					fix = `{"uri": "widget.go", "uriBaseId": "SRCROOT"}`
+				}
+				input := fmt.Sprintf(`{
+					"version": "2.1.0",
+					"runs": [{
+						"tool": {"driver": {"name": "ordinary-go-style-lint"}},
+						"originalUriBaseIds": {%s},
+						"results": [{
+							"message": {"text": "exported declaration Widget should have a comment"},
+							"level": "warning",
+							"locations": [{"physicalLocation": {
+								"artifactLocation": %s,
+								"region": {"startLine": 3}
+							}}],
+							"relatedLocations": [{"message": {"text": "ordinary style context"}, "physicalLocation": {
+								"artifactLocation": %s,
+								"region": {"startLine": 3}
+							}}],
+							"fixes": [{"artifactChanges": [{
+								"artifactLocation": %s,
+								"replacements": [{
+									"deletedRegion": {"startLine": 3, "startColumn": 1, "endLine": 3, "endColumn": 1},
+									"insertedContent": {"text": "// Widget is a style example.\n"}
+								}]
+							}]}]
+						}]
+					}]
+				}`, tc.bases, primary, related, fix)
+				got, err := NewSarifParser().Parse(strings.NewReader(input))
+				if err != nil {
+					t.Fatal(err)
+				}
+				for _, d := range got {
+					wantPath := "packages/app/src/widget.go"
+					if caller == "primary" {
+						wantPath = filepath.FromSlash(wantPath)
+					}
+					if d.GetLocation().GetPath() != wantPath {
+						t.Errorf("Parse() path = %q, want %q", d.GetLocation().GetPath(), wantPath)
+					}
+					d.Location.Path = filepath.ToSlash(d.Location.Path)
+					for _, related := range d.RelatedLocations {
+						related.Location.Path = filepath.ToSlash(related.Location.Path)
+					}
+				}
+				rng := &rdf.Range{Start: &rdf.Position{Line: 3}}
+				want := []*rdf.Diagnostic{{
+					Message:  "exported declaration Widget should have a comment",
+					Location: &rdf.Location{Path: "packages/app/src/widget.go", Range: rng},
+					Severity: rdf.Severity_WARNING,
+					Source:   &rdf.Source{Name: "ordinary-go-style-lint"},
+					RelatedLocations: []*rdf.RelatedLocation{{
+						Message:  "ordinary style context",
+						Location: &rdf.Location{Path: "packages/app/src/other.go", Range: rng},
+					}},
+					Suggestions: []*rdf.Suggestion{{
+						Range: &rdf.Range{Start: &rdf.Position{Line: 3, Column: 1}, End: &rdf.Position{Line: 3, Column: 1}},
+						Text:  "// Widget is a style example.\n",
+					}},
+				}}
+				if diff := cmp.Diff(want, got, protocmp.Transform(), protocmp.IgnoreFields(&rdf.Diagnostic{}, "original_output")); diff != "" {
+					t.Errorf("Parse() mismatch (-want +got):\n%s", diff)
+				}
+			})
+		}
+	}
+}
+
+func TestSarifParser_ResolveURIBaseIDs(t *testing.T) {
+	p := func(s string) *string { return &s }
+	root := filepath.Join(t.TempDir(), "repo with space")
+	rootURI := (&url.URL{Scheme: "file", Path: "/" + strings.TrimPrefix(filepath.ToSlash(root), "/") + "/"}).String()
+	tests := []struct {
+		name    string
+		loc     sarif.ArtifactLocation
+		bases   map[string]sarif.ArtifactLocation
+		want    string
+		wantErr bool
+	}{
+		{
+			name: "absolute base with parent",
+			loc:  sarif.ArtifactLocation{URI: p("a.go"), URIBaseID: p("SRCROOT")},
+			bases: map[string]sarif.ArtifactLocation{
+				"SRCROOT":   {URI: p(rootURI), URIBaseID: p("ELSEWHERE")},
+				"ELSEWHERE": {URI: p("file:///elsewhere/")},
+			},
+			want: "a.go",
+		},
+		{
+			name: "absolute location with base",
+			loc:  sarif.ArtifactLocation{URI: p(rootURI + "a.go"), URIBaseID: p("SRCROOT")},
+			bases: map[string]sarif.ArtifactLocation{
+				"SRCROOT": {URI: p("file:///elsewhere/")},
+			},
+			want: "a.go",
+		},
+		{
+			name: "two levels",
+			loc:  sarif.ArtifactLocation{URI: p("a.go"), URIBaseID: p("SRCROOT")},
+			bases: map[string]sarif.ArtifactLocation{
+				"SRCROOT":  {URI: p("src/"), URIBaseID: p("REPOROOT")},
+				"REPOROOT": {URI: p(rootURI + "packages/app/")},
+			},
+			want: "packages/app/src/a.go",
+		},
+		{
+			name: "three levels",
+			loc:  sarif.ArtifactLocation{URI: p("a.go"), URIBaseID: p("SRCROOT")},
+			bases: map[string]sarif.ArtifactLocation{
+				"SRCROOT":  {URI: p("src/"), URIBaseID: p("PKGROOT")},
+				"PKGROOT":  {URI: p("packages/app/"), URIBaseID: p("REPOROOT")},
+				"REPOROOT": {URI: p(rootURI)},
+			},
+			want: "packages/app/src/a.go",
+		},
+		{
+			name: "undefined parent",
+			loc:  sarif.ArtifactLocation{URI: p("a.go"), URIBaseID: p("SRCROOT")},
+			bases: map[string]sarif.ArtifactLocation{
+				"SRCROOT": {URI: p("src/"), URIBaseID: p("REPOROOT")},
+			},
+			want: "src/a.go",
+		},
+		{
+			name: "direct base",
+			loc:  sarif.ArtifactLocation{URI: p("a.go"), URIBaseID: p("SRCROOT")},
+			bases: map[string]sarif.ArtifactLocation{
+				"SRCROOT": {URI: p(rootURI + "packages/app/src/")},
+			},
+			want: "packages/app/src/a.go",
+		},
+		{
+			name: "unbased",
+			loc:  sarif.ArtifactLocation{URI: p("src/a.go")},
+			want: "src/a.go",
+		},
+		{
+			name: "join error keeps relative path",
+			loc:  sarif.ArtifactLocation{URI: p("src/a.go"), URIBaseID: p("SRCROOT")},
+			bases: map[string]sarif.ArtifactLocation{
+				"SRCROOT": {URI: p("%zz")},
+			},
+			want: "src/a.go",
+		},
+		{
+			name:    "parse error remains an error",
+			loc:     sarif.ArtifactLocation{URI: p("%zz")},
+			wantErr: true,
+		},
+	}
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			got, err := getPath(tt.loc, tt.bases, nil, root)
+			if (err != nil) != tt.wantErr {
+				t.Fatalf("getPath error = %v, want error %v", err, tt.wantErr)
+			}
+			if want := tt.want; filepath.ToSlash(got) != want {
+				t.Errorf("getPath = %q, want %q", got, want)
+			}
+		})
+	}
+}
+
+func TestSarifParser_TestFileURI(t *testing.T) {
+	for _, root := range []string{"/work/repo with space#", "C:/work/repo with space#"} {
+		t.Run(root, func(t *testing.T) {
+			path := "/" + strings.TrimPrefix(filepath.ToSlash(root), "/") + "/"
+			uri := (&url.URL{Scheme: "file", Path: path}).String()
+			got, err := url.Parse(uri)
+			if err != nil {
+				t.Fatal(err)
+			}
+			if got.Scheme != "file" || got.Host != "" || got.Path != path || got.Fragment != "" {
+				t.Errorf("url.Parse(%q) = %#v, want file URI with path %q and empty host/fragment", uri, got, path)
+			}
+			if !strings.Contains(uri, "%20") || !strings.Contains(uri, "%23") {
+				t.Errorf("file URI is not escaped: %q", uri)
 			}
 		})
 	}
