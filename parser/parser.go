@@ -16,6 +16,15 @@ type Parser interface {
 	Parse(r io.Reader) ([]*rdf.Diagnostic, error)
 }
 
+// StreamParser is an interface for parsers that support parsing multiple streams
+// (such as stdout and stderr) while maintaining stream affinity for multiline error messages.
+// Implementations parse streams sequentially and return immediately on the first error,
+// discarding any diagnostics from previous streams.
+type StreamParser interface {
+	Parser
+	ParseStreams(readers ...io.Reader) ([]*rdf.Diagnostic, error)
+}
+
 // Option represents option to create Parser. Either FormatName or
 // Errorformat should be specified.
 type Option struct {
