@@ -12,6 +12,8 @@ jobs:
     runs-on: ubuntu-latest
     steps:
     - uses: actions/checkout@v7.0.1
+      with:
+        persist-credentials: false
     - name: Build
       working-directory: proto/
       run: ./update.sh

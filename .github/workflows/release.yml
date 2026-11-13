@@ -68,5 +68,7 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v7.0.1
+        with:
+          persist-credentials: false
       - name: Post bumpr status comment
         uses: haya14busa/action-bumpr@v1.11.4
