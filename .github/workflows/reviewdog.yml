@@ -284,6 +284,10 @@ jobs:
       - uses: reviewdog/action-typos@v1.20.0
 
   languagetool:
+    permissions:
+      checks: write # the github-check reporter creates a check run
+      contents: read
+      pull-requests: read # reviewdog reads the pull request diff
     name: runner / languagetool
     runs-on: ubuntu-latest
     steps:
