@@ -8,9 +8,14 @@ on:
 
 jobs:
   protoc:
+    permissions:
+      contents: write # create-pull-request pushes the depup branch
+      pull-requests: write # and opens the pull request
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v7.0.1
+        with:
+          persist-credentials: false
       - uses: reviewdog/action-depup@v1.6.7
         id: depup
         with:
@@ -42,9 +47,14 @@ jobs:
           labels: ${{ inputs.labels }}
 
   protoc-gen-go:
+    permissions:
+      contents: write # create-pull-request pushes the depup branch
+      pull-requests: write # and opens the pull request
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v7.0.1
+        with:
+          persist-credentials: false
       - uses: reviewdog/action-depup@v1.6.7
         id: depup
         with:
@@ -76,9 +86,14 @@ jobs:
           labels: ${{ inputs.labels }}
 
   protoc-gen-jsonschema:
+    permissions:
+      contents: write # create-pull-request pushes the depup branch
+      pull-requests: write # and opens the pull request
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v7.0.1
+        with:
+          persist-credentials: false
       - uses: reviewdog/action-depup@v1.6.7
         id: depup
         with:

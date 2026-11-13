@@ -15,6 +15,8 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v7.0.1
+        with:
+          persist-credentials: false
 
       - uses: actions/setup-go@v7.0.0
         with:
@@ -63,6 +65,8 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v7.0.1
+        with:
+          persist-credentials: false
 
       - uses: actions/setup-go@v7.0.0
         with:
@@ -182,6 +186,8 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v7.0.1
+        with:
+          persist-credentials: false
       - uses: reviewdog/action-golangci-lint@v2.10.2
         with:
           github_token: ${{ secrets.github_token }}
@@ -199,6 +205,8 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v7.0.1
+        with:
+          persist-credentials: false
       - uses: actions/setup-go@v7.0.0
         with:
           go-version-file: "go.mod"
@@ -212,10 +220,16 @@ jobs:
           # workdir: ./_testdata/
 
   misspell:
+    permissions:
+      checks: write # the github-check reporter creates a check run
+      contents: read
+      pull-requests: read # reviewdog reads the pull request diff
     name: runner / misspell
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v7.0.1
+        with:
+          persist-credentials: false
       - uses: reviewdog/action-misspell@v1.31.0
         with:
           github_token: ${{ secrets.github_token }}
@@ -229,6 +243,8 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v7.0.1
+        with:
+          persist-credentials: false
 
       - uses: actions/setup-go@v7.0.0
         with:
@@ -255,6 +271,8 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v7.0.1
+        with:
+          persist-credentials: false
       - uses: actions/setup-go@v7.0.0
         with:
           go-version-file: "go.mod"
@@ -277,17 +295,28 @@ jobs:
       - uses: github/codeql-action/upload-sarif@v4.39.3
 
   typos:
+    permissions:
+      contents: read
+      pull-requests: write # the github-pr-review reporter posts review comments
     name: runner / typos
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v7.0.1
+        with:
+          persist-credentials: false
       - uses: reviewdog/action-typos@v1.20.0
 
   languagetool:
+    permissions:
+      checks: write # the github-check reporter creates a check run
+      contents: read
+      pull-requests: read # reviewdog reads the pull request diff
     name: runner / languagetool
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v7.0.1
+        with:
+          persist-credentials: false
       - uses: reviewdog/action-languagetool@v1.23.0
         with:
           github_token: ${{ secrets.github_token }}
@@ -298,21 +327,33 @@ jobs:
             !**/testdata/**
 
   shellcheck:
+    permissions:
+      checks: write
+      contents: read
+      pull-requests: write # the github-pr-review reporter posts review comments
     if: github.event_name == 'pull_request'
     name: runner / shellcheck
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v7.0.1
+        with:
+          persist-credentials: false
       - uses: reviewdog/action-shellcheck@v1.35.1
         with:
           github_token: ${{ secrets.github_token }}
           reporter: github-pr-review
 
   alex:
+    permissions:
+      checks: write # the github-check reporter creates a check run
+      contents: read
+      pull-requests: read # reviewdog reads the pull request diff
     name: runner / alex
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v7.0.1
+        with:
+          persist-credentials: false
       - uses: reviewdog/action-alex@v1.20.0
         with:
           github_token: ${{ secrets.github_token }}
@@ -320,10 +361,16 @@ jobs:
           level: info
 
   textlint:
+    permissions:
+      checks: write # the github-check reporter creates a check run
+      contents: read
+      pull-requests: read # reviewdog reads the pull request diff
     name: runner / textlint
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v7.0.1
+        with:
+          persist-credentials: false
       - uses: reviewdog/action-setup@v1.5.0
       - run: npm install
       - name: textlint
@@ -334,10 +381,16 @@ jobs:
             reviewdog -f=checkstyle -name="textlint" -reporter=github-check -level=info
 
   sarif:
+    permissions:
+      checks: write # the github-check reporter creates a check run
+      contents: read
+      pull-requests: read # reviewdog reads the pull request diff
     name: runner / textlint sarif
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v7.0.1
+        with:
+          persist-credentials: false
       - uses: reviewdog/action-setup@v1.5.0
       - run: npm install
       - name: textlint sarif
