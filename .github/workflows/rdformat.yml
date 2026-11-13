@@ -6,6 +6,8 @@ on:
   pull_request:
 jobs:
   build:
+    permissions:
+      contents: read
     name: Built
     runs-on: ubuntu-latest
     steps:

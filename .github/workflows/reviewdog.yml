@@ -212,6 +212,10 @@ jobs:
           # workdir: ./_testdata/
 
   misspell:
+    permissions:
+      checks: write # the github-check reporter creates a check run
+      contents: read
+      pull-requests: read # reviewdog reads the pull request diff
     name: runner / misspell
     runs-on: ubuntu-latest
     steps:
@@ -277,6 +281,9 @@ jobs:
       - uses: github/codeql-action/upload-sarif@v4.39.3
 
   typos:
+    permissions:
+      contents: read
+      pull-requests: write # the github-pr-review reporter posts review comments
     name: runner / typos
     runs-on: ubuntu-latest
     steps:
@@ -302,6 +309,10 @@ jobs:
             !**/testdata/**
 
   shellcheck:
+    permissions:
+      checks: write
+      contents: read
+      pull-requests: write # the github-pr-review reporter posts review comments
     if: github.event_name == 'pull_request'
     name: runner / shellcheck
     runs-on: ubuntu-latest
@@ -313,6 +324,10 @@ jobs:
           reporter: github-pr-review
 
   alex:
+    permissions:
+      checks: write # the github-check reporter creates a check run
+      contents: read
+      pull-requests: read # reviewdog reads the pull request diff
     name: runner / alex
     runs-on: ubuntu-latest
     steps:
@@ -324,6 +339,10 @@ jobs:
           level: info
 
   textlint:
+    permissions:
+      checks: write # the github-check reporter creates a check run
+      contents: read
+      pull-requests: read # reviewdog reads the pull request diff
     name: runner / textlint
     runs-on: ubuntu-latest
     steps:
@@ -338,6 +357,10 @@ jobs:
             reviewdog -f=checkstyle -name="textlint" -reporter=github-check -level=info
 
   sarif:
+    permissions:
+      checks: write # the github-check reporter creates a check run
+      contents: read
+      pull-requests: read # reviewdog reads the pull request diff
     name: runner / textlint sarif
     runs-on: ubuntu-latest
     steps:

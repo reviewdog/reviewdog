@@ -8,6 +8,9 @@ on:
 
 jobs:
   protoc:
+    permissions:
+      contents: write # create-pull-request pushes the depup branch
+      pull-requests: write # and opens the pull request
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v7.0.1
@@ -42,6 +45,9 @@ jobs:
           labels: ${{ inputs.labels }}
 
   protoc-gen-go:
+    permissions:
+      contents: write # create-pull-request pushes the depup branch
+      pull-requests: write # and opens the pull request
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v7.0.1
@@ -76,6 +82,9 @@ jobs:
           labels: ${{ inputs.labels }}
 
   protoc-gen-jsonschema:
+    permissions:
+      contents: write # create-pull-request pushes the depup branch
+      pull-requests: write # and opens the pull request
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v7.0.1
