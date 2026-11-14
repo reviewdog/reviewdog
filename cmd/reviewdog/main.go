@@ -641,7 +641,7 @@ func giteaClient(ctx context.Context, url, token string) (*gitea.Client, error) 
 }
 
 func githubService(ctx context.Context, opt *option) (gs *githubservice.PullRequest, isPR bool, err error) {
-	g, client, err := githubBuildInfoWithClient(ctx)
+	g, client, err := githubBuildInfoWithClient(ctx, opt)
 	if err != nil {
 		return nil, false, err
 	}
@@ -667,7 +667,7 @@ func githubService(ctx context.Context, opt *option) (gs *githubservice.PullRequ
 }
 
 func githubCheckService(ctx context.Context, opt *option) (reviewdog.CommentService, reviewdog.DiffService, bool, error) {
-	g, client, err := githubBuildInfoWithClient(ctx)
+	g, client, err := githubBuildInfoWithClient(ctx, opt)
 	if err != nil {
 		return nil, nil, false, err
 	}
@@ -690,7 +690,7 @@ func githubCheckService(ctx context.Context, opt *option) (reviewdog.CommentServ
 }
 
 func githubActionLogService(ctx context.Context, opt *option) (reviewdog.CommentService, reviewdog.DiffService, bool, error) {
-	g, client, err := githubBuildInfoWithClient(ctx)
+	g, client, err := githubBuildInfoWithClient(ctx, opt)
 	if err != nil {
 		return nil, nil, false, err
 	}
@@ -709,7 +709,7 @@ func githubActionLogService(ctx context.Context, opt *option) (reviewdog.Comment
 	return cs, ds, g.PullRequest != 0, nil
 }
 
-func githubBuildInfoWithClient(ctx context.Context) (*cienv.BuildInfo, *github.Client, error) {
+func githubBuildInfoWithClient(ctx context.Context, opt *option) (*cienv.BuildInfo, *github.Client, error) {
 	token, err := nonEmptyEnv("REVIEWDOG_GITHUB_API_TOKEN")
 	if err != nil {
 		return nil, nil, err
