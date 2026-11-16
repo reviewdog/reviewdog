@@ -146,6 +146,10 @@ func toRDFormatLocation(location sarif.Location,
 	basedir string,
 ) (*rdf.Location, error) {
 	physicalLocation := location.PhysicalLocation
+	if physicalLocation == nil {
+		// SARIF locations may contain only logical location information.
+		return nil, nil
+	}
 	artifactLocation := physicalLocation.ArtifactLocation
 	loc := sarif.ArtifactLocation{}
 	if artifactLocation != nil {
