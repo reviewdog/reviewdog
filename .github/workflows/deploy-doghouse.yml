@@ -15,7 +15,7 @@ jobs:
         with:
           fetch-depth: 50 # Need git history for testing.
           persist-credentials: false
-      - uses: actions/setup-go@v7.0.0
+      - uses: actions/setup-go@v7.1.0
         with:
           # Ideally, it should be synced with doghouse/appengine/app.yaml,
           # but it's ok to use different one because it's only for testing.
