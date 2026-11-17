@@ -5,37 +5,37 @@ version: 'v0.0.3'
 workflows:
     '.github/workflows/codeql-analysis.yml':
         - 'actions/checkout@v7.0.1'
-        - 'actions/setup-go@v7.0.0'
+        - 'actions/setup-go@v7.1.0'
         - 'github/codeql-action@v4.39.3'
     '.github/workflows/deploy-doghouse.yml':
         - 'actions/checkout@v7.0.1'
-        - 'actions/setup-go@v7.0.0'
+        - 'actions/setup-go@v7.1.0'
         - 'google-github-actions/auth@v3.0.0'
         - 'google-github-actions/setup-gcloud@v3.0.1'
     '.github/workflows/depup.yml':
         - 'actions/checkout@v7.0.1'
-        - 'actions/setup-go@v7.0.0'
+        - 'actions/setup-go@v7.1.0'
         - 'peter-evans/create-pull-request@v8.1.3'
         - 'reviewdog/action-depup@v1.6.7'
     '.github/workflows/go.yml':
         - 'actions/checkout@v7.0.1'
-        - 'actions/setup-go@v7.0.0'
+        - 'actions/setup-go@v7.1.0'
         - 'codecov/codecov-action@v7.1.1'
     '.github/workflows/rdformat.yml':
         - 'actions/checkout@v7.0.1'
     '.github/workflows/release.yml':
         - 'actions/checkout@v7.0.1'
-        - 'actions/setup-go@v7.0.0'
+        - 'actions/setup-go@v7.1.0'
         - 'goreleaser/goreleaser-action@v7.3.0'
         - 'haya14busa/action-bumpr@v1.11.4'
         - 'haya14busa/action-cond@v1.2.1'
     '.github/workflows/release_test.yml':
         - 'actions/checkout@v7.0.1'
-        - 'actions/setup-go@v7.0.0'
+        - 'actions/setup-go@v7.1.0'
         - 'goreleaser/goreleaser-action@v7.3.0'
     '.github/workflows/reviewdog.yml':
         - 'actions/checkout@v7.0.1'
-        - 'actions/setup-go@v7.0.0'
+        - 'actions/setup-go@v7.1.0'
         - 'github/codeql-action@v4.39.3'
         - 'reviewdog/action-alex@v1.20.0'
         - 'reviewdog/action-golangci-lint@v2.10.2'
@@ -58,9 +58,9 @@ dependencies:
         commit: 'sha1-ed597411d8f924073f98dfc5c65a23a2325f34cd'
         owner_id: 44036562
         repo_id: 205262760
-    'actions/setup-go@v7.0.0':
-        ref: 'v7.0.0'
-        commit: 'sha1-b7ad1dad31e06c5925ef5d2fc7ad053ef454303e'
+    'actions/setup-go@v7.1.0':
+        ref: 'v7.1.0'
+        commit: 'sha1-d8cbb8045d7f43706b9177cceb36c1f91a6644d5'
         owner_id: 44036562
         repo_id: 192624594
     'codecov/codecov-action@v7.1.1':
