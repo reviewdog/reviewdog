@@ -39,7 +39,7 @@ workflows:
         - 'github/codeql-action@v4.39.3'
         - 'reviewdog/action-alex@v1.20.0'
         - 'reviewdog/action-golangci-lint@v2.10.2'
-        - 'reviewdog/action-languagetool@v1.23.0'
+        - 'reviewdog/action-languagetool@v1.24.0'
         - 'reviewdog/action-misspell@v1.31.0'
         - 'reviewdog/action-setup@v1.5.0'
         - 'reviewdog/action-shellcheck@v1.35.1'
@@ -120,9 +120,9 @@ dependencies:
         commit: 'sha1-284129a3ac23bc5d8ac1522e0b6511df74a8836d'
         owner_id: 48765237
         repo_id: 208542589
-    'reviewdog/action-languagetool@v1.23.0':
-        ref: 'v1.23.0'
-        commit: 'sha1-afd06e9b0f782c9562c92efffb66a49c09b2b4f4'
+    'reviewdog/action-languagetool@v1.24.0':
+        ref: 'v1.24.0'
+        commit: 'sha1-7d3a8b5e6ca46585fc7cdbf9fee76ad359216953'
         owner_id: 48765237
         repo_id: 239077280
     'reviewdog/action-misspell@v1.31.0':
