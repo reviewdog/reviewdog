@@ -97,6 +97,8 @@ func (p *SarifParser) Parse(r io.Reader) ([]*rdf.Diagnostic, error) {
 				if err != nil {
 					return nil, err
 				}
+				// Keep related entries even without a physical location to preserve their
+				// messages; RDF cannot represent SARIF logical locations.
 				l := &rdf.RelatedLocation{
 					Location: loc,
 				}
