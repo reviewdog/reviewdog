@@ -1,17 +1,23 @@
 package main
 
 import (
+	"context"
 	"log"
 	"net/http"
 	"os"
 	"strconv"
 
-	"contrib.go.opencensus.io/exporter/stackdriver"
-	"contrib.go.opencensus.io/exporter/stackdriver/propagation"
 	"github.com/haya14busa/secretbox"
 	"github.com/justinas/nosurf"
-	"go.opencensus.io/plugin/ochttp"
-	"go.opencensus.io/trace"
+	"go.opentelemetry.io/contrib/instrumentation/net/http/otelhttp"
+	"go.opentelemetry.io/otel"
+	"go.opentelemetry.io/otel/attribute"
+	"go.opentelemetry.io/otel/exporters/otlp/otlptrace/otlptracegrpc"
+	"go.opentelemetry.io/otel/propagation"
+	"go.opentelemetry.io/otel/sdk/resource"
+	sdktrace "go.opentelemetry.io/otel/sdk/trace"
+	"google.golang.org/grpc"
+	"google.golang.org/grpc/credentials/oauth"
 
 	"github.com/reviewdog/reviewdog/doghouse/server/cookieman"
 	"github.com/reviewdog/reviewdog/doghouse/server/storage"
@@ -86,10 +92,7 @@ func main() {
 		integrationID:    integrationID,
 		ghInstStore:      &ghInstStore,
 		ghRepoTokenStore: &ghRepoTokenStore,
-		tr: &ochttp.Transport{
-			// Use Google Cloud propagation format.
-			Propagation: &propagation.HTTPFormat{},
-		},
+		tr:               otelhttp.NewTransport(http.DefaultTransport),
 	}
 
 	ghWebhookHandler := githubWebhookHandler{
@@ -102,23 +105,16 @@ func main() {
 	// Register Admin handlers.
 	mu.HandleFunc("/_ah/warmup", warmupHandler)
 
-	handleFunc(mu, "/", handleTop)
-	handleFunc(mu, "/check", ghChecker.handleCheck)
-	handleFunc(mu, "/gh_/webhook", ghWebhookHandler.handleWebhook)
-	handleFunc(mu, "/gh_/auth/callback", ghHandler.HandleAuthCallback)
-	handleFunc(mu, "/gh_/logout", ghHandler.HandleLogout)
-	mu.Handle("/gh/", nosurf.New(ochttp.WithRouteTag(ghHandler.LogInHandler(http.HandlerFunc(ghHandler.HandleGitHubTop)), "/gh/")))
+	// otelhttp records the matched ServeMux pattern as the route.
+	mu.HandleFunc("/", handleTop)
+	mu.HandleFunc("/check", ghChecker.handleCheck)
+	mu.HandleFunc("/gh_/webhook", ghWebhookHandler.handleWebhook)
+	mu.HandleFunc("/gh_/auth/callback", ghHandler.HandleAuthCallback)
+	mu.HandleFunc("/gh_/logout", ghHandler.HandleLogout)
+	mu.Handle("/gh/", nosurf.New(ghHandler.LogInHandler(http.HandlerFunc(ghHandler.HandleGitHubTop))))
 
 	http.Handle("/", mu)
-	log.Fatal(http.ListenAndServe(":"+os.Getenv("PORT"), &ochttp.Handler{
-		Handler:     mu,
-		Propagation: &propagation.HTTPFormat{},
-	}))
-}
-
-func handleFunc(mu *http.ServeMux, pattern string, handler func(http.ResponseWriter, *http.Request)) {
-	mu.Handle(pattern,
-		ochttp.WithRouteTag(http.HandlerFunc(handler), pattern))
+	log.Fatal(http.ListenAndServe(":"+os.Getenv("PORT"), otelhttp.NewHandler(mu, "doghouse")))
 }
 
 func handleTop(w http.ResponseWriter, _ *http.Request) {
@@ -129,15 +125,35 @@ func handleTop(w http.ResponseWriter, _ *http.Request) {
 	topTmpl.ExecuteTemplate(w, "base", &data)
 }
 
-// Document: https://cloud.google.com/trace/docs/setup/go
+// Document: https://cloud.google.com/trace/docs/migrate-to-otlp-endpoints
 func configureTrace() {
-	// Create and register a OpenCensus Stackdriver Trace exporter.
-	exporter, err := stackdriver.NewExporter(stackdriver.Options{
-		ProjectID: os.Getenv("GOOGLE_CLOUD_PROJECT"),
-	})
+	ctx := context.Background()
+
+	// Export traces to Cloud Trace via the Telemetry (OTLP) API.
+	creds, err := oauth.NewApplicationDefault(ctx)
 	if err != nil {
 		log.Fatal(err)
 	}
-	trace.RegisterExporter(exporter)
-	trace.ApplyConfig(trace.Config{DefaultSampler: trace.AlwaysSample()})
+	exporter, err := otlptracegrpc.New(ctx,
+		otlptracegrpc.WithEndpoint("telemetry.googleapis.com:443"),
+		otlptracegrpc.WithDialOption(grpc.WithPerRPCCredentials(creds)),
+	)
+	if err != nil {
+		log.Fatal(err)
+	}
+	res, err := resource.Merge(resource.Default(), resource.NewSchemaless(
+		attribute.String("gcp.project_id", os.Getenv("GOOGLE_CLOUD_PROJECT")),
+	))
+	if err != nil {
+		log.Fatal(err)
+	}
+	otel.SetTracerProvider(sdktrace.NewTracerProvider(
+		sdktrace.WithBatcher(exporter),
+		sdktrace.WithResource(res),
+		sdktrace.WithSampler(sdktrace.AlwaysSample()),
+	))
+	otel.SetTextMapPropagator(propagation.NewCompositeTextMapPropagator(
+		propagation.TraceContext{},
+		propagation.Baggage{},
+	))
 }

@@ -87,7 +87,7 @@ func (p *SarifParser) Parse(r io.Reader) ([]*rdf.Diagnostic, error) {
 						}
 						suggestions = append(suggestions, s)
 					}
-					suggestionsMap[path] = suggestions
+					suggestionsMap[filepath.ToSlash(path)] = suggestions
 				}
 			}
 
@@ -129,7 +129,7 @@ func (p *SarifParser) Parse(r io.Reader) ([]*rdf.Diagnostic, error) {
 						Url:  informationURI,
 					},
 					Code:             code,
-					Suggestions:      suggestionsMap[loc.GetPath()],
+					Suggestions:      suggestionsMap[filepath.ToSlash(loc.GetPath())],
 					RelatedLocations: relatedLocs,
 					OriginalOutput:   string(original),
 				}
@@ -189,21 +189,44 @@ func getPath(
 	if l.URIBaseID != nil {
 		urlBaseID = *l.URIBaseID
 	}
-	baseURI := baseURIs[urlBaseID].URI
-	if baseURI != nil && *baseURI != "" {
-		if u, err := url.JoinPath(*baseURI, uri); err == nil {
-			uri = u
+	// SARIF 2.1.0 §3.14.14 allows a base URI to refer to another base ID.
+	// Invalid cycles yield a partially resolved path after at most len(baseURIs) joins.
+	for i := 0; i < len(baseURIs); i++ {
+		if u, err := url.Parse(uri); err == nil && u.IsAbs() {
+			break
 		}
+		base := baseURIs[urlBaseID]
+		if base.URI != nil && *base.URI != "" {
+			if u, err := url.JoinPath(*base.URI, uri); err == nil {
+				uri = u
+			}
+		}
+		if base.URIBaseID == nil {
+			break
+		}
+		urlBaseID = *base.URIBaseID
 	}
 	parse, err := url.Parse(uri)
 	if err != nil {
 		return "", err
 	}
-	path := parse.Path
+	path := trimDriveLetterSlash(parse.Path)
 	if relpath, err := filepath.Rel(basedir, path); err == nil {
 		path = relpath
 	}
 	return path, nil
+}
+
+// trimDriveLetterSlash drops the leading slash that url.Parse leaves in front
+// of a Windows drive letter: file:///C:/work/a.go has the path "/C:/work/a.go",
+// which filepath.Rel cannot compare with a Windows working directory.
+func trimDriveLetterSlash(path string) string {
+	if len(path) >= 3 && path[0] == '/' && path[2] == ':' &&
+		(path[1] >= 'A' && path[1] <= 'Z' || path[1] >= 'a' && path[1] <= 'z') &&
+		(len(path) == 3 || path[3] == '/') {
+		return path[1:]
+	}
+	return path
 }
 
 // isSuppressed reports whether a SARIF result should be skipped because the

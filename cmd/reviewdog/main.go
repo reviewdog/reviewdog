@@ -333,6 +333,12 @@ func run(r io.Reader, w io.Writer, opt *option) error {
 		ds = ghDiffService
 		cs = reviewdog.MultiCommentService(checkService, cs)
 	case "github-annotations", "github-pr-annotations":
+		if opt.filterMode == filter.ModeNoFilter {
+			// No diff or pull request lookup is needed when reporting all diagnostics.
+			cs = githubutils.NewGitHubActionLogWriter(opt.level)
+			ds = &reviewdog.EmptyDiff{}
+			break
+		}
 		var err error
 		var isPR bool
 		cs, ds, isPR, err = githubActionLogService(ctx, opt)

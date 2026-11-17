@@ -2,6 +2,7 @@ package parser
 
 import (
 	"bufio"
+	"bytes"
 	"fmt"
 	"io"
 
@@ -25,6 +26,9 @@ func (p *RDJSONLParser) Parse(r io.Reader) ([]*rdf.Diagnostic, error) {
 	var results []*rdf.Diagnostic
 	s := bufio.NewScanner(r)
 	for s.Scan() {
+		if len(bytes.TrimSpace(s.Bytes())) == 0 {
+			continue
+		}
 		d := new(rdf.Diagnostic)
 		if err := (protojson.UnmarshalOptions{DiscardUnknown: true}).Unmarshal(s.Bytes(), d); err != nil {
 			return nil, fmt.Errorf("failed to unmarshal rdjsonl (Diagnostic): %w", err)
