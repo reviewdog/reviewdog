@@ -11,7 +11,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ### :rocket: Enhancements
 
 ### :bug: Fixes
-- Avoid a panic when SARIF primary or related locations contain only logical location information.
+- [#2994](https://github.com/reviewdog/reviewdog/pull/2994) Avoid a panic when SARIF primary or related locations contain only logical location information.
 - Resolve chained SARIF URI base IDs for diagnostic paths, related locations, and suggestions.
 - Match SARIF suggestions across native and slash-separated paths on Windows.
 - [#2927](https://github.com/reviewdog/reviewdog/pull/2927) Skip blank and whitespace-only lines in `-f=rdjsonl` input instead of failing to parse.
