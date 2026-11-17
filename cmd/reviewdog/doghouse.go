@@ -152,7 +152,9 @@ func postResultSet(ctx context.Context, resultSet *reviewdog.ResultMap,
 }
 
 func checkResultToAnnotation(d *rdf.Diagnostic, wd, gitRelWd string) *doghouse.Annotation {
-	d.GetLocation().Path = pathutil.NormalizePath(d.GetLocation().GetPath(), wd, gitRelWd)
+	if loc := d.GetLocation(); loc != nil {
+		loc.Path = pathutil.NormalizePath(loc.GetPath(), wd, gitRelWd)
+	}
 	return &doghouse.Annotation{
 		Diagnostic: d,
 	}

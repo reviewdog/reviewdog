@@ -20,6 +20,7 @@ import (
 	"github.com/reviewdog/reviewdog/doghouse"
 	"github.com/reviewdog/reviewdog/doghouse/client"
 	"github.com/reviewdog/reviewdog/filter"
+	"github.com/reviewdog/reviewdog/parser"
 	"github.com/reviewdog/reviewdog/project"
 	"github.com/reviewdog/reviewdog/proto/rdf"
 )
@@ -301,4 +302,42 @@ func absPath(t *testing.T, path string) string {
 		t.Errorf("filepath.Abs(%q) failed: %v", path, err)
 	}
 	return p
+}
+
+func TestCheckResultToAnnotation_SarifLogicalLocation(t *testing.T) {
+	input := `{"version":"2.1.0","runs":[{"tool":{"driver":{"name":"example"}},"results":[{"message":{"text":"logical diagnostic"},"locations":[{"logicalLocations":[{"fullyQualifiedName":"example.Function"}]}]}]}]}`
+	diagnostics, err := parser.NewSarifParser().Parse(strings.NewReader(input))
+	if err != nil {
+		t.Fatal(err)
+	}
+	if len(diagnostics) != 1 {
+		t.Fatalf("got %d diagnostics, want 1", len(diagnostics))
+	}
+	d := diagnostics[0]
+	if d.GetLocation() != nil {
+		t.Fatalf("logical-only location = %v, want nil", d.GetLocation())
+	}
+	annotation := checkResultToAnnotation(d, t.TempDir(), "subdir")
+	if annotation.Diagnostic != d || annotation.Diagnostic.GetMessage() != "logical diagnostic" {
+		t.Fatal("diagnostic was not preserved")
+	}
+	if annotation.Diagnostic.GetLocation() != nil {
+		t.Errorf("location = %v, want nil", annotation.Diagnostic.GetLocation())
+	}
+}
+
+func TestCheckResultToAnnotation_PhysicalLocation(t *testing.T) {
+	wd := t.TempDir()
+	d := &rdf.Diagnostic{
+		Message:  "physical diagnostic",
+		Location: &rdf.Location{Path: filepath.Join(wd, "main.go"), Range: &rdf.Range{Start: &rdf.Position{Line: 3}}},
+	}
+	annotation := checkResultToAnnotation(d, wd, "subdir")
+	if annotation.Diagnostic != d || annotation.Diagnostic.GetMessage() != "physical diagnostic" {
+		t.Fatal("diagnostic was not preserved")
+	}
+	loc := annotation.Diagnostic.GetLocation()
+	if loc.GetPath() != "subdir/main.go" || loc.GetRange().GetStart().GetLine() != 3 {
+		t.Errorf("location = %v, want subdir/main.go:3", loc)
+	}
 }
