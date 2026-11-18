@@ -5,6 +5,7 @@ import (
 	"encoding/json"
 	"fmt"
 	"strings"
+	"testing"
 
 	"google.golang.org/protobuf/encoding/protojson"
 )
@@ -177,4 +178,37 @@ func ExampleCheckStyleParser() {
 	//   },
 	//   "originalOutput": "/path/to/file:7:2: error: Unnecessary semicolon. (no-extra-semi) (eslint.rules.no-extra-semi)"
 	// }
+}
+
+func TestCheckStyleParser_nonUTF8Encoding(t *testing.T) {
+	tests := []struct {
+		name    string
+		input   string
+		wantMsg string
+	}{
+		{
+			name:    "ISO-8859-1",
+			input:   "<?xml version=\"1.0\" encoding=\"ISO-8859-1\"?>\n<checkstyle version=\"4.3\"><file name=\"caf\xe9.java\"><error line=\"1\" column=\"2\" severity=\"warning\" message=\"M\xfcll\" source=\"s\" /></file></checkstyle>",
+			wantMsg: "Müll",
+		},
+		{
+			name:    "windows-1252",
+			input:   "<?xml version=\"1.0\" encoding=\"windows-1252\"?>\n<checkstyle version=\"4.3\"><file name=\"a.java\"><error line=\"1\" severity=\"warning\" message=\"\x93quoted\x94\" /></file></checkstyle>",
+			wantMsg: "“quoted”",
+		},
+	}
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			ds, err := NewCheckStyleParser().Parse(strings.NewReader(tt.input))
+			if err != nil {
+				t.Fatalf("Parse() error = %v", err)
+			}
+			if len(ds) != 1 {
+				t.Fatalf("got %d diagnostics, want 1", len(ds))
+			}
+			if got := ds[0].GetMessage(); got != tt.wantMsg {
+				t.Errorf("message = %q, want %q", got, tt.wantMsg)
+			}
+		})
+	}
 }
