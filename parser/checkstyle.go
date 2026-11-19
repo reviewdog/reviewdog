@@ -5,6 +5,8 @@ import (
 	"fmt"
 	"io"
 
+	"golang.org/x/net/html/charset"
+
 	"github.com/reviewdog/reviewdog/proto/rdf"
 )
 
@@ -20,7 +22,11 @@ func NewCheckStyleParser() Parser {
 
 func (p *CheckStyleParser) Parse(r io.Reader) ([]*rdf.Diagnostic, error) {
 	var cs = new(CheckStyleResult)
-	if err := xml.NewDecoder(r).Decode(cs); err != nil {
+	dec := xml.NewDecoder(r)
+	// encoding/xml only understands UTF-8 itself; decode other declared
+	// encodings (ISO-8859-1, windows-1252, Shift_JIS, "UTF8", ...) to UTF-8.
+	dec.CharsetReader = charset.NewReaderLabel
+	if err := dec.Decode(cs); err != nil {
 		return nil, err
 	}
 	var ds []*rdf.Diagnostic

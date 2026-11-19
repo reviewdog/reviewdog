@@ -12,6 +12,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### :bug: Fixes
 - [#2994](https://github.com/reviewdog/reviewdog/pull/2994) Avoid a panic when SARIF primary or related locations contain only logical location information.
+- [#3001](https://github.com/reviewdog/reviewdog/pull/3001) Parse checkstyle XML that declares a non-UTF-8 encoding such as ISO-8859-1, windows-1252, Shift_JIS or `UTF8`.
 - Resolve chained SARIF URI base IDs for diagnostic paths, related locations, and suggestions.
 - Match SARIF suggestions across native and slash-separated paths on Windows.
 - [#2927](https://github.com/reviewdog/reviewdog/pull/2927) Skip blank and whitespace-only lines in `-f=rdjsonl` input instead of failing to parse.
