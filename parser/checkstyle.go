@@ -5,7 +5,7 @@ import (
 	"fmt"
 	"io"
 
-	"golang.org/x/text/encoding/ianaindex"
+	"golang.org/x/net/html/charset"
 
 	"github.com/reviewdog/reviewdog/proto/rdf"
 )
@@ -23,7 +23,9 @@ func NewCheckStyleParser() Parser {
 func (p *CheckStyleParser) Parse(r io.Reader) ([]*rdf.Diagnostic, error) {
 	var cs = new(CheckStyleResult)
 	dec := xml.NewDecoder(r)
-	dec.CharsetReader = charsetReader
+	// encoding/xml only understands UTF-8 itself; decode other declared
+	// encodings (ISO-8859-1, windows-1252, Shift_JIS, "UTF8", ...) to UTF-8.
+	dec.CharsetReader = charset.NewReaderLabel
 	if err := dec.Decode(cs); err != nil {
 		return nil, err
 	}
@@ -52,20 +54,6 @@ func (p *CheckStyleParser) Parse(r io.Reader) ([]*rdf.Diagnostic, error) {
 		}
 	}
 	return ds, nil
-}
-
-// charsetReader converts XML documents which declare an encoding other than
-// UTF-8 (e.g. <?xml version="1.0" encoding="ISO-8859-1"?>) to UTF-8.
-// encoding/xml handles UTF-8 itself and calls this only for other encodings.
-func charsetReader(label string, input io.Reader) (io.Reader, error) {
-	enc, err := ianaindex.IANA.Encoding(label)
-	if err != nil {
-		return nil, err
-	}
-	if enc == nil {
-		return nil, fmt.Errorf("unsupported XML encoding: %q", label)
-	}
-	return enc.NewDecoder().Reader(input), nil
 }
 
 // CheckStyleResult represents checkstyle XML result.

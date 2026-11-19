@@ -182,19 +182,40 @@ func ExampleCheckStyleParser() {
 
 func TestCheckStyleParser_nonUTF8Encoding(t *testing.T) {
 	tests := []struct {
-		name    string
-		input   string
-		wantMsg string
+		name     string
+		input    string
+		wantMsg  string
+		wantPath string
 	}{
 		{
-			name:    "ISO-8859-1",
-			input:   "<?xml version=\"1.0\" encoding=\"ISO-8859-1\"?>\n<checkstyle version=\"4.3\"><file name=\"caf\xe9.java\"><error line=\"1\" column=\"2\" severity=\"warning\" message=\"M\xfcll\" source=\"s\" /></file></checkstyle>",
-			wantMsg: "Müll",
+			name:     "ISO-8859-1",
+			input:    "<?xml version=\"1.0\" encoding=\"ISO-8859-1\"?>\n<checkstyle version=\"4.3\"><file name=\"caf\xe9.java\"><error line=\"1\" column=\"2\" severity=\"warning\" message=\"M\xfcll\" source=\"s\" /></file></checkstyle>",
+			wantMsg:  "Müll",
+			wantPath: "café.java",
 		},
 		{
-			name:    "windows-1252",
-			input:   "<?xml version=\"1.0\" encoding=\"windows-1252\"?>\n<checkstyle version=\"4.3\"><file name=\"a.java\"><error line=\"1\" severity=\"warning\" message=\"\x93quoted\x94\" /></file></checkstyle>",
-			wantMsg: "“quoted”",
+			name:     "windows-1252",
+			input:    "<?xml version=\"1.0\" encoding=\"windows-1252\"?>\n<checkstyle version=\"4.3\"><file name=\"a.java\"><error line=\"1\" severity=\"warning\" message=\"\x93quoted\x94\" /></file></checkstyle>",
+			wantMsg:  "“quoted”",
+			wantPath: "a.java",
+		},
+		{
+			name:     "Shift_JIS",
+			input:    "<?xml version=\"1.0\" encoding=\"Shift_JIS\"?>\n<checkstyle version=\"4.3\"><file name=\"a.java\"><error line=\"1\" severity=\"warning\" message=\"\x93\xfa\x96\x7b\" /></file></checkstyle>",
+			wantMsg:  "日本",
+			wantPath: "a.java",
+		},
+		{
+			name:     "UTF8 without hyphen",
+			input:    "<?xml version=\"1.0\" encoding=\"UTF8\"?>\n<checkstyle version=\"4.3\"><file name=\"a.java\"><error line=\"1\" severity=\"warning\" message=\"Müll\" /></file></checkstyle>",
+			wantMsg:  "Müll",
+			wantPath: "a.java",
+		},
+		{
+			name:     "cp1252",
+			input:    "<?xml version=\"1.0\" encoding=\"cp1252\"?>\n<checkstyle version=\"4.3\"><file name=\"a.java\"><error line=\"1\" severity=\"warning\" message=\"\x93quoted\x94\" /></file></checkstyle>",
+			wantMsg:  "“quoted”",
+			wantPath: "a.java",
 		},
 	}
 	for _, tt := range tests {
@@ -209,6 +230,16 @@ func TestCheckStyleParser_nonUTF8Encoding(t *testing.T) {
 			if got := ds[0].GetMessage(); got != tt.wantMsg {
 				t.Errorf("message = %q, want %q", got, tt.wantMsg)
 			}
+			if got := ds[0].GetLocation().GetPath(); got != tt.wantPath {
+				t.Errorf("path = %q, want %q", got, tt.wantPath)
+			}
 		})
+	}
+}
+
+func TestCheckStyleParser_unknownEncoding(t *testing.T) {
+	input := "<?xml version=\"1.0\" encoding=\"bogus\"?>\n<checkstyle version=\"4.3\"></checkstyle>"
+	if _, err := NewCheckStyleParser().Parse(strings.NewReader(input)); err == nil {
+		t.Error("Parse() error = nil, want an error for an unknown encoding")
 	}
 }
