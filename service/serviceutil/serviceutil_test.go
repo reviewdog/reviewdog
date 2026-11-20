@@ -2,6 +2,7 @@ package serviceutil
 
 import (
 	"os"
+	"path/filepath"
 	"testing"
 )
 
@@ -25,7 +26,9 @@ func TestGitRelWorkdir(t *testing.T) {
 	if err := os.Chdir(subDir); err != nil {
 		t.Fatal(err)
 	}
-	if wd, _ := GitRelWorkdir(); wd != subDir {
-		t.Fatalf("gitRelWorkdir() = %q, want %q", wd, subDir)
+	// GitRelWorkdir uses the OS-specific path separator.
+	want := filepath.FromSlash(subDir)
+	if wd, _ := GitRelWorkdir(); wd != want {
+		t.Fatalf("gitRelWorkdir() = %q, want %q", wd, want)
 	}
 }
