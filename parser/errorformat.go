@@ -33,7 +33,7 @@ func NewErrorformatParserString(efms []string) (*ErrorformatParser, error) {
 }
 
 func (p *ErrorformatParser) Parse(r io.Reader) ([]*rdf.Diagnostic, error) {
-	s := p.efm.NewScanner(r)
+	s := p.efm.NewScanner(decodeBOM(r))
 	var ds []*rdf.Diagnostic
 	for s.Scan() {
 		e := s.Entry()

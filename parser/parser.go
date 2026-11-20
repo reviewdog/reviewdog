@@ -1,11 +1,12 @@
 package parser
 
 import (
-	"bufio"
-	"bytes"
 	"errors"
 	"fmt"
 	"io"
+
+	"golang.org/x/text/encoding/unicode"
+	"golang.org/x/text/transform"
 
 	"github.com/reviewdog/errorformat/fmts"
 
@@ -75,17 +76,11 @@ func severity(s string) rdf.Severity {
 	}
 }
 
-// utf8BOM is the UTF-8 byte order mark. Tools on Windows (PowerShell's
-// Out-File, Notepad, some .NET writers) put it in front of JSON files, but JSON
-// parsers reject it as an invalid first character.
-var utf8BOM = []byte{0xEF, 0xBB, 0xBF}
-
-// skipUTF8BOM returns a reader that yields r without a leading UTF-8 byte
-// order mark.
-func skipUTF8BOM(r io.Reader) io.Reader {
-	br := bufio.NewReader(r)
-	if b, err := br.Peek(len(utf8BOM)); err == nil && bytes.Equal(b, utf8BOM) {
-		_, _ = br.Discard(len(utf8BOM))
-	}
-	return br
+// decodeBOM returns a reader that drops a leading byte order mark from r and,
+// for a UTF-16 one, decodes the rest to UTF-8. Tools on Windows write these:
+// PowerShell 5.1's > and Out-File produce UTF-16LE with a BOM, newer ones and
+// some .NET writers UTF-8 with a BOM. Input without a BOM is passed through
+// unchanged.
+func decodeBOM(r io.Reader) io.Reader {
+	return transform.NewReader(r, unicode.BOMOverride(transform.Nop))
 }

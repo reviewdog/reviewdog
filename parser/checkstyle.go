@@ -4,6 +4,7 @@ import (
 	"encoding/xml"
 	"fmt"
 	"io"
+	"strings"
 
 	"golang.org/x/net/html/charset"
 
@@ -22,10 +23,8 @@ func NewCheckStyleParser() Parser {
 
 func (p *CheckStyleParser) Parse(r io.Reader) ([]*rdf.Diagnostic, error) {
 	var cs = new(CheckStyleResult)
-	dec := xml.NewDecoder(r)
-	// encoding/xml only understands UTF-8 itself; decode other declared
-	// encodings (ISO-8859-1, windows-1252, Shift_JIS, "UTF8", ...) to UTF-8.
-	dec.CharsetReader = charset.NewReaderLabel
+	dec := xml.NewDecoder(decodeBOM(r))
+	dec.CharsetReader = charsetReader
 	if err := dec.Decode(cs); err != nil {
 		return nil, err
 	}
@@ -54,6 +53,17 @@ func (p *CheckStyleParser) Parse(r io.Reader) ([]*rdf.Diagnostic, error) {
 		}
 	}
 	return ds, nil
+}
+
+// charsetReader decodes declared encodings other than UTF-8 (ISO-8859-1,
+// windows-1252, Shift_JIS, "UTF8", ...), which encoding/xml doesn't handle
+// itself. A document declaring UTF-16 can only be read here if decodeBOM has
+// already converted it to UTF-8, so it is passed through as is.
+func charsetReader(label string, input io.Reader) (io.Reader, error) {
+	if strings.HasPrefix(strings.ToLower(label), "utf-16") {
+		return input, nil
+	}
+	return charset.NewReaderLabel(label, input)
 }
 
 // CheckStyleResult represents checkstyle XML result.
