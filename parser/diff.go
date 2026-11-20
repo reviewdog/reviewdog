@@ -43,7 +43,14 @@ func (d dstate) build(path string, currentLine int) *rdf.Diagnostic {
 		drange.GetStart().Column = 1
 	}
 	return &rdf.Diagnostic{
-		Location:       &rdf.Location{Path: path, Range: drange},
+		Location: &rdf.Location{Path: path, Range: drange},
+		// Diff format carries no descriptive text of its own; other parsers
+		// (e.g. ErrorformatParser) always set Message from the tool's own
+		// output, and reporters rely on it being non-empty -- most notably
+		// GitHub's Check Runs API, which documents "message" as required and
+		// rejects annotations with an empty one (422, "field: annotations,
+		// code: invalid"). See https://github.com/reviewdog/reviewdog/issues/924.
+		Message:        "Suggested fix",
 		Suggestions:    []*rdf.Suggestion{{Range: drange, Text: text}},
 		OriginalOutput: strings.Join(d.originalLines, "\n"),
 	}

@@ -53,6 +53,7 @@ func ExampleDiffParser() {
 	}
 	// Output:
 	// {
+	//   "message": "Suggested fix",
 	//   "location": {
 	//     "path": "gofmt.go",
 	//     "range": {
@@ -80,6 +81,7 @@ func ExampleDiffParser() {
 	//   "originalOutput": "gofmt.go:3:-func    fmt     () {\ngofmt.go:3:+func fmt() {"
 	// }
 	// {
+	//   "message": "Suggested fix",
 	//   "location": {
 	//     "path": "gofmt.go",
 	//     "range": {
@@ -107,6 +109,7 @@ func ExampleDiffParser() {
 	//   "originalOutput": "gofmt.go:13:-println(\ngofmt.go:14:-\t\t\"hello, gofmt test\"    )\ngofmt.go:15:-//comment\ngofmt.go:13:+\tprintln(\ngofmt.go:14:+\t\t\"hello, gofmt test\")\ngofmt.go:15:+\t//comment"
 	// }
 	// {
+	//   "message": "Suggested fix",
 	//   "location": {
 	//     "path": "gofmt.go",
 	//     "range": {
@@ -138,6 +141,7 @@ func ExampleDiffParser() {
 	//   "originalOutput": "gofmt.go:18:+type s struct{ A int }"
 	// }
 	// {
+	//   "message": "Suggested fix",
 	//   "location": {
 	//     "path": "gofmt.go",
 	//     "range": {
