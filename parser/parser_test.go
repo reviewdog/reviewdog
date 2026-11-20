@@ -2,6 +2,7 @@ package parser
 
 import (
 	"reflect"
+	"strings"
 	"testing"
 )
 
@@ -71,5 +72,37 @@ func TestNewParser(t *testing.T) {
 		if got, want := reflect.TypeOf(p), reflect.TypeOf(tt.typ); got != want {
 			t.Errorf("typ: got %v, want %v", got, want)
 		}
+	}
+}
+
+func TestParsersSkipUTF8BOM(t *testing.T) {
+	const bom = "\xef\xbb\xbf"
+	tests := []struct {
+		name   string
+		parser Parser
+		in     string
+		want   int
+	}{
+		{"rdjson", NewRDJSONParser(), bom + `{"diagnostics":[{"message":"m","location":{"path":"a.go"}}]}`, 1},
+		{"rdjsonl", NewRDJSONLParser(), bom + `{"message":"m","location":{"path":"a.go"}}` + "\r\n", 1},
+		{"sarif", NewSarifParser(), bom + `{"version":"2.1.0","runs":[{"tool":{"driver":{"name":"t"}},"results":[{"message":{"text":"m"},"locations":[{"physicalLocation":{"artifactLocation":{"uri":"a.go"},"region":{"startLine":1}}}]}]}]}`, 1},
+		{"checkstyle", NewCheckStyleParser(), bom + `<?xml version="1.0"?><checkstyle><file name="a.go"><error line="1" message="m"/></file></checkstyle>`, 1},
+	}
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			ds, err := tt.parser.Parse(strings.NewReader(tt.in))
+			if err != nil {
+				t.Fatal(err)
+			}
+			if len(ds) != tt.want {
+				t.Fatalf("got %d diagnostics, want %d", len(ds), tt.want)
+			}
+			if got := ds[0].GetLocation().GetPath(); got != "a.go" {
+				t.Errorf("got path %q, want a.go", got)
+			}
+			if got := ds[0].GetMessage(); got != "m" {
+				t.Errorf("got message %q, want m", got)
+			}
+		})
 	}
 }

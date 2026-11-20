@@ -21,7 +21,7 @@ func NewRDJSONParser() *RDJSONParser {
 
 // Parse parses rdjson (JSON of DiagnosticResult).
 func (p *RDJSONParser) Parse(r io.Reader) ([]*rdf.Diagnostic, error) {
-	b, err := io.ReadAll(r)
+	b, err := io.ReadAll(skipUTF8BOM(r))
 	if err != nil {
 		return nil, err
 	}

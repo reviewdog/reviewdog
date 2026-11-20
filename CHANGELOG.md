@@ -11,6 +11,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ### :rocket: Enhancements
 
 ### :bug: Fixes
+- Accept a UTF-8 byte order mark at the start of `-f=rdjson`, `-f=rdjsonl` and `-f=sarif` input instead of failing with a JSON syntax error.
 - [#2994](https://github.com/reviewdog/reviewdog/pull/2994) Avoid a panic when SARIF primary or related locations contain only logical location information.
 - [#3001](https://github.com/reviewdog/reviewdog/pull/3001) Parse checkstyle XML that declares a non-UTF-8 encoding such as ISO-8859-1, windows-1252, Shift_JIS or `UTF8`.
 - Resolve chained SARIF URI base IDs for diagnostic paths, related locations, and suggestions.

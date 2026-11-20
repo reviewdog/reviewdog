@@ -24,7 +24,7 @@ func NewRDJSONLParser() *RDJSONLParser {
 // Parse parses rdjson (JSONL of Diagnostic).
 func (p *RDJSONLParser) Parse(r io.Reader) ([]*rdf.Diagnostic, error) {
 	var results []*rdf.Diagnostic
-	s := bufio.NewScanner(r)
+	s := bufio.NewScanner(skipUTF8BOM(r))
 	for s.Scan() {
 		if len(bytes.TrimSpace(s.Bytes())) == 0 {
 			continue

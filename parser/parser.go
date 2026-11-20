@@ -1,6 +1,8 @@
 package parser
 
 import (
+	"bufio"
+	"bytes"
 	"errors"
 	"fmt"
 	"io"
@@ -71,4 +73,19 @@ func severity(s string) rdf.Severity {
 	default:
 		return rdf.Severity_UNKNOWN_SEVERITY
 	}
+}
+
+// utf8BOM is the UTF-8 byte order mark. Tools on Windows (PowerShell's
+// Out-File, Notepad, some .NET writers) put it in front of JSON files, but JSON
+// parsers reject it as an invalid first character.
+var utf8BOM = []byte{0xEF, 0xBB, 0xBF}
+
+// skipUTF8BOM returns a reader that yields r without a leading UTF-8 byte
+// order mark.
+func skipUTF8BOM(r io.Reader) io.Reader {
+	br := bufio.NewReader(r)
+	if b, err := br.Peek(len(utf8BOM)); err == nil && bytes.Equal(b, utf8BOM) {
+		_, _ = br.Discard(len(utf8BOM))
+	}
+	return br
 }
