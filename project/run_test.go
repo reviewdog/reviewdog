@@ -12,6 +12,7 @@ import (
 
 	"github.com/reviewdog/reviewdog"
 	"github.com/reviewdog/reviewdog/filter"
+	"github.com/reviewdog/reviewdog/parser"
 )
 
 type fakeDiffService struct {
@@ -330,6 +331,140 @@ func TestRun(t *testing.T) {
 			t.Fatalf("got %d diagnostics, want 1", len(result.Diagnostics))
 		}
 	})
+
+	t.Run("interleaved multiline diagnostics maintain stream affinity", func(t *testing.T) {
+		if runtime.GOOS == "windows" {
+			t.Skip("requires POSIX shell utilities")
+		}
+
+		ctx, cancel := context.WithTimeout(ctx, 5*time.Second)
+		defer cancel()
+
+		conf := &Config{
+			Runner: map[string]*Runner{
+				"test": {
+					Cmd:         "printf 'a.go:1: error A\\n  detail A\\nEND\\n'; printf 'b.go:2: error B\\n  detail B\\nEND\\n' >&2",
+					Errorformat: []string{"%E%f:%l: %m", "%C  %m", "%ZEND"},
+				},
+			},
+		}
+
+		results, err := RunAndParse(ctx, conf, nil, "", false)
+		if err != nil {
+			t.Fatalf("RunAndParse failed: %v", err)
+		}
+
+		result, err := results.Load("test")
+		if err != nil {
+			t.Fatalf("failed to load result: %v", err)
+		}
+		if result.CmdErr != nil {
+			t.Fatalf("unexpected command error: %v", result.CmdErr)
+		}
+		if len(result.Diagnostics) != 2 {
+			t.Fatalf("got %d diagnostics, want 2: %#v", len(result.Diagnostics), result.Diagnostics)
+		}
+		if result.Diagnostics[0].Location.Path != "a.go" || result.Diagnostics[0].Message != "error A\ndetail A" {
+			t.Errorf("diagnostic 0 mismatch: %#v", result.Diagnostics[0])
+		}
+		if result.Diagnostics[1].Location.Path != "b.go" || result.Diagnostics[1].Message != "error B\ndetail B" {
+			t.Errorf("diagnostic 1 mismatch: %#v", result.Diagnostics[1])
+		}
+	})
+
+	t.Run("cross stream continuation lines do not attach across stream boundaries", func(t *testing.T) {
+		if runtime.GOOS == "windows" {
+			t.Skip("requires POSIX shell utilities")
+		}
+
+		ctx, cancel := context.WithTimeout(ctx, 5*time.Second)
+		defer cancel()
+
+		conf := &Config{
+			Runner: map[string]*Runner{
+				"test": {
+					Cmd:         "printf 'a.go:1: error A\\n'; printf '  orphan continuation\\nEND\\nb.go:2: error B\\n  detail B\\nEND\\n' >&2",
+					Errorformat: []string{"%E%f:%l: %m", "%C  %m", "%ZEND"},
+				},
+			},
+		}
+
+		results, err := RunAndParse(ctx, conf, nil, "", false)
+		if err != nil {
+			t.Fatalf("RunAndParse failed: %v", err)
+		}
+
+		result, err := results.Load("test")
+		if err != nil {
+			t.Fatalf("failed to load result: %v", err)
+		}
+		if len(result.Diagnostics) != 2 {
+			t.Fatalf("got %d diagnostics, want 2: %#v", len(result.Diagnostics), result.Diagnostics)
+		}
+		if result.Diagnostics[0].Location.Path != "a.go" || result.Diagnostics[0].Location.Range.Start.Line != 1 || result.Diagnostics[0].Message != "error A" {
+			t.Errorf("diagnostic 0 mismatch: %#v", result.Diagnostics[0])
+		}
+		if result.Diagnostics[1].Location.Path != "b.go" || result.Diagnostics[1].Location.Range.Start.Line != 2 || result.Diagnostics[1].Message != "error B\ndetail B" {
+			t.Errorf("diagnostic 1 mismatch: %#v", result.Diagnostics[1])
+		}
+	})
+
+	t.Run("headers on stdout and details on stderr do not attach across streams", func(t *testing.T) {
+		if runtime.GOOS == "windows" {
+			t.Skip("requires POSIX shell utilities")
+		}
+
+		ctx, cancel := context.WithTimeout(ctx, 5*time.Second)
+		defer cancel()
+
+		conf := &Config{
+			Runner: map[string]*Runner{
+				"test": {
+					Cmd:         "printf 'a.go:1: error A\\nb.go:2: error B\\n'; printf '  detail A\\nEND\\n  detail B\\nEND\\n' >&2",
+					Errorformat: []string{"%E%f:%l: %m", "%C  %m", "%ZEND"},
+				},
+			},
+		}
+
+		results, err := RunAndParse(ctx, conf, nil, "", false)
+		if err != nil {
+			t.Fatalf("RunAndParse failed: %v", err)
+		}
+
+		result, err := results.Load("test")
+		if err != nil {
+			t.Fatalf("failed to load result: %v", err)
+		}
+		if result.CmdErr != nil {
+			t.Fatalf("unexpected command error: %v", result.CmdErr)
+		}
+		if len(result.Diagnostics) != 2 {
+			t.Fatalf("got %d diagnostics, want 2: %#v", len(result.Diagnostics), result.Diagnostics)
+		}
+		if result.Diagnostics[0].Location.Path != "a.go" || result.Diagnostics[0].Location.Range.Start.Line != 1 || result.Diagnostics[0].Message != "error A" {
+			t.Errorf("diagnostic 0 mismatch: %#v", result.Diagnostics[0])
+		}
+		if result.Diagnostics[1].Location.Path != "b.go" || result.Diagnostics[1].Location.Range.Start.Line != 2 || result.Diagnostics[1].Message != "error B" {
+			t.Errorf("diagnostic 1 mismatch: %#v", result.Diagnostics[1])
+		}
+	})
+}
+
+func TestParseRunnerOutput_StructuredFallback(t *testing.T) {
+	p := parser.NewCheckStyleParser()
+	stdout := strings.NewReader(`<?xml version="1.0" encoding="utf-8"?><checkstyle version="4.3"><file name="main.go"><error line="5" column="1" severity="error" message="checkstyle error" source="golint" /></file></checkstyle>`)
+	stderr := strings.NewReader("WARN: build cache miss\n")
+
+	diags, err := parseRunnerOutput(p, stdout, stderr)
+	if err != nil {
+		t.Fatalf("unexpected error: %v", err)
+	}
+	if len(diags) != 1 {
+		t.Fatalf("got %d diagnostics, want 1", len(diags))
+	}
+	if diags[0].Location.Path != "main.go" || diags[0].Message != "checkstyle error" {
+		t.Errorf("unexpected diagnostic: %#v", diags[0])
+	}
 }
 
 func TestFilteredEnviron(t *testing.T) {
