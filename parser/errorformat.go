@@ -42,7 +42,8 @@ func NewErrorformatParserString(efms []string) (*ErrorformatParser, error) {
 const maxLineLen = bufio.MaxScanTokenSize - 2
 
 // lineLimitReader cuts every line of r to max bytes and drops the rest of that
-// line. The line breaks themselves are kept.
+// line. The line breaks themselves are kept. A multi-byte UTF-8 character that
+// would cross the limit is dropped whole, so the cut never leaves half of one.
 type lineLimitReader struct {
 	r         io.Reader
 	max       int
@@ -57,7 +58,8 @@ func (l *lineLimitReader) Read(p []byte) (int, error) {
 		for _, b := range p[:n] {
 			if b == '\n' {
 				l.n = 0
-			} else if l.n >= l.max {
+			} else if l.n+seqLen(b) > l.max {
+				l.n = l.max // the rest of the line is dropped too
 				l.truncated = true
 				continue
 			} else {
@@ -71,6 +73,20 @@ func (l *lineLimitReader) Read(p []byte) (int, error) {
 			return w, err
 		}
 	}
+}
+
+// seqLen returns the length of the UTF-8 sequence that b starts, and 1 for any
+// other byte.
+func seqLen(b byte) int {
+	switch {
+	case b >= 0xF0:
+		return 4
+	case b >= 0xE0:
+		return 3
+	case b >= 0xC0:
+		return 2
+	}
+	return 1
 }
 
 func (p *ErrorformatParser) Parse(r io.Reader) ([]*rdf.Diagnostic, error) {
