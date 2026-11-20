@@ -9,6 +9,7 @@ import (
 	"os/exec"
 	"path/filepath"
 	"slices"
+	"strconv"
 	"strings"
 	"testing"
 
@@ -199,8 +200,11 @@ func TestGitLabMergeRequestCommitCommenter_Flush_lastCommitOfLine(t *testing.T) 
 		mrCommits []string
 		// existing is where the same comment has already been posted.
 		existing *position
+		// failComments is a commit whose comments can't be listed.
+		failComments string
 		// want is where the comment is posted, or nil if it isn't.
-		want *position
+		want    *position
+		wantErr bool
 	}{
 		{
 			name: "line moved by a later commit",
@@ -224,11 +228,13 @@ func TestGitLabMergeRequestCommitCommenter_Flush_lastCommitOfLine(t *testing.T) 
 			want: &position{head, "a.txt", 3},
 		},
 		{
+			// The line comes from first, which isn't in the clone, so second
+			// may not have changed it.
 			name: "boundary commit of a shallow clone",
 			dir:  shallow,
 			path: "a.txt",
 			line: 3,
-			want: &position{second, "a.txt", 1},
+			want: &position{head, "a.txt", 3},
 		},
 		{
 			name: "line not committed yet",
@@ -275,6 +281,23 @@ func TestGitLabMergeRequestCommitCommenter_Flush_lastCommitOfLine(t *testing.T) 
 			mrCommits: []string{second},
 			existing:  &position{head, "a.txt", 3},
 		},
+		{
+			// The head changes on every push, so the comment may have been
+			// posted on a previous head.
+			name:     "already posted on the head commit before a push",
+			dir:      src,
+			path:     "a.txt",
+			line:     3,
+			existing: &position{second, "a.txt", 3},
+		},
+		{
+			name:         "failed to list comments on a commit",
+			dir:          src,
+			path:         "a.txt",
+			line:         6,
+			failComments: second,
+			wantErr:      true,
+		},
 	}
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
@@ -294,31 +317,52 @@ func TestGitLabMergeRequestCommitCommenter_Flush_lastCommitOfLine(t *testing.T) 
 			}
 			body := commentutil.MarkdownComment(c)
 
+			// paginate writes one item per page, so that every page has to be read.
+			paginate := func(w http.ResponseWriter, r *http.Request, items []any) {
+				page := 1
+				if p := r.URL.Query().Get("page"); p != "" {
+					var err error
+					if page, err = strconv.Atoi(p); err != nil {
+						t.Error(err)
+						return
+					}
+				}
+				resp := []any{}
+				if page <= len(items) {
+					resp = append(resp, items[page-1])
+				}
+				if page < len(items) {
+					w.Header().Set("X-Next-Page", strconv.Itoa(page+1))
+				}
+				if err := json.NewEncoder(w).Encode(resp); err != nil {
+					t.Error(err)
+					return
+				}
+			}
+
 			var posted []position
 			mux := http.NewServeMux()
-			mux.HandleFunc("GET /api/v4/projects/o%2Fr/merge_requests/14/commits", func(w http.ResponseWriter, _ *http.Request) {
+			mux.HandleFunc("GET /api/v4/projects/o%2Fr/merge_requests/14/commits", func(w http.ResponseWriter, r *http.Request) {
 				mrCommits := tt.mrCommits
 				if mrCommits == nil {
 					mrCommits = []string{head, second}
 				}
-				var cs []*gitlab.Commit
+				var cs []any
 				for _, id := range mrCommits {
 					cs = append(cs, &gitlab.Commit{ID: id})
 				}
-				if err := json.NewEncoder(w).Encode(cs); err != nil {
-					t.Error(err)
-					return
-				}
+				paginate(w, r, cs)
 			})
 			mux.HandleFunc("GET /api/v4/projects/o%2Fr/repository/commits/{sha}/comments", func(w http.ResponseWriter, r *http.Request) {
-				cs := []*gitlab.CommitComment{}
+				if r.PathValue("sha") == tt.failComments {
+					w.WriteHeader(http.StatusInternalServerError)
+					return
+				}
+				cs := []any{&gitlab.CommitComment{Path: "other.txt", Line: 1, Note: body}}
 				if e := tt.existing; e != nil && e.commit == r.PathValue("sha") {
 					cs = append(cs, &gitlab.CommitComment{Path: e.path, Line: e.line, Note: body})
 				}
-				if err := json.NewEncoder(w).Encode(cs); err != nil {
-					t.Error(err)
-					return
-				}
+				paginate(w, r, cs)
 			})
 			mux.HandleFunc("POST /api/v4/projects/o%2Fr/repository/commits/{sha}/comments", func(w http.ResponseWriter, r *http.Request) {
 				var req gitlab.CommitComment
@@ -335,7 +379,7 @@ func TestGitLabMergeRequestCommitCommenter_Flush_lastCommitOfLine(t *testing.T) 
 			ts := httptest.NewServer(mux)
 			defer ts.Close()
 
-			cli, err := gitlab.NewClient("", gitlab.WithBaseURL(ts.URL))
+			cli, err := gitlab.NewClient("", gitlab.WithBaseURL(ts.URL), gitlab.WithoutRetries())
 			if err != nil {
 				t.Fatal(err)
 			}
@@ -343,8 +387,8 @@ func TestGitLabMergeRequestCommitCommenter_Flush_lastCommitOfLine(t *testing.T) 
 			if err := g.Post(context.Background(), c); err != nil {
 				t.Fatal(err)
 			}
-			if err := g.Flush(context.Background()); err != nil {
-				t.Fatal(err)
+			if err := g.Flush(context.Background()); (err != nil) != tt.wantErr {
+				t.Fatalf("Flush() error = %v, wantErr %v", err, tt.wantErr)
 			}
 			var want []position
 			if tt.want != nil {

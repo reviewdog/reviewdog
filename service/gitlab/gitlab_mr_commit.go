@@ -4,6 +4,7 @@ import (
 	"context"
 	"errors"
 	"fmt"
+	"log"
 	"os/exec"
 	"slices"
 	"strconv"
@@ -41,7 +42,7 @@ type MergeRequestCommitCommenter struct {
 }
 
 // postedComment identifies a comment by the commit, path and line it's posted
-// on, and its body.
+// on, and its body. An empty commit matches a comment on any commit.
 type postedComment struct {
 	commit string
 	path   string
@@ -52,6 +53,11 @@ type postedComment struct {
 // errNotCommitted is returned by getLastCommitsID for lines that only exist in
 // the working tree.
 var errNotCommitted = errors.New("line is not committed yet")
+
+// errBoundary is returned by getLastCommitsID for lines that git blame
+// attributes to a boundary commit, e.g. the oldest commit of a shallow clone.
+// Such lines may come from an older commit that isn't in the clone.
+var errBoundary = errors.New("line is attributed to a boundary commit")
 
 // NewGitLabMergeRequestCommitCommenter returns a new MergeRequestCommitCommenter service.
 // MergeRequestCommitCommenter service needs git command in $PATH.
@@ -103,16 +109,21 @@ func (g *MergeRequestCommitCommenter) postCommentsForEach(ctx context.Context) e
 			if errors.Is(err, errNotCommitted) {
 				// No commit has the line, and the same line number in the head
 				// commit may be another line or past the end of the file.
+				log.Printf("reviewdog: skipping comment on %s:%d: %v", loc.GetPath(), lnum, err)
 				return nil
 			}
 			commitID, path, line := g.sha, loc.GetPath(), lnum
 			// Comment on the head commit when the line comes from a commit outside
 			// the merge request, e.g. on the target branch, since only comments on
-			// the merge request's commits are checked for duplicates.
+			// the merge request's commits are checked for duplicates. The head
+			// changes on every push, so the comment counts as posted if any of
+			// those commits already has it at the same position.
+			posted := postedComment{path: path, line: line, body: body}
 			if err == nil && g.commits[id] {
 				commitID, path, line = id, p, l
+				posted = postedComment{commit: id, path: p, line: l, body: body}
 			}
-			if g.postedcs[postedComment{commit: commitID, path: path, line: line, body: body}] {
+			if g.postedcs[posted] {
 				return nil
 			}
 			prcomment := &gitlab.PostCommitCommentOptions{
@@ -156,11 +167,14 @@ func (g *MergeRequestCommitCommenter) getLastCommitsID(ctx context.Context, path
 	}
 	// The header is followed by "<key> <value>" lines and then by the content
 	// of the line, which starts with a tab. "filename" is the file's path in
-	// the commit.
+	// the commit, and "boundary" marks a boundary commit.
 	origPath = path
 	for _, l := range lines[1:] {
 		if strings.HasPrefix(l, "\t") {
 			break
+		}
+		if l == "boundary" {
+			return "", "", 0, errBoundary
 		}
 		if name, ok := strings.CutPrefix(l, "filename "); ok {
 			// Paths with unusual characters are quoted, like in other git output.
@@ -170,7 +184,6 @@ func (g *MergeRequestCommitCommenter) getLastCommitsID(ctx context.Context, path
 				}
 			}
 			origPath = name
-			break
 		}
 	}
 	return commitID, origPath, origLine, nil
@@ -179,8 +192,7 @@ func (g *MergeRequestCommitCommenter) getLastCommitsID(ctx context.Context, path
 func (g *MergeRequestCommitCommenter) setPostedComment(ctx context.Context) error {
 	g.postedcs = make(map[postedComment]bool)
 	g.commits = make(map[string]bool)
-	commits, _, err := g.cli.MergeRequests.GetMergeRequestCommits(
-		g.projects, int64(g.pr), nil, gitlab.WithContext(ctx))
+	commits, err := g.listAllMergeRequestCommits(ctx)
 	if err != nil {
 		return err
 	}
@@ -194,12 +206,13 @@ func (g *MergeRequestCommitCommenter) setPostedComment(ctx context.Context) erro
 		ids = append(ids, g.sha)
 	}
 	for _, id := range ids {
-		g.commits[id] = true
-		cs, _, err := g.cli.Commits.GetCommitComments(
-			g.projects, id, nil, gitlab.WithContext(ctx))
+		// Comments are posted on these commits, so a commit whose comments
+		// can't be listed would get them posted again.
+		cs, err := g.listAllCommitComments(ctx, id)
 		if err != nil {
-			continue
+			return fmt.Errorf("failed to list comments on commit %s: %w", id, err)
 		}
+		g.commits[id] = true
 		for _, c := range cs {
 			if c.Line == 0 || c.Path == "" || c.Note == "" {
 				// skip resolved comments. Or comments which do not have "path" nor
@@ -207,7 +220,42 @@ func (g *MergeRequestCommitCommenter) setPostedComment(ctx context.Context) erro
 				continue
 			}
 			g.postedcs[postedComment{commit: id, path: c.Path, line: int(c.Line), body: c.Note}] = true
+			g.postedcs[postedComment{path: c.Path, line: int(c.Line), body: c.Note}] = true
 		}
 	}
 	return nil
+}
+
+func (g *MergeRequestCommitCommenter) listAllMergeRequestCommits(ctx context.Context) ([]*gitlab.Commit, error) {
+	opts := &gitlab.GetMergeRequestCommitsOptions{ListOptions: gitlab.ListOptions{PerPage: 100}}
+	var all []*gitlab.Commit
+	for {
+		commits, resp, err := g.cli.MergeRequests.GetMergeRequestCommits(
+			g.projects, int64(g.pr), opts, gitlab.WithContext(ctx))
+		if err != nil {
+			return nil, err
+		}
+		all = append(all, commits...)
+		if resp.NextPage == 0 {
+			return all, nil
+		}
+		opts.Page = resp.NextPage
+	}
+}
+
+func (g *MergeRequestCommitCommenter) listAllCommitComments(ctx context.Context, sha string) ([]*gitlab.CommitComment, error) {
+	opts := &gitlab.GetCommitCommentsOptions{ListOptions: gitlab.ListOptions{PerPage: 100}}
+	var all []*gitlab.CommitComment
+	for {
+		cs, resp, err := g.cli.Commits.GetCommitComments(
+			g.projects, sha, opts, gitlab.WithContext(ctx))
+		if err != nil {
+			return nil, err
+		}
+		all = append(all, cs...)
+		if resp.NextPage == 0 {
+			return all, nil
+		}
+		opts.Page = resp.NextPage
+	}
 }
