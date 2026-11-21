@@ -1,6 +1,8 @@
 package parser
 
 import (
+	"bufio"
+	"bytes"
 	"errors"
 	"fmt"
 	"io"
@@ -78,9 +80,27 @@ func severity(s string) rdf.Severity {
 
 // decodeBOM returns a reader that drops a leading byte order mark from r and,
 // for a UTF-16 one, decodes the rest to UTF-8. Tools on Windows write these:
-// PowerShell 5.1's > and Out-File produce UTF-16LE with a BOM, newer ones and
-// some .NET writers UTF-8 with a BOM. Input without a BOM is passed through
-// unchanged.
+// Windows PowerShell 5.1's > and Out-File produce UTF-16LE with a BOM, and
+// -Encoding utf8 there (utf8BOM in PowerShell 7) or some .NET writers UTF-8
+// with a BOM. Input without a BOM is passed through unchanged.
 func decodeBOM(r io.Reader) io.Reader {
-	return transform.NewReader(r, unicode.BOMOverride(transform.Nop))
+	rd, _ := stripBOM(r)
+	return rd
 }
+
+// stripBOM is decodeBOM that also reports whether r started with a BOM. Only
+// input that has one goes through the transformer.
+func stripBOM(r io.Reader) (io.Reader, bool) {
+	br := bufio.NewReader(r)
+	b, _ := br.Peek(3)
+	if !bytes.HasPrefix(b, utf8BOM) && !bytes.HasPrefix(b, utf16LEBOM) && !bytes.HasPrefix(b, utf16BEBOM) {
+		return br, false
+	}
+	return transform.NewReader(br, unicode.BOMOverride(transform.Nop)), true
+}
+
+var (
+	utf8BOM    = []byte{0xEF, 0xBB, 0xBF}
+	utf16LEBOM = []byte{0xFF, 0xFE}
+	utf16BEBOM = []byte{0xFE, 0xFF}
+)

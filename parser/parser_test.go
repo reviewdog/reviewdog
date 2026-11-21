@@ -1,10 +1,11 @@
 package parser
 
 import (
+	"fmt"
 	"reflect"
 	"strings"
 	"testing"
-	utf16enc "unicode/utf16"
+	"unicode/utf16"
 )
 
 func TestNewParser(t *testing.T) {
@@ -76,15 +77,15 @@ func TestNewParser(t *testing.T) {
 	}
 }
 
-// utf16 encodes s as UTF-16 with a byte order mark.
-func utf16(s string, bigEndian bool) string {
+// encodeUTF16 encodes s as UTF-16 with a byte order mark.
+func encodeUTF16(s string, bigEndian bool) string {
 	var b []byte
 	if bigEndian {
 		b = append(b, 0xFE, 0xFF)
 	} else {
 		b = append(b, 0xFF, 0xFE)
 	}
-	for _, u := range utf16enc.Encode([]rune(s)) {
+	for _, u := range utf16.Encode([]rune(s)) {
 		if bigEndian {
 			b = append(b, byte(u>>8), byte(u))
 		} else {
@@ -117,8 +118,8 @@ func TestParsersByteOrderMark(t *testing.T) {
 		encode func(string) string
 	}{
 		{"UTF-8 BOM", func(s string) string { return utf8BOM + s }},
-		{"UTF-16LE BOM", func(s string) string { return utf16(s, false) }},
-		{"UTF-16BE BOM", func(s string) string { return utf16(s, true) }},
+		{"UTF-16LE BOM", func(s string) string { return encodeUTF16(s, false) }},
+		{"UTF-16BE BOM", func(s string) string { return encodeUTF16(s, true) }},
 	}
 	for _, in := range inputs {
 		for _, enc := range encodings {
@@ -146,14 +147,49 @@ func TestParsersByteOrderMark(t *testing.T) {
 	}
 }
 
-func TestCheckStyleParserUTF16Declaration(t *testing.T) {
-	in := utf16(`<?xml version="1.0" encoding="UTF-16"?><checkstyle><file name="a.go"><error line="1" message="m"/></file></checkstyle>`, false)
-	ds, err := NewCheckStyleParser().Parse(strings.NewReader(in))
+func TestCheckStyleParserBOMOverridesDeclaration(t *testing.T) {
+	const doc = `<?xml version="1.0" encoding="%s"?><checkstyle><file name="a.go"><error line="1" message="café"/></file></checkstyle>`
+	tests := []struct {
+		name string
+		in   string
+	}{
+		{"UTF-16LE BOM, UTF-16", encodeUTF16(fmt.Sprintf(doc, "UTF-16"), false)},
+		{"UTF-16LE BOM, unicode alias", encodeUTF16(fmt.Sprintf(doc, "unicode"), false)},
+		{"UTF-16BE BOM, unicodefffe alias", encodeUTF16(fmt.Sprintf(doc, "unicodefffe"), true)},
+		{"UTF-16LE BOM, UTF-16BE declared", encodeUTF16(fmt.Sprintf(doc, "UTF-16BE"), false)},
+		{"UTF-8 BOM, windows-1252 declared", "\xef\xbb\xbf" + fmt.Sprintf(doc, "windows-1252")},
+	}
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			ds, err := NewCheckStyleParser().Parse(strings.NewReader(tt.in))
+			if err != nil {
+				t.Fatal(err)
+			}
+			if len(ds) != 1 || ds[0].GetMessage() != "caf\xc3\xa9" {
+				t.Fatalf("got %v, want one diagnostic with message caf\xc3\xa9", ds)
+			}
+		})
+	}
+}
+
+func TestErrorformatParserBOMInMiddle(t *testing.T) {
+	// e.g. project mode, where stderr is appended to stdout and both start with a BOM
+	const bom = "\xef\xbb\xbf"
+	efm, err := NewErrorformatParserString([]string{`%f:%l:%c: %m`})
 	if err != nil {
 		t.Fatal(err)
 	}
-	if len(ds) != 1 || ds[0].GetMessage() != "m" {
-		t.Fatalf("got %v, want one diagnostic with message m", ds)
+	ds, err := efm.Parse(strings.NewReader(bom + "a.go:1:2: a\n" + bom + "b.go:3:4: b\n"))
+	if err != nil {
+		t.Fatal(err)
+	}
+	if len(ds) != 2 {
+		t.Fatalf("got %d diagnostics, want 2", len(ds))
+	}
+	for i, want := range []string{"a.go", "b.go"} {
+		if got := ds[i].GetLocation().GetPath(); got != want {
+			t.Errorf("diagnostic %d: got path %q, want %q", i, got, want)
+		}
 	}
 }
 
@@ -176,26 +212,33 @@ func TestRDJSONLParserBOMPerLine(t *testing.T) {
 }
 
 func TestParsersShortInput(t *testing.T) {
-	for _, in := range []string{"", "\xef\xbb\xbf", "\xff\xfe", "\n", "{}"} {
-		ds, err := NewRDJSONLParser().Parse(strings.NewReader(in))
-		if err != nil {
-			t.Errorf("rdjsonl %q: %v", in, err)
-		}
-		want := 0
-		if in == "{}" {
-			want = 1
-		}
-		if len(ds) != want {
-			t.Errorf("rdjsonl %q: got %d diagnostics, want %d", in, len(ds), want)
-		}
-	}
 	efm, err := NewErrorformatParserString([]string{`%f:%l:%c: %m`})
 	if err != nil {
 		t.Fatal(err)
 	}
-	for _, in := range []string{"", "\xef\xbb\xbf", "\xfe\xff", "a"} {
-		if _, err := efm.Parse(strings.NewReader(in)); err != nil {
-			t.Errorf("errorformat %q: %v", in, err)
+	parsers := []struct {
+		name   string
+		parser Parser
+	}{
+		{"rdjson", NewRDJSONParser()},
+		{"rdjsonl", NewRDJSONLParser()},
+		{"sarif", NewSarifParser()},
+		{"checkstyle", NewCheckStyleParser()},
+		{"errorformat", efm},
+		{"diff", NewDiffParser(0)},
+	}
+	for _, p := range parsers {
+		// A BOM alone must behave exactly like empty input.
+		wantDs, wantErr := p.parser.Parse(strings.NewReader(""))
+		for _, in := range []string{"\xef\xbb\xbf", "\xff\xfe", "\xfe\xff"} {
+			ds, err := p.parser.Parse(strings.NewReader(in))
+			if (err != nil) != (wantErr != nil) || len(ds) != len(wantDs) {
+				t.Errorf("%s %q: got (%d, %v), want (%d, %v) as for empty input", p.name, in, len(ds), err, len(wantDs), wantErr)
+			}
+		}
+		// Inputs shorter than a UTF-8 BOM must not panic.
+		for _, in := range []string{"a", "\xef", "\xef\xbb"} {
+			_, _ = p.parser.Parse(strings.NewReader(in))
 		}
 	}
 }

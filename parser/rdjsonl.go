@@ -21,8 +21,6 @@ func NewRDJSONLParser() *RDJSONLParser {
 	return &RDJSONLParser{}
 }
 
-var utf8BOM = []byte{0xEF, 0xBB, 0xBF}
-
 // Parse parses rdjson (JSONL of Diagnostic).
 func (p *RDJSONLParser) Parse(r io.Reader) ([]*rdf.Diagnostic, error) {
 	var results []*rdf.Diagnostic

@@ -23,8 +23,16 @@ func NewCheckStyleParser() Parser {
 
 func (p *CheckStyleParser) Parse(r io.Reader) ([]*rdf.Diagnostic, error) {
 	var cs = new(CheckStyleResult)
-	dec := xml.NewDecoder(decodeBOM(r))
+	rd, hasBOM := stripBOM(r)
+	dec := xml.NewDecoder(rd)
 	dec.CharsetReader = charsetReader
+	if hasBOM {
+		// A byte order mark takes precedence over the declared encoding, and
+		// stripBOM has already decoded the document to UTF-8.
+		dec.CharsetReader = func(_ string, input io.Reader) (io.Reader, error) {
+			return input, nil
+		}
+	}
 	if err := dec.Decode(cs); err != nil {
 		return nil, err
 	}
@@ -57,10 +65,11 @@ func (p *CheckStyleParser) Parse(r io.Reader) ([]*rdf.Diagnostic, error) {
 
 // charsetReader decodes declared encodings other than UTF-8 (ISO-8859-1,
 // windows-1252, Shift_JIS, "UTF8", ...), which encoding/xml doesn't handle
-// itself. A document declaring UTF-16 can only be read here if decodeBOM has
-// already converted it to UTF-8, so it is passed through as is.
+// itself. Without a BOM, a document whose declaration encoding/xml could read
+// is not UTF-16 whatever it declares (e.g. "UTF-16" or its alias "unicode"),
+// so it is passed through as is.
 func charsetReader(label string, input io.Reader) (io.Reader, error) {
-	if strings.HasPrefix(strings.ToLower(label), "utf-16") {
+	if _, name := charset.Lookup(label); strings.HasPrefix(name, "utf-16") {
 		return input, nil
 	}
 	return charset.NewReaderLabel(label, input)

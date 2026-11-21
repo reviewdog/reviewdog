@@ -40,7 +40,9 @@ func (p *ErrorformatParser) Parse(r io.Reader) ([]*rdf.Diagnostic, error) {
 		if e.Valid {
 			d := &rdf.Diagnostic{
 				Location: &rdf.Location{
-					Path: e.Filename,
+					// A BOM in the middle of the input, e.g. at the start of
+					// stderr appended to stdout, ends up in the file name.
+					Path: strings.TrimPrefix(e.Filename, string(utf8BOM)),
 					Range: &rdf.Range{
 						Start: &rdf.Position{
 							Line:   int32(e.Lnum),
