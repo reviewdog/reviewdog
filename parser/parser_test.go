@@ -1,11 +1,16 @@
 package parser
 
 import (
+	"errors"
 	"fmt"
+	"io"
 	"reflect"
 	"strings"
 	"testing"
+	"testing/iotest"
 	"unicode/utf16"
+
+	"golang.org/x/text/transform"
 )
 
 func TestNewParser(t *testing.T) {
@@ -175,22 +180,81 @@ func TestCheckStyleParserBOMOverridesDeclaration(t *testing.T) {
 func TestErrorformatParserBOMInMiddle(t *testing.T) {
 	// e.g. project mode, where stderr is appended to stdout and both start with a BOM
 	const bom = "\xef\xbb\xbf"
-	efm, err := NewErrorformatParserString([]string{`%f:%l:%c: %m`})
+	tests := []struct {
+		efm  string
+		line func(path string) string
+	}{
+		{`%f:%l:%c: %m`, func(path string) string { return path + ":1:2: m" }},
+		{`ERROR: %f:%l: %m`, func(path string) string { return "ERROR: " + path + ":1: m" }},
+	}
+	for _, tt := range tests {
+		t.Run(tt.efm, func(t *testing.T) {
+			efm, err := NewErrorformatParserString([]string{tt.efm})
+			if err != nil {
+				t.Fatal(err)
+			}
+			in := bom + tt.line("a.go") + "\n" + bom + tt.line("b.go") + "\r\n" + bom + tt.line("c.go")
+			ds, err := efm.Parse(strings.NewReader(in))
+			if err != nil {
+				t.Fatal(err)
+			}
+			if len(ds) != 3 {
+				t.Fatalf("got %d diagnostics, want 3", len(ds))
+			}
+			for i, want := range []string{"a.go", "b.go", "c.go"} {
+				if got := ds[i].GetLocation().GetPath(); got != want {
+					t.Errorf("diagnostic %d: got path %q, want %q", i, got, want)
+				}
+				if got := ds[i].GetOriginalOutput(); strings.HasPrefix(got, bom) {
+					t.Errorf("diagnostic %d: original output %q starts with a BOM", i, got)
+				}
+			}
+		})
+	}
+}
+
+func TestLineBOMStripperChunkBoundaries(t *testing.T) {
+	const bom = "\xef\xbb\xbf"
+	in := bom + "a\n" + bom + "b\n\n" + "\xef\xbb" + "c\n" + bom
+	want := "a\nb\n\n\xef\xbbc\n"
+	// one byte at a time, so every BOM is split across reads
+	got, err := io.ReadAll(transform.NewReader(iotest.OneByteReader(strings.NewReader(in)), &lineBOMStripper{}))
 	if err != nil {
 		t.Fatal(err)
 	}
-	ds, err := efm.Parse(strings.NewReader(bom + "a.go:1:2: a\n" + bom + "b.go:3:4: b\n"))
-	if err != nil {
-		t.Fatal(err)
+	if string(got) != want {
+		t.Errorf("got %q, want %q", got, want)
 	}
-	if len(ds) != 2 {
-		t.Fatalf("got %d diagnostics, want 2", len(ds))
-	}
-	for i, want := range []string{"a.go", "b.go"} {
-		if got := ds[i].GetLocation().GetPath(); got != want {
-			t.Errorf("diagnostic %d: got path %q, want %q", i, got, want)
+}
+
+func TestDecodeBOMKeepsReadError(t *testing.T) {
+	errBoom := errors.New("boom")
+	for _, in := range []string{"a", "\xef\xbb\xbf", "\xff\xfe"} {
+		r := &onceErrReader{data: []byte(in), err: errBoom}
+		if _, err := io.ReadAll(decodeBOM(r)); !errors.Is(err, errBoom) {
+			t.Errorf("%q: got error %v, want %v", in, err, errBoom)
 		}
 	}
+}
+
+// onceErrReader returns data, then err once, then io.EOF.
+type onceErrReader struct {
+	data []byte
+	err  error
+}
+
+func (r *onceErrReader) Read(p []byte) (int, error) {
+	if len(r.data) > 0 {
+		n := copy(p, r.data)
+		r.data = r.data[n:]
+		return n, nil
+	}
+	if r.err != nil {
+		err := r.err
+		r.err = nil
+		return 0, err
+	}
+	return 0, io.EOF
 }
 
 func TestRDJSONLParserBOMPerLine(t *testing.T) {

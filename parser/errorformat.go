@@ -6,6 +6,7 @@ import (
 	"strings"
 
 	"github.com/reviewdog/errorformat"
+	"golang.org/x/text/transform"
 
 	"github.com/reviewdog/reviewdog/proto/rdf"
 )
@@ -33,16 +34,14 @@ func NewErrorformatParserString(efms []string) (*ErrorformatParser, error) {
 }
 
 func (p *ErrorformatParser) Parse(r io.Reader) ([]*rdf.Diagnostic, error) {
-	s := p.efm.NewScanner(decodeBOM(r))
+	s := p.efm.NewScanner(transform.NewReader(decodeBOM(r), &lineBOMStripper{}))
 	var ds []*rdf.Diagnostic
 	for s.Scan() {
 		e := s.Entry()
 		if e.Valid {
 			d := &rdf.Diagnostic{
 				Location: &rdf.Location{
-					// A BOM in the middle of the input, e.g. at the start of
-					// stderr appended to stdout, ends up in the file name.
-					Path: strings.TrimPrefix(e.Filename, string(utf8BOM)),
+					Path: e.Filename,
 					Range: &rdf.Range{
 						Start: &rdf.Position{
 							Line:   int32(e.Lnum),

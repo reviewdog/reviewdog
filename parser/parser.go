@@ -92,11 +92,55 @@ func decodeBOM(r io.Reader) io.Reader {
 // input that has one goes through the transformer.
 func stripBOM(r io.Reader) (io.Reader, bool) {
 	br := bufio.NewReader(r)
-	b, _ := br.Peek(3)
-	if !bytes.HasPrefix(b, utf8BOM) && !bytes.HasPrefix(b, utf16LEBOM) && !bytes.HasPrefix(b, utf16BEBOM) {
-		return br, false
+	b, err := br.Peek(3)
+	var rd io.Reader = br
+	if err != nil {
+		// Peek clears the error from br, so keep it for the caller instead
+		// of reading r again after it has failed or ended.
+		rd = io.MultiReader(bytes.NewReader(b), errReader{err})
 	}
-	return transform.NewReader(br, unicode.BOMOverride(transform.Nop)), true
+	if !bytes.HasPrefix(b, utf8BOM) && !bytes.HasPrefix(b, utf16LEBOM) && !bytes.HasPrefix(b, utf16BEBOM) {
+		return rd, false
+	}
+	return transform.NewReader(rd, unicode.BOMOverride(transform.Nop)), true
+}
+
+type errReader struct{ err error }
+
+func (r errReader) Read([]byte) (int, error) { return 0, r.err }
+
+// lineBOMStripper is a transform.Transformer that drops a UTF-8 BOM at the
+// start of every line, e.g. where concatenated files or stderr appended to
+// stdout begin.
+type lineBOMStripper struct{ midLine bool }
+
+func (t *lineBOMStripper) Reset() { t.midLine = false }
+
+func (t *lineBOMStripper) Transform(dst, src []byte, atEOF bool) (nDst, nSrc int, err error) {
+	for nSrc < len(src) {
+		if !t.midLine {
+			rest := src[nSrc:]
+			if !atEOF && len(rest) < len(utf8BOM) && bytes.HasPrefix(utf8BOM, rest) {
+				return nDst, nSrc, transform.ErrShortSrc
+			}
+			if bytes.HasPrefix(rest, utf8BOM) {
+				nSrc += len(utf8BOM)
+			}
+			t.midLine = true
+			continue
+		}
+		if nDst == len(dst) {
+			return nDst, nSrc, transform.ErrShortDst
+		}
+		c := src[nSrc]
+		dst[nDst] = c
+		nDst++
+		nSrc++
+		if c == '\n' {
+			t.midLine = false
+		}
+	}
+	return nDst, nSrc, nil
 }
 
 var (
