@@ -12,6 +12,7 @@ import (
 
 	"github.com/google/go-cmp/cmp"
 	"github.com/haya14busa/go-sarif/sarif"
+	"github.com/reviewdog/reviewdog/pathutil"
 	"github.com/reviewdog/reviewdog/proto/rdf"
 	"google.golang.org/protobuf/encoding/protojson"
 	"google.golang.org/protobuf/testing/protocmp"
@@ -22,11 +23,14 @@ func TestExampleSarifParser(t *testing.T) {
 	for i, fixture := range fixtures {
 		diagnostics, err := p.Parse(strings.NewReader(fixture[0]))
 		if err != nil {
-			panic(err)
+			t.Fatalf("fixtures[%d]: %v", i, err)
 		}
 		if len(diagnostics) == 0 {
 			t.Errorf("empty diagnostics")
 		}
+		// The parser returns OS-native paths; reviewdog normalizes them to
+		// slash-separated paths afterwards, as the fixtures expect.
+		pathutil.NormalizePathInResults(diagnostics, "", "")
 		for _, d := range diagnostics {
 			rdjson, err := protojson.MarshalOptions{Indent: "  "}.Marshal(d)
 			if err != nil {
@@ -339,10 +343,17 @@ func TestSarifParser_ArtifactLocationIndexUnresolved(t *testing.T) {
 	}
 }
 
+// basedir returns the working directory as a slash-separated absolute path,
+// so that it can be embedded in JSON strings and URIs as is.
+// On Windows, C:\work becomes /C:/work.
 func basedir() string {
 	wd, err := os.Getwd()
 	if err != nil {
 		panic(err)
+	}
+	wd = filepath.ToSlash(wd)
+	if !strings.HasPrefix(wd, "/") {
+		wd = "/" + wd
 	}
 	return wd
 }
