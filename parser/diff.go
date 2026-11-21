@@ -51,7 +51,7 @@ func (d dstate) build(path string, currentLine int) *rdf.Diagnostic {
 
 // Parse parses input as unified diff format and return it as diagnostics.
 func (p *DiffParser) Parse(r io.Reader) ([]*rdf.Diagnostic, error) {
-	filediffs, err := diff.ParseMultiFile(r)
+	filediffs, err := diff.ParseMultiFile(decodeBOM(r))
 	if err != nil {
 		return nil, fmt.Errorf("fail to parse diff: %w", err)
 	}

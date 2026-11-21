@@ -23,7 +23,7 @@ func NewSarifParser() Parser {
 
 func (p *SarifParser) Parse(r io.Reader) ([]*rdf.Diagnostic, error) {
 	slf := new(sarif.Sarif)
-	if err := json.NewDecoder(r).Decode(slf); err != nil {
+	if err := json.NewDecoder(decodeBOM(r)).Decode(slf); err != nil {
 		return nil, err
 	}
 	var ds []*rdf.Diagnostic

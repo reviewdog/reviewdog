@@ -8,6 +8,7 @@ import (
 	"strings"
 
 	"github.com/reviewdog/errorformat"
+	"golang.org/x/text/transform"
 
 	"github.com/reviewdog/reviewdog/proto/rdf"
 )
@@ -90,7 +91,9 @@ func seqLen(b byte) int {
 }
 
 func (p *ErrorformatParser) Parse(r io.Reader) ([]*rdf.Diagnostic, error) {
-	lr := &lineLimitReader{r: r, max: maxLineLen}
+	// Drop byte order marks first so that they neither count toward nor get
+	// cut by the line length limit.
+	lr := &lineLimitReader{r: transform.NewReader(decodeBOM(r), &lineBOMStripper{}), max: maxLineLen}
 	s := p.efm.NewScanner(lr)
 	var ds []*rdf.Diagnostic
 	for s.Scan() {

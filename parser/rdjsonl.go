@@ -24,18 +24,21 @@ func NewRDJSONLParser() *RDJSONLParser {
 // Parse parses rdjson (JSONL of Diagnostic).
 func (p *RDJSONLParser) Parse(r io.Reader) ([]*rdf.Diagnostic, error) {
 	var results []*rdf.Diagnostic
-	s := bufio.NewScanner(r)
+	s := bufio.NewScanner(decodeBOM(r))
 	for s.Scan() {
-		if len(bytes.TrimSpace(s.Bytes())) == 0 {
+		// A UTF-8 BOM can also start a later line when files are concatenated
+		// or several outputs are joined (e.g. stdout and stderr in project mode).
+		line := bytes.TrimPrefix(s.Bytes(), utf8BOM)
+		if len(bytes.TrimSpace(line)) == 0 {
 			continue
 		}
 		d := new(rdf.Diagnostic)
-		if err := (protojson.UnmarshalOptions{DiscardUnknown: true}).Unmarshal(s.Bytes(), d); err != nil {
+		if err := (protojson.UnmarshalOptions{DiscardUnknown: true}).Unmarshal(line, d); err != nil {
 			return nil, fmt.Errorf("failed to unmarshal rdjsonl (Diagnostic): %w", err)
 		}
 		if d.GetOriginalOutput() == "" {
 			// TODO(haya14busa): Refactor not to fill in original output.
-			d.OriginalOutput = s.Text()
+			d.OriginalOutput = string(line)
 		}
 		results = append(results, d)
 	}
