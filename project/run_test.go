@@ -167,9 +167,12 @@ func TestRun(t *testing.T) {
 			t.Log(err)
 		}
 		var want string
-		if runtime.GOOS == "darwin" {
+		switch runtime.GOOS {
+		case "darwin":
 			want = "sh: not-found: command not found\n"
-		} else {
+		case "windows":
+			want = "'not-found' is not recognized as an internal or external command,\r\noperable program or batch file.\r\n"
+		default:
 			want = "sh: 1: not-found: not found\n"
 		}
 		if got := buf.String(); got != want {
@@ -217,7 +220,7 @@ func TestRun(t *testing.T) {
 		conf := &Config{
 			Runner: map[string]*Runner{
 				"test": {
-					Cmd:         "echo 'hi'",
+					Cmd:         "echo hi",
 					Errorformat: []string{`%f:%l:%c:%m`},
 				},
 			},
@@ -226,6 +229,9 @@ func TestRun(t *testing.T) {
 			t.Error(err)
 		}
 		want := "hi\n"
+		if runtime.GOOS == "windows" {
+			want = "hi\r\n"
+		}
 		if got := buf.String(); got != want {
 			t.Errorf("got stdout %q, want %q", got, want)
 		}

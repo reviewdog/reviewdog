@@ -1,13 +1,19 @@
 package parser
 
 import (
+	"bufio"
 	"bytes"
 	"encoding/json"
 	"fmt"
+	"io"
 	"strings"
 	"testing"
+	"testing/iotest"
+	"unicode/utf8"
 
 	"google.golang.org/protobuf/encoding/protojson"
+
+	"github.com/reviewdog/reviewdog/service/serviceutil"
 )
 
 func TestNewErrorformatParserString(t *testing.T) {
@@ -75,4 +81,128 @@ func ExampleErrorformatParser() {
 	//   },
 	//   "originalOutput": "/path/to/file2.txt:2:14: [N][RULE:7] message 2"
 	// }
+}
+
+// A line the scanner cannot hold must not end the parse: every diagnostic
+// around it is still reported, and the long line itself is cut.
+func TestErrorformatParser_Parse_longLine(t *testing.T) {
+	p, err := NewErrorformatParserString([]string{`%f:%l:%c: %m`})
+	if err != nil {
+		t.Fatal(err)
+	}
+	atLimit := "c.go:3:3: " + strings.Repeat("x", maxLineLen-len("c.go:3:3: "))
+	in := "a.go:1:1: first\n" +
+		"b.go:2:2: " + strings.Repeat("y", 3*bufio.MaxScanTokenSize) + "\n" +
+		atLimit + "\n" +
+		atLimit + "\r\n" +
+		"d.go:4:4: last" // no trailing newline
+
+	got, err := p.Parse(strings.NewReader(in))
+	if err != nil {
+		t.Fatal(err)
+	}
+	wantPaths := []string{"a.go", "b.go", "c.go", "c.go", "d.go"}
+	if len(got) != len(wantPaths) {
+		t.Fatalf("got %d diagnostics, want %d", len(got), len(wantPaths))
+	}
+	for i, d := range got {
+		if path := d.GetLocation().GetPath(); path != wantPaths[i] {
+			t.Errorf("diagnostic %d: path = %q, want %q", i, path, wantPaths[i])
+		}
+	}
+	if got, want := len(got[1].GetMessage()), maxLineLen-len("b.go:2:2: "); got != want {
+		t.Errorf("long line message length = %d, want it cut to %d", got, want)
+	}
+	if got[2].GetMessage() != strings.Repeat("x", maxLineLen-len("c.go:3:3: ")) {
+		t.Errorf("a line of exactly maxLineLen bytes must not be changed")
+	}
+}
+
+// A character that straddles the limit must be dropped whole: half a character
+// is invalid UTF-8, which proto marshaling, and so Fingerprint, rejects.
+func TestErrorformatParser_Parse_multibyteAtLimit(t *testing.T) {
+	p, err := NewErrorformatParserString([]string{`%f:%l:%c: %m`})
+	if err != nil {
+		t.Fatal(err)
+	}
+	const prefix = "a.go:1:1: "
+	// Pad the message by 0 to 3 bytes so that every character width straddles
+	// the limit at every possible offset.
+	for _, char := range []string{"é", "あ", "😀"} {
+		for pad := 0; pad < utf8.UTFMax; pad++ {
+			t.Run(fmt.Sprintf("%s/pad %d", char, pad), func(t *testing.T) {
+				msg := strings.Repeat("x", pad) + strings.Repeat(char, bufio.MaxScanTokenSize)
+				in := prefix + msg + "\nb.go:2:2: after\n"
+
+				got, err := p.Parse(strings.NewReader(in))
+				if err != nil {
+					t.Fatal(err)
+				}
+				if len(got) != 2 || got[1].GetLocation().GetPath() != "b.go" {
+					t.Fatalf("got %d diagnostics, want the long line and the one after it", len(got))
+				}
+				for _, d := range got {
+					if !utf8.ValidString(d.GetMessage()) || !utf8.ValidString(d.GetOriginalOutput()) {
+						t.Errorf("%q: invalid UTF-8 in Message or OriginalOutput", d.GetLocation().GetPath())
+					}
+					if _, err := serviceutil.Fingerprint(d); err != nil {
+						t.Errorf("%q: Fingerprint: %v", d.GetLocation().GetPath(), err)
+					}
+				}
+				// Only the character that did not fit is lost.
+				if n := len(prefix) + len(got[0].GetMessage()); n > maxLineLen || n <= maxLineLen-len(char) {
+					t.Errorf("long line is %d bytes, want %d to %d", n, maxLineLen-len(char)+1, maxLineLen)
+				}
+			})
+		}
+	}
+}
+
+func TestLineLimitReader(t *testing.T) {
+	tests := []struct {
+		name string
+		in   string
+		max  int
+		want string
+	}{
+		{name: "empty", in: "", max: 3, want: ""},
+		{name: "short lines are unchanged", in: "ab\ncd\n", max: 3, want: "ab\ncd\n"},
+		{name: "line at the limit", in: "abc\ndef", max: 3, want: "abc\ndef"},
+		{name: "long line is cut", in: "abcdef\ngh\n", max: 3, want: "abc\ngh\n"},
+		{name: "cut applies to every line", in: "abcd\nefgh\nij", max: 2, want: "ab\nef\nij"},
+		{name: "empty lines are kept", in: "abcd\n\n\nef", max: 2, want: "ab\n\n\nef"},
+		{name: "long last line without newline", in: "ab\ncdefgh", max: 3, want: "ab\ncde"},
+		{name: "crlf counts toward the limit", in: "abcd\r\nef\r\n", max: 3, want: "abc\nef\r\n"},
+		// A multi-byte character is kept whole or dropped whole.
+		{name: "character straddling the limit", in: "aあ\n", max: 2, want: "a\n"},
+		{name: "character straddling the limit by one byte", in: "aあ\n", max: 3, want: "a\n"},
+		{name: "character ending at the limit", in: "aあ\n", max: 4, want: "aあ\n"},
+		{name: "four-byte character", in: "ab😀\n", max: 5, want: "ab\n"},
+		{name: "cut after a whole character", in: "あい\n", max: 3, want: "あ\n"},
+		{name: "character wider than the limit", in: "あ\nb\n", max: 2, want: "\nb\n"},
+		{name: "nothing is kept after a dropped character", in: "aあb\nc\n", max: 2, want: "a\nc\n"},
+		{name: "invalid bytes are passed through", in: "\x80\x80\x80\x80\n", max: 3, want: "\x80\x80\x80\n"},
+	}
+	for _, tt := range tests {
+		// Read in one go and one byte at a time: the cut must not depend on how
+		// the underlying reader splits the input.
+		for name, wrap := range map[string]func(io.Reader) io.Reader{
+			"whole":    func(r io.Reader) io.Reader { return r },
+			"one byte": iotest.OneByteReader,
+		} {
+			t.Run(tt.name+"/"+name, func(t *testing.T) {
+				lr := &lineLimitReader{r: wrap(strings.NewReader(tt.in)), max: tt.max}
+				got, err := io.ReadAll(lr)
+				if err != nil {
+					t.Fatal(err)
+				}
+				if string(got) != tt.want {
+					t.Errorf("got %q, want %q", got, tt.want)
+				}
+				if wantCut := tt.want != tt.in; lr.truncated != wantCut {
+					t.Errorf("truncated = %v, want %v", lr.truncated, wantCut)
+				}
+			})
+		}
+	}
 }

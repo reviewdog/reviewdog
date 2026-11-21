@@ -17,6 +17,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Resolve chained SARIF URI base IDs for diagnostic paths, related locations, and suggestions.
 - Match SARIF suggestions across native and slash-separated paths on Windows.
 - [#2927](https://github.com/reviewdog/reviewdog/pull/2927) Skip blank and whitespace-only lines in `-f=rdjsonl` input instead of failing to parse.
+- Cut input lines longer than 64 KiB for `-efm`, `-f=<errorformat name>` and runners with `errorformat`, instead of silently dropping every diagnostic after such a line.
 
 ### :rotating_light: Breaking changes
 
