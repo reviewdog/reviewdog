@@ -7,7 +7,7 @@ toolchain go1.27.4
 require (
 	cloud.google.com/go/compute/metadata v0.10.0
 	cloud.google.com/go/datastore v1.28.1
-	gitea.dev/sdk v1.5.1
+	gitea.dev/sdk v1.5.2
 	github.com/bradleyfalzon/ghinstallation/v2 v2.19.0
 	github.com/google/go-cmp v0.7.0
 	github.com/google/go-github/v93 v93.0.0
@@ -45,7 +45,7 @@ require (
 	github.com/42wim/httpsig v1.3.0 // indirect
 	github.com/cenkalti/backoff/v5 v5.0.3 // indirect
 	github.com/cespare/xxhash/v2 v2.3.0 // indirect
-	github.com/davidmz/go-pageant v1.0.2 // indirect
+	github.com/davidmz/go-pageant v1.1.0 // indirect
 	github.com/felixge/httpsnoop v1.1.0 // indirect
 	github.com/go-logr/logr v1.4.4 // indirect
 	github.com/go-logr/stdr v1.2.2 // indirect
