@@ -17,6 +17,7 @@ import (
 	"github.com/reviewdog/reviewdog/diff"
 	"github.com/reviewdog/reviewdog/filter"
 	"github.com/reviewdog/reviewdog/parser"
+	"github.com/reviewdog/reviewdog/proto/rdf"
 )
 
 // RunAndParse runs commands and parse results. Returns map of tool name to check results.
@@ -59,7 +60,7 @@ func RunAndParse(ctx context.Context, conf *Config, runners map[string]bool, def
 		}
 		g.Go(func() error {
 			defer func() { <-semaphore }()
-			diagnostics, err := p.Parse(concurrentMultiReader(stdout, stderr))
+			diagnostics, err := parseRunnerOutput(p, stdout, stderr)
 			if err != nil {
 				return err
 			}
@@ -168,30 +169,34 @@ func getRunnerName(key string, runner *Runner) string {
 	return key
 }
 
-// We need concurrent Reader to prevent deadlock.
-// If we read stdout and stderr sequentially,
-// 1. huge stderr can block the process
+// drainReadersConcurrently reads all readers concurrently into memory buffers to prevent deadlocks.
+// If we read stdout and stderr sequentially:
+// 1. huge stderr can block the process (pipe buffer fills up)
 // 2. stdout doesn't close until the process finishes
 // 3. we can't read stderr until stdout is closed <- deadlock
-func concurrentMultiReader(readers ...io.Reader) io.Reader {
-	pr, pw := io.Pipe()
-	var bufs []*bytes.Buffer
-
+func drainReadersConcurrently(readers ...io.Reader) ([]*bytes.Buffer, error) {
+	bufs := make([]*bytes.Buffer, len(readers))
 	var g errgroup.Group
-	for _, r := range readers {
+	for i, r := range readers {
+		i, r := i, r
 		b := &bytes.Buffer{}
-		bufs = append(bufs, b)
+		bufs[i] = b
 		g.Go(func() error {
 			_, err := io.Copy(b, r)
-			if err != nil {
-				return err
-			}
-			return nil
+			return err
 		})
 	}
+	if err := g.Wait(); err != nil {
+		return nil, err
+	}
+	return bufs, nil
+}
+
+func concurrentMultiReader(readers ...io.Reader) io.Reader {
+	pr, pw := io.Pipe()
 
 	go func() {
-		err := g.Wait()
+		bufs, err := drainReadersConcurrently(readers...)
 		if err != nil {
 			_ = pw.CloseWithError(err)
 			return
@@ -206,4 +211,15 @@ func concurrentMultiReader(readers ...io.Reader) io.Reader {
 	}()
 
 	return pr
+}
+
+func parseRunnerOutput(p parser.Parser, stdout, stderr io.Reader) ([]*rdf.Diagnostic, error) {
+	if sp, ok := p.(parser.StreamParser); ok {
+		bufs, err := drainReadersConcurrently(stdout, stderr)
+		if err != nil {
+			return nil, err
+		}
+		return sp.ParseStreams(bufs[0], bufs[1])
+	}
+	return p.Parse(concurrentMultiReader(stdout, stderr))
 }

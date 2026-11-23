@@ -14,6 +14,7 @@ import (
 )
 
 var _ Parser = &ErrorformatParser{}
+var _ StreamParser = &ErrorformatParser{}
 
 // ErrorformatParser is errorformat parser.
 type ErrorformatParser struct {
@@ -123,4 +124,19 @@ func (p *ErrorformatParser) Parse(r io.Reader) ([]*rdf.Diagnostic, error) {
 		slog.Warn("reviewdog: cut input lines longer than the limit before parsing", "limit", maxLineLen)
 	}
 	return ds, nil
+}
+
+// ParseStreams parses multiple streams sequentially, maintaining stream affinity
+// so that multiline diagnostics from one stream do not absorb lines from another stream.
+// It returns on the first error encountered and discards diagnostics from earlier streams.
+func (p *ErrorformatParser) ParseStreams(readers ...io.Reader) ([]*rdf.Diagnostic, error) {
+	var allDiags []*rdf.Diagnostic
+	for _, r := range readers {
+		diags, err := p.Parse(r)
+		if err != nil {
+			return nil, err
+		}
+		allDiags = append(allDiags, diags...)
+	}
+	return allDiags, nil
 }
