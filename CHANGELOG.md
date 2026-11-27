@@ -16,6 +16,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - [#3001](https://github.com/reviewdog/reviewdog/pull/3001) Parse checkstyle XML that declares a non-UTF-8 encoding such as ISO-8859-1, windows-1252, Shift_JIS or `UTF8`.
 - Resolve chained SARIF URI base IDs for diagnostic paths, related locations, and suggestions.
 - Match SARIF suggestions across native and slash-separated paths on Windows.
+- [#2929](https://github.com/reviewdog/reviewdog/pull/2929) Post `gitlab-mr-commit` comments on the line's path and position in the merge request commit that last changed it, or on the head commit for lines from outside the merge request, and skip lines that aren't committed instead of failing with 404.
 - [#2927](https://github.com/reviewdog/reviewdog/pull/2927) Skip blank and whitespace-only lines in `-f=rdjsonl` input instead of failing to parse.
 - Cut input lines longer than 64 KiB for `-efm`, `-f=<errorformat name>` and runners with `errorformat`, instead of silently dropping every diagnostic after such a line.
 
